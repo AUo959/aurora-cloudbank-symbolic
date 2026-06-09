@@ -106,7 +106,7 @@ class RecursiveEthicsValidator:
     ) -> None:
         self.max_chain_depth = max_chain_depth
         self._rules_registered = False
-        self._engine: Optional[Any] = None
+        self._engine: Any = None
 
         try:
             if engine is not None:

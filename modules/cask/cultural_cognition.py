@@ -164,7 +164,7 @@ def score_cultural_sensitivity(
             details={"reason": "empty_input"},
         )
 
-    ctx = context or {}
+    ctx: Dict[str, Any] = context if context is not None else {}
     text_lower = text.lower()
 
     positive_matches = _find_matches(text_lower, _POSITIVE_MARKERS)

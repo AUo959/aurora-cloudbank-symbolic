@@ -3184,6 +3184,154 @@ async def rag_chat_endpoint(req: RAGChatRequest, request: Request):
         raise HTTPException(status_code=500, detail="RAG chat failed")
 
 
+# ============================================================================
+# Unified AI Interface — wired endpoint (issue #777)
+# ============================================================================
+
+try:
+    from modules.ai_core.unified_ai_interface import (
+        UnifiedAIInterface,
+        AIRequest,
+    )
+    _unified_ai: Optional[UnifiedAIInterface] = None
+
+    def _get_unified_ai() -> UnifiedAIInterface:
+        global _unified_ai
+        if _unified_ai is None:
+            _unified_ai = UnifiedAIInterface()
+        return _unified_ai
+
+    class AICompleteRequest(BaseModel):
+        model_config = ConfigDict(extra="forbid")
+        prompt: str = Field(..., min_length=1, max_length=32_000)
+        task_type: str = Field("general", pattern=r"^[a-z_]{1,40}$")
+        max_tokens: int = Field(1024, ge=1, le=8192)
+        context_tag: str = Field(
+            default_factory=lambda: f"ai_complete_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+        )
+
+    @app.post("/api/ai/complete", dependencies=[Depends(security), Depends(verify_csrf_token)])
+    @limiter.limit("30/minute")
+    async def ai_complete(
+        request: Request,
+        body: AICompleteRequest,
+        token: HTTPAuthorizationCredentials = Depends(security),
+    ):
+        """
+        Complete a prompt using the UnifiedAIInterface.
+
+        Automatically selects the best available model based on task_type.
+        Falls back through the configured fallback chain on provider errors.
+        """
+        verify_csrf_token(token)
+        ai = _get_unified_ai()
+        ai_request = AIRequest(
+            prompt=body.prompt,
+            max_tokens=body.max_tokens,
+            context_tag=body.context_tag,
+        )
+        try:
+            response = await ai.execute_request(ai_request, task_type=body.task_type)
+        except Exception as exc:
+            logger.error("UnifiedAI execute_request failed: %s", exc)
+            raise HTTPException(status_code=502, detail="AI backend unavailable")
+        return {
+            "content": response.content,
+            "model_used": response.model_used.value,
+            "provider": response.provider.value,
+            "tokens_used": response.tokens_used,
+            "context_tag": body.context_tag,
+            "success": response.success,
+        }
+
+    @app.get("/api/ai/models")
+    @limiter.limit("60/minute")
+    async def list_ai_models(request: Request):
+        """List available AI models and their capability profiles."""
+        try:
+            ai = _get_unified_ai()
+            models = []
+            for model, caps in ai.CAPABILITIES.items():
+                models.append({
+                    "model": model.value,
+                    "provider": caps.provider.value,
+                    "available": caps.available,
+                    "context_window": caps.context_window,
+                    "max_output_tokens": caps.max_output_tokens,
+                    "reasoning_strength": caps.reasoning_strength,
+                    "code_generation_strength": caps.code_generation_strength,
+                })
+            return {"models": models, "total": len(models)}
+        except Exception as exc:
+            logger.error("Failed to list AI models: %s", exc)
+            raise HTTPException(status_code=500, detail="Internal server error")
+
+    UNIFIED_AI_AVAILABLE = True
+    logger.info("UnifiedAI endpoints registered: /api/ai/complete, /api/ai/models")
+
+except Exception as _e:
+    UNIFIED_AI_AVAILABLE = False
+    logger.warning("UnifiedAI not available — /api/ai/* endpoints disabled: %s", _e)
+
+
+# ============================================================================
+# SystemFlowOrchestrator — wired endpoint (issue #777)
+# ============================================================================
+
+try:
+    from modules.quantum_forge.system_flow_orchestrator import (
+        get_system_flow_orchestrator,
+    )
+    _sfo = None
+
+    def _get_sfo():
+        global _sfo
+        if _sfo is None:
+            _sfo = get_system_flow_orchestrator()
+        return _sfo
+
+    @app.get("/api/quantum-forge/flow/status")
+    @limiter.limit("60/minute")
+    async def quantum_forge_flow_status(request: Request):
+        """
+        Return the SystemFlowOrchestrator manifest: current phase, module health,
+        drift count, and synchronization state.
+        """
+        try:
+            return _get_sfo().export_flow_manifest()
+        except Exception as exc:
+            logger.error("SystemFlowOrchestrator flow status failed: %s", exc)
+            raise HTTPException(status_code=500, detail="Internal server error")
+
+    @app.post("/api/quantum-forge/flow/optimize", dependencies=[Depends(security), Depends(verify_csrf_token)])
+    @limiter.limit("10/minute")
+    async def quantum_forge_flow_optimize(
+        request: Request,
+        token: HTTPAuthorizationCredentials = Depends(security),
+    ):
+        """
+        Trigger an auto-optimization pass across all registered modules.
+
+        Returns the optimization report including any mode transitions applied.
+        """
+        verify_csrf_token(token)
+        try:
+            return _get_sfo().auto_optimize_system()
+        except Exception as exc:
+            logger.error("SystemFlowOrchestrator auto_optimize failed: %s", exc)
+            raise HTTPException(status_code=500, detail="Internal server error")
+
+    SYSTEM_FLOW_AVAILABLE = True
+    logger.info(
+        "SystemFlowOrchestrator endpoints registered: "
+        "/api/quantum-forge/flow/status, /api/quantum-forge/flow/optimize"
+    )
+
+except Exception as _e:
+    SYSTEM_FLOW_AVAILABLE = False
+    logger.warning("SystemFlowOrchestrator not available — /api/quantum-forge/flow/* disabled: %s", _e)
+
+
 if __name__ == "__main__":
     import uvicorn
 

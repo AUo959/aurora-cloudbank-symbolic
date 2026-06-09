@@ -125,7 +125,7 @@ class InsightLedger:
         else:
             ledger_root = Path.cwd() / "data" / "ledgers"
         import logging as _logging
-        _logging.getLogger(__name__).info("Ledger root resolved to: %s", ledger_root)
+        _logging.getLogger(__name__).debug("Ledger root resolved to: %s", ledger_root)
         
         # Validate storage path is safe
         # Allow creation since ledgers may not exist yet

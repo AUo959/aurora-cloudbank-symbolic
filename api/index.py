@@ -27,6 +27,11 @@ if not os.getenv("WS_AUTH_SECRET"):
 if not os.getenv("AES_KEY_256_HEX"):
     os.environ["AES_KEY_256_HEX"] = "BUILD_PHASE_PLACEHOLDER_" + "0" * 48
 
+# Fail closed: raise at runtime if placeholder secrets are still in effect.
+# This is a no-op when AURORA_BUILD_PHASE=1 (Vercel import/build phase).
+from api._guard import assert_no_placeholder_secrets
+assert_no_placeholder_secrets()
+
 # Now import the app (will use placeholders during build, real values at runtime)
 # Import directly from aurora_api since Vercel runs from the api/ directory context
 from aurora_api import app

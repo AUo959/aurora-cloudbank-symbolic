@@ -1,0 +1,217 @@
+"""Recursive Ethics Validator — CASK runtime component.
+
+Validates (action, context) pairs against cultural ethics rules.  Rules are
+registered with the shared EthicsEngine so violations flow into the standard
+audit trail.  The validator itself acts as the Picard_Delta_3-compliant layer
+described in the CASK design surface.
+"""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+
+try:
+    from src.monitoring.ethics_engine import (
+        ActionContext,
+        EthicsEngine,
+        EthicsRule,
+        EthicsViolation,
+        RuleCategory,
+        ViolationSeverity,
+    )
+    _ENGINE_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    _ENGINE_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
+
+# Rules contributed by this component.  They are registered once on
+# construction and become active across the shared engine.
+_CASK_RULES: List[Dict[str, Any]] = [
+    {
+        "id": "cask_cultural_hegemony",
+        "name": "Cultural Hegemony Prevention",
+        "description": "Action attempts to flatten or override non-dominant cultural values",
+        "category": RuleCategory.FAIRNESS if _ENGINE_AVAILABLE else None,
+        "severity": ViolationSeverity.HIGH if _ENGINE_AVAILABLE else None,
+        "auto_block": False,
+        "conditions": ["cultural_override", "value_flattening"],
+    },
+    {
+        "id": "cask_ethics_chain_break",
+        "name": "Ethics Chain Traceability",
+        "description": "Action bypasses recursive ethics validation chain (Picard_Delta_3)",
+        "category": RuleCategory.AI_ETHICS if _ENGINE_AVAILABLE else None,
+        "severity": ViolationSeverity.CRITICAL if _ENGINE_AVAILABLE else None,
+        "auto_block": True,
+        "conditions": ["ethics_bypass", "chain_skip"],
+    },
+    {
+        "id": "cask_bias_injection",
+        "name": "Cultural Bias Injection",
+        "description": "Agent generation algorithm introduces cultural bias into simulation",
+        "category": RuleCategory.FAIRNESS if _ENGINE_AVAILABLE else None,
+        "severity": ViolationSeverity.HIGH if _ENGINE_AVAILABLE else None,
+        "auto_block": False,
+        "conditions": ["bias_detected", "cultural_bias"],
+    },
+    {
+        "id": "cask_safety_boundary",
+        "name": "Simulation Safety Boundary",
+        "description": "Recursive simulation depth exceeds safety boundary",
+        "category": RuleCategory.SAFETY if _ENGINE_AVAILABLE else None,
+        "severity": ViolationSeverity.CRITICAL if _ENGINE_AVAILABLE else None,
+        "auto_block": True,
+        "conditions": ["recursion_depth_exceeded", "simulation_unsafe"],
+    },
+]
+
+
+@dataclass
+class ValidationVerdict:
+    """Result returned by RecursiveEthicsValidator.validate()."""
+
+    action: str
+    allowed: bool
+    violations: List[Any] = field(default_factory=list)
+    violation_count: int = 0
+    blocked: bool = False
+    chain_depth: int = 1
+    context_tag: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "action": self.action,
+            "allowed": self.allowed,
+            "violations": [
+                v.to_dict() if hasattr(v, "to_dict") else v for v in self.violations
+            ],
+            "violation_count": self.violation_count,
+            "blocked": self.blocked,
+            "chain_depth": self.chain_depth,
+            "context_tag": self.context_tag,
+        }
+
+
+class RecursiveEthicsValidator:
+    """Picard_Delta_3-compliant ethics validator for CASK.
+
+    Wraps an EthicsEngine instance, registers CASK-specific cultural safety
+    rules on first use, and exposes a simple ``validate(action, context)``
+    interface that returns a :class:`ValidationVerdict`.
+
+    Args:
+        engine: Optional pre-configured EthicsEngine.  When *None* a new
+            engine is created if ``src.monitoring.ethics_engine`` is available.
+        max_chain_depth: Maximum recursive validation depth before the
+            ``simulation_unsafe`` condition is triggered automatically.
+    """
+
+    def __init__(
+        self,
+        engine: Optional[Any] = None,
+        max_chain_depth: int = 5,
+    ) -> None:
+        self.max_chain_depth = max_chain_depth
+        self._rules_registered = False
+
+        if not _ENGINE_AVAILABLE:
+            logger.warning(
+                "EthicsEngine unavailable — RecursiveEthicsValidator running in "
+                "degraded mode (no violation tracking)"
+            )
+            self._engine: Optional[Any] = None
+            return
+
+        self._engine = engine if engine is not None else EthicsEngine()
+        self._register_cask_rules()
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _register_cask_rules(self) -> None:
+        if self._rules_registered or self._engine is None:
+            return
+        for rule_def in _CASK_RULES:
+            rule = EthicsRule(
+                id=rule_def["id"],
+                name=rule_def["name"],
+                description=rule_def["description"],
+                category=rule_def["category"],
+                severity=rule_def["severity"],
+                auto_block=rule_def["auto_block"],
+                conditions=rule_def["conditions"],
+                metadata={"source": "cask_recursive_ethics_validator"},
+            )
+            self._engine.add_rule(rule)
+        self._rules_registered = True
+        logger.info("CASK: registered %d ethics rules", len(_CASK_RULES))
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def validate(
+        self,
+        action: str,
+        context: Dict[str, Any],
+        *,
+        agent_id: str = "cask_validator",
+        chain_depth: int = 1,
+        context_tag: Optional[str] = None,
+    ) -> ValidationVerdict:
+        """Validate *action* against CASK ethics rules.
+
+        Args:
+            action: Action type string (e.g. ``"generate_agent"``).
+            context: Parameter dict describing the action.
+            agent_id: Identifier of the requesting agent.
+            chain_depth: Current recursion depth (incremented by callers).
+            context_tag: DLP context tag for audit trail.
+
+        Returns:
+            :class:`ValidationVerdict` with verdict and any violations.
+        """
+        # Inject recursion-guard condition when depth exceeds limit.
+        effective_context = dict(context)
+        if chain_depth > self.max_chain_depth:
+            effective_context["recursion_depth_exceeded"] = True
+
+        if self._engine is None:
+            # Degraded mode: pass through with a warning.
+            logger.warning(
+                "CASK ethics validation skipped (engine unavailable) for action=%s",
+                action,
+            )
+            return ValidationVerdict(
+                action=action,
+                allowed=True,
+                chain_depth=chain_depth,
+                context_tag=context_tag,
+            )
+
+        action_ctx = ActionContext(
+            agent_id=agent_id,
+            action_type=action,
+            parameters=effective_context,
+            context_tag=context_tag,
+        )
+        violations: List[EthicsViolation] = self._engine.evaluate_action(action_ctx)
+        blocked = self._engine.check_should_block(violations)
+
+        return ValidationVerdict(
+            action=action,
+            allowed=not blocked,
+            violations=violations,
+            violation_count=len(violations),
+            blocked=blocked,
+            chain_depth=chain_depth,
+            context_tag=context_tag,
+        )
+
+    def registered_rule_ids(self) -> List[str]:
+        """Return the list of CASK rule IDs registered with the engine."""
+        return [r["id"] for r in _CASK_RULES]

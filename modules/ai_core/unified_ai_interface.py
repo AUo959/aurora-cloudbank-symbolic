@@ -11,6 +11,7 @@ Multi-model AI abstraction layer supporting:
 
 import asyncio
 import logging
+import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -240,6 +241,8 @@ class UnifiedAIInterface:
         self.openai_client = None
         self.performance_metrics: Dict[AIModel, List[float]] = {}
         self.usage_stats: Dict[AIModel, Dict[str, int]] = {}
+        _concurrency_limit = int(os.environ.get("AI_CONCURRENCY_LIMIT", "16"))
+        self._semaphore = asyncio.Semaphore(_concurrency_limit)
         self._initialize_clients()
 
     def _initialize_clients(self):
@@ -247,9 +250,15 @@ class UnifiedAIInterface:
         # Try Anthropic
         try:
             import anthropic
+            import httpx
+
+            _TIMEOUT = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0)
+            _MAX_RETRIES = 2
 
             self.anthropic_client = anthropic.AsyncAnthropic(
-                api_key=self.config.get("anthropic_api_key", "")
+                api_key=self.config.get("anthropic_api_key", ""),
+                timeout=_TIMEOUT,
+                max_retries=_MAX_RETRIES,
             )
             logger.info("✅ Anthropic client initialized")
         except ImportError:
@@ -260,8 +269,16 @@ class UnifiedAIInterface:
         # Try OpenAI
         try:
             import openai
+            import httpx
 
-            self.openai_client = openai.AsyncOpenAI(api_key=self.config.get("openai_api_key", ""))
+            _TIMEOUT = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0)
+            _MAX_RETRIES = 2
+
+            self.openai_client = openai.AsyncOpenAI(
+                api_key=self.config.get("openai_api_key", ""),
+                timeout=_TIMEOUT,
+                max_retries=_MAX_RETRIES,
+            )
             logger.info("✅ OpenAI client initialized")
         except ImportError:
             logger.warning("⚠️  OpenAI library not available - install: pip install openai>=1.50.0")
@@ -348,13 +365,16 @@ class UnifiedAIInterface:
                 task_type, self.FALLBACK_CHAINS["general"]
             )
 
-            for fallback_model in fallback:
+            for attempt, fallback_model in enumerate(fallback):
                 if fallback_model == model:
                     continue  # Skip the failed model
 
                 fallback_caps = self.CAPABILITIES.get(fallback_model)
                 if not fallback_caps or not fallback_caps.available:
                     continue
+
+                if attempt > 0:
+                    await asyncio.sleep(0.5 * (2 ** (attempt - 1)))
 
                 try:
                     logger.info(f"Trying fallback model: {fallback_model.value}")

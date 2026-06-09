@@ -224,7 +224,7 @@ class TestCaskApi:
 
     def test_topology_layers(self, client):
         resp = client.get("/api/cask/topology")
-        layers = {l["id"] for l in resp.json()["layers"]}
+        layers = {layer["id"] for layer in resp.json()["layers"]}
         assert layers == {"knowledge", "processing", "validation_runtime"}
 
     def test_topology_runtime_components(self, client):

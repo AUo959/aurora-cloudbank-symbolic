@@ -9,12 +9,9 @@ Value Systems Index, etc.).
 
 from __future__ import annotations
 
-import logging
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
-
-logger = logging.getLogger(__name__)
+from typing import Any, Dict, List, Optional
 
 # ---------------------------------------------------------------------------
 # Marker word sets extracted from CASK's knowledge layer
@@ -188,10 +185,14 @@ def score_cultural_sensitivity(
     # --- Context bonuses ----------------------------------------------
     domain_bonus = 0.05 if ctx.get("domain") in ("governance", "legal", "ethics") else 0.0
 
-    num_languages: int = int(ctx.get("num_languages", 1))
+    try:
+        num_languages = int(ctx.get("num_languages", 1))
+    except (TypeError, ValueError):
+        num_languages = 1
     language_bonus = min((num_languages - 1) * 0.02, 0.10) if num_languages > 1 else 0.0
 
-    target_regions: List[str] = ctx.get("target_regions", [])
+    raw_regions = ctx.get("target_regions", [])
+    target_regions: List[str] = list(raw_regions) if isinstance(raw_regions, (list, tuple)) else []
     region_bonus = min(len(target_regions) * 0.02, 0.10)
 
     score = max(0.0, min(1.0, raw + domain_bonus + language_bonus + region_bonus))

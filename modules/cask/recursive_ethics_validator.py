@@ -1,9 +1,11 @@
 """Recursive Ethics Validator — CASK runtime component.
 
 Validates (action, context) pairs against cultural ethics rules.  Rules are
-registered with the shared EthicsEngine so violations flow into the standard
-audit trail.  The validator itself acts as the Picard_Delta_3-compliant layer
-described in the CASK design surface.
+registered with an EthicsEngine instance (caller-supplied or a fresh per-instance
+engine by default).  Violations are persisted only when the engine is configured
+with a ``violations_path``; inject a shared engine to aggregate into the standard
+audit trail.  The validator acts as the Picard_Delta_3-compliant layer described
+in the CASK design surface.
 """
 
 from __future__ import annotations
@@ -27,15 +29,16 @@ except ImportError:  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
-# Rules contributed by this component.  They are registered once on
-# construction and become active across the shared engine.
-_CASK_RULES: List[Dict[str, Any]] = [
+# Rules contributed by this component, stored as plain dicts (category/severity as
+# strings) so no enum references appear at module level when the engine is absent.
+# They are resolved to proper EthicsRule objects inside _register_cask_rules().
+_CASK_RULES_DATA: List[Dict[str, Any]] = [
     {
         "id": "cask_cultural_hegemony",
         "name": "Cultural Hegemony Prevention",
         "description": "Action attempts to flatten or override non-dominant cultural values",
-        "category": RuleCategory.FAIRNESS if _ENGINE_AVAILABLE else None,
-        "severity": ViolationSeverity.HIGH if _ENGINE_AVAILABLE else None,
+        "category": "fairness",
+        "severity": "high",
         "auto_block": False,
         "conditions": ["cultural_override", "value_flattening"],
     },
@@ -43,8 +46,8 @@ _CASK_RULES: List[Dict[str, Any]] = [
         "id": "cask_ethics_chain_break",
         "name": "Ethics Chain Traceability",
         "description": "Action bypasses recursive ethics validation chain (Picard_Delta_3)",
-        "category": RuleCategory.AI_ETHICS if _ENGINE_AVAILABLE else None,
-        "severity": ViolationSeverity.CRITICAL if _ENGINE_AVAILABLE else None,
+        "category": "ai_ethics",
+        "severity": "critical",
         "auto_block": True,
         "conditions": ["ethics_bypass", "chain_skip"],
     },
@@ -52,8 +55,8 @@ _CASK_RULES: List[Dict[str, Any]] = [
         "id": "cask_bias_injection",
         "name": "Cultural Bias Injection",
         "description": "Agent generation algorithm introduces cultural bias into simulation",
-        "category": RuleCategory.FAIRNESS if _ENGINE_AVAILABLE else None,
-        "severity": ViolationSeverity.HIGH if _ENGINE_AVAILABLE else None,
+        "category": "fairness",
+        "severity": "high",
         "auto_block": False,
         "conditions": ["bias_detected", "cultural_bias"],
     },
@@ -61,8 +64,8 @@ _CASK_RULES: List[Dict[str, Any]] = [
         "id": "cask_safety_boundary",
         "name": "Simulation Safety Boundary",
         "description": "Recursive simulation depth exceeds safety boundary",
-        "category": RuleCategory.SAFETY if _ENGINE_AVAILABLE else None,
-        "severity": ViolationSeverity.CRITICAL if _ENGINE_AVAILABLE else None,
+        "category": "safety",
+        "severity": "critical",
         "auto_block": True,
         "conditions": ["recursion_depth_exceeded", "simulation_unsafe"],
     },
@@ -135,20 +138,20 @@ class RecursiveEthicsValidator:
     def _register_cask_rules(self) -> None:
         if self._rules_registered or self._engine is None:
             return
-        for rule_def in _CASK_RULES:
+        for rule_def in _CASK_RULES_DATA:
             rule = EthicsRule(
                 id=rule_def["id"],
                 name=rule_def["name"],
                 description=rule_def["description"],
-                category=rule_def["category"],
-                severity=rule_def["severity"],
+                category=RuleCategory(rule_def["category"]),
+                severity=ViolationSeverity(rule_def["severity"]),
                 auto_block=rule_def["auto_block"],
                 conditions=rule_def["conditions"],
                 metadata={"source": "cask_recursive_ethics_validator"},
             )
             self._engine.add_rule(rule)
         self._rules_registered = True
-        logger.info("CASK: registered %d ethics rules", len(_CASK_RULES))
+        logger.info("CASK: registered %d ethics rules", len(_CASK_RULES_DATA))
 
     # ------------------------------------------------------------------
     # Public API
@@ -214,4 +217,4 @@ class RecursiveEthicsValidator:
 
     def registered_rule_ids(self) -> List[str]:
         """Return the list of CASK rule IDs registered with the engine."""
-        return [r["id"] for r in _CASK_RULES]
+        return [r["id"] for r in _CASK_RULES_DATA]

@@ -55,7 +55,7 @@ def _analysis_endpoint(generator_fn, label: str):
             status_code=503,
             detail=f"pandas is required for CASK analysis endpoints: {exc}",
         )
-    except Exception as exc:
+    except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -81,8 +81,9 @@ async def get_risk():
 async def get_topology():
     """Return the layered component topology as structured JSON.
 
-    Components are grouped into three layers: knowledge (5), processing (2.8),
-    and validation/runtime (0.8).  ``status`` is ``'runtime'`` for components
-    with a concrete implementation in this release, ``'design'`` otherwise.
+    Components are arranged in three layers with vertical y-positions: knowledge
+    (y=5), processing (y=2.8), and validation/runtime (y=0.8).  ``status`` is
+    ``'runtime'`` for components with a concrete implementation in this release,
+    ``'design'`` otherwise.
     """
     return _TOPOLOGY

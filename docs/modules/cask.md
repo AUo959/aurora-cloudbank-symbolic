@@ -85,7 +85,7 @@ print(result.level)   # "medium" | "low" | "high"
 print(result.positive_matches)
 ```
 
-**Score bands**: `low` < 0.3 ≤ `medium` < 0.6 ≤ `high`
+**Score bands**: score < 0.3 → `"low"` | 0.3 ≤ score < 0.6 → `"medium"` | score ≥ 0.6 → `"high"`
 
 **Context keys**:
 - `domain` — `"governance"`, `"legal"`, or `"ethics"` add +0.05
@@ -122,7 +122,7 @@ print(verdict.violation_count) # 0 if clean
 | `cask_bias_injection` | HIGH | No | `bias_detected`, `cultural_bias` |
 | `cask_safety_boundary` | CRITICAL | **Yes** | `recursion_depth_exceeded`, `simulation_unsafe` |
 
-Rules are registered into the shared `EthicsEngine` so violations appear in the standard audit trail.
+Rules are registered into the engine instance used by this validator.  To aggregate violations into the central audit trail, inject a shared `EthicsEngine` configured with a `violations_path`; by default a fresh per-instance engine is created.
 
 ---
 

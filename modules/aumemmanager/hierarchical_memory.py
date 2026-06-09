@@ -11,10 +11,12 @@ This module provides enterprise-grade memory management with:
 """
 
 import json
+import os
 import time
 import uuid
 import re
 import numpy as np
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict, field
 from enum import Enum
@@ -33,6 +35,13 @@ try:
 except ImportError:
     AURORA_DLP_AVAILABLE = False
     logger.warning("Aurora DLP not available - running in standalone mode")
+
+try:
+    from src.utils.atomic_io import atomic_write_json
+    ATOMIC_IO_AVAILABLE = True
+except ImportError:
+    ATOMIC_IO_AVAILABLE = False
+    logger.warning("atomic_io not available - persistence will use non-atomic writes")
 
 # Constants
 SUMMARY_MAX_LENGTH = 100  # Maximum length for content summaries in logs
@@ -273,37 +282,38 @@ class MemoryItem:
 class HierarchicalMemoryManager:
     """Advanced hierarchical memory management with Aurora CloudBank integration"""
     
-    def __init__(self, max_active_memories: int = 1000):
+    def __init__(self, max_active_memories: int = 1000, persist_path: Optional[str] = None):
         # Import the quantum flight controller
         from .quantum_flight_control import QuantumFlightController
-        
+
         self.memory_stores: Dict[str, Dict[str, MemoryItem]] = defaultdict(dict)
         self.attention_weights = AttentionWeight()
         self.flight_controller = QuantumFlightController()
-        
+
         # Hierarchical storage tiers
         self.active_tier: Dict[str, MemoryItem] = {}
         self.compressed_tier: Dict[str, MemoryItem] = {}
         self.archived_tier: Dict[str, MemoryItem] = {}
-        
+
         # Configuration
         self.max_active_memories = max_active_memories
         self.compression_threshold = 0.8 * max_active_memories
         self.auto_compress = True
         self.auto_decay = True
-        
+
         # Indexing for fast retrieval
         self.importance_index: Dict[float, List[str]] = defaultdict(list)
         self.tag_index: Dict[str, List[str]] = defaultdict(list)
         self.type_index: Dict[MemoryType, List[str]] = defaultdict(list)
-        
+
         # Aurora CloudBank specific indexes
         self.anchor_index: Dict[str, List[str]] = defaultdict(list)
         self.cultural_index: Dict[float, List[str]] = defaultdict(list)
-        
+
         # Thread safety
         self.lock = threading.RLock()
-        
+        self._persist_lock = threading.Lock()
+
         # Performance metrics
         self.metrics = {
             'total_memories': 0,
@@ -316,8 +326,186 @@ class HierarchicalMemoryManager:
             'dlp_tracked_memories': 0,
             'aurora_anchored_memories': 0
         }
+
+        # Persistence configuration
+        # Prefer explicit argument; fall back to environment variable.
+        self._persist_path: Optional[str] = persist_path or os.environ.get("AURORA_AUMEM_PERSIST_PATH")
+
+        if self._persist_path:
+            self._load_from_disk()
     
-    def add_memory(self, 
+    # ------------------------------------------------------------------
+    # Persistence helpers
+    # ------------------------------------------------------------------
+
+    def _serialize_memory(self, memory: MemoryItem) -> Dict[str, Any]:
+        """Convert a MemoryItem to a JSON-serialisable dict.
+
+        Enum fields are stored as their string value so they round-trip
+        through JSON without loss.
+        """
+        raw = asdict(memory)
+        # Enums are preserved as their `.value` by asdict() in Python 3.11+
+        # but we make it explicit for safety.
+        raw["memory_type"] = memory.memory_type.value
+        raw["status"] = memory.status.value
+        return raw
+
+    def _deserialize_memory(self, raw: Dict[str, Any]) -> MemoryItem:
+        """Reconstruct a MemoryItem from a persisted dict.
+
+        Unknown keys are silently ignored so old snapshots remain loadable
+        after the dataclass gains new fields.
+        """
+        # Restore enum fields from their string values.
+        try:
+            raw["memory_type"] = MemoryType(raw["memory_type"])
+        except (KeyError, ValueError):
+            raw["memory_type"] = MemoryType.AGENT
+
+        try:
+            raw["status"] = MemoryStatus(raw["status"])
+        except (KeyError, ValueError):
+            raw["status"] = MemoryStatus.ACTIVE
+
+        # Reconstruct nested QuantumSymbolicVector if present.
+        qv_data = raw.get("quantum_vector")
+        if qv_data and isinstance(qv_data, dict):
+            try:
+                raw["quantum_vector"] = QuantumSymbolicVector(**qv_data)
+            except Exception:
+                raw["quantum_vector"] = None
+        else:
+            raw["quantum_vector"] = None
+
+        # Keep only fields that MemoryItem.__init__ accepts.
+        valid_fields = {f.name for f in MemoryItem.__dataclass_fields__.values()}
+        filtered = {k: v for k, v in raw.items() if k in valid_fields}
+
+        return MemoryItem(**filtered)
+
+    def save_to_disk(self) -> None:
+        """Persist all memory tiers to *_persist_path* as a JSON snapshot.
+
+        The write is atomic (via :func:`atomic_write_json`) so readers will
+        never observe a half-written file.  This method is thread-safe and
+        is a no-op when *persist_path* was not configured.
+        """
+        if not self._persist_path:
+            return
+
+        with self._persist_lock:
+            with self.lock:
+                memories = []
+                for tier_name, tier in [
+                    ("active", self.active_tier),
+                    ("compressed", self.compressed_tier),
+                    ("archived", self.archived_tier),
+                ]:
+                    for memory in tier.values():
+                        entry = self._serialize_memory(memory)
+                        entry["_tier"] = tier_name
+                        memories.append(entry)
+
+            payload: Dict[str, Any] = {
+                "_schema_version": 1,
+                "_saved_at": datetime.now(timezone.utc).isoformat(),
+                "memories": memories,
+            }
+
+            try:
+                if ATOMIC_IO_AVAILABLE:
+                    atomic_write_json(self._persist_path, payload)
+                else:
+                    # Fallback: plain write (not atomic but functional)
+                    dest_dir = os.path.dirname(os.path.abspath(self._persist_path))
+                    os.makedirs(dest_dir, exist_ok=True)
+                    with open(self._persist_path, "w", encoding="utf-8") as fh:
+                        json.dump(payload, fh, indent=2, default=str)
+
+                logger.info(
+                    "AuMemManager: saved %d memories to %s",
+                    len(memories),
+                    str(self._persist_path)[:SUMMARY_MAX_LENGTH],
+                )
+            except Exception as exc:
+                logger.error(
+                    "AuMemManager: save_to_disk failed (%s): %s",
+                    type(exc).__name__,
+                    str(exc)[:SUMMARY_MAX_LENGTH],
+                )
+
+    def _load_from_disk(self) -> None:
+        """Restore memories from *_persist_path* if the file exists.
+
+        Handles three failure modes gracefully:
+        - Missing file: logs info and starts with empty memory (new install).
+        - Corrupt JSON: logs a warning and starts with empty memory.
+        - Individual bad records: skips the record and logs a warning.
+        """
+        if not self._persist_path:
+            return
+
+        if not os.path.exists(self._persist_path):
+            logger.info(
+                "AuMemManager: no persist file at %s — starting fresh",
+                str(self._persist_path)[:SUMMARY_MAX_LENGTH],
+            )
+            return
+
+        try:
+            with open(self._persist_path, "r", encoding="utf-8") as fh:
+                payload = json.load(fh)
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning(
+                "AuMemManager: could not read persist file %s (%s: %s) — starting with empty memory",
+                str(self._persist_path)[:SUMMARY_MAX_LENGTH],
+                type(exc).__name__,
+                str(exc)[:SUMMARY_MAX_LENGTH],
+            )
+            return
+
+        memories_raw: List[Dict[str, Any]] = payload.get("memories", [])
+        restored = 0
+
+        for raw in memories_raw:
+            try:
+                tier_name = raw.pop("_tier", "active")
+                memory = self._deserialize_memory(raw)
+
+                # Place into correct tier.
+                if tier_name == "compressed":
+                    self.compressed_tier[memory.id] = memory
+                    self.metrics["compressed_memories"] += 1
+                elif tier_name == "archived":
+                    self.archived_tier[memory.id] = memory
+                    self.metrics["archived_memories"] += 1
+                else:
+                    self.active_tier[memory.id] = memory
+                    self.metrics["active_memories"] += 1
+
+                # Rebuild owner store.
+                self.memory_stores[memory.owner][memory.id] = memory
+
+                # Rebuild search indexes.
+                self._update_indexes(memory)
+
+                self.metrics["total_memories"] += 1
+                restored += 1
+            except Exception as exc:
+                logger.warning(
+                    "AuMemManager: skipped corrupt record during load (%s: %s)",
+                    type(exc).__name__,
+                    str(exc)[:SUMMARY_MAX_LENGTH],
+                )
+
+        logger.info(
+            "AuMemManager: restored %d memories from %s",
+            restored,
+            str(self._persist_path)[:SUMMARY_MAX_LENGTH],
+        )
+
+    def add_memory(self,
                    content: Any,
                    memory_type: MemoryType,
                    owner: str,

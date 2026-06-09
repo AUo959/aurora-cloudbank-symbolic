@@ -166,3 +166,53 @@ def test_telemetry_initialized_in_lifespan():
     # Service names may vary if initialized before lifespan runs
     assert aurora_telemetry.service_name in ["aurora-cloudbank", "aurora-cloudbank-api"]
     assert r2_telemetry.service_name in ["aurora-r2-agent", "r2-agent"]
+
+
+@pytest.mark.integration
+@pytest.mark.observability
+def test_r2_middleware_records_span_per_request():
+    """R2AgentTelemetry middleware must produce at least one span per non-skip request.
+
+    This is the acceptance-criteria test for issue #769: removing the middleware
+    causes this test to fail because no operations are recorded.
+    """
+    from api.aurora_api import app
+    from src.observability import get_r2_telemetry, reset_r2_telemetry
+
+    reset_r2_telemetry()
+
+    client = TestClient(app)
+    # /telemetry/snapshot is a real API path (not in _R2_SKIP_PATHS) so the
+    # middleware must wrap it and record an operation.
+    response = client.get("/telemetry/snapshot")
+    assert response.status_code == 200
+
+    r2 = get_r2_telemetry()
+    summary = r2.get_metrics_summary()
+    # At least one operation must have been recorded by the middleware.
+    assert summary.get("total_operations", 0) >= 1, (
+        "R2AgentTelemetry middleware did not record any spans — "
+        "check that r2_telemetry_middleware is registered in aurora_api.py"
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.observability
+def test_metrics_endpoint_includes_r2_counters():
+    """The /metrics endpoint must expose R2 Prometheus counters after a traced request."""
+    from api.aurora_api import app
+    from src.observability import reset_r2_telemetry
+
+    reset_r2_telemetry()
+
+    client = TestClient(app)
+    # Trigger a span by hitting a real endpoint first
+    client.get("/telemetry/snapshot")
+
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    content = response.text
+    # R2 Prometheus counters should appear after at least one span is recorded
+    assert "r2_agent_operations_total" in content, (
+        "/metrics is not exporting R2AgentTelemetry counters"
+    )

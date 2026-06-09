@@ -581,6 +581,49 @@ async def telemetry_middleware(request: Request, call_next):
             raise
 
 
+# ================================
+# R2 Agent Telemetry Middleware
+# ================================
+
+# Paths that produce noisy or circular telemetry if traced at this level
+_R2_SKIP_PATHS = frozenset({"/health", "/metrics", "/docs", "/openapi.json", "/redoc", "/"})
+
+
+@app.middleware("http")
+async def r2_telemetry_middleware(request: Request, call_next):
+    """Wrap every API request in an R2AgentTelemetry span for distributed tracing.
+
+    Records http_method, http_path, and http_status_code per span, enabling
+    downstream anomaly detection and Prometheus counters for every route.
+
+    DLP: r2_request_tracing_middleware
+    """
+    if request.url.path in _R2_SKIP_PATHS or request.url.path.startswith("/static"):
+        return await call_next(request)
+
+    try:
+        r2 = get_r2_telemetry()
+    except Exception:  # pragma: no cover - graceful degradation
+        return await call_next(request)
+
+    context_tag = (
+        f"http_{request.url.path.replace('/', '_').strip('_')}_"
+        f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+    )
+    with r2.trace_agent_operation(
+        f"http_{request.method.lower()}",
+        context_tag=context_tag,
+        http_method=request.method,
+        http_path=str(request.url.path),
+    ) as op:
+        try:
+            response = await call_next(request)
+            op.metadata["http_status_code"] = response.status_code
+            return response
+        except Exception:
+            raise
+
+
 # HIGH-5: NoSQL Injection Prevention - Input Validation Helper
 def validate_identifier(identifier: str, param_name: str) -> str:
     """
@@ -1172,8 +1215,14 @@ def prometheus_metrics(request: Request):
     from fastapi.responses import PlainTextResponse
     try:
         telemetry = get_telemetry()
-        prometheus_data = telemetry.export_prometheus_format()
-        return PlainTextResponse(content=prometheus_data, media_type="text/plain; version=0.0.4")
+        parts = [telemetry.export_prometheus_format()]
+        try:
+            r2 = get_r2_telemetry()
+            parts.append(r2.export_prometheus_metrics())
+        except Exception as r2_err:
+            logger.warning("R2 metrics export partial failure: %s", r2_err)
+        combined = "\n".join(p for p in parts if p)
+        return PlainTextResponse(content=combined, media_type="text/plain; version=0.0.4")
     except Exception as e:
         logger.error("Failed to export Prometheus metrics: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error")

@@ -162,15 +162,15 @@ _RISK_PRIORITIES: List[str] = [
 
 
 def _write_csv(records: List[dict], output_csv: str) -> None:
-    """Write *records* to *output_csv* using pandas (optional dependency)."""
-    try:
-        import pandas as pd
-        pd.DataFrame(records).to_csv(output_csv, index=False)
-    except ImportError as exc:
-        raise ImportError(
-            "pandas is required for CASK analysis features. "
-            "Install with: pip install pandas>=2.1.0"
-        ) from exc
+    """Write *records* to *output_csv* using the built-in csv module."""
+    import csv
+    if not records:
+        return
+    fieldnames: list = list(records[0].keys())
+    with open(output_csv, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(records)
 
 
 def generate_technical_specifications(output_csv: str | None = None) -> List[dict]:

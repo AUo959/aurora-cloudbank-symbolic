@@ -201,8 +201,8 @@ class RecursiveEthicsValidator:
                 parameters=effective_context,
                 context_tag=context_tag,
             )
-            violations = engine.evaluate_action(action_ctx)
-            blocked = engine.check_should_block(violations)
+            violations: list = list(engine.evaluate_action(action_ctx))
+            blocked: bool = engine.check_should_block(violations)
             return ValidationVerdict(
                 action=action,
                 allowed=not blocked,

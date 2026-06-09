@@ -26,6 +26,15 @@ try:
     _ENGINE_AVAILABLE = True
 except ImportError:  # pragma: no cover
     _ENGINE_AVAILABLE = False
+    # Ensure names are always defined so static analysis doesn't flag them as
+    # potentially undefined. These stubs are never called (the engine guard
+    # returns early when _ENGINE_AVAILABLE is False).
+    ActionContext = None  # type: ignore[assignment,misc]
+    EthicsEngine = None  # type: ignore[assignment]
+    EthicsRule = None  # type: ignore[assignment]
+    EthicsViolation = None  # type: ignore[assignment]
+    RuleCategory = None  # type: ignore[assignment]
+    ViolationSeverity = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 

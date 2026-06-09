@@ -1,7 +1,9 @@
 """CASK data generation utilities."""
 
+from typing import Any
 
-def generate_technical_specifications(output_csv: str | None = None):
+
+def generate_technical_specifications(output_csv: str | None = None) -> Any:
     """Return CASK technical specifications as a DataFrame and optionally save CSV."""
     try:
         import pandas as pd
@@ -66,7 +68,7 @@ def generate_technical_specifications(output_csv: str | None = None):
         ) from exc
 
 
-def generate_vs_sota_comparison(output_csv: str | None = None):
+def generate_vs_sota_comparison(output_csv: str | None = None) -> Any:
     """Return comparison of CASK against state of the art and optionally save CSV."""
     try:
         import pandas as pd
@@ -143,7 +145,7 @@ def generate_vs_sota_comparison(output_csv: str | None = None):
         ) from exc
 
 
-def generate_risk_assessment(output_csv: str | None = None):
+def generate_risk_assessment(output_csv: str | None = None) -> Any:
     """Return CASK project risk assessment DataFrame and optionally save CSV."""
     try:
         import pandas as pd

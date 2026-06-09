@@ -84,6 +84,24 @@ class TestRecursiveEthicsValidator:
 # score_cultural_sensitivity
 # ---------------------------------------------------------------------------
 
+_POSITIVE_TERMS = [
+    "cultural context",
+    "cross-cultural",
+    "multicultural",
+    "cultural diversity",
+    "value system",
+    "collective",
+    "indigenous",
+    "local knowledge",
+    "cultural nuance",
+    "cultural norm",
+    "cultural perspective",
+    "intercultural",
+    "inclusive",
+    "pluralism",
+    "multilingual",
+]
+
 
 @pytest.mark.unit
 @pytest.mark.aurora
@@ -165,25 +183,6 @@ class TestScoreCulturalSensitivity:
         d = result.to_dict()
         for key in ("score", "level", "positive_matches", "negative_matches", "scope_indicators", "details"):
             assert key in d
-
-
-_POSITIVE_TERMS = [
-    "cultural context",
-    "cross-cultural",
-    "multicultural",
-    "cultural diversity",
-    "value system",
-    "collective",
-    "indigenous",
-    "local knowledge",
-    "cultural nuance",
-    "cultural norm",
-    "cultural perspective",
-    "intercultural",
-    "inclusive",
-    "pluralism",
-    "multilingual",
-]
 
 
 # ---------------------------------------------------------------------------

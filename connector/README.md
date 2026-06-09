@@ -1,7 +1,7 @@
 # Aurora Cloudbank MCP Connector
 
 > Version: 0.1.0 (scaffold)  
-> Status: 🚧 Implementation pending — stubs ready for wiring  
+> Status: ✅ v0.1.0 — all five read-only tools wired to live Aurora API endpoints  
 > Protocol: [Model Context Protocol (MCP)](https://modelcontextprotocol.io)  
 > Transport: stdio (default) | SSE (HTTP streaming)
 
@@ -118,9 +118,17 @@ python -m connector.server --transport sse --port 8765
 
 ## Development Status
 
-All tool handlers in `connector/tools/` are **stubbed** — they return
-shape-correct mock data. Wire them to real endpoints in
-`connector/transport/bridge.py` by implementing the `TODO` blocks.
+All five v0.1.0 read-only tools are wired to live Aurora API endpoints:
+
+| Tool | Aurora endpoint | Notes |
+|------|-----------------|-------|
+| `aurora_get_state` | `GET /health` + `GET /api/drift/alerts` | Health flags → layer state; recent alerts → echochain |
+| `aurora_get_agents` | `GET /api/crew/all` | `online` status → Available; `offline` → Invisible |
+| `aurora_get_drift` | `GET /api/drift/alerts` | Alert level critical/warning/info → L1/L2/L3 layers |
+| `aurora_get_ethics_log` | `POST /gumas/violations` | Severity mapped to connector labels (violation/warning/info) |
+| `aurora_get_capsules` | `GET /synergy/components` | `active` status → loaded; symbolic hash derived from name+version |
+
+Path constants live in `connector/transport/bridge.py` (`AURORA_PATH_*`).
 
 See [`docs/dev-notes/drift-threshold-stratification.md`](../docs/dev-notes/drift-threshold-stratification.md)
 before touching any drift-related tool logic.

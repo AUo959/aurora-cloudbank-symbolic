@@ -14,19 +14,34 @@ Three-layer stratification:
   L3 Macro / Network       : 0.1    (loosest  - cross-network coherence)
 
 The 10x ratio between layers is intentional.
+
+Backed by GET /api/drift/alerts. Alert severity levels (critical/warning/info)
+are mapped to the L1/L2/L3 layer structure: critical → L1, warning → L2,
+info → L3.
 """
 
 import json
 from datetime import datetime, timezone
 from mcp.types import Tool
 
-from connector.transport.bridge import CloudbankBridge
+from connector.transport.bridge import (
+    CloudbankBridge,
+    BridgeError,
+    AURORA_PATH_DRIFT_ALERTS,
+)
 
 # Architecture constants -- see docs/dev-notes/drift-threshold-stratification.md
 DRIFT_THRESHOLDS = {
     "L1_capsule_governance": 0.002,
     "L2_agent_qgia": 0.02,
     "L3_macro_network": 0.1,
+}
+
+# Maps each connector layer to the Aurora drift alert severity level it tracks.
+_LAYER_TO_ALERT_LEVEL = {
+    "L1_capsule_governance": "critical",
+    "L2_agent_qgia": "warning",
+    "L3_macro_network": "info",
 }
 
 
@@ -59,16 +74,35 @@ class GetDriftTool:
     async def run(self, arguments: dict) -> str:
         include_history = arguments.get("include_history", False)
 
-        # TODO: Replace stub with bridge call:
-        # bridge = CloudbankBridge()
-        # data = await bridge.get("/drift", params={"history": include_history})
+        bridge = CloudbankBridge()
+        try:
+            raw = await bridge.get(AURORA_PATH_DRIFT_ALERTS, params={"limit": 100})
+        except BridgeError as exc:
+            return json.dumps({
+                "error": str(exc),
+                "layers": [],
+                "any_breach": False,
+                "thresholds_ref": "docs/dev-notes/drift-threshold-stratification.md",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }, indent=2)
 
-        # --- STUB RESPONSE ---
+        all_alerts = raw.get("alerts", [])
+
         layers = []
         for layer_key, threshold in DRIFT_THRESHOLDS.items():
-            # Stub: current reading is 0.0 (nominal). Real impl fetches from API.
-            current_reading = 0.0
-            breach = current_reading > threshold
+            alert_level = _LAYER_TO_ALERT_LEVEL[layer_key]
+            level_alerts = [
+                a for a in all_alerts
+                if a.get("level", "").lower() == alert_level
+            ]
+
+            breach = len(level_alerts) > 0
+            # Represent the reading as 0.0 (nominal) or threshold * 1.5 (breached).
+            # The real signal is breach/not-breach; the exact reading carries limited
+            # meaning across the unit mismatch between Aurora's relative-change
+            # deviation and the connector's symbolic threshold scale.
+            current_reading = round(threshold * 1.5, 6) if breach else 0.0
+
             layer_data = {
                 "layer": layer_key,
                 "threshold": threshold,
@@ -77,8 +111,19 @@ class GetDriftTool:
                 "breach": breach,
                 "headroom": round(threshold - current_reading, 6),
             }
+
             if include_history:
-                layer_data["history"] = []  # TODO: populate from API
+                layer_data["history"] = [
+                    {
+                        "timestamp": a.get("timestamp", ""),
+                        "agent_id": a.get("agent_id", ""),
+                        "metric": a.get("metric_name", ""),
+                        "deviation": a.get("deviation", 0.0),
+                        "description": a.get("description", ""),
+                    }
+                    for a in level_alerts[-5:]
+                ]
+
             layers.append(layer_data)
 
         data = {

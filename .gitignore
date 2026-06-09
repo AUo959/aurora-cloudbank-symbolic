@@ -290,3 +290,4 @@ runtime/mesh/transcripts/*.jsonl
 
 # Claude Code internal directory
 .claude/
+shutdown_manifest.json

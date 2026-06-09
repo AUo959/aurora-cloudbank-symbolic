@@ -8,6 +8,7 @@ Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 
 # Install log-injection filter as early as possible so all subsequent loggers
@@ -494,6 +495,7 @@ async def telemetry_middleware(request: Request, call_next):
         }
     ):
         try:
+            _req_start = time.perf_counter()
             response = await call_next(request)
 
             # Record feature usage based on endpoint
@@ -505,6 +507,21 @@ async def telemetry_middleware(request: Request, call_next):
                 telemetry.record_feature_usage("memory_api")
             elif request.url.path.startswith("/quantum"):
                 telemetry.record_feature_usage("quantum_api")
+
+            # Check per-endpoint performance budget
+            try:
+                from src.observability.performance_budgets import check_budget_violation
+                _duration_ms = (time.perf_counter() - _req_start) * 1000
+                _violation = check_budget_violation(
+                    request.method,
+                    str(request.url.path),
+                    _duration_ms,
+                    response.status_code >= 500,
+                )
+                if _violation:
+                    logger.warning("PERF BUDGET VIOLATION: %s", _violation)
+            except Exception:
+                pass
 
             return response
         except Exception as e:
@@ -2916,6 +2933,26 @@ async def verify_patchweaver_state(
             status_code=500,
             detail="Internal server error"
         )
+
+
+# ================================
+# Performance Budgets Endpoint
+# ================================
+
+@app.get("/api/performance-budgets")
+@limiter.limit("60/minute")
+async def get_performance_budgets(request: Request):
+    """Returns the documented per-endpoint performance budgets.
+
+    Each entry specifies p95/p99 latency targets in milliseconds and the
+    maximum acceptable error rate as a percentage.  These values are checked
+    at runtime by the telemetry middleware and logged as warnings when exceeded.
+    """
+    from src.observability.performance_budgets import list_budgets
+    return {
+        "budgets": list_budgets(),
+        "note": "p95/p99 latency targets in ms; error rate in percent",
+    }
 
 
 if __name__ == "__main__":

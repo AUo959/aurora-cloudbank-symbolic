@@ -30,6 +30,7 @@ from src.observability import get_telemetry, get_r2_telemetry
 from src.middleware.body_size import MaxBodySizeMiddleware, _default_max_bytes
 from src.middleware.exception_handler import validation_handler
 from src.middleware.request_id import RequestIDMiddleware
+from src.runtime.shutdown import ShutdownCoordinator
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 try:
@@ -273,7 +274,7 @@ except Exception as e:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage application lifecycle with startup and shutdown logic"""
+    """Manage application lifecycle with startup and shutdown logic."""
     # Startup
     logger.info("Aurora API starting up...")
     logger.info("Rate limiter active: AI=20/min, crew=30/min, quantum=10/min, memory_write=60/min")
@@ -288,6 +289,8 @@ async def lifespan(app: FastAPI):
             "state divergence. See docs/operations/single-worker-constraint.md for details.",
             _worker_count,
         )
+
+    shutdown_coordinator = ShutdownCoordinator()
 
     # Initialize telemetry systems
     try:
@@ -306,48 +309,54 @@ async def lifespan(app: FastAPI):
         try:
             await HALO_PAS_CONTROLLER.start()
             logger.info("✅ HALO/PAS Drift Controller started")
+            shutdown_coordinator.register_flush(HALO_PAS_CONTROLLER.stop, name="HALO/PAS stop")
         except Exception as e:
             logger.error("❌ Failed to start HALO/PAS Controller: %s", e)
 
+    # Register telemetry snapshot as a shutdown flush
+    def _telemetry_flush() -> None:
+        try:
+            telemetry = get_telemetry()
+            snapshot = telemetry.get_metrics_snapshot(context_tag="shutdown_metrics")
+            logger.info(
+                "📊 Final telemetry: %d operations, %d features tracked",
+                len(snapshot.performance_metrics),
+                len(snapshot.adoption_metrics),
+            )
+        except Exception as exc:
+            logger.debug("Telemetry snapshot failed: %s", exc)
+
+    shutdown_coordinator.register_flush(_telemetry_flush, name="telemetry snapshot")
+
+    # Register shutdown manifest as a flush
+    def _manifest_flush() -> None:
+        try:
+            import json as _json
+            manifest = build_shutdown_manifest()
+            manifest_path = os.path.join(os.getcwd(), "shutdown_manifest.json")
+            with open(manifest_path, "w", encoding="utf-8") as f:
+                _json.dump(manifest, f, ensure_ascii=False, indent=2)
+            logger.info(
+                "🧾 Shutdown manifest written (%s components, hash=%s)",
+                len(manifest.get("components", {})),
+                manifest.get("hash"),
+            )
+        except Exception as exc:
+            logger.warning("⚠️ Failed to generate shutdown manifest: %s", exc)
+
+    shutdown_coordinator.register_flush(_manifest_flush, name="shutdown manifest")
+
     yield
 
-    # Shutdown
-    logger.info("Aurora API shutting down...")
-
-    # Export final telemetry snapshot
-    try:
-        aurora_telemetry = get_telemetry()
-        snapshot = aurora_telemetry.get_metrics_snapshot(context_tag="shutdown_metrics")
-        logger.info(
-            "📊 Final telemetry: %d operations, %d features tracked",
-            len(snapshot.performance_metrics),
-            len(snapshot.adoption_metrics),
-        )
-    except Exception as e:
-        logger.debug("Telemetry snapshot failed: %s", e)
-
-    # Stop HALO/PAS drift controller if running
-    if HALO_PAS_AVAILABLE and HALO_PAS_CONTROLLER:
-        try:
-            await HALO_PAS_CONTROLLER.stop()
-            logger.info("✅ HALO/PAS Drift Controller stopped")
-        except Exception as e:
-            logger.error("❌ Failed to stop HALO/PAS Controller: %s", e)
-
-    # Build and persist shutdown manifest (Phase 1 implementation)
-    try:
-        import json  # local import to avoid mid-file import lint warnings
-        manifest = build_shutdown_manifest()
-        manifest_path = os.path.join(os.getcwd(), "shutdown_manifest.json")
-        with open(manifest_path, "w", encoding="utf-8") as f:
-            json.dump(manifest, f, ensure_ascii=False, indent=2)
-        logger.info(
-            "🧾 Shutdown manifest written (%s components, hash=%s)",
-            len(manifest.get("components", {})),
-            manifest.get("hash"),
-        )
-    except Exception as e:
-        logger.warning("⚠️ Failed to generate shutdown manifest: %s", e)
+    # Shutdown — coordinator cancels tasks, shuts down executors, runs flushes
+    logger.info(
+        "Aurora API shutting down (tasks=%d flushes=%d executors=%d)...",
+        shutdown_coordinator.pending_task_count,
+        shutdown_coordinator.registered_flush_count,
+        shutdown_coordinator.registered_executor_count,
+    )
+    await shutdown_coordinator.shutdown(timeout=10.0)
+    logger.info("Aurora API shutdown complete.")
 
 
 def build_shutdown_manifest() -> Dict[str, Any]:

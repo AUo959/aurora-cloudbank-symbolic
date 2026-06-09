@@ -126,8 +126,10 @@ class RecursiveEthicsValidator:
     # ------------------------------------------------------------------
 
     def _register_cask_rules(self) -> None:
+        if self._rules_registered:
+            return
         engine = self._engine
-        if self._rules_registered or engine is None:
+        if engine is None:
             return
         try:
             from src.monitoring.ethics_engine import EthicsRule, RuleCategory, ViolationSeverity

@@ -70,6 +70,7 @@ from src.middleware.fastapi_security import (
     limiter,
     security,
     verify_csrf_token,
+    require_csrf_token,
     verify_ws_token,
     validate_ws_tool,
     sanitize_request_id,
@@ -3191,16 +3192,12 @@ async def rag_chat_endpoint(req: RAGChatRequest, request: Request):
 
 try:
     from modules.ai_core.unified_ai_interface import (
-        UnifiedAIInterface,
+        unified_ai as _unified_ai_singleton,
         AIRequest,
     )
-    _unified_ai: Optional[UnifiedAIInterface] = None
 
-    def _get_unified_ai() -> UnifiedAIInterface:
-        global _unified_ai
-        if _unified_ai is None:
-            _unified_ai = UnifiedAIInterface()
-        return _unified_ai
+    def _get_unified_ai():
+        return _unified_ai_singleton
 
     class AICompleteRequest(BaseModel):
         model_config = ConfigDict(extra="forbid")
@@ -3211,20 +3208,15 @@ try:
             default_factory=lambda: f"ai_complete_{utc_now().strftime('%Y%m%dT%H%M%S')}"
         )
 
-    @app.post("/api/ai/complete", dependencies=[Depends(security), Depends(verify_csrf_token)])
+    @app.post("/api/ai/complete", dependencies=[Depends(require_csrf_token)])
     @limiter.limit("30/minute")
-    async def ai_complete(
-        request: Request,
-        body: AICompleteRequest,
-        token: HTTPAuthorizationCredentials = Depends(security),
-    ):
+    async def ai_complete(request: Request, body: AICompleteRequest):
         """
         Complete a prompt using the UnifiedAIInterface.
 
         Automatically selects the best available model based on task_type.
         Falls back through the configured fallback chain on provider errors.
         """
-        verify_csrf_token(token)
         ai = _get_unified_ai()
         ai_request = AIRequest(
             prompt=body.prompt,
@@ -3304,18 +3296,14 @@ try:
             logger.error("SystemFlowOrchestrator flow status failed: %s", exc)
             raise HTTPException(status_code=500, detail="Internal server error")
 
-    @app.post("/api/quantum-forge/flow/optimize", dependencies=[Depends(security), Depends(verify_csrf_token)])
+    @app.post("/api/quantum-forge/flow/optimize", dependencies=[Depends(require_csrf_token)])
     @limiter.limit("10/minute")
-    async def quantum_forge_flow_optimize(
-        request: Request,
-        token: HTTPAuthorizationCredentials = Depends(security),
-    ):
+    async def quantum_forge_flow_optimize(request: Request):
         """
         Trigger an auto-optimization pass across all registered modules.
 
         Returns the optimization report including any mode transitions applied.
         """
-        verify_csrf_token(token)
         try:
             return _get_sfo().auto_optimize_system()
         except Exception as exc:

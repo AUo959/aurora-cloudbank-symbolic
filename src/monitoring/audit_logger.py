@@ -456,7 +456,7 @@ class AuditLogger:
             return
 
         try:
-with self._write_lock:
+            with self._write_lock:
                 self.storage_path.parent.mkdir(parents=True, exist_ok=True)
                 record = get_registry().stamp(entry.to_dict(), "audit_log")
                 with open(self.storage_path, 'a', encoding='utf-8') as f:

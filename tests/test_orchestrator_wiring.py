@@ -178,6 +178,9 @@ def test_flow_optimize_with_auth(client):
         )
 
     assert resp.status_code == 200
+    body = resp.json()
+    assert body.get("optimized") is True
+    assert "actions_taken" in body
 
 
 # ---------------------------------------------------------------------------

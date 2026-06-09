@@ -130,22 +130,22 @@ class RecursiveEthicsValidator:
             return
         try:
             from src.monitoring.ethics_engine import EthicsRule, RuleCategory, ViolationSeverity
+            for rule_def in _CASK_RULES_DATA:
+                rule = EthicsRule(
+                    id=rule_def["id"],
+                    name=rule_def["name"],
+                    description=rule_def["description"],
+                    category=RuleCategory(rule_def["category"]),
+                    severity=ViolationSeverity(rule_def["severity"]),
+                    auto_block=rule_def["auto_block"],
+                    conditions=rule_def["conditions"],
+                    metadata={"source": "cask_recursive_ethics_validator"},
+                )
+                self._engine.add_rule(rule)
+            self._rules_registered = True
+            logger.info("CASK: registered %d ethics rules", len(_CASK_RULES_DATA))
         except ImportError:
             return
-        for rule_def in _CASK_RULES_DATA:
-            rule = EthicsRule(
-                id=rule_def["id"],
-                name=rule_def["name"],
-                description=rule_def["description"],
-                category=RuleCategory(rule_def["category"]),
-                severity=ViolationSeverity(rule_def["severity"]),
-                auto_block=rule_def["auto_block"],
-                conditions=rule_def["conditions"],
-                metadata={"source": "cask_recursive_ethics_validator"},
-            )
-            self._engine.add_rule(rule)
-        self._rules_registered = True
-        logger.info("CASK: registered %d ethics rules", len(_CASK_RULES_DATA))
 
     # ------------------------------------------------------------------
     # Public API
@@ -199,6 +199,15 @@ class RecursiveEthicsValidator:
             )
             violations = self._engine.evaluate_action(action_ctx)
             blocked = self._engine.check_should_block(violations)
+            return ValidationVerdict(
+                action=action,
+                allowed=not blocked,
+                violations=violations,
+                violation_count=len(violations),
+                blocked=blocked,
+                chain_depth=chain_depth,
+                context_tag=context_tag,
+            )
         except Exception as exc:
             logger.error("CASK ethics validation error for action=%s: %s", action, exc)
             return ValidationVerdict(
@@ -207,16 +216,6 @@ class RecursiveEthicsValidator:
                 chain_depth=chain_depth,
                 context_tag=context_tag,
             )
-
-        return ValidationVerdict(
-            action=action,
-            allowed=not blocked,
-            violations=violations,
-            violation_count=len(violations),
-            blocked=blocked,
-            chain_depth=chain_depth,
-            context_tag=context_tag,
-        )
 
     def registered_rule_ids(self) -> List[str]:
         """Return the list of CASK rule IDs registered with the engine."""

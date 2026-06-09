@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 """
 NEXUS Phase 11: Multi-Dimensional Consciousness Orchestrator
+============================================================
+
+DISPOSITION: non-production / experimental
+-------------------------------------------
+This module has no production API caller and is not wired into aurora_api.py.
+It is retained for research and experimentation.
+
+To use it experimentally see examples/orchestrators/multidim_example.py.
+Do NOT instantiate this class from production request handlers.
 =============================================================
 Anchor: T11-MULTIDIM-2025
 Parent: T10-COPILOT-SCHEMA-2025
@@ -382,12 +391,20 @@ class QuantumProcessor(DimensionalProcessor):
 
 class MultiDimensionalOrchestrator:
     """
-    Main orchestrator for multi-dimensional consciousness
-    
-    HAND-OFF READY: Complete state export and recovery protocols
+    Main orchestrator for multi-dimensional consciousness.
+
+    DISPOSITION: non-production / experimental.
+    This class is not wired to any Aurora production endpoint.
+    For experimental use only; see examples/orchestrators/multidim_example.py.
     """
-    
+
     def __init__(self):
+        import warnings
+        warnings.warn(
+            "MultiDimensionalOrchestrator is non-production/experimental and has "
+            "no production API endpoint. For experimental use only.",
+            stacklevel=2,
+        )
         self.anchor = DIMENSIONAL_ANCHORS["primary"]
         self.parent_anchor = DIMENSIONAL_ANCHORS["parent"]
         self.seed = DIMENSIONAL_ANCHORS["seed"]

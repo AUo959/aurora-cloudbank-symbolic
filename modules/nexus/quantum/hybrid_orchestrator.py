@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """
 NEXUS Phase 10: Quantum-Classical Hybrid Orchestration
+=======================================================
+
+DISPOSITION: wired-internally via recursion_bridge.py
+------------------------------------------------------
+HybridQuantumOrchestrator is consumed by
+modules.nexus.quantum.recursion_bridge, which constitutes its production
+entry point. It is not directly exposed via a REST endpoint — access it
+through the bridge module, not by instantiating it directly in handlers.
 ========================================================
 Anchor: T10-HYBRID-2025
 Parent: T9-INFINITE-UNIFIED-2025

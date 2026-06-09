@@ -150,6 +150,16 @@ except ImportError:
     AUMEMMANAGER_AVAILABLE = False
     AUMEMMANAGER_ROUTER = None
 
+# Import Memory Retrieval API integration
+try:
+    from modules.memory_retrieval.api import router as memory_retrieval_router
+    MEMORY_RETRIEVAL_AVAILABLE = True
+    MEMORY_RETRIEVAL_ROUTER = memory_retrieval_router
+except ImportError:
+    logging.getLogger("aurora_api").warning("Memory Retrieval not available - memory retrieval features disabled")
+    MEMORY_RETRIEVAL_AVAILABLE = False
+    MEMORY_RETRIEVAL_ROUTER = None
+
 # Import Data Guardian API integration
 try:
     from modules.data_guardian.api import router as data_guardian_router
@@ -250,6 +260,16 @@ except ImportError:
     RELAY_MANAGER_ROUTER = None
 
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
+
+# Import Memory Retrieval API router
+try:
+    from modules.memory_retrieval.router import router as memory_retrieval_router
+    MEMORY_RETRIEVAL_AVAILABLE = True
+    MEMORY_RETRIEVAL_ROUTER = memory_retrieval_router
+except ImportError:
+    logging.getLogger("aurora_api").warning("Memory Retrieval not available - memory retrieval features disabled")
+    MEMORY_RETRIEVAL_AVAILABLE = False
+    MEMORY_RETRIEVAL_ROUTER = None
 
 # Structured logger (avoids f-string interpolation for security)
 logger = logging.getLogger("aurora_api")
@@ -631,6 +651,15 @@ if AUMEMMANAGER_AVAILABLE and AUMEMMANAGER_ROUTER:
         logger.error("Failed to integrate AuMemManager API routes: %s", e)
         AUMEMMANAGER_AVAILABLE = False
 
+# Include Memory Retrieval API routes if available
+if MEMORY_RETRIEVAL_AVAILABLE and MEMORY_RETRIEVAL_ROUTER:
+    try:
+        app.include_router(MEMORY_RETRIEVAL_ROUTER)
+        logger.info("Memory Retrieval API routes integrated successfully")
+    except Exception as e:
+        logger.error("Failed to integrate Memory Retrieval API routes: %s", e)
+        MEMORY_RETRIEVAL_AVAILABLE = False
+
 # Include Data Guardian API routes if available
 if DATA_GUARDIAN_AVAILABLE and DATA_GUARDIAN_ROUTER:
     try:
@@ -674,6 +703,15 @@ if QUANTUM_SIMULATOR_AVAILABLE and QUANTUM_SIMULATOR_ROUTER:
     except Exception as e:
         logger.error("Failed to integrate Quantum Simulator API routes: %s", e)
         QUANTUM_SIMULATOR_AVAILABLE = False
+
+# Include Memory Retrieval API routes if available
+if MEMORY_RETRIEVAL_AVAILABLE and MEMORY_RETRIEVAL_ROUTER:
+    try:
+        app.include_router(MEMORY_RETRIEVAL_ROUTER)
+        logger.info("Memory Retrieval API routes integrated successfully")
+    except Exception as e:
+        logger.error("Failed to integrate Memory Retrieval API routes: %s", e)
+        MEMORY_RETRIEVAL_AVAILABLE = False
 
 # Include RD Productization Pipeline API routes if available
 if RD_PIPELINE_AVAILABLE:

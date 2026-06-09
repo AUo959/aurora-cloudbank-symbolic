@@ -146,7 +146,18 @@ test:
 	$(MAKE) ensure-venv
 	$(PYTHON_VENV) -m pytest tests
 
+serve:
+	# Start canonical FastAPI API server (uvicorn api.aurora_api:app)
+	$(MAKE) ensure-venv
+	$(PYTHON_VENV) -m uvicorn api.aurora_api:app --host 0.0.0.0 --port 8000
+
+serve-dev:
+	# Start API server with hot-reload for development
+	$(MAKE) ensure-venv
+	$(PYTHON_VENV) -m uvicorn api.aurora_api:app --host 0.0.0.0 --port 8000 --reload
+
 run:
+	# Legacy: runs reflective_autonomy loom restore (not the main API)
 	python modules/reflective_autonomy/loom_restore_script.py
 
 check:

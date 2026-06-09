@@ -112,9 +112,18 @@ class InsightLedger:
         Raises:
             ValueError: If storage_path is invalid or outside safe directory
         """
-        # Define safe root for ledger storage
-        # In production, this should come from config
-        ledger_root = Path.cwd() / "data" / "ledgers"
+        # Resolve ledger root from env vars; fall back to cwd-relative for local dev.
+        # Priority: AURORA_LEDGER_PATH → AURORA_STATE_ROOT/ledgers → cwd/data/ledgers
+        _state_root = os.environ.get("AURORA_STATE_ROOT", "")
+        _ledger_env = os.environ.get("AURORA_LEDGER_PATH", "")
+        if _ledger_env:
+            ledger_root = Path(_ledger_env)
+        elif _state_root:
+            ledger_root = Path(_state_root) / "ledgers"
+        else:
+            ledger_root = Path.cwd() / "data" / "ledgers"
+        import logging as _logging
+        _logging.getLogger(__name__).info("Ledger root resolved to: %s", ledger_root)
         
         # Validate storage path is safe
         # Allow creation since ledgers may not exist yet

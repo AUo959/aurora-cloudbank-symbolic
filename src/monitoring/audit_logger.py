@@ -16,6 +16,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from src.core.time_utils import utc_now
+from src.utils.persist_redact import redact_for_persistence
 
 logger = logging.getLogger(__name__)
 
@@ -310,9 +311,12 @@ class AuditLogger:
         context_tag: Optional[str]
     ) -> AuditEntry:
         """Create and sign a new audit entry"""
+        # Redact PII from context/metadata before persisting
+        safe_data = redact_for_persistence(data, context_tag=context_tag or "")
+
         # Get previous hash for chain
         previous_hash = self.entries[-1].compute_hash() if self.entries else None
-        
+
         entry = AuditEntry(
             id=f"AUDIT-{self._next_id:08d}",
             timestamp=utc_now().isoformat(),
@@ -320,7 +324,7 @@ class AuditLogger:
             agent_id=agent_id,
             severity=severity,
             description=description,
-            data=data,
+            data=safe_data,
             context_tag=context_tag,
             previous_hash=previous_hash
         )

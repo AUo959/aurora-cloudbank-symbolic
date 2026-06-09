@@ -116,7 +116,7 @@ def build_server() -> Server:
             log.exception("Tool '%s' raised an exception", name)
             return [TextContent(
                 type="text",
-                text=f"ERROR executing '{name}': {exc}"
+                text=f"TOOL_EXECUTION_ERROR: tool '{name}' failed; check server logs"
             )]
 
     return server

@@ -15,6 +15,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
 
+from src.utils.atomic_io import atomic_write_json, append_jsonl
+
 logger = logging.getLogger(__name__)
 
 
@@ -450,10 +452,8 @@ class EthicsEngine:
             return
 
         try:
-            self.violations_path.parent.mkdir(parents=True, exist_ok=True)
             with self._write_lock:
-                with open(self.violations_path, 'a') as f:
-                    f.write(json.dumps(violation.to_dict(), sort_keys=True) + "\n")
+                append_jsonl(self.violations_path, violation.to_dict())
         except Exception as e:
             logger.error("Failed to persist ethics violation: %s", e)
 
@@ -479,11 +479,20 @@ class EthicsEngine:
             return
 
         try:
-            self.violations_path.parent.mkdir(parents=True, exist_ok=True)
             with self._write_lock:
-                with open(self.violations_path, 'w') as f:
-                    for violation in self.violations:
-                        f.write(json.dumps(violation.to_dict(), sort_keys=True) + "\n")
+                import os
+                tmp = self.violations_path.with_suffix(self.violations_path.suffix + ".tmp")
+                try:
+                    self.violations_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(tmp, "w", encoding="utf-8") as f:
+                        for violation in self.violations:
+                            f.write(json.dumps(violation.to_dict(), sort_keys=True) + "\n")
+                        f.flush()
+                        os.fsync(f.fileno())
+                    os.replace(tmp, self.violations_path)
+                except Exception:
+                    tmp.unlink(missing_ok=True)
+                    raise
         except Exception as e:
             logger.error("Failed to rewrite ethics violations: %s", e)
 

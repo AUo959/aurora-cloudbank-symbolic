@@ -15,6 +15,7 @@ from pathlib import Path
 from threading import Lock
 from typing import Any, Dict, List, Optional
 
+from src.utils.atomic_io import atomic_write_json, append_jsonl
 from .crypto_signatures import SignatureManager
 from .schemas import AuditQuery, InsightRecord, InsightType, LedgerEntry, LedgerStats
 from src.utils.persist_redact import redact_for_persistence
@@ -244,8 +245,7 @@ class InsightLedger:
 
     def _save_index(self) -> None:
         """Persist index to disk."""
-        with open(self.index_file, "w") as f:
-            json.dump(self._index, f, indent=2, default=str)
+        atomic_write_json(self.index_file, self._index)
 
     def _create_genesis_entry(self) -> None:
         """Create the first (genesis) entry in the ledger."""
@@ -326,8 +326,7 @@ class InsightLedger:
             }
 
             # Append to file (JSONL format - one JSON object per line)
-            with open(self.entries_file, "a") as f:
-                f.write(json.dumps(complete_entry, default=str) + "\n")
+            append_jsonl(self.entries_file, complete_entry)
 
             # Update index
             self._index["entry_count"] += 1

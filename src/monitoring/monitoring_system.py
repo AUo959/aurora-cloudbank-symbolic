@@ -17,6 +17,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
 
+from src.utils.atomic_io import atomic_write_json
+
 from .drift_detector import DriftDetector, DriftAlert, DriftLevel
 from .ethics_engine import EthicsEngine, EthicsViolation, ActionContext, ViolationSeverity
 from .behavioral_monitor import BehaviorMonitor
@@ -146,6 +148,9 @@ class MonitoringSystem:
         audit_storage = self.storage_dir / "audit_log.jsonl"
         self.audit_logger = AuditLogger(storage_path=audit_storage)
         
+        # Thread safety for state persistence
+        self._lock = threading.Lock()
+
         # Intervention tracking
         self.interventions: List[Intervention] = []
         self.last_intervention_time: Dict[str, datetime] = {}
@@ -710,7 +715,6 @@ class MonitoringSystem:
                     },
                     "monitoring_state",
                 )
-                with open(self._state_path, 'w') as f:
-                    json.dump(state, f, indent=2, sort_keys=True)
+                atomic_write_json(self._state_path, state)
         except Exception as e:
             logger.error("Failed to persist monitoring state: %s", e)

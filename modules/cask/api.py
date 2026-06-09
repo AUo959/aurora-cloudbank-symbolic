@@ -49,8 +49,7 @@ _TOPOLOGY = {
 async def get_technical_specs():
     """Return the technical specification for each of the ten CASK components."""
     try:
-        df = generate_technical_specifications()
-        records = df.to_dict(orient="records")
+        records = generate_technical_specifications()
         return {"data": records, "total": len(records), "source": "technical_specifications"}
     except ImportError as exc:
         raise HTTPException(
@@ -66,8 +65,7 @@ async def get_technical_specs():
 async def get_vs_sota():
     """Return CASK's innovation advantages vs the current state of the art per domain."""
     try:
-        df = generate_vs_sota_comparison()
-        records = df.to_dict(orient="records")
+        records = generate_vs_sota_comparison()
         return {"data": records, "total": len(records), "source": "vs_sota_comparison"}
     except ImportError as exc:
         raise HTTPException(
@@ -83,8 +81,7 @@ async def get_vs_sota():
 async def get_risk():
     """Return the risk assessment matrix: category, probability, impact, and mitigation."""
     try:
-        df = generate_risk_assessment()
-        records = df.to_dict(orient="records")
+        records = generate_risk_assessment()
         return {"data": records, "total": len(records), "source": "risk_assessment"}
     except ImportError as exc:
         raise HTTPException(

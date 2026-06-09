@@ -1,10 +1,10 @@
 """CASK data generation utilities."""
 
-from typing import Any
+from typing import List
 
 
-def generate_technical_specifications(output_csv: str | None = None) -> Any:
-    """Return CASK technical specifications as a DataFrame and optionally save CSV."""
+def generate_technical_specifications(output_csv: str | None = None) -> List[dict]:
+    """Return CASK technical specifications as a list of record dicts."""
     try:
         import pandas as pd
         data = {
@@ -60,7 +60,7 @@ def generate_technical_specifications(output_csv: str | None = None) -> Any:
         df = pd.DataFrame(data)
         if output_csv:
             df.to_csv(output_csv, index=False)
-        return df
+        return df.to_dict(orient="records")
     except ImportError as exc:
         raise ImportError(
             "pandas is required for CASK analysis features. "
@@ -68,8 +68,8 @@ def generate_technical_specifications(output_csv: str | None = None) -> Any:
         ) from exc
 
 
-def generate_vs_sota_comparison(output_csv: str | None = None) -> Any:
-    """Return comparison of CASK against state of the art and optionally save CSV."""
+def generate_vs_sota_comparison(output_csv: str | None = None) -> List[dict]:
+    """Return comparison of CASK against state of the art as a list of record dicts."""
     try:
         import pandas as pd
         comparison_data = {
@@ -137,7 +137,7 @@ def generate_vs_sota_comparison(output_csv: str | None = None) -> Any:
         df = pd.DataFrame(comparison_data)
         if output_csv:
             df.to_csv(output_csv, index=False)
-        return df
+        return df.to_dict(orient="records")
     except ImportError as exc:
         raise ImportError(
             "pandas is required for CASK analysis features. "
@@ -145,8 +145,8 @@ def generate_vs_sota_comparison(output_csv: str | None = None) -> Any:
         ) from exc
 
 
-def generate_risk_assessment(output_csv: str | None = None) -> Any:
-    """Return CASK project risk assessment DataFrame and optionally save CSV."""
+def generate_risk_assessment(output_csv: str | None = None) -> List[dict]:
+    """Return CASK project risk assessment as a list of record dicts."""
     try:
         import pandas as pd
         risk_data = {
@@ -214,7 +214,7 @@ def generate_risk_assessment(output_csv: str | None = None) -> Any:
         df = pd.DataFrame(risk_data)
         if output_csv:
             df.to_csv(output_csv, index=False)
-        return df
+        return df.to_dict(orient="records")
     except ImportError as exc:
         raise ImportError(
             "pandas is required for CASK analysis features. "

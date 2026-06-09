@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSock
 from fastapi.responses import JSONResponse
 
 from src.middleware.fastapi_security import require_csrf_token
+from src.monitoring.ethics_gate import EthicsViolationError, check_ethics
 
 from .orchestrator import get_orchestrator
 from .scenario_cache import get_cache
@@ -88,6 +89,19 @@ async def run_simulation(request: ScenarioRequest) -> SimulationResult:
         }
         ```
     """
+    # Ethics gate: block scenarios that fail the ethics check
+    try:
+        check_ethics(
+            "quantum_simulate",
+            {"scenario_type": str(request.scenario_type), **dict(request.parameters or {})},
+            context_tag=request.tags[0] if request.tags else "",
+        )
+    except EthicsViolationError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "ethics_violation", "message": str(exc), "violations": exc.violations},
+        )
+
     try:
         # Get orchestrator and cache
         orchestrator = await get_orchestrator()

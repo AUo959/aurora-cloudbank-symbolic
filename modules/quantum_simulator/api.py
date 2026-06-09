@@ -10,10 +10,10 @@ import asyncio
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
-from src.middleware.fastapi_security import require_csrf_token
+from src.middleware.fastapi_security import limiter, require_csrf_token
 from src.monitoring.ethics_gate import EthicsViolationError, check_ethics
 
 from .orchestrator import get_orchestrator
@@ -73,7 +73,8 @@ def _not_found_status(simulation_id: str) -> SimulationStatus:
     status_code=202,
     dependencies=MUTATION_DEPENDENCIES,
 )
-async def run_simulation(request: ScenarioRequest) -> SimulationResult:
+@limiter.limit("10/minute")  # Quantum scenario run - expensive, strict rate limit per IP
+async def run_simulation(request: ScenarioRequest, http_request: Request) -> SimulationResult:
     """
     Run quantum-classical hybrid simulation scenario.
 

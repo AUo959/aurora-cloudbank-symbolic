@@ -253,6 +253,7 @@ async def lifespan(app: FastAPI):
     """Manage application lifecycle with startup and shutdown logic."""
     # Startup
     logger.info("Aurora API starting up...")
+    logger.info("Rate limiter active: AI=20/min, crew=30/min, quantum=10/min, memory_write=60/min")
 
     # Validate application configuration — exits non-zero if critical vars missing
     from src.config.settings import load_settings

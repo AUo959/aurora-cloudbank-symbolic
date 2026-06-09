@@ -7,6 +7,7 @@ Anchor: T1-QSS-003
 """
 
 import asyncio
+import logging
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
@@ -19,6 +20,19 @@ from .orchestrator import get_orchestrator
 from .scenario_cache import get_cache
 from .scenario_engine import ScenarioEngine
 from .schemas import ScenarioListItem, ScenarioRequest, ScenarioType, SimulationResult, SimulationStatus
+
+logger = logging.getLogger(__name__)
+
+# Action Guard: fire-and-forget ethics/compliance evaluation
+try:
+    from src.monitoring.action_guard import evaluate_response as _evaluate_response
+    _ACTION_GUARD_AVAILABLE = True
+except Exception as _ag_exc:  # pragma: no cover - graceful degradation
+    logger.warning("ActionGuard not available in quantum_simulator.api: %s", _ag_exc)
+    _ACTION_GUARD_AVAILABLE = False
+
+    def _evaluate_response(*_args, **_kwargs) -> None:  # type: ignore[misc]
+        """No-op fallback when action_guard cannot be imported."""
 
 # Create router
 router = APIRouter(prefix="/simulate", tags=["quantum-simulator"])
@@ -116,6 +130,18 @@ async def run_simulation(request: ScenarioRequest) -> SimulationResult:
         # Cache result
         cache.set(result, ttl_hours=24)
         active_simulations.pop(result.simulation_id, None)
+
+        # Ethics/compliance evaluation — fire-and-forget, never blocks response
+        _evaluate_response(
+            "quantum_simulate",
+            result.model_dump(mode="json") if hasattr(result, "model_dump") else {},
+            metadata={
+                "endpoint": "/simulate/scenario",
+                "scenario_type": request.scenario_type.value if hasattr(request.scenario_type, "value") else str(request.scenario_type),
+                "simulation_id": result.simulation_id,
+            },
+            context_tag=f"quantum_simulate_{result.simulation_id}",
+        )
 
         return result
 

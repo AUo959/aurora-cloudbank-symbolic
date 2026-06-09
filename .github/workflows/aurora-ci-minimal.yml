@@ -52,6 +52,24 @@ jobs:
           pip install flake8 pytest pytest-cov pytest-asyncio
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       
+      - name: Check requirements-lock.txt drift (informational)
+        continue-on-error: true
+        run: |
+          pip install pip-tools 2>/dev/null || true
+          # Generate a fresh freeze from current installed packages
+          pip freeze | sort > /tmp/current_freeze.txt
+          # Compare with committed lock file (if it exists)
+          if [ -f requirements-lock.txt ]; then
+            if diff -u requirements-lock.txt /tmp/current_freeze.txt > /tmp/lock_drift.txt 2>&1; then
+              echo "Lock file is current — no drift detected."
+            else
+              echo "::warning::Lock file drift detected. Run 'pip freeze | sort > requirements-lock.txt' and commit."
+              cat /tmp/lock_drift.txt | head -50
+            fi
+          else
+            echo "requirements-lock.txt not found — skipping drift check."
+          fi
+
       # SYNTAX CHECKS ONLY - must pass
       - name: Python syntax check
         run: |

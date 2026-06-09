@@ -135,7 +135,7 @@ class AuditLogger:
 
         self.signing_key = signing_key
 
-self._write_lock = threading.Lock()
+        self._write_lock = threading.Lock()
         self.entries: List[AuditEntry] = []
         self._next_id = 1
         

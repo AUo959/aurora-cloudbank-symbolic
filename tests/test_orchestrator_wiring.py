@@ -177,8 +177,7 @@ def test_flow_optimize_with_auth(client):
             headers=_auth_headers(),
         )
 
-    # 200 with valid CSRF token, or 403 if the test environment rejects it
-    assert resp.status_code in (200, 403)
+    assert resp.status_code == 200
 
 
 # ---------------------------------------------------------------------------

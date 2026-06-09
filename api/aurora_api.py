@@ -55,6 +55,7 @@ from src.integrations.chatgpt_agent_mode import chatgpt_agent_integration
 
 # Import canonical DLP request envelope
 from src.core.request_envelope import request_envelope
+from src.core.time_utils import utc_now
 
 # Import Gemini Agent Mode integration
 try:
@@ -3207,7 +3208,7 @@ try:
         task_type: str = Field("general", pattern=r"^[a-z_]{1,40}$")
         max_tokens: int = Field(1024, ge=1, le=8192)
         context_tag: str = Field(
-            default_factory=lambda: f"ai_complete_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+            default_factory=lambda: f"ai_complete_{utc_now().strftime('%Y%m%dT%H%M%S')}"
         )
 
     @app.post("/api/ai/complete", dependencies=[Depends(security), Depends(verify_csrf_token)])

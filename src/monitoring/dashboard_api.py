@@ -97,6 +97,12 @@ def get_monitoring_system(
     return _monitoring_system
 
 
+def run_monitoring_cleanup() -> None:
+    """Run retention cleanup on the active MonitoringSystem instance (no-op if not yet created)."""
+    if _monitoring_system is not None:
+        _monitoring_system.run_retention_cleanup()
+
+
 def create_monitoring_router(
     storage_dir: Optional[Path] = None,
     ethics_rules_path: Optional[Path] = None

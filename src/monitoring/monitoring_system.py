@@ -103,16 +103,19 @@ class MonitoringSystem:
         self,
         storage_dir: Optional[Path] = None,
         ethics_rules_path: Optional[Path] = None,
-        config: Optional[AlertConfig] = None
+        config: Optional[AlertConfig] = None,
+        retention_hours: int = 168,
     ):
         """
         Initialize monitoring system
-        
+
         Args:
             storage_dir: Directory for persistent storage
             ethics_rules_path: Path to ethics rules configuration
             config: Alert configuration
+            retention_hours: Retain in-memory state for this many hours (default: 168 = 7 days)
         """
+        self.retention_hours = retention_hours
         if storage_dir is not None:
             self.storage_dir = Path(storage_dir)
         else:
@@ -127,15 +130,17 @@ class MonitoringSystem:
                 self.storage_dir = Path("./monitoring_data")
         self._state_path = self.storage_dir / "monitoring_state.json"
         self.config = config or AlertConfig()
-        
-        # Initialize subsystems
-        self.behavior_monitor = BehaviorMonitor(retention_hours=168)
+
+        # Initialize subsystems with matching retention window
+        self.behavior_monitor = BehaviorMonitor(retention_hours=retention_hours)
         self.drift_detector = DriftDetector(
-            alerts_path=self.storage_dir / "drift_alerts.jsonl"
+            alerts_path=self.storage_dir / "drift_alerts.jsonl",
+            retention_hours=retention_hours,
         )
         self.ethics_engine = EthicsEngine(
             rules_path=ethics_rules_path,
-            violations_path=self.storage_dir / "ethics_violations.jsonl"
+            violations_path=self.storage_dir / "ethics_violations.jsonl",
+            retention_hours=retention_hours,
         )
         
         audit_storage = self.storage_dir / "audit_log.jsonl"
@@ -182,7 +187,37 @@ class MonitoringSystem:
         """
         self.alert_handlers[level].append(handler)
         logger.info("Registered alert handler for %s level", level.value)
-    
+
+    def purge_old_interventions(self) -> int:
+        """Trim interventions and last_intervention_time entries older than retention_hours."""
+        from datetime import timedelta, timezone
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
+        before_count = len(self.interventions)
+        self.interventions = [
+            iv for iv in self.interventions
+            if datetime.fromisoformat(iv.timestamp) >= cutoff
+        ]
+        # Evict stale cooldown entries
+        stale_agents = [
+            agent_id for agent_id, ts in self.last_intervention_time.items()
+            if ts < cutoff
+        ]
+        for agent_id in stale_agents:
+            del self.last_intervention_time[agent_id]
+        removed = before_count - len(self.interventions)
+        if removed or stale_agents:
+            logger.info(
+                "MonitoringSystem: purged %d interventions and %d cooldown entries older than %dh",
+                removed, len(stale_agents), self.retention_hours,
+            )
+        return removed
+
+    def run_retention_cleanup(self) -> None:
+        """Run all retention cleanup methods across every subsystem."""
+        self.drift_detector.purge_old_alerts()
+        self.ethics_engine.purge_old_violations()
+        self.purge_old_interventions()
+
     def establish_agent_baseline(
         self,
         agent_id: str,

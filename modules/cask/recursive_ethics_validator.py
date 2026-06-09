@@ -126,7 +126,8 @@ class RecursiveEthicsValidator:
     # ------------------------------------------------------------------
 
     def _register_cask_rules(self) -> None:
-        if self._rules_registered or self._engine is None:
+        engine = self._engine
+        if self._rules_registered or engine is None:
             return
         try:
             from src.monitoring.ethics_engine import EthicsRule, RuleCategory, ViolationSeverity
@@ -141,7 +142,7 @@ class RecursiveEthicsValidator:
                     conditions=rule_def["conditions"],
                     metadata={"source": "cask_recursive_ethics_validator"},
                 )
-                self._engine.add_rule(rule)
+                engine.add_rule(rule)
             self._rules_registered = True
             logger.info("CASK: registered %d ethics rules", len(_CASK_RULES_DATA))
         except ImportError:
@@ -177,7 +178,8 @@ class RecursiveEthicsValidator:
         if chain_depth > self.max_chain_depth:
             effective_context["recursion_depth_exceeded"] = True
 
-        if self._engine is None:
+        engine = self._engine
+        if engine is None:
             logger.warning(
                 "CASK ethics validation skipped (engine unavailable) for action=%s",
                 action,
@@ -197,8 +199,8 @@ class RecursiveEthicsValidator:
                 parameters=effective_context,
                 context_tag=context_tag,
             )
-            violations = self._engine.evaluate_action(action_ctx)
-            blocked = self._engine.check_should_block(violations)
+            violations = engine.evaluate_action(action_ctx)
+            blocked = engine.check_should_block(violations)
             return ValidationVerdict(
                 action=action,
                 allowed=not blocked,
@@ -218,5 +220,11 @@ class RecursiveEthicsValidator:
             )
 
     def registered_rule_ids(self) -> List[str]:
-        """Return the list of CASK rule IDs registered with the engine."""
+        """Return the CASK rule IDs actually registered with the engine.
+
+        Returns an empty list when running in degraded mode (engine unavailable
+        or rule registration incomplete).
+        """
+        if not self._rules_registered:
+            return []
         return [r["id"] for r in _CASK_RULES_DATA]

@@ -208,9 +208,10 @@ def score_cultural_sensitivity(
         "word_count": len(text.split()),
     }
 
+    rounded_score = round(score, 4)
     return CulturalSensitivityScore(
-        score=round(score, 4),
-        level=_level_from_score(score),
+        score=rounded_score,
+        level=_level_from_score(rounded_score),
         positive_matches=positive_matches,
         negative_matches=negative_matches,
         scope_indicators=scope_indicators,

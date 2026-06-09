@@ -1,4 +1,5 @@
 # Aurora GUI CloudHub Dockerfile
+# TODO(#833): pin to verified SHA256 digest
 FROM python:3.11-slim
 
 # Install Node.js 18.x (LTS) and curl

@@ -40,6 +40,7 @@
 # Stage 2 — Runtime
 # Minimal production image built on the same NeMo base (GPU support)
 # ══════════════════════════════════════════════════════════════════════════
+# TODO(#833): pin to verified SHA256 digest
 FROM nvcr.io/nvidia/nemo:24.07 AS runtime
 
 # ── Aurora symbolic labels ────────────────────────────────────────────────

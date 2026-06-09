@@ -1,3 +1,4 @@
+# TODO(#833): pin to verified SHA256 digest
 FROM python:3.11-slim
 
 WORKDIR /app

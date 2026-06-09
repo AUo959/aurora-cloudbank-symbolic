@@ -9,7 +9,7 @@
 # }
 
 # Base image with Node.js 20
-FROM mcr.microsoft.com/devcontainers/javascript-node:20
+FROM mcr.microsoft.com/devcontainers/javascript-node:20  # TODO(#833): pin to verified SHA256 digest for supply-chain integrity
 
 # Install Python 3 and pip for the backend
 RUN apt-get update \

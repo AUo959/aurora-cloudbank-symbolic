@@ -29,6 +29,7 @@ from pydantic import BaseModel, Field, field_validator, ConfigDict
 from src.observability import get_telemetry, get_r2_telemetry
 from src.middleware.body_size import MaxBodySizeMiddleware, _default_max_bytes
 from src.middleware.exception_handler import validation_handler
+from src.middleware.idempotency import IdempotencyMiddleware
 from src.middleware.request_id import RequestIDMiddleware
 from src.runtime.shutdown import ShutdownCoordinator
 
@@ -438,6 +439,11 @@ except Exception as e:  # pragma: no cover - graceful degradation if slowapi mis
 # Body-size guard: registered before RequestIDMiddleware so oversized requests
 # are rejected before ID assignment and inner middleware run.
 app.add_middleware(MaxBodySizeMiddleware, max_bytes=_default_max_bytes())
+
+# Idempotency middleware: caches and replays responses for state-changing
+# requests that carry an Idempotency-Key header. Registered before
+# RequestIDMiddleware so the ID is already set when idempotency logic fires.
+app.add_middleware(IdempotencyMiddleware)
 
 # Request-ID middleware: must be registered last so it wraps everything and
 # its ContextVar is set before any inner middleware runs.

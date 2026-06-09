@@ -4,6 +4,8 @@ Exposes the CASK design-surface data as JSON endpoints so the analysis
 corpus is discoverable at runtime alongside other Aurora modules.
 """
 
+import logging
+
 from fastapi import APIRouter, HTTPException
 
 from modules.cask.analysis import (
@@ -11,6 +13,8 @@ from modules.cask.analysis import (
     generate_vs_sota_comparison,
     generate_risk_assessment,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/cask", tags=["CASK"])
 
@@ -55,8 +59,9 @@ def _analysis_endpoint(generator_fn, label: str):
             status_code=503,
             detail=f"pandas is required for CASK analysis endpoints: {exc}",
         )
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as exc:
+        logger.error("CASK analysis endpoint error [%s]: %s", label, exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/specs/technical", summary="CASK technical specifications per component")

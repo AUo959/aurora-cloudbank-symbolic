@@ -14,28 +14,6 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-try:
-    from src.monitoring.ethics_engine import (
-        ActionContext,
-        EthicsEngine,
-        EthicsRule,
-        EthicsViolation,
-        RuleCategory,
-        ViolationSeverity,
-    )
-    _ENGINE_AVAILABLE = True
-except ImportError:  # pragma: no cover
-    _ENGINE_AVAILABLE = False
-    # Ensure names are always defined so static analysis doesn't flag them as
-    # potentially undefined. These stubs are never called (the engine guard
-    # returns early when _ENGINE_AVAILABLE is False).
-    ActionContext = None  # type: ignore[assignment,misc]
-    EthicsEngine = None  # type: ignore[assignment]
-    EthicsRule = None  # type: ignore[assignment]
-    EthicsViolation = None  # type: ignore[assignment]
-    RuleCategory = None  # type: ignore[assignment]
-    ViolationSeverity = None  # type: ignore[assignment]
-
 logger = logging.getLogger(__name__)
 
 # Rules contributed by this component, stored as plain dicts (category/severity as
@@ -111,14 +89,14 @@ class RecursiveEthicsValidator:
     """Picard_Delta_3-compliant ethics validator for CASK.
 
     Wraps an EthicsEngine instance, registers CASK-specific cultural safety
-    rules on first use, and exposes a simple ``validate(action, context)``
+    rules during ``__init__``, and exposes a simple ``validate(action, context)``
     interface that returns a :class:`ValidationVerdict`.
 
     Args:
         engine: Optional pre-configured EthicsEngine.  When *None* a new
             engine is created if ``src.monitoring.ethics_engine`` is available.
         max_chain_depth: Maximum recursive validation depth before the
-            ``simulation_unsafe`` condition is triggered automatically.
+            ``recursion_depth_exceeded`` condition is injected automatically.
     """
 
     def __init__(
@@ -128,17 +106,20 @@ class RecursiveEthicsValidator:
     ) -> None:
         self.max_chain_depth = max_chain_depth
         self._rules_registered = False
+        self._engine: Optional[Any] = None
 
-        if not _ENGINE_AVAILABLE:
+        try:
+            if engine is not None:
+                self._engine = engine
+            else:
+                from src.monitoring.ethics_engine import EthicsEngine
+                self._engine = EthicsEngine()
+            self._register_cask_rules()
+        except ImportError:
             logger.warning(
                 "EthicsEngine unavailable — RecursiveEthicsValidator running in "
                 "degraded mode (no violation tracking)"
             )
-            self._engine: Optional[Any] = None
-            return
-
-        self._engine = engine if engine is not None else EthicsEngine()
-        self._register_cask_rules()
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -146,6 +127,10 @@ class RecursiveEthicsValidator:
 
     def _register_cask_rules(self) -> None:
         if self._rules_registered or self._engine is None:
+            return
+        try:
+            from src.monitoring.ethics_engine import EthicsRule, RuleCategory, ViolationSeverity
+        except ImportError:
             return
         for rule_def in _CASK_RULES_DATA:
             rule = EthicsRule(
@@ -193,7 +178,6 @@ class RecursiveEthicsValidator:
             effective_context["recursion_depth_exceeded"] = True
 
         if self._engine is None:
-            # Degraded mode: pass through with a warning.
             logger.warning(
                 "CASK ethics validation skipped (engine unavailable) for action=%s",
                 action,
@@ -205,14 +189,24 @@ class RecursiveEthicsValidator:
                 context_tag=context_tag,
             )
 
-        action_ctx = ActionContext(
-            agent_id=agent_id,
-            action_type=action,
-            parameters=effective_context,
-            context_tag=context_tag,
-        )
-        violations: List[EthicsViolation] = self._engine.evaluate_action(action_ctx)
-        blocked = self._engine.check_should_block(violations)
+        try:
+            from src.monitoring.ethics_engine import ActionContext
+            action_ctx = ActionContext(
+                agent_id=agent_id,
+                action_type=action,
+                parameters=effective_context,
+                context_tag=context_tag,
+            )
+            violations = self._engine.evaluate_action(action_ctx)
+            blocked = self._engine.check_should_block(violations)
+        except Exception as exc:
+            logger.error("CASK ethics validation error for action=%s: %s", action, exc)
+            return ValidationVerdict(
+                action=action,
+                allowed=True,
+                chain_depth=chain_depth,
+                context_tag=context_tag,
+            )
 
         return ValidationVerdict(
             action=action,

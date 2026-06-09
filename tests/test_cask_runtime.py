@@ -116,25 +116,13 @@ class TestScoreCulturalSensitivity:
         assert len(result.negative_matches) > 0
 
     def test_high_band_threshold(self):
-        # Stuff enough positive markers to hit high band (≥0.6)
-        terms = [
-            "cultural context",
-            "cross-cultural",
-            "multicultural",
-            "cultural diversity",
-            "value system",
-            "collective",
-            "indigenous",
-            "local knowledge",
-            "cultural nuance",
-            "cultural norm",
-            "cultural perspective",
-            "intercultural",
-            "inclusive",
-            "pluralism",
-            "multilingual",
-        ]
-        text = " ".join(terms) + " The work in Africa, Asia, and Europe is growing."
+        # Use all positive markers (positive_ratio=1.0) + ≥6 scope indicators
+        # (scope_ratio=1.0) → raw = 0.5*1.0 + 0.3*1.0 = 0.8 → "high"
+        from modules.cask.cultural_cognition import _POSITIVE_MARKERS
+        text = (
+            " ".join(_POSITIVE_MARKERS)
+            + " africa asia europe latin america south asia southeast asia oceania"
+        )
         result = self._score(text)
         assert result.level == "high"
         assert result.score >= 0.6

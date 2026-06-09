@@ -148,7 +148,7 @@ def score_cultural_sensitivity(
 
     * ``"domain"`` — ``"governance"`` or ``"legal"`` add +0.05 base
     * ``"num_languages"`` — integer ≥ 2 adds proportional scope bonus (capped +0.1)
-    * ``"target_regions"`` — list; each extra region adds 0.02 (capped +0.1)
+    * ``"target_regions"`` — list; each region adds 0.02 (capped +0.1)
 
     Args:
         text: The text to score.

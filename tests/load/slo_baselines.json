@@ -1,0 +1,79 @@
+{
+  "_doc": "Aurora SLO baselines — p95 latency (ms) and max error rate targets. Established at 50 concurrent users, 60s run.",
+  "endpoints": {
+    "GET /health": {
+      "p95_ms": 50,
+      "error_rate_pct": 0.1,
+      "notes": "Primary health probe — must stay sub-50 ms under all normal load"
+    },
+    "GET /api/health": {
+      "p95_ms": 50,
+      "error_rate_pct": 0.1,
+      "notes": "Alternate health endpoint — same tight target as /health"
+    },
+    "POST /memory/retrieve": {
+      "p95_ms": 500,
+      "error_rate_pct": 1.0,
+      "notes": "Core memory read path (AuMemManager). Active-tier retrieval targets sub-ms; p95 budget includes serialization overhead."
+    },
+    "POST /memory/create": {
+      "p95_ms": 300,
+      "error_rate_pct": 1.0,
+      "notes": "Memory write path — slightly tighter than retrieve because writes go to active tier first"
+    },
+    "GET /memory/metrics": {
+      "p95_ms": 100,
+      "error_rate_pct": 0.5,
+      "notes": "Lightweight read — in-memory aggregation only"
+    },
+    "GET /memory/health": {
+      "p95_ms": 100,
+      "error_rate_pct": 0.5,
+      "notes": "Memory subsystem health probe"
+    },
+    "GET /telemetry/snapshot": {
+      "p95_ms": 200,
+      "error_rate_pct": 0.5,
+      "notes": "R-2 Agent Telemetry snapshot — async aggregation may add latency"
+    },
+    "GET /metrics": {
+      "p95_ms": 100,
+      "error_rate_pct": 0.1,
+      "notes": "Prometheus scrape endpoint — must be consistently fast for scrape intervals"
+    },
+    "GET /api/synergy/health": {
+      "p95_ms": 200,
+      "error_rate_pct": 1.0,
+      "notes": "Synergy dashboard health — topology analysis may be moderately expensive"
+    },
+    "GET /simulate/scenarios": {
+      "p95_ms": 100,
+      "error_rate_pct": 0.5,
+      "notes": "Static list endpoint — should be very fast"
+    },
+    "GET /simulate/cache/stats": {
+      "p95_ms": 100,
+      "error_rate_pct": 0.5,
+      "notes": "Simulator cache stats — in-memory read"
+    },
+    "POST /simulate/scenario": {
+      "p95_ms": 5000,
+      "error_rate_pct": 2.0,
+      "notes": "Full quantum simulation — intentionally wide budget due to async execution and backend variability"
+    },
+    "GET /api/drift/patterns": {
+      "p95_ms": 300,
+      "error_rate_pct": 1.0,
+      "notes": "Drift detection pattern read — ML inference adds latency"
+    }
+  },
+  "load_profile": {
+    "users": 50,
+    "spawn_rate": 5,
+    "run_time_seconds": 60,
+    "user_class": "AuroraAPIUser"
+  },
+  "generated_at": "2026-06-08",
+  "version": "1.0.0",
+  "notes": "Re-run load tests after significant changes to core paths (memory, quantum, telemetry). Use AuroraHighLoadUser for stress testing at higher concurrency."
+}

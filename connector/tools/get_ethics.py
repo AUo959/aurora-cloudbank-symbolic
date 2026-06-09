@@ -52,7 +52,7 @@ class GetEthicsLogTool:
         )
 
     async def run(self, arguments: dict) -> str:
-        limit = min(arguments.get("limit", 20), 100)
+        limit = arguments.get("limit", 20)
         severity_filter = arguments.get("severity_filter", "all")
 
         # TODO: Replace stub with bridge call:

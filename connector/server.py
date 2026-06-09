@@ -21,6 +21,14 @@ import os
 import sys
 from typing import Any
 
+# jsonschema is an optional dependency — validation is skipped gracefully if absent
+try:
+    import jsonschema as _jsonschema
+    _JSONSCHEMA_AVAILABLE = True
+except ImportError:
+    _jsonschema = None  # type: ignore[assignment]
+    _JSONSCHEMA_AVAILABLE = False
+
 # MCP SDK -- install via: pip install mcp
 try:
     from mcp.server import Server
@@ -63,9 +71,13 @@ def build_server() -> Server:
         """Return schemas for all registered Aurora tools."""
         return [tool.schema() for tool in TOOL_REGISTRY.values()]
 
+    _jsonschema_warning_emitted = False
+
     @server.call_tool()
     async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
         """Dispatch a tool call to the appropriate handler."""
+        nonlocal _jsonschema_warning_emitted
+
         if name not in TOOL_REGISTRY:
             return [TextContent(
                 type="text",
@@ -74,6 +86,29 @@ def build_server() -> Server:
             )]
 
         tool = TOOL_REGISTRY[name]
+
+        # --- inputSchema validation ---
+        if _JSONSCHEMA_AVAILABLE:
+            tool_schema = tool.schema()
+            input_schema = getattr(tool_schema, "inputSchema", None)
+            if input_schema:
+                try:
+                    _jsonschema.validate(arguments, input_schema)
+                except _jsonschema.ValidationError as ve:
+                    path = "/".join(str(p) for p in ve.absolute_path)
+                    return [TextContent(
+                        type="text",
+                        text=f"TOOL_VALIDATION_ERROR: {ve.message}"
+                             + (f" (path: {path})" if path else ""),
+                    )]
+        else:
+            if not _jsonschema_warning_emitted:
+                log.warning(
+                    "jsonschema not installed — tool input validation is disabled. "
+                    "Install it with: pip install jsonschema"
+                )
+                _jsonschema_warning_emitted = True
+
         try:
             result = await tool.run(arguments)
             return [TextContent(type="text", text=result)]

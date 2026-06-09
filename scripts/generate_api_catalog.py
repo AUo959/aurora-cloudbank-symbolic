@@ -3,8 +3,13 @@
 Generate API Catalog from FastAPI OpenAPI Schema
 
 Extracts comprehensive API documentation from aurora_api.py
+
+Usage:
+    python scripts/generate_api_catalog.py                  # writes to docs/api/
+    python scripts/generate_api_catalog.py --output-dir .   # writes to cwd
 """
 
+import argparse
 import json
 import os
 import sys
@@ -19,17 +24,24 @@ os.environ["WS_AUTH_SECRET"] = "dev-secret-for-catalog-generation"
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# Default output directory is docs/api/ relative to the project root so that
+# generated snapshots land in the tracked location regardless of cwd.
+DEFAULT_OUTPUT_DIR = project_root / "docs" / "api"
+
 from api.aurora_api import app
 
 
-def generate_api_catalog():
+def generate_api_catalog(output_dir: Path = DEFAULT_OUTPUT_DIR):
     """Generate comprehensive API catalog"""
     
     # Extract OpenAPI schema
     schema = app.openapi()
     
+    # Ensure output directory exists
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     # Save full schema
-    with open("api_schema.json", "w") as f:
+    with open(output_dir / "api_schema.json", "w") as f:
         json.dump(schema, f, indent=2)
     
     # Generate human-readable catalog
@@ -86,22 +98,22 @@ def generate_api_catalog():
                 catalog["routes"].append(route_info)
     
     # Save catalog
-    with open("API_CATALOG.json", "w") as f:
+    with open(output_dir / "API_CATALOG.json", "w") as f:
         json.dump(catalog, f, indent=2)
-    
+
     # Generate markdown catalog
-    generate_markdown_catalog(catalog)
-    
+    generate_markdown_catalog(catalog, output_dir)
+
     print("✅ API Catalog Generated:")
-    print("   - api_schema.json (%d bytes)" % len(json.dumps(schema)))
-    print("   - API_CATALOG.json")
-    print("   - API_CATALOG.md")
+    print("   - %s/api_schema.json (%d bytes)" % (output_dir, len(json.dumps(schema))))
+    print("   - %s/API_CATALOG.json" % output_dir)
+    print("   - %s/API_CATALOG.md" % output_dir)
     print("   - Total routes: %d" % catalog['total_routes'])
-    
+
     return catalog
 
 
-def generate_markdown_catalog(catalog):
+def generate_markdown_catalog(catalog, output_dir: Path = DEFAULT_OUTPUT_DIR):
     """Generate markdown documentation"""
     
     lines = [
@@ -189,13 +201,23 @@ def generate_markdown_catalog(catalog):
             lines.append("")
     
     # Write markdown
-    with open("API_CATALOG.md", "w") as f:
+    with open(output_dir / "API_CATALOG.md", "w") as f:
         f.write("\n".join(lines))
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate Aurora API catalog snapshots")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=DEFAULT_OUTPUT_DIR,
+        help="Directory to write api_schema.json, API_CATALOG.json, and API_CATALOG.md "
+             "(default: docs/api/ relative to project root)",
+    )
+    args = parser.parse_args()
+
     try:
-        catalog = generate_api_catalog()
+        catalog = generate_api_catalog(output_dir=args.output_dir)
         sys.exit(0)
     except Exception as e:
         print("❌ Error generating API catalog: %s" % e, file=sys.stderr)

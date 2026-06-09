@@ -1,4 +1,6 @@
 {
+  "_snapshot_status": "historical",
+  "_snapshot_note": "Generated 2025-11-13. Run `python scripts/generate_api_catalog.py` from repo root to refresh.",
   "openapi": "3.1.0",
   "info": {
     "title": "Aurora CloudBank Symbolic API - Sonnet 4 Enhanced",

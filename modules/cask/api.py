@@ -45,41 +45,55 @@ _TOPOLOGY = {
 }
 
 
-def _df_to_records(df) -> list:
-    return df.to_dict(orient="records")
-
-
-def _analysis_endpoint(generator_fn, label: str):
+@router.get("/specs/technical", summary="CASK technical specifications per component")
+async def get_technical_specs():
+    """Return the technical specification for each of the ten CASK components."""
     try:
-        df = generator_fn()
-        records = _df_to_records(df)
-        return {"data": records, "total": len(records), "source": label}
+        df = generate_technical_specifications()
+        records = df.to_dict(orient="records")
+        return {"data": records, "total": len(records), "source": "technical_specifications"}
     except ImportError as exc:
         raise HTTPException(
             status_code=503,
             detail=f"pandas is required for CASK analysis endpoints: {exc}",
-        )
+        ) from exc
     except Exception as exc:
-        logger.error("CASK analysis endpoint error [%s]: %s", label, exc)
+        logger.error("CASK get_technical_specs error: %s", exc)
         raise HTTPException(status_code=500, detail="Internal server error") from exc
-
-
-@router.get("/specs/technical", summary="CASK technical specifications per component")
-async def get_technical_specs():
-    """Return the technical specification for each of the ten CASK components."""
-    return _analysis_endpoint(generate_technical_specifications, "technical_specifications")
 
 
 @router.get("/specs/vs-sota", summary="CASK comparison against state of the art")
 async def get_vs_sota():
     """Return CASK's innovation advantages vs the current state of the art per domain."""
-    return _analysis_endpoint(generate_vs_sota_comparison, "vs_sota_comparison")
+    try:
+        df = generate_vs_sota_comparison()
+        records = df.to_dict(orient="records")
+        return {"data": records, "total": len(records), "source": "vs_sota_comparison"}
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"pandas is required for CASK analysis endpoints: {exc}",
+        ) from exc
+    except Exception as exc:
+        logger.error("CASK get_vs_sota error: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/specs/risk", summary="CASK project risk assessment")
 async def get_risk():
     """Return the risk assessment matrix: category, probability, impact, and mitigation."""
-    return _analysis_endpoint(generate_risk_assessment, "risk_assessment")
+    try:
+        df = generate_risk_assessment()
+        records = df.to_dict(orient="records")
+        return {"data": records, "total": len(records), "source": "risk_assessment"}
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"pandas is required for CASK analysis endpoints: {exc}",
+        ) from exc
+    except Exception as exc:
+        logger.error("CASK get_risk error: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/topology", summary="CASK component topology metadata")

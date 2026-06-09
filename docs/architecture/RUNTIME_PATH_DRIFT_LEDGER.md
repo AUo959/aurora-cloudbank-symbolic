@@ -1,7 +1,7 @@
 # Runtime Path Drift Ledger
 
 **Status:** Current repo evidence review
-**Last reviewed:** 2026-05-26
+**Last reviewed:** 2026-06-09
 **Purpose:** Track stale, conflicting, legacy, test-only, and unverified runtime
 or operator entrypoint claims.
 
@@ -38,6 +38,10 @@ entrypoints, or change runtime behavior.
 | `docs/api/API_CATALOG.json` and `docs/api/api_schema.json` | generated snapshot | Snapshot was generated in 2025 and may not reflect current router additions. | Use `docs/api/api_surface_inventory.json` for governance ownership, and regenerate catalog snapshots when route details must be current. |
 | `scripts/generate_api_catalog.py` output location | unverified workflow drift | Script writes `api_schema.json`, `API_CATALOG.json`, and `API_CATALOG.md` to the current working directory. Existing tracked snapshots live under `docs/api/`. | Run from `docs/api` or update the generator in a separate issue before treating output paths as canonical. |
 | `docs/LAYER_BOUNDARY_REFERENCE.md` references to `aurora_api.py` without `api/` | legacy wording inside canonical boundary doc | The layer definitions remain canonical, but the entrypoint spelling reflects older path language. | Interpret the API component as `api/aurora_api.py` until the boundary doc is updated. |
+| `package.json` `start` script pointing to `aurora_api_server.py` | resolved | Updated in issue #759. `npm start` and `npm run dev` now invoke `uvicorn api.aurora_api:app`. Old command retained as `npm run start:legacy`. | `npm start` → `uvicorn api.aurora_api:app --host 0.0.0.0 --port 8000` |
+| `scripts/deployment/start_aurora.sh` requiring `aurora_api_server.py`, `aurora_master_integration.py`, etc. | resolved | Rewritten in issue #759 to use `uvicorn api.aurora_api:app`. All root-level file prerequisites removed. Three modes: foreground, background, dev-reload. | `scripts/deployment/start_aurora.sh` → canonical uvicorn launch |
+| `scripts/deployment/stop_aurora.sh` `pkill -f aurora_api_server.py` | resolved | Updated in issue #759 to `pkill -f "api.aurora_api:app"`. | `stop_aurora.sh` now targets canonical process pattern |
+| `Makefile` `run` target launching loom restore script | active (intentional) | `make run` is a dedicated reflective_autonomy utility, not the main API. New `make serve` and `make serve-dev` targets added as canonical API start commands. | Use `make serve` to start the API; `make run` is a separate tool target. |
 
 ## Maintenance Rule
 

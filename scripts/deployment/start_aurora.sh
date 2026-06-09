@@ -1,118 +1,70 @@
 #!/bin/bash
-# Aurora CloudBank Comprehensive Startup Script
-# Launches all Phase 4 real-world applications
+# Aurora CloudBank Startup Script
+# Canonical entrypoint: uvicorn api.aurora_api:app
+#
+# Legacy note: older Phase 3-4 scripts referenced aurora_api_server.py,
+# aurora_master_integration.py, and aurora_cli.py at the repo root.
+# Those files are no longer part of the canonical runtime. See:
+#   docs/architecture/RUNTIME_PATH_DRIFT_LEDGER.md
 
 set -e
 
-echo "🚀 Aurora CloudBank Phase 4 Startup"
-echo "======================================"
+echo "Aurora CloudBank Startup"
+echo "========================"
 
-# Check if Python is available
+# Check for Python
 if ! command -v python3 &> /dev/null; then
-    echo "❌ Python 3 is required but not installed"
+    echo "ERROR: Python 3 is required but not installed"
+    exit 1
+fi
+echo "Python: $(python3 --version)"
+
+# Check for uvicorn
+if ! python3 -m uvicorn --version &> /dev/null; then
+    echo "ERROR: uvicorn is not installed. Run: pip install uvicorn"
     exit 1
 fi
 
-echo "✅ Python 3 found: $(python3 --version)"
-
-# Check required files
-REQUIRED_FILES=(
-    "aurora_quantum_processor.py"
-    "aurora_consciousness_engine.py" 
-    "aurora_adaptive_learning.py"
-    "aurora_master_integration.py"
-    "aurora_api_server.py"
-    "aurora_cli.py"
-    "aurora_dashboard.html"
-)
-
-echo "🔍 Checking required files..."
-for file in "${REQUIRED_FILES[@]}"; do
-    if [ -f "$file" ]; then
-        echo "✅ $file"
-    else
-        echo "❌ $file (missing)"
-        MISSING_FILES=true
-    fi
-done
-
-if [ "$MISSING_FILES" = true ]; then
-    echo "⚠️ Some required files are missing"
-    echo "💡 Please ensure all Aurora CloudBank Phase 3-4 files are present"
+# Verify canonical entrypoint exists
+if [ ! -f "api/aurora_api.py" ]; then
+    echo "ERROR: api/aurora_api.py not found. Run from the repository root."
     exit 1
 fi
+echo "Entrypoint: api/aurora_api.py (canonical)"
 
-# Function to start service in background
-start_service() {
-    local service_name="$1"
-    local command="$2"
-    local log_file="$3"
-    
-    echo "🌟 Starting $service_name..."
-    nohup $command > "$log_file" 2>&1 &
-    local pid=$!
-    echo "$pid" > "${service_name,,}.pid"
-    echo "✅ $service_name started (PID: $pid)"
-}
+echo ""
+echo "Startup modes:"
+echo "  1) API server (foreground)"
+echo "  2) API server (background, logs to logs/api_server.log)"
+echo "  3) API server with auto-reload (development)"
+echo ""
+read -p "Enter choice (1-3): " choice
 
-# Create logs directory
 mkdir -p logs
 
-# Start services based on user choice
-echo ""
-echo "🎮 Choose startup mode:"
-echo "1) API Server only"
-echo "2) CLI Interactive mode"
-echo "3) Full integration test"
-echo "4) All services"
-echo ""
-read -p "Enter choice (1-4): " choice
+UVICORN_CMD="python3 -m uvicorn api.aurora_api:app --host 0.0.0.0 --port 8000"
 
 case $choice in
     1)
-        echo "🌐 Starting API Server..."
-        python3 aurora_api_server.py
+        echo "Starting API server (foreground)..."
+        exec $UVICORN_CMD
         ;;
     2)
-        echo "⌨️ Starting CLI Interactive mode..."
-        python3 aurora_cli.py --interactive
+        echo "Starting API server (background)..."
+        nohup $UVICORN_CMD > logs/api_server.log 2>&1 &
+        echo $! > api-server.pid
+        echo "Started (PID: $(cat api-server.pid))"
+        echo "Logs:  logs/api_server.log"
+        echo "API:   http://localhost:8000"
+        echo "Docs:  http://localhost:8000/docs"
+        echo "Stop:  ./scripts/deployment/stop_aurora.sh"
         ;;
     3)
-        echo "🧪 Running full integration test..."
-        python3 aurora_master_integration.py
-        ;;
-    4)
-        echo "🚀 Starting all services..."
-        
-        # Start API server in background
-        start_service "API-Server" "python3 aurora_api_server.py" "logs/api_server.log"
-        
-        # Wait a moment for API server to start
-        sleep 3
-        
-        # Run integration test
-        echo "🧪 Running integration test..."
-        python3 aurora_master_integration.py
-        
-        echo ""
-        echo "🎉 All services started!"
-        echo "🔗 API Server: http://localhost:8000"
-        echo "📖 API Docs: http://localhost:8000/docs"
-        echo "📊 Dashboard: http://localhost:8000"
-        echo ""
-        echo "📋 Service Status:"
-        if [ -f "api-server.pid" ]; then
-            echo "✅ API Server running (PID: $(cat api-server.pid))"
-        fi
-        
-        echo ""
-        echo "🛑 To stop services, run: ./stop_aurora.sh"
+        echo "Starting API server (dev mode with --reload)..."
+        exec $UVICORN_CMD --reload
         ;;
     *)
-        echo "❓ Invalid choice. Exiting."
+        echo "Invalid choice."
         exit 1
         ;;
 esac
-
-echo ""
-echo "🎉 Aurora CloudBank startup complete!"

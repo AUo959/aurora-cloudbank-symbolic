@@ -13,8 +13,8 @@ if [ -f "api-server.pid" ]; then
     rm api-server.pid
 fi
 
-# Clean up any remaining processes
-pkill -f "aurora_api_server.py" 2>/dev/null || true
-pkill -f "aurora_cli.py" 2>/dev/null || true
+# Clean up any remaining canonical API processes
+pkill -f "api.aurora_api:app" 2>/dev/null || true
+pkill -f "api/aurora_api.py" 2>/dev/null || true
 
 echo "🎉 Aurora CloudBank services stopped"

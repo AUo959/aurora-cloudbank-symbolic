@@ -91,8 +91,8 @@ jsonschema>=4.17.0                  # JSON Schema validation (MCP tool inputSche
 # SYSTEM UTILITIES
 # ===================================================================
 requests>=2.32.5                    # HTTP library
-urllib3>=2.6.0                      # HTTP connection pooling
+urllib3>=2.7.0                      # HTTP connection pooling
 certifi>=2026.5.20                   # SSL certificates
 charset-normalizer>=3.4.3           # Character encoding detection
-idna>=3.10                          # Internationalized domain names
+idna>=3.15                          # Internationalized domain names
 psutil>=5.9.0                       # Process and system monitoring (for R-2 telemetry)

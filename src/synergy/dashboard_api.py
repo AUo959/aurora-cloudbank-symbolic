@@ -8,7 +8,9 @@ DLP: synergy_dashboard_api
 T1: Initial implementation
 """
 
-from typing import Dict, List, Any, Optional
+import importlib
+import sys
+from typing import Dict, List, Any, Optional, Set
 from datetime import datetime, timezone
 import logging
 
@@ -24,19 +26,133 @@ dlp_tracker = NativeDLPTracker()
 # Create router for synergy dashboard endpoints
 router = APIRouter(prefix="/api/synergy", tags=["synergy"])
 
+# ── Runtime introspection helpers ─────────────────────────────────────────────
+
+# Maps component_id → importable module path used for import-health probing
+_COMPONENT_MODULE_MAP: Dict[str, str] = {
+    "aumemmanager": "modules.aumemmanager",
+    "data_guardian": "modules.data_guardian",
+    "insight_ledger": "modules.insight_ledger",
+    "quantum_simulator": "modules.quantum_simulator",
+    "dlp_tracker": "src.core.native_dlp_export",
+    "chatgpt_agent": "src.integrations.chatgpt_agent_mode",
+    "symbolic_engine": "modules.symbolic_core",
+    "thread_bridge": "modules.thread_transfer_bridge",
+}
+
+# Maps component_id → route prefix to look for in the mounted FastAPI app
+_COMPONENT_ROUTE_PREFIX_MAP: Dict[str, str] = {
+    "aumemmanager": "/aumem",
+    "data_guardian": "/api/guardian",
+    "insight_ledger": "/api/ledger",
+    "quantum_simulator": "/api/quantum",
+    "dlp_tracker": "/api/dlp",
+    "chatgpt_agent": "/agent",
+    "symbolic_engine": "/api/symbolic",
+    "thread_bridge": "/api/bridge",
+}
+
+
+def _probe_import(module_path: str) -> Dict[str, Any]:
+    """Try importing *module_path* and return an availability dict.
+
+    Safe to call at request time — uses sys.modules cache first so there is no
+    disk I/O cost for modules already loaded.
+    """
+    if module_path in sys.modules:
+        return {"available": True, "source": "runtime_import"}
+    try:
+        importlib.import_module(module_path)
+        return {"available": True, "source": "runtime_import"}
+    except ImportError as exc:
+        return {"available": False, "source": "runtime_import", "error": str(exc)[:200]}
+    except Exception as exc:
+        return {"available": False, "source": "runtime_import", "error": str(exc)[:200]}
+
+
+def _get_app_route_paths() -> Set[str]:
+    """Return all route paths currently mounted in the FastAPI app.
+
+    Uses a deferred import so circular-import risk is zero at module load time:
+    by the time any request calls this function, api.aurora_api is already in
+    sys.modules.
+    """
+    try:
+        aurora_api = sys.modules.get("api.aurora_api") or sys.modules.get("aurora_api")
+        if aurora_api is None:
+            return set()
+        app = getattr(aurora_api, "app", None)
+        if app is None:
+            return set()
+        return {getattr(r, "path", "") for r in app.routes}
+    except Exception:
+        return set()
+
+
+def _runtime_health(component_id: str) -> Dict[str, Any]:
+    """Compute a live health score (0–100) for *component_id*.
+
+    Signal priority:
+      1. Import probe  → component unavailable → score 0
+      2. Route presence → router missing      → score 50 (degraded)
+      3. R2 telemetry success-rate            → scales 70–100
+      4. Fallback static score                → tagged source: "static"
+    """
+    module_path = _COMPONENT_MODULE_MAP.get(component_id)
+    route_prefix = _COMPONENT_ROUTE_PREFIX_MAP.get(component_id)
+
+    # 1. Import probe
+    if module_path:
+        probe = _probe_import(module_path)
+        if not probe["available"]:
+            return {"score": 0.0, "source": "runtime_import", "status": "unavailable"}
+
+    # 2. Route presence
+    if route_prefix:
+        mounted_paths = _get_app_route_paths()
+        # A mounted router contributes many paths; check if any starts with the prefix
+        route_present = any(p.startswith(route_prefix) for p in mounted_paths)
+        if not route_present:
+            return {"score": 50.0, "source": "runtime_routes", "status": "degraded"}
+
+    # 3. R2 telemetry (overall signal — per-component filtering requires operation log scan)
+    try:
+        from src.observability import get_r2_telemetry
+        r2 = get_r2_telemetry()
+        summary = r2.get_metrics_summary()
+        success_rate = summary.get("success_rate")
+        if success_rate is not None:
+            # Map 0–1 success rate onto 70–100 health range
+            score = 70.0 + success_rate * 30.0
+            return {"score": round(score, 1), "source": "runtime_telemetry", "status": "active"}
+    except Exception:
+        pass
+
+    # 4. Static fallback
+    _static_scores = {
+        "aumemmanager": 95.0, "data_guardian": 88.0, "insight_ledger": 92.0,
+        "quantum_simulator": 85.0, "dlp_tracker": 98.0, "chatgpt_agent": 90.0,
+        "symbolic_engine": 87.0, "thread_bridge": 82.0,
+    }
+    return {"score": _static_scores.get(component_id, 0.0), "source": "static", "status": "unknown"}
+
 
 # Data models
 class ComponentStatus(BaseModel):
-    """Static component registry entry."""
+    """Component registry entry — runtime-enriched where possible."""
     component_id: str
     name: str
     category: str
     description: str
     endpoints: List[str]
-    status: str = Field(description="documented")
+    status: str = Field(description="active|degraded|unavailable|documented")
     telemetry_available: bool = False
     telemetry_source: str = "static_registry"
     health_score: Optional[float] = Field(default=None, ge=0.0, le=100.0)
+    health_source: str = Field(
+        default="static",
+        description="Source of health_score: runtime_import|runtime_routes|runtime_telemetry|static"
+    )
     last_heartbeat: Optional[str] = None
     uptime_seconds: Optional[int] = None
     resource_usage: Optional[Dict[str, float]] = None
@@ -146,19 +262,12 @@ def get_component_registry() -> List[Dict[str, Any]]:
 
 
 def calculate_component_health(component_id: str) -> float:
-    """Calculate health score for a component (0-100)"""
-    # Placeholder implementation - would query actual metrics
-    health_scores = {
-        "aumemmanager": 95.0,
-        "data_guardian": 88.0,
-        "insight_ledger": 92.0,
-        "quantum_simulator": 85.0,
-        "dlp_tracker": 98.0,
-        "chatgpt_agent": 90.0,
-        "symbolic_engine": 87.0,
-        "thread_bridge": 82.0,
-    }
-    return health_scores.get(component_id, 0.0)
+    """Return runtime health score (0–100) for *component_id*.
+
+    Delegates to _runtime_health(); callers that only need the scalar can use
+    this wrapper.  Use _runtime_health() directly when the source matters.
+    """
+    return _runtime_health(component_id)["score"]
 
 
 def get_component_interactions() -> List[Dict[str, Any]]:
@@ -240,21 +349,25 @@ async def get_components(
     
     statuses = []
     for comp in components:
-        status = "documented"
-        
+        health_info = _runtime_health(comp["id"])
+        runtime_status = health_info.get("status", "unknown")
+        health_source = health_info.get("source", "static")
+
         # Apply filter if specified
-        if status_filter and status != status_filter:
+        if status_filter and runtime_status != status_filter:
             continue
-        
+
         statuses.append(ComponentStatus(
             component_id=comp["id"],
             name=comp["name"],
             category=comp["category"],
             description=comp["description"],
             endpoints=comp["endpoints"],
-            status=status,
-            telemetry_available=False,
-            telemetry_source="static_registry",
+            status=runtime_status,
+            health_score=health_info["score"],
+            health_source=health_source,
+            telemetry_available=(health_source == "runtime_telemetry"),
+            telemetry_source="r2_agent_telemetry" if health_source == "runtime_telemetry" else "static_registry",
         ))
     
     # Track with DLP
@@ -276,25 +389,28 @@ async def get_topology() -> ComponentTopology:
     components = get_component_registry()
     interactions = get_component_interactions()
     
-    # Build nodes
-    nodes = [
-        {
+    # Build nodes — health and status sourced from live runtime probes
+    nodes = []
+    for comp in components:
+        health_info = _runtime_health(comp["id"])
+        nodes.append({
             "id": comp["id"],
             "label": comp["name"],
             "category": comp["category"],
             "description": comp["description"],
-            "health": calculate_component_health(comp["id"]),
-        }
-        for comp in components
-    ]
-    
-    # Build edges
+            "health": health_info["score"],
+            "status": health_info.get("status", "unknown"),
+            "health_source": health_info.get("source", "static"),
+        })
+
+    # Build edges — interactions are still architecture-documented; tagged accordingly
     edges = [
         {
             "source": inter["source"],
             "target": inter["target"],
             "type": inter["type"],
             "description": inter["description"],
+            "source_type": "static",
         }
         for inter in interactions
     ]

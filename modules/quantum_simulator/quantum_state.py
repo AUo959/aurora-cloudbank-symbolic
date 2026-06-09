@@ -3,6 +3,13 @@ Quantum State Representation
 
 Classes for representing and manipulating quantum states.
 
+Supports pure states (state vectors) and mixed states (density matrices).
+Mixed-state operations (measure, entropy, fidelity_with) use standard
+density-matrix formulations:
+  - Measurement: diagonal elements of ρ in the computational basis
+  - Von Neumann entropy: -Tr(ρ log₂ ρ) via spectral decomposition
+  - Fidelity: F(ρ₁,ρ₂) = Tr(√(√ρ₁ ρ₂ √ρ₁))²
+
 Anchor: T1-QSS-001
 """
 
@@ -10,6 +17,13 @@ import math
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+
+
+def _matrix_sqrt(matrix: np.ndarray) -> np.ndarray:
+    """Compute the matrix square root of a Hermitian positive-semidefinite matrix."""
+    eigenvalues, eigenvectors = np.linalg.eigh(matrix)
+    sqrt_eigs = np.sqrt(np.maximum(eigenvalues.real, 0.0))
+    return (eigenvectors * sqrt_eigs) @ eigenvectors.conj().T
 
 
 class StateVector:
@@ -132,6 +146,8 @@ class QuantumState:
             state_vector: Optional state vector (for pure states)
             num_qubits: Number of qubits (if creating from scratch)
         """
+        self._density_matrix: Optional[np.ndarray] = None
+
         if state_vector is not None:
             self.state_vector = state_vector
             self.num_qubits = state_vector.num_qubits
@@ -214,6 +230,93 @@ class QuantumState:
         state_vector = StateVector(amplitudes)
         return cls(state_vector=state_vector)
 
+    @classmethod
+    def from_density_matrix(cls, matrix: np.ndarray) -> "QuantumState":
+        """
+        Create a mixed (or pure) state from a density matrix.
+
+        Args:
+            matrix: Square complex ndarray of shape (2^n, 2^n) representing ρ.
+                    Must be Hermitian, positive-semidefinite, and trace-1.
+
+        Returns:
+            QuantumState backed by the density matrix.
+
+        Raises:
+            ValueError: If the matrix dimensions are invalid or not power-of-2.
+        """
+        matrix = np.array(matrix, dtype=complex)
+        if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+            raise ValueError("Density matrix must be a square 2-D array")
+        dim = matrix.shape[0]
+        num_qubits = int(math.log2(dim))
+        if 2**num_qubits != dim:
+            raise ValueError(f"Density matrix dimension ({dim}) must be a power of 2")
+
+        obj = cls.__new__(cls)
+        obj.num_qubits = num_qubits
+        obj.state_vector = None  # type: ignore[assignment]
+        obj._density_matrix = matrix.copy()
+
+        # Determine whether the state is actually pure: Tr(ρ²) ≈ 1
+        purity = float(np.real(np.trace(matrix @ matrix)))
+        obj.is_pure = abs(purity - 1.0) < 1e-6
+
+        return obj
+
+    @classmethod
+    def from_pure_ensemble(
+        cls,
+        ensemble: List[Tuple["QuantumState", float]],
+    ) -> "QuantumState":
+        """
+        Create a mixed state from a probabilistic ensemble of pure states.
+
+        ρ = Σᵢ pᵢ |ψᵢ⟩⟨ψᵢ|
+
+        Args:
+            ensemble: List of (pure_state, probability) pairs. Probabilities
+                      must sum to 1 (within 1e-6 tolerance).
+
+        Returns:
+            QuantumState representing the mixed state.
+
+        Raises:
+            ValueError: If probabilities don't sum to 1 or states have different dimensions.
+        """
+        if not ensemble:
+            raise ValueError("Ensemble must be non-empty")
+
+        total_prob = sum(p for _, p in ensemble)
+        if abs(total_prob - 1.0) > 1e-6:
+            raise ValueError(f"Ensemble probabilities must sum to 1 (got {total_prob})")
+
+        num_qubits = ensemble[0][0].num_qubits
+        dim = 2**num_qubits
+        rho = np.zeros((dim, dim), dtype=complex)
+
+        for state, prob in ensemble:
+            if state.num_qubits != num_qubits:
+                raise ValueError("All states in ensemble must have the same number of qubits")
+            psi = state.density_matrix
+            rho += prob * psi
+
+        return cls.from_density_matrix(rho)
+
+    @property
+    def density_matrix(self) -> np.ndarray:
+        """
+        Return the density matrix ρ for this state.
+
+        For pure states: ρ = |ψ⟩⟨ψ|
+        For mixed states: the stored density matrix.
+        """
+        if self._density_matrix is not None:
+            return self._density_matrix
+        # Pure state: compute ρ = |ψ⟩⟨ψ| on the fly
+        psi = self.state_vector.amplitudes
+        return np.outer(psi, psi.conj())
+
     def apply_gate(self, gate_name: str, target_qubits: List[int]) -> "QuantumState":
         """
         Apply quantum gate to specified qubits.
@@ -236,7 +339,11 @@ class QuantumState:
         self, num_shots: int = 1000, seed: Optional[int] = None
     ) -> Tuple[Dict[str, int], Dict[str, float]]:
         """
-        Measure the quantum state.
+        Measure the quantum state in the computational basis.
+
+        For pure states: uses the state-vector amplitude approach.
+        For mixed states: probabilities are the diagonal elements ρ[k,k],
+        i.e. ⟨k|ρ|k⟩ for each computational basis state |k⟩.
 
         Args:
             num_shots: Number of measurements
@@ -245,40 +352,76 @@ class QuantumState:
         Returns:
             Tuple of (counts, probabilities)
         """
-        if not self.is_pure:
-            raise NotImplementedError("Measurement of mixed states not yet implemented")
+        if self.is_pure:
+            counts = self.state_vector.measure(num_shots=num_shots, seed=seed)
+            probabilities = self.state_vector.probabilities()
+            return counts, probabilities
 
-        counts = self.state_vector.measure(num_shots=num_shots, seed=seed)
-        probabilities = self.state_vector.probabilities()
+        # Mixed state: diagonal elements of ρ are the measurement probabilities
+        dim = 2**self.num_qubits
+        basis_labels = [f"|{bin(i)[2:].zfill(self.num_qubits)}⟩" for i in range(dim)]
+        probs = np.real(np.diagonal(self._density_matrix))
+        probs = np.maximum(probs, 0.0)
+        probs /= probs.sum()  # renormalize against floating-point drift
 
+        if seed is not None:
+            np.random.seed(seed)
+
+        indices = np.random.choice(dim, size=num_shots, p=probs)
+        counts: Dict[str, int] = {}
+        for idx in indices:
+            label = basis_labels[idx]
+            counts[label] = counts.get(label, 0) + 1
+
+        probabilities = {label: float(p) for label, p in zip(basis_labels, probs)}
         return counts, probabilities
 
     def entropy(self) -> float:
-        """Calculate entropy of the state."""
-        if not self.is_pure:
-            raise NotImplementedError("Entropy of mixed states not yet implemented")
-        return self.state_vector.entropy()
+        """
+        Calculate Von Neumann entropy of the state.
+
+        For pure states backed by a state vector: delegates to StateVector.entropy().
+        For all other cases (mixed or pure-but-density-matrix-backed):
+        S(ρ) = -Tr(ρ log₂ ρ) = -Σᵢ λᵢ log₂(λᵢ) where λᵢ are eigenvalues of ρ.
+        """
+        if self.is_pure and self.state_vector is not None:
+            return self.state_vector.entropy()
+
+        eigenvalues = np.linalg.eigvalsh(self.density_matrix)
+        eigenvalues = np.maximum(eigenvalues.real, 0.0)
+        nonzero = eigenvalues[eigenvalues > 1e-12]
+        return float(-np.sum(nonzero * np.log2(nonzero)))
 
     def fidelity_with(self, other: "QuantumState") -> float:
         """
         Calculate fidelity with another state.
 
+        Pure–pure:   F = |⟨ψ₁|ψ₂⟩|²
+        Pure–mixed or mixed–mixed:
+                     F = Tr(√(√ρ₁ ρ₂ √ρ₁))²
+
         Args:
             other: Another quantum state
 
         Returns:
-            Fidelity (0.0 to 1.0)
+            Fidelity in [0.0, 1.0]
         """
-        if not (self.is_pure and other.is_pure):
-            raise NotImplementedError("Fidelity for mixed states not yet implemented")
+        if self.is_pure and other.is_pure:
+            return self.state_vector.fidelity(other.state_vector)
 
-        return self.state_vector.fidelity(other.state_vector)
+        rho1 = self.density_matrix
+        rho2 = other.density_matrix
+        sqrt_rho1 = _matrix_sqrt(rho1)
+        inner = sqrt_rho1 @ rho2 @ sqrt_rho1
+        sqrt_inner = _matrix_sqrt(inner)
+        return float(max(0.0, np.real(np.trace(sqrt_inner))) ** 2)
 
     def __repr__(self) -> str:
         """String representation."""
-        if self.is_pure:
+        if self.is_pure and self.state_vector is not None:
             return f"QuantumState({self.num_qubits} qubits, pure): {self.state_vector}"
-        return f"QuantumState({self.num_qubits} qubits, mixed)"
+        kind = "pure (density matrix)" if self.is_pure else "mixed"
+        return f"QuantumState({self.num_qubits} qubits, {kind})"
 
 
 def create_ghz_state(num_qubits: int) -> QuantumState:

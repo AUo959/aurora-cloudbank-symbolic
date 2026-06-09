@@ -276,6 +276,17 @@ async def lifespan(app: FastAPI):
     logger.info("Aurora API starting up...")
     logger.info("Rate limiter active: AI=20/min, crew=30/min, quantum=10/min, memory_write=60/min")
 
+    # Warn when in-process monitoring state cannot be shared across workers.
+    _worker_count = int(os.environ.get("WEB_CONCURRENCY", "1"))
+    if _worker_count > 1:
+        logger.warning(
+            "⚠️  WEB_CONCURRENCY=%d detected. The monitoring, ethics, and audit modules "
+            "use in-process state that is NOT shared across uvicorn workers. "
+            "Run with WEB_CONCURRENCY=1 (or a single-worker deployment) to avoid "
+            "state divergence. See docs/operations/single-worker-constraint.md for details.",
+            _worker_count,
+        )
+
     # Initialize telemetry systems
     try:
         aurora_telemetry = get_telemetry(service_name="aurora-cloudbank-api")

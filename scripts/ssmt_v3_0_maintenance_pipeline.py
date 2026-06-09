@@ -17,10 +17,10 @@ from pathlib import Path
 class SSMTMaintenancePipeline:
     """Automated pipeline to maintain repository health gains"""
     
-    def __init__(self, repo_path="/workspaces/aurora-cloudbank-symbolic"):
-        self.repo_path = repo_path
-        self.config_file = Path(repo_path) / "ssmt_maintenance_config.json"
-        self.log_file = Path(repo_path) / "ssmt_maintenance.log"
+    def __init__(self, repo_path=None):
+        self.repo_path = Path(repo_path) if repo_path else Path(__file__).resolve().parents[1]
+        self.config_file = self.repo_path / "ssmt_maintenance_config.json"
+        self.log_file = self.repo_path / "ssmt_maintenance.log"
         self.load_config()
     
     def load_config(self):

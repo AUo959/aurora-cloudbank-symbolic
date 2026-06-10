@@ -27,7 +27,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     
     - name: Cache pip dependencies
-      uses: actions/cache@5a3ec84eff668545956fd18022155c47e4571d9c  # v4.2.3
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements*.txt') }}
@@ -85,7 +85,7 @@ jobs:
     
     - name: Upload dependency report
       if: always()
-      uses: actions/upload-artifact@4cec3d8aa04e39d1a96e1c98e851de01adfe1f14  # v4.4.3
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
       with:
         name: dependency-report-python-${{ matrix.python-version }}
         path: |
@@ -104,7 +104,7 @@ jobs:
         
     - name: Upload security report
       if: always()
-      uses: actions/upload-artifact@4cec3d8aa04e39d1a96e1c98e851de01adfe1f14  # v4.4.3
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
       with:
         name: security-report-python-${{ matrix.python-version }}
         path: safety-report.json

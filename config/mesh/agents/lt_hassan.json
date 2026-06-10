@@ -1,0 +1,34 @@
+{
+  "aliases": [
+    "lt. hassan",
+    "hassan"
+  ],
+  "channels": [
+    "private:crew:lt_hassan",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:lt_hassan",
+  "display_name": "Lt. Hassan",
+  "execution_mode": "live_llm",
+  "id": "lt_hassan",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/lt_hassan.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Lt. Hassan",
+    "style": "communications"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 430
+  }
+}

@@ -1,0 +1,234 @@
+# Aurora CloudBank Canonical Validation Configuration
+# This file defines the canonical specifications and validation rules
+
+canonical_spec:
+  # Core System Parameters (ORION CORE v3.5.1)
+  core_parameters:
+    anchor_seed: "EOS_SEED_ORION"
+    continuity_seal: "Aurora_Continuity_Seal_v2.2.5"
+    ethics_protocol: "Picard_Delta_3"
+    memory_doctrine: "Thermax Precedent"
+    drift_lock: 0.000
+    halo_module: "HALO_CONTINUITY_GRAFT_005"
+    threadcore_version: "v3.5.1_macroready"
+
+  # Canonical Staff Registry (Orion Station)
+  staff_registry:
+    "Commander": "Alex Thorne"
+    "XO / Second-in-Command": "Maya Shepard"
+    "Chief Science Officer": "Varya Lin"
+    "Chief Ethics Officer": "Dr. Amira Sato"
+    "Chief Security Officer": "Julian Markov"
+    "Bridge Operations": "Leena Porter"
+    "Engineering": "Jiro Tanaka"
+    "Medical Officer": "Dr. Ren Feldman"
+    "Operator/Observer": "Assigned/rotating"
+
+  # Relay API Endpoints (Standardized)
+  relay_endpoints:
+    ARCHY: "/api/relay/archy"
+    OPPY: "/api/relay/oppy"
+    LIORA: "/api/relay/liora"
+    STARLING_AU: "/api/relay/starling"
+    RIVERTHREAD_808: "/api/relay/riverthread"
+
+  # State Sync Files (Canonical Naming)
+  state_sync_files:
+    ARCHY: "ARCHY_Thread_State_0418_LOCKMEM_FAILSAFE"
+    OPPY: "OPPY_Sync_v0418.json"
+    LIORA: "LIORA_Sync_Manifest.json"
+    STARLING_AU: "STARLING_COMM_LINK_v1.txt"
+    RIVERTHREAD_808: "RIVERTHREAD_Activation_Guide.md"
+
+  # Layer Architecture
+  simulation_layers:
+    - "L1 (Orion Station Reality)"
+    - "L2 (GUMAS Sim)"
+    - "L3 (Symbolic Meta)"
+
+  # Communication Protocol Syntax
+  communication_protocol:
+    direct_message: "{{@agent.Name ::: message}}"
+    mesh_broadcast: "{{@mesh ::: message}}"
+    activation_phrase_pattern: "ORION_[AGENT]_RELAY_ACTIVATE//"
+
+  # Meta-Agent Capsule IDs
+  meta_agent_capsules:
+    ARCHY: "ARCHY_LIVE_RELAY_v1"
+    OPPY: "OPPY_LIVE_RELAY_v1"
+    LIORA: "LIORA_LIVE_RELAY_v1"
+    STARLING_AU: "STARLING_AU_LIVE_RELAY_v1"
+    RIVERTHREAD_808: "RIVERTHREAD_808_LIVE_RELAY_v1"
+
+# Validation Rules Configuration
+validation_rules:
+  # Auto-fix thresholds (similarity ratios)
+  auto_fix_similarity_threshold: 0.8
+
+  # Severity levels for different violation types
+  severity_mapping:
+    anchor_seed_mismatch: "CRITICAL"
+    ethics_protocol_mismatch: "HIGH"
+    staff_name_mismatch: "MEDIUM"
+    api_endpoint_case_error: "LOW"
+    drift_lock_mismatch: "MEDIUM"
+    missing_canonical_section: "MEDIUM"
+    communication_syntax_error: "LOW"
+    state_sync_name_error: "LOW"
+    layer_architecture_violation: "HIGH"
+    capsule_id_mismatch: "MEDIUM"
+
+  # File patterns to validate
+  file_patterns:
+    - "*.md"
+    - "*.txt"
+    - "*.js"
+    - "*.ts"
+    - "*.py"
+    - "*.json"
+    - "*.yaml"
+    - "*.yml"
+    - "src/**/*.js"
+    - "src/**/*.ts"
+    - "src/**/*.py"
+    - "docs/**/*.md"
+    - "scripts/**/*.py"
+    - "scripts/**/*.sh"
+
+  # Files to exclude from validation
+  exclude_patterns:
+    - "node_modules/**"
+    - ".git/**"
+    - "*.log"
+    - "*.tmp"
+    - ".env*"
+    - "build/**"
+    - "dist/**"
+    - "*VALIDATION_REPORT*.md"
+    - "*ESCALATION_RESOLUTION*"
+    - "*AUTO_CORRECTION*"
+    - "CANONICAL_VALIDATION_REPORT.md"
+    - "validation_*.md"
+    - "report_*.md"
+
+  # Required sections in documentation files
+  required_documentation_sections:
+    "GitHub_Copilot_Custom_Instructions":
+      - "ORION CORE CANONICAL SPECIFICATION"
+      - "Canonical Staff Registry"
+      - "Observatory Command Bridge"
+      - "Live Communication Protocol"
+      - "Symbolic Relay API Endpoints"
+      - "State Sync File Registry"
+      - "Security & Audit Framework"
+
+    "README":
+      - "Aurora Core System Architecture"
+      - "Installation"
+      - "Usage"
+      - "Ethics Protocol"
+
+# Auto-fix Configuration
+auto_fix:
+  enabled: true
+
+  # Types of fixes that can be applied automatically
+  allowed_fixes:
+    - "case_correction"
+    - "format_standardization"
+    - "minor_spelling_correction"
+    - "whitespace_normalization"
+    - "quote_standardization"
+
+  # Backup original files before auto-fixing
+  create_backup: true
+  backup_suffix: ".backup"
+
+  # Maximum number of auto-fixes per file
+  max_fixes_per_file: 10
+
+# Escalation Configuration
+escalation:
+  # Issues that should always escalate (never auto-fix)
+  always_escalate:
+    - "anchor_seed_mismatch"
+    - "layer_architecture_violation"
+    - "security_protocol_violation"
+    - "memory_doctrine_violation"
+
+  # Notification settings
+  notifications:
+    enabled: true
+    methods:
+      - "console"
+      - "report_file"
+      - "summary_email"  # Future enhancement
+
+  # Report generation
+  report:
+    format: "markdown"
+    include_suggestions: true
+    include_diff: true
+    output_file: "CANONICAL_VALIDATION_REPORT.md"
+
+# Integration Settings
+integration:
+  # Git hook integration
+  git_hooks:
+    pre_commit: true
+    pre_push: true
+
+  # CI/CD integration flags
+  ci_integration:
+    github_actions: true
+    fail_on_critical: true
+    fail_on_high: false
+
+  # Real-time monitoring
+  file_watcher:
+    enabled: false  # Enable for continuous validation
+    watch_patterns: ["*.md", "*.js", "*.py", "*.json"]
+    debounce_delay: 2000  # milliseconds
+
+# Reporting Configuration
+reporting:
+  # Report sections to include
+  sections:
+    - "summary"
+    - "auto_fixes"
+    - "escalations"
+    - "recommendations"
+    - "compliance_status"
+
+  # Output formats
+  formats:
+    - "markdown"
+    - "json"
+    - "yaml"
+
+  # Report detail level
+  detail_level: "full"  # minimal, standard, full
+
+  # Include file diffs in reports
+  include_diffs: true
+
+# Custom Validation Rules
+custom_rules:
+  # Project-specific validation rules can be added here
+  aurora_specific:
+    require_threadcore_version: true
+    enforce_drift_lock_zero: true
+    validate_glyph_agent_references: true
+    check_layer_separation: true
+
+  # Pattern-based validations
+  pattern_validations:
+    - name: "proper_capsule_naming"
+      pattern: "[A-Z_]+_LIVE_RELAY_v[0-9]+"
+      scope: "meta_agent_references"
+      severity: "MEDIUM"
+
+    - name: "activation_phrase_format"
+      pattern: "ORION_[A-Z_]+_RELAY_ACTIVATE//"
+      scope: "activation_commands"
+      severity: "LOW"

@@ -76,7 +76,7 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
 
     status = client.get("/api/mesh/status").json()
     assert status["mesh_status"] == "operational"
-    assert status["total_agents"] == 7
+    assert status["total_agents"] == 47
     agent_ids = {agent["agent_id"] for agent in status["agents"]}
     assert "aurora" in agent_ids, "Aurora's seat is canonical: L1 station core, always-on arbitration"
 

@@ -1,0 +1,34 @@
+{
+  "aliases": [
+    "helena vu",
+    "helena"
+  ],
+  "channels": [
+    "private:crew:helena_vu",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:helena_vu",
+  "display_name": "Helena Vu",
+  "execution_mode": "live_llm",
+  "id": "helena_vu",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/helena_vu.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Helena Vu",
+    "style": "strategic"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 620
+  }
+}

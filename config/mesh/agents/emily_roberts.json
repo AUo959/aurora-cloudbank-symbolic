@@ -1,0 +1,34 @@
+{
+  "aliases": [
+    "emily roberts",
+    "emily"
+  ],
+  "channels": [
+    "private:crew:emily_roberts",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:emily_roberts",
+  "display_name": "Emily Roberts",
+  "execution_mode": "live_llm",
+  "id": "emily_roberts",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/emily_roberts.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Emily Roberts",
+    "style": "adaptive"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 500
+  }
+}

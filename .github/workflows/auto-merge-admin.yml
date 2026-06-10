@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Check PR status
         id: pr-status
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -41,7 +41,7 @@ jobs:
       
       - name: Auto-approve PR
         if: github.actor == 'AUo959'
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -59,7 +59,7 @@ jobs:
             }
       
       - name: Enable auto-merge
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -75,7 +75,7 @@ jobs:
       
       - name: Delete branch
         if: success()
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

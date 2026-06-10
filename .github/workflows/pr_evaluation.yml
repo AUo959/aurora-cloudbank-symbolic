@@ -52,14 +52,14 @@ jobs:
     
     - name: Upload evaluation results
       if: steps.detect.outputs.should_run == 'true'
-      uses: actions/upload-artifact@4cec3d8aa04e39d1a96e1c98e851de01adfe1f14  # v4.4.3
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
       with:
         name: pr-evaluation-results
         path: pr_results.json
     
     - name: Comment on PR
       if: steps.detect.outputs.should_run == 'true'
-      uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
       with:
         script: |
           const fs = require('fs');

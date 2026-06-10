@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Auto assign reviewers
-        uses: kentaro-m/auto-assign-action@6f0f42e47d4d24a3f5dd3a5e92c5bfab4f3a9f41  # v2.0.0
+        uses: kentaro-m/auto-assign-action@f4648c0a9fdb753479e9e75fc251f507ce17bb7e  # v2.0.0
         with:
           configuration-path: '.github/auto_assign.yml'
 
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Assign issue or PR to repository owner
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           script: |
             const owner = context.repo.owner;
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Assign based on label
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           script: |
             const owner = context.repo.owner;

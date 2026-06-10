@@ -136,7 +136,7 @@ jobs:
     steps:
       - name: Route event
         if: needs.validate-event.outputs.event_type == matrix.event
-        uses: peter-evans/repository-dispatch@ce5485de42c9b2622d2ed064be479e8ed65e76f2  # v3.0.0
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0  # v3.0.0
         with:
           token: ${{ secrets.CONSTELLATION_TOKEN }}
           repository: ${{ matrix.owner }}/${{ matrix.subscriber }}

@@ -24,7 +24,7 @@ bandit>=1.7.5                       # Security vulnerability scanner
 bandit[toml]>=1.7.5                 # Bandit with TOML support
 safety>=3.6.2                       # Dependency vulnerability scanning
 pip-audit>=2.9.0                    # Security auditing tool
-semgrep>=1.45.0                     # Static analysis security scanner
+semgrep>=1.165.0                     # Static analysis security scanner
 
 # ===================================================================
 # DEVELOPMENT PRODUCTIVITY

@@ -1,0 +1,34 @@
+{
+  "aliases": [
+    "prof. elena sorensen",
+    "elena sorensen"
+  ],
+  "channels": [
+    "private:crew:elena_sorensen",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:elena_sorensen",
+  "display_name": "Elena Sorensen",
+  "execution_mode": "live_llm",
+  "id": "elena_sorensen",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/elena_sorensen.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Elena Sorensen",
+    "style": "strategic"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 620
+  }
+}

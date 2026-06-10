@@ -1,0 +1,35 @@
+{
+  "aliases": [
+    "cadet mira chen",
+    "mira chen",
+    "mira"
+  ],
+  "channels": [
+    "private:crew:mira_chen",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:mira_chen",
+  "display_name": "Mira Chen",
+  "execution_mode": "live_llm",
+  "id": "mira_chen",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/mira_chen.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Mira Chen",
+    "style": "adaptive"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 500
+  }
+}

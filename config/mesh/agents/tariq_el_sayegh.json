@@ -1,0 +1,34 @@
+{
+  "aliases": [
+    "tariq el-sayegh",
+    "tariq"
+  ],
+  "channels": [
+    "private:crew:tariq_el_sayegh",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:tariq_el_sayegh",
+  "display_name": "Tariq El-Sayegh",
+  "execution_mode": "live_llm",
+  "id": "tariq_el_sayegh",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/tariq_el_sayegh.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Tariq El-Sayegh",
+    "style": "continuity"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 460
+  }
+}

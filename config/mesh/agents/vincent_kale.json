@@ -1,0 +1,34 @@
+{
+  "aliases": [
+    "vincent kale",
+    "vincent"
+  ],
+  "channels": [
+    "private:crew:vincent_kale",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:vincent_kale",
+  "display_name": "Vincent Kale",
+  "execution_mode": "live_llm",
+  "id": "vincent_kale",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/vincent_kale.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Vincent Kale",
+    "style": "analytical"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 520
+  }
+}

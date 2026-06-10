@@ -1,0 +1,34 @@
+{
+  "aliases": [
+    "ryan patel",
+    "ryan"
+  ],
+  "channels": [
+    "private:crew:ryan_patel",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:ryan_patel",
+  "display_name": "Ryan Patel",
+  "execution_mode": "live_llm",
+  "id": "ryan_patel",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/ryan_patel.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Ryan Patel",
+    "style": "analytical"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 520
+  }
+}

@@ -76,7 +76,9 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
 
     status = client.get("/api/mesh/status").json()
     assert status["mesh_status"] == "operational"
-    assert status["total_agents"] == 6
+    assert status["total_agents"] == 7
+    agent_ids = {agent["agent_id"] for agent in status["agents"]}
+    assert "aurora" in agent_ids, "Aurora's seat is canonical: L1 station core, always-on arbitration"
 
     with client.websocket_connect("/ws/mesh") as websocket:
         initial = websocket.receive_json()
@@ -92,3 +94,17 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
     assert send.status_code == 200
     history = wait_for_agent_reply(client, "private:captain:alex")
     assert any(event["event_type"] == "agent_reply" for event in history["events"])
+
+    # Aurora handshake: the station core must be reachable and answer on
+    # their direct channel (registry: "All staff must handshake with Aurora").
+    handshake = client.post(
+        "/api/mesh/messages",
+        json={"to": "Aurora", "channel": "direct:aurora", "content": "Handshake. Please report status."},
+    )
+    assert handshake.status_code == 200
+    aurora_history = wait_for_agent_reply(client, "direct:aurora")
+    aurora_replies = [
+        event for event in aurora_history["events"] if event["event_type"] == "agent_reply"
+    ]
+    assert aurora_replies, "Aurora must answer the handshake"
+    assert any(event.get("agent_id") == "aurora" for event in aurora_replies)

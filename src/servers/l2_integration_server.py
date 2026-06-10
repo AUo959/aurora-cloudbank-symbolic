@@ -147,6 +147,15 @@ def create_app(project_root: Path | None = None) -> FastAPI:
         except WebSocketDisconnect:
             await mesh_runtime.websocket_hub.disconnect(websocket)
 
+    @mesh_app.get("/health")
+    async def mesh_health() -> Dict[str, Any]:
+        status = mesh_runtime.get_status()
+        return {
+            "status": "healthy",
+            "mesh_status": status["mesh_status"],
+            "total_agents": status["total_agents"],
+        }
+
     @mesh_app.get("/api/mesh/status")
     async def mesh_status() -> Dict[str, Any]:
         return mesh_runtime.get_status()

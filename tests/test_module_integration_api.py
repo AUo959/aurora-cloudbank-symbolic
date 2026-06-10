@@ -16,9 +16,13 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 import os
 
-# Set required environment variables for testing
-os.environ["CSRF_SECRET_KEY"] = "test_csrf_secret_key_for_integration_tests_only"
-os.environ["WS_AUTH_SECRET"] = "test_ws_auth_secret_for_integration_tests_only"
+# Set required environment variables for testing. setdefault, not assignment:
+# a direct write at import time changes the secret AFTER other test modules
+# have bound it into fastapi_security's module constant, so tokens they
+# generate no longer match what GlobalCsrfMiddleware (which re-reads the env
+# lazily at first request) validates against.
+os.environ.setdefault("CSRF_SECRET_KEY", "test_csrf_secret_key_for_integration_tests_only")
+os.environ.setdefault("WS_AUTH_SECRET", "test_ws_auth_secret_for_integration_tests_only")
 
 
 # ============================================================================

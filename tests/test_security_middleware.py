@@ -65,6 +65,7 @@ class TestSecurityMiddleware:
         """Test HTTPBearer security instance"""
         assert security is not None
         assert hasattr(security, 'scheme_name')
+        assert security.auto_error is False
 
     def test_secure_compare_equal_strings(self):
         """Test secure_compare with equal strings"""

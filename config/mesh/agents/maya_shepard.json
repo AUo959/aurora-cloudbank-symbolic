@@ -1,0 +1,35 @@
+{
+  "aliases": [
+    "lt. commander maya shepard",
+    "maya shepard",
+    "maya"
+  ],
+  "channels": [
+    "private:crew:maya_shepard",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:maya_shepard",
+  "display_name": "Maya Shepard",
+  "execution_mode": "live_llm",
+  "id": "maya_shepard",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/maya_shepard.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Maya Shepard",
+    "style": "strategic"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 620
+  }
+}

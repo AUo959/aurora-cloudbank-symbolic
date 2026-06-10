@@ -1,0 +1,33 @@
+{
+  "aliases": [
+    "ren takahashi"
+  ],
+  "channels": [
+    "private:crew:ren_takahashi",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:ren_takahashi",
+  "display_name": "Ren Takahashi",
+  "execution_mode": "live_llm",
+  "id": "ren_takahashi",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/ren_takahashi.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Ren Takahashi",
+    "style": "analytical"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 520
+  }
+}

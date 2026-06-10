@@ -544,7 +544,10 @@ async def telemetry_middleware(request: Request, call_next):
         attributes={
             "http.method": request.method,
             "http.url": str(request.url.path),
-            "http.client": request.client.host if request.client else "unknown"
+            "http.client": request.client.host if request.client else "unknown",
+            "http.user_agent": request.headers.get("user-agent", "unknown"),
+            "aurora.source_client": request.headers.get("x-source-client", "unknown"),
+            "aurora.connector_version": request.headers.get("x-connector-version", "unknown"),
         }
     ):
         try:

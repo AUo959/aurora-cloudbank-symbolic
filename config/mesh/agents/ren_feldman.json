@@ -1,0 +1,34 @@
+{
+  "aliases": [
+    "dr. ren feldman",
+    "ren feldman"
+  ],
+  "channels": [
+    "private:crew:ren_feldman",
+    "#crew_lounge"
+  ],
+  "continuity_log_file": "",
+  "default_channel": "private:crew:ren_feldman",
+  "display_name": "Ren Feldman",
+  "execution_mode": "live_llm",
+  "id": "ren_feldman",
+  "instruction_profile_file": "",
+  "memory_files": [
+    "config/mesh/memory/ren_feldman.md"
+  ],
+  "model_profile": {
+    "max_output_tokens": 220,
+    "model": "gpt-4.1-mini",
+    "provider": "openai",
+    "temperature": 0.4
+  },
+  "response_policy": {
+    "fallback_to_deterministic": true,
+    "signature": "Ren Feldman",
+    "style": "adaptive"
+  },
+  "tool_bindings": [],
+  "typing_profile": {
+    "delay_ms": 500
+  }
+}

@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Get PR/Issue from Check Suite
         id: get-item
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           script: |
             let pr_number = null;
@@ -44,7 +44,7 @@ jobs:
       - name: Determine CI Status
         id: ci-status
         if: steps.get-item.outputs.has_item == 'true'
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           script: |
             const conclusion = context.payload.check_suite?.conclusion || 
@@ -61,7 +61,7 @@ jobs:
 
       - name: Update Project Board - Move to In Progress (CI Failed)
         if: steps.ci-status.outputs.ci_failed == 'true'
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -105,7 +105,7 @@ jobs:
 
       - name: Update Project Board - Move to In Review (CI Passed)
         if: steps.ci-status.outputs.ci_passed == 'true'
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -149,7 +149,7 @@ jobs:
 
       - name: Add Status Comment
         if: steps.get-item.outputs.has_item == 'true'
-        uses: actions/github-script@60a0d83039f74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
         with:
           script: |
             const pr_number = parseInt('${{ steps.get-item.outputs.pr_number }}');

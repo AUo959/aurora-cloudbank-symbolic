@@ -186,6 +186,8 @@ class DLPAutoTrackingMiddleware(BaseHTTPMiddleware):
             "query_params": dict(request.query_params) if request.query_params else {},
             "client_host": request.client.host if request.client else "unknown",
             "user_agent": request.headers.get("user-agent", "unknown"),
+            "source_client": request.headers.get("x-source-client", "unknown"),
+            "connector_version": request.headers.get("x-connector-version", "unknown"),
             "content_type": request.headers.get("content-type", "unknown")
         }
     

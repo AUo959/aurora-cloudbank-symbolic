@@ -309,6 +309,8 @@ class TestRequestDataExtraction:
             client = type('obj', (object,), {'host': 'localhost'})
             headers = {
                 "user-agent": "test-client",
+                "x-source-client": "aurora-mcp-connector",
+                "x-connector-version": "0.1.0",
                 "content-type": "application/json"
             }
         
@@ -320,6 +322,8 @@ class TestRequestDataExtraction:
         assert data["query_params"] == {"param": "value"}
         assert data["client_host"] == "localhost"
         assert data["user_agent"] == "test-client"
+        assert data["source_client"] == "aurora-mcp-connector"
+        assert data["connector_version"] == "0.1.0"
         assert data["content_type"] == "application/json"
 
 

@@ -107,6 +107,48 @@ def detect_drift(old_index: dict | None, new_index: dict) -> list[str]:
     return drift_notes
 
 
+def strip_volatile_aggregation_metadata(index: dict) -> dict:
+    """Return a comparable copy without timestamps that should not trigger commits."""
+    comparable = json.loads(json.dumps(index))
+    comparable.pop("generated_at", None)
+
+    source_metadata = comparable.get("aggregation_metadata", {}).get("sources", {})
+    for metadata in source_metadata.values():
+        metadata.pop("generated_at", None)
+
+    return comparable
+
+
+def preserve_existing_noop_aggregate(old_index: dict | None, new_index: dict) -> dict:
+    """Keep the existing aggregate when only volatile timestamps changed."""
+    if old_index is None:
+        return new_index
+
+    if strip_volatile_aggregation_metadata(old_index) == strip_volatile_aggregation_metadata(new_index):
+        print("No material aggregate changes; preserving existing generated timestamps.")
+        return old_index
+
+    return new_index
+
+
+def preserve_existing_noop_cache(cache_file: str, new_index: dict) -> dict:
+    """Keep a cached spoke index when only volatile timestamps changed."""
+    if not os.path.exists(cache_file):
+        return new_index
+
+    try:
+        with open(cache_file, "r") as f:
+            old_index = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return new_index
+
+    if strip_volatile_aggregation_metadata(old_index) == strip_volatile_aggregation_metadata(new_index):
+        print(f"  Cache unchanged except generated timestamps; preserving {cache_file}")
+        return old_index
+
+    return new_index
+
+
 def aggregate(use_local: bool = False) -> dict:
     """Main aggregation logic."""
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -159,6 +201,7 @@ def aggregate(use_local: bool = False) -> dict:
 
         # Cache locally
         cache_file = LOCAL_INDEXES[repo_name]
+        index = preserve_existing_noop_cache(cache_file, index)
         with open(cache_file, "w") as f:
             json.dump(index, f, indent=2)
         print(f"  Cached to {cache_file}")
@@ -201,6 +244,7 @@ def aggregate(use_local: bool = False) -> dict:
     for note in drift_notes:
         print(f"  - {note}")
     aggregated["aggregation_metadata"]["drift_notes"] = drift_notes
+    aggregated = preserve_existing_noop_aggregate(old_aggregated, aggregated)
 
     # Write aggregated index
     with open(AGGREGATED_FILE, "w") as f:

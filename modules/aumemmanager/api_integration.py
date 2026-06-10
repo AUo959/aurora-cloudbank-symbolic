@@ -208,7 +208,7 @@ async def create_quantum_vector(request: QuantumVectorRequest, http_request: Req
 
 @router.post("/quantum/entangle", response_model=Dict[str, str], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
 @limiter.limit("60/minute")  # Memory write - rate limited per IP
-async def entangle_vectors(vector1_id: str, vector2_id: str, http_request: Request):
+async def entangle_vectors(vector1_id: str, vector2_id: str, request: Request):
     """Create quantum entanglement between two vectors"""
     try:
         success = memory_manager.flight_controller.entangle_vectors(vector1_id, vector2_id)

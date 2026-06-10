@@ -159,8 +159,10 @@ def reset_rate_limiter():  # pragma: no cover - exercised via tests indirectly
 # CSRF Protection
 # ================================
 
-# HTTPBearer security scheme for CSRF token validation
-security = HTTPBearer()
+# HTTPBearer security scheme for CSRF token validation.
+# FastAPI/Starlette defaults missing bearer credentials to 401; this module's
+# CSRF contract intentionally normalizes missing credentials to 403.
+security = HTTPBearer(auto_error=False)
 
 # Get CSRF secret from environment
 CSRF_SECRET_KEY = os.getenv("CSRF_SECRET_KEY")

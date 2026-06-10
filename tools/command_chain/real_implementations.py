@@ -68,7 +68,7 @@ class RealCommandImplementations:
                 return result
 
             # Parse porcelain output
-            for line in status_output.strip().split('\n'):
+            for line in status_output.splitlines():
                 if not line:
                     continue
 

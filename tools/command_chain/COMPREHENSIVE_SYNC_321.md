@@ -1,22 +1,28 @@
-# Aurora Command Chain: #321//. – Comprehensive Sync & Validate (Enhanced)
+# Aurora Command Chain: #321//. – Comprehensive Sync & Validate
 
 **Command Code:** `#321//.`  
 **Category:** Universal Sync & Quality Assurance  
-**Status:** Production Ready  
-**Version:** 4.0.0  
-**Last Updated:** 2025-11-03
+**Status:** Split implementation surface  
+**Version:** Python integrated path + enhanced shell variant  
+**Last Updated:** 2026-03-27
 
 ---
 
 ## Quick Summary
 
-**One command to rule them all.** `#321//.` is Aurora's most powerful and frequently used workflow command—a universal "clean working tree" operation that stages, commits, syncs with remote, validates all changes, **intelligently updates documentation**, and **automatically syncs the wiki submodule** in a single intelligent sequence.
+`#321//.` is a universal "clean working tree" command family with two active execution tracks in this repo: the integrated Python path and a separate enhanced shell variant.
 
-**When to use:** Anytime you want pending changes sorted with high quality, with automatic documentation updates when needed.
+**Integrated Python path:** `python tools/command_chain/cmd_321.py` or `python tools/command_chain/dispatcher.py 321`
 
-**Runtime:** ~30-60 seconds depending on change volume.
+**Integrated behavior:** 6 phases for check, stage, commit, sync, validation, and performance verification.
 
-**New in v4.0:** Intelligent documentation updates (VERSION → README badges) and automatic wiki submodule synchronization.
+**Enhanced shell variant:** `bash scripts/sync_321_enhanced.sh`
+
+**Enhanced extras:** VERSION/README automation and wiki synchronization. This shell path is separate from the dispatcher-backed implementation and carries additional environment assumptions.
+
+**When to use:** Anytime you want pending changes sorted with high quality, choosing the Python or shell path explicitly.
+
+**Runtime:** Python path is typically faster; enhanced shell runtime depends on documentation and wiki work.
 
 ---
 
@@ -27,15 +33,14 @@
 ### What Makes #321//. Special
 
 1. **Always Available** - Use anytime, not just end-of-session
-2. **7-Phase Execution** - Every step from check to verify (now with docs & wiki!)
-3. **Intelligent Documentation** - Auto-updates VERSION → README badges, dates, wiki
-4. **Wiki Synchronization** - Automatically commits and pushes wiki submodule
-5. **Intelligent Staging** - Groups files by type and importance
-6. **Smart Commits** - Generates meaningful messages from change analysis
-7. **Safe Syncing** - Pull with rebase, conflict detection, push verification
-8. **Quick Validation** - Critical checks only for speed
-9. **Performance Tracking** - Measures timing and reports success
-10. **Clean Working Tree** - Guaranteed clean state after execution
+2. **Integrated Python Workflow** - 6 phases wired into the command-chain entrypoints
+3. **Enhanced Shell Variant** - Separate manual path for doc/wiki automation
+4. **Intelligent Staging** - Groups files by type and importance
+5. **Smart Commits** - Generates meaningful messages from change analysis
+6. **Safe Syncing** - Pull with rebase, conflict detection, push verification
+7. **Quick Validation** - Critical checks only for speed
+8. **Performance Tracking** - Measures timing and reports success
+9. **Clean Working Tree Goal** - Reports when additional cleanup is still required
 
 ### The Universal Sync Command
 
@@ -52,7 +57,7 @@
 
 ---
 
-## 📊 The 7 Phases
+## 📊 Integrated Python Path: 6 Phases
 
 ### Phase 1: Check for Pending Changes
 

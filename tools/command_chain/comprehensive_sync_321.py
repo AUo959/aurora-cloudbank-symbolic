@@ -20,7 +20,7 @@ Usage:
 
 import json
 import logging
-import subprocess
+import subprocess  # nosec B404
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -28,6 +28,39 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_workspace_path(workspace_path: Optional[str] = None) -> Path:
+    """Resolve the target workspace directory for command execution."""
+    return Path(workspace_path).expanduser() if workspace_path else Path.cwd()
+
+
+def resolve_config_path(config_path: Optional[str] = None, workspace_path: Optional[str] = None) -> Optional[Path]:
+    """Resolve config lookup without leaking caller-cwd config into another workspace."""
+    workspace = resolve_workspace_path(workspace_path) if workspace_path else None
+
+    if config_path:
+        candidate = Path(config_path).expanduser()
+        if candidate.is_absolute() or workspace is None:
+            return candidate
+
+        workspace_candidate = workspace / candidate
+        if candidate.exists() and workspace_candidate.exists():
+            logger.warning(
+                "Config path '%s' exists in both caller CWD and workspace; "
+                "using workspace-scoped path '%s'",
+                candidate,
+                workspace_candidate,
+            )
+
+        return workspace_candidate
+
+    if workspace is not None:
+        workspace_config = workspace / ".aurora" / "sync_config.json"
+        return workspace_config if workspace_config.exists() else None
+
+    local_config = Path(".aurora/sync_config.json")
+    return local_config if local_config.exists() else None
 
 
 @dataclass
@@ -190,8 +223,10 @@ class ComprehensiveSync:
             if not phase1.success:
                 return self._build_result(success=False)
 
+            files_changed = phase1.details.get('files_changed', 0)
+
             # Early exit if no changes
-            if phase1.details.get('files_changed', 0) == 0:
+            if files_changed == 0:
                 logger.info("No changes detected - working tree already clean")
                 return self._build_result(success=True)
 
@@ -199,25 +234,35 @@ class ComprehensiveSync:
             phase2 = self._phase2_intelligent_staging(phase1.details)
             self.phases.append(phase2)
             if not phase2.success:
-                return self._build_result(success=False)
+                return self._build_result(success=False, files_changed=files_changed)
 
             # Phase 3: Generate & commit
             phase3 = self._phase3_generate_commit(phase1.details, phase2.details)
             self.phases.append(phase3)
             if not phase3.success:
-                return self._build_result(success=False)
+                return self._build_result(success=False, files_changed=files_changed)
 
             # Phase 4: Sync to main
             phase4 = self._phase4_sync_to_main()
             self.phases.append(phase4)
             if not phase4.success:
-                return self._build_result(success=False)
+                return self._build_result(
+                    success=False,
+                    commit_sha=phase3.details.get('commit_sha'),
+                    files_changed=files_changed,
+                    summary_message=phase3.details.get('commit_message', '')
+                )
 
             # Phase 5: Quick validation
             phase5 = self._phase5_quick_validation(phase1.details)
             self.phases.append(phase5)
             if not phase5.success:
-                return self._build_result(success=False)
+                return self._build_result(
+                    success=False,
+                    commit_sha=phase3.details.get('commit_sha'),
+                    files_changed=files_changed,
+                    summary_message=phase3.details.get('commit_message', '')
+                )
 
             # Phase 6: Performance verification
             phase6 = self._phase6_performance_verification()
@@ -226,7 +271,7 @@ class ComprehensiveSync:
             return self._build_result(
                 success=True,
                 commit_sha=phase3.details.get('commit_sha'),
-                files_changed=phase1.details.get('files_changed', 0),
+                files_changed=files_changed,
                 summary_message=phase3.details.get('commit_message', '')
             )
 
@@ -726,7 +771,7 @@ class ComprehensiveSync:
         """Execute shell command with timeout"""
         timeout = timeout or self.config.timeout_seconds
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec
                 cmd,
                 cwd=self.workspace,
                 capture_output=True,
@@ -769,8 +814,9 @@ def execute_321(config_path: Optional[str] = None, workspace_path: Optional[str]
         >>> if result.success:
         ...     print(f"Clean working tree in {result.total_duration:.1f}s")
     """
-    config = SyncConfig.load(Path(config_path) if config_path else None)
-    workspace = Path(workspace_path) if workspace_path else None
+    resolved_config_path = resolve_config_path(config_path=config_path, workspace_path=workspace_path)
+    config = SyncConfig.load(resolved_config_path)
+    workspace = resolve_workspace_path(workspace_path)
 
     sync = ComprehensiveSync(config=config, workspace_path=workspace)
     result = sync.execute()

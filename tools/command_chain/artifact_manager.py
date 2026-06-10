@@ -16,11 +16,13 @@ Pattern:
 
 import logging
 import subprocess
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
 logger = logging.getLogger(__name__)
+
+UTC = timezone.utc
 
 
 class ArtifactManager:

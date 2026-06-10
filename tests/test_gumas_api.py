@@ -13,6 +13,7 @@ Chain: #test/gumas/api/001
 Target: 95%+ code coverage
 """
 
+import os
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
@@ -23,7 +24,9 @@ from fastapi.testclient import TestClient
 # Add modules to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from api.aurora_api import app
+os.environ.setdefault("CSRF_SECRET_KEY", "test-csrf-secret-for-gumas-api")
+
+from api.aurora_api import app  # noqa: E402
 from src.monitoring.ethics_engine import (
     EthicsEngine,
     EthicsRule,
@@ -37,7 +40,10 @@ client = TestClient(app)
 
 
 def _auth_headers() -> dict[str, str]:
-    return {"Authorization": f"Bearer {generate_csrf_token('gumas-test-session')}"}
+    # GlobalCsrfMiddleware checks X-CSRF-Token on unsafe methods; the
+    # require_csrf_token route dependency reads the bearer credentials.
+    token = generate_csrf_token('gumas-test-session')
+    return {"Authorization": f"Bearer {token}", "X-CSRF-Token": token}
 
 
 @pytest.fixture
@@ -104,7 +110,7 @@ class TestGumasEvaluateAction:
             "context_tag": "test_evaluation"
         }
 
-        response = client.post("/gumas/evaluate", json=request_data)
+        response = client.post("/gumas/evaluate", json=request_data, headers=_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -135,7 +141,7 @@ class TestGumasEvaluateAction:
             "parameters": {},
         }
 
-        response = client.post("/gumas/evaluate", json=request_data)
+        response = client.post("/gumas/evaluate", json=request_data, headers=_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -152,7 +158,7 @@ class TestGumasEvaluateAction:
             # Missing action_type
         }
 
-        response = client.post("/gumas/evaluate", json=request_data)
+        response = client.post("/gumas/evaluate", json=request_data, headers=_auth_headers())
 
         assert response.status_code == 422  # Validation error
 
@@ -164,7 +170,7 @@ class TestGumasEvaluateAction:
             "parameters": {},
         }
 
-        response = client.post("/gumas/evaluate", json=request_data)
+        response = client.post("/gumas/evaluate", json=request_data, headers=_auth_headers())
 
         assert response.status_code == 200
 
@@ -177,7 +183,7 @@ class TestGumasEvaluateAction:
             "context_tag": "custom_context_123"
         }
 
-        response = client.post("/gumas/evaluate", json=request_data)
+        response = client.post("/gumas/evaluate", json=request_data, headers=_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -195,7 +201,7 @@ class TestGumasViolationsQuery:
             "limit": 100
         }
 
-        response = client.post("/gumas/violations", json=request_data)
+        response = client.post("/gumas/violations", json=request_data, headers=_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -208,7 +214,7 @@ class TestGumasViolationsQuery:
             "limit": 5
         }
 
-        response = client.post("/gumas/violations", json=request_data)
+        response = client.post("/gumas/violations", json=request_data, headers=_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -220,7 +226,7 @@ class TestGumasViolationsQuery:
             "severity": "INVALID_SEVERITY"
         }
 
-        response = client.post("/gumas/violations", json=request_data)
+        response = client.post("/gumas/violations", json=request_data, headers=_auth_headers())
 
         # Should return 400 for invalid parameter
         assert response.status_code == 400
@@ -232,7 +238,7 @@ class TestGumasViolationsQuery:
             "category": "INVALID_CATEGORY"
         }
 
-        response = client.post("/gumas/violations", json=request_data)
+        response = client.post("/gumas/violations", json=request_data, headers=_auth_headers())
 
         assert response.status_code == 400
 
@@ -243,7 +249,7 @@ class TestGumasViolationsQuery:
             "limit": 100
         }
 
-        response = client.post("/gumas/violations", json=request_data)
+        response = client.post("/gumas/violations", json=request_data, headers=_auth_headers())
 
         assert response.status_code == 200
 
@@ -251,17 +257,17 @@ class TestGumasViolationsQuery:
         """Test limit parameter validation."""
         # Test minimum limit
         request_data = {"limit": 1}
-        response = client.post("/gumas/violations", json=request_data)
+        response = client.post("/gumas/violations", json=request_data, headers=_auth_headers())
         assert response.status_code == 200
 
         # Test maximum limit
         request_data = {"limit": 1000}
-        response = client.post("/gumas/violations", json=request_data)
+        response = client.post("/gumas/violations", json=request_data, headers=_auth_headers())
         assert response.status_code == 200
 
         # Test exceeding maximum
         request_data = {"limit": 2000}
-        response = client.post("/gumas/violations", json=request_data)
+        response = client.post("/gumas/violations", json=request_data, headers=_auth_headers())
         assert response.status_code == 422  # Validation error
 
 
@@ -486,7 +492,8 @@ class TestGumasUtilityEndpoints:
     def test_register_evaluator_not_implemented(self):
         """Test that custom evaluator registration returns 501."""
         response = client.post(
-            "/gumas/rules/test_rule/register-evaluator?condition=test_condition"
+            "/gumas/rules/test_rule/register-evaluator?condition=test_condition",
+            headers=_auth_headers(),
         )
 
         assert response.status_code == 501
@@ -526,7 +533,7 @@ class TestGumasApiIntegration:
             "parameters": {}
         }
 
-        eval_response = client.post("/gumas/evaluate", json=eval_request)
+        eval_response = client.post("/gumas/evaluate", json=eval_request, headers=_auth_headers())
         assert eval_response.status_code == 200
 
         # 4. Delete the rule

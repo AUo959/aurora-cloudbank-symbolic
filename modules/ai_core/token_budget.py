@@ -143,7 +143,7 @@ class TokenBudget:
         self._global_bucket: Deque[_BucketEntry] = collections.deque()
 
         logger.info(
-            "TokenBudget initialised — per_request=%s, per_user_hour=%s, "
+            "TokenBudget initialized — per_request=%s, per_user_hour=%s, "
             "per_user_day=%s, global_hour=%s",
             self.max_per_request,
             self.max_per_user_hour,

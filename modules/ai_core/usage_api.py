@@ -7,6 +7,13 @@ Routes:
     GET /api/usage/me     — per-user rolling-window totals (authenticated)
     GET /api/usage/global — global rolling-window totals + configured limits (admin)
 
+Security note:
+    Both endpoints currently accept a ``user_id`` query parameter as a placeholder.
+    Before exposing these endpoints in production, replace the ``user_id`` parameter
+    with a proper ``Depends()`` authentication dependency that extracts the user
+    identity from a verified JWT bearer token, and restrict the ``/global`` endpoint
+    to admin roles via role-based access control.
+
 Anchor: T1-AIB-001
 """
 
@@ -58,9 +65,10 @@ class GlobalUsageResponse(BaseModel):
     response_model=UserUsageResponse,
     summary="Get token usage for the current user",
     description=(
-        "Returns rolling hourly and daily token totals for the authenticated user. "
-        "The ``user_id`` query parameter is a temporary stand-in for proper JWT "
-        "extraction and should be replaced with a real auth dependency in production."
+        "Returns rolling hourly and daily token totals for a user. "
+        "**Production hardening required**: replace the ``user_id`` query parameter "
+        "with a JWT-extraction dependency (e.g. ``Depends(get_current_user)``) so "
+        "callers can only query their own usage."
     ),
 )
 async def get_user_usage(
@@ -93,7 +101,8 @@ async def get_user_usage(
     summary="Get global token usage (admin)",
     description=(
         "Returns the global rolling hourly token total and all configured caps. "
-        "This endpoint should be restricted to admin roles in production."
+        "**Production hardening required**: restrict to admin roles via role-based "
+        "access control before exposing in a multi-tenant environment."
     ),
 )
 async def get_global_usage() -> GlobalUsageResponse:

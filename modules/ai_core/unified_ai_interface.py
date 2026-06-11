@@ -251,7 +251,10 @@ class UnifiedAIInterface:
             from modules.ai_core.token_budget import token_budget as _budget
             self._budget = _budget
         except Exception as _budget_err:  # pragma: no cover
-            logger.warning("TokenBudget unavailable: %s", _budget_err)
+            logger.warning(
+                "TokenBudget initialization failed, continuing without budget enforcement: %s",
+                _budget_err,
+            )
             self._budget = None
 
         self._initialize_clients()
@@ -392,7 +395,8 @@ class UnifiedAIInterface:
             return response
 
         except TokenBudgetExceededError:
-            # Budget errors are not retried — propagate immediately
+            # Budget errors indicate limits are reached, not transient failures.
+            # Retrying fallback models would fail again and waste billed tokens.
             raise
 
         except Exception as e:

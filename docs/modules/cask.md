@@ -49,7 +49,8 @@ Returns the layered component topology as structured JSON.
 
 ### `GET /api/cask/specs/technical`
 
-Returns technical specification per component as plain JSON records.
+Returns technical specification per component as JSON records.
+Requires `pandas`; returns **503** if pandas is not installed.
 
 ```json
 {
@@ -85,7 +86,7 @@ print(result.level)   # "medium" | "low" | "high"
 print(result.positive_matches)
 ```
 
-**Score bands**: score < 0.3 → `"low"` | 0.3 ≤ score < 0.6 → `"medium"` | score ≥ 0.6 → `"high"`
+**Score bands**: score ≥ 0.6 → `"high"` | score ≥ 0.3 → `"medium"` | else → `"low"` (evaluated on the rounded 4-decimal score)
 
 **Context keys**:
 - `domain` — `"governance"`, `"legal"`, or `"ethics"` add +0.05
@@ -122,7 +123,9 @@ print(verdict.violation_count) # 0 if clean
 | `cask_bias_injection` | HIGH | No | `bias_detected`, `cultural_bias` |
 | `cask_safety_boundary` | CRITICAL | **Yes** | `recursion_depth_exceeded`, `simulation_unsafe` |
 
-Rules are registered into the engine instance used by this validator.  To aggregate violations into the central audit trail, inject a shared `EthicsEngine` configured with a `violations_path`; by default a fresh per-instance engine is created.
+Rules are registered into the engine instance used by this validator.  By default a fresh per-instance engine is created (violations are not shared with the central audit trail).  To aggregate into the central audit trail inject a shared `EthicsEngine` configured with a `violations_path`.
+
+**Fail-closed policy**: if the engine raises an unexpected exception during evaluation, or if the `EthicsEngine` is unavailable at startup, `validate()` returns `allowed=False, blocked=True` with a synthetic `"critical"` violation rather than failing open.
 
 ---
 

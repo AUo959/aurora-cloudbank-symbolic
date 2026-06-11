@@ -49,10 +49,14 @@ _TOPOLOGY = {
 async def get_technical_specs():
     """Return the technical specification for each of the ten CASK components."""
     try:
-        records = generate_technical_specifications()
+        df = generate_technical_specifications()
+        records = list(df.to_dict("records"))
         return {"data": records, "total": len(records), "source": "technical_specifications"}
+    except ImportError as exc:
+        logger.exception("CASK: pandas unavailable for specs/technical")
+        raise HTTPException(status_code=503, detail="pandas is required for CASK analysis") from exc
     except Exception as exc:
-        logger.error("CASK get_technical_specs error: %s", exc)
+        logger.exception("CASK get_technical_specs error")
         raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
@@ -60,10 +64,14 @@ async def get_technical_specs():
 async def get_vs_sota():
     """Return CASK's innovation advantages vs the current state of the art per domain."""
     try:
-        records = generate_vs_sota_comparison()
+        df = generate_vs_sota_comparison()
+        records = list(df.to_dict("records"))
         return {"data": records, "total": len(records), "source": "vs_sota_comparison"}
+    except ImportError as exc:
+        logger.exception("CASK: pandas unavailable for specs/vs-sota")
+        raise HTTPException(status_code=503, detail="pandas is required for CASK analysis") from exc
     except Exception as exc:
-        logger.error("CASK get_vs_sota error: %s", exc)
+        logger.exception("CASK get_vs_sota error")
         raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
@@ -71,10 +79,14 @@ async def get_vs_sota():
 async def get_risk():
     """Return the risk assessment matrix: category, probability, impact, and mitigation."""
     try:
-        records = generate_risk_assessment()
+        df = generate_risk_assessment()
+        records = list(df.to_dict("records"))
         return {"data": records, "total": len(records), "source": "risk_assessment"}
+    except ImportError as exc:
+        logger.exception("CASK: pandas unavailable for specs/risk")
+        raise HTTPException(status_code=503, detail="pandas is required for CASK analysis") from exc
     except Exception as exc:
-        logger.error("CASK get_risk error: %s", exc)
+        logger.exception("CASK get_risk error")
         raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 

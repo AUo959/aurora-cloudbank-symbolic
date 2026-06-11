@@ -200,22 +200,36 @@ class RecursiveEthicsValidator:
                     chain_depth=chain_depth,
                     context_tag=context_tag,
                 )
-            except Exception as exc:
-                logger.error("CASK ethics validation error for action=%s: %s", action, exc)
+            except Exception:
+                logger.exception("CASK ethics validation error for action=%s", action)
                 return ValidationVerdict(
                     action=action,
-                    allowed=True,
+                    allowed=False,
+                    blocked=True,
+                    violations=[{
+                        "rule": "internal_error",
+                        "severity": "critical",
+                        "detail": "ethics engine exception; failing closed",
+                    }],
+                    violation_count=1,
                     chain_depth=chain_depth,
                     context_tag=context_tag,
                 )
 
-        logger.warning(
-            "CASK ethics validation skipped (engine unavailable) for action=%s",
+        logger.error(
+            "CASK ethics engine unavailable for action=%s — failing closed",
             action,
         )
         return ValidationVerdict(
             action=action,
-            allowed=True,
+            allowed=False,
+            blocked=True,
+            violations=[{
+                "rule": "engine_unavailable",
+                "severity": "critical",
+                "detail": "EthicsEngine unavailable; failing closed",
+            }],
+            violation_count=1,
             chain_depth=chain_depth,
             context_tag=context_tag,
         )

@@ -1,7 +1,7 @@
 """CASK data generation utilities."""
 
 try:
-    import pandas as pd
+    import pandas
     PANDAS_AVAILABLE = True
 except ImportError:
     PANDAS_AVAILABLE = False
@@ -14,6 +14,7 @@ def generate_technical_specifications(output_csv: str | None = None):
             "pandas is required for CASK analysis features. "
             "Install with: pip install pandas>=2.1.0"
         )
+    import pandas as pd  # noqa: PLC0415
     data = {
         "Component": [
             "Global Cross-Linguistic Database",
@@ -77,6 +78,7 @@ def generate_vs_sota_comparison(output_csv: str | None = None):
             "pandas is required for CASK analysis features. "
             "Install with: pip install pandas>=2.1.0"
         )
+    import pandas as pd  # noqa: PLC0415
     comparison_data = {
         "Technical_Domain": [
             "Cultural AI Systems",
@@ -152,6 +154,7 @@ def generate_risk_assessment(output_csv: str | None = None):
             "pandas is required for CASK analysis features. "
             "Install with: pip install pandas>=2.1.0"
         )
+    import pandas as pd  # noqa: PLC0415
     risk_data = {
         "Risk_Category": [
             "Cultural Bias Introduction",

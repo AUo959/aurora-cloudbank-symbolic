@@ -1,0 +1,106 @@
+# AURORA Drift Response Runbooks
+# DLP: drift_runbooks_v1
+# Anchors: T1:DRIFT_OPS, SRB:ORION_SENTINEL
+#
+# Defines automated response procedures for each DriftLevel.
+# Executed by src/agents/drift_responder.py (DriftResponder agent).
+#
+# Schema per runbook entry:
+#   level      : DriftLevel enum value (info | warning | critical)
+#   name       : Human-readable runbook name
+#   description: What this runbook does
+#   actions    : Ordered list of steps — each step has:
+#       type   : log | alert | throttle | suspend | rebaseline | escalate | notify
+#       params : Dict of action-specific parameters
+#
+# Action types:
+#   log       — write a structured log entry at the given severity
+#   alert     — emit an internal alert event to the sentinel alert bus
+#   throttle  — reduce the agent's request throughput by `percent` (0-100)
+#   suspend   — suspend identified agent for `duration_s` seconds
+#   rebaseline— trigger a fresh baseline capture for the agent/metric
+#   escalate  — send notification to `target` crew member / channel
+#   notify    — broadcast event to WebSocket stream consumers
+
+runbooks:
+  - level: info
+    name: "INFO — Soft Drift Monitor"
+    description: >
+      Drift detected at INFO severity (z-score 1-2σ).  Log the event and
+      re-record the moving baseline without any service interruption.
+    actions:
+      - type: log
+        params:
+          severity: info
+          message: "Soft drift detected — logging and rebaselining."
+      - type: notify
+        params:
+          event_type: drift_info
+          include_metrics: true
+      - type: rebaseline
+        params:
+          window_size: 60  # seconds of recent data to establish new baseline
+
+  - level: warning
+    name: "WARNING — Adaptive Throttle & Alert"
+    description: >
+      Drift at WARNING severity (z-score 2-3σ or moving-average deviation).
+      Throttle the agent by 50 %, raise an internal alert, rebaseline with a
+      longer window, and notify the Sentinel stream.
+    actions:
+      - type: log
+        params:
+          severity: warning
+          message: "WARNING drift detected — throttling agent and alerting."
+      - type: alert
+        params:
+          priority: medium
+          route_to: sentinel_bus
+      - type: throttle
+        params:
+          percent: 50
+          duration_s: 300  # 5 minutes, then restore
+      - type: notify
+        params:
+          event_type: drift_warning
+          include_metrics: true
+      - type: rebaseline
+        params:
+          window_size: 120
+
+  - level: critical
+    name: "CRITICAL — Suspend, Escalate & Hard-Rebaseline"
+    description: >
+      Critical drift (z-score >3σ or threshold breach).  Immediately suspend
+      the agent, escalate to security and command crew, then perform a hard
+      rebaseline from the last known good snapshot.
+    actions:
+      - type: log
+        params:
+          severity: critical
+          message: "CRITICAL drift detected — suspending agent and escalating."
+      - type: suspend
+        params:
+          duration_s: 600  # 10 minutes
+      - type: alert
+        params:
+          priority: critical
+          route_to: sentinel_bus
+      - type: escalate
+        params:
+          target: julian_markov   # Chief Security Officer
+          channel: security_ops
+          message: "CRITICAL drift event — agent suspended pending review."
+      - type: escalate
+        params:
+          target: alex_thorne     # Station Commander
+          channel: command_bridge
+          message: "CRITICAL drift escalation for immediate review."
+      - type: notify
+        params:
+          event_type: drift_critical
+          include_metrics: true
+      - type: rebaseline
+        params:
+          window_size: 300
+          hard: true  # wipe existing baseline and rebuild from scratch

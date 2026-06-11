@@ -918,6 +918,15 @@ except ImportError as e:
     logger.warning("⚠️ QGIA Forecast routes not available: %s", e)
 except Exception as e:
     logger.error("❌ Failed to integrate QGIA Forecast routes: %s", e)
+# Include Checkpoint Vault routes
+try:
+    from modules.checkpoint_vault.api import router as checkpoint_vault_router
+    app.include_router(checkpoint_vault_router)
+    logger.info("✅ Ethical Checkpoint Vault routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ Checkpoint Vault routes not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Checkpoint Vault routes: %s", e)
 
 # Include Playground backend routes
 try:

@@ -393,3 +393,96 @@ def create_drift_metrics_router(detector: Optional[DriftDetector] = None) -> API
     if detector:
         set_drift_detector(detector)
     return router
+
+
+# ---------------------------------------------------------------------------
+# WebSocket drift stream (requires starlette WebSocket support)
+# ---------------------------------------------------------------------------
+
+import asyncio
+import json
+from typing import Set
+
+from fastapi import WebSocket, WebSocketDisconnect
+
+# Connected WebSocket clients
+_ws_clients: Set[WebSocket] = set()
+
+# Async queue used by the broadcast hook to pass events to the WS loop
+_ws_event_queue: asyncio.Queue = asyncio.Queue()
+
+
+def _ws_enqueue_event(payload: Dict[str, Any]) -> None:
+    """Synchronous hook registered with DriftResponder to enqueue WS events."""
+    try:
+        _ws_event_queue.put_nowait(payload)
+    except asyncio.QueueFull:
+        logger.warning("[DriftStream] WS event queue full — dropping event")
+
+
+async def _ws_broadcast_loop() -> None:
+    """Background task: dequeue events and broadcast to all WS clients."""
+    while True:
+        payload = await _ws_event_queue.get()
+        disconnected: Set[WebSocket] = set()
+        for ws in list(_ws_clients):
+            try:
+                await ws.send_text(json.dumps(payload))
+            except Exception:  # noqa: BLE001
+                disconnected.add(ws)
+        _ws_clients.difference_update(disconnected)
+        _ws_event_queue.task_done()
+
+
+@router.websocket("/stream")
+async def drift_stream(websocket: WebSocket) -> None:
+    """WebSocket endpoint: stream real-time drift events to connected clients.
+
+    Connect to ws://<host>/api/drift/stream to receive JSON events pushed
+    by the DriftResponder whenever a runbook action of type ``notify`` fires.
+
+    Event shape::
+
+        {
+          "event_type": "drift_warning",
+          "agent_id": "...",
+          "metric_name": "...",
+          "drift_level": "warning",
+          "deviation": 2.7,
+          "description": "...",
+          "timestamp": "2026-..."
+        }
+
+    DLP: drift_stream_v1
+    """
+    await websocket.accept()
+    _ws_clients.add(websocket)
+    logger.info("[DriftStream] Client connected (%d total)", len(_ws_clients))
+    try:
+        # Register the broadcast hook with the responder (idempotent)
+        try:
+            from src.agents.drift_responder import register_ws_broadcast_hook
+            register_ws_broadcast_hook(_ws_enqueue_event)
+        except ImportError:
+            pass
+        # Keep connection alive; receive loop also handles client disconnects
+        while True:
+            try:
+                await websocket.receive_text()
+            except WebSocketDisconnect:
+                break
+    finally:
+        _ws_clients.discard(websocket)
+        logger.info("[DriftStream] Client disconnected (%d remaining)", len(_ws_clients))
+
+
+async def start_ws_broadcast_loop() -> None:
+    """Start the background WS broadcast loop.
+
+    Call this once from the FastAPI lifespan or startup event::
+
+        @app.on_event("startup")
+        async def startup():
+            asyncio.create_task(start_ws_broadcast_loop())
+    """
+    asyncio.create_task(_ws_broadcast_loop())

@@ -4,17 +4,19 @@ Tests for src.monitoring.ethics_gate — ethics-gated quantum simulation.
 Covers:
 - check_ethics passes when engine permits action
 - check_ethics raises EthicsViolationError when engine blocks action
-- check_ethics is a no-op when EthicsEngine is unavailable (ImportError)
+- check_ethics fails closed when EthicsEngine is unavailable for high-impact work
+- check_ethics fails closed when EthicsEngine raises an unexpected error
+- check_ethics can explicitly allow low-risk degraded operation with visible logging
 - EthicsViolationError carries the violations list
 - Quantum endpoint returns 422 when ethics check fails (mock)
 - Quantum endpoint proceeds when ethics check passes (mock)
-- check_ethics is a no-op when EthicsEngine raises an unexpected error
 - EthicsViolationError message includes the action type
 """
 
-import pytest
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from src.monitoring.ethics_gate import EthicsViolationError, check_ethics
 
@@ -67,9 +69,10 @@ def test_check_ethics_raises_when_blocked():
 
 
 @pytest.mark.unit
-def test_check_ethics_noop_when_import_fails():
-    """check_ethics silently passes when EthicsEngine cannot be imported."""
+def test_check_ethics_fails_closed_when_import_fails():
+    """High-impact checks fail closed when EthicsEngine cannot be imported."""
     import sys
+
     original_modules = {}
     modules_to_remove = ["src.monitoring.ethics_engine"]
 
@@ -79,25 +82,71 @@ def test_check_ethics_noop_when_import_fails():
 
     try:
         with patch.dict("sys.modules", {"src.monitoring.ethics_engine": None}):
-            # Should not raise — graceful degradation
-            check_ethics("quantum_simulate", {"scenario_type": "supply_chain"})
+            with pytest.raises(EthicsViolationError) as exc_info:
+                check_ethics("quantum_simulate", {"scenario_type": "supply_chain"})
     finally:
         # Restore original modules
         for mod, val in original_modules.items():
             sys.modules[mod] = val
 
+    assert exc_info.value.violations[0]["rule_id"] == "ETHICS_GATE_UNAVAILABLE"
+    assert exc_info.value.violations[0]["blocked"] is True
+    assert exc_info.value.violations[0]["impact_level"] == "high"
+
 
 @pytest.mark.unit
-def test_check_ethics_noop_on_unexpected_error():
-    """check_ethics silently passes when EthicsEngine raises an unexpected error."""
+def test_check_ethics_fails_closed_on_unexpected_error():
+    """High-impact checks fail closed when EthicsEngine raises an unexpected error."""
     mock_engine_instance = MagicMock()
     mock_engine_instance.evaluate_action.side_effect = RuntimeError("db connection lost")
     mock_engine_cls = MagicMock(return_value=mock_engine_instance)
 
     with patch("src.monitoring.ethics_engine.EthicsEngine", mock_engine_cls), \
          patch("src.monitoring.ethics_engine.ActionContext", MagicMock()):
-        # Should not raise — graceful degradation
-        check_ethics("quantum_simulate", {"scenario_type": "energy_grid"})
+        with pytest.raises(EthicsViolationError) as exc_info:
+            check_ethics("quantum_simulate", {"scenario_type": "energy_grid"})
+
+    assert "failing closed" in str(exc_info.value)
+    assert exc_info.value.violations[0]["rule_id"] == "ETHICS_GATE_UNAVAILABLE"
+    assert exc_info.value.violations[0]["error_type"] == "RuntimeError"
+
+
+@pytest.mark.unit
+def test_check_ethics_allows_explicit_low_risk_degraded_mode(caplog):
+    """Low-risk degraded operation is allowed only when explicitly requested."""
+    mock_engine_instance = MagicMock()
+    mock_engine_instance.evaluate_action.side_effect = RuntimeError("db connection lost")
+    mock_engine_cls = MagicMock(return_value=mock_engine_instance)
+
+    with patch("src.monitoring.ethics_engine.EthicsEngine", mock_engine_cls), \
+         patch("src.monitoring.ethics_engine.ActionContext", MagicMock()), \
+         caplog.at_level("WARNING"):
+        check_ethics(
+            "read_status",
+            {"resource": "health"},
+            impact_level="low",
+            allow_degraded=True,
+        )
+
+    assert "allowing low-risk degraded action 'read_status'" in caplog.text
+
+
+@pytest.mark.unit
+def test_check_ethics_degraded_mode_does_not_allow_high_impact():
+    """allow_degraded cannot silently permit high-impact operations."""
+    mock_engine_instance = MagicMock()
+    mock_engine_instance.evaluate_action.side_effect = RuntimeError("db connection lost")
+    mock_engine_cls = MagicMock(return_value=mock_engine_instance)
+
+    with patch("src.monitoring.ethics_engine.EthicsEngine", mock_engine_cls), \
+         patch("src.monitoring.ethics_engine.ActionContext", MagicMock()):
+        with pytest.raises(EthicsViolationError):
+            check_ethics(
+                "quantum_simulate",
+                {"scenario_type": "energy_grid"},
+                impact_level="high",
+                allow_degraded=True,
+            )
 
 
 @pytest.mark.unit
@@ -144,8 +193,9 @@ def test_check_ethics_error_message_includes_action_type():
 @pytest.mark.api
 def test_quantum_endpoint_returns_422_when_ethics_blocked():
     """POST /simulate/scenario returns 422 when ethics gate blocks the request."""
-    from fastapi.testclient import TestClient
     from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
     from modules.quantum_simulator.api import router
     from src.middleware.fastapi_security import require_csrf_token
 
@@ -190,10 +240,11 @@ def test_quantum_endpoint_returns_422_when_ethics_blocked():
 @pytest.mark.api
 def test_quantum_endpoint_proceeds_when_ethics_passes():
     """POST /simulate/scenario proceeds to simulation when ethics gate passes."""
-    from fastapi.testclient import TestClient
     from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
     from modules.quantum_simulator.api import router
-    from modules.quantum_simulator.schemas import SimulationResult, ScenarioType, QuantumBackend
+    from modules.quantum_simulator.schemas import QuantumBackend, ScenarioType, SimulationResult
     from src.middleware.fastapi_security import require_csrf_token
 
     app = FastAPI()

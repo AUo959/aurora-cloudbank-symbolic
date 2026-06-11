@@ -50,7 +50,7 @@ Returns the layered component topology as structured JSON.
 ### `GET /api/cask/specs/technical`
 
 Returns technical specification per component as JSON records.
-Requires `pandas`; returns **503** if pandas is not installed.
+Requires `pandas`; returns **503** if pandas is not installed (generator returns `None`, API layer maps to 503).
 
 ```json
 {

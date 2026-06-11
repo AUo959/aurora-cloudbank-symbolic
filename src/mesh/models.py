@@ -90,8 +90,10 @@ class MeshMessageRequest:
     content: str
     to: Optional[str] = None
     channel: Optional[str] = None
-    sender_id: str = "captain"
-    sender_name: str = "Captain"
+    # Canon (ORION.ROLE.PILOT, owner-ruled 2026-06-11): the user-interface
+    # role is Pilot; "captain" is the accepted legacy alias from early sessions.
+    sender_id: str = "pilot"
+    sender_name: str = "Pilot"
     type: str = "direct"
 
     @classmethod
@@ -100,8 +102,8 @@ class MeshMessageRequest:
             content=str(payload["content"]),
             to=payload.get("to"),
             channel=payload.get("channel"),
-            sender_id=str(payload.get("sender_id", "captain")),
-            sender_name=str(payload.get("sender_name", "Captain")),
+            sender_id=str(payload.get("sender_id", "pilot")),
+            sender_name=str(payload.get("sender_name", "Pilot")),
             type=str(payload.get("type", "direct")),
         )
 

@@ -494,7 +494,7 @@ class MeshRuntime:
     ) -> Dict[str, Any]:
         manifest = self._resolve_manifest(agent_id_or_alias)
         self.heartbeat(manifest.id)
-        channel_id = manifest.default_channel if target in {"Aurora", "Captain", "captain"} else target
+        channel_id = manifest.default_channel if target in {"Aurora", "Pilot", "pilot", "Captain", "captain"} else target
         message_id = uuid.uuid4().hex
         self.store.create_message(
             message_id=message_id,

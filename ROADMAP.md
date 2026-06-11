@@ -1,12 +1,13 @@
 # Aurora CloudBank Roadmap
 
-This root file exists so the active development roadmap is easy to find from the repository landing page and file tree.
+The active development roadmap lives at [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-- **Current development roadmap:** [`docs/ROADMAP.md`](docs/ROADMAP.md)
-- **Outside/session review intake queue:** [`docs/review-notes/`](docs/review-notes/)
-- **Actionable execution queue:** [GitHub Issues](https://github.com/AUo959/aurora-cloudbank-symbolic/issues)
+Related planning surfaces:
 
-Use the roadmap to understand priority and sequencing. Use review notes to preserve observations before they become work. Use GitHub Issues for committed, actionable tasks.
+- [`docs/review-notes/`](docs/review-notes/) — intake queue for outside reviews and session observations
+- GitHub Issues — execution queue for actionable work
+
+Use the roadmap for priority and sequencing. Use review notes to preserve observations before they become issues.
 
 ---
 

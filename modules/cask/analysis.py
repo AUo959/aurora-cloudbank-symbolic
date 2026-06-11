@@ -5,7 +5,6 @@ try:
     PANDAS_AVAILABLE = True
 except ImportError:
     PANDAS_AVAILABLE = False
-    pd = None  # type: ignore[assignment]
 
 
 def generate_technical_specifications(output_csv: str | None = None):

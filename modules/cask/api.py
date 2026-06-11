@@ -53,7 +53,7 @@ async def get_technical_specs():
         records = list(df.to_dict("records"))
         return {"data": records, "total": len(records), "source": "technical_specifications"}
     except ImportError as exc:
-        logger.exception("CASK: pandas unavailable for specs/technical")
+        logger.warning("CASK: pandas unavailable for specs/technical")
         raise HTTPException(status_code=503, detail="pandas is required for CASK analysis") from exc
     except Exception as exc:
         logger.exception("CASK get_technical_specs error")
@@ -68,7 +68,7 @@ async def get_vs_sota():
         records = list(df.to_dict("records"))
         return {"data": records, "total": len(records), "source": "vs_sota_comparison"}
     except ImportError as exc:
-        logger.exception("CASK: pandas unavailable for specs/vs-sota")
+        logger.warning("CASK: pandas unavailable for specs/vs-sota")
         raise HTTPException(status_code=503, detail="pandas is required for CASK analysis") from exc
     except Exception as exc:
         logger.exception("CASK get_vs_sota error")
@@ -83,7 +83,7 @@ async def get_risk():
         records = list(df.to_dict("records"))
         return {"data": records, "total": len(records), "source": "risk_assessment"}
     except ImportError as exc:
-        logger.exception("CASK: pandas unavailable for specs/risk")
+        logger.warning("CASK: pandas unavailable for specs/risk")
         raise HTTPException(status_code=503, detail="pandas is required for CASK analysis") from exc
     except Exception as exc:
         logger.exception("CASK get_risk error")

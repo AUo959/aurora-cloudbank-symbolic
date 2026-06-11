@@ -78,6 +78,7 @@ Built for enterprises deploying advanced AI systems with quantum-inspired cognit
 ### 🔧 **Developer Resources**
 - [API Catalog](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/API-Catalog) (50+ endpoints)
 - [Deployment Reference](docs/aurora_deployment_reference.md) - Architecture & deployment guide
+- [Scaling Plan](docs/architecture/scaling_plan.md) - Horizontal and multi-region readiness plan
 - [Quick Start](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Quick-Start)
 - [Installation](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Installation)
 - [Testing](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Testing)
@@ -233,7 +234,8 @@ Single API for Claude, GPT, quantum reasoning
 **Infrastructure:**
 - Kubernetes manifests
 - Docker containers
-- Horizontal scaling
+- Single-region deployment baseline
+- Externalized-state scaling plan
 - Multi-cloud quantum
 
 **Observability:**
@@ -1887,6 +1889,13 @@ kubectl logs -f deployment/aurora-api -n aurora
 # Access via service
 kubectl port-forward svc/aurora-api 8000:8000 -n aurora
 ```
+
+**Scaling expectation:** The Kubernetes manifests include replica and HPA
+mechanics, but production horizontal or multi-region operation still requires
+state externalization for rate limits, sessions, memory, ledger, mesh events,
+uploads, and audit records. See
+[docs/architecture/scaling_plan.md](docs/architecture/scaling_plan.md) before
+treating more pods as a state-safe deployment.
 
 **Option 4: Docker Compose (Full Stack)**
 ```bash

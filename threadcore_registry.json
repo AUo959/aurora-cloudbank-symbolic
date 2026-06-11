@@ -1,5 +1,7 @@
 {
   "registry_version": "1.0.0",
+  "capsule_id": "threadcore_registry",
+  "role": "ThreadCore payload registry \u2014 canonical payload index and authority map",
   "canonical_version": "v3.5.1",
   "anchor_seed": "EOS_SEED_ORION",
   "ethics_protocol": "Picard_Delta_3",

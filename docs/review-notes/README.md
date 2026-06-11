@@ -4,11 +4,30 @@ This directory is a **persistent intake queue** for architectural observations, 
 
 Agents should check this directory regularly. Notes in `status: open` are eligible to be picked up as tasks or opened as GitHub issues.
 
+**Central roadmap:** [`docs/ROADMAP.md`](../ROADMAP.md)  
+**Execution queue:** [GitHub Issues](https://github.com/AUo959/aurora-cloudbank-symbolic/issues)
+
+---
+
+## Where this fits
+
+```text
+outside/session review
+  → docs/review-notes/entries/YYYYMMDD-short-slug.md
+  → triage status: open | picked_up | issued | resolved | wont_fix
+  → GitHub issue when actionable
+  → docs/ROADMAP.md when priority affects sequencing
+  → implementation PR
+  → update issue + review note + roadmap
+```
+
+Use review notes for observations that should not disappear but are not yet fully scoped as implementation work. Use GitHub Issues once the evidence, impact, and acceptance criteria are clear.
+
 ---
 
 ## Directory Structure
 
-```
+```text
 docs/review-notes/
 ├── README.md              ← This file (schema + workflow)
 ├── _template.md           ← Copy this to create a new note
@@ -20,7 +39,7 @@ docs/review-notes/
 
 ## Lifecycle
 
-```
+```text
 open → picked_up → issued → resolved
          ↓
        wont_fix
@@ -56,6 +75,7 @@ tags: []                   # Optional free-form tags
 ```
 
 Followed by a freeform body with at minimum:
+
 - **Observation** — what was noticed
 - **Risk / Impact** — why it matters
 - **Suggested Actions** — concrete next steps (use `- [ ]` task checkboxes)
@@ -66,11 +86,12 @@ Followed by a freeform body with at minimum:
 
 When scanning this directory:
 
-1. List all entries in `entries/` where `status: open`
-2. Evaluate priority and category to decide whether to pick up or open an issue
-3. To open an issue: copy the note's **Observation** as the issue body, link back to the note file, then update `status: issued` and `issue_url` in the frontmatter
-4. To pick up directly: update `status: picked_up`, implement the suggested actions, then update to `resolved` when done
-5. Never delete note files — they are a permanent audit record. Only update their `status`.
+1. List all entries in `entries/` where `status: open`.
+2. Evaluate priority and category to decide whether to pick up or open an issue.
+3. To open an issue: copy the note's **Observation** as the issue body, link back to the note file, then update `status: issued` and `issue_url` in the frontmatter.
+4. If the issue changes project sequencing, update [`docs/ROADMAP.md`](../ROADMAP.md) in the same PR or a follow-up docs PR.
+5. To pick up directly: update `status: picked_up`, implement the suggested actions, then update to `resolved` when done.
+6. Never delete note files — they are a permanent audit record. Only update their `status`.
 
 ---
 

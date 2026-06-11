@@ -1,20 +1,21 @@
 """CASK data generation utilities."""
 
 try:
-    import pandas as pd
+    import pandas  # noqa: F401
     PANDAS_AVAILABLE = True
 except ImportError:
     PANDAS_AVAILABLE = False
-    pd = None  # type: ignore[assignment]
 
 
 def generate_technical_specifications(output_csv: str | None = None):
-    """Return CASK technical specifications as a DataFrame and optionally save CSV."""
+    """Return CASK technical specifications as a DataFrame, or None if pandas is absent."""
     if not PANDAS_AVAILABLE:
-        raise ImportError(
-            "pandas is required for CASK analysis features. "
-            "Install with: pip install pandas>=2.1.0"
-        )
+        if output_csv:
+            raise ImportError(
+                "pandas is required for CSV output. Install with: pip install pandas>=2.1.0"
+            )
+        return None
+    import pandas as pd  # noqa: PLC0415
     data = {
         "Component": [
             "Global Cross-Linguistic Database",
@@ -72,12 +73,14 @@ def generate_technical_specifications(output_csv: str | None = None):
 
 
 def generate_vs_sota_comparison(output_csv: str | None = None):
-    """Return comparison of CASK against state of the art and optionally save CSV."""
+    """Return comparison of CASK against state of the art, or None if pandas is absent."""
     if not PANDAS_AVAILABLE:
-        raise ImportError(
-            "pandas is required for CASK analysis features. "
-            "Install with: pip install pandas>=2.1.0"
-        )
+        if output_csv:
+            raise ImportError(
+                "pandas is required for CSV output. Install with: pip install pandas>=2.1.0"
+            )
+        return None
+    import pandas as pd  # noqa: PLC0415
     comparison_data = {
         "Technical_Domain": [
             "Cultural AI Systems",
@@ -147,12 +150,14 @@ def generate_vs_sota_comparison(output_csv: str | None = None):
 
 
 def generate_risk_assessment(output_csv: str | None = None):
-    """Return CASK project risk assessment DataFrame and optionally save CSV."""
+    """Return CASK project risk assessment DataFrame, or None if pandas is absent."""
     if not PANDAS_AVAILABLE:
-        raise ImportError(
-            "pandas is required for CASK analysis features. "
-            "Install with: pip install pandas>=2.1.0"
-        )
+        if output_csv:
+            raise ImportError(
+                "pandas is required for CSV output. Install with: pip install pandas>=2.1.0"
+            )
+        return None
+    import pandas as pd  # noqa: PLC0415
     risk_data = {
         "Risk_Category": [
             "Cultural Bias Introduction",

@@ -939,6 +939,16 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate Playground backend routes: %s", e)
 
+# Include CASK design-surface API routes
+try:
+    from modules.cask.api import router as cask_router
+    app.include_router(cask_router)
+    logger.info("✅ CASK API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ CASK module not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate CASK API routes: %s", e)
+
 # Initialize Ethics Gate for high-impact operations
 try:
     from src.aurora.ethics import EthicsGate, GUMASEthicsClient

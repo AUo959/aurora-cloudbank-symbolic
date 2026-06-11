@@ -7,6 +7,18 @@ Anchors: T1:TEST_QGIA, SRB:L1_QGIA
 import pytest
 from fastapi.testclient import TestClient
 
+import os
+
+os.environ.setdefault("CSRF_SECRET_KEY", "test-csrf-secret-for-qgia-api")
+
+
+def _auth_headers() -> dict[str, str]:
+    from src.middleware.fastapi_security import generate_csrf_token
+
+    token = generate_csrf_token("qgia-api-test-session")
+    return {"Authorization": f"Bearer {token}", "X-CSRF-Token": token}
+
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -71,7 +83,7 @@ def test_qgia_health(client):
 @pytest.mark.unit
 def test_run_forecast_returns_201(client, forecast_payload):
     """POST /qgia/forecast should return 201 and a valid ForecastOutput."""
-    resp = client.post("/qgia/forecast", json=forecast_payload)
+    resp = client.post("/qgia/forecast", json=forecast_payload, headers=_auth_headers())
     assert resp.status_code == 201
     data = resp.json()
     assert "forecast_id" in data
@@ -94,7 +106,7 @@ def test_run_forecast_missing_evidence_rejected(client):
         "domain": "military",
         "evidence_fragments": [],
     }
-    resp = client.post("/qgia/forecast", json=payload)
+    resp = client.post("/qgia/forecast", json=payload, headers=_auth_headers())
     assert resp.status_code == 422
 
 
@@ -107,7 +119,7 @@ def test_run_forecast_missing_evidence_rejected(client):
 def test_list_forecasts(client, forecast_payload):
     """GET /qgia/forecast should return a list."""
     # Ensure at least one forecast exists
-    client.post("/qgia/forecast", json=forecast_payload)
+    client.post("/qgia/forecast", json=forecast_payload, headers=_auth_headers())
     resp = client.get("/qgia/forecast")
     assert resp.status_code == 200
     data = resp.json()
@@ -134,7 +146,7 @@ def test_list_forecasts_filter_by_scenario_id(client, forecast_payload):
 @pytest.mark.unit
 def test_get_forecast_by_id(client, forecast_payload):
     """GET /qgia/forecast/{id} should return the stored forecast."""
-    post_resp = client.post("/qgia/forecast", json=forecast_payload)
+    post_resp = client.post("/qgia/forecast", json=forecast_payload, headers=_auth_headers())
     assert post_resp.status_code == 201
     forecast_id = post_resp.json()["forecast_id"]
 
@@ -211,7 +223,7 @@ def test_example_scenarios_list(client):
 @pytest.mark.integration
 def test_run_example_forecast(client):
     """POST /qgia/forecast/example/iran should return 201."""
-    resp = client.post("/qgia/forecast/example/iran")
+    resp = client.post("/qgia/forecast/example/iran", headers=_auth_headers())
     assert resp.status_code == 201
     data = resp.json()
     assert data["forecast_id"].startswith("QSFE-")
@@ -221,5 +233,5 @@ def test_run_example_forecast(client):
 @pytest.mark.unit
 def test_run_example_forecast_not_found(client):
     """POST /qgia/forecast/example/nonexistent should return 404."""
-    resp = client.post("/qgia/forecast/example/nonexistent_scenario_xyz")
+    resp = client.post("/qgia/forecast/example/nonexistent_scenario_xyz", headers=_auth_headers())
     assert resp.status_code == 404

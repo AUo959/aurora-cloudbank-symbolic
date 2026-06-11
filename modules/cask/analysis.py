@@ -1,13 +1,15 @@
 """CASK data generation utilities."""
 
+from typing import Any
+
 try:
-    import pandas
+    import pandas  # noqa: F401
     PANDAS_AVAILABLE = True
 except ImportError:
     PANDAS_AVAILABLE = False
 
 
-def generate_technical_specifications(output_csv: str | None = None):
+def generate_technical_specifications(output_csv: str | None = None) -> Any:
     """Return CASK technical specifications as a DataFrame and optionally save CSV."""
     if not PANDAS_AVAILABLE:
         raise ImportError(
@@ -71,7 +73,7 @@ def generate_technical_specifications(output_csv: str | None = None):
     return df
 
 
-def generate_vs_sota_comparison(output_csv: str | None = None):
+def generate_vs_sota_comparison(output_csv: str | None = None) -> Any:
     """Return comparison of CASK against state of the art and optionally save CSV."""
     if not PANDAS_AVAILABLE:
         raise ImportError(
@@ -147,7 +149,7 @@ def generate_vs_sota_comparison(output_csv: str | None = None):
     return df
 
 
-def generate_risk_assessment(output_csv: str | None = None):
+def generate_risk_assessment(output_csv: str | None = None) -> Any:
     """Return CASK project risk assessment DataFrame and optionally save CSV."""
     if not PANDAS_AVAILABLE:
         raise ImportError(

@@ -134,7 +134,7 @@ Rules are registered into the engine instance used by this validator.  By defaul
 ```
 modules/cask/
 ├── __init__.py               # Public exports
-├── analysis.py               # Static record dicts (specs data, no external deps)
+├── analysis.py               # Specs data generators (requires pandas; 503 when absent)
 ├── api.py                    # FastAPI router (/api/cask)
 ├── charts.py                 # Plotly topology charts (CLI tool)
 ├── cultural_cognition.py     # score_cultural_sensitivity()

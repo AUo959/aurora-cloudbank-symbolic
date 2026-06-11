@@ -48,15 +48,13 @@ _TOPOLOGY = {
 @router.get("/specs/technical", summary="CASK technical specifications per component")
 async def get_technical_specs():
     """Return the technical specification for each of the ten CASK components."""
+    df = generate_technical_specifications()
+    if df is None:
+        logger.warning("CASK: pandas unavailable for specs/technical")
+        raise HTTPException(status_code=503, detail="pandas is required for CASK analysis")
     try:
-        df = generate_technical_specifications()
-        if df is None:
-            logger.warning("CASK: pandas unavailable for specs/technical")
-            raise HTTPException(status_code=503, detail="pandas is required for CASK analysis")
         records = list(df.to_dict("records"))
         return {"data": records, "total": len(records), "source": "technical_specifications"}
-    except HTTPException:
-        raise
     except Exception as exc:
         logger.exception("CASK get_technical_specs error")
         raise HTTPException(status_code=500, detail="Internal server error") from exc
@@ -65,15 +63,13 @@ async def get_technical_specs():
 @router.get("/specs/vs-sota", summary="CASK comparison against state of the art")
 async def get_vs_sota():
     """Return CASK's innovation advantages vs the current state of the art per domain."""
+    df = generate_vs_sota_comparison()
+    if df is None:
+        logger.warning("CASK: pandas unavailable for specs/vs-sota")
+        raise HTTPException(status_code=503, detail="pandas is required for CASK analysis")
     try:
-        df = generate_vs_sota_comparison()
-        if df is None:
-            logger.warning("CASK: pandas unavailable for specs/vs-sota")
-            raise HTTPException(status_code=503, detail="pandas is required for CASK analysis")
         records = list(df.to_dict("records"))
         return {"data": records, "total": len(records), "source": "vs_sota_comparison"}
-    except HTTPException:
-        raise
     except Exception as exc:
         logger.exception("CASK get_vs_sota error")
         raise HTTPException(status_code=500, detail="Internal server error") from exc
@@ -82,15 +78,13 @@ async def get_vs_sota():
 @router.get("/specs/risk", summary="CASK project risk assessment")
 async def get_risk():
     """Return the risk assessment matrix: category, probability, impact, and mitigation."""
+    df = generate_risk_assessment()
+    if df is None:
+        logger.warning("CASK: pandas unavailable for specs/risk")
+        raise HTTPException(status_code=503, detail="pandas is required for CASK analysis")
     try:
-        df = generate_risk_assessment()
-        if df is None:
-            logger.warning("CASK: pandas unavailable for specs/risk")
-            raise HTTPException(status_code=503, detail="pandas is required for CASK analysis")
         records = list(df.to_dict("records"))
         return {"data": records, "total": len(records), "source": "risk_assessment"}
-    except HTTPException:
-        raise
     except Exception as exc:
         logger.exception("CASK get_risk error")
         raise HTTPException(status_code=500, detail="Internal server error") from exc

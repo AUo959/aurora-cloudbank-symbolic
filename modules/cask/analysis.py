@@ -10,6 +10,10 @@ except ImportError:
 def generate_technical_specifications(output_csv: str | None = None):
     """Return CASK technical specifications as a DataFrame, or None if pandas is absent."""
     if not PANDAS_AVAILABLE:
+        if output_csv:
+            raise ImportError(
+                "pandas is required for CSV output. Install with: pip install pandas>=2.1.0"
+            )
         return None
     import pandas as pd  # noqa: PLC0415
     data = {
@@ -71,6 +75,10 @@ def generate_technical_specifications(output_csv: str | None = None):
 def generate_vs_sota_comparison(output_csv: str | None = None):
     """Return comparison of CASK against state of the art, or None if pandas is absent."""
     if not PANDAS_AVAILABLE:
+        if output_csv:
+            raise ImportError(
+                "pandas is required for CSV output. Install with: pip install pandas>=2.1.0"
+            )
         return None
     import pandas as pd  # noqa: PLC0415
     comparison_data = {
@@ -144,6 +152,10 @@ def generate_vs_sota_comparison(output_csv: str | None = None):
 def generate_risk_assessment(output_csv: str | None = None):
     """Return CASK project risk assessment DataFrame, or None if pandas is absent."""
     if not PANDAS_AVAILABLE:
+        if output_csv:
+            raise ImportError(
+                "pandas is required for CSV output. Install with: pip install pandas>=2.1.0"
+            )
         return None
     import pandas as pd  # noqa: PLC0415
     risk_data = {

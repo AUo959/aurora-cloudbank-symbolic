@@ -223,24 +223,20 @@ class TestCaskApi:
 
     def test_technical_specs_endpoint(self, client):
         resp = client.get("/api/cask/specs/technical")
-        # Returns 200 with data or 503 if pandas unavailable — both are valid
-        assert resp.status_code in (200, 503)
-        if resp.status_code == 200:
-            body = resp.json()
-            assert "data" in body
-            assert "total" in body
-            assert body["total"] == 10
+        assert resp.status_code == 200
+        body = resp.json()
+        assert "data" in body
+        assert "total" in body
+        assert body["total"] == 10
 
     def test_vs_sota_endpoint(self, client):
         resp = client.get("/api/cask/specs/vs-sota")
-        assert resp.status_code in (200, 503)
-        if resp.status_code == 200:
-            body = resp.json()
-            assert body["total"] == 10
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["total"] == 10
 
     def test_risk_endpoint(self, client):
         resp = client.get("/api/cask/specs/risk")
-        assert resp.status_code in (200, 503)
-        if resp.status_code == 200:
-            body = resp.json()
-            assert body["total"] == 10
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["total"] == 10

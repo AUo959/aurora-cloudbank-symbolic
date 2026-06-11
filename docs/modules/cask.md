@@ -49,7 +49,7 @@ Returns the layered component topology as structured JSON.
 
 ### `GET /api/cask/specs/technical`
 
-Returns technical specification per component (`pandas` required; 503 if unavailable).
+Returns technical specification per component as plain JSON records.
 
 ```json
 {
@@ -131,7 +131,7 @@ Rules are registered into the engine instance used by this validator.  To aggreg
 ```
 modules/cask/
 ├── __init__.py               # Public exports
-├── analysis.py               # Static pandas DataFrames (specs data)
+├── analysis.py               # Static record dicts (specs data, no external deps)
 ├── api.py                    # FastAPI router (/api/cask)
 ├── charts.py                 # Plotly topology charts (CLI tool)
 ├── cultural_cognition.py     # score_cultural_sensitivity()

@@ -119,7 +119,7 @@ def _find_scope_indicators(text_lower: str) -> List[str]:
     for pattern in _SCOPE_MARKERS:
         for match in re.finditer(pattern, text_lower, re.IGNORECASE):
             term = match.group(0)
-            if term is not None and term not in found:
+            if term not in found:
                 found.append(term)
     return found
 

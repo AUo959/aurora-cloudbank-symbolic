@@ -27,17 +27,19 @@ jobs:
       valid: ${{ steps.validate.outputs.valid }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - name: Parse event
         id: parse
+        env:
+          CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
         run: |
           echo "event_type=${{ github.event.action }}" >> "$GITHUB_OUTPUT"
-          echo "source_node=$(echo '${{ toJSON(github.event.client_payload) }}' | jq -r '.source_node // "unknown"')" >> "$GITHUB_OUTPUT"
-          echo "correlation_id=$(echo '${{ toJSON(github.event.client_payload) }}' | jq -r '.correlation_id // "none"')" >> "$GITHUB_OUTPUT"
+          echo "source_node=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.source_node // "unknown"')" >> "$GITHUB_OUTPUT"
+          echo "correlation_id=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.correlation_id // "none"')" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38  # v5.4.0
         with:
           python-version: "3.12"
 
@@ -46,28 +48,43 @@ jobs:
 
       - name: Validate payload against schema
         id: validate
+        env:
+          CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
         run: |
-          python3 -c "
-          import json, sys
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
           from jsonschema import validate, ValidationError
 
-          with open('constellation-contracts/schemas/constellation-event.schema.json') as f:
+          with open('constellation-contracts/schemas/constellation-event.schema.json', encoding='utf-8') as f:
               schema = json.load(f)
 
-          payload = json.loads('''${{ toJSON(github.event.client_payload) }}''')
+          raw_payload = os.environ.get('CLIENT_PAYLOAD', '{}')
+
+          try:
+              payload = json.loads(raw_payload)
+          except json.JSONDecodeError as exc:
+              print(f'Payload JSON decode failed: {exc}', file=sys.stderr)
+              print(f'Raw payload: {raw_payload[:500]}', file=sys.stderr)
+              sys.exit(1)
 
           try:
               validate(instance=payload, schema=schema)
               print('Payload is valid')
-          except ValidationError as e:
-              print(f'Validation failed: {e.message}', file=sys.stderr)
+          except ValidationError as exc:
+              print(f'Validation failed: {exc.message}', file=sys.stderr)
               sys.exit(1)
-          "
+          PY
           echo "valid=true" >> "$GITHUB_OUTPUT"
 
       - name: Audit log
+        env:
+          CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
         run: |
-          echo "::notice::Constellation Event received: type=${{ github.event.action }}, source=$(echo '${{ toJSON(github.event.client_payload) }}' | jq -r '.source_node'), correlation_id=$(echo '${{ toJSON(github.event.client_payload) }}' | jq -r '.correlation_id')"
+          SOURCE=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.source_node // "unknown"')
+          CORR=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.correlation_id // "none"')
+          echo "::notice::Constellation Event received: type=${{ github.event.action }}, source=${SOURCE}, correlation_id=${CORR}"
 
   route-event:
     name: Route to ${{ matrix.subscriber }}
@@ -119,7 +136,7 @@ jobs:
     steps:
       - name: Route event
         if: needs.validate-event.outputs.event_type == matrix.event
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@ce5485de42c9b2622d2ed064be479e8ed65e76f2  # v3.0.0
         with:
           token: ${{ secrets.CONSTELLATION_TOKEN }}
           repository: ${{ matrix.owner }}/${{ matrix.subscriber }}

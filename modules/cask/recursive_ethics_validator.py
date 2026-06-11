@@ -129,26 +129,25 @@ class RecursiveEthicsValidator:
         if self._rules_registered:
             return
         engine = self._engine
-        if engine is None:
-            return
-        try:
-            from src.monitoring.ethics_engine import EthicsRule, RuleCategory, ViolationSeverity
-            for rule_def in _CASK_RULES_DATA:
-                rule = EthicsRule(
-                    id=rule_def["id"],
-                    name=rule_def["name"],
-                    description=rule_def["description"],
-                    category=RuleCategory(rule_def["category"]),
-                    severity=ViolationSeverity(rule_def["severity"]),
-                    auto_block=rule_def["auto_block"],
-                    conditions=rule_def["conditions"],
-                    metadata={"source": "cask_recursive_ethics_validator"},
-                )
-                engine.add_rule(rule)
-            self._rules_registered = True
-            logger.info("CASK: registered %d ethics rules", len(_CASK_RULES_DATA))
-        except ImportError:
-            return
+        if engine is not None:
+            try:
+                from src.monitoring.ethics_engine import EthicsRule, RuleCategory, ViolationSeverity
+                for rule_def in _CASK_RULES_DATA:
+                    rule = EthicsRule(
+                        id=rule_def["id"],
+                        name=rule_def["name"],
+                        description=rule_def["description"],
+                        category=RuleCategory(rule_def["category"]),
+                        severity=ViolationSeverity(rule_def["severity"]),
+                        auto_block=rule_def["auto_block"],
+                        conditions=rule_def["conditions"],
+                        metadata={"source": "cask_recursive_ethics_validator"},
+                    )
+                    engine.add_rule(rule)
+                self._rules_registered = True
+                logger.info("CASK: registered %d ethics rules", len(_CASK_RULES_DATA))
+            except ImportError:
+                return
 
     # ------------------------------------------------------------------
     # Public API
@@ -181,45 +180,45 @@ class RecursiveEthicsValidator:
             effective_context["recursion_depth_exceeded"] = True
 
         engine = self._engine
-        if engine is None:
-            logger.warning(
-                "CASK ethics validation skipped (engine unavailable) for action=%s",
-                action,
-            )
-            return ValidationVerdict(
-                action=action,
-                allowed=True,
-                chain_depth=chain_depth,
-                context_tag=context_tag,
-            )
+        if engine is not None:
+            try:
+                from src.monitoring.ethics_engine import ActionContext
+                action_ctx = ActionContext(
+                    agent_id=agent_id,
+                    action_type=action,
+                    parameters=effective_context,
+                    context_tag=context_tag,
+                )
+                violations: list = list(engine.evaluate_action(action_ctx))
+                blocked: bool = bool(engine.check_should_block(violations))
+                return ValidationVerdict(
+                    action=action,
+                    allowed=not blocked,
+                    violations=violations,
+                    violation_count=len(violations),
+                    blocked=blocked,
+                    chain_depth=chain_depth,
+                    context_tag=context_tag,
+                )
+            except Exception as exc:
+                logger.error("CASK ethics validation error for action=%s: %s", action, exc)
+                return ValidationVerdict(
+                    action=action,
+                    allowed=True,
+                    chain_depth=chain_depth,
+                    context_tag=context_tag,
+                )
 
-        try:
-            from src.monitoring.ethics_engine import ActionContext
-            action_ctx = ActionContext(
-                agent_id=agent_id,
-                action_type=action,
-                parameters=effective_context,
-                context_tag=context_tag,
-            )
-            violations: list = list(engine.evaluate_action(action_ctx))
-            blocked: bool = engine.check_should_block(violations)
-            return ValidationVerdict(
-                action=action,
-                allowed=not blocked,
-                violations=violations,
-                violation_count=len(violations),
-                blocked=blocked,
-                chain_depth=chain_depth,
-                context_tag=context_tag,
-            )
-        except Exception as exc:
-            logger.error("CASK ethics validation error for action=%s: %s", action, exc)
-            return ValidationVerdict(
-                action=action,
-                allowed=True,
-                chain_depth=chain_depth,
-                context_tag=context_tag,
-            )
+        logger.warning(
+            "CASK ethics validation skipped (engine unavailable) for action=%s",
+            action,
+        )
+        return ValidationVerdict(
+            action=action,
+            allowed=True,
+            chain_depth=chain_depth,
+            context_tag=context_tag,
+        )
 
     def registered_rule_ids(self) -> List[str]:
         """Return the CASK rule IDs actually registered with the engine.

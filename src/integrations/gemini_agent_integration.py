@@ -5,8 +5,8 @@ Provides the integration layer for Google's Gemini models, adhering to the
 BaseAgentIntegration architecture and incorporating the Symbolic Sandbox Protocol (SSP).
 """
 from .base_agent_integration import BaseAgentIntegration
-from pydantic import BaseModel
-from typing import Dict, Any, Callable, Awaitable, List
+from pydantic import BaseModel, ConfigDict, ValidationError
+from typing import Dict, Any, List
 import logging
 
 # Configure logging
@@ -23,6 +23,40 @@ class ImpactReport(BaseModel):
     srb_anchor_advancement: int
     memory_seals_affected: List[str]
     estimated_cost: float = 0.0
+
+
+class OperationParams(BaseModel):
+    """
+    Typed parameters for the execute_sensitive_operation tool.
+
+    Extra fields are forbidden so that callers cannot silently pass
+    unrecognised keys that bypass validation.
+    """
+    model_config = ConfigDict(extra="forbid")
+
+    target_resource: str
+    dry_run: bool = True
+
+
+def _validation_error_response(exc: ValidationError) -> Dict[str, Any]:
+    """Return the canonical structured error shape for a Pydantic ValidationError."""
+    errors = exc.errors(include_url=False)
+    return {
+        "success": False,
+        "error": "Parameter validation failed.",
+        "details": [
+            {
+                "field": ".".join(str(loc) for loc in err["loc"]) if err["loc"] else "(root)",
+                "message": err["msg"],
+                "type": err["type"],
+            }
+            for err in errors
+        ],
+        "recovery_suggestions": [
+            "Ensure all required parameters are provided and correctly typed.",
+            "Remove any unrecognised extra fields.",
+        ],
+    }
 
 
 class GeminiAgentIntegration(BaseAgentIntegration):
@@ -58,6 +92,17 @@ class GeminiAgentIntegration(BaseAgentIntegration):
         tool = self.get_tool(tool_name)
         if not tool:
             raise ValueError(f"Tool '{tool_name}' not found.")
+
+        # Schema enforcement: validate params for execute_sensitive_operation
+        # using the typed OperationParams model before any handler dispatch.
+        if tool_name == "execute_sensitive_operation":
+            try:
+                validated = OperationParams(**params)
+            except ValidationError as exc:
+                return _validation_error_response(exc)
+            # Re-derive dry_run from the validated model so the handler
+            # always works with a clean, typed value.
+            params = validated.model_dump()
 
         handler = tool["handler"]
         is_dry_run = params.get("dry_run", True)

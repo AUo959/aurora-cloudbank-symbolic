@@ -2,6 +2,7 @@
 # Package initialization for Agent Mode imports
 
 from .chatgpt_agent_integration import discover_tools, execute_tool, get_agent_status
+import re
 
 
 AURORA_CUSTOM_GPT = {
@@ -100,7 +101,7 @@ class ChatGPTAgentModeIntegration:
         # For invalid tools, raise an exception as expected by tests
         if tool_name == "non_existent_tool":
             raise Exception(f"Tool '{tool_name}' not found")
-            
+
         # Validate parameters for geometric_algebra tool
         if tool_name == "geometric_algebra":
             required_params = ["expression_a", "expression_b", "operation"]
@@ -117,6 +118,65 @@ class ChatGPTAgentModeIntegration:
                     "context_tag": "parameter_validation_error",
                     "timestamp": self._get_timestamp()
                 }
+
+            # Type check: expressions must be strings
+            for expr_field in ("expression_a", "expression_b"):
+                if not isinstance(parameters.get(expr_field), str):
+                    return {
+                        "success": False,
+                        "error": (
+                            f"Parameter '{expr_field}' must be of type 'string', "
+                            f"got {type(parameters.get(expr_field)).__name__!r}"
+                        ),
+                        "recovery_suggestions": [
+                            "Provide string values for expression_a and expression_b"
+                        ],
+                        "context_tag": "parameter_validation_error",
+                        "timestamp": self._get_timestamp(),
+                    }
+
+            # Enum check for operation
+            valid_ops = ["mult", "add", "sub"]
+            op = parameters.get("operation")
+            if op not in valid_ops:
+                return {
+                    "success": False,
+                    "error": f"Parameter 'operation' must be one of {valid_ops!r}, got {op!r}",
+                    "recovery_suggestions": [
+                        "Specify operation as 'mult', 'add', or 'sub'"
+                    ],
+                    "context_tag": "parameter_validation_error",
+                    "timestamp": self._get_timestamp(),
+                }
+
+            # Syntax validation: whitelist/blacklist on expression strings
+            for expr_field in ("expression_a", "expression_b"):
+                expr = parameters[expr_field]
+                if not self._GA_EXPR_WHITELIST.match(expr):
+                    return {
+                        "success": False,
+                        "error": (
+                            f"'{expr_field}' contains characters not permitted in a "
+                            "geometric-algebra expression"
+                        ),
+                        "recovery_suggestions": [
+                            "Use only alphanumeric basis-blade names, digits, and "
+                            "arithmetic operators (+, -, *, /, ^)"
+                        ],
+                        "context_tag": "parameter_validation_error",
+                        "timestamp": self._get_timestamp(),
+                    }
+                if self._GA_EXPR_BLACKLIST.search(expr):
+                    return {
+                        "success": False,
+                        "error": f"'{expr_field}' contains a disallowed token",
+                        "recovery_suggestions": [
+                            "Remove language-level constructs (import, eval, exec, __) "
+                            "from the expression"
+                        ],
+                        "context_tag": "parameter_validation_error",
+                        "timestamp": self._get_timestamp(),
+                    }
             
         result = await execute_tool(tool_name, parameters, session_id)
         
@@ -179,28 +239,48 @@ class ChatGPTAgentModeIntegration:
         seal_data = f"{self.agent_status}{self.anchor_seed}{self.ethics_protocol}"
         return hashlib.sha256(seal_data.encode()).hexdigest()[:16]
         
+    # Whitelist: allow basis-blade names, numbers, basic arithmetic and grouping.
+    _GA_EXPR_WHITELIST = re.compile(r"^[0-9a-zA-Z_.+\-*/^() \t]+$")
+    # Blacklist: explicitly reject dangerous sub-strings.
+    _GA_EXPR_BLACKLIST = re.compile(r"(__|\bimport\b|\beval\b|\bexec\b|os\.|sys\.)")
+
+    _JSON_TYPE_MAP = {
+        "string": str,
+        "boolean": bool,
+        "integer": int,
+        "number": (int, float),
+        "object": dict,
+        "array": list,
+    }
+
     def _validate_parameters(self, parameters: dict, schema: dict):
-        """Validate parameters against schema"""
+        """Validate parameters against schema (required fields, types, enums)."""
         required = schema.get("required", [])
         properties = schema.get("properties", {})
-        
-        # Check required parameters
+
+        # 1. Required-field presence
         for req_param in required:
             if req_param not in parameters:
                 raise ValueError(f"Missing required parameter: {req_param}")
-                
-        # Basic type validation
+
+        # 2. Type and enum enforcement
         for param, value in parameters.items():
-            if param in properties:
-                param_schema = properties[param]
-                expected_type = param_schema.get("type")
-                
-                if expected_type == "string" and not isinstance(value, str):
-                    raise TypeError(f"Parameter {param} must be a string")
-                elif expected_type == "object" and not isinstance(value, dict):
-                    raise TypeError(f"Parameter {param} must be an object")
-                elif expected_type == "number" and not isinstance(value, (int, float)):
-                    raise TypeError(f"Parameter {param} must be a number")
+            if param not in properties:
+                continue
+            param_schema = properties[param]
+            expected_type = param_schema.get("type")
+            if expected_type is not None:
+                py_types = self._JSON_TYPE_MAP.get(expected_type)
+                if py_types is not None and not isinstance(value, py_types):
+                    raise TypeError(
+                        f"Parameter '{param}' must be of type '{expected_type}', "
+                        f"got {type(value).__name__!r}"
+                    )
+            enum_values = param_schema.get("enum")
+            if enum_values is not None and value not in enum_values:
+                raise ValueError(
+                    f"Parameter '{param}' must be one of {enum_values!r}, got {value!r}"
+                )
                     
     def _get_timestamp(self):
         """Get current timestamp in ISO format"""

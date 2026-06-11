@@ -43,6 +43,14 @@ class AutomationAuditor:
                 self.repo_name = "Unknown Repository"
         except Exception:
             self.repo_name = "Unknown Repository"
+
+    @staticmethod
+    def _normalize_workflow_definition(workflow: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize workflow YAML so the `on` key survives YAML 1.1 parsing."""
+        workflow = dict(workflow or {})
+        if True in workflow and "on" not in workflow:
+            workflow["on"] = workflow.pop(True)
+        return workflow
         
     def audit_workflows(self) -> Dict[str, Any]:
         """Audit GitHub Actions workflows"""
@@ -58,8 +66,9 @@ class AutomationAuditor:
         for workflow_file in workflow_dir.glob("*.yml"):
             try:
                 with open(workflow_file, 'r') as f:
-                    workflow = yaml.safe_load(f)
+                    raw = yaml.safe_load(f)
                     
+                workflow = self._normalize_workflow_definition(raw)
                 workflow_info = {
                     "name": workflow_file.name,
                     "title": workflow.get("name", "Unknown"),

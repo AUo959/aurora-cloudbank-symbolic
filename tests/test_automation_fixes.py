@@ -121,6 +121,14 @@ def test_log_files_created():
     print("  ✅ PASSED: Log files created correctly")
 
 
+def normalize_workflow_definition(workflow):
+    """Normalize GitHub workflow YAML so the `on` key survives YAML 1.1 parsing."""
+    workflow = dict(workflow or {})
+    if True in workflow and "on" not in workflow:
+        workflow["on"] = workflow.pop(True)
+    return workflow
+
+
 def main():
     """Run all tests (for standalone execution)"""
     print("\n" + "="*60)

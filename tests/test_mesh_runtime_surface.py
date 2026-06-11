@@ -34,3 +34,17 @@ def test_mesh_runtime_initializes_from_agent_manifests(tmp_path: Path) -> None:
     assert status["total_agents"] == len(manifest_paths)
     assert runtime.get_agent("captain alex line")["agent_id"] == "alex_thorne"
     assert (tmp_path / "config" / "mesh" / "memory" / "alex_thorne.md").exists()
+
+
+def test_pilot_is_default_sender_and_captain_stays_legacy_alias(tmp_path):
+    """Canon ORION.ROLE.PILOT: defaults are Pilot; captain routes as legacy alias."""
+    from src.mesh.models import MeshMessageRequest
+
+    default = MeshMessageRequest.from_dict({"to": "alex_thorne", "content": "hi"})
+    assert default.sender_id == "pilot"
+    assert default.sender_name == "Pilot"
+
+    legacy = MeshMessageRequest.from_dict(
+        {"to": "alex_thorne", "content": "hi", "sender_id": "captain", "sender_name": "Captain"}
+    )
+    assert legacy.sender_name == "Captain"  # historical senders remain representable

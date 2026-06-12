@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/ethics/recovered_protocol.schema.json",
+  "title": "Recovered Ethics Protocol",
+  "description": "Planning schema for recovered Sherlock / Watson / Moriarty / Tribunal / SHADOWFAX protocol review. This schema is for custody and promotion planning, not runtime enforcement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_id",
+    "version",
+    "status",
+    "role",
+    "source_classification",
+    "allowed_actions",
+    "forbidden_actions",
+    "required_evidence",
+    "handoff_targets",
+    "audit_requirements",
+    "layer_boundaries",
+    "rollback_requirements",
+    "appeal_requirements"
+  ],
+  "properties": {
+    "protocol_id": {
+      "type": "string",
+      "enum": ["sherlock", "watson", "moriarty", "tribunal", "shadowfax"]
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["recovered_candidate", "sealed_bundle_reference", "control_plane_lineage", "repo_canon", "missing_dependency", "draft_schema"]
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_classification": {
+      "type": "string",
+      "enum": ["recovered_candidate", "sealed_bundle_reference", "control_plane_lineage", "repo_canon", "missing_dependency", "draft_schema"]
+    },
+    "custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_package": {"type": "string"},
+        "source_package_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+        "internal_path": {"type": "string"},
+        "internal_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+        "verified_at": {"type": "string"},
+        "verified_by": {"type": "string"},
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "allowed_actions": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "forbidden_actions": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "required_evidence": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "handoff_targets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["sherlock", "watson", "moriarty", "tribunal", "shadowfax", "ethics_engine", "ethics_gate", "compliance_monitor", "human_reviewer"]
+      }
+    },
+    "audit_requirements": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "layer_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["l1", "l2", "l3", "cross_layer_rules"],
+      "properties": {
+        "l1": {"type": "string"},
+        "l2": {"type": "string"},
+        "l3": {"type": "string"},
+        "cross_layer_rules": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        }
+      }
+    },
+    "rollback_requirements": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "appeal_requirements": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "protocol_specific": {
+      "type": "object",
+      "description": "Protocol-specific planning fields; validate with protocol-specific schemas before runtime use."
+    }
+  }
+}

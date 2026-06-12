@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aurora-cloudbank-symbolic/schemas/ethics/recovered_protocol.schema.json",
+  "$id": "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/ethics/recovered_protocol.schema.json",
   "title": "Recovered Ethics Protocol",
   "description": "Planning schema for recovered Sherlock / Watson / Moriarty / Tribunal / SHADOWFAX protocol review. This schema is for custody and promotion planning, not runtime enforcement.",
   "type": "object",
@@ -39,7 +39,7 @@
     },
     "source_classification": {
       "type": "string",
-      "enum": ["current_repo_canon", "control_plane_report_lineage", "uploaded_recovered_candidate", "sealed_bundle_reference", "missing_dependency"]
+      "enum": ["recovered_candidate", "sealed_bundle_reference", "control_plane_lineage", "repo_canon", "missing_dependency", "draft_schema"]
     },
     "custody": {
       "type": "object",

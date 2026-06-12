@@ -20,6 +20,9 @@ Key Endpoints:
     POST /api/bridge/gpt/connect/{agent_id} - Connect Custom GPT agent
     POST /api/bridge/gpt/message/{agent_id} - Relay messages to agents
     GET  /api/bridge/constellation/status   - Full constellation status
+    GET  /api/mesh/agents                   - List all mesh agents
+    GET  /api/mesh/agents/{agent_id}        - Get specific mesh agent detail
+    POST /api/mesh/agents/{agent_id}/activate - Activate a mesh agent
 
 Security:
     - All POST endpoints require CSRF token validation
@@ -172,6 +175,43 @@ def create_app(project_root: Path | None = None) -> FastAPI:
     async def mesh_events(after: int = 0, limit: int = 100) -> Dict[str, Any]:
         return mesh_runtime.get_events_after(after=after, limit=limit)
 
+    # --- /api/mesh/agents routes: contract drift resolved (#764) ---
+
+    @mesh_app.get("/api/mesh/agents")
+    async def mesh_list_agents() -> Dict[str, Any]:
+        """List all mesh agents registered with the runtime."""
+        agents = mesh_runtime.list_agents()
+        return {"agents": agents, "total": len(agents)}
+
+    @mesh_app.get("/api/mesh/agents/{agent_id}")
+    async def mesh_get_agent(agent_id: str) -> Dict[str, Any]:
+        """Get detail for a specific mesh agent by ID."""
+        try:
+            agent = mesh_runtime.get_agent(agent_id)
+            return {"success": True, **agent}
+        except KeyError:
+            raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
+        except Exception as e:
+            logger.error("mesh_get_agent failed for %s: %s", str(agent_id)[:100], str(e)[:100])
+            raise HTTPException(status_code=500, detail="Internal server error")
+
+    @mesh_app.post("/api/mesh/agents/{agent_id}/activate")
+    async def mesh_activate_agent(agent_id: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Activate a mesh agent by ID. Requires activationPhrase in request body."""
+        activation_phrase = request_data.get("activationPhrase")
+        if not activation_phrase:
+            raise HTTPException(status_code=400, detail="Missing activationPhrase")
+        try:
+            agent = mesh_runtime.activate_agent(agent_id)
+            return {"success": True, "agent_id": agent["agent_id"], "status": "connected"}
+        except KeyError:
+            raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
+        except Exception as e:
+            logger.error("mesh_activate_agent failed for %s: %s", str(agent_id)[:100], str(e)[:100])
+            raise HTTPException(status_code=500, detail="Internal server error")
+
+    # --- end /api/mesh/agents routes ---
+
     @mesh_app.post("/api/bridge/gpt/connect/{agent_id}")
     async def mesh_bridge_connect(agent_id: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
         activation_phrase = request_data.get("activationPhrase")
@@ -233,25 +273,9 @@ except ImportError:
             self.agents = {}
 
         async def activate_agent(self, agent_id, _phrase):
-            """
-            Mock agent activation for testing.
-            
-            Args:
-                agent_id: Unique identifier for the agent to activate
-                _phrase: Activation phrase (unused in mock, prefixed with _ to indicate intentional)
-            
-            Returns:
-                Dict with success=True and the agent_id
-            """
             return {"success": True, "agent_id": agent_id}
 
         def get_constellation_status(self):
-            """
-            Get empty constellation status for testing.
-            
-            Returns:
-                Dict with constellation name and zero agents
-            """
             return {
                 "relay_tier": {
                     "constellation": "RELAY_TIER_CAPSULES",
@@ -262,18 +286,6 @@ except ImportError:
             }
         
         async def relay_message(self, agent_id, target, message, message_type):
-            """
-            Mock message relay for testing.
-            
-            Args:
-                agent_id: Source agent identifier
-                target: Target destination
-                message: Message content
-                message_type: Type of message
-            
-            Returns:
-                Dict with success=True and relay confirmation
-            """
             return {
                 "success": True,
                 "agent_id": agent_id,
@@ -282,15 +294,6 @@ except ImportError:
             }
         
         def get_agent_status(self, agent_id):
-            """
-            Get mock status for an agent.
-            
-            Args:
-                agent_id: Agent identifier
-            
-            Returns:
-                Dict with basic status information
-            """
             return {
                 "agent_id": agent_id,
                 "status": "active",
@@ -322,7 +325,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],
-    max_age=86400,  # Cache preflight for 24 hours
+    max_age=86400,
 )
 
 # Server state
@@ -332,8 +335,6 @@ server_state = {
     "active_connections": 0,
     "version": "v3.5.1_macroready",
 }
-
-# Middleware to track requests
 
 
 @app.middleware("http")
@@ -392,39 +393,27 @@ async def health_check():
 
 # Aurora Custom GPT Integration Endpoints
 if AURORA_CUSTOM_GPT_AVAILABLE:
-    # CSRF token verification occurs inside the handler
     @app.post("/api/aurora/command")
     async def aurora_custom_gpt_command(request_data: dict, token: HTTPAuthorizationCredentials = Depends(security)):
         """Receive command from Aurora Custom GPT and route to command node with CSRF validation."""
         verify_csrf_token(token)
-
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT command request")
-
         try:
             command = request_data.get("command", {})
             context = request_data.get("context", {})
-
-            # Initialize Aurora Custom GPT integration if not already done
             if not auroraCustomGptBridge.integrationActive:
                 logger.info("Initializing Aurora Custom GPT integration")
                 init_result = await auroraCustomGptBridge.initializeCommandNodeIntegration()
                 if not init_result["success"]:
                     raise HTTPException(status_code=500, detail=f"Aurora integration failed: {init_result['error']}")
-
-            # Route command through Aurora Custom GPT bridge
             result = await auroraCustomGptBridge.routeCommandFromCustomGpt(command, context)
-
-            # Secure logging to prevent log injection
             logger.info("Aurora command processed with status: %s", str(result.get('success', 'unknown'))[:50])
-
             if result["success"]:
                 return result
             else:
                 raise HTTPException(status_code=400, detail=result["error"])
-
         except Exception as e:
-            # Secure logging to prevent log injection
             logger.error("Aurora command failed: %s", str(e)[:100])
             raise HTTPException(status_code=500, detail="Aurora command processing failed")
 
@@ -433,11 +422,9 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
         """Get Aurora Custom GPT integration status"""
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT status request")
-
         try:
             integration_status = auroraCustomGptBridge.getIntegrationStatus()
             constellation_status = await auroraCustomGptBridge.getConstellationStatus()
-
             return {
                 "aurora_integration": integration_status,
                 "constellation": constellation_status,
@@ -448,18 +435,14 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
             logger.error("Aurora status request failed: %s", str(str(e))[:100])
             raise HTTPException(status_code=500, detail="Aurora status retrieval failed")
 
-    # CSRF token verification occurs inside the handler
     @app.post("/api/aurora/initialize")
     async def initialize_aurora_integration(token: HTTPAuthorizationCredentials = Depends(security)):
         """Initialize Aurora Custom GPT integration with CSRF validation."""
         verify_csrf_token(token)
-
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT initialization request")
-
         try:
             result = await auroraCustomGptBridge.initializeCommandNodeIntegration()
-
             if result["success"]:
                 logger.info("Aurora Custom GPT integration initialized successfully")
                 return {
@@ -469,7 +452,6 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
                 }
             else:
                 raise HTTPException(status_code=500, detail=f"Integration failed: {result['error']}")
-
         except Exception as e:
             logger.error("Aurora initialization failed: %s", str(str(e))[:100])
             raise HTTPException(status_code=500, detail="Aurora initialization failed")
@@ -489,59 +471,22 @@ else:
 
 # L2 Meta-Agent Bridge Endpoints
 
-# CSRF token verification occurs inside the handler
 @app.post("/api/bridge/gpt/connect/{agent_id}")
 async def connect_custom_gpt(
     agent_id: str,
     request_data: Dict[str, Any],
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
-    """
-    Connect a Custom GPT agent to the Aurora mesh.
-    
-    Establishes a new connection for a Custom GPT agent to the L2 Meta-Agent
-    constellation. Requires valid activation phrase and CSRF token.
-    
-    Args:
-        agent_id: Unique identifier for the Custom GPT agent
-        request_data: Dict containing:
-            - activationPhrase (required): Phrase to activate the agent
-            - capabilities (optional): List of agent capabilities
-        token: Bearer token for CSRF validation
-    
-    Returns:
-        JSONResponse with:
-            - success: Boolean indicating connection status
-            - agent_id: Echo of the agent identifier
-            - server_info: Version and timestamp data
-    
-    Raises:
-        HTTPException 400: Missing or invalid activation phrase
-        HTTPException 403: Invalid CSRF token
-        HTTPException 500: Internal server error during connection
-    
-    Security:
-        - CSRF token validation required
-        - Agent ID sanitized to prevent injection
-        - Request logged with lineage tracking
-    
-    DLP: context_tag="bridge_gpt_connect"
-    """
+    """Connect a Custom GPT agent to the Aurora mesh."""
     verify_csrf_token(token)
     agent_id = sanitize_session_id(agent_id)
-
     try:
-        # Secure logging to prevent log injection
         logger.info("Connection request for agent: %s", str(agent_id)[:50])
-
         activation_phrase = request_data.get("activationPhrase")
         request_data.get("capabilities", [])
-
         if not activation_phrase:
             raise HTTPException(status_code=400, detail="Missing activation phrase")
-
         result = await l2_bridge.activate_agent(agent_id, activation_phrase)
-
         if result["success"]:
             logger.info("Custom GPT %s connected successfully", str(agent_id)[:100])
             return JSONResponse(
@@ -552,19 +497,15 @@ async def connect_custom_gpt(
                 },
             )
         else:
-            error_msg = str(result.get('error'))
-            # Sanitize potential log injection vectors
-            error_msg = error_msg.replace('\r\n', '').replace('\n', '').replace('\r', '')[:100]
+            error_msg = str(result.get('error', '')).replace('\r\n', '').replace('\n', '').replace('\r', '')[:100]
             logger.warning("Custom GPT %s connection failed: %s", str(agent_id)[:100], error_msg)
             raise HTTPException(status_code=400, detail=result.get("error", "Connection failed"))
-
     except HTTPException:
         raise
     except Exception as e:
         logger.error("Custom GPT connection failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
 
-# CSRF token verification occurs inside the handler
 @app.post("/api/bridge/gpt/message/{agent_id}")
 async def relay_message(
     agent_id: str,
@@ -574,29 +515,21 @@ async def relay_message(
     """Relay message from Custom GPT agent with CSRF validation."""
     verify_csrf_token(token)
     agent_id = sanitize_session_id(agent_id)
-
     try:
         logger.info("Message relay request from: %s", str(agent_id)[:100])
-
         message = request_data.get("message")
         target = request_data.get("target", "Aurora")
         message_type = request_data.get("type", "direct")
-
         if not message:
             raise HTTPException(status_code=400, detail="Missing message content")
-
         result = await l2_bridge.relay_message(agent_id, target, message, message_type)
-
         if result["success"]:
             logger.info("Message relayed successfully from %s", str(agent_id)[:100])
             return JSONResponse(status_code=200, content=result)
         else:
-            error_msg = str(result.get('error'))
-            # Sanitize potential log injection vectors
-            error_msg = error_msg.replace('\r\n', '').replace('\n', '').replace('\r', '')[:100]
+            error_msg = str(result.get('error', '')).replace('\r\n', '').replace('\n', '').replace('\r', '')[:100]
             logger.warning("Message relay failed from %s: %s", str(agent_id)[:100], error_msg)
             raise HTTPException(status_code=400, detail=result.get("error", "Message relay failed"))
-
     except HTTPException:
         raise
     except Exception as e:
@@ -608,19 +541,14 @@ async def get_constellation_status():
     """Get status of the entire agent constellation"""
     try:
         logger.info("Constellation status request")
-
         status = l2_bridge.get_constellation_status()
-
-        # Add server information
         status["server_info"] = {
             "uptime": (datetime.now() - server_state["start_time"]).total_seconds(),
             "requests_count": server_state["requests_count"],
             "version": server_state["version"],
             "timestamp": datetime.now().isoformat(),
         }
-
         return JSONResponse(status_code=200, content=status)
-
     except Exception as e:
         logger.error("Status retrieval failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -630,32 +558,25 @@ async def get_agent_status(agent_id: str):
     """Get detailed status of a specific agent"""
     try:
         logger.info("Agent status request for: %s", str(agent_id)[:100])
-
         result = l2_bridge.get_agent_status(agent_id)
-
         if result.get("success", True):
             return JSONResponse(status_code=200, content=result)
         else:
             raise HTTPException(status_code=404, detail=result.get("error", f"Agent {agent_id} not found"))
-
     except HTTPException:
         raise
     except Exception as e:
         logger.error("Agent status retrieval failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
 
-# CSRF token verification occurs inside the handler
 @app.post("/api/bridge/gpt/heartbeat/{agent_id}")
 async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
     """Update agent heartbeat timestamp with CSRF validation."""
     verify_csrf_token(token)
     agent_id = sanitize_session_id(agent_id)
-
     try:
-        # Update heartbeat in bridge
         if hasattr(l2_bridge, "agents") and agent_id in l2_bridge.agents:
             l2_bridge.agents[agent_id].last_heartbeat = datetime.now()
-
             return JSONResponse(
                 status_code=200,
                 content={
@@ -667,57 +588,48 @@ async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = 
             )
         else:
             raise HTTPException(status_code=404, detail="Agent not found")
-
     except HTTPException:
         raise
     except Exception as e:
         logger.error("Heartbeat update failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
 
-# CSRF token verification occurs inside the handler
 @app.post("/api/bridge/gpt/disconnect/{agent_id}")
 async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
     """Disconnect an agent from the constellation with CSRF validation."""
     verify_csrf_token(token)
     agent_id = sanitize_session_id(agent_id)
-
     try:
         logger.info("Disconnect request for: %s", str(agent_id)[:100])
-
         result = await l2_bridge.disconnect_agent(agent_id)
-
         if result["success"]:
             logger.info("Agent %s disconnected successfully", str(agent_id)[:100])
             return JSONResponse(status_code=200, content=result)
         else:
             raise HTTPException(status_code=400, detail=result.get("error", "Disconnect failed"))
-
     except HTTPException:
         raise
     except Exception as e:
         logger.error("Disconnect failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
 
-# Additional API endpoints
-
 @app.get("/api/agents")
 async def list_agents():
     """List all available agents"""
     try:
         if hasattr(l2_bridge, "agents"):
-            agents = []
-            for agent_id, agent in l2_bridge.agents.items():
-                agents.append(
-                    {
-                        "agent_id": agent_id,
-                        "role": agent.role,
-                        "type": agent.type,
-                        "description": agent.description,
-                        "capabilities": agent.capabilities,
-                        "status": agent.status,
-                        "api_endpoint": agent.api_endpoint,
-                    }
-                )
+            agents = [
+                {
+                    "agent_id": agent_id,
+                    "role": agent.role,
+                    "type": agent.type,
+                    "description": agent.description,
+                    "capabilities": agent.capabilities,
+                    "status": agent.status,
+                    "api_endpoint": agent.api_endpoint,
+                }
+                for agent_id, agent in l2_bridge.agents.items()
+            ]
             return {"agents": agents, "total": len(agents)}
         else:
             return {"agents": [], "total": 0}
@@ -748,7 +660,6 @@ async def get_orion_core_info():
         logger.error("ORION Core info retrieval failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
 
-# Server lifecycle events
 
 @app.on_event("startup")
 async def startup_event():
@@ -759,14 +670,11 @@ async def startup_event():
     logger.info("API Documentation: http://localhost:8000/api/docs")
     logger.info("Health Check: http://localhost:8000/health")
 
-    # Initialize any background tasks here
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Server shutdown event"""
     logger.info("Aurora L2 Integration Server shutting down")
-
-    # Cleanup any resources here
     if hasattr(l2_bridge, "agents"):
         for agent_id in l2_bridge.agents:
             try:
@@ -774,19 +682,15 @@ async def shutdown_event():
             except Exception as e:
                 logger.error("Error disconnecting %s: %s", str(agent_id)[:100], str(str(e))[:100])
 
-# Main entry point
 
 def main():
     """Main entry point for the server"""
-
     parser = argparse.ArgumentParser(description="Aurora L2 Integration Server")
     parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
     parser.add_argument("--log-level", default="info", help="Log level")
-
     args = parser.parse_args()
-
     logger.info("=" * 60)
     logger.info("🌟 AURORA L2 META-AGENT INTEGRATION SERVER")
     logger.info("=" * 60)
@@ -795,10 +699,10 @@ def main():
     logger.info("API Docs: http://%s:%s/api/docs", args.host, args.port)
     logger.info("Health: http://%s:%s/health", args.host, args.port)
     logger.info("=" * 60)
-
     uvicorn.run(
         "l2_integration_server:app", host=args.host, port=args.port, reload=args.reload, log_level=args.log_level
     )
+
 
 if __name__ == "__main__":
     main()

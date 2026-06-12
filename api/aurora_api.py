@@ -909,6 +909,18 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate Drift Metrics routes: %s", e)
 
+# Include Sensor Array routes (observation-only; spec SENSOR_ARRAY_SPECIFICATION_v0_3_0)
+try:
+    from src.sensors.array import SensorArrayFacade
+    from src.sensors.api.routes import build_router as build_sensor_router
+    _sensor_array = SensorArrayFacade()
+    app.include_router(build_sensor_router(_sensor_array), prefix="/api/sensors")
+    logger.info("✅ Sensor Array routes integrated successfully (GET-only observation surface)")
+except ImportError as e:
+    logger.warning("⚠️ Sensor Array routes not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Sensor Array routes: %s", e)
+
 # Include QGIA Forecast Simulation Engine routes
 try:
     from modules.qgia.api import router as qgia_router

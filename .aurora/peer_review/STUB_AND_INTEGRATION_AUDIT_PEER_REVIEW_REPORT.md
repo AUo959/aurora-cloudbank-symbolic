@@ -27,11 +27,12 @@ This PR does not implement fixes.
 
 ## 2. Executive Finding
 
-The historical audit is materially stale. At least three major claims require correction:
+The historical audit is materially stale. Several major claims require correction or reclassification:
 
 1. Mixed-state quantum measurement, entropy, and fidelity support now exist in `modules/quantum_simulator/quantum_state.py`.
 2. Opal2 does have an API surface in `modules/opal2/api/opal2_api.py`; the old `routes.py` absence is not enough to conclude there is no API implementation.
 3. Flight Control is not merely an isolated JS-only module; current docs describe a Python-JS Fleet Bridge, FastAPI `/api/fleet/*` router, demos, and integration tests.
+4. Continuity/HALO/PAS has implemented controller code, manifest metadata, README documentation, and tests. The remaining question is whether the documented `/continuity/halo_pas/status` endpoint is actually exposed by the canonical API.
 
 Direct current inspection still confirms real recovery targets:
 
@@ -42,6 +43,7 @@ Direct current inspection still confirms real recovery targets:
 - Closed issue #765 and merged PR #935 already repaired malformed Opal2 route decorators and added route smoke tests.
 - The remaining Opal2 question is likely main-app integration and lint/CI coverage, not missing API code.
 - Flight Control has current docs and tests for Python-JS bridge, DLP manifests, maintenance orchestration, and docking sequences. Remaining work is future enhancement/classification, not basic integration absence.
+- Continuity/HALO/PAS has implemented drift sampling/status export and tests, but the public API route should be verified because docs and manifest claim `/continuity/halo_pas/status`.
 - `src/improvement/engine.py` still has a base `ImprovementPattern.detect()` that raises `NotImplementedError`, while concrete default patterns are implemented.
 
 The peer review pipeline should therefore use this report as a current triage artifact, not as acceptance of the old audit wholesale.
@@ -65,8 +67,11 @@ The peer review pipeline should therefore use this report as a current triage ar
 | Flight Control Python-JS Fleet Bridge is documented as implemented | Observed | `docs/PYTHON_JS_FLEET_BRIDGE.md` says status implemented, documents `/api/fleet/*`, `app.include_router(fleet_bridge_router)`, client polling, data flow, and tests | Treat old JS-only isolation claim as stale or incomplete |
 | Flight Control has infrastructure tests | Observed | `tests/test_flight_control_infrastructure.py` runs JS demos and verifies DLP manifests, maintenance orchestration, docking phases, telemetry, and module exports | Remaining work should focus on future milestones, not basic existence |
 | Flight Control has no obvious open/closed issue tracking the old audit claim | Observed | Search for Flight Control terms returned no matching issues; PR search returned no focused Flight Control recovery PR | Create a new issue only if current direct inspection finds an actionable gap |
+| Continuity/HALO/PAS controller implementation exists | Observed | `src/aurora/continuity/halo_pas_controller.py` defines `HALOPASController`, drift sampling, DLP tagging, lifecycle start/stop, and `export_status()` | Treat old "controller exists but no API" claim as partially current; implementation itself exists |
+| Continuity docs and manifest claim `/continuity/halo_pas/status` | Observed | `modules/continuity/README.md` and `halo_pas_manifest.json` both document `/continuity/halo_pas/status` | Verify canonical API route exposure before claiming runtime availability |
+| Continuity tests cover controller behavior and status export | Observed | `tests/test_halo_pas_controller.py` tests drift samples, DLP tags, start/stop lifecycle, and `export_status()` | Remaining gap is route exposure / docs-runtime alignment, not controller implementation |
+| Continuity public API route exposure remains uncertain | Derived / Blocked | Search found docs/API file references but direct route definition was not confirmed in inspected API slices | Create focused route-alignment issue if no route exists after full-file verification |
 | Improvement Engine base class still raises `NotImplementedError`, but concrete default patterns are implemented | Observed / Derived | `ImprovementPattern.detect()` raises `NotImplementedError`; `ComplexityPattern`, `DuplicateCodePattern`, `LongFunctionPattern`, `MagicNumberPattern`, and `ErrorHandlingPattern` implement detection | Classify as abstract base behavior unless production code instantiates base pattern directly |
-| Continuity API status not yet re-verified in this pass | Blocked | Not inspected directly in this refresh | Do not create issue yet; verify first |
 | Security TODOs from old audit not yet re-verified in this pass | Blocked | Not inspected directly in this refresh | Run focused security TODO search before creating issues |
 
 ---
@@ -170,7 +175,29 @@ Recommended follow-up:
 - Treat Flight Control as partially recovered: bridge and infrastructure exist; remaining work is future milestone/classification.
 - If needed, create a focused issue for one specific next milestone, such as DLP manifest persistence, WebSocket push, or production CI coverage for Node demos.
 
-### 4.5 Improvement Engine — Partially Stale / Needs Classification
+### 4.5 Continuity / HALO-PAS — Implementation Exists, Route Exposure Needs Verification
+
+The old audit said the controller runs but lacks dedicated query endpoints. Current evidence shows the controller and tests exist, while public route exposure still needs direct confirmation.
+
+Current Continuity evidence:
+
+- `src/aurora/continuity/halo_pas_controller.py` implements `HALOPASController`, `DriftSample`, drift sampling, DLP tagging, lifecycle start/stop, sample retention, and `export_status()`.
+- `src/aurora/continuity/__init__.py` exports `HALOPASController` and `DriftSample`.
+- `modules/continuity/README.md` documents API integration at `/continuity/halo_pas/status` and describes status output.
+- `src/aurora/continuity/halo_pas_manifest.json` also lists `/continuity/halo_pas/status` as the integration endpoint.
+- `tests/test_halo_pas_controller.py` tests controller initialization, drift calculation, DLP tag creation, status export, lifecycle start/stop, sample collection, and recent-sample limits.
+
+Remaining question:
+
+- Is `/continuity/halo_pas/status` actually registered on the canonical `api/aurora_api.py` app, or do docs/manifest overstate API exposure?
+
+Recommended follow-up:
+
+- Verify the full canonical API file or route table for `/continuity/halo_pas/status`.
+- If the route is absent, create a focused docs-runtime alignment issue: either add the read-only status route or update docs/manifest to say the controller is library/tested but not API-exposed.
+- Avoid mutating sampling/configuration routes until a design review decides whether external control of HALO/PAS is safe.
+
+### 4.6 Improvement Engine — Partially Stale / Needs Classification
 
 The base class still raises `NotImplementedError`, but current file also includes concrete pattern implementations and a registered default pattern set.
 
@@ -243,6 +270,19 @@ Scope:
 - Verify whether Node-based Flight Control tests run in CI.
 - Open focused issues only for confirmed desired milestones such as DLP persistence, WebSocket push, or docking-phase hardening.
 
+### Issue Candidate — Continuity HALO/PAS Route Alignment
+
+**Priority:** Medium  
+**Type:** Docs-runtime alignment / API read surface  
+**Status:** Controller and tests exist; public API route exposure needs direct confirmation.
+
+Scope:
+
+- Verify whether `/continuity/halo_pas/status` is registered in the canonical FastAPI app.
+- If present, add/verify route tests and mark the old audit claim stale.
+- If absent, either add a read-only status endpoint or update README/manifest to remove the API-exposure claim.
+- Do not expose configuration mutation endpoints without design review.
+
 ### Issue Candidate — Mixed-State Quantum Test Coverage Review
 
 **Priority:** Low-Medium  
@@ -274,7 +314,6 @@ Scope:
 
 Scope:
 
-- Continuity API status.
 - Empty exception handlers.
 - Security TODOs.
 - Agents, instance_bridge, memory_retrieval, vector_gen module status.
@@ -295,6 +334,8 @@ Scope:
 | Flight Control JS-only isolation claim | Historical State / Mostly Resolved or Reclassified |
 | Flight Control Fleet Bridge and infrastructure tests | Current Canon Evidence |
 | Flight Control remaining next steps | Proposed Design / Milestone Candidates |
+| Continuity HALO/PAS controller and tests | Current Canon Evidence |
+| Continuity `/continuity/halo_pas/status` route claim | Current Evidence Gap / Docs-Runtime Alignment Needed |
 | Improvement base `NotImplementedError` | Current Canon Evidence / Needs Design Classification |
 | Follow-up work list | Recommended Planning Artifact |
 | Any implementation fixes | Not canon until committed through PR |
@@ -313,6 +354,8 @@ Do not create implementation issues for stale or unverified claims.
 
 Do not treat library/API exposure questions as implementation bugs until intended surface is confirmed.
 
+Do not expose HALO/PAS configuration mutation endpoints without design review.
+
 Security TODOs require a separate current-evidence pass before issue creation.
 
 ---
@@ -325,6 +368,7 @@ Recommended outcome for this PR:
 - Route HR recovery work through existing issue #761.
 - Treat Opal2 as partially recovered: API exists, decorator bug fixed, remaining question is classification/integration/CI coverage.
 - Treat Flight Control as partially recovered/reclassified: Python-JS bridge and infrastructure tests exist; remaining work should be milestone-specific.
+- Treat Continuity/HALO-PAS as implemented at controller/test level, with route exposure requiring docs-runtime verification.
 - Create focused follow-up issues only for findings verified against current `main` and not already tracked.
 - Treat mixed-state quantum implementation as likely resolved unless tests/docs prove a remaining gap.
 - Continue evidence refresh for the remaining historical audit categories.
@@ -346,6 +390,7 @@ assert 'Current Evidence Ledger' in text
 assert 'Existing issue #761' in text
 assert 'Opal2 `opal2_api.py` API surface' in text
 assert 'Flight Control Fleet Bridge and infrastructure tests' in text
+assert 'Continuity HALO/PAS controller and tests' in text
 assert 'Historical State / Lead List' in text
 assert 'Likely Resolved' in text
 PY

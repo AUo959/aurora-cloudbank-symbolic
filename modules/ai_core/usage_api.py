@@ -22,10 +22,12 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from modules.ai_core.token_budget import token_budget
+from src.security.oauth2 import User, get_current_active_user
+from src.security.roles import Role
 
 logger = logging.getLogger(__name__)
 
@@ -65,16 +67,14 @@ class GlobalUsageResponse(BaseModel):
     response_model=UserUsageResponse,
     summary="Get token usage for the current user",
     description=(
-        "Returns rolling hourly and daily token totals for a user. "
-        "**Production hardening required**: replace the ``user_id`` query parameter "
-        "with a JWT-extraction dependency (e.g. ``Depends(get_current_user)``) so "
-        "callers can only query their own usage."
+        "Returns rolling hourly and daily token totals for the authenticated user."
     ),
 )
 async def get_user_usage(
-    user_id: str = Query(default="anonymous", min_length=1, max_length=256),
+    current_user: User = Depends(get_current_active_user),
 ) -> UserUsageResponse:
     """Return per-user token consumption for the rolling windows."""
+    user_id = current_user.username
     try:
         usage = token_budget.get_user_usage(user_id)
         return UserUsageResponse(
@@ -100,13 +100,18 @@ async def get_user_usage(
     response_model=GlobalUsageResponse,
     summary="Get global token usage (admin)",
     description=(
-        "Returns the global rolling hourly token total and all configured caps. "
-        "**Production hardening required**: restrict to admin roles via role-based "
-        "access control before exposing in a multi-tenant environment."
+        "Returns the global rolling hourly token total and all configured caps for admin users."
     ),
 )
-async def get_global_usage() -> GlobalUsageResponse:
+async def get_global_usage(
+    current_user: User = Depends(get_current_active_user),
+) -> GlobalUsageResponse:
     """Return global token consumption across all users."""
+    if current_user.role != Role.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient role. Required: admin",
+        )
     try:
         usage = token_budget.get_global_usage()
         return GlobalUsageResponse(

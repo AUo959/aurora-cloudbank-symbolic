@@ -417,7 +417,7 @@
         "Router prefix is /api/usage.",
         "api/aurora_api.py includes it via guarded import from modules.ai_core.usage_api."
       ],
-      "notes": "Token budget usage endpoints: GET /api/usage/me and GET /api/usage/global."
+      "notes": "Token budget usage endpoints: GET /api/usage/me requires authenticated JWT user context; GET /api/usage/global requires authenticated admin role."
     }
   ]
 }

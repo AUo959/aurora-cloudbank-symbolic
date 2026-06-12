@@ -2,7 +2,7 @@
 # Package initialization for Agent Mode imports
 
 from .chatgpt_agent_integration import discover_tools, execute_tool, get_agent_status
-import re
+from src.integrations._ga_validation import validate_ga_expression
 
 
 AURORA_CUSTOM_GPT = {
@@ -149,31 +149,27 @@ class ChatGPTAgentModeIntegration:
                     "timestamp": self._get_timestamp(),
                 }
 
-            # Syntax validation: whitelist/blacklist on expression strings
+            # Syntax validation for expression strings
             for expr_field in ("expression_a", "expression_b"):
                 expr = parameters[expr_field]
-                if not self._GA_EXPR_WHITELIST.match(expr):
-                    return {
-                        "success": False,
-                        "error": (
-                            f"'{expr_field}' contains characters not permitted in a "
-                            "geometric-algebra expression"
-                        ),
-                        "recovery_suggestions": [
-                            "Use only alphanumeric basis-blade names, digits, and "
-                            "arithmetic operators (+, -, *, /, ^)"
-                        ],
-                        "context_tag": "parameter_validation_error",
-                        "timestamp": self._get_timestamp(),
-                    }
-                if self._GA_EXPR_BLACKLIST.search(expr):
-                    return {
-                        "success": False,
-                        "error": f"'{expr_field}' contains a disallowed token",
-                        "recovery_suggestions": [
+                try:
+                    validate_ga_expression(expr_field, expr)
+                except ValueError as e:
+                    error_text = str(e)
+                    if "disallowed token" in error_text:
+                        suggestions = [
                             "Remove language-level constructs (import, eval, exec, __) "
                             "from the expression"
-                        ],
+                        ]
+                    else:
+                        suggestions = [
+                            "Use only alphanumeric basis-blade names, digits, and "
+                            "arithmetic operators (+, -, *, /, ^)"
+                        ]
+                    return {
+                        "success": False,
+                        "error": error_text,
+                        "recovery_suggestions": suggestions,
                         "context_tag": "parameter_validation_error",
                         "timestamp": self._get_timestamp(),
                     }
@@ -239,11 +235,6 @@ class ChatGPTAgentModeIntegration:
         seal_data = f"{self.agent_status}{self.anchor_seed}{self.ethics_protocol}"
         return hashlib.sha256(seal_data.encode()).hexdigest()[:16]
         
-    # Whitelist: allow basis-blade names, numbers, basic arithmetic and grouping.
-    _GA_EXPR_WHITELIST = re.compile(r"^[0-9a-zA-Z_.+\-*/^() \t]+$")
-    # Blacklist: explicitly reject dangerous sub-strings.
-    _GA_EXPR_BLACKLIST = re.compile(r"(__|\bimport\b|\beval\b|\bexec\b|os\.|sys\.)")
-
     _JSON_TYPE_MAP = {
         "string": str,
         "boolean": bool,

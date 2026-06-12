@@ -34,6 +34,8 @@ The historical audit is materially stale. Several major claims require correctio
 3. Flight Control is not merely an isolated JS-only module; current docs describe a Python-JS Fleet Bridge, FastAPI `/api/fleet/*` router, demos, and integration tests.
 4. Continuity/HALO/PAS has implemented controller code, manifest metadata, README documentation, and tests. The remaining question is whether the documented `/continuity/halo_pas/status` endpoint is actually exposed by the canonical API.
 5. Several security TODO / raw-exception concerns from the old audit appear already tracked and/or remediated by the 2026 hardening push. They should not be reopened from stale audit text without current grep evidence.
+6. The generic `agents` category appears recovered/reclassified as Glyph Mesh Controller infrastructure with docs and tests.
+7. The specific historical names `instance_bridge`, `memory_retrieval`, and `vector_gen` were not found as current implementation surfaces by GitHub search; treat them as stale names or unrecovered concepts until local/full-tree evidence says otherwise.
 
 Direct current inspection still confirms real recovery targets:
 
@@ -46,6 +48,7 @@ Direct current inspection still confirms real recovery targets:
 - Flight Control has current docs and tests for Python-JS bridge, DLP manifests, maintenance orchestration, and docking sequences. Remaining work is future enhancement/classification, not basic integration absence.
 - Continuity/HALO/PAS has implemented drift sampling/status export and tests, but the public API route should be verified because docs and manifest claim `/continuity/halo_pas/status`.
 - Security hardening issues and PRs already exist for HTTPException detail leaks, MCP raw exception strings, Pilot seal validation, schema validation, connector auth, headers, and external pen-test planning.
+- Glyph Mesh Controller has current docs, implementation, DLP-tagged messaging, handler isolation, and tests.
 - `src/improvement/engine.py` still has a base `ImprovementPattern.detect()` that raises `NotImplementedError`, while concrete default patterns are implemented.
 
 The peer review pipeline should therefore use this report as a current triage artifact, not as acceptance of the old audit wholesale.
@@ -77,6 +80,9 @@ The peer review pipeline should therefore use this report as a current triage ar
 | Security PRs already remediated several audit patterns | Observed | PRs #881, #888, #889, #891, #903 correspond to exception sanitization, HMAC Pilot seal, schema validation, MCP error sanitization, and connector tests | Treat old security TODO claims as stale unless current grep proves remaining code risk |
 | Current broad code search for security TODO terms mostly surfaced historical/report/tooling files | Observed / Blocked | Searches for `TODO`, `FIXME`, `SECURITY`, SQL injection, CSRF, token placeholder surfaced the old audit, reports, scripts, validators, Dockerfiles, and docs rather than a directly confirmed runtime defect | Requires local grep/classification before opening new security issues |
 | Empty exception/pass-only concern remains unverified | Blocked | Broad search found candidates, but not enough context to classify runtime defects vs tooling/docs/intentional abstract paths | Run targeted local static scan before issue creation |
+| Agents category appears recovered as Glyph Mesh Controller | Observed | `src/aurora/agents/glyph_mesh_controller.py`, `modules/agents/README.md`, manifest, and tests exist | Do not open generic agents recovery issue from old audit |
+| Glyph Mesh Controller has current tests and docs | Observed | Tests cover direct/broadcast delivery, handler isolation, DLP tags, singleton, performatives, layer contexts, stats, and multi-agent scenarios | Remaining work, if any, should be API exposure/async/persistence milestone-specific |
+| `instance_bridge`, `memory_retrieval`, and `vector_gen` not found as current implementation surfaces | Observed / Blocked | GitHub searches only surfaced old audit/docs references, not implementation files | Treat as stale names or unrecovered concepts; require local/full-tree search before issue creation |
 | Improvement Engine base class still raises `NotImplementedError`, but concrete default patterns are implemented | Observed / Derived | `ImprovementPattern.detect()` raises `NotImplementedError`; `ComplexityPattern`, `DuplicateCodePattern`, `LongFunctionPattern`, `MagicNumberPattern`, and `ErrorHandlingPattern` implement detection | Classify as abstract base behavior unless production code instantiates base pattern directly |
 
 ---
@@ -235,7 +241,44 @@ Recommended follow-up:
 - Run a local static scan that classifies results by runtime path, test/tooling path, docs/report path, and intentional abstract behavior.
 - Only open focused issues for confirmed current runtime defects not already covered by #783, #822–#826, #841, or their merged PRs.
 
-### 4.7 Improvement Engine — Partially Stale / Needs Classification
+### 4.7 Agents / Glyph Mesh — Recovered as Current Implementation
+
+The old audit grouped `agents` among historical follow-up categories. Current evidence shows a concrete agents subsystem exists as Glyph Mesh Controller infrastructure.
+
+Current agents evidence:
+
+- `src/aurora/agents/glyph_mesh_controller.py` implements `MeshMessage`, `build_message()`, `GlyphMeshController`, subscription/unsubscription, direct and broadcast publishing, DLP tagging, structured logging, handler isolation, stats export, DLP manifest export, and a global singleton.
+- `modules/agents/README.md` documents the controller, message schema, performatives, layer contexts, DLP logging, exception handling, integration patterns, security considerations, performance characteristics, and future extensions.
+- `tests/test_glyph_mesh_controller.py` covers message construction, subscription behavior, direct delivery, broadcast delivery, handler exception isolation, DLP tag creation, singleton behavior, performatives, layer contexts, stats, and multi-agent scenarios.
+
+Remaining questions:
+
+- Is Glyph Mesh intended to remain an internal in-process coordination bus, or should it expose API/observability surfaces?
+- Are future extensions such as async support, persistence, topics/channels, and message filtering active backlog or design-only?
+
+Recommended follow-up:
+
+- Do not open a generic agents recovery issue.
+- If additional work is desired, create a focused milestone issue for API exposure, persistence, async delivery, or observability.
+
+### 4.8 instance_bridge / memory_retrieval / vector_gen — Not Found as Current Surfaces
+
+The specific historical names `instance_bridge`, `memory_retrieval`, and `vector_gen` did not surface current implementation files in GitHub search. Search results mostly point back to the stale audit and documentation references.
+
+Current classification:
+
+- These may be stale names.
+- They may have been renamed or consolidated into newer systems.
+- They may exist only in local/control-plane material not indexed in this repo.
+- They may represent unrecovered concepts rather than current implementation work.
+
+Recommended follow-up:
+
+- Do not open implementation issues using these names alone.
+- Run a local/full-tree search for semantic equivalents before deciding whether work is missing.
+- Search likely replacement surfaces: bridge, memory, retrieval, vector, embeddings, VSA, fleet bridge, thread bridge, mesh runtime, and AuMemManager.
+
+### 4.9 Improvement Engine — Partially Stale / Needs Classification
 
 The base class still raises `NotImplementedError`, but current file also includes concrete pattern implementations and a registered default pattern set.
 
@@ -334,6 +377,30 @@ Scope:
 - Exclude already remediated/tracked findings from #783, #822–#826, #841 and related PRs.
 - Open focused issues only for confirmed current runtime defects.
 
+### Issue Candidate — Agents / Glyph Mesh Milestone Classification
+
+**Priority:** Low-Medium  
+**Type:** Architecture / observability / persistence  
+**Status:** Current implementation exists; future work should be milestone-specific.
+
+Scope:
+
+- Decide whether Glyph Mesh remains internal-only or should expose observability/API surfaces.
+- Decide whether async delivery, persistence, topics/channels, reply-to fields, or message filtering are active backlog.
+- Add focused issue only for selected next milestone.
+
+### Issue Candidate — Historical Name Recovery Sweep
+
+**Priority:** Low-Medium  
+**Type:** Recovery search / classification  
+**Status:** `instance_bridge`, `memory_retrieval`, and `vector_gen` were not found as current surfaces by GitHub search.
+
+Scope:
+
+- Search local/full tree and closed branches for these names and semantic equivalents.
+- Map any recovered work to modern surfaces.
+- Close as stale terminology if no implementation or active design exists.
+
 ### Issue Candidate — Mixed-State Quantum Test Coverage Review
 
 **Priority:** Low-Medium  
@@ -357,19 +424,6 @@ Scope:
 - Check if base class is directly instantiated anywhere.
 - Consider `abc.ABC` / `@abstractmethod` cleanup or documentation.
 
-### Audit Continuation — Remaining Historical Claims
-
-**Priority:** Medium  
-**Type:** Audit continuation  
-**Status:** Blocked until direct inspection.
-
-Scope:
-
-- Agents.
-- instance_bridge.
-- memory_retrieval.
-- vector_gen module status.
-
 ---
 
 ## 6. State Classification
@@ -391,6 +445,9 @@ Scope:
 | Security TODO/raw exception broad claims | Historical State / Partially Remediated, Requires Current Scan |
 | Security hardening issue/PR set | Current Canon Evidence / Existing Coordination Surface |
 | Empty exception/pass-only broad claim | Current Evidence Gap / Static Scan Needed |
+| Agents generic recovery claim | Historical State / Recovered as Glyph Mesh Current Canon Evidence |
+| Glyph Mesh future enhancements | Proposed Design / Milestone Candidates |
+| `instance_bridge`, `memory_retrieval`, `vector_gen` names | Historical State / Not Found as Current Surfaces |
 | Improvement base `NotImplementedError` | Current Canon Evidence / Needs Design Classification |
 | Follow-up work list | Recommended Planning Artifact |
 | Any implementation fixes | Not canon until committed through PR |
@@ -413,6 +470,8 @@ Do not expose HALO/PAS configuration mutation endpoints without design review.
 
 Security TODOs require a separate local static scan and runtime/test/tooling/docs classification before issue creation.
 
+Do not open issues for `instance_bridge`, `memory_retrieval`, or `vector_gen` from name evidence alone; require recovered code or active design evidence.
+
 ---
 
 ## 8. Recommended Peer Review Outcome
@@ -425,9 +484,10 @@ Recommended outcome for this PR:
 - Treat Flight Control as partially recovered/reclassified: Python-JS bridge and infrastructure tests exist; remaining work should be milestone-specific.
 - Treat Continuity/HALO-PAS as implemented at controller/test level, with route exposure requiring docs-runtime verification.
 - Treat broad security TODO/exception findings as partially remediated by existing hardening issues/PRs; require local static scan before opening new security work.
+- Treat agents as recovered/reclassified through Glyph Mesh Controller unless a specific missing surface is identified.
+- Treat `instance_bridge`, `memory_retrieval`, and `vector_gen` as historical names requiring local/full-tree recovery search before action.
 - Create focused follow-up issues only for findings verified against current `main` and not already tracked.
 - Treat mixed-state quantum implementation as likely resolved unless tests/docs prove a remaining gap.
-- Continue evidence refresh for the remaining historical audit categories.
 
 ---
 
@@ -448,6 +508,7 @@ assert 'Opal2 `opal2_api.py` API surface' in text
 assert 'Flight Control Fleet Bridge and infrastructure tests' in text
 assert 'Continuity HALO/PAS controller and tests' in text
 assert 'Security hardening issue/PR set' in text
+assert 'Agents generic recovery claim' in text
 assert 'Historical State / Lead List' in text
 assert 'Likely Resolved' in text
 PY

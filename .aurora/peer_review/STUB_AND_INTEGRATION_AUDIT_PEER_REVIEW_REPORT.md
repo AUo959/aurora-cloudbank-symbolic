@@ -1,8 +1,8 @@
-# Peer Review Report — Stub and Integration Audit
+# Peer Review Report — Current Stub and Integration Evidence
 
 **Date:** 2026-06-12  
-**Status:** Peer review candidate  
-**Source audit:** `.aurora/STUB_AND_INTEGRATION_AUDIT.md`  
+**Status:** Peer review candidate — current-evidence refresh  
+**Historical source audit:** `.aurora/STUB_AND_INTEGRATION_AUDIT.md`  
 **Review mode:** Documentation / planning only  
 **Runtime impact:** None  
 
@@ -10,151 +10,203 @@
 
 ## 1. Purpose
 
-This report promotes the existing Aurora stub and integration audit into the peer review pipeline.
+This report replaces the stale-audit summary with a current-evidence peer review report.
 
-The goal is not to implement fixes in this PR. The goal is to make the audit findings reviewable, prioritize follow-up work, and prevent partially implemented or unintegrated modules from being mistaken for production-complete capability.
+The historical `.aurora/STUB_AND_INTEGRATION_AUDIT.md` is dated November 14, 2025. It is useful as a lead list, but it is too old to treat as current truth. This report therefore separates:
+
+- historical audit claims,
+- current evidence checked against `main`,
+- stale or likely-resolved findings,
+- confirmed current risks,
+- follow-up issues that should enter peer review.
+
+This PR does not implement fixes.
 
 ---
 
 ## 2. Executive Finding
 
-The existing audit identifies 28 modules with mixed implementation completeness:
+The historical audit is materially stale. At least one major claim is no longer accurate: mixed-state quantum measurement, entropy, and fidelity support now exist in `modules/quantum_simulator/quantum_state.py`.
 
-- 15 fully integrated modules
-- 8 partially implemented modules
-- 5 unintegrated modules
+However, direct current inspection confirms that some risk remains real:
 
-The audit also identifies several risk patterns:
+- HR routes still contain silent mock fallback behavior for missing `StaffingAnalyzer`, `CharacterGenerator`, and `OrganizationalIntelligence` imports.
+- Repository search did not find concrete class definitions for those HR core classes outside the route imports.
+- `modules/opal2/api/routes.py` is still absent.
+- `src/improvement/engine.py` still has a base `ImprovementPattern.detect()` that raises `NotImplementedError`, while concrete default patterns are implemented.
 
-- API routes that can return mock or placeholder responses
-- `NotImplementedError` paths in reachable or semi-reachable implementation surfaces
-- modules with implemented core logic but no API exposure
-- JavaScript-only functionality without clear Python/FastAPI integration
-- empty exception handlers and placeholder/pass patterns requiring review
-- security TODOs that should not be lost in general cleanup
-
-Peer review should decide which findings become implementation issues, which should become documentation clarifications, and which should be closed as intentional internal-library status.
+The peer review pipeline should therefore use this report as a current triage artifact, not as acceptance of the old audit wholesale.
 
 ---
 
-## 3. Evidence Ledger
+## 3. Current Evidence Ledger
 
-| Finding | Label | Source Evidence | Peer Review Action |
+| Finding | Label | Current Evidence | Peer Review Action |
 |---|---|---|---|
-| Audit identifies 28 modules with mixed completeness | Observed | `.aurora/STUB_AND_INTEGRATION_AUDIT.md` executive summary | Accept audit as review input; verify current repo state before implementation |
-| HR System routes exist but core classes are reported missing and endpoints return mock/placeholder data | Observed from source audit | HR section reports missing `staffing_analyzer.py`, `character_generator.py`, and `organizational_intelligence.py` | Create/confirm implementation issue; verify against current tree first |
-| Quantum Simulator mixed-state operations raise `NotImplementedError` | Observed from source audit | `measure`, `entropy`, and `fidelity` for mixed states are documented as unimplemented | Decide whether to implement density-matrix support or document pure-state-only scope |
-| Improvement Engine base pattern detection raises `NotImplementedError` | Observed from source audit | `ImprovementPattern.detect()` reported as abstract/incomplete | Classify as internal dev tool, complete implementation, or remove production claims |
-| Opal2 core exists but API router is missing | Observed from source audit | `modules/opal2/api/` exists but `routes.py` is absent in the audit | Verify current tree; if still true, create API integration issue or document library-only status |
-| Flight Control module is JavaScript-only with no Python API integration | Observed from source audit | `modules/flight_control/` JS files listed; no Python API reported | Decide between wrapper, Fleet Bridge exposure, or explicit JS-only documentation |
-| Continuity controller runs but lacks dedicated query/config API | Observed from source audit | HALO/PAS controller reported active, with no `/continuity/*` router | Create follow-up issue for read-only status/history/config endpoints if still desired |
-| Ethics Field and AI Core may be internal libraries rather than API surfaces | Observed / Derived | Audit says core classes exist but no API integration; purpose unclear | Classify explicitly: internal library vs API feature |
-| Empty exception handlers and pass-only functions may hide operational failures | Observed from source audit | Audit lists 100+ pass-only instances and specific high-priority review targets | Create focused logging/error-handling audit issue |
-| Security TODOs are present in SQL injection, CSRF, validation, and token placeholder areas | Observed from source audit | Audit lists TODO/FIXME categories | Route to security review; do not bury in general stub cleanup |
+| Historical audit is stale | Observed | Historical source audit is dated November 14, 2025 | Do not open implementation issues from it without current verification |
+| HR route mock fallback remains present | Observed | `modules/hr_system/api/hr_routes.py` catches `ImportError` and returns mock data for staffing, character generation, and organizational intelligence | Open focused issue to remove/gate silent mock fallback after verifying intended behavior |
+| HR core classes were not found by repository search | Observed / Blocked | Search for `class StaffingAnalyzer`, `class CharacterGenerator`, and `class OrganizationalIntelligence` returned only `hr_routes.py` | Verify with local tree or broader code search before implementation |
+| Quantum mixed-state `NotImplementedError` claim appears resolved/stale | Observed | Current `quantum_state.py` implements density-matrix creation, mixed-state measurement, entropy, and fidelity paths | Do not open mixed-state implementation issue from old audit; consider tests/docs review only |
+| Opal2 API router remains absent | Observed | Fetching `modules/opal2/api/routes.py` returned not found | Open architecture/integration decision issue: API exposure vs internal library status |
+| Improvement Engine base class still raises `NotImplementedError`, but concrete default patterns are implemented | Observed / Derived | `ImprovementPattern.detect()` raises `NotImplementedError`; `ComplexityPattern`, `DuplicateCodePattern`, `LongFunctionPattern`, `MagicNumberPattern`, and `ErrorHandlingPattern` implement detection | Classify as abstract base behavior unless production code instantiates base pattern directly |
+| Flight Control integration status not yet re-verified in this pass | Blocked | Not inspected directly in this refresh | Do not create issue yet; verify first |
+| Continuity API status not yet re-verified in this pass | Blocked | Not inspected directly in this refresh | Do not create issue yet; verify first |
+| Security TODOs from old audit not yet re-verified in this pass | Blocked | Not inspected directly in this refresh | Run focused security TODO search before creating issues |
 
 ---
 
-## 4. Peer Review Questions
+## 4. Current-Evidence Detail
 
-Reviewers should answer:
+### 4.1 HR System Mock Fallback — Confirmed Current Risk
 
-1. Which findings are still accurate against current `main`?
-2. Which findings already have open issues or PRs?
-3. Which findings are production-facing and user-visible?
-4. Which findings are acceptable internal-library status?
-5. Which mock fallbacks should be removed, gated, or explicitly marked as demo-only?
-6. Which API exposures should be deferred rather than implemented?
-7. Which security TODOs need separate high-priority issues?
-8. Which items require ADR or canon-promotion review before implementation?
+Current route behavior imports implementation classes inside request handlers and returns plausible mock data if imports fail.
+
+Confirmed fallback sites:
+
+- `analyze_staffing_needs()` imports `StaffingAnalyzer`; on `ImportError`, it logs a warning and returns mock staffing numbers.
+- `generate_character()` imports `CharacterGenerator`; on `ImportError`, it logs a warning and returns generated placeholder profile data.
+- `get_organizational_intelligence()` imports `OrganizationalIntelligence`; on `ImportError`, it logs a warning and returns placeholder organizational data.
+
+Risk:
+
+- API consumers may receive plausible but non-real HR analysis.
+- Import failure is degraded to mock content instead of explicit unavailable/demo-mode behavior.
+- This can blur implementation truth and runtime capability.
+
+Recommended follow-up:
+
+- Create a focused issue for HR mock fallback and core implementation verification.
+- Decide whether fallback should be disabled, gated behind demo mode, or converted into structured unavailable responses.
+- Add tests for success and missing-backend behavior.
+
+### 4.2 Quantum Mixed-State Operations — Historical Claim Appears Resolved
+
+The old audit claimed mixed-state `measure`, `entropy`, and `fidelity` raised `NotImplementedError`.
+
+Current evidence shows:
+
+- `QuantumState.from_density_matrix()` exists.
+- `QuantumState.from_pure_ensemble()` exists.
+- `density_matrix` property supports stored density matrix and pure-state conversion.
+- `measure()` handles mixed states via diagonal density-matrix probabilities.
+- `entropy()` computes Von Neumann entropy from density-matrix eigenvalues.
+- `fidelity_with()` handles pure/mixed and mixed/mixed state fidelity using matrix square roots.
+
+Recommended follow-up:
+
+- Do not open an implementation issue from the old audit.
+- Optional: verify test coverage for mixed-state measurement, entropy, and fidelity.
+- Optional: update or annotate the historical audit as stale if repo convention allows.
+
+### 4.3 Opal2 API Router — Confirmed Missing File
+
+Current fetch for `modules/opal2/api/routes.py` returned not found.
+
+Risk:
+
+- If Opal2 is intended as API-facing functionality, this remains an integration gap.
+- If Opal2 is intended as internal library functionality, the gap is documentation/classification rather than code.
+
+Recommended follow-up:
+
+- Create an architecture/integration decision issue.
+- Decide whether Opal2 should be API-facing.
+- Avoid implementing routes until intended surface is confirmed.
+
+### 4.4 Improvement Engine — Partially Stale / Needs Classification
+
+The base class still raises `NotImplementedError`, but current file also includes concrete pattern implementations and a registered default pattern set.
+
+Current concrete implementations include:
+
+- `ComplexityPattern`
+- `DuplicateCodePattern`
+- `LongFunctionPattern`
+- `MagicNumberPattern`
+- `ErrorHandlingPattern`
+
+Risk:
+
+- This may be normal abstract/base-class behavior rather than an incomplete implementation.
+- The real question is whether base `ImprovementPattern` is ever instantiated directly or whether production claims overstate the engine's capability.
+
+Recommended follow-up:
+
+- Do not classify this as an implementation bug yet.
+- Verify usage sites and tests.
+- If needed, convert base class to `abc.ABC` / `@abstractmethod` or document extension contract.
 
 ---
 
 ## 5. Recommended Follow-Up Issue Split
 
-### Issue A — HR System Mock Fallback and Core Implementation
+### Issue A — Verify and Remediate HR System Mock Fallback
 
 **Priority:** High  
 **Type:** Implementation / safety  
+**Status:** Current evidence supports creating an issue.
 
 Scope:
 
-- Verify current `modules/hr_system/` tree.
-- Implement or restore concrete core classes if still missing.
-- Remove silent mock fallback behavior from production routes, or gate it behind explicit demo/test configuration.
-- Add tests proving routes return real analysis or explicit unavailable/error status.
+- Verify current `modules/hr_system/core/` tree locally or via full file listing.
+- Confirm whether concrete `StaffingAnalyzer`, `CharacterGenerator`, and `OrganizationalIntelligence` implementations exist.
+- Remove silent production mock fallback, gate it behind explicit demo mode, or return structured unavailable errors.
+- Add tests for success and missing-backend behavior.
 
 Acceptance criteria:
 
 - No production route silently returns plausible mock data because imports failed.
-- Import failures are logged or surfaced through structured error behavior.
-- Tests cover success and missing-backend behavior.
+- Missing backend behavior is explicit and test-covered.
+- Logs do not expose sensitive implementation details.
 
-### Issue B — Opal2 API Exposure Decision
-
-**Priority:** Medium  
-**Type:** Architecture / integration  
-
-Scope:
-
-- Verify whether `modules/opal2/api/routes.py` remains absent.
-- Decide whether Opal2 is internal library code or API-facing functionality.
-- If API-facing, create minimal `/opal2/health` and selected read-only endpoints.
-- If internal-only, document that status.
-
-### Issue C — Quantum Mixed-State Support or Scope Boundary
-
-**Priority:** Medium  
-**Type:** Implementation / documentation  
-
-Scope:
-
-- Verify current mixed-state behavior in `modules/quantum_simulator/quantum_state.py`.
-- Decide whether density-matrix operations are in scope.
-- Either implement `measure`, `entropy`, and `fidelity` for mixed states with tests, or document pure-state-only limitation.
-
-### Issue D — Flight Control Integration Boundary
+### Issue B — Decide Opal2 API Exposure
 
 **Priority:** Medium  
 **Type:** Architecture / integration  
+**Status:** Current evidence supports creating an issue.
 
 Scope:
 
-- Verify current Flight Control module contents.
-- Decide whether it should be exposed through Fleet Bridge, Python wrapper, dedicated FastAPI routes, or documented as JS-only service code.
-- Avoid partial exposure without tests.
+- Confirm intended status of Opal2: internal library or API-facing module.
+- If API-facing, design minimal routes and tests.
+- If internal-only, document that status clearly.
 
-### Issue E — Continuity API Read Interface
+### Issue C — Mixed-State Quantum Test Coverage Review
 
 **Priority:** Low-Medium  
-**Type:** Observability / API  
+**Type:** Test/documentation review  
+**Status:** Historical implementation claim appears stale; do not create implementation issue without new evidence.
 
 Scope:
 
-- Verify HALO/PAS controller lifecycle.
-- Add read-only endpoints for drift status/history if operationally useful.
-- Avoid mutating continuity state without a separate design review.
+- Verify tests for mixed-state measurement, entropy, and fidelity.
+- Add tests/docs only if coverage or public API documentation is weak.
 
-### Issue F — Empty Exception Handler and Pass-Only Audit
+### Issue D — Improvement Engine Contract Review
+
+**Priority:** Low  
+**Type:** Design/documentation  
+**Status:** Needs usage verification.
+
+Scope:
+
+- Verify whether `ImprovementPattern` is intentionally abstract.
+- Check if base class is directly instantiated anywhere.
+- Consider `abc.ABC` / `@abstractmethod` cleanup or documentation.
+
+### Issue E — Continue Current-Evidence Verification of Remaining Historical Claims
 
 **Priority:** Medium  
-**Type:** Reliability / observability  
+**Type:** Audit continuation  
+**Status:** Blocked until direct inspection.
 
 Scope:
 
-- Re-run current search for empty exception handlers and pass-only functions.
-- Separate acceptable abstract methods from silent production failures.
-- Add logging, structured error handling, or explicit comments where needed.
-
-### Issue G — Security TODO Triage
-
-**Priority:** High  
-**Type:** Security review  
-
-Scope:
-
-- Verify SQL injection, CSRF, validation, and token placeholder TODOs listed in the audit.
-- Promote confirmed items into security-specific issues.
-- Avoid mixing security remediation into general integration cleanup.
+- Flight Control integration boundary.
+- Continuity API status.
+- Empty exception handlers.
+- Security TODOs.
+- Agents, instance_bridge, memory_retrieval, vector_gen module status.
 
 ---
 
@@ -162,8 +214,12 @@ Scope:
 
 | Item | Classification |
 |---|---|
-| Existing audit file | Historical State / Current Review Input |
-| This report | Proposed Design / Peer Review Candidate |
+| Historical audit file | Historical State / Lead List |
+| This report | Current Review Artifact / Peer Review Candidate |
+| HR mock fallback finding | Current Canon Evidence |
+| Quantum mixed-state implementation-gap claim | Historical State / Likely Resolved |
+| Opal2 router absence | Current Canon Evidence |
+| Improvement base `NotImplementedError` | Current Canon Evidence / Needs Design Classification |
 | Follow-up issue list | Recommended Planning Artifact |
 | Any implementation fixes | Not canon until committed through PR |
 
@@ -171,11 +227,15 @@ Scope:
 
 ## 7. Review Constraints
 
-This report should not be used as proof that every finding is still current. The source audit is dated November 14, 2025. Every implementation issue should refresh current repo state before mutation.
+Do not use the November 2025 audit as direct proof of current defects.
 
 Do not implement all findings in one umbrella PR.
 
-Do not treat mock fallback removal, API exposure, mixed-state quantum support, and security TODO remediation as one task. They require separate review and separate validation.
+Do not create implementation issues for stale or unverified claims.
+
+Do not treat library/API exposure questions as implementation bugs until intended surface is confirmed.
+
+Security TODOs require a separate current-evidence pass before issue creation.
 
 ---
 
@@ -183,10 +243,11 @@ Do not treat mock fallback removal, API exposure, mixed-state quantum support, a
 
 Recommended outcome for this PR:
 
-- Accept this report as a peer-review planning artifact.
-- Open focused follow-up issues for confirmed high-priority findings.
-- Assign security-sensitive TODOs to security review.
-- Mark ambiguous library/API-surface findings for architecture review.
+- Accept this report as a corrected current-evidence triage artifact.
+- Create focused follow-up issues only for findings verified against current `main`.
+- Start with HR mock fallback and Opal2 API exposure decision.
+- Treat mixed-state quantum implementation as likely resolved unless tests/docs prove a remaining gap.
+- Continue evidence refresh for the remaining historical audit categories.
 
 ---
 
@@ -194,15 +255,16 @@ Recommended outcome for this PR:
 
 Documentation-only change.
 
-Suggested validation:
+Suggested local check:
 
 ```bash
-# Optional local check
 python - <<'PY'
 from pathlib import Path
 p = Path('.aurora/peer_review/STUB_AND_INTEGRATION_AUDIT_PEER_REVIEW_REPORT.md')
-assert p.exists()
-assert 'Evidence Ledger' in p.read_text()
+text = p.read_text()
+assert 'Current Evidence Ledger' in text
+assert 'Historical State / Lead List' in text
+assert 'Likely Resolved' in text
 PY
 ```
 

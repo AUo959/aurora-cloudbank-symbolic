@@ -174,7 +174,7 @@ def test_flowstate_flow_channel_creation():
     flowstate.bind_to_constellation("BridgeAgent", metadata={})
     
     channel = flowstate.create_flow_channel("agent_001", "BridgeAgent")
-    assert channel is not None
+    assert channel.split("::")[1:3] == ["agent_001", "BridgeAgent"]
     assert channel.startswith("channel::agent_001::BridgeAgent::")
 
 
@@ -218,7 +218,7 @@ def test_quantum_forge_agent_generation():
         metadata={"purpose": "Research agent"}
     )
     
-    assert agent is not None
+    assert agent.metadata["purpose"] == "Research agent"
     assert len(agent.agent_id) == 16  # UUID hex format
     assert len(agent.vector_core) == forge.vector_dimension
     assert agent.intent_alignment > 0.0
@@ -251,7 +251,7 @@ def test_quantum_forge_memory_creation():
         tags=["concept", "architecture"]
     )
     
-    assert memory is not None
+    assert memory.content["text"] == "Symbolic architecture patterns"
     assert memory.node_id.startswith("mem::")
     assert "concept" in memory.tags
     assert len(memory.embedding) == forge.vector_dimension
@@ -349,7 +349,7 @@ def test_full_quantum_forge_workflow():
         constellation_targets=["ORION", "ZIPWIZ"],
         metadata={"purpose": "Research"}
     )
-    assert agent is not None
+    assert agent.metadata["purpose"] == "Research"
     
     # 2. Create memories
     mem1 = forge.create_memory_node({"content": "T1/SRB anchors"}, ["core", "symbolic"])
@@ -394,7 +394,7 @@ def test_ethics_flowstate_integration():
     )
     
     # Agent should be created
-    assert agent is not None
+    assert agent.metadata["ethics"] == "strict"
     assert "ORION" in agent.constellation_bindings
     assert agent.intent_alignment > 0.0
 

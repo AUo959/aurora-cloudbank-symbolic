@@ -44,11 +44,11 @@ class TestSymbolicCPUAnchor:
         """Test symbolic CPU anchor initializes correctly."""
         anchor = SymbolicCPUAnchor()
 
-        assert anchor is not None
-        assert hasattr(anchor, 'quantum_state')
-        assert hasattr(anchor, 'symbolic_memory')
-        assert hasattr(anchor, 'anchor_protocols')
-        assert hasattr(anchor, 'processing_modes')
+        assert anchor.quantum_state == {}
+        assert anchor.symbolic_memory == {}
+        assert anchor.anchor_protocols == ["EOS_SEED_ORION", "Picard_Delta_3", "QUANTUM_SYMBOLIC_BRIDGE"]
+        assert set(anchor.processing_modes) == {"quantum", "symbolic", "hybrid"}
+        assert anchor.processing_modes["hybrid"] == "quantum_symbolic_fusion"
 
     def test_anchor_protocols_present(self):
         """Test that anchor protocols are properly initialized."""
@@ -85,7 +85,7 @@ class TestSymbolicCPUAnchorStateProcessing:
         test_data = {"test": "data", "value": 42}
         result = anchor.anchor_quantum_symbolic_state(test_data)
 
-        assert result is not None
+        assert set(result) == {"quantum_anchor", "symbolic_anchor", "hybrid_coordination"}
         assert "quantum_anchor" in result
         assert "symbolic_anchor" in result
         assert "hybrid_coordination" in result
@@ -97,7 +97,7 @@ class TestSymbolicCPUAnchorStateProcessing:
         test_data = {"quantum": "input"}
         result = anchor.process_quantum_state(test_data)
 
-        assert result is not None
+        assert set(result) == {"quantum_processed", "coherence_maintained", "entanglement_preserved"}
         assert result["quantum_processed"] is True
         assert result["coherence_maintained"] is True
         assert result["entanglement_preserved"] is True
@@ -109,7 +109,11 @@ class TestSymbolicCPUAnchorStateProcessing:
         test_data = {"symbolic": "input"}
         result = anchor.process_symbolic_state(test_data)
 
-        assert result is not None
+        assert set(result) == {
+            "symbolic_patterns_extracted",
+            "reasoning_chains_constructed",
+            "logical_consistency_verified",
+        }
         assert result["symbolic_patterns_extracted"] is True
         assert result["reasoning_chains_constructed"] is True
         assert result["logical_consistency_verified"] is True
@@ -121,7 +125,7 @@ class TestSymbolicCPUAnchorStateProcessing:
         test_data = {"hybrid": "input"}
         result = anchor.coordinate_hybrid_processing(test_data)
 
-        assert result is not None
+        assert set(result) == {"hybrid_mode", "quantum_symbolic_bridge", "processing_efficiency"}
         assert result["hybrid_mode"] == "active"
         assert result["quantum_symbolic_bridge"] == "established"
         assert result["processing_efficiency"] == "optimized"
@@ -134,7 +138,7 @@ class TestSymbolicCPUAnchorStateProcessing:
         result = anchor.anchor_quantum_symbolic_state(empty_data)
 
         # Should handle empty data gracefully
-        assert result is not None
+        assert result["hybrid_coordination"]["hybrid_mode"] == "active"
         assert "quantum_anchor" in result
         assert "symbolic_anchor" in result
 
@@ -153,7 +157,7 @@ class TestSymbolicCPUAnchorStateProcessing:
 
         result = anchor.anchor_quantum_symbolic_state(complex_data)
 
-        assert result is not None
+        assert result["symbolic_anchor"]["logical_consistency_verified"] is True
         assert "quantum_anchor" in result
         assert "symbolic_anchor" in result
 
@@ -168,9 +172,9 @@ class TestQuantumProcessingLayerInitialization:
         """Test quantum layer initializes with default qubits."""
         layer = QuantumProcessingLayer()
 
-        assert layer is not None
+        assert layer.quantum_circuits == {}
         assert layer.num_qubits == 8
-        assert hasattr(layer, 'quantum_circuits')
+        assert isinstance(layer.quantum_circuits, dict)
 
     def test_quantum_layer_initialization_custom_qubits(self):
         """Test quantum layer with custom qubit count."""
@@ -183,8 +187,8 @@ class TestQuantumProcessingLayerInitialization:
         layer = QuantumProcessingLayer()
 
         if _QISKIT_AVAILABLE:
-            assert hasattr(layer, 'simulator')
-            assert layer.simulator is not None
+            assert layer.simulator.__class__.__name__ == "AerSimulator"
+            assert callable(getattr(layer.simulator, "run", None))
 
 
 @pytest.mark.unit
@@ -200,7 +204,7 @@ class TestQuantumCircuitCreation:
         operations = []
         circuit = layer.create_quantum_circuit("empty_circuit", operations)
 
-        assert circuit is not None
+        assert circuit is layer.quantum_circuits["empty_circuit"]
         assert "empty_circuit" in layer.quantum_circuits
 
     def test_create_circuit_with_hadamard(self):
@@ -213,7 +217,7 @@ class TestQuantumCircuitCreation:
 
         circuit = layer.create_quantum_circuit("hadamard_circuit", operations)
 
-        assert circuit is not None
+        assert circuit is layer.quantum_circuits["hadamard_circuit"]
         assert "hadamard_circuit" in layer.quantum_circuits
 
     def test_create_circuit_with_cnot(self):
@@ -226,7 +230,7 @@ class TestQuantumCircuitCreation:
 
         circuit = layer.create_quantum_circuit("cnot_circuit", operations)
 
-        assert circuit is not None
+        assert circuit is layer.quantum_circuits["cnot_circuit"]
         assert "cnot_circuit" in layer.quantum_circuits
 
     def test_create_circuit_with_rotation(self):
@@ -239,7 +243,7 @@ class TestQuantumCircuitCreation:
 
         circuit = layer.create_quantum_circuit("rotation_circuit", operations)
 
-        assert circuit is not None
+        assert circuit.num_qubits == layer.num_qubits
 
     def test_create_circuit_with_multiple_operations(self):
         """Test creating circuit with multiple operations."""
@@ -253,7 +257,7 @@ class TestQuantumCircuitCreation:
 
         circuit = layer.create_quantum_circuit("multi_op_circuit", operations)
 
-        assert circuit is not None
+        assert circuit is layer.quantum_circuits["multi_op_circuit"]
         assert "multi_op_circuit" in layer.quantum_circuits
 
     def test_create_multiple_circuits(self):
@@ -286,7 +290,7 @@ class TestQuantumCircuitExecution:
         layer.create_quantum_circuit("simple_circuit", operations)
         result = layer.execute_quantum_symbolic_computation("simple_circuit", shots=100)
 
-        assert result is not None
+        assert isinstance(result["quantum_results"], dict)
         assert "quantum_results" in result
         assert "symbolic_interpretation" in result
         assert "hybrid_output" in result
@@ -307,7 +311,7 @@ class TestQuantumCircuitExecution:
 
         result = layer.execute_quantum_symbolic_computation("custom_shots_circuit", shots=500)
 
-        assert result is not None
+        assert sum(result["quantum_results"].values()) == 500
 
     def test_interpret_quantum_results(self):
         """Test quantum results interpretation."""
@@ -383,7 +387,7 @@ class TestQuantumSymbolicIntegration:
         test_data = {"workflow": "test", "value": 123}
         anchor_result = anchor.anchor_quantum_symbolic_state(test_data)
 
-        assert anchor_result is not None
+        assert set(anchor_result) == {"quantum_anchor", "symbolic_anchor", "hybrid_coordination"}
         assert anchor_result["quantum_anchor"]["quantum_processed"] is True
         assert anchor_result["symbolic_anchor"]["symbolic_patterns_extracted"] is True
         assert anchor_result["hybrid_coordination"]["hybrid_mode"] == "active"
@@ -402,7 +406,7 @@ class TestQuantumSymbolicIntegration:
         circuit_data = {"circuit": "integration_test"}
         anchor_result = anchor.anchor_quantum_symbolic_state(circuit_data)
 
-        assert anchor_result is not None
+        assert anchor_result["hybrid_coordination"]["quantum_symbolic_bridge"] == "established"
 
     def test_multiple_anchor_states(self):
         """Test processing multiple states through anchor."""
@@ -417,7 +421,7 @@ class TestQuantumSymbolicIntegration:
         results = [anchor.anchor_quantum_symbolic_state(state) for state in states]
 
         assert len(results) == 3
-        assert all(r is not None for r in results)
+        assert all(r["hybrid_coordination"]["hybrid_mode"] == "active" for r in results)
         assert all("quantum_anchor" in r for r in results)
 
 
@@ -432,7 +436,7 @@ class TestQuantumCoreErrorHandling:
 
         # Should handle None gracefully
         result = anchor.process_quantum_state(None)
-        assert result is not None
+        assert result["quantum_processed"] is True
 
     def test_symbolic_anchor_with_invalid_data_type(self):
         """Test symbolic anchor handles various data types."""
@@ -440,15 +444,15 @@ class TestQuantumCoreErrorHandling:
 
         # Test with string
         result_str = anchor.process_quantum_state("string_data")
-        assert result_str is not None
+        assert result_str["coherence_maintained"] is True
 
         # Test with list
         result_list = anchor.process_symbolic_state([1, 2, 3])
-        assert result_list is not None
+        assert result_list["reasoning_chains_constructed"] is True
 
         # Test with number
         result_num = anchor.coordinate_hybrid_processing(42)
-        assert result_num is not None
+        assert result_num["processing_efficiency"] == "optimized"
 
     @pytest.mark.skipif(not QUANTUM_LAYER_AVAILABLE, reason="Quantum layer not available")
     def test_quantum_layer_invalid_qubit_index(self):
@@ -462,7 +466,7 @@ class TestQuantumCoreErrorHandling:
         try:
             circuit = layer.create_quantum_circuit("invalid_qubit", operations)
             # If it succeeds, that's also acceptable (some implementations may extend)
-            assert circuit is not None
+            assert layer.quantum_circuits["invalid_qubit"] is circuit
         except (IndexError, ValueError):
             # Expected for strict implementations
             pass
@@ -480,7 +484,7 @@ class TestQuantumCoreErrorHandling:
 
         # Should handle unknown operations gracefully
         circuit = layer.create_quantum_circuit("unknown_op", operations)
-        assert circuit is not None
+        assert layer.quantum_circuits["unknown_op"] is circuit
 
 
 @pytest.mark.unit
@@ -494,7 +498,7 @@ class TestQuantumCoreGracefulDegradation:
         anchor = SymbolicCPUAnchor()
 
         result = anchor.anchor_quantum_symbolic_state({"test": "data"})
-        assert result is not None
+        assert result["symbolic_anchor"]["logical_consistency_verified"] is True
 
     def test_quantum_layer_import_handles_missing_qiskit(self):
         """Test that quantum layer import handles missing qiskit gracefully."""
@@ -509,7 +513,7 @@ class TestQuantumCoreGracefulDegradation:
         # or provide meaningful error message
         try:
             layer = QuantumProcessingLayer(num_qubits=2)
-            assert layer is not None
+            assert layer.num_qubits == 2
         except ImportError as e:
             # Acceptable to raise ImportError with clear message
             assert "qiskit not available" in str(e).lower() or "native implementation missing" in str(e).lower()
@@ -540,4 +544,4 @@ class TestQuantumCorePerformance:
         # Process multiple states
         for i in range(100):
             result = anchor.anchor_quantum_symbolic_state({"iteration": i})
-            assert result is not None
+            assert result["quantum_anchor"]["quantum_processed"] is True

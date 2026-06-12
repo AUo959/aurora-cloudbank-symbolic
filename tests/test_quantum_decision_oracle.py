@@ -25,7 +25,7 @@ class TestQuantumDecisionOracleBasic:
     def test_initialization(self):
         """Test oracle initialization"""
         oracle = QuantumDecisionOracle()
-        assert oracle is not None
+        assert callable(oracle.predict_outcome)
         assert oracle.mode == QuantumReasoningMode.PROBABILISTIC
         assert oracle.computation_count == 0
     
@@ -94,7 +94,7 @@ class TestQuantumDecisionOraclePrediction:
         # Check audit trail entries
         assert len(result.audit_trail) >= 3  # initialization, computation, completion
         assert all(isinstance(entry, AuditTrailEntry) for entry in result.audit_trail)
-        assert all(hasattr(entry, 'timestamp') for entry in result.audit_trail)
+        assert all(entry.timestamp for entry in result.audit_trail)
     
     @pytest.mark.integration
     def test_predict_outcome_with_aurora(self):
@@ -106,7 +106,7 @@ class TestQuantumDecisionOraclePrediction:
         )
         
         # Should complete successfully with Aurora overhead
-        assert result is not None
+        assert result.decision_id.startswith("QDO-")
         # Check if Aurora oversight appears in audit trail
         aurora_entries = [e for e in result.audit_trail if 'aurora' in e.step.lower()]
         assert len(aurora_entries) > 0 or True  # Aurora may be available or not
@@ -178,7 +178,7 @@ class TestQuantumDecisionOracleEdgeCases:
             scenario={'action': 'minimal'},
             params={}
         )
-        assert result is not None
+        assert result.probabilities["success"] > 0
         assert result.confidence > 0
     
     def test_predict_comprehensive_scenario(self):
@@ -202,7 +202,7 @@ class TestQuantumDecisionOracleEdgeCases:
                 'amplitude': 0.95
             }
         )
-        assert result is not None
+        assert len(result.scenario_trace) > 0
         # Comprehensive scenario should have higher confidence
         assert result.confidence > 0.5
     
@@ -214,7 +214,7 @@ class TestQuantumDecisionOracleEdgeCases:
         for mode in QuantumReasoningMode:
             oracle = QuantumDecisionOracle(mode=mode)
             result = oracle.predict_outcome(scenario, params, seed=42)
-            assert result is not None
+            assert result.decision_id.startswith("QDO-")
             assert result.quantum_mode == mode
     
     def test_predict_extreme_parameters(self):
@@ -226,14 +226,14 @@ class TestQuantumDecisionOracleEdgeCases:
             scenario={'action': 'test'},
             params={'risk_weight': 1.0, 'confidence_threshold': 1.0}
         )
-        assert result_max is not None
+        assert pytest.approx(sum(result_max.probabilities.values()), rel=0, abs=1e-9) == 1.0
         
         # Minimum risk
         result_min = oracle.predict_outcome(
             scenario={'action': 'test'},
             params={'risk_weight': 0.0, 'confidence_threshold': 0.0}
         )
-        assert result_min is not None
+        assert pytest.approx(sum(result_min.probabilities.values()), rel=0, abs=1e-9) == 1.0
 
 
 class TestQuantumDecisionOracleBatch:
@@ -325,7 +325,7 @@ class TestQuantumDecisionOracleFuzz:
             }
             
             result = oracle.predict_outcome(scenario, params)
-            assert result is not None
+            assert result.decision_id.startswith("QDO-")
             assert 0.0 <= result.confidence <= 1.0
     
     def test_fuzz_random_parameters(self):
@@ -340,7 +340,7 @@ class TestQuantumDecisionOracleFuzz:
             }
             
             result = oracle.predict_outcome(scenario, params)
-            assert result is not None
+            assert len(result.probabilities) > 0
 
 
 @pytest.mark.integration
@@ -353,13 +353,13 @@ class TestQuantumDecisionOracleIntegration:
         
         # Oracle should initialize with Aurora if available
         if oracle.aurora:
-            assert oracle.aurora is not None
+            assert oracle.get_statistics()["aurora_integrated"] is True
             # Test that Aurora is consulted during prediction
             result = oracle.predict_outcome(
                 scenario={'action': 'aurora_test'},
                 params={'risk_weight': 0.5}
             )
-            assert result is not None
+            assert len(result.audit_trail) >= 3
     
     def test_result_serialization(self):
         """Test that results can be serialized"""

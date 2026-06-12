@@ -173,6 +173,92 @@ def test_dlp_tracker_creates_tag(mocker):
     mock_open.assert_called_once()
 ```
 
+## Assertion Quality Guidelines
+
+Behavioral tests should prove that an object works, not just that it exists. Assertions like
+`assert X is not None` and `assert hasattr(obj, "field")` are weak in most unit and integration
+tests because a broken object can still instantiate and expose attributes while returning the wrong
+state, the wrong values, or the wrong side effects.
+
+Prefer assertions that exercise the object under test and verify a concrete outcome:
+- returned field values
+- state updates on the object
+- collection contents
+- serialized output
+- observable side effects
+
+### Before/after examples from Tier 1 tests
+
+**Example 1 — manager/anchor behavior**
+```python
+# Before (tests/test_quantum_core.py)
+result = anchor.anchor_quantum_symbolic_state(test_data)
+assert result is not None
+
+# After
+result = anchor.anchor_quantum_symbolic_state(test_data)
+assert set(result) == {"quantum_anchor", "symbolic_anchor", "hybrid_coordination"}
+```
+
+**Example 2 — generated model behavior**
+```python
+# Before (tests/test_quantum_forge_v2.py)
+agent = forge.generate_agent(...)
+assert agent is not None
+
+# After
+agent = forge.generate_agent(...)
+assert agent.metadata["purpose"] == "Research agent"
+```
+
+**Example 3 — subsystem wiring behavior**
+```python
+# Before (tests/test_monitoring_system.py)
+monitoring = MonitoringSystem(storage_dir=Path(tmpdir))
+assert monitoring.audit_logger is not None
+
+# After
+monitoring = MonitoringSystem(storage_dir=Path(tmpdir))
+assert monitoring.audit_logger.storage_path == Path(tmpdir) / "audit_log.jsonl"
+```
+
+## Good assertion patterns
+
+### Managers
+Call a method and verify the returned state or stored side effect.
+```python
+result = anchor.anchor_quantum_symbolic_state({"test": "data"})
+assert result["symbolic_anchor"]["logical_consistency_verified"] is True
+```
+
+### Dataclasses
+Assert a specific field value instead of mere existence.
+```python
+verdict = EthicsVerdict(allowed=True, score=0.85, reason="ok", engine="gumas")
+assert verdict.score == 0.85
+```
+
+### Collections
+Assert length, membership, or an element property.
+```python
+top_memories = memory_enhancer.retrieve_by_priority(top_k=2)
+assert len(top_memories) <= 2
+```
+
+### Strings
+Assert content, structure, or parsing behavior.
+```python
+channel = flowstate.create_flow_channel("agent_001", "BridgeAgent")
+assert channel.split("::")[1:3] == ["agent_001", "BridgeAgent"]
+```
+
+## When instantiation checks are acceptable
+
+Instantiation-only assertions are acceptable in narrowly scoped smoke tests where the explicit goal
+is “import/construct without crashing,” or in compatibility checks that intentionally guard optional
+dependencies. Label those tests clearly as smoke/setup coverage, and use `# noqa: shallow-ok` for
+rare cases where a shallow assertion is still the right tool.
+
 ## Test Coverage Goals
 
 - **Unit Tests:** 80%+ coverage for core logic

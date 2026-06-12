@@ -10,6 +10,12 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-commit]
+      - id: shallow-assertion-warning
+        name: shallow-assertion-warning
+        entry: python .github/hooks/check_shallow_assertions.py
+        language: system
+        files: '^tests/.*\.py$'
+        stages: [pre-commit]
 
   # Essential file checks - fast and reliable
   - repo: https://github.com/pre-commit/pre-commit-hooks

@@ -61,19 +61,19 @@ class TestQuantumIntegration:
         from modules.quantum_forge import QuantumForgeIntegration, get_quantum_integration
         
         integration = QuantumForgeIntegration()
-        assert integration is not None
+        assert integration.metrics["total_conversions"] == 0
         assert integration.fidelity_threshold == 0.95
         
         # Test singleton
         integration2 = get_quantum_integration()
-        assert integration2 is not None
+        assert integration2.default_coherence_time == 300.0
         
     def test_agent_to_quantum_conversion(self, test_agent, quantum_integration):
         """Test converting agent to quantum state"""
         integration = quantum_integration
         quantum_state = integration.agent_to_quantum(test_agent)
         
-        assert quantum_state is not None
+        assert quantum_state.num_qubits >= 8
         assert quantum_state.agent_id == test_agent.agent_id
         assert quantum_state.num_qubits >= 8
         assert 0.0 <= quantum_state.fidelity <= 1.01  # Allow small floating point error
@@ -85,7 +85,7 @@ class TestQuantumIntegration:
         quantum_state = integration.agent_to_quantum(test_agent)
         restored_agent = integration.quantum_to_agent(quantum_state)
         
-        assert restored_agent is not None
+        assert restored_agent.metadata == test_agent.metadata
         assert restored_agent.agent_id == test_agent.agent_id
         # Joy and alignment should be close (within 10%)
         assert abs(restored_agent.joy_index - test_agent.joy_index) < 0.1
@@ -114,7 +114,7 @@ class TestQuantumIntegration:
         integration = quantum_integration
         optimized = integration.optimize_agent_quantum(test_agent)
         
-        assert optimized is not None
+        assert optimized.agent_id == test_agent.agent_id
         # Joy should be optimized (increased or maintained)
         assert optimized.joy_index >= test_agent.joy_index * 0.95
 
@@ -149,12 +149,12 @@ class TestEntanglementNetwork:
         from modules.quantum_forge import EntanglementNetwork, get_entanglement_network
         
         network = EntanglementNetwork()
-        assert network is not None
+        assert network.metrics["total_entanglements"] == 0
         assert len(network.entanglement_links) == 0
         
         # Test singleton
         network2 = get_entanglement_network()
-        assert network2 is not None
+        assert network2.metrics["active_entanglements"] >= 0
         
     def test_entangle_agents(self, quantum_forge, test_agents):
         """Test creating entanglement between agents"""
@@ -165,7 +165,7 @@ class TestEntanglementNetwork:
         
         link = network.entangle_agents(agent1.agent_id, agent2.agent_id, strength=0.8)
         
-        assert link is not None
+        assert link.link_id in network.entanglement_links
         assert link.agent_1_id == agent1.agent_id
         assert link.agent_2_id == agent2.agent_id
         assert 0.0 <= link.entanglement_strength <= 1.0
@@ -203,7 +203,7 @@ class TestEntanglementNetwork:
             topology="mesh"
         )
         
-        assert cluster is not None
+        assert cluster.topology == "mesh"
         assert len(cluster.agent_ids) == len(test_agents)
         # Mesh topology: n*(n-1)/2 links
         expected_links = len(test_agents) * (len(test_agents) - 1) // 2
@@ -224,7 +224,7 @@ class TestEntanglementNetwork:
         
         health = network.monitor_network_health()
         
-        assert health is not None
+        assert isinstance(health["recommendations"], list)
         assert "total_links" in health
         assert "average_strength" in health
         assert health["total_links"] >= 2
@@ -251,7 +251,7 @@ class TestQuantumMemoryEnhancer:
         from modules.quantum_forge import QuantumMemoryEnhancer, get_quantum_memory_enhancer
         
         enhancer = QuantumMemoryEnhancer()
-        assert enhancer is not None
+        assert enhancer.metrics["total_enhanced_memories"] == 0
         assert len(enhancer.quantum_metadata) == 0
         
     def test_enhance_memory(self, memory_enhancer):
@@ -269,7 +269,7 @@ class TestQuantumMemoryEnhancer:
         
         metadata = memory_enhancer.enhance_memory(test_memory)
         
-        assert metadata is not None
+        assert metadata.quantum_priority > 0.0
         assert metadata.memory_id == "mem_001"
         assert metadata.coherence_state == "COHERENT"
         assert 0.0 <= metadata.coherence_score <= 1.0
@@ -381,7 +381,7 @@ class TestSystemFlowOrchestrator:
         from modules.quantum_forge import SystemFlowOrchestrator, get_system_flow_orchestrator
         
         orchestrator = SystemFlowOrchestrator()
-        assert orchestrator is not None
+        assert orchestrator.current_phase == type(orchestrator.current_phase).STARTUP
         # Should auto-register 8 core modules
         assert len(orchestrator.modules) >= 8
         
@@ -451,11 +451,11 @@ class TestSystemFlowOrchestrator:
         """Test system metrics collection"""
         metrics = orchestrator.get_system_metrics()
         
-        assert metrics is not None
-        assert hasattr(metrics, 'system_load')
-        assert hasattr(metrics, 'average_health')
-        assert hasattr(metrics, 'drift_count')
-        assert hasattr(metrics, 'total_transitions')
+        assert metrics.current_phase == orchestrator.current_phase
+        assert 0.0 <= metrics.system_load <= 1.0
+        assert 0.0 <= metrics.average_health <= 1.0
+        assert metrics.drift_count >= 0
+        assert metrics.total_transitions >= 0
 
 
 # ============================================================================
@@ -477,8 +477,8 @@ class TestEthicsQuantumGates:
         
     def test_ethics_gate_initialization(self, ethics_gate):
         """Test EthicsAwareQuantumGate initialization"""
-        assert ethics_gate is not None
-        assert ethics_gate.gumas is not None
+        assert ethics_gate.gumas.level.value == "balanced"
+        assert ethics_gate.total_operations == 0
         
     def test_validate_gate_operation_pass(self, ethics_gate):
         """Test gate validation with valid operation"""
@@ -511,7 +511,7 @@ class TestEthicsQuantumGates:
         
         metrics = ethics_gate.get_ethics_metrics()
         
-        assert metrics is not None
+        assert metrics["audit_log_size"] >= 0
         assert "total_operations" in metrics
         assert metrics["total_operations"] >= 2
 
@@ -534,7 +534,7 @@ class TestConstellationTopologyMapper:
         from modules.quantum_forge import get_topology_mapper
         
         mapper = get_topology_mapper()
-        assert mapper is not None
+        assert mapper.optimization_metric.value == "entanglement_fidelity"
         # Should auto-register 8 core modules
         assert len(mapper.modules) >= 8
         
@@ -542,7 +542,7 @@ class TestConstellationTopologyMapper:
         """Test optimal topology calculation"""
         mapping = topology_mapper.calculate_optimal_topology()
         
-        assert mapping is not None
+        assert mapping.optimization_metric.value == topology_mapper.optimization_metric.value
         assert len(mapping.links) > 0
         assert 0.0 <= mapping.average_fidelity <= 1.0
         
@@ -599,7 +599,7 @@ class TestJoyEvolutionEngine:
         
     def test_evolution_engine_initialization(self, evolution_engine):
         """Test JoyEvolutionEngine initialization"""
-        assert evolution_engine is not None
+        assert evolution_engine.current_generation == 0
         assert evolution_engine.params.population_size == 10
         
     def test_initialize_population(self, evolution_engine):
@@ -620,7 +620,7 @@ class TestJoyEvolutionEngine:
         # Run evolution
         final_stats = evolution_engine.evolve(generations=3)
         
-        assert final_stats is not None
+        assert final_stats.generation == evolution_engine.current_generation
         # Fitness should improve or stay similar
         assert final_stats.avg_fitness >= initial_avg_fitness * 0.9
         
@@ -630,7 +630,7 @@ class TestJoyEvolutionEngine:
         
         best = evolution_engine.get_best_agent()
         
-        assert best is not None
+        assert best.agent_id in {genome.agent_id for genome in evolution_engine.population}
         # Should be highest fitness
         assert best.fitness == max(g.fitness for g in evolution_engine.population)
         
@@ -640,7 +640,7 @@ class TestJoyEvolutionEngine:
         
         most_joyful = evolution_engine.get_most_joyful_agent()
         
-        assert most_joyful is not None
+        assert most_joyful.agent_id in {genome.agent_id for genome in evolution_engine.population}
         # Should be highest joy
         assert most_joyful.joy_index == max(g.joy_index for g in evolution_engine.population)
 

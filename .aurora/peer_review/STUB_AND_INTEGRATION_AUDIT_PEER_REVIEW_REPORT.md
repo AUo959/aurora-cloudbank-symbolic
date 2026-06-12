@@ -33,6 +33,7 @@ The historical audit is materially stale. Several major claims require correctio
 2. Opal2 does have an API surface in `modules/opal2/api/opal2_api.py`; the old `routes.py` absence is not enough to conclude there is no API implementation.
 3. Flight Control is not merely an isolated JS-only module; current docs describe a Python-JS Fleet Bridge, FastAPI `/api/fleet/*` router, demos, and integration tests.
 4. Continuity/HALO/PAS has implemented controller code, manifest metadata, README documentation, and tests. The remaining question is whether the documented `/continuity/halo_pas/status` endpoint is actually exposed by the canonical API.
+5. Several security TODO / raw-exception concerns from the old audit appear already tracked and/or remediated by the 2026 hardening push. They should not be reopened from stale audit text without current grep evidence.
 
 Direct current inspection still confirms real recovery targets:
 
@@ -44,6 +45,7 @@ Direct current inspection still confirms real recovery targets:
 - The remaining Opal2 question is likely main-app integration and lint/CI coverage, not missing API code.
 - Flight Control has current docs and tests for Python-JS bridge, DLP manifests, maintenance orchestration, and docking sequences. Remaining work is future enhancement/classification, not basic integration absence.
 - Continuity/HALO/PAS has implemented drift sampling/status export and tests, but the public API route should be verified because docs and manifest claim `/continuity/halo_pas/status`.
+- Security hardening issues and PRs already exist for HTTPException detail leaks, MCP raw exception strings, Pilot seal validation, schema validation, connector auth, headers, and external pen-test planning.
 - `src/improvement/engine.py` still has a base `ImprovementPattern.detect()` that raises `NotImplementedError`, while concrete default patterns are implemented.
 
 The peer review pipeline should therefore use this report as a current triage artifact, not as acceptance of the old audit wholesale.
@@ -71,8 +73,11 @@ The peer review pipeline should therefore use this report as a current triage ar
 | Continuity docs and manifest claim `/continuity/halo_pas/status` | Observed | `modules/continuity/README.md` and `halo_pas_manifest.json` both document `/continuity/halo_pas/status` | Verify canonical API route exposure before claiming runtime availability |
 | Continuity tests cover controller behavior and status export | Observed | `tests/test_halo_pas_controller.py` tests drift samples, DLP tags, start/stop lifecycle, and `export_status()` | Remaining gap is route exposure / docs-runtime alignment, not controller implementation |
 | Continuity public API route exposure remains uncertain | Derived / Blocked | Search found docs/API file references but direct route definition was not confirmed in inspected API slices | Create focused route-alignment issue if no route exists after full-file verification |
+| Security issues already track raw exception / validation / connector risks | Observed | Closed issues #783, #822, #823, #824, #825, #826 and external-review issue #841 cover major security audit themes | Do not create duplicate issues from old audit categories |
+| Security PRs already remediated several audit patterns | Observed | PRs #881, #888, #889, #891, #903 correspond to exception sanitization, HMAC Pilot seal, schema validation, MCP error sanitization, and connector tests | Treat old security TODO claims as stale unless current grep proves remaining code risk |
+| Current broad code search for security TODO terms mostly surfaced historical/report/tooling files | Observed / Blocked | Searches for `TODO`, `FIXME`, `SECURITY`, SQL injection, CSRF, token placeholder surfaced the old audit, reports, scripts, validators, Dockerfiles, and docs rather than a directly confirmed runtime defect | Requires local grep/classification before opening new security issues |
+| Empty exception/pass-only concern remains unverified | Blocked | Broad search found candidates, but not enough context to classify runtime defects vs tooling/docs/intentional abstract paths | Run targeted local static scan before issue creation |
 | Improvement Engine base class still raises `NotImplementedError`, but concrete default patterns are implemented | Observed / Derived | `ImprovementPattern.detect()` raises `NotImplementedError`; `ComplexityPattern`, `DuplicateCodePattern`, `LongFunctionPattern`, `MagicNumberPattern`, and `ErrorHandlingPattern` implement detection | Classify as abstract base behavior unless production code instantiates base pattern directly |
-| Security TODOs from old audit not yet re-verified in this pass | Blocked | Not inspected directly in this refresh | Run focused security TODO search before creating issues |
 
 ---
 
@@ -197,7 +202,40 @@ Recommended follow-up:
 - If the route is absent, create a focused docs-runtime alignment issue: either add the read-only status route or update docs/manifest to say the controller is library/tested but not API-exposed.
 - Avoid mutating sampling/configuration routes until a design review decides whether external control of HALO/PAS is safe.
 
-### 4.6 Improvement Engine — Partially Stale / Needs Classification
+### 4.6 Security TODOs and Empty Exception Handlers — Mostly Tracked / Needs Local Scan
+
+The old audit grouped security TODOs, raw exception leaks, token placeholder risks, schema validation, and empty handlers into broad categories. Current issue/PR evidence shows much of this was already handled by the 2026 hardening push.
+
+Existing security coordination surfaces:
+
+- #783 tracks `HTTPException(detail=str(e))` leakage across 153 call sites.
+- #823 tracks MCP connector raw exception strings reaching the model.
+- #822 tracks substring-based Pilot seal validation.
+- #824 tracks connector fail-open missing-token behavior and retry/circuit-breaker gaps.
+- #825 tracks MCP schema validation at dispatch.
+- #826 tracks connector provenance headers.
+- #841 tracks formal external security review / pen-test planning after hardening.
+
+Existing remediation PRs:
+
+- #881 replaces HTTPException detail leaks with safe messages.
+- #888 replaces substring Pilot seal validation with HMAC-SHA256.
+- #889 validates MCP tool args against inputSchema.
+- #891 sanitizes MCP tool execution errors.
+- #903 adds broad MCP connector tests for dispatch, sanitization, tools, and bridge headers.
+
+Current search posture:
+
+- Broad searches for security TODO/FIXME terms mostly surfaced historical audit/report/tooling files rather than a directly confirmed runtime defect.
+- Broad `pass` / `except Exception` searches surfaced candidates, but not enough context to classify runtime failures vs tooling scripts, docs, validators, or intentional abstract/error-isolation behavior.
+
+Recommended follow-up:
+
+- Do not open broad duplicate security issues from the old audit.
+- Run a local static scan that classifies results by runtime path, test/tooling path, docs/report path, and intentional abstract behavior.
+- Only open focused issues for confirmed current runtime defects not already covered by #783, #822–#826, #841, or their merged PRs.
+
+### 4.7 Improvement Engine — Partially Stale / Needs Classification
 
 The base class still raises `NotImplementedError`, but current file also includes concrete pattern implementations and a registered default pattern set.
 
@@ -283,6 +321,19 @@ Scope:
 - If absent, either add a read-only status endpoint or update README/manifest to remove the API-exposure claim.
 - Do not expose configuration mutation endpoints without design review.
 
+### Issue Candidate — Security Static Scan Follow-Up
+
+**Priority:** Medium  
+**Type:** Security / reliability audit  
+**Status:** Existing issues/PRs cover many known risks; remaining broad TODO/pass/empty-except claims need local classification.
+
+Scope:
+
+- Run a local static scan for TODO/FIXME/security markers, raw exception exposures, empty exception handlers, and pass-only functions.
+- Classify each result by runtime vs test/tooling/docs.
+- Exclude already remediated/tracked findings from #783, #822–#826, #841 and related PRs.
+- Open focused issues only for confirmed current runtime defects.
+
 ### Issue Candidate — Mixed-State Quantum Test Coverage Review
 
 **Priority:** Low-Medium  
@@ -314,9 +365,10 @@ Scope:
 
 Scope:
 
-- Empty exception handlers.
-- Security TODOs.
-- Agents, instance_bridge, memory_retrieval, vector_gen module status.
+- Agents.
+- instance_bridge.
+- memory_retrieval.
+- vector_gen module status.
 
 ---
 
@@ -336,6 +388,9 @@ Scope:
 | Flight Control remaining next steps | Proposed Design / Milestone Candidates |
 | Continuity HALO/PAS controller and tests | Current Canon Evidence |
 | Continuity `/continuity/halo_pas/status` route claim | Current Evidence Gap / Docs-Runtime Alignment Needed |
+| Security TODO/raw exception broad claims | Historical State / Partially Remediated, Requires Current Scan |
+| Security hardening issue/PR set | Current Canon Evidence / Existing Coordination Surface |
+| Empty exception/pass-only broad claim | Current Evidence Gap / Static Scan Needed |
 | Improvement base `NotImplementedError` | Current Canon Evidence / Needs Design Classification |
 | Follow-up work list | Recommended Planning Artifact |
 | Any implementation fixes | Not canon until committed through PR |
@@ -348,7 +403,7 @@ Do not use the November 2025 audit as direct proof of current defects.
 
 Do not implement all findings in one umbrella PR.
 
-Do not create duplicate issues for work already tracked by #761 or resolved by #765/#935.
+Do not create duplicate issues for work already tracked by #761, #783, #822–#826, #841, or resolved by #765/#935 and hardening PRs.
 
 Do not create implementation issues for stale or unverified claims.
 
@@ -356,7 +411,7 @@ Do not treat library/API exposure questions as implementation bugs until intende
 
 Do not expose HALO/PAS configuration mutation endpoints without design review.
 
-Security TODOs require a separate current-evidence pass before issue creation.
+Security TODOs require a separate local static scan and runtime/test/tooling/docs classification before issue creation.
 
 ---
 
@@ -369,6 +424,7 @@ Recommended outcome for this PR:
 - Treat Opal2 as partially recovered: API exists, decorator bug fixed, remaining question is classification/integration/CI coverage.
 - Treat Flight Control as partially recovered/reclassified: Python-JS bridge and infrastructure tests exist; remaining work should be milestone-specific.
 - Treat Continuity/HALO-PAS as implemented at controller/test level, with route exposure requiring docs-runtime verification.
+- Treat broad security TODO/exception findings as partially remediated by existing hardening issues/PRs; require local static scan before opening new security work.
 - Create focused follow-up issues only for findings verified against current `main` and not already tracked.
 - Treat mixed-state quantum implementation as likely resolved unless tests/docs prove a remaining gap.
 - Continue evidence refresh for the remaining historical audit categories.
@@ -391,6 +447,7 @@ assert 'Existing issue #761' in text
 assert 'Opal2 `opal2_api.py` API surface' in text
 assert 'Flight Control Fleet Bridge and infrastructure tests' in text
 assert 'Continuity HALO/PAS controller and tests' in text
+assert 'Security hardening issue/PR set' in text
 assert 'Historical State / Lead List' in text
 assert 'Likely Resolved' in text
 PY

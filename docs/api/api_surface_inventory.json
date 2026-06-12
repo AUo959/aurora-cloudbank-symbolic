@@ -404,6 +404,20 @@
         "It is not an ownership or deployment authority."
       ],
       "notes": "Regenerate before using for current route-level detail."
+    },
+    {
+      "id": "token_usage_api",
+      "owner": "ai-core",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/ai_core/usage_api.py",
+      "mount_path": "/api/usage",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /api/usage.",
+        "api/aurora_api.py includes it via guarded import from modules.ai_core.usage_api."
+      ],
+      "notes": "Token budget usage endpoints: GET /api/usage/me and GET /api/usage/global."
     }
   ]
 }

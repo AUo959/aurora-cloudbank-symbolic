@@ -87,6 +87,7 @@ class AIRequest:
     dlp_tracking: bool = True
     safety_level: str = "high"
     stream: bool = False
+    user_id: str = "anonymous"
 
 
 @dataclass
@@ -243,6 +244,19 @@ class UnifiedAIInterface:
         self.usage_stats: Dict[AIModel, Dict[str, int]] = {}
         _concurrency_limit = int(os.environ.get("AI_CONCURRENCY_LIMIT", "16"))
         self._semaphore = asyncio.Semaphore(_concurrency_limit)
+
+        # Token budget enforcement — import lazily so the rest of the interface
+        # works even if the budget module has import problems.
+        try:
+            from modules.ai_core.token_budget import token_budget as _budget
+            self._budget = _budget
+        except Exception as _budget_err:  # pragma: no cover
+            logger.warning(
+                "TokenBudget initialization failed, continuing without budget enforcement: %s",
+                _budget_err,
+            )
+            self._budget = None
+
         self._initialize_clients()
 
     def _initialize_clients(self):
@@ -345,17 +359,45 @@ class UnifiedAIInterface:
 
         Returns:
             AI response with metadata
+
+        Raises:
+            TokenBudgetExceededError: When a token cap is breached.
         """
+        from modules.ai_core.token_budget import TokenBudgetExceededError
+
         model = await self.select_optimal_model(request, task_type)
         caps = self.CAPABILITIES[model]
 
+        # Pre-call budget check (uses request.max_tokens as conservative estimate)
+        if self._budget is not None:
+            self._budget.check_pre_call(
+                user_id=request.user_id,
+                max_tokens_requested=request.max_tokens,
+                context_tag=request.context_tag,
+            )
+
         try:
             if caps.provider == AIProvider.ANTHROPIC:
-                return await self._execute_anthropic(request, model)
+                response = await self._execute_anthropic(request, model)
             elif caps.provider == AIProvider.OPENAI:
-                return await self._execute_openai(request, model)
+                response = await self._execute_openai(request, model)
             else:
                 raise ValueError(f"Unknown provider: {caps.provider}")
+
+            # Record actual usage after a successful call
+            if self._budget is not None and response.success:
+                self._budget.record_usage(
+                    user_id=request.user_id,
+                    tokens_used=response.tokens_used,
+                    context_tag=request.context_tag,
+                )
+
+            return response
+
+        except TokenBudgetExceededError:
+            # Budget errors indicate limits are reached, not transient failures.
+            # Retrying fallback models would fail again and waste billed tokens.
+            raise
 
         except Exception as e:
             logger.error(f"Model {model.value} failed: {e}")
@@ -379,9 +421,25 @@ class UnifiedAIInterface:
                 try:
                     logger.info(f"Trying fallback model: {fallback_model.value}")
                     if fallback_caps.provider == AIProvider.ANTHROPIC:
-                        return await self._execute_anthropic(request, fallback_model)
+                        response = await self._execute_anthropic(request, fallback_model)
                     elif fallback_caps.provider == AIProvider.OPENAI:
-                        return await self._execute_openai(request, fallback_model)
+                        response = await self._execute_openai(request, fallback_model)
+                    else:
+                        continue
+
+                    # Record actual usage for the successful fallback call
+                    if self._budget is not None and response.success:
+                        self._budget.record_usage(
+                            user_id=request.user_id,
+                            tokens_used=response.tokens_used,
+                            context_tag=request.context_tag,
+                        )
+
+                    return response
+
+                except TokenBudgetExceededError:
+                    raise
+
                 except Exception as fallback_error:
                     logger.error(f"Fallback model {fallback_model.value} failed: {fallback_error}")
                     continue

@@ -10,6 +10,7 @@ Features:
 - Task-specific optimization (reasoning, code generation, agent mode)
 - Performance tracking and cost management
 - DLP-compliant request/response tracking
+- Token budget enforcement (per-request, per-user, global)
 """
 
 from modules.ai_core.unified_ai_interface import (
@@ -20,6 +21,12 @@ from modules.ai_core.unified_ai_interface import (
     ModelCapabilities,
     UnifiedAIInterface,
     unified_ai,
+)
+
+from modules.ai_core.token_budget import (
+    TokenBudget,
+    TokenBudgetExceededError,
+    token_budget,
 )
 
 try:
@@ -44,6 +51,9 @@ __all__ = [
     "ModelCapabilities",
     "UnifiedAIInterface",
     "unified_ai",
+    "TokenBudget",
+    "TokenBudgetExceededError",
+    "token_budget",
     "ClaudeIntegrationHub",
     "claude_hub",
     "sonnet4_hub",

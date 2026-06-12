@@ -949,6 +949,16 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate CASK API routes: %s", e)
 
+# Include Token Usage API routes
+try:
+    from modules.ai_core.usage_api import router as token_usage_router
+    app.include_router(token_usage_router)
+    logger.info("✅ Token Usage API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ Token Usage routes not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Token Usage routes: %s", e)
+
 # Initialize Ethics Gate for high-impact operations
 try:
     from src.aurora.ethics import EthicsGate, GUMASEthicsClient

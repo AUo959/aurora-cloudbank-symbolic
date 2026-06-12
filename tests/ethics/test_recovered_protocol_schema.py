@@ -66,6 +66,7 @@ def test_protocol_records_validate_against_common_schema(
 @pytest.mark.unit
 def test_protocol_records_keep_custody_blockers(protocol_records: list[dict]) -> None:
     for record in protocol_records:
+        assert "custody" in record, f"{record['protocol_id']} must include custody metadata"
         blockers = record["custody"].get("blockers", [])
         assert blockers, f"{record['protocol_id']} must keep explicit custody blockers"
         assert any("hash" in blocker.lower() for blocker in blockers), record["protocol_id"]

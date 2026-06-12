@@ -166,3 +166,104 @@ def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
     bridge_status = client.get("/api/bridge/constellation/status").json()
     assert bridge_status["totalAgents"] == 6
     assert bridge_status["meshStatus"] == "operational"
+
+
+def test_mesh_agents_list(tmp_path: Path) -> None:
+    """GET /api/mesh/agents should return all 6 registered agents with expected fields."""
+
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("fastapi is not installed in this environment")
+
+    project_root = copy_mesh_project(tmp_path)
+    client = TestClient(create_app(project_root))
+
+    response = client.get("/api/mesh/agents")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] == 6
+    assert len(body["agents"]) == 6
+    agent_ids = {agent["agent_id"] for agent in body["agents"]}
+    assert "alex_thorne" in agent_ids
+    # Every agent record must have the required contract fields
+    for agent in body["agents"]:
+        assert "agent_id" in agent
+        assert "status" in agent
+
+
+def test_mesh_agent_get_by_id(tmp_path: Path) -> None:
+    """GET /api/mesh/agents/{agent_id} should return detail for a known agent."""
+
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("fastapi is not installed in this environment")
+
+    project_root = copy_mesh_project(tmp_path)
+    client = TestClient(create_app(project_root))
+
+    response = client.get("/api/mesh/agents/alex_thorne")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True
+    assert body["agent_id"] == "alex_thorne"
+
+
+def test_mesh_agent_get_unknown_returns_404(tmp_path: Path) -> None:
+    """GET /api/mesh/agents/{agent_id} for an unknown agent should return 404."""
+
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("fastapi is not installed in this environment")
+
+    project_root = copy_mesh_project(tmp_path)
+    client = TestClient(create_app(project_root))
+
+    response = client.get("/api/mesh/agents/nonexistent_agent_xyz")
+    assert response.status_code == 404
+
+
+def test_mesh_agent_activate(tmp_path: Path) -> None:
+    """POST /api/mesh/agents/{agent_id}/activate should return success and connected status."""
+
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("fastapi is not installed in this environment")
+
+    project_root = copy_mesh_project(tmp_path)
+    client = TestClient(create_app(project_root))
+
+    response = client.post(
+        "/api/mesh/agents/alex_thorne/activate",
+        json={"activationPhrase": "ORION_ALEX_THORNE_RELAY_ACTIVATE//"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True
+    assert body["agent_id"] == "alex_thorne"
+    assert body["status"] == "connected"
+
+
+def test_mesh_agent_activate_missing_phrase(tmp_path: Path) -> None:
+    """POST /api/mesh/agents/{agent_id}/activate without activationPhrase should return 400."""
+
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("fastapi is not installed in this environment")
+
+    project_root = copy_mesh_project(tmp_path)
+    client = TestClient(create_app(project_root))
+
+    response = client.post("/api/mesh/agents/alex_thorne/activate", json={})
+    assert response.status_code == 400
+    assert "activationPhrase" in response.json()["detail"]
+
+
+def test_mesh_agent_activate_unknown_returns_404(tmp_path: Path) -> None:
+    """POST /api/mesh/agents/{agent_id}/activate for unknown agent should return 404."""
+
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("fastapi is not installed in this environment")
+
+    project_root = copy_mesh_project(tmp_path)
+    client = TestClient(create_app(project_root))
+
+    response = client.post(
+        "/api/mesh/agents/nonexistent_agent_xyz/activate",
+        json={"activationPhrase": "ORION_RELAY_ACTIVATE//"},
+    )
+    assert response.status_code == 404

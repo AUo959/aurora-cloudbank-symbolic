@@ -1,8 +1,4 @@
 """
-from datetime import datetime
-import hashlib
-import json
-import os
 ChatGPT Agent Mode Integration for Aurora CloudBank
 
 This module implements advanced integration capabilities for ChatGPT's new agent mode,
@@ -14,6 +10,7 @@ import logging
 import hashlib
 import json
 import os
+import re
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -276,11 +273,58 @@ class ChatGPTAgentModeIntegration:
             }
             return error_response
 
+    # Whitelist for geometric-algebra expression tokens.  Allows basis-blade
+    # names (e1, e12, …), numbers (including decimals), basic arithmetic
+    # operators and grouping characters.  Anything outside this set is
+    # rejected before the expression is passed to the handler.
+    _GA_EXPR_WHITELIST = re.compile(
+        r"^[0-9a-zA-Z_.+\-*/^() \t]+$"
+    )
+    # Explicit blacklist for dangerous sub-strings that slip past the
+    # whitelist when buried in otherwise-valid-looking strings.
+    _GA_EXPR_BLACKLIST = re.compile(
+        r"(__|\bimport\b|\beval\b|\bexec\b|os\.|sys\.)"
+    )
+
+    _JSON_TYPE_MAP: Dict[str, type] = {
+        "string": str,
+        "boolean": bool,
+        "integer": int,
+        "number": (int, float),
+        "object": dict,
+        "array": list,
+    }
+
     def _validate_parameters(self, parameters: Dict[str, Any], schema: Dict[str, Any]):
-        """Basic parameter validation against JSON schema"""
-        for param in schema.get("required", []):
+        """Validate parameters against JSON schema (required fields, types, enums)."""
+        required = schema.get("required", [])
+        properties = schema.get("properties", {})
+
+        # 1. Required-field presence
+        for param in required:
             if param not in parameters:
                 raise ValueError(f"Required parameter '{param}' missing")
+
+        # 2. Type and enum enforcement for every supplied parameter
+        for param, value in parameters.items():
+            prop_schema = properties.get(param)
+            if prop_schema is None:
+                continue  # unknown extra fields are tolerated here; GA handler does stricter checks
+
+            expected_type = prop_schema.get("type")
+            if expected_type is not None:
+                py_types = self._JSON_TYPE_MAP.get(expected_type)
+                if py_types is not None and not isinstance(value, py_types):
+                    raise TypeError(
+                        f"Parameter '{param}' must be of type '{expected_type}', "
+                        f"got {type(value).__name__!r}"
+                    )
+
+            enum_values = prop_schema.get("enum")
+            if enum_values is not None and value not in enum_values:
+                raise ValueError(
+                    f"Parameter '{param}' must be one of {enum_values!r}, got {value!r}"
+                )
 
     async def _handle_symbolic_processing(self, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """Handle symbolic processing operations with Aurora's engine"""
@@ -305,6 +349,24 @@ class ChatGPTAgentModeIntegration:
             expr_a = parameters["expression_a"]
             expr_b = parameters["expression_b"]
             operation = parameters["operation"]
+
+            # Validate that expressions are strings (type enforcement)
+            if not isinstance(expr_a, str):
+                raise ValueError("expression_a must be a string")
+            if not isinstance(expr_b, str):
+                raise ValueError("expression_b must be a string")
+
+            # Validate expression syntax via whitelist/blacklist
+            for name, expr in (("expression_a", expr_a), ("expression_b", expr_b)):
+                if not self._GA_EXPR_WHITELIST.match(expr):
+                    raise ValueError(
+                        f"'{name}' contains characters not permitted in a "
+                        "geometric-algebra expression"
+                    )
+                if self._GA_EXPR_BLACKLIST.search(expr):
+                    raise ValueError(
+                        f"'{name}' contains a disallowed token"
+                    )
 
             # Use Aurora's geometric algebra module
             if operation == "mult":

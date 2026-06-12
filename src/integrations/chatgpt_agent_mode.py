@@ -10,10 +10,10 @@ import logging
 import hashlib
 import json
 import os
-import re
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from src.integrations._ga_validation import validate_ga_expression
 
 # Handle missing dependencies gracefully
 try:
@@ -273,19 +273,6 @@ class ChatGPTAgentModeIntegration:
             }
             return error_response
 
-    # Whitelist for geometric-algebra expression tokens.  Allows basis-blade
-    # names (e1, e12, …), numbers (including decimals), basic arithmetic
-    # operators and grouping characters.  Anything outside this set is
-    # rejected before the expression is passed to the handler.
-    _GA_EXPR_WHITELIST = re.compile(
-        r"^[0-9a-zA-Z_.+\-*/^() \t]+$"
-    )
-    # Explicit blacklist for dangerous sub-strings that slip past the
-    # whitelist when buried in otherwise-valid-looking strings.
-    _GA_EXPR_BLACKLIST = re.compile(
-        r"(__|\bimport\b|\beval\b|\bexec\b|os\.|sys\.)"
-    )
-
     _JSON_TYPE_MAP: Dict[str, type] = {
         "string": str,
         "boolean": bool,
@@ -358,15 +345,7 @@ class ChatGPTAgentModeIntegration:
 
             # Validate expression syntax via whitelist/blacklist
             for name, expr in (("expression_a", expr_a), ("expression_b", expr_b)):
-                if not self._GA_EXPR_WHITELIST.match(expr):
-                    raise ValueError(
-                        f"'{name}' contains characters not permitted in a "
-                        "geometric-algebra expression"
-                    )
-                if self._GA_EXPR_BLACKLIST.search(expr):
-                    raise ValueError(
-                        f"'{name}' contains a disallowed token"
-                    )
+                validate_ga_expression(name, expr)
 
             # Use Aurora's geometric algebra module
             if operation == "mult":

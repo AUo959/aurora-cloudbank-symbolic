@@ -27,10 +27,11 @@ This PR does not implement fixes.
 
 ## 2. Executive Finding
 
-The historical audit is materially stale. At least two major claims require correction:
+The historical audit is materially stale. At least three major claims require correction:
 
 1. Mixed-state quantum measurement, entropy, and fidelity support now exist in `modules/quantum_simulator/quantum_state.py`.
 2. Opal2 does have an API surface in `modules/opal2/api/opal2_api.py`; the old `routes.py` absence is not enough to conclude there is no API implementation.
+3. Flight Control is not merely an isolated JS-only module; current docs describe a Python-JS Fleet Bridge, FastAPI `/api/fleet/*` router, demos, and integration tests.
 
 Direct current inspection still confirms real recovery targets:
 
@@ -40,6 +41,7 @@ Direct current inspection still confirms real recovery targets:
 - Opal2 appears to be implemented as a standalone FastAPI app in `modules/opal2/api/opal2_api.py`, with health/render/generate/plugins/cache/WebSocket/demo surfaces.
 - Closed issue #765 and merged PR #935 already repaired malformed Opal2 route decorators and added route smoke tests.
 - The remaining Opal2 question is likely main-app integration and lint/CI coverage, not missing API code.
+- Flight Control has current docs and tests for Python-JS bridge, DLP manifests, maintenance orchestration, and docking sequences. Remaining work is future enhancement/classification, not basic integration absence.
 - `src/improvement/engine.py` still has a base `ImprovementPattern.detect()` that raises `NotImplementedError`, while concrete default patterns are implemented.
 
 The peer review pipeline should therefore use this report as a current triage artifact, not as acceptance of the old audit wholesale.
@@ -59,8 +61,11 @@ The peer review pipeline should therefore use this report as a current triage ar
 | Opal2 `routes.py` is absent, but Opal2 API code exists under `opal2_api.py` | Observed | `modules/opal2/api/opal2_api.py` defines a FastAPI app with `/health`, `/render`, `/generate`, `/plugins`, `/cache/stats`, `/cache/clear`, `/ws`, and `/demo` | Do not classify as missing API implementation solely because `routes.py` is absent |
 | Existing Opal2 issue/PR already repaired route decorator breakage | Observed | Issue #765 is closed; PR #935 merged decorator fixes and route smoke tests | Do not reopen decorator issue unless regression is observed |
 | Remaining Opal2 risk is likely integration/classification/CI coverage | Derived | Search for `opal2_api` main-app inclusion did not find current integration evidence; old issues note Opal2 CI exclusions | Verify whether Opal2 is standalone service, mounted app, or intentionally excluded from main API |
+| Flight Control has current integration documentation | Observed | `modules/flight_control/README.md` documents Fleet Bridge client, Python fleet API, demos, event channels, and next steps | Do not classify as unintegrated solely from old audit |
+| Flight Control Python-JS Fleet Bridge is documented as implemented | Observed | `docs/PYTHON_JS_FLEET_BRIDGE.md` says status implemented, documents `/api/fleet/*`, `app.include_router(fleet_bridge_router)`, client polling, data flow, and tests | Treat old JS-only isolation claim as stale or incomplete |
+| Flight Control has infrastructure tests | Observed | `tests/test_flight_control_infrastructure.py` runs JS demos and verifies DLP manifests, maintenance orchestration, docking phases, telemetry, and module exports | Remaining work should focus on future milestones, not basic existence |
+| Flight Control has no obvious open/closed issue tracking the old audit claim | Observed | Search for Flight Control terms returned no matching issues; PR search returned no focused Flight Control recovery PR | Create a new issue only if current direct inspection finds an actionable gap |
 | Improvement Engine base class still raises `NotImplementedError`, but concrete default patterns are implemented | Observed / Derived | `ImprovementPattern.detect()` raises `NotImplementedError`; `ComplexityPattern`, `DuplicateCodePattern`, `LongFunctionPattern`, `MagicNumberPattern`, and `ErrorHandlingPattern` implement detection | Classify as abstract base behavior unless production code instantiates base pattern directly |
-| Flight Control integration status not yet re-verified in this pass | Blocked | Not inspected directly in this refresh | Do not create issue yet; verify first |
 | Continuity API status not yet re-verified in this pass | Blocked | Not inspected directly in this refresh | Do not create issue yet; verify first |
 | Security TODOs from old audit not yet re-verified in this pass | Blocked | Not inspected directly in this refresh | Run focused security TODO search before creating issues |
 
@@ -142,7 +147,30 @@ Recommended follow-up:
 - Create or locate a focused issue only for Opal2 runtime classification/main-app integration/CI coverage if that gap remains.
 - If Opal2 is intentionally standalone, document that status instead of wiring it into `aurora_api.py` by default.
 
-### 4.4 Improvement Engine — Partially Stale / Needs Classification
+### 4.4 Flight Control Integration — Historical Claim Appears Mostly Resolved / Reclassified
+
+The old audit described Flight Control as JavaScript-only with no Python API integration. Current evidence shows a more mature state.
+
+Current Flight Control evidence:
+
+- `modules/flight_control/README.md` documents `station_operations_service.js`, `station_types.js`, `fleet_bridge_client.js`, standalone demos, Python fleet bridge demo, event channels, and next steps.
+- The README explicitly documents a Python-JS Fleet Bridge, where `/api/fleet/*` exposes registered vessels/probes/drones and `FleetBridgeClient` polls and syncs craft into station state.
+- `docs/PYTHON_JS_FLEET_BRIDGE.md` is marked implemented and documents the Python backend, `src/integrations/fleet_bridge.py`, `/api/fleet/*` endpoints, `api/aurora_api.py app.include_router(fleet_bridge_router)`, JS client polling, schema mapping, tests, and data flow.
+- `tests/test_flight_control_infrastructure.py` verifies infrastructure demos, DLP manifest generation, maintenance orchestration workflow, docking sequence phases, telemetry bus integration, and JS module exports.
+
+Remaining questions:
+
+- Is Flight Control intended to remain JS-led with Python fleet data synchronization, or should Python expose additional station-operations routes?
+- Are remaining README next steps still desired: station snapshot persistence, expanded maintenance/turnaround orchestration, full docking phases, WebSocket push replacing polling?
+- Does CI reliably run the Node-based flight control tests, or are they optional/local-only?
+
+Recommended follow-up:
+
+- Do not create an issue saying Flight Control has no Python integration.
+- Treat Flight Control as partially recovered: bridge and infrastructure exist; remaining work is future milestone/classification.
+- If needed, create a focused issue for one specific next milestone, such as DLP manifest persistence, WebSocket push, or production CI coverage for Node demos.
+
+### 4.5 Improvement Engine — Partially Stale / Needs Classification
 
 The base class still raises `NotImplementedError`, but current file also includes concrete pattern implementations and a registered default pattern set.
 
@@ -202,6 +230,19 @@ Scope:
 - If internal-only, document that status clearly.
 - Confirm whether Opal2 remains excluded from broad lint/CI and whether targeted tests are sufficient.
 
+### Issue Candidate — Flight Control Remaining Milestone Classification
+
+**Priority:** Low-Medium  
+**Type:** Architecture / integration / CI coverage  
+**Status:** Historical isolation claim appears stale; remaining work should be milestone-specific.
+
+Scope:
+
+- Confirm intended runtime status: JS-led station operations with Python fleet bridge, or additional Python API exposure.
+- Decide whether README next steps are active backlog items or future ideas.
+- Verify whether Node-based Flight Control tests run in CI.
+- Open focused issues only for confirmed desired milestones such as DLP persistence, WebSocket push, or docking-phase hardening.
+
 ### Issue Candidate — Mixed-State Quantum Test Coverage Review
 
 **Priority:** Low-Medium  
@@ -233,7 +274,6 @@ Scope:
 
 Scope:
 
-- Flight Control integration boundary.
 - Continuity API status.
 - Empty exception handlers.
 - Security TODOs.
@@ -252,6 +292,9 @@ Scope:
 | Opal2 `routes.py` absence | Historical State / Misleading Narrow Claim |
 | Opal2 `opal2_api.py` API surface | Current Canon Evidence |
 | Opal2 main-app integration question | Current Evidence Gap / Architecture Classification Needed |
+| Flight Control JS-only isolation claim | Historical State / Mostly Resolved or Reclassified |
+| Flight Control Fleet Bridge and infrastructure tests | Current Canon Evidence |
+| Flight Control remaining next steps | Proposed Design / Milestone Candidates |
 | Improvement base `NotImplementedError` | Current Canon Evidence / Needs Design Classification |
 | Follow-up work list | Recommended Planning Artifact |
 | Any implementation fixes | Not canon until committed through PR |
@@ -281,6 +324,7 @@ Recommended outcome for this PR:
 - Accept this report as a corrected current-evidence triage artifact.
 - Route HR recovery work through existing issue #761.
 - Treat Opal2 as partially recovered: API exists, decorator bug fixed, remaining question is classification/integration/CI coverage.
+- Treat Flight Control as partially recovered/reclassified: Python-JS bridge and infrastructure tests exist; remaining work should be milestone-specific.
 - Create focused follow-up issues only for findings verified against current `main` and not already tracked.
 - Treat mixed-state quantum implementation as likely resolved unless tests/docs prove a remaining gap.
 - Continue evidence refresh for the remaining historical audit categories.
@@ -301,6 +345,7 @@ text = p.read_text()
 assert 'Current Evidence Ledger' in text
 assert 'Existing issue #761' in text
 assert 'Opal2 `opal2_api.py` API surface' in text
+assert 'Flight Control Fleet Bridge and infrastructure tests' in text
 assert 'Historical State / Lead List' in text
 assert 'Likely Resolved' in text
 PY

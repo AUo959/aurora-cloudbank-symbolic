@@ -1,0 +1,5 @@
+.backup/
+*.backup
+.archive/
+*.bak
+.venv/

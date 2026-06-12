@@ -1,7 +1,7 @@
 # Runtime Path Drift Ledger
 
 **Status:** Current repo evidence review
-**Last reviewed:** 2026-06-09
+**Last reviewed:** 2026-06-12
 **Purpose:** Track stale, conflicting, legacy, test-only, and unverified runtime
 or operator entrypoint claims.
 
@@ -31,7 +31,7 @@ entrypoints, or change runtime behavior.
 | `/quantum/*` as the quantum simulator mount | legacy/stale for current router | `modules/quantum_simulator/api.py` declares `APIRouter(prefix="/simulate")`. Some older docs describe `/quantum/*`. | Use `/simulate/*` for current Quantum Simulator API unless a migration explicitly reintroduces `/quantum`. |
 | `src/api/mesh_api.js` as production mesh authority | test-only, unverified production mount | The Express router is mounted in `tests/node/mesh_api_activation.test.js`. No current production server mount was found in this review. | Use `src/servers/l2_integration_server.py` and `src/mesh/runtime.py` for canonical mesh runtime endpoints. |
 | `src/servers/l2_integration_server.py` | canonical, standalone | Defines `create_app()` with `/api/mesh/*`, `/api/bridge/*`, `/ws/mesh`, `/chamber`, and dashboard routes; covered by `tests/test_mesh_router_v1.py`. | Keep as Mesh Runtime V1 entrypoint. |
-| `skills/mesh-router/references/runtime-contract.md` `/api/mesh/agents` routes | unverified contract drift | The contract lists `/api/mesh/agents`, `/api/mesh/agents/{id}`, and `/api/mesh/agents/{id}/activate`; current `src/servers/l2_integration_server.py#create_app()` evidence does not show those mesh-agent routes. | Keep the implemented surface documented in `RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md`; add or verify the missing routes in a runtime issue before treating them as active. |
+| `skills/mesh-router/references/runtime-contract.md` `/api/mesh/agents` routes | **resolved** — canonical, active | Implemented in `create_app()` in PR #1011 (issue #764). `GET /api/mesh/agents`, `GET /api/mesh/agents/{id}`, and `POST /api/mesh/agents/{id}/activate` are now live in the Python mesh runtime, covered by `tests/test_mesh_router_v1.py`. | Routes are canonical. No further drift action needed. |
 | `src/bridge/enhanced_api_bridge.js` as route authority | superseded, test-covered | Defines bridge handlers and is tested by node tests. Current canonical route surface is the Python mesh runtime. | Treat as compatibility bridge until a deployment surface mounts it explicitly. |
 | `src/bridge/api_bridge_server.js` | standalone | Instantiated by station initialization scripts and tested by `tests/node/api_bridge_server.test.js`. | Document as standalone helper, not a FastAPI route. |
 | `modules/hr/rd_api.py` and `modules/hr_system/api/hr_routes.py` relationship | canonical split | R&D productization is mounted at `/rd`; HR staffing and character generation is mounted at `/hr_system`. | Keep both inventory records; do not collapse them into one owner. |

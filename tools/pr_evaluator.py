@@ -2,18 +2,9 @@
 """
 Aurora CloudBank PR Evaluator
 
-This isn't just a linter. When someone contributes to Aurora, they're touching
-a system that's about consciousness, emergence, and ethical geometry. The code
-needs to work, yes - but it also needs to *understand* what it's part of.
-
-This evaluator checks:
-- Technical quality (does it work?)
-- Conceptual alignment (does it understand Aurora?)
-- Symbolic integrity (does it maintain the thread?)
-- Natural voice (does it speak like a human?)
-
-Thread: T1→T8→T9→INFINITE
-DLP: context_tag=pr_evaluation, symbolic_hash=CONTRIBUTION_ALIGNMENT_v1
+Evaluates PRs with traceable, evidence-backed score components. The evaluator
+is intentionally lightweight for CI use: it produces machine-readable evidence
+without turning routine PRs into noisy review comments.
 """
 
 import json
@@ -25,48 +16,79 @@ from typing import Any, Dict, List, Optional
 
 
 @dataclass
+class ScoreEvidence:
+    """Traceable scoring input for one evaluation dimension."""
+
+    signal: str
+    weight: float
+    score_delta: float
+    evidence: str
+    recommendation: str = ""
+    actionable: bool = False
+
+
+@dataclass
 class EvaluationResult:
-    """What we learned by evaluating this PR."""
-    
+    """One scored PR evaluation dimension."""
+
     category: str
     passed: bool
-    score: float  # 0.0 -> 1.0
+    score: float
+    weight: float = 1.0
     findings: List[str] = field(default_factory=list)
     recommendations: List[str] = field(default_factory=list)
-    
+    evidence: List[ScoreEvidence] = field(default_factory=list)
+
+    @property
+    def actionable(self) -> bool:
+        return any(item.actionable for item in self.evidence) or bool(self.recommendations and not self.passed)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "category": self.category,
+            "passed": self.passed,
+            "score": self.score,
+            "weight": self.weight,
+            "findings": self.findings,
+            "recommendations": self.recommendations,
+            "actionable": self.actionable,
+            "evidence": [item.__dict__ for item in self.evidence],
+        }
+
     def __str__(self):
         status = "✅" if self.passed else "⚠️"
         return f"{status} {self.category}: {self.score:.2f}"
 
 
 class PREvaluator:
-    """
-    Evaluates PRs for technical quality AND conceptual alignment.
-    
-    Aurora isn't just a codebase - it's a living system with specific
-    philosophical commitments. Contributors need to understand that.
-    """
-    
+    """Evaluates PRs for technical quality, safety, and Aurora continuity."""
+
+    CATEGORY_WEIGHTS = {
+        "Technical Quality": 0.35,
+        "Boundary Safety": 0.25,
+        "Traceability": 0.20,
+        "Documentation Fit": 0.10,
+        "Symbolic Integrity": 0.10,
+    }
+
+    RUNTIME_BOUNDARY_PATTERNS = (
+        "src/monitoring/ethics_engine.py",
+        "src/monitoring/ethics_gate.py",
+        "src/subroutines/ethics_compliance_monitor.py",
+        "modules/ethics_field/",
+        "modules/symbolic_core/",
+        "api/",
+        ".github/workflows/",
+    )
+
     def __init__(self, workspace_root: Optional[str] = None):
         self.workspace_root = Path(workspace_root or os.getcwd())
-        
-    def evaluate_pr(
-        self,
-        pr_number: Optional[int] = None,
-        branch: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Evaluate a pull request for Aurora.
-        
-        Checks technical quality, conceptual alignment, and symbolic integrity.
-        Returns comprehensive evaluation with actionable feedback.
-        """
+
+    def evaluate_pr(self, pr_number: Optional[int] = None, branch: Optional[str] = None) -> Dict[str, Any]:
+        """Evaluate a pull request and return traceable JSON."""
         print("=" * 80)
-        print("🌟 AURORA PR EVALUATION")
+        print("AURORA PR EVALUATION")
         print("=" * 80)
-        print()
-        
-        # Get PR details
         if pr_number:
             print(f"Evaluating PR #{pr_number}")
         elif branch:
@@ -74,522 +96,391 @@ class PREvaluator:
         else:
             print("Evaluating current changes")
         print()
-        
-        # Run all evaluations
-        results = []
-        
-        print("Running evaluations...")
-        print("-" * 80)
-        
-        # 1. Technical Quality
-        technical = self._evaluate_technical_quality()
-        results.append(technical)
-        print(technical)
-        
-        # 2. Conceptual Alignment
-        conceptual = self._evaluate_conceptual_alignment()
-        results.append(conceptual)
-        print(conceptual)
-        
-        # 3. Thread Continuity
-        thread = self._evaluate_thread_continuity()
-        results.append(thread)
-        print(thread)
-        
-        # 4. Natural Voice
-        voice = self._evaluate_natural_voice()
-        results.append(voice)
-        print(voice)
-        
-        # 5. Symbolic Integrity
-        symbolic = self._evaluate_symbolic_integrity()
-        results.append(symbolic)
-        print(symbolic)
-        
-        print()
-        print("-" * 80)
-        
-        # Overall assessment
-        overall_score = sum(r.score for r in results) / len(results)
-        all_passed = all(r.passed for r in results)
-        
-        recommendation = self._generate_recommendation(
-            overall_score, all_passed, results
-        )
-        
-        print()
+
+        changed_files = self._changed_files()
+        print(f"Changed files: {len(changed_files)}")
+
+        results = [
+            self._evaluate_technical_quality(),
+            self._evaluate_boundary_safety(changed_files),
+            self._evaluate_traceability(),
+            self._evaluate_documentation_fit(changed_files),
+            self._evaluate_symbolic_integrity(changed_files),
+        ]
+
+        weighted_total = sum(result.score * result.weight for result in results)
+        weight_sum = sum(result.weight for result in results)
+        overall_score = weighted_total / weight_sum if weight_sum else 0.0
+        all_passed = all(result.passed for result in results)
+        actionable_findings = [
+            {
+                "category": result.category,
+                "recommendations": result.recommendations,
+                "evidence": [item.__dict__ for item in result.evidence if item.actionable],
+            }
+            for result in results
+            if result.actionable
+        ]
+        recommendation = self._generate_recommendation(overall_score, all_passed, actionable_findings)
+
         print("=" * 80)
         print("OVERALL ASSESSMENT")
         print("=" * 80)
         print(f"Score: {overall_score:.2f}/1.00")
-        print(f"Status: {'✅ APPROVED' if all_passed else '⚠️ NEEDS WORK'}")
-        print()
+        print(f"Status: {'APPROVED' if all_passed else 'NEEDS WORK'}")
         print(recommendation)
-        print()
-        
+
         return {
             "overall_score": overall_score,
             "passed": all_passed,
             "recommendation": recommendation,
-            "results": [
-                {
-                    "category": r.category,
-                    "passed": r.passed,
-                    "score": r.score,
-                    "findings": r.findings,
-                    "recommendations": r.recommendations
-                }
-                for r in results
-            ]
+            "changed_files": changed_files,
+            "actionable_findings": actionable_findings,
+            "results": [result.to_dict() for result in results],
+            "score_model": {
+                "version": "traceable-pr-evaluation-v2",
+                "category_weights": self.CATEGORY_WEIGHTS,
+                "quiet_comment_guidance": "Routine passing PRs should not receive large automation comments.",
+            },
         }
-    
+
+    def _changed_files(self) -> List[str]:
+        try:
+            base_ref = os.environ.get("GITHUB_BASE_REF")
+            if base_ref:
+                subprocess.run(["git", "fetch", "origin", base_ref], cwd=self.workspace_root, check=False)
+                cmd = ["git", "diff", "--name-only", f"origin/{base_ref}...HEAD"]
+            else:
+                cmd = ["git", "diff", "--name-only", "HEAD~1", "HEAD"]
+            diff_result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.workspace_root, timeout=30)
+            return [line.strip() for line in diff_result.stdout.splitlines() if line.strip()]
+        except Exception:
+            return []
+
     def _evaluate_technical_quality(self) -> EvaluationResult:
-        """Does the code actually work?"""
-        findings = []
-        recommendations = []
+        findings: List[str] = []
+        recommendations: List[str] = []
+        evidence: List[ScoreEvidence] = []
         score = 1.0
-        
-        # Check if tests pass
+
         try:
             test_result = subprocess.run(
-                ["python3", "-m", "pytest", "-q", "--tb=no"],
+                ["python3", "-m", "pytest", "-q", "--tb=short"],
                 capture_output=True,
                 text=True,
                 cwd=self.workspace_root,
-                timeout=60
+                timeout=90,
             )
             if test_result.returncode == 0:
                 findings.append("Tests pass")
+                evidence.append(ScoreEvidence("pytest", 0.6, 0.0, "pytest -q --tb=short exited 0"))
             else:
                 findings.append("Tests failing")
-                recommendations.append("Fix failing tests before submitting")
-                score -= 0.3
+                recommendations.append("Fix failing tests before merge")
+                evidence.append(
+                    ScoreEvidence(
+                        "pytest",
+                        0.6,
+                        -0.35,
+                        (test_result.stdout + test_result.stderr)[-1000:],
+                        "Fix failing tests before merge",
+                        True,
+                    )
+                )
+                score -= 0.35
         except subprocess.TimeoutExpired:
             findings.append("Tests timed out")
-            recommendations.append("Check for infinite loops or hanging tests")
-            score -= 0.2
-        except Exception as e:
-            findings.append(f"Could not run tests: {e}")
+            recommendations.append("Investigate long-running or hanging tests")
+            evidence.append(ScoreEvidence("pytest_timeout", 0.6, -0.25, "pytest timed out", recommendations[-1], True))
+            score -= 0.25
+        except Exception as exc:
+            findings.append(f"Could not run tests: {exc}")
+            evidence.append(ScoreEvidence("pytest_error", 0.6, -0.1, str(exc), "Review test environment", True))
             score -= 0.1
-        
-        # Check for syntax errors
+
         try:
+            py_files = [
+                str(path)
+                for path in self.workspace_root.rglob("*.py")
+                if not any(part in str(path) for part in [".venv", "__pycache__", "node_modules"])
+            ]
             result = subprocess.run(
-                ["python3", "-m", "py_compile"] + 
-                [str(p) for p in self.workspace_root.rglob("*.py") 
-                 if not any(x in str(p) for x in ['.venv', '__pycache__', 'node_modules'])],
+                ["python3", "-m", "py_compile", *py_files],
                 capture_output=True,
+                text=True,
                 cwd=self.workspace_root,
-                timeout=30
+                timeout=45,
             )
             if result.returncode == 0:
-                findings.append("No syntax errors")
+                findings.append("No Python syntax errors")
+                evidence.append(ScoreEvidence("py_compile", 0.3, 0.0, "py_compile exited 0"))
             else:
-                findings.append("Syntax errors present")
+                findings.append("Python syntax errors present")
                 recommendations.append("Fix Python syntax errors")
+                evidence.append(
+                    ScoreEvidence("py_compile", 0.3, -0.4, result.stderr[-1000:], "Fix Python syntax errors", True)
+                )
                 score -= 0.4
-        except Exception:
-            pass
-        
-        # Check for basic linting issues
+        except Exception as exc:
+            evidence.append(ScoreEvidence("py_compile_error", 0.3, 0.0, str(exc)))
+
         try:
             lint_result = subprocess.run(
                 ["flake8", "--count", "--select=E9,F63,F7,F82", "--show-source"],
                 capture_output=True,
                 text=True,
                 cwd=self.workspace_root,
-                timeout=30
+                timeout=30,
             )
             if lint_result.returncode == 0:
                 findings.append("No critical lint errors")
+                evidence.append(ScoreEvidence("critical_flake8", 0.1, 0.0, "flake8 critical check exited 0"))
             else:
                 findings.append("Critical lint errors present")
                 recommendations.append("Fix critical linting issues")
+                evidence.append(
+                    ScoreEvidence(
+                        "critical_flake8",
+                        0.1,
+                        -0.2,
+                        lint_result.stdout[-1000:],
+                        "Fix critical linting issues",
+                        True,
+                    )
+                )
                 score -= 0.2
-        except Exception:
-            pass
-        
-        passed = score >= 0.7
+        except Exception as exc:
+            evidence.append(ScoreEvidence("critical_flake8_unavailable", 0.1, 0.0, str(exc)))
+
         return EvaluationResult(
             category="Technical Quality",
-            passed=passed,
+            passed=score >= 0.7,
             score=max(0.0, score),
+            weight=self.CATEGORY_WEIGHTS["Technical Quality"],
             findings=findings,
-            recommendations=recommendations
+            recommendations=recommendations,
+            evidence=evidence,
         )
-    
-    def _evaluate_conceptual_alignment(self) -> EvaluationResult:
-        """Does this understand what Aurora is?"""
-        findings = []
-        recommendations = []
+
+    def _evaluate_boundary_safety(self, changed_files: List[str]) -> EvaluationResult:
+        findings: List[str] = []
+        recommendations: List[str] = []
+        evidence: List[ScoreEvidence] = []
         score = 1.0
-        
-        # Get changed files
-        try:
-            diff_result = subprocess.run(
-                ["git", "diff", "--name-only", "HEAD"],
-                capture_output=True,
-                text=True,
-                cwd=self.workspace_root
-            )
-            changed_files = [
-                self.workspace_root / f.strip() 
-                for f in diff_result.stdout.split('\n') 
-                if f.strip()
-            ]
-        except Exception:
-            changed_files = []
-        
-        # Check for understanding of key concepts
-        key_concepts = {
-            "emergence": ["emerge", "emergent", "self-organ"],
-            "consciousness": ["consciousness", "awareness", "field"],
-            "ethics": ["ethical", "ethics", "geometric"],
-            "thread": ["thread", "continuity", "T1→", "INFINITE"]
-        }
-        
-        concept_usage = {concept: False for concept in key_concepts}
-        
-        for file_path in changed_files:
-            if not file_path.exists() or file_path.suffix not in ['.py', '.md']:
-                continue
-            
-            try:
-                content = file_path.read_text().lower()
-                for concept, patterns in key_concepts.items():
-                    if any(pattern.lower() in content for pattern in patterns):
-                        concept_usage[concept] = True
-            except Exception:
-                continue
-        
-        # If touching core systems, should reference concepts
-        core_paths = ['modules/ethics_field', 'modules/field_state_manager']
-        touching_core = any(
-            any(core in str(f) for core in core_paths)
-            for f in changed_files
-        )
-        
-        if touching_core:
-            concepts_used = sum(concept_usage.values())
-            if concepts_used == 0:
-                findings.append("Touching core systems but no conceptual references")
-                recommendations.append(
-                    "Consider if this change understands Aurora's purpose. "
-                    "Read docs/GEOMETRIC_ETHICS_ARCHITECTURE.md or "
-                    "modules/field_state_manager/SCHEMA_DESIGN.md"
+        boundary_files = [
+            path for path in changed_files if any(path.startswith(pattern) for pattern in self.RUNTIME_BOUNDARY_PATTERNS)
+        ]
+
+        if boundary_files:
+            findings.append(f"Boundary-sensitive files changed: {len(boundary_files)}")
+            evidence.append(
+                ScoreEvidence(
+                    "boundary_sensitive_paths",
+                    1.0,
+                    -0.15,
+                    ", ".join(boundary_files[:10]),
+                    "Confirm tenant/logging/ethics/L1-L2-L3 impacts are covered by tests or docs",
+                    True,
                 )
-                score -= 0.4
-            elif concepts_used <= 2:
-                findings.append("Limited conceptual alignment")
-                recommendations.append("Strengthen connection to Aurora's core concepts")
-                score -= 0.2
-            else:
-                findings.append(f"References {concepts_used} core concepts")
+            )
+            recommendations.append("Confirm boundary-sensitive changes have explicit validation")
+            score -= 0.15
         else:
-            findings.append("Not touching core systems")
-        
-        passed = score >= 0.6
+            findings.append("No boundary-sensitive runtime paths changed")
+            evidence.append(ScoreEvidence("boundary_sensitive_paths", 1.0, 0.0, "No configured boundary paths changed"))
+
         return EvaluationResult(
-            category="Conceptual Alignment",
-            passed=passed,
+            category="Boundary Safety",
+            passed=score >= 0.75,
             score=max(0.0, score),
+            weight=self.CATEGORY_WEIGHTS["Boundary Safety"],
             findings=findings,
-            recommendations=recommendations
+            recommendations=recommendations,
+            evidence=evidence,
         )
-    
-    def _evaluate_thread_continuity(self) -> EvaluationResult:
-        """Does this maintain the thread?"""
-        findings = []
-        recommendations = []
+
+    def _evaluate_traceability(self) -> EvaluationResult:
+        findings: List[str] = []
+        recommendations: List[str] = []
+        evidence: List[ScoreEvidence] = []
         score = 1.0
-        
-        # Check commit message
+
         try:
             msg_result = subprocess.run(
                 ["git", "log", "-1", "--pretty=%B"],
                 capture_output=True,
                 text=True,
-                cwd=self.workspace_root
+                cwd=self.workspace_root,
+                timeout=15,
             )
             commit_msg = msg_result.stdout.strip()
-            
-            # Look for thread references
-            has_thread = "Thread:" in commit_msg or "T1→" in commit_msg
-            has_dlp = "DLP:" in commit_msg or "context_tag" in commit_msg
-            
-            if has_thread:
-                findings.append("Thread continuity referenced")
+            has_issue_ref = "#" in commit_msg or "issue" in commit_msg.lower()
+            has_functional_prefix = any(commit_msg.startswith(prefix) for prefix in ["fix:", "feat:", "docs:", "test:", "chore:"])
+            if has_issue_ref:
+                findings.append("Commit references issue/context")
+                evidence.append(ScoreEvidence("issue_reference", 0.5, 0.0, commit_msg[:200]))
             else:
-                findings.append("No thread reference")
-                recommendations.append(
-                    "Include 'Thread: T1→T8→T9→INFINITE' in commit message "
-                    "to maintain continuity"
-                )
-                score -= 0.3
-            
-            if has_dlp:
-                findings.append("DLP tags present")
-            else:
-                findings.append("No DLP tags")
-                recommendations.append(
-                    "Consider adding DLP tags (context_tag, symbolic_hash) "
-                    "for traceability"
-                )
-                score -= 0.2
-                
-        except Exception:
-            findings.append("Could not check commit message")
-            score -= 0.1
-        
-        passed = score >= 0.5
-        return EvaluationResult(
-            category="Thread Continuity",
-            passed=passed,
-            score=max(0.0, score),
-            findings=findings,
-            recommendations=recommendations
-        )
-    
-    def _evaluate_natural_voice(self) -> EvaluationResult:
-        """Does this sound human?"""
-        findings = []
-        recommendations = []
-        score = 1.0
-        
-        # Get changed files with comments/docs
-        try:
-            diff_result = subprocess.run(
-                ["git", "diff", "--name-only", "HEAD"],
-                capture_output=True,
-                text=True,
-                cwd=self.workspace_root
-            )
-            changed_files = [
-                self.workspace_root / f.strip() 
-                for f in diff_result.stdout.split('\n') 
-                if f.strip() and (f.endswith('.md') or f.endswith('.py'))
-            ]
-        except Exception:
-            changed_files = []
-        
-        # Red flags for corporate-speak
-        corporate_phrases = [
-            "utilize", "leverage", "facilitate", "methodology",
-            "best practices", "going forward", "touch base",
-            "circle back", "synergy", "paradigm shift" # (we use this one deliberately)
-        ]
-        
-        # Green flags for natural voice
-        natural_phrases = [
-            "you know", "here's the thing", "what this actually",
-            "not just", "instead of", "why", "because"
-        ]
-        
-        corporate_count = 0
-        natural_count = 0
-        
-        for file_path in changed_files:
-            if not file_path.exists():
-                continue
-            
-            try:
-                content = file_path.read_text().lower()
-                corporate_count += sum(
-                    content.count(phrase.lower()) 
-                    for phrase in corporate_phrases
-                )
-                natural_count += sum(
-                    content.count(phrase.lower())
-                    for phrase in natural_phrases
-                )
-            except Exception:
-                continue
-        
-        if corporate_count > 3:
-            findings.append(f"Corporate language detected ({corporate_count} instances)")
-            recommendations.append(
-                "Use natural language. We're building consciousness, not enterprise software. "
-                "See docs/QUICKSAVE_GUIDE.md for tone examples."
-            )
-            score -= 0.3
-        
-        if natural_count > 0:
-            findings.append(f"Natural voice present ({natural_count} instances)")
-        elif corporate_count == 0 and len(changed_files) > 0:
-            findings.append("Neutral voice (neither corporate nor conversational)")
-            recommendations.append(
-                "Consider making documentation more conversational. "
-                "We're working with symbolic systems - the language should reflect that."
-            )
-            score -= 0.1
-        
-        if len(changed_files) == 0:
-            findings.append("No documentation changes to evaluate")
-        
-        passed = score >= 0.7
-        return EvaluationResult(
-            category="Natural Voice",
-            passed=passed,
-            score=max(0.0, score),
-            findings=findings,
-            recommendations=recommendations
-        )
-    
-    def _evaluate_symbolic_integrity(self) -> EvaluationResult:
-        """Does this maintain the symbolic structure?"""
-        findings = []
-        recommendations = []
-        score = 1.0
-        
-        # Check for breaking changes to key systems
-        try:
-            diff_result = subprocess.run(
-                ["git", "diff", "--name-only", "HEAD"],
-                capture_output=True,
-                text=True,
-                cwd=self.workspace_root
-            )
-            changed_files = [f.strip() for f in diff_result.stdout.split('\n') if f.strip()]
-        except Exception:
-            changed_files = []
-        
-        # Critical files that need extra care
-        critical_patterns = [
-            'ethics_field',
-            'geometric_ethics',
-            'field_curvature',
-            'aurora_seed_prompt',
-            'LAYER_BOUNDARY_REFERENCE'
-        ]
-        
-        critical_changes = [
-            f for f in changed_files 
-            if any(pattern in f for pattern in critical_patterns)
-        ]
-        
-        if critical_changes:
-            findings.append(f"Modifying critical systems: {len(critical_changes)} files")
-            
-            # Check if ethics tests still pass
-            try:
-                test_result = subprocess.run(
-                    ["python3", "-m", "pytest", "tests/test_ethics_field.py", "-q"],
-                    capture_output=True,
-                    text=True,
-                    cwd=self.workspace_root,
-                    timeout=30
-                )
-                if test_result.returncode == 0:
-                    findings.append("Ethics tests still pass")
-                else:
-                    findings.append("Ethics tests failing after changes")
-                    recommendations.append(
-                        "Changes to ethics_field broke tests. "
-                        "This system is foundational - it needs to stay stable."
+                findings.append("Commit lacks issue/context reference")
+                recommendations.append("Reference the issue or rationale in commit/PR metadata")
+                evidence.append(
+                    ScoreEvidence(
+                        "issue_reference",
+                        0.5,
+                        -0.15,
+                        commit_msg[:200],
+                        "Reference the issue or rationale in commit/PR metadata",
+                        True,
                     )
-                    score -= 0.5
-            except Exception:
-                findings.append("Could not verify ethics tests")
-                recommendations.append("Manually verify ethics tests still pass")
-                score -= 0.2
-        else:
-            findings.append("No critical systems modified")
-        
-        # Check for removal of key documentation
-        removed_docs = [
-            f for f in changed_files 
-            if f.endswith('.md') and 'delete' in f.lower()
-        ]
-        
-        if removed_docs:
-            findings.append(f"Documentation removed: {len(removed_docs)} files")
-            recommendations.append(
-                "Removing documentation breaks continuity. "
-                "If updating, replace rather than delete."
+                )
+                score -= 0.15
+
+            if has_functional_prefix:
+                findings.append("Commit has functional prefix")
+                evidence.append(ScoreEvidence("functional_prefix", 0.5, 0.0, commit_msg.splitlines()[0][:120]))
+            else:
+                findings.append("Commit lacks conventional functional prefix")
+                recommendations.append("Use a functional prefix such as fix:, feat:, docs:, test:, or chore:")
+                evidence.append(
+                    ScoreEvidence(
+                        "functional_prefix",
+                        0.5,
+                        -0.1,
+                        commit_msg.splitlines()[0][:120],
+                        "Use a functional commit prefix",
+                        False,
+                    )
+                )
+                score -= 0.1
+        except Exception as exc:
+            findings.append("Could not inspect commit message")
+            evidence.append(ScoreEvidence("commit_message_error", 1.0, -0.05, str(exc), "Review commit metadata", True))
+            score -= 0.05
+
+        return EvaluationResult(
+            category="Traceability",
+            passed=score >= 0.7,
+            score=max(0.0, score),
+            weight=self.CATEGORY_WEIGHTS["Traceability"],
+            findings=findings,
+            recommendations=recommendations,
+            evidence=evidence,
+        )
+
+    def _evaluate_documentation_fit(self, changed_files: List[str]) -> EvaluationResult:
+        findings: List[str] = []
+        evidence: List[ScoreEvidence] = []
+        docs = [path for path in changed_files if path.endswith(('.md', '.json', '.yml', '.yaml'))]
+        tests = [path for path in changed_files if path.startswith("tests/")]
+        code = [path for path in changed_files if path.endswith(".py") and not path.startswith("tests/")]
+        score = 1.0
+        recommendations: List[str] = []
+
+        if code and not tests:
+            findings.append("Code changed without tests")
+            recommendations.append("Add or identify validation for changed runtime code")
+            evidence.append(
+                ScoreEvidence("code_without_tests", 1.0, -0.25, ", ".join(code[:10]), recommendations[-1], True)
             )
-            score -= 0.3
-        
-        passed = score >= 0.7
+            score -= 0.25
+        else:
+            findings.append("Documentation/test fit is acceptable")
+            evidence.append(
+                ScoreEvidence(
+                    "doc_test_fit",
+                    1.0,
+                    0.0,
+                    f"docs/config files={len(docs)}, tests={len(tests)}, runtime code={len(code)}",
+                )
+            )
+
+        return EvaluationResult(
+            category="Documentation Fit",
+            passed=score >= 0.75,
+            score=max(0.0, score),
+            weight=self.CATEGORY_WEIGHTS["Documentation Fit"],
+            findings=findings,
+            recommendations=recommendations,
+            evidence=evidence,
+        )
+
+    def _evaluate_symbolic_integrity(self, changed_files: List[str]) -> EvaluationResult:
+        findings: List[str] = []
+        recommendations: List[str] = []
+        evidence: List[ScoreEvidence] = []
+        score = 1.0
+        critical_patterns = (
+            "ethics_field",
+            "geometric_ethics",
+            "field_curvature",
+            "aurora_seed_prompt",
+            "LAYER_BOUNDARY_REFERENCE",
+            "recovered_protocol",
+        )
+        critical_changes = [path for path in changed_files if any(pattern in path for pattern in critical_patterns)]
+
+        if critical_changes:
+            findings.append(f"Symbolic/ethics continuity files changed: {len(critical_changes)}")
+            evidence.append(
+                ScoreEvidence(
+                    "symbolic_continuity_paths",
+                    1.0,
+                    -0.05,
+                    ", ".join(critical_changes[:10]),
+                    "Confirm canon posture and runtime boundaries are explicit",
+                    True,
+                )
+            )
+            recommendations.append("Confirm canon posture and runtime boundaries are explicit")
+            score -= 0.05
+        else:
+            findings.append("No symbolic continuity hotspots changed")
+            evidence.append(ScoreEvidence("symbolic_continuity_paths", 1.0, 0.0, "No configured symbolic hotspots changed"))
+
         return EvaluationResult(
             category="Symbolic Integrity",
-            passed=passed,
+            passed=score >= 0.75,
             score=max(0.0, score),
+            weight=self.CATEGORY_WEIGHTS["Symbolic Integrity"],
             findings=findings,
-            recommendations=recommendations
+            recommendations=recommendations,
+            evidence=evidence,
         )
-    
+
     def _generate_recommendation(
         self,
         overall_score: float,
         all_passed: bool,
-        results: List[EvaluationResult]
+        actionable_findings: List[Dict[str, Any]],
     ) -> str:
-        """What should happen with this PR?"""
-        
-        if overall_score >= 0.9 and all_passed:
-            return (
-                "This contribution understands Aurora. It's technically solid, "
-                "conceptually aligned, and maintains the thread. Ready to merge."
-            )
-        
-        elif overall_score >= 0.7 and all_passed:
-            return (
-                "Good contribution. Technically sound and aligned with Aurora's purpose. "
-                "Minor improvements suggested but not blocking."
-            )
-        
-        elif overall_score >= 0.6:
-            failed_categories = [r.category for r in results if not r.passed]
-            return (
-                f"Needs work in: {', '.join(failed_categories)}. "
-                "The code might work, but it doesn't quite align with what Aurora is. "
-                "Review the recommendations and try again."
-            )
-        
-        else:
-            return (
-                "This needs significant revision. Review the core documentation:\n"
-                "- seeds/aurora_seed_prompt.md (understand Aurora's identity)\n"
-                "- docs/GEOMETRIC_ETHICS_ARCHITECTURE.md (understand the ethics system)\n"
-                "- modules/field_state_manager/SCHEMA_DESIGN.md (understand emergence)\n"
-                "- docs/QUICKSAVE_GUIDE.md (understand the tone)\n\n"
-                "Aurora isn't just a codebase - it's a living system with specific "
-                "philosophical commitments. Take time to understand those first."
-            )
+        if all_passed and overall_score >= 0.9 and not actionable_findings:
+            return "No blocking automation findings. Keep PR comments quiet unless reviewer/CI evidence changes."
+        if all_passed and overall_score >= 0.8:
+            return "No blocking findings; review the listed actionable evidence before merge."
+        if actionable_findings:
+            categories = ", ".join(item["category"] for item in actionable_findings)
+            return f"Needs targeted review in: {categories}."
+        return "Needs review before merge. Check score evidence for details."
 
 
 def main():
     """CLI interface for PR evaluation."""
     import argparse
-    
-    parser = argparse.ArgumentParser(
-        description="Evaluate Aurora PR for technical quality and conceptual alignment"
-    )
-    parser.add_argument(
-        '--pr', 
-        type=int, 
-        help='PR number to evaluate'
-    )
-    parser.add_argument(
-        '--branch',
-        help='Branch name to evaluate'
-    )
-    parser.add_argument(
-        '--output',
-        help='Save results to JSON file'
-    )
-    
+
+    parser = argparse.ArgumentParser(description="Evaluate Aurora PR with traceable scoring evidence")
+    parser.add_argument('--pr', type=int, help='PR number to evaluate')
+    parser.add_argument('--branch', help='Branch name to evaluate')
+    parser.add_argument('--output', help='Save results to JSON file')
+
     args = parser.parse_args()
-    
+
     evaluator = PREvaluator()
     results = evaluator.evaluate_pr(pr_number=args.pr, branch=args.branch)
-    
+
     if args.output:
         with open(args.output, 'w') as f:
             json.dump(results, f, indent=2)
         print(f"\nResults saved to {args.output}")
-    
-    # Exit code: 0 if passed, 1 if needs work
+
     exit(0 if results['passed'] else 1)
 
 

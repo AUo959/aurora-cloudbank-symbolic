@@ -155,15 +155,21 @@ class ChatGPTAgentModeIntegration:
                 try:
                     validate_ga_expression(expr_field, expr)
                 except ValueError as e:
+                    error_text = str(e)
+                    if "disallowed token" in error_text:
+                        suggestions = [
+                            "Remove language-level constructs (import, eval, exec, __) "
+                            "from the expression"
+                        ]
+                    else:
+                        suggestions = [
+                            "Use only alphanumeric basis-blade names, digits, and "
+                            "arithmetic operators (+, -, *, /, ^)"
+                        ]
                     return {
                         "success": False,
-                        "error": str(e),
-                        "recovery_suggestions": [
-                            "Use only alphanumeric basis-blade names, digits, and "
-                            "arithmetic operators (+, -, *, /, ^)",
-                            "Remove language-level constructs (import, eval, exec, __) "
-                            "from the expression",
-                        ],
+                        "error": error_text,
+                        "recovery_suggestions": suggestions,
                         "context_tag": "parameter_validation_error",
                         "timestamp": self._get_timestamp(),
                     }

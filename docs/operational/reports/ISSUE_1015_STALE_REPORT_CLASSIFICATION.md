@@ -4,7 +4,7 @@ Status: issue triage report. This file classifies historical implementation
 claims against current `main`; it does not promote historical reports into
 implementation truth.
 
-Source issue: https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1015
+Source issue: [AUo959/aurora-cloudbank-symbolic#1015](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1015)
 Worktree base: `origin/main` at `3494e5ac` (`deps: bump esbuild (#1017)`)
 Created by: Codex
 Created date: 2026-06-13

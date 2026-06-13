@@ -76,6 +76,24 @@
       "deployment_status": "active"
     }
   },
+  "beacon_contact": {
+    "beacon_id": "THREADCORE_REGISTRY_BEACON_01",
+    "channel": "direct:aurora",
+    "relay": "zipwiz_patchweaver_relay",
+    "cadence": "on_drift_event",
+    "drift_threshold_ref": 0.002,
+    "established": "2026-06-13"
+  },
+  "threadreflect": {
+    "reflection_module": "modules/reflective_autonomy/threadcore_payloads/threadcore_v3.5.1_macroready.json",
+    "snapshot_capability": "reflection_snapshot",
+    "diagnostics": [
+      "drift_monitoring",
+      "anchor_propagation",
+      "constellation_alignment"
+    ],
+    "established": "2026-06-13"
+  },
   "deprecated_versions": [],
   "version_history": [
     {
@@ -123,7 +141,7 @@
   },
   "metadata": {
     "created": "2025-07-13",
-    "last_modified": "2025-07-13",
+    "last_modified": "2026-06-13",
     "maintainer": "Aurora CloudBank Development Team",
     "schema_version": "1.0.0"
   }

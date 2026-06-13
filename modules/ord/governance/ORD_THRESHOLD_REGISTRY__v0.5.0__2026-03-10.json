@@ -1,0 +1,46 @@
+{
+  "registry_id": "ORD_THRESHOLD_REGISTRY",
+  "version": "0.5.0",
+  "status": "draft_governance_candidate",
+  "scope": "ORD dispatch, inspection, transport, and escalation policy",
+  "thresholds": {
+    "reconnaissance_threshold": 0.4,
+    "inspection_threshold": 0.4,
+    "secure_transport_threshold": 0.4,
+    "drift_threshold": 0.005,
+    "quantum_seal_threshold": 0.6,
+    "quarantine_violation_count": 3
+  },
+  "sensitivity_keywords": {
+    "auth": "RESTRICTED",
+    "credential": "RESTRICTED",
+    "key": "RESTRICTED",
+    "secret": "RESTRICTED",
+    "token": "RESTRICTED"
+  },
+  "sensitivity_match_mode": "tokenized_structured_match",
+  "escalation_rules": [
+    {
+      "rule_id": "ER-001",
+      "when": "drift_score >= drift_threshold",
+      "action": "require_human_review",
+      "rationale": "semantic drift can silently break provenance"
+    },
+    {
+      "rule_id": "ER-002",
+      "when": "ethics_violation_count > 0 and drift_score >= drift_threshold",
+      "action": "force_quarantine",
+      "rationale": "compound ethics and drift failure should not auto-integrate"
+    },
+    {
+      "rule_id": "ER-003",
+      "when": "risk_level >= secure_transport_threshold or restricted sensitivity",
+      "action": "require_secure_transport",
+      "rationale": "sensitive payloads need stable packaging guarantees"
+    }
+  ],
+  "ownership": {
+    "threshold_owner": "L3 governance / ORD review board",
+    "code_role": "consume registry, do not silently redefine it"
+  }
+}

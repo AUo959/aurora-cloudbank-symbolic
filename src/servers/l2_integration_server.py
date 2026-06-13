@@ -189,7 +189,8 @@ def create_app(project_root: Path | None = None) -> FastAPI:
         try:
             agent = mesh_runtime.get_agent(agent_id)
             return {"success": True, **agent}
-        except KeyError:
+        except (KeyError, ValueError):
+            # MeshRuntime._resolve_manifest raises ValueError for unknown ids
             raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
         except Exception as e:
             logger.error("mesh_get_agent failed for %s: %s", str(agent_id)[:100], str(e)[:100])
@@ -204,7 +205,8 @@ def create_app(project_root: Path | None = None) -> FastAPI:
         try:
             agent = mesh_runtime.activate_agent(agent_id)
             return {"success": True, "agent_id": agent["agent_id"], "status": "connected"}
-        except KeyError:
+        except (KeyError, ValueError):
+            # MeshRuntime._resolve_manifest raises ValueError for unknown ids
             raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
         except Exception as e:
             logger.error("mesh_activate_agent failed for %s: %s", str(agent_id)[:100], str(e)[:100])

@@ -374,8 +374,10 @@ class OrionSimulationV2:
     def tick(self) -> None:
         """Execute one simulation tick"""
         tick = self.ticks
-        events = self.aurora.maybe_emit_events(tick, self.agents, self.tasks)
+        # Assign before emitting: emergent events key off working agents, so
+        # emitting first made first-tick emergence structurally impossible.
         self._coordinate_assignments()
+        events = self.aurora.maybe_emit_events(tick, self.agents, self.tasks)
         progress = self._apply_work(events)
         self._log_and_transcript(tick, events, progress)
         self.ticks += 1

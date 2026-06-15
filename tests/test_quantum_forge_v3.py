@@ -61,19 +61,17 @@ class TestQuantumIntegration:
         from modules.quantum_forge import QuantumForgeIntegration, get_quantum_integration
         
         integration = QuantumForgeIntegration()
-        assert integration is not None
         assert integration.fidelity_threshold == 0.95
-        
-        # Test singleton
+
+        # Test singleton — returns the same cached instance
         integration2 = get_quantum_integration()
-        assert integration2 is not None
+        assert integration2.fidelity_threshold == 0.95
         
     def test_agent_to_quantum_conversion(self, test_agent, quantum_integration):
         """Test converting agent to quantum state"""
         integration = quantum_integration
         quantum_state = integration.agent_to_quantum(test_agent)
         
-        assert quantum_state is not None
         assert quantum_state.agent_id == test_agent.agent_id
         assert quantum_state.num_qubits >= 8
         assert 0.0 <= quantum_state.fidelity <= 1.01  # Allow small floating point error
@@ -85,7 +83,6 @@ class TestQuantumIntegration:
         quantum_state = integration.agent_to_quantum(test_agent)
         restored_agent = integration.quantum_to_agent(quantum_state)
         
-        assert restored_agent is not None
         assert restored_agent.agent_id == test_agent.agent_id
         # Joy and alignment should be close (within 10%)
         assert abs(restored_agent.joy_index - test_agent.joy_index) < 0.1
@@ -450,12 +447,11 @@ class TestSystemFlowOrchestrator:
     def test_get_system_metrics(self, orchestrator):
         """Test system metrics collection"""
         metrics = orchestrator.get_system_metrics()
-        
-        assert metrics is not None
-        assert hasattr(metrics, 'system_load')
-        assert hasattr(metrics, 'average_health')
-        assert hasattr(metrics, 'drift_count')
-        assert hasattr(metrics, 'total_transitions')
+
+        assert isinstance(metrics.system_load, float) and metrics.system_load >= 0.0
+        assert isinstance(metrics.average_health, float) and 0.0 <= metrics.average_health <= 1.0
+        assert isinstance(metrics.drift_count, int) and metrics.drift_count >= 0
+        assert isinstance(metrics.total_transitions, int) and metrics.total_transitions >= 0
 
 
 # ============================================================================

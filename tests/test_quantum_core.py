@@ -44,11 +44,10 @@ class TestSymbolicCPUAnchor:
         """Test symbolic CPU anchor initializes correctly."""
         anchor = SymbolicCPUAnchor()
 
-        assert anchor is not None
-        assert hasattr(anchor, 'quantum_state')
-        assert hasattr(anchor, 'symbolic_memory')
-        assert hasattr(anchor, 'anchor_protocols')
-        assert hasattr(anchor, 'processing_modes')
+        assert anchor.quantum_state == {}  # fresh anchor has no state yet
+        assert anchor.symbolic_memory == {}  # fresh anchor has no memory yet
+        assert len(anchor.anchor_protocols) == 3  # EOS_SEED_ORION, Picard_Delta_3, QUANTUM_SYMBOLIC_BRIDGE
+        assert len(anchor.processing_modes) == 3  # quantum, symbolic, hybrid
 
     def test_anchor_protocols_present(self):
         """Test that anchor protocols are properly initialized."""
@@ -85,7 +84,6 @@ class TestSymbolicCPUAnchorStateProcessing:
         test_data = {"test": "data", "value": 42}
         result = anchor.anchor_quantum_symbolic_state(test_data)
 
-        assert result is not None
         assert "quantum_anchor" in result
         assert "symbolic_anchor" in result
         assert "hybrid_coordination" in result
@@ -97,7 +95,6 @@ class TestSymbolicCPUAnchorStateProcessing:
         test_data = {"quantum": "input"}
         result = anchor.process_quantum_state(test_data)
 
-        assert result is not None
         assert result["quantum_processed"] is True
         assert result["coherence_maintained"] is True
         assert result["entanglement_preserved"] is True
@@ -109,7 +106,6 @@ class TestSymbolicCPUAnchorStateProcessing:
         test_data = {"symbolic": "input"}
         result = anchor.process_symbolic_state(test_data)
 
-        assert result is not None
         assert result["symbolic_patterns_extracted"] is True
         assert result["reasoning_chains_constructed"] is True
         assert result["logical_consistency_verified"] is True
@@ -121,7 +117,6 @@ class TestSymbolicCPUAnchorStateProcessing:
         test_data = {"hybrid": "input"}
         result = anchor.coordinate_hybrid_processing(test_data)
 
-        assert result is not None
         assert result["hybrid_mode"] == "active"
         assert result["quantum_symbolic_bridge"] == "established"
         assert result["processing_efficiency"] == "optimized"
@@ -134,7 +129,6 @@ class TestSymbolicCPUAnchorStateProcessing:
         result = anchor.anchor_quantum_symbolic_state(empty_data)
 
         # Should handle empty data gracefully
-        assert result is not None
         assert "quantum_anchor" in result
         assert "symbolic_anchor" in result
 
@@ -153,7 +147,6 @@ class TestSymbolicCPUAnchorStateProcessing:
 
         result = anchor.anchor_quantum_symbolic_state(complex_data)
 
-        assert result is not None
         assert "quantum_anchor" in result
         assert "symbolic_anchor" in result
 

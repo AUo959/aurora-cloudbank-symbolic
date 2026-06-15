@@ -27,11 +27,11 @@ class TestMonitoringSystem:
         """Test monitoring system initialization"""
         with TemporaryDirectory() as tmpdir:
             monitoring = MonitoringSystem(storage_dir=Path(tmpdir))
-            
-            assert monitoring.behavior_monitor is not None
-            assert monitoring.drift_detector is not None
-            assert monitoring.ethics_engine is not None
-            assert monitoring.audit_logger is not None
+
+            assert monitoring.behavior_monitor.get_agent_ids() == []
+            assert monitoring.drift_detector.baselines == {}
+            assert monitoring.ethics_engine.get_violations() == []
+            assert monitoring.audit_logger.get_entries() == []
     
     def test_establish_agent_baseline(self):
         """Test establishing agent baseline"""

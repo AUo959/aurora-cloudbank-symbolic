@@ -155,7 +155,7 @@ The server exposes ~339 HTTP routes across 30+ routers. All routes return JSON.
 | GUMAS | `/api/gumas/` | Ethics alignment enforcement |
 | Sensors | `/api/sensors/` | System sensor array |
 
-See `API_CATALOG.md` for the full route listing.
+See [`docs/reference/API_CATALOG.md`](docs/reference/API_CATALOG.md) for the full route listing.
 
 ---
 
@@ -228,10 +228,11 @@ pytest --cov=modules --cov=src --cov-report=html
 
 ```bash
 make setup          # Create venv, install deps, validate environment
+make serve          # Start the API server (uvicorn, port 8000)
 make test           # Run full test suite
-make lint           # Lint modules/reflective_autonomy
+make lint           # Lint modules/reflective_autonomy (scoped)
 make lint-all       # Lint src/, modules/, tests/, tools/
-make check          # lint-all + full tests
+make check          # lint-tools + full tests (fast stability check)
 make security       # Run safety + bandit scans
 make deps-check     # Dependency conflict detection
 make health-check   # Repository health report

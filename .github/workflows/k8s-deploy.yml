@@ -140,7 +140,7 @@ jobs:
       
       - name: Build and push Docker image
         id: build
-        uses: docker/build-push-action@67a2d409c0a876cbe6b11854e3e25193efe4e62d  # v6.12.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf  # v7.2.0
         with:
           context: .
           file: ./k8s/Dockerfile

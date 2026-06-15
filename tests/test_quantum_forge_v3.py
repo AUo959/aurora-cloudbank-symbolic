@@ -111,7 +111,6 @@ class TestQuantumIntegration:
         integration = quantum_integration
         optimized = integration.optimize_agent_quantum(test_agent)
         
-        assert optimized is not None
         # Joy should be optimized (increased or maintained)
         assert optimized.joy_index >= test_agent.joy_index * 0.95
 
@@ -146,12 +145,11 @@ class TestEntanglementNetwork:
         from modules.quantum_forge import EntanglementNetwork, get_entanglement_network
         
         network = EntanglementNetwork()
-        assert network is not None
         assert len(network.entanglement_links) == 0
-        
+
         # Test singleton
         network2 = get_entanglement_network()
-        assert network2 is not None
+        assert isinstance(network2.entanglement_links, dict)
         
     def test_entangle_agents(self, quantum_forge, test_agents):
         """Test creating entanglement between agents"""
@@ -162,7 +160,6 @@ class TestEntanglementNetwork:
         
         link = network.entangle_agents(agent1.agent_id, agent2.agent_id, strength=0.8)
         
-        assert link is not None
         assert link.agent_1_id == agent1.agent_id
         assert link.agent_2_id == agent2.agent_id
         assert 0.0 <= link.entanglement_strength <= 1.0
@@ -200,7 +197,6 @@ class TestEntanglementNetwork:
             topology="mesh"
         )
         
-        assert cluster is not None
         assert len(cluster.agent_ids) == len(test_agents)
         # Mesh topology: n*(n-1)/2 links
         expected_links = len(test_agents) * (len(test_agents) - 1) // 2
@@ -221,7 +217,6 @@ class TestEntanglementNetwork:
         
         health = network.monitor_network_health()
         
-        assert health is not None
         assert "total_links" in health
         assert "average_strength" in health
         assert health["total_links"] >= 2
@@ -248,7 +243,6 @@ class TestQuantumMemoryEnhancer:
         from modules.quantum_forge import QuantumMemoryEnhancer, get_quantum_memory_enhancer
         
         enhancer = QuantumMemoryEnhancer()
-        assert enhancer is not None
         assert len(enhancer.quantum_metadata) == 0
         
     def test_enhance_memory(self, memory_enhancer):
@@ -266,7 +260,6 @@ class TestQuantumMemoryEnhancer:
         
         metadata = memory_enhancer.enhance_memory(test_memory)
         
-        assert metadata is not None
         assert metadata.memory_id == "mem_001"
         assert metadata.coherence_state == "COHERENT"
         assert 0.0 <= metadata.coherence_score <= 1.0
@@ -378,7 +371,6 @@ class TestSystemFlowOrchestrator:
         from modules.quantum_forge import SystemFlowOrchestrator, get_system_flow_orchestrator
         
         orchestrator = SystemFlowOrchestrator()
-        assert orchestrator is not None
         # Should auto-register 8 core modules
         assert len(orchestrator.modules) >= 8
         
@@ -473,8 +465,7 @@ class TestEthicsQuantumGates:
         
     def test_ethics_gate_initialization(self, ethics_gate):
         """Test EthicsAwareQuantumGate initialization"""
-        assert ethics_gate is not None
-        assert ethics_gate.gumas is not None
+        assert len(ethics_gate.gumas.violation_log) == 0
         
     def test_validate_gate_operation_pass(self, ethics_gate):
         """Test gate validation with valid operation"""
@@ -507,7 +498,6 @@ class TestEthicsQuantumGates:
         
         metrics = ethics_gate.get_ethics_metrics()
         
-        assert metrics is not None
         assert "total_operations" in metrics
         assert metrics["total_operations"] >= 2
 
@@ -530,7 +520,6 @@ class TestConstellationTopologyMapper:
         from modules.quantum_forge import get_topology_mapper
         
         mapper = get_topology_mapper()
-        assert mapper is not None
         # Should auto-register 8 core modules
         assert len(mapper.modules) >= 8
         
@@ -538,7 +527,6 @@ class TestConstellationTopologyMapper:
         """Test optimal topology calculation"""
         mapping = topology_mapper.calculate_optimal_topology()
         
-        assert mapping is not None
         assert len(mapping.links) > 0
         assert 0.0 <= mapping.average_fidelity <= 1.0
         
@@ -595,7 +583,6 @@ class TestJoyEvolutionEngine:
         
     def test_evolution_engine_initialization(self, evolution_engine):
         """Test JoyEvolutionEngine initialization"""
-        assert evolution_engine is not None
         assert evolution_engine.params.population_size == 10
         
     def test_initialize_population(self, evolution_engine):
@@ -616,7 +603,6 @@ class TestJoyEvolutionEngine:
         # Run evolution
         final_stats = evolution_engine.evolve(generations=3)
         
-        assert final_stats is not None
         # Fitness should improve or stay similar
         assert final_stats.avg_fitness >= initial_avg_fitness * 0.9
         
@@ -626,7 +612,6 @@ class TestJoyEvolutionEngine:
         
         best = evolution_engine.get_best_agent()
         
-        assert best is not None
         # Should be highest fitness
         assert best.fitness == max(g.fitness for g in evolution_engine.population)
         
@@ -636,7 +621,6 @@ class TestJoyEvolutionEngine:
         
         most_joyful = evolution_engine.get_most_joyful_agent()
         
-        assert most_joyful is not None
         # Should be highest joy
         assert most_joyful.joy_index == max(g.joy_index for g in evolution_engine.population)
 

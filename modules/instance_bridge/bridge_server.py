@@ -1,3 +1,23 @@
+"""Aurora Instance Bridge — standalone WebSocket relay server.
+
+Runtime role
+------------
+This module runs as an **independent process** (not mounted in aurora_api.py)
+on port 8090 (localhost).  Its purpose is cross-instance messaging: multiple
+Aurora runtime instances or tools can connect to the same channel and relay
+messages to each other without going through the main API.
+
+Invocation::
+
+    python -m modules.instance_bridge.bridge_server
+
+Dependency surface
+------------------
+- No Aurora API, mesh, or thread-transfer surface imports this module.
+- It is referenced as an external tool in docs/INTEROPERABILITY_SUPPORT.md.
+- bridge_client.py provides a CLI consumer for this server.
+"""
+
 from typing import Dict, Set
 
 import uvicorn

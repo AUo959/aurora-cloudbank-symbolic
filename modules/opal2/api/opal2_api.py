@@ -1,5 +1,18 @@
 #!/usr/bin/env python3
-"""Opal2 Modular System - FastAPI Integration."""
+"""Opal2 Modular System - FastAPI Integration.
+
+This module is intentionally a standalone FastAPI application rather than a
+sub-router mounted in api/aurora_api.py.  Reasons:
+  - Opal2 owns a WebSocket endpoint (/ws) that benefits from an independent
+    event-loop scope and server lifecycle.
+  - Its render/generate/cache routes carry distinct auth patterns (CSRF on
+    mutating ops, open health/stats) that would complicate the main router.
+  - The standalone topology was the original design; mounting would require
+    prefixing all paths and updating downstream clients.
+
+To run Opal2 alongside the main Aurora API, start it as a separate process
+(e.g. `uvicorn modules.opal2.api.opal2_api:app --port 8001`).
+"""
 
 import json
 import logging

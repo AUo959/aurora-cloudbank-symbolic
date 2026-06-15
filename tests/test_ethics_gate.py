@@ -40,7 +40,7 @@ class TestEthicsVerdict:
         assert verdict.score == 0.85
         assert verdict.reason == "Action complies with all rules"
         assert verdict.engine == "gumas"
-        assert verdict.timestamp is not None
+        assert datetime.fromisoformat(verdict.timestamp)  # parseable ISO timestamp
         assert verdict.dlp_tag_id is None
 
     def test_verdict_to_dict(self):
@@ -181,7 +181,7 @@ class TestEthicsGate:
         assert verdict.allowed is True
         assert verdict.score >= 0.7
         assert verdict.engine == "gumas"
-        assert verdict.dlp_tag_id is not None
+        assert isinstance(verdict.dlp_tag_id, str) and verdict.dlp_tag_id  # non-empty DLP id
 
     @pytest.mark.asyncio
     async def test_gate_blocks_non_compliant_action(self):
@@ -260,8 +260,7 @@ class TestEthicsGate:
             context={"agent_id": "test"}
         )
 
-        # Check DLP tag was created
-        assert verdict.dlp_tag_id is not None
+        # Check DLP tag was created and registered in tracker
         assert verdict.dlp_tag_id in dlp_tracker.tags
 
         # Check tag has required anchors

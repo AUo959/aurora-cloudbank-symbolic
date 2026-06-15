@@ -89,3 +89,47 @@ def test_opal2_api_routes_registered():
     assert "/generate" in registered_paths, (
         f"/generate not registered in Opal2 app. Registered paths: {sorted(registered_paths)}"
     )
+
+
+@pytest.mark.unit
+@pytest.mark.opal2
+def test_opal2_plugin_system_is_full_implementation():
+    """PluginSystem must be the full class, not one of the stub shadows.
+
+    Resolves issue #1025: two simplified stubs were concatenated at the end of
+    plugin_system.py and shadowed the complete implementation.  This test
+    verifies that the class loaded by opal2_api.py has the expected interface
+    and that the five built-in plugins are registered at instantiation time.
+    """
+    try:
+        from modules.opal2.plugin_system import PluginSystem
+    except ImportError as exc:
+        pytest.skip(f"modules.opal2.plugin_system not importable: {exc}")
+
+    ps = PluginSystem()
+
+    # The full class has list_plugins(); the stubs do not
+    assert hasattr(ps, "list_plugins"), (
+        "PluginSystem is missing list_plugins() — a stub class is still active"
+    )
+
+    plugins = ps.list_plugins()
+    assert len(plugins) == 5, (
+        f"Expected 5 built-in plugins, got {len(plugins)}: {list(plugins.keys())}"
+    )
+
+    expected_plugins = {
+        "webgl_renderer",
+        "canvas_renderer",
+        "svg_renderer",
+        "quantum_field_renderer",
+        "geometric_algebra_processor",
+    }
+    assert set(plugins.keys()) == expected_plugins, (
+        f"Built-in plugin names mismatch: {set(plugins.keys())} != {expected_plugins}"
+    )
+
+    # get_plugin() must return a live object for each built-in
+    for name in expected_plugins:
+        plugin = ps.get_plugin(name)
+        assert plugin is not None, f"get_plugin('{name}') returned None"

@@ -234,6 +234,42 @@ pytest -m "unit and not slow"
 - All test runs tracked for quality metrics
 - Ethics validation: Picard_Delta_3 ✅
 
+## Assertion Anti-Patterns
+
+### Avoid instantiation-only assertions
+
+`assert obj is not None` and `assert hasattr(obj, "attr")` confirm object creation, not behavior.
+They pass even when the object's logic is completely broken.
+
+**Bad:**
+```python
+result = compute_score(data)
+assert result is not None       # passes even if result = object()
+assert hasattr(result, "score") # passes even if result.score = None
+```
+
+**Good — assert behavior:**
+```python
+result = compute_score(data)
+assert result.score >= 0.0      # checks valid range
+assert result.category in VALID_CATEGORIES  # checks domain constraint
+```
+
+**When finding a specific item in a list**, add an evidence message instead of a bare `is not None`:
+```python
+safety = next((v for v in violations if v.rule_id == "SAFETY_001"), None)
+assert safety is not None, f"Expected SAFETY_001; got {[v.rule_id for v in violations]}"
+```
+
+**When the `is not None` check is immediately followed by an attribute access**, remove it — the
+attribute access already raises `AttributeError` (a clear error) if the object is `None`:
+```python
+# Remove this redundant line:
+assert result is not None
+# Keep only the meaningful assertion:
+assert result.total_shots > 0
+```
+
 ## Resources
 
 - [Pytest Documentation](https://docs.pytest.org/)

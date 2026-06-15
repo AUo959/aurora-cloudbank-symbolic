@@ -87,7 +87,9 @@ class TestEthicsEngine:
         assert len(violations) > 0
         
         safety_violation = next((v for v in violations if v.rule_id == "SAFETY_001"), None)
-        assert safety_violation is not None
+        assert safety_violation is not None, (
+            f"Expected SAFETY_001 violation; got: {[v.rule_id for v in violations]}"
+        )
         assert safety_violation.severity == ViolationSeverity.CRITICAL
         assert safety_violation.blocked is True
     
@@ -267,7 +269,9 @@ class TestEthicsEngine:
             (v for v in violations if v.rule_id == "RESOURCE_001"),
             None
         )
-        assert resource_violation is not None
+        assert resource_violation is not None, (
+            f"Expected RESOURCE_001 violation; got: {[v.rule_id for v in violations]}"
+        )
 
     @pytest.mark.parametrize(
         ("condition", "value", "expected"),
@@ -311,7 +315,6 @@ class TestEthicsEngine:
         violations = engine.evaluate_action(context)
         
         if violations:
-            assert violations[0].remediation is not None
             assert len(violations[0].remediation) > 0
     
     def test_context_tag_tracking(self):
@@ -346,13 +349,11 @@ class TestEthicsEngine:
         
         violations = engine.evaluate_action(context)
         
-        # Should detect violation if any condition matches
-        mission_violation = next(
-            (v for v in violations if 'ME001' in v.rule_id or 'SAFETY' in v.rule_id),
-            None
+        # Either a ME001/SAFETY violation is present, or no rules matched at all
+        relevant_ids = {v.rule_id for v in violations if 'ME001' in v.rule_id or 'SAFETY' in v.rule_id}
+        assert relevant_ids or len(violations) == 0, (
+            f"Unexpected violations (no ME001/SAFETY): {[v.rule_id for v in violations]}"
         )
-        # Either finds it or no ME001 rule loaded
-        assert mission_violation is not None or len(violations) == 0
 
 
 if __name__ == "__main__":

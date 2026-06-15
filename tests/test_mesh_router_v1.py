@@ -43,6 +43,23 @@ def copy_mesh_project(tmp_path: Path) -> Path:
     return tmp_path
 
 
+def _all_agent_ids(project_root: Path) -> list:
+    """Return sorted list of all agent IDs present in the manifest directory."""
+    agents_dir = project_root / "config" / "mesh" / "agents"
+    return sorted(json.loads(p.read_text())["id"] for p in agents_dir.glob("*.json"))
+
+
+def _channel_agent_ids(project_root: Path, channel: str) -> list:
+    """Return sorted list of agent IDs subscribed to the given channel."""
+    agents_dir = project_root / "config" / "mesh" / "agents"
+    result = []
+    for p in agents_dir.glob("*.json"):
+        manifest = json.loads(p.read_text())
+        if channel in manifest.get("channels", []):
+            result.append(manifest["id"])
+    return sorted(result)
+
+
 def test_alias_resolution_and_live_fallback(tmp_path: Path) -> None:
     """Alex should resolve by alias and fall back deterministically when live mode is unavailable."""
 
@@ -81,36 +98,34 @@ def test_broadcast_routes_to_all_channel_agents(tmp_path: Path) -> None:
     """Broadcasts should reach all agents subscribed to the channel."""
 
     project_root = copy_mesh_project(tmp_path)
+    expected_targets = _channel_agent_ids(project_root, "#crew_lounge")
     runtime = MeshRuntime(project_root)
 
     async def scenario():
         result = await runtime.send_message(
             MeshMessageRequest(channel="#crew_lounge", content="Stand up in ten minutes.", type="broadcast")
         )
-        await asyncio.sleep(0.12)
-        history = runtime.get_channel_history("#crew_lounge")["events"]
+        # Poll until all targets have replied; gives 47+ agents time without wasting wall time
+        target_count = len(expected_targets)
+        deadline = 10.0
+        elapsed = 0.0
+        history = []
+        while elapsed < deadline:
+            await asyncio.sleep(0.1)
+            elapsed += 0.1
+            history = runtime.get_channel_history("#crew_lounge")["events"]
+            replied = {event["agent_id"] for event in history if event["event_type"] == "agent_reply"}
+            if len(replied) >= target_count:
+                break
         return result, history
 
     result, history = asyncio.run(scenario())
-    assert sorted(result["targets"]) == [
-        "alex_thorne",
-        "archy",
-        "liora",
-        "oppy",
-        "riverthread_808",
-        "starling_au",
-    ]
+    assert sorted(result["targets"]) == expected_targets
     reply_agents = sorted({event["agent_id"] for event in history if event["event_type"] == "agent_reply"})
-    assert reply_agents == [
-        "alex_thorne",
-        "archy",
-        "liora",
-        "oppy",
-        "riverthread_808",
-        "starling_au",
-    ]
+    assert reply_agents == expected_targets
 
 
+@pytest.mark.critical
 def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
     """The server should expose the canonical APIs, compatibility aliases, and same-origin chamber UI."""
 
@@ -118,6 +133,7 @@ def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
         pytest.skip("fastapi is not installed in this environment")
 
     project_root = copy_mesh_project(tmp_path)
+    expected_total = len(_all_agent_ids(project_root))
     client = TestClient(create_app(project_root))
 
     chamber_html = client.get("/chamber")
@@ -139,7 +155,7 @@ def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
 
     status = client.get("/api/mesh/status").json()
     assert status["mesh_status"] == "operational"
-    assert status["total_agents"] == 6
+    assert status["total_agents"] == expected_total
 
     send = client.post(
         "/api/mesh/messages",
@@ -164,24 +180,26 @@ def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
     assert connect.json()["status"] == "connected"
 
     bridge_status = client.get("/api/bridge/constellation/status").json()
-    assert bridge_status["totalAgents"] == 6
+    assert bridge_status["totalAgents"] == expected_total
     assert bridge_status["meshStatus"] == "operational"
 
 
+@pytest.mark.critical
 def test_mesh_agents_list(tmp_path: Path) -> None:
-    """GET /api/mesh/agents should return all 6 registered agents with expected fields."""
+    """GET /api/mesh/agents should return all registered agents with expected fields."""
 
     if not FASTAPI_AVAILABLE:
         pytest.skip("fastapi is not installed in this environment")
 
     project_root = copy_mesh_project(tmp_path)
+    expected_total = len(_all_agent_ids(project_root))
     client = TestClient(create_app(project_root))
 
     response = client.get("/api/mesh/agents")
     assert response.status_code == 200
     body = response.json()
-    assert body["total"] == 6
-    assert len(body["agents"]) == 6
+    assert body["total"] == expected_total
+    assert len(body["agents"]) == expected_total
     agent_ids = {agent["agent_id"] for agent in body["agents"]}
     assert "alex_thorne" in agent_ids
     # Every agent record must have the required contract fields
@@ -190,6 +208,7 @@ def test_mesh_agents_list(tmp_path: Path) -> None:
         assert "status" in agent
 
 
+@pytest.mark.critical
 def test_mesh_agent_get_by_id(tmp_path: Path) -> None:
     """GET /api/mesh/agents/{agent_id} should return detail for a known agent."""
 
@@ -206,6 +225,7 @@ def test_mesh_agent_get_by_id(tmp_path: Path) -> None:
     assert body["agent_id"] == "alex_thorne"
 
 
+@pytest.mark.critical
 def test_mesh_agent_get_unknown_returns_404(tmp_path: Path) -> None:
     """GET /api/mesh/agents/{agent_id} for an unknown agent should return 404."""
 
@@ -219,6 +239,7 @@ def test_mesh_agent_get_unknown_returns_404(tmp_path: Path) -> None:
     assert response.status_code == 404
 
 
+@pytest.mark.critical
 def test_mesh_agent_activate(tmp_path: Path) -> None:
     """POST /api/mesh/agents/{agent_id}/activate should return success and connected status."""
 
@@ -239,6 +260,7 @@ def test_mesh_agent_activate(tmp_path: Path) -> None:
     assert body["status"] == "connected"
 
 
+@pytest.mark.critical
 def test_mesh_agent_activate_missing_phrase(tmp_path: Path) -> None:
     """POST /api/mesh/agents/{agent_id}/activate without activationPhrase should return 400."""
 
@@ -253,6 +275,7 @@ def test_mesh_agent_activate_missing_phrase(tmp_path: Path) -> None:
     assert "activationPhrase" in response.json()["detail"]
 
 
+@pytest.mark.critical
 def test_mesh_agent_activate_unknown_returns_404(tmp_path: Path) -> None:
     """POST /api/mesh/agents/{agent_id}/activate for unknown agent should return 404."""
 

@@ -25,7 +25,6 @@ class TestQuantumDecisionOracleBasic:
     def test_initialization(self):
         """Test oracle initialization"""
         oracle = QuantumDecisionOracle()
-        assert oracle is not None
         assert oracle.mode == QuantumReasoningMode.PROBABILISTIC
         assert oracle.computation_count == 0
     
@@ -106,7 +105,7 @@ class TestQuantumDecisionOraclePrediction:
         )
         
         # Should complete successfully with Aurora overhead
-        assert result is not None
+        assert result.confidence >= 0.0  # valid confidence score produced
         # Check if Aurora oversight appears in audit trail
         aurora_entries = [e for e in result.audit_trail if 'aurora' in e.step.lower()]
         assert len(aurora_entries) > 0 or True  # Aurora may be available or not
@@ -202,38 +201,36 @@ class TestQuantumDecisionOracleEdgeCases:
                 'amplitude': 0.95
             }
         )
-        assert result is not None
         # Comprehensive scenario should have higher confidence
         assert result.confidence > 0.5
-    
+
     def test_predict_all_modes(self):
         """Test prediction works in all quantum modes"""
         scenario = {'action': 'mode_test', 'environment': 'test'}
         params = {'risk_weight': 0.5}
-        
+
         for mode in QuantumReasoningMode:
             oracle = QuantumDecisionOracle(mode=mode)
             result = oracle.predict_outcome(scenario, params, seed=42)
-            assert result is not None
             assert result.quantum_mode == mode
     
     def test_predict_extreme_parameters(self):
         """Test with extreme but valid parameters"""
         oracle = QuantumDecisionOracle()
         
-        # Maximum risk
+        # Maximum risk — should produce a valid confidence in range
         result_max = oracle.predict_outcome(
             scenario={'action': 'test'},
             params={'risk_weight': 1.0, 'confidence_threshold': 1.0}
         )
-        assert result_max is not None
-        
-        # Minimum risk
+        assert 0.0 <= result_max.confidence <= 1.0
+
+        # Minimum risk — confidence should also be in range
         result_min = oracle.predict_outcome(
             scenario={'action': 'test'},
             params={'risk_weight': 0.0, 'confidence_threshold': 0.0}
         )
-        assert result_min is not None
+        assert 0.0 <= result_min.confidence <= 1.0
 
 
 class TestQuantumDecisionOracleBatch:
@@ -325,22 +322,21 @@ class TestQuantumDecisionOracleFuzz:
             }
             
             result = oracle.predict_outcome(scenario, params)
-            assert result is not None
             assert 0.0 <= result.confidence <= 1.0
-    
+
     def test_fuzz_random_parameters(self):
         """Test with randomly generated parameters"""
         oracle = QuantumDecisionOracle()
         scenario = {'action': 'fuzz_test'}
-        
+
         for _ in range(20):
             params = {
                 f'param_{i}': random.uniform(0, 1)
                 for i in range(random.randint(1, 5))
             }
-            
+
             result = oracle.predict_outcome(scenario, params)
-            assert result is not None
+            assert 0.0 <= result.confidence <= 1.0  # valid confidence always produced
 
 
 @pytest.mark.integration
@@ -353,13 +349,12 @@ class TestQuantumDecisionOracleIntegration:
         
         # Oracle should initialize with Aurora if available
         if oracle.aurora:
-            assert oracle.aurora is not None
             # Test that Aurora is consulted during prediction
             result = oracle.predict_outcome(
                 scenario={'action': 'aurora_test'},
                 params={'risk_weight': 0.5}
             )
-            assert result is not None
+            assert result.confidence >= 0.0
     
     def test_result_serialization(self):
         """Test that results can be serialized"""

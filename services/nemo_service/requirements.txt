@@ -4,7 +4,7 @@
 # Chain Notation: #SERVICES//NEMO//REQUIREMENTS//
 
 # ── Core inference framework ──────────────────────────────────────────────
-nemo_toolkit[all]>=1.23.0
+nemo_toolkit[all]>=2.7.3
 
 # ── Web server ────────────────────────────────────────────────────────────
 fastapi>=0.136.3

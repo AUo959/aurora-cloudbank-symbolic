@@ -92,14 +92,16 @@ async def analyze_staffing_needs(request: StaffingNeedRequest):
         
     except ImportError:
         # Graceful degradation if core module not available
-        logger.warning("StaffingAnalyzer not available, returning mock data")
+        logger.warning("StaffingAnalyzer not available, returning degraded response")
         return {
             "department": request.department,
-            "current_staff": 10,
-            "recommended_staff": 12,
-            "gap_analysis": {"general": 2},
-            "priority": "MEDIUM",
-            "rationale": "Staffing analyzer not yet fully implemented"
+            "current_staff": 0,
+            "recommended_staff": 0,
+            "gap_analysis": {},
+            "priority": "UNKNOWN",
+            "rationale": "Staffing analyzer module unavailable",
+            "degraded": True,
+            "degraded_reason": "StaffingAnalyzer could not be imported",
         }
     except Exception as e:
         logger.error("Staffing analysis failed: %s", str(e))
@@ -113,33 +115,45 @@ async def generate_character(request: CharacterGenerationRequest):
     Creates crew member profile with skills, background, and personality.
     """
     try:
-        from modules.hr_system.core.character_generator import CharacterGenerator
-        
-        generator = CharacterGenerator()
-        character = generator.generate_profile(
-            role=request.role,
-            department=request.department,
-            skills_required=request.skills_required or [],
-            context_tag=request.context_tag
+        from modules.hr_system.core.character_generator import (
+            CharacterGenerator,
+            Department as CGDepartment,
+            Rank,
         )
-        
-        return character
+
+        generator = CharacterGenerator()
+        dept_map = {d.value.lower(): d for d in CGDepartment}
+        dept_enum = dept_map.get(request.department.lower(), CGDepartment.OPERATIONS)
+        candidates = generator.generate_character(
+            role=request.role,
+            department=dept_enum,
+            rank=Rank.LIEUTENANT,
+            specializations=request.skills_required or [],
+        )
+        char_dict = candidates[0].to_dict()
+        return {
+            "name": char_dict["name"],
+            "role": request.role,
+            "department": char_dict["department"],
+            "skills": char_dict["specializations"],
+            "background": char_dict["background"]["story"],
+            "personality_traits": char_dict["personality"]["traits"],
+            "quantum_properties": char_dict.get("quantum_profile", {}),
+        }
         
     except ImportError:
         # Graceful degradation if core module not available
-        logger.warning("CharacterGenerator not available, returning mock data")
+        logger.warning("CharacterGenerator not available, returning degraded response")
         return {
-            "name": f"Officer_{request.role[:3].upper()}",
+            "name": "UNAVAILABLE",
             "role": request.role,
             "department": request.department,
-            "skills": request.skills_required or ["Leadership", "Problem Solving"],
-            "background": "Experienced professional with diverse background",
-            "personality_traits": ["Analytical", "Team-oriented", "Adaptive"],
-            "quantum_properties": {
-                "coherence": 0.85,
-                "entanglement_potential": 0.72,
-                "symbolic_resonance": "high"
-            }
+            "skills": [],
+            "background": "Character generator module unavailable",
+            "personality_traits": [],
+            "quantum_properties": {},
+            "degraded": True,
+            "degraded_reason": "CharacterGenerator could not be imported",
         }
     except Exception as e:
         logger.error("Character generation failed: %s", str(e))
@@ -164,13 +178,14 @@ async def get_organizational_intelligence(
         
     except ImportError:
         # Graceful degradation
-        logger.warning("OrganizationalIntelligence not available, returning mock data")
+        logger.warning("OrganizationalIntelligence not available, returning degraded response")
         return {
-            "departments": ["Security", "Engineering", "Science", "Medical", "Operations"],
-            "total_capacity": 100,
-            "current_utilization": 0.78,
-            "growth_trajectory": "expanding",
-            "recommendation": "Organizational intelligence system not yet fully implemented"
+            "departments": [],
+            "total_capacity": 0,
+            "current_utilization": 0.0,
+            "growth_trajectory": "unknown",
+            "degraded": True,
+            "degraded_reason": "OrganizationalIntelligence could not be imported",
         }
     except Exception as e:
         logger.error("Organizational intelligence query failed: %s", str(e))

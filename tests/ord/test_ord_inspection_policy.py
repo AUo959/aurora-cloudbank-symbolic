@@ -73,6 +73,21 @@ class TestOrdInspectionPolicy(unittest.TestCase):
         self.assertEqual(QuarantineDecision.QUARANTINE, report.decision)
         self.assertTrue(report.human_review_required)
 
+    def test_encoding_anomaly_requests_normalization(self) -> None:
+        report = self.policy.inspect(
+            InspectionInput(
+                mission_id="tv-105",
+                structure_valid=True,
+                contamination_detected=False,
+                drift_score=0.001,
+                ethics_violations=[],
+                encoding_anomaly=True,
+            )
+        )
+        self.assertEqual(QuarantineDecision.SANITIZE, report.decision)
+        self.assertEqual([SanitizationAction.NORMALIZE_ENCODING], report.requires_sanitization)
+        self.assertFalse(report.human_review_required)
+
 
 if __name__ == "__main__":
     unittest.main()

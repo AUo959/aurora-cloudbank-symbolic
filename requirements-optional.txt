@@ -80,6 +80,6 @@ kombu>=5.3.0                        # Messaging library
 # MONITORING & TELEMETRY (Optional)
 # ===================================================================
 # Optional enhanced monitoring
-opentelemetry-api>=1.21.0           # OpenTelemetry API
+opentelemetry-api>=1.42.1           # OpenTelemetry API
 opentelemetry-sdk>=1.42.1           # OpenTelemetry SDK
 sentry-sdk>=2.58.0                  # Error tracking

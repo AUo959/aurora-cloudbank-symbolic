@@ -53,7 +53,7 @@ gunicorn>=21.2.0                    # WSGI HTTP server
 # ===================================================================
 # LOAD TESTING
 # ===================================================================
-locust>=2.32.0                      # Load testing framework (see tests/load/)
+locust>=2.44.3                      # Load testing framework (see tests/load/)
 
 # ===================================================================
 # DEPENDENCY MANAGEMENT

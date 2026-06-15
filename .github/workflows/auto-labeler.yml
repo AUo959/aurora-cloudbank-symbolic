@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Apply labels
-        uses: actions/labeler@9794b1493b6f1fa7b006c5f8635a19c76c98be95  # v3.0.0
+        uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213  # v6.1.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           config: .github/labeler.yml

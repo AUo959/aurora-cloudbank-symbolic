@@ -40,7 +40,8 @@ class TestEthicsVerdict:
         assert verdict.score == 0.85
         assert verdict.reason == "Action complies with all rules"
         assert verdict.engine == "gumas"
-        assert verdict.timestamp is not None, "EthicsVerdict must have a timestamp"
+        if verdict.timestamp is None:
+            raise AssertionError("EthicsVerdict must have a timestamp")
         assert datetime.fromisoformat(verdict.timestamp).isoformat() == verdict.timestamp
         assert verdict.dlp_tag_id is None
 
@@ -182,7 +183,8 @@ class TestEthicsGate:
         assert verdict.allowed is True
         assert verdict.score >= 0.7
         assert verdict.engine == "gumas"
-        assert verdict.dlp_tag_id is not None, "EthicsGate must assign a DLP tag ID after evaluation"
+        if verdict.dlp_tag_id is None:
+            raise AssertionError("EthicsGate must assign a DLP tag ID after evaluation")
         assert verdict.dlp_tag_id in gate.dlp_tracker.tags
         assert gate.dlp_tracker.tags[verdict.dlp_tag_id].operation == "ethics_gate_evaluate"
 
@@ -264,7 +266,8 @@ class TestEthicsGate:
         )
 
         # Check DLP tag was created
-        assert verdict.dlp_tag_id is not None, "EthicsGate must assign a DLP tag ID after evaluation"
+        if verdict.dlp_tag_id is None:
+            raise AssertionError("EthicsGate must assign a DLP tag ID after evaluation")
         assert verdict.dlp_tag_id in dlp_tracker.tags
         assert dlp_tracker.tags[verdict.dlp_tag_id].operation == "ethics_gate_evaluate"
 

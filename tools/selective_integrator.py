@@ -136,36 +136,42 @@ class SelectiveIntegrator:
         strategy: str,
         evaluation_results: Dict[str, Any]
     ) -> str:
-        """Explain why we chose this strategy."""
-        
+        """Explain why we chose this strategy, referencing actual scores."""
+        score = evaluation_results.get('overall_score', 0)
+        results = evaluation_results.get('results', [])
+        technical = next((r for r in results if r['category'] == 'Technical Quality'), {})
+        conceptual = next((r for r in results if r['category'] == 'Conceptual Alignment'), {})
+        symbolic = next((r for r in results if r['category'] == 'Symbolic Integrity'), {})
+
         if strategy == "direct_merge":
             return (
-                "This PR understands Aurora. High scores across all dimensions, "
-                "conceptual alignment solid, symbolic integrity maintained. "
-                "Safe to merge directly."
+                f"Score {score:.2f}; all dimensions pass. "
+                "Technical, conceptual, and symbolic checks are satisfied. "
+                "Ready for review and merge."
             )
-        
+
         elif strategy == "compatibility_layer":
+            t = technical.get('score', 0)
+            c = conceptual.get('score', 0)
             return (
-                "Good code, conceptual mismatch. The implementation is sound but "
-                "treats Aurora like traditional infrastructure rather than understanding "
-                "the field consciousness model. We'll wrap it in a compatibility layer "
-                "that preserves the functionality while maintaining Aurora's architecture."
+                f"Score {score:.2f}: technical {t:.2f}, conceptual alignment {c:.2f}. "
+                "Implementation quality is solid but conceptual alignment is below threshold. "
+                "Integration via a compatibility wrapper is recommended."
             )
-        
+
         elif strategy == "value_extraction":
+            t = technical.get('score', 0)
+            s = symbolic.get('score', 0)
             return (
-                "Mixed quality. Some valuable improvements exist alongside issues. "
-                "We'll cherry-pick the good parts (bug fixes, documentation, tests) "
-                "while leaving behind code that misunderstands Aurora's nature."
+                f"Score {score:.2f}: technical {t:.2f}, symbolic integrity {s:.2f}. "
+                "Some improvements (bug fixes, tests, docs) can be cherry-picked. "
+                "See findings below for which parts are actionable."
             )
-        
+
         else:  # decline
             return (
-                "This needs significant work before integration. Either technical quality "
-                "is too low, or the contributor hasn't yet understood what Aurora is. "
-                "Better to provide guidance and ask them to revise than to try forcing "
-                "misaligned code into the system."
+                f"Score {score:.2f} is below the merge threshold. "
+                "Address the critical issues listed in the evaluation before resubmitting."
             )
     
     def _plan_direct_merge(

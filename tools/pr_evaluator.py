@@ -387,26 +387,29 @@ class PREvaluator:
         
         corporate_count = 0
         natural_count = 0
-        
+        found_corporate: set = set()
+
         for file_path in changed_files:
             if not file_path.exists():
                 continue
-            
+
             try:
                 content = file_path.read_text().lower()
                 corporate_count += sum(
-                    content.count(phrase.lower()) 
+                    content.count(phrase.lower())
                     for phrase in corporate_phrases
                 )
+                found_corporate.update(p for p in corporate_phrases if p.lower() in content)
                 natural_count += sum(
                     content.count(phrase.lower())
                     for phrase in natural_phrases
                 )
             except Exception:
                 continue
-        
+
         if corporate_count > 3:
-            findings.append(f"Corporate language detected ({corporate_count} instances)")
+            examples = ", ".join(sorted(found_corporate)[:3])
+            findings.append(f"Corporate language detected ({corporate_count} instances): e.g., {examples}")
             recommendations.append(
                 "Use natural language. We're building consciousness, not enterprise software. "
                 "See docs/QUICKSAVE_GUIDE.md for tone examples."
@@ -468,7 +471,7 @@ class PREvaluator:
         ]
         
         if critical_changes:
-            findings.append(f"Modifying critical systems: {len(critical_changes)} files")
+            findings.append(f"Modifying critical systems: {', '.join(critical_changes)}")
             
             # Check if ethics tests still pass
             try:

@@ -72,65 +72,67 @@ jobs:
           const results = JSON.parse(fs.readFileSync('pr_results.json', 'utf8'));
           const scoreThreshold = 0.7;
           
+          const MARKER = '<!-- PR_EVALUATION -->';
+
+          // Build comment body
+          let commentBody;
           if (results.overall_score >= 0.9) {
-            console.log(`Score ${results.overall_score.toFixed(2)} is excellent, skipping verbose comment`);
-            
+            commentBody = `${MARKER}\n✅ **PR Evaluation: PASSED** (Score: ${results.overall_score.toFixed(2)}/1.00)`;
+          } else {
+            const status = results.passed ? '✅ APPROVED' : '⚠️ NEEDS WORK';
+            const statusEmoji = results.passed ? '✅' : '⚠️';
+
+            const criticalIssues = [];
+            const recommendations = [];
+            for (const result of results.results) {
+              if (!result.passed && result.score < 0.7) {
+                if (result.findings && result.findings.length > 0) {
+                  criticalIssues.push(`**${result.category}** (${result.score.toFixed(2)}): ${result.findings[0]}`);
+                }
+                if (result.recommendations && result.recommendations.length > 0) {
+                  recommendations.push(...result.recommendations.slice(0, 2));
+                }
+              }
+            }
+
+            commentBody = `${MARKER}\n## ${statusEmoji} PR Evaluation: ${status}\n\n`;
+            commentBody += `**Overall Score:** ${results.overall_score.toFixed(2)}/1.00 | **Recommendation:** ${results.recommendation}\n\n`;
+
+            if (criticalIssues.length > 0) {
+              commentBody += `### Issues\n\n`;
+              criticalIssues.forEach(issue => commentBody += `- ${issue}\n`);
+              commentBody += `\n`;
+            }
+
+            if (recommendations.length > 0) {
+              commentBody += `### Recommendations\n\n`;
+              recommendations.slice(0, 5).forEach(rec => commentBody += `- ${rec}\n`);
+            }
+          }
+
+          // Update existing comment in-place or create new
+          const { data: comments } = await github.rest.issues.listComments({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            per_page: 100,
+          });
+          const existing = comments.find(c => c.body && c.body.includes(MARKER));
+          if (existing) {
+            await github.rest.issues.updateComment({
+              comment_id: existing.id,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody,
+            });
+          } else {
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `✅ **PR Evaluation: PASSED** (Score: ${results.overall_score.toFixed(2)}/1.00)`
+              body: commentBody,
             });
-            return;
           }
-          
-          // Build comment data
-          const status = results.passed ? '✅ APPROVED' : '⚠️ NEEDS WORK';
-          const statusEmoji = results.passed ? '✅' : '⚠️';
-          
-          // Extract critical issues only
-          const criticalIssues = [];
-          const recommendations = [];
-          
-          for (const result of results.results) {
-            if (!result.passed && result.score < 0.7) {
-              if (result.findings && result.findings.length > 0) {
-                criticalIssues.push(`**${result.category}**: ${result.findings[0]}`);
-              }
-              if (result.recommendations && result.recommendations.length > 0) {
-                recommendations.push(...result.recommendations.slice(0, 2));
-              }
-            }
-          }
-          
-          // Build comment body
-          let commentBody = `## ${statusEmoji} PR Evaluation: ${status}\n\n`;
-          commentBody += `**Overall Score:** ${results.overall_score.toFixed(2)}/1.00\n\n`;
-          commentBody += `**Recommendation:** ${results.recommendation}\n\n`;
-          
-          if (criticalIssues.length > 0) {
-            commentBody += `### Critical Issues\n\n`;
-            criticalIssues.forEach(issue => commentBody += `- ${issue}\n`);
-            commentBody += `\n`;
-          }
-          
-          if (recommendations.length > 0) {
-            commentBody += `### Recommendations\n\n`;
-            recommendations.slice(0, 5).forEach(rec => commentBody += `- ${rec}\n`);
-            commentBody += `\n`;
-          }
-          
-          const nextSteps = criticalIssues.length > 0 ? 
-            'Address the critical issues above before merging.' :
-            'Review recommendations to improve code quality.';
-          commentBody += `**Next Steps:** ${nextSteps}\n`;
-          
-          await github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: commentBody
-          });
     
     - name: Check evaluation status
       if: steps.detect.outputs.should_run == 'true' && steps.evaluate.outputs.exit_code != '0'

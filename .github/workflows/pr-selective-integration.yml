@@ -107,7 +107,7 @@ jobs:
         retention-days: 30
     
     - name: Prepare Integration Analysis Comment
-      if: steps.detect.outputs.should_run == 'true'
+      if: steps.detect.outputs.should_run == 'true' && steps.integration.outputs.integration_strategy != 'direct_merge'
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
       with:
         script: |
@@ -153,24 +153,6 @@ jobs:
           
           comment += `#### Reasoning\n${integrationPlan.reasoning}\n\n`;
           
-          // Strategy Explanation
-          comment += `<details>\n<summary><b>What does "${integrationPlan.strategy}" mean?</b></summary>\n\n`;
-          
-          if (integrationPlan.strategy === 'direct_merge') {
-            comment += `This PR demonstrates excellent technical quality and conceptual alignment with Aurora's philosophy. It can be merged directly into the main codebase without modifications.\n\n`;
-            comment += `**Next Steps:** Review, approve, and merge when ready.\n`;
-          } else if (integrationPlan.strategy === 'compatibility_layer') {
-            comment += `This PR contains valuable technical contributions but approaches Aurora from a different philosophical perspective. We can integrate it through a compatibility layer that preserves Aurora's core identity while accepting the contribution.\n\n`;
-            comment += `**Next Steps:** Maintainers will create a wrapper module that adapts this code to Aurora's patterns.\n`;
-          } else if (integrationPlan.strategy === 'value_extraction') {
-            comment += `This PR contains some valuable elements (bug fixes, tests, documentation) but also includes changes that don't align with Aurora's conceptual foundation. We'll extract and integrate the valuable parts.\n\n`;
-            comment += `**Next Steps:** Maintainers will cherry-pick specific improvements and provide feedback on the rest.\n`;
-          } else {
-            comment += `This PR doesn't align with Aurora's core philosophy and identity. Rather than force-fit misaligned code, we recommend revisiting the conceptual foundation.\n\n`;
-            comment += `**Next Steps:** Review Aurora's documentation and consider a fresh approach aligned with the system's identity.\n`;
-          }
-          
-          comment += `</details>\n\n`;
           
           // Detailed Evaluation Results
           comment += `### 📊 Detailed Evaluation\n\n`;
@@ -234,8 +216,6 @@ jobs:
           comment += `- [Aurora Philosophy](../blob/main/seeds/aurora_seed_prompt.md)\n`;
           comment += `- [Geometric Ethics Architecture](../blob/main/docs/GEOMETRIC_ETHICS_ARCHITECTURE.md)\n\n`;
           
-          comment += `*This analysis combines technical evaluation with conceptual alignment assessment.*\n`;
-          comment += `*Aurora isn't just a codebase - it's a living system with specific philosophical commitments.*\n`;
           
           // Write comment to file
           fs.writeFileSync('/tmp/integration_analysis.md', comment);
@@ -243,7 +223,7 @@ jobs:
           console.log('✅ Integration analysis prepared');
     
     - name: Post Integration Analysis Comment
-      if: steps.detect.outputs.should_run == 'true'
+      if: steps.detect.outputs.should_run == 'true' && steps.integration.outputs.integration_strategy != 'direct_merge'
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |

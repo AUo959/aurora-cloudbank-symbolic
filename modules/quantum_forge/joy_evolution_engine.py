@@ -284,7 +284,7 @@ class JoyEvolutionEngine:
                         genome.vector_core = [x / norm for x in genome.vector_core]
                 
                 # Slightly adjust joy (mutation can increase creativity)
-                genome.joy_index = min(1.0, genome.joy_index + random.uniform(-0.05, 0.1))
+                genome.joy_index = max(0.0, min(1.0, genome.joy_index + random.uniform(-0.05, 0.1)))
         
         return offspring
         

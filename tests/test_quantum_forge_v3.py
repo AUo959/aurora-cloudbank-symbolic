@@ -67,7 +67,7 @@ class TestQuantumIntegration:
 
         # Test singleton
         integration2 = get_quantum_integration()
-        if integration2.default_coherence_time != 300.0:
+        if abs(integration2.default_coherence_time - 300.0) > 1e-9:
             raise AssertionError("Expected default_coherence_time to be 300.0")
 
     def test_agent_to_quantum_conversion(self, test_agent, quantum_integration):

@@ -232,7 +232,7 @@ class TestQuantumDecisionOracleEdgeCases:
             scenario={'action': 'test'},
             params={'risk_weight': 1.0, 'confidence_threshold': 1.0}
         )
-        if sum(result_max.probabilities.values()) != pytest.approx(1.0, rel=0, abs=1e-9):
+        if abs(sum(result_max.probabilities.values()) - 1.0) > 1e-9:
             raise AssertionError("Expected result_max probabilities to sum to 1.0")
 
         # Minimum risk
@@ -240,7 +240,7 @@ class TestQuantumDecisionOracleEdgeCases:
             scenario={'action': 'test'},
             params={'risk_weight': 0.0, 'confidence_threshold': 0.0}
         )
-        if sum(result_min.probabilities.values()) != pytest.approx(1.0, rel=0, abs=1e-9):
+        if abs(sum(result_min.probabilities.values()) - 1.0) > 1e-9:
             raise AssertionError("Expected result_min probabilities to sum to 1.0")
 
 
@@ -388,3 +388,7 @@ class TestQuantumDecisionOracleIntegration:
         assert 'probabilities' in result_dict
         assert 'confidence' in result_dict
         assert 'audit_trail' in result_dict
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

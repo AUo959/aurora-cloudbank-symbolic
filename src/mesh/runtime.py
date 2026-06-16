@@ -19,6 +19,7 @@ except ImportError:  # pragma: no cover - runtime still works without FastAPI in
 from .live_agents import LiveAdapterUnavailable, OpenAILiveAdapter
 from .manifests import build_alias_index, ensure_seed_memory_files, load_manifests, normalize_lookup
 from .models import AgentManifest, MeshEvent, MeshMessageRequest
+from .terminals import PersonalTerminalProfile, TerminalDirectory, load_terminal_directory
 
 
 ORION_CORE = {
@@ -350,6 +351,7 @@ class MeshRuntime:
         self.project_root = project_root
         self.runtime_root = self.project_root / "runtime" / "mesh"
         self.manifest_dir = self.project_root / "config" / "mesh" / "agents"
+        self.terminal_dir = self.project_root / "config" / "mesh" / "terminals"
         self.memory_dir = self.project_root / "config" / "mesh" / "memory"
         ensure_seed_memory_files(self.memory_dir)
         self.store = MeshStore(self.runtime_root / "mesh.db", self.runtime_root / "transcripts")
@@ -357,11 +359,13 @@ class MeshRuntime:
         self.live_adapter = OpenAILiveAdapter()
         self.manifests: Dict[str, AgentManifest] = {}
         self.alias_index: Dict[str, str] = {}
+        self.terminal_directory = TerminalDirectory([])
         self.reload_manifests()
 
     def reload_manifests(self) -> None:
         self.manifests = load_manifests(self.manifest_dir)
         self.alias_index = build_alias_index(self.manifests.values())
+        self.terminal_directory = load_terminal_directory(self.terminal_dir, self.manifests)
         for manifest in self.manifests.values():
             self.store.upsert_manifest(manifest)
 
@@ -377,6 +381,12 @@ class MeshRuntime:
         manifest = self._resolve_manifest(agent_id_or_alias)
         row = self.store.get_agent_row(manifest.id) or {}
         return self._present_agent(manifest, row)
+
+    def list_terminals(self) -> List[Dict[str, Any]]:
+        return [profile.to_dict() for profile in self.terminal_directory.list_profiles()]
+
+    def get_terminal(self, terminal_id_or_alias: str) -> Dict[str, Any]:
+        return self.terminal_directory.resolve_presented(terminal_id_or_alias)
 
     def activate_agent(self, agent_id_or_alias: str) -> Dict[str, Any]:
         manifest = self._resolve_manifest(agent_id_or_alias)
@@ -397,13 +407,16 @@ class MeshRuntime:
         agents = self.list_agents()
         active_agents = [agent for agent in agents if agent["status"] == "active"]
         channels = sorted({channel for manifest in self.manifests.values() for channel in manifest.channels})
+        terminals = self.list_terminals()
         return {
             "mesh_status": "operational",
             "version": ORION_CORE["version"],
             "event_cursor": self.store.last_event_id(),
             "total_agents": len(agents),
+            "total_terminals": len(terminals),
             "active_agents": len(active_agents),
             "agents": agents,
+            "terminals": terminals,
             "channels": channels,
             "orion_core": ORION_CORE,
             "live_adapter": {
@@ -419,6 +432,7 @@ class MeshRuntime:
         return self.store.get_channel_history(channel_id=channel_id, limit=limit)
 
     async def send_message(self, request: MeshMessageRequest) -> Dict[str, Any]:
+        target_terminals = self._resolve_terminal_profiles(request.to)
         target_agents = self._resolve_targets(request)
         channel_id = self._resolve_channel(request, target_agents)
         message_id = uuid.uuid4().hex
@@ -444,6 +458,7 @@ class MeshRuntime:
                 "sender_id": request.sender_id,
                 "sender_name": request.sender_name,
                 "targets": [agent.id for agent in target_agents],
+                "target_terminals": [terminal.terminal_id for terminal in target_terminals],
                 "message_type": request.type,
             },
         )
@@ -467,6 +482,7 @@ class MeshRuntime:
             "message_id": message_id,
             "channel_id": channel_id,
             "targets": [agent.id for agent in target_agents],
+            "target_terminals": [terminal.terminal_id for terminal in target_terminals],
             "event_id": accepted_event.event_id,
         }
 
@@ -657,6 +673,15 @@ class MeshRuntime:
 
     def _resolve_targets(self, request: MeshMessageRequest) -> List[AgentManifest]:
         if request.to:
+            terminal_profiles = self._resolve_terminal_profiles(request.to, include_non_routable=True)
+            if terminal_profiles:
+                routable_profiles = [profile for profile in terminal_profiles if profile.routable]
+                if not routable_profiles:
+                    raise ValueError(f"Terminal '{request.to}' has no routable mesh agent")
+                return [
+                    self._resolve_manifest(profile.mesh_route.owner_agent_id or profile.owner_agent_id or "")
+                    for profile in routable_profiles
+                ]
             return [self._resolve_manifest(request.to)]
 
         if request.channel:
@@ -673,8 +698,33 @@ class MeshRuntime:
     def _resolve_channel(self, request: MeshMessageRequest, targets: Iterable[AgentManifest]) -> str:
         if request.channel:
             return request.channel
+        if request.to:
+            terminal_profiles = self._resolve_terminal_profiles(request.to)
+            if terminal_profiles:
+                anchor_nodes = {
+                    profile.pat_overlay.anchor_node
+                    for profile in terminal_profiles
+                    if profile.pat_overlay and profile.pat_overlay.anchor_node
+                }
+                if len(terminal_profiles) > 1 and len(anchor_nodes) == 1:
+                    return next(iter(anchor_nodes))
+                if terminal_profiles[0].mesh_route.channel_id:
+                    return terminal_profiles[0].mesh_route.channel_id
         first_target = next(iter(targets))
         return first_target.default_channel
+
+    def _resolve_terminal_profiles(
+        self,
+        terminal_id_or_alias: Optional[str],
+        *,
+        include_non_routable: bool = False,
+    ) -> List[PersonalTerminalProfile]:
+        if not terminal_id_or_alias:
+            return []
+        matches = self.terminal_directory.resolve(terminal_id_or_alias)
+        if include_non_routable:
+            return matches
+        return [profile for profile in matches if profile.routable]
 
     def _resolve_manifest(self, agent_id_or_alias: str) -> AgentManifest:
         direct = self.manifests.get(agent_id_or_alias)

@@ -214,6 +214,24 @@ def create_app(project_root: Path | None = None) -> FastAPI:
 
     # --- end /api/mesh/agents routes ---
 
+    @mesh_app.get("/api/mesh/terminals")
+    async def mesh_list_terminals() -> Dict[str, Any]:
+        """List Personal Access Terminal profiles registered with the runtime."""
+        terminals = mesh_runtime.list_terminals()
+        return {"terminals": terminals, "total": len(terminals)}
+
+    @mesh_app.get("/api/mesh/terminals/{terminal_id}")
+    async def mesh_get_terminal(terminal_id: str) -> Dict[str, Any]:
+        """Get a terminal profile by id, namespace, owner alias, or anchor node."""
+        try:
+            terminal = mesh_runtime.get_terminal(terminal_id)
+            return {"success": True, **terminal}
+        except (KeyError, ValueError):
+            raise HTTPException(status_code=404, detail=f"Terminal '{terminal_id}' not found")
+        except Exception as e:
+            logger.error("mesh_get_terminal failed for %s: %s", str(terminal_id)[:100], str(e)[:100])
+            raise HTTPException(status_code=500, detail="Internal server error")
+
     @mesh_app.post("/api/bridge/gpt/connect/{agent_id}")
     async def mesh_bridge_connect(agent_id: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
         activation_phrase = request_data.get("activationPhrase")

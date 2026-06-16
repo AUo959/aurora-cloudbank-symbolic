@@ -16,7 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.servers.l2_integration_server import create_app
+from src.servers.l2_integration_server import create_app  # noqa: E402
 
 try:
     from fastapi.testclient import TestClient
@@ -77,8 +77,19 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
     status = client.get("/api/mesh/status").json()
     assert status["mesh_status"] == "operational"
     assert status["total_agents"] == 47
+    assert status["total_terminals"] == 55
     agent_ids = {agent["agent_id"] for agent in status["agents"]}
     assert "aurora" in agent_ids, "Aurora's seat is canonical: L1 station core, always-on arbitration"
+
+    terminals = client.get("/api/mesh/terminals").json()
+    assert terminals["total"] == 55
+    carmen_terminal = client.get("/api/mesh/terminals/core_development.carmen.term")
+    assert carmen_terminal.status_code == 200
+    assert carmen_terminal.json()["owner_agent_id"] == "carmen_rivas"
+
+    dev_terminal_group = client.get("/api/mesh/terminals/aurora.dev.code.query")
+    assert dev_terminal_group.status_code == 200
+    assert dev_terminal_group.json()["terminal_group"] is True
 
     with client.websocket_connect("/ws/mesh") as websocket:
         initial = websocket.receive_json()
@@ -108,3 +119,13 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
     ]
     assert aurora_replies, "Aurora must answer the handshake"
     assert any(event.get("agent_id") == "aurora" for event in aurora_replies)
+
+    terminal_send = client.post(
+        "/api/mesh/messages",
+        json={"to": "core_development.carmen.term", "content": "Terminal namespace status check."},
+    )
+    assert terminal_send.status_code == 200
+    terminal_payload = terminal_send.json()
+    assert terminal_payload["targets"] == ["carmen_rivas"]
+    assert terminal_payload["target_terminals"] == ["l1_carmen_rivas_terminal"]
+    assert terminal_payload["channel_id"] == "private:crew:carmen_rivas"

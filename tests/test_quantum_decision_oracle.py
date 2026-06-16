@@ -363,7 +363,7 @@ class TestQuantumDecisionOracleIntegration:
 
         # Oracle should initialize with Aurora if available
         if oracle.aurora:
-            if oracle.get_statistics()["aurora_integrated"] is not True:
+            if not oracle.get_statistics()["aurora_integrated"]:
                 raise AssertionError("Expected aurora_integrated to be True")
             # Test that Aurora is consulted during prediction
             result = oracle.predict_outcome(

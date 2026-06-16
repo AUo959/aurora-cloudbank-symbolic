@@ -167,7 +167,7 @@ class TestSymbolicCPUAnchorStateProcessing:
 
         result = anchor.anchor_quantum_symbolic_state(complex_data)
 
-        if result["symbolic_anchor"]["logical_consistency_verified"] is not True:
+        if not result["symbolic_anchor"]["logical_consistency_verified"]:
             raise AssertionError("Expected logical_consistency_verified to be True")
         assert "quantum_anchor" in result
         assert "symbolic_anchor" in result
@@ -461,7 +461,7 @@ class TestQuantumCoreErrorHandling:
 
         # Should handle None gracefully
         result = anchor.process_quantum_state(None)
-        if result["quantum_processed"] is not True:
+        if not result["quantum_processed"]:
             raise AssertionError("Expected quantum_processed to be True")
 
     def test_symbolic_anchor_with_invalid_data_type(self):
@@ -470,12 +470,12 @@ class TestQuantumCoreErrorHandling:
 
         # Test with string
         result_str = anchor.process_quantum_state("string_data")
-        if result_str["coherence_maintained"] is not True:
+        if not result_str["coherence_maintained"]:
             raise AssertionError("Expected coherence_maintained to be True")
 
         # Test with list
         result_list = anchor.process_symbolic_state([1, 2, 3])
-        if result_list["reasoning_chains_constructed"] is not True:
+        if not result_list["reasoning_chains_constructed"]:
             raise AssertionError("Expected reasoning_chains_constructed to be True")
 
         # Test with number
@@ -529,7 +529,7 @@ class TestQuantumCoreGracefulDegradation:
         anchor = SymbolicCPUAnchor()
 
         result = anchor.anchor_quantum_symbolic_state({"test": "data"})
-        if result["symbolic_anchor"]["logical_consistency_verified"] is not True:
+        if not result["symbolic_anchor"]["logical_consistency_verified"]:
             raise AssertionError("Expected logical_consistency_verified to be True")
 
     def test_quantum_layer_import_handles_missing_qiskit(self):
@@ -577,5 +577,5 @@ class TestQuantumCorePerformance:
         # Process multiple states
         for i in range(100):
             result = anchor.anchor_quantum_symbolic_state({"iteration": i})
-            if result["quantum_anchor"]["quantum_processed"] is not True:
+            if not result["quantum_anchor"]["quantum_processed"]:
                 raise AssertionError("Expected quantum_processed to be True")

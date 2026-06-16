@@ -356,8 +356,10 @@ async def test_scenario_engine_supply_chain():
     result = await engine.execute_scenario(request)
 
     assert result.status == "completed"
-    assert len(result.optimization_result.optimal_solution) > 0
-    assert len(result.forecast_result.time_labels) > 0
+    if len(result.optimization_result.optimal_solution) == 0:
+        raise AssertionError("Expected non-empty optimal_solution")
+    if len(result.forecast_result.time_labels) == 0:
+        raise AssertionError("Expected non-empty forecast time_labels")
     assert result.execution_time_seconds and result.execution_time_seconds > 0
 
 
@@ -383,9 +385,12 @@ async def test_scenario_engine_energy_grid():
     result = await engine.execute_scenario(request)
 
     assert result.status == "completed"
-    assert result.optimization_result.iterations > 0
-    assert result.measurement_result.total_shots == request.parameters["num_shots"]
-    assert len(result.forecast_result.forecast_values) > 0
+    if result.optimization_result.iterations <= 0:
+        raise AssertionError("Expected optimization_result.iterations > 0")
+    if result.measurement_result.total_shots != request.parameters["num_shots"]:
+        raise AssertionError("Expected measurement_result.total_shots to match requested num_shots")
+    if len(result.forecast_result.forecast_values) == 0:
+        raise AssertionError("Expected non-empty forecast_values")
 
 
 @pytest.mark.integration
@@ -409,8 +414,10 @@ async def test_scenario_engine_risk_analysis():
     result = await engine.execute_scenario(request)
 
     assert result.status == "completed"
-    assert result.measurement_result.total_shots == request.num_shots
-    assert len(result.forecast_result.time_labels) > 0
+    if result.measurement_result.total_shots != request.num_shots:
+        raise AssertionError("Expected measurement_result.total_shots to match request.num_shots")
+    if len(result.forecast_result.time_labels) == 0:
+        raise AssertionError("Expected non-empty forecast time_labels")
 
 
 @pytest.mark.integration
@@ -435,7 +442,8 @@ async def test_scenario_engine_optimization():
     result = await engine.execute_scenario(request)
 
     assert result.status == "completed"
-    assert result.optimization_result.iterations > 0
+    if result.optimization_result.iterations <= 0:
+        raise AssertionError("Expected optimization_result.iterations > 0")
     assert len(result.optimization_result.optimal_solution) == 5
 
 
@@ -471,7 +479,8 @@ async def test_cache_set_and_get(tmp_path):
 
     # Retrieve result
     cached_result = cache.get(result.simulation_id)
-    assert cached_result.parameters == result.parameters
+    if cached_result.parameters != result.parameters:
+        raise AssertionError("Expected cached_result.parameters to match result.parameters")
     assert cached_result.simulation_id == result.simulation_id
 
 

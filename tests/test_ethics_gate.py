@@ -42,7 +42,8 @@ class TestEthicsVerdict:
         assert verdict.engine == "gumas"
         if verdict.timestamp is None:
             raise AssertionError("EthicsVerdict must have a timestamp")
-        assert datetime.fromisoformat(verdict.timestamp).isoformat() == verdict.timestamp
+        if datetime.fromisoformat(verdict.timestamp).isoformat() != verdict.timestamp:
+            raise AssertionError("Expected verdict timestamp to be a normalized ISO format string")
         assert verdict.dlp_tag_id is None
 
     def test_verdict_to_dict(self):
@@ -185,8 +186,10 @@ class TestEthicsGate:
         assert verdict.engine == "gumas"
         if verdict.dlp_tag_id is None:
             raise AssertionError("EthicsGate must assign a DLP tag ID after evaluation")
-        assert verdict.dlp_tag_id in gate.dlp_tracker.tags
-        assert gate.dlp_tracker.tags[verdict.dlp_tag_id].operation == "ethics_gate_evaluate"
+        if verdict.dlp_tag_id not in gate.dlp_tracker.tags:
+            raise AssertionError("Expected DLP tag ID to be present in dlp_tracker.tags")
+        if gate.dlp_tracker.tags[verdict.dlp_tag_id].operation != "ethics_gate_evaluate":
+            raise AssertionError("Expected DLP tag operation to be ethics_gate_evaluate")
 
     @pytest.mark.asyncio
     async def test_gate_blocks_non_compliant_action(self):
@@ -269,7 +272,8 @@ class TestEthicsGate:
         if verdict.dlp_tag_id is None:
             raise AssertionError("EthicsGate must assign a DLP tag ID after evaluation")
         assert verdict.dlp_tag_id in dlp_tracker.tags
-        assert dlp_tracker.tags[verdict.dlp_tag_id].operation == "ethics_gate_evaluate"
+        if dlp_tracker.tags[verdict.dlp_tag_id].operation != "ethics_gate_evaluate":
+            raise AssertionError("Expected DLP tag operation to be ethics_gate_evaluate")
 
         # Check tag has required anchors
         tag = dlp_tracker.tags[verdict.dlp_tag_id]

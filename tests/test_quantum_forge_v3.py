@@ -393,7 +393,7 @@ class TestSystemFlowOrchestrator:
         from modules.quantum_forge import SystemFlowOrchestrator, get_system_flow_orchestrator
 
         orchestrator = SystemFlowOrchestrator()
-        if orchestrator.current_phase != type(orchestrator.current_phase).STARTUP:
+        if orchestrator.current_phase is not type(orchestrator.current_phase).STARTUP:
             raise AssertionError("Expected orchestrator.current_phase to be STARTUP")
         # Should auto-register 8 core modules
         assert len(orchestrator.modules) >= 8

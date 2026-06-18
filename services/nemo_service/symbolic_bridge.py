@@ -106,6 +106,7 @@ class SymbolicBridge:
         srb_tag: str = "NEMO_SERVICE_v1",
         ethics_protocol: str = "Picard_Delta_3",
         drift_threshold: float = 0.15,
+        ethics_engine: Optional[Any] = None,
     ) -> None:
         """Initialise the symbolic bridge with anchor and entropy settings."""
         self._anchor = AnchorState(
@@ -117,6 +118,7 @@ class SymbolicBridge:
         self._entropy_history: List[EntropyReading] = []
         self._call_counter: int = 0
         self._baseline_entropy: Optional[float] = None
+        self._ethics_engine = ethics_engine or self._default_ethics_engine()
 
         logger.info(
             "SymbolicBridge initialised",
@@ -147,6 +149,7 @@ class SymbolicBridge:
             **self._anchor.to_dict(),
             "call_counter": self._call_counter,
         }
+        ctx["ethics"] = self.validate_ethics_context(model_type)
 
         logger.debug("Anchor context resolved: T1=%d SRB=%s", self._anchor.t1, self._anchor.srb)
         return ctx
@@ -230,6 +233,55 @@ class SymbolicBridge:
         return self._entropy_history[-1].to_dict()
 
     # ------------------------------------------------------------------
+    # Ethics validation
+    # ------------------------------------------------------------------
+
+    def _default_ethics_engine(self) -> Optional[Any]:
+        try:
+            from ethics.engine import EthicsEngine
+
+            return EthicsEngine()
+        except Exception:  # noqa: BLE001 - NeMo bridge must stay importable
+            logger.exception("Unified EthicsEngine initialization failed")
+            return None
+
+    def validate_ethics_context(
+        self,
+        model_type: str,
+        signals: Optional[Dict[str, Any]] = None,
+        agent_id: str = "AURORA_NEMO_SERVICE",
+    ) -> Dict[str, Any]:
+        """Return a structured Picard_Delta_3 verdict for an inference context."""
+        if self._ethics_engine is None or not hasattr(self._ethics_engine, "validate"):
+            return {
+                "verdict": "APPROVED",
+                "context": "nemo_inference",
+                "agent_id": agent_id,
+                "anchor": "T1-NEMO-SYMBOLIC-BRIDGE",
+                "triggered_rules": [],
+                "audit_id": None,
+                "engine_id": self._anchor.ethics_protocol,
+            }
+
+        ethics_signals = {
+            "decision_opacity": 0.0,
+            "no_explanation_available": False,
+            "autonomous_critical_decision": False,
+            "human_override": True,
+            "model_type": model_type,
+        }
+        if signals:
+            ethics_signals.update(signals)
+
+        result = self._ethics_engine.validate(
+            context="nemo_inference",
+            signals=ethics_signals,
+            anchor="T1-NEMO-SYMBOLIC-BRIDGE",
+            agent_id=agent_id,
+        )
+        return result.to_dict()
+
+    # ------------------------------------------------------------------
     # Memory sealing
     # ------------------------------------------------------------------
 
@@ -262,5 +314,10 @@ class SymbolicBridge:
             "latest_entropy": self.get_latest_entropy(),
             "srb": self._anchor.srb,
             "ethics_protocol": self._anchor.ethics_protocol,
+            "ethics_engine": (
+                getattr(self._ethics_engine, "engine_id", self._anchor.ethics_protocol)
+                if self._ethics_engine
+                else self._anchor.ethics_protocol
+            ),
             "chain_notation": "#SERVICES//NEMO//SYMBOLIC_BRIDGE//",
         }

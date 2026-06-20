@@ -3,13 +3,13 @@ Jinja2==3.1.6
 MarkupSafe==3.0.3
 PyGObject==3.48.2
 PyJWT==2.13.0
-PyYAML==6.0.1
+PyYAML==6.0.3
 Pygments==2.20.0
 aiofiles==25.1.0
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
-argcomplete==3.1.4
+argcomplete==3.6.3
 attrs==26.1.0
 bcrypt==5.0.0
 blinker==1.7.0
@@ -66,7 +66,7 @@ python-json-logger==4.1.0
 python-multipart==0.0.32
 redis==8.0.0
 referencing==0.37.0
-requests==2.33.1
+requests==2.34.2
 rpds-py==2026.5.1
 rsa==4.9.1
 six==1.16.0

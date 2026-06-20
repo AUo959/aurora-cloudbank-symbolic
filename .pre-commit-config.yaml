@@ -12,7 +12,7 @@ repos:
         stages: [pre-commit]
       - id: shallow-assertion-warning
         name: shallow-assertion-warning
-        entry: python .github/hooks/check_shallow_assertions.py
+        entry: python3 .github/hooks/check_shallow_assertions.py
         language: system
         files: '^tests/.*\.py$'
         stages: [pre-commit]

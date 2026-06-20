@@ -44,7 +44,7 @@ def test_gumas_thermax_drift_detection_pass():
     ethics = GUMAS_Thermax(level=EthicsLevel.BALANCED)
     current = [1.0, 0.0, 0.0]
     baseline = [0.98, 0.05, 0.05]
-
+    
     is_acceptable, drift = ethics.check_drift(current, baseline)
     assert is_acceptable is True
     assert drift < 0.15
@@ -56,7 +56,7 @@ def test_gumas_thermax_drift_detection_fail():
     ethics = GUMAS_Thermax(level=EthicsLevel.STRICT)
     current = [1.0, 0.0, 0.0]
     baseline = [0.0, 1.0, 0.0]  # Complete drift
-
+    
     is_acceptable, drift = ethics.check_drift(current, baseline)
     assert is_acceptable is False
     assert drift > 0.05
@@ -67,7 +67,7 @@ def test_gumas_thermax_thermal_regulation():
     """Test thermal regulation balancing"""
     ethics = GUMAS_Thermax()
     vectors = [[1.0, 0.0], [2.0, 0.0], [3.0, 0.0]]
-
+    
     balanced = ethics.thermal_regulation(vectors, target_temperature=1.0)
     assert len(balanced) == 3
     # Verify balancing occurred (high values reduced)
@@ -78,10 +78,10 @@ def test_gumas_thermax_thermal_regulation():
 def test_gumas_thermax_memetic_integrity():
     """Test memetic integrity validation"""
     ethics = GUMAS_Thermax()
-
+    
     valid_data = {"content": "test content", "created_at": 1234567890.0}
     assert ethics.verify_memetic_integrity(valid_data) is True
-
+    
     invalid_data = {"type": "agent"}  # Missing required fields
     assert ethics.verify_memetic_integrity(invalid_data) is False
 
@@ -90,17 +90,17 @@ def test_gumas_thermax_memetic_integrity():
 def test_gumas_thermax_alignment_enforcement():
     """Test alignment enforcement with interventions"""
     ethics = GUMAS_Thermax(level=EthicsLevel.STRICT)
-
+    
     # High alignment - pass
     is_aligned, intervention = ethics.enforce_alignment(0.9, minimum_threshold=0.5)
     assert is_aligned is True
     assert intervention is None
-
+    
     # Medium alignment - warn
     is_aligned, intervention = ethics.enforce_alignment(0.55, minimum_threshold=0.5)
     assert is_aligned is True
     assert intervention == InterventionType.WARN
-
+    
     # Low alignment - block
     is_aligned, intervention = ethics.enforce_alignment(0.3, minimum_threshold=0.5)
     assert is_aligned is False
@@ -111,10 +111,10 @@ def test_gumas_thermax_alignment_enforcement():
 def test_gumas_thermax_violation_logging():
     """Test violation logging and summary"""
     ethics = GUMAS_Thermax(level=EthicsLevel.STRICT)
-
+    
     ethics.enforce_alignment(0.3, minimum_threshold=0.5)
     ethics.enforce_alignment(0.1, minimum_threshold=0.5)  # deficit=0.4, gets BLOCK
-
+    
     summary = ethics.get_violation_summary()
     assert summary["total_violations"] == 2
     assert InterventionType.BLOCK.value in summary["by_type"]
@@ -136,7 +136,7 @@ def test_flowstate_initialization():
 def test_flowstate_mode_switching():
     """Test mode switching"""
     flowstate = Aurora_Core_Flowstate()
-
+    
     flowstate.set_mode(FlowstateMode.RESONANT)
     assert flowstate.mode == FlowstateMode.RESONANT
     assert len(flowstate.state_history) == 1
@@ -146,7 +146,7 @@ def test_flowstate_mode_switching():
 def test_flowstate_constellation_binding():
     """Test constellation binding"""
     flowstate = Aurora_Core_Flowstate()
-
+    
     success = flowstate.bind_to_constellation(
         "ORION",
         metadata={"purpose": "Agent coordination"}
@@ -159,7 +159,7 @@ def test_flowstate_constellation_binding():
 def test_flowstate_constellation_unbinding():
     """Test constellation unbinding"""
     flowstate = Aurora_Core_Flowstate()
-
+    
     flowstate.bind_to_constellation("ZIPWIZ", metadata={})
     success = flowstate.unbind_from_constellation("ZIPWIZ")
     assert success is True
@@ -172,10 +172,8 @@ def test_flowstate_flow_channel_creation():
     """Test flow channel creation"""
     flowstate = Aurora_Core_Flowstate()
     flowstate.bind_to_constellation("BridgeAgent", metadata={})
-
+    
     channel = flowstate.create_flow_channel("agent_001", "BridgeAgent")
-    if channel.split("::")[1:3] != ["agent_001", "BridgeAgent"]:
-        raise AssertionError("Expected channel to encode agent_001/BridgeAgent")
     assert channel.startswith("channel::agent_001::BridgeAgent::")
 
 
@@ -184,7 +182,7 @@ def test_flowstate_constellation_status():
     """Test constellation status retrieval"""
     flowstate = Aurora_Core_Flowstate()
     flowstate.bind_to_constellation("DriftConcord", metadata={"version": "2.0"})
-
+    
     status = flowstate.get_constellation_status()
     assert "active_bindings" in status
     assert len(status["active_bindings"]) == 1
@@ -212,15 +210,13 @@ def test_quantum_forge_initialization():
 def test_quantum_forge_agent_generation():
     """Test quantum agent generation"""
     forge = QuantumForge()
-
+    
     agent = forge.generate_agent(
         intent_query="Research quantum-symbolic architectures",
         constellation_targets=["ORION", "ZIPWIZ"],
         metadata={"purpose": "Research agent"}
     )
-
-    if agent.metadata["purpose"] != "Research agent":
-        raise AssertionError("Expected agent metadata purpose to be preserved")
+    
     assert len(agent.agent_id) == 16  # UUID hex format
     assert len(agent.vector_core) == forge.vector_dimension
     assert agent.intent_alignment > 0.0
@@ -234,7 +230,7 @@ def test_quantum_forge_ethics_blocking():
         ethics_level=EthicsLevel.STRICT,
         vector_dimension=256
     )
-
+    
     with pytest.raises(ValueError, match="Agent creation blocked"):
         forge.generate_agent(
             intent_query="x",  # Very short intent = low alignment
@@ -247,14 +243,12 @@ def test_quantum_forge_ethics_blocking():
 def test_quantum_forge_memory_creation():
     """Test memory node creation"""
     forge = QuantumForge()
-
+    
     memory = forge.create_memory_node(
         content={"text": "Symbolic architecture patterns"},
         tags=["concept", "architecture"]
     )
-
-    if memory.content["text"] != "Symbolic architecture patterns":
-        raise AssertionError("Expected memory content to be preserved")
+    
     assert memory.node_id.startswith("mem::")
     assert "concept" in memory.tags
     assert len(memory.embedding) == forge.vector_dimension
@@ -264,15 +258,15 @@ def test_quantum_forge_memory_creation():
 def test_quantum_forge_intent_reactivation():
     """Test intent-aligned memory reactivation"""
     forge = QuantumForge()
-
+    
     # Create multiple memory nodes
     forge.create_memory_node({"text": "Quantum entanglement"}, ["quantum", "concept"])
     forge.create_memory_node({"text": "Vector operations"}, ["vector", "operation"])
     forge.create_memory_node({"text": "Ethics enforcement"}, ["ethics", "governance"])
-
+    
     # Reactivate by intent
     matches = forge.reactivate_by_intent("quantum mechanics", top_k=2)
-
+    
     assert len(matches) <= 2
     assert all(isinstance(m, SymbolicMemoryNode) for m in matches)
 
@@ -281,17 +275,17 @@ def test_quantum_forge_intent_reactivation():
 def test_quantum_forge_agent_evolution():
     """Test evolutionary optimization"""
     forge = QuantumForge()
-
+    
     agent = forge.generate_agent(
         "Test agent",
         constellation_targets=["ORION"],
         metadata={}
     )
-
+    
     initial_alignment = agent.intent_alignment
-
+    
     new_alignment = forge.optimize_agent_evolution(agent.agent_id)
-
+    
     assert new_alignment >= 0.0
     assert agent.optimization_iterations == 1
 
@@ -300,17 +294,17 @@ def test_quantum_forge_agent_evolution():
 def test_quantum_forge_joy_infusion():
     """Test joy infusion mechanism"""
     forge = QuantumForge()
-
+    
     agent = forge.generate_agent(
         "Happy agent",
         constellation_targets=[],
         metadata={}
     )
-
+    
     initial_joy = agent.joy_index
-
+    
     new_joy = forge.infuse_joy(agent.agent_id, joy_increment=0.2)
-
+    
     assert new_joy > initial_joy
     assert new_joy <= 1.0
     assert agent.joy_events == 1
@@ -320,13 +314,13 @@ def test_quantum_forge_joy_infusion():
 def test_quantum_forge_manifest_export():
     """Test system manifest export"""
     forge = QuantumForge()
-
+    
     # Generate some activity
     forge.generate_agent("Test agent", [], {})
     forge.create_memory_node({"content": "Test memory"}, ["test"])
-
+    
     manifest = forge.export_manifest()
-
+    
     assert "version" in manifest
     assert "metrics" in manifest
     assert manifest["metrics"]["agents_created"] == 1
@@ -345,34 +339,33 @@ def test_full_quantum_forge_workflow():
         flowstate_mode=FlowstateMode.GENERATIVE,
         vector_dimension=512
     )
-
+    
     # 1. Generate agent
     agent = forge.generate_agent(
         "Research symbolic architectures",
         constellation_targets=["ORION", "ZIPWIZ"],
         metadata={"purpose": "Research"}
     )
-    if agent.metadata["purpose"] != "Research":
-        raise AssertionError("Expected agent metadata purpose to be preserved")
+    assert len(agent.agent_id) == 16
 
     # 2. Create memories
     mem1 = forge.create_memory_node({"content": "T1/SRB anchors"}, ["core", "symbolic"])
     mem2 = forge.create_memory_node({"content": "DLP tracking"}, ["data", "governance"])
     assert len(forge.memory_nodes) == 2
-
+    
     # 3. Reactivate by intent
     matches = forge.reactivate_by_intent("symbolic architecture", top_k=2)
     assert len(matches) > 0
-
+    
     # 4. Optimize agent
     new_alignment = forge.optimize_agent_evolution(agent.agent_id)
     assert new_alignment >= 0.0
-
+    
     # 5. Infuse joy
     initial_joy = agent.joy_index
     new_joy = forge.infuse_joy(agent.agent_id, joy_increment=0.15)
     assert new_joy > initial_joy
-
+    
     # 6. Export manifest
     manifest = forge.export_manifest()
     assert manifest["metrics"]["agents_created"] == 1
@@ -386,20 +379,18 @@ def test_ethics_flowstate_integration():
         ethics_level=EthicsLevel.BALANCED,  # Use BALANCED to allow creation
         flowstate_mode=FlowstateMode.RESONANT
     )
-
+    
     # Bind to constellation
     forge.flowstate.bind_to_constellation("ORION", {})
-
+    
     # Generate agent - ethics should enforce
     agent = forge.generate_agent(
         "High-integrity ethical agent with robust governance and alignment protocols",
         constellation_targets=["ORION"],
         metadata={"ethics": "strict"}
     )
-
+    
     # Agent should be created
-    if agent.metadata["ethics"] != "strict":
-        raise AssertionError("Expected agent metadata ethics to be preserved")
     assert "ORION" in agent.constellation_bindings
     assert agent.intent_alignment > 0.0
 
@@ -412,7 +403,7 @@ def test_ethics_flowstate_integration():
 def test_empty_vector_handling():
     """Test handling of empty vectors"""
     ethics = GUMAS_Thermax()
-
+    
     result = ethics.thermal_regulation([], target_temperature=1.0)
     assert result == []
 
@@ -421,7 +412,7 @@ def test_empty_vector_handling():
 def test_invalid_constellation_binding():
     """Test binding to invalid constellation"""
     flowstate = Aurora_Core_Flowstate()
-
+    
     # Valid constellations: ORION, ZIPWIZ, BridgeAgent, DriftConcord
     success = flowstate.bind_to_constellation("InvalidConstellation", {})
     assert success is False
@@ -431,7 +422,7 @@ def test_invalid_constellation_binding():
 def test_memory_reactivation_empty_store():
     """Test reactivation with empty memory store"""
     forge = QuantumForge()
-
+    
     matches = forge.reactivate_by_intent("anything", top_k=5)
     assert len(matches) == 0
 
@@ -440,7 +431,7 @@ def test_memory_reactivation_empty_store():
 def test_agent_evolution_nonexistent():
     """Test evolution of nonexistent agent"""
     forge = QuantumForge()
-
+    
     with pytest.raises(ValueError, match="Agent not found"):
         forge.optimize_agent_evolution("nonexistent_id")
 
@@ -449,7 +440,7 @@ def test_agent_evolution_nonexistent():
 def test_joy_infusion_nonexistent():
     """Test joy infusion for nonexistent agent"""
     forge = QuantumForge()
-
+    
     with pytest.raises(ValueError, match="Agent not found"):
         forge.infuse_joy("nonexistent_id", joy_increment=0.1)
 

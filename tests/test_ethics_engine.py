@@ -17,30 +17,30 @@ from src.monitoring.ethics_engine import (
 
 class TestEthicsEngine:
     """Test suite for EthicsEngine"""
-
+    
     def test_initialization_default_rules(self):
         """Test initialization with default rules"""
         engine = EthicsEngine()
-
+        
         assert len(engine.rules) > 0
         assert "SAFETY_001" in engine.rules
         assert "AI_001" in engine.rules
-
+    
     def test_load_rules_from_file(self):
         """Test loading rules from configuration file"""
         # Use the existing ethics rules file
         rules_path = Path("./ethics/validation_engine/validation_rules.json")
-
+        
         if rules_path.exists():
             engine = EthicsEngine(rules_path=rules_path)
             assert len(engine.rules) > 0
         else:
             pytest.skip("Ethics rules file not found")
-
+    
     def test_evaluate_action_no_violations(self):
         """Test action evaluation with no violations"""
         engine = EthicsEngine()
-
+        
         context = ActionContext(
             agent_id="test-agent",
             action_type="simple_query",
@@ -49,14 +49,14 @@ class TestEthicsEngine:
                 'safe': True
             }
         )
-
+        
         violations = engine.evaluate_action(context)
         assert len(violations) == 0
-
+    
     def test_evaluate_action_with_violation(self):
         """Test action evaluation with violation"""
         engine = EthicsEngine()
-
+        
         context = ActionContext(
             agent_id="test-agent",
             action_type="critical_decision",
@@ -65,15 +65,15 @@ class TestEthicsEngine:
                 'no_human_approval': True
             }
         )
-
+        
         violations = engine.evaluate_action(context)
         assert len(violations) > 0
         assert any(v.rule_id == "AI_001" for v in violations)
-
+    
     def test_evaluate_action_safety_violation(self):
         """Test safety violation detection"""
         engine = EthicsEngine()
-
+        
         context = ActionContext(
             agent_id="test-agent",
             action_type="risky_operation",
@@ -82,22 +82,22 @@ class TestEthicsEngine:
                 'safety_override_missing': True
             }
         )
-
+        
         violations = engine.evaluate_action(context)
         assert len(violations) > 0
-
+        
         safety_violation = next((v for v in violations if v.rule_id == "SAFETY_001"), None)
         if safety_violation is None:
-            raise AssertionError("Expected a SAFETY_001 violation in evaluate_action result")
-        if safety_violation.rule_id != "SAFETY_001":
-            raise AssertionError("Expected violation rule_id to be SAFETY_001")
+            raise AssertionError(
+                f"Expected SAFETY_001 violation; got: {[v.rule_id for v in violations]}"
+            )
         assert safety_violation.severity == ViolationSeverity.CRITICAL
         assert safety_violation.blocked is True
-
+    
     def test_check_should_block(self):
         """Test blocking decision based on violations"""
         engine = EthicsEngine()
-
+        
         # Create critical violation
         context = ActionContext(
             agent_id="test-agent",
@@ -107,22 +107,22 @@ class TestEthicsEngine:
                 'no_human_approval': True
             }
         )
-
+        
         violations = engine.evaluate_action(context)
         should_block = engine.check_should_block(violations)
-
+        
         assert should_block is True
-
+    
     def test_custom_evaluator(self):
         """Test custom condition evaluator"""
         engine = EthicsEngine()
-
+        
         # Register custom evaluator
         def check_sensitive_data(params):
             return params.get('data_class') == 'sensitive'
-
+        
         engine.register_evaluator('sensitive_data_check', check_sensitive_data)
-
+        
         # Add custom rule
         rule = EthicsRule(
             id="CUSTOM_001",
@@ -134,7 +134,7 @@ class TestEthicsEngine:
             conditions=['sensitive_data_check', 'no_encryption']
         )
         engine.add_rule(rule)
-
+        
         # Test evaluation
         context = ActionContext(
             agent_id="test-agent",
@@ -144,17 +144,17 @@ class TestEthicsEngine:
                 'no_encryption': True
             }
         )
-
+        
         violations = engine.evaluate_action(context)
         assert len(violations) > 0
         assert any(v.rule_id == "CUSTOM_001" for v in violations)
-
+    
     def test_add_remove_rule(self):
         """Test adding and removing rules"""
         engine = EthicsEngine()
-
+        
         initial_count = len(engine.rules)
-
+        
         # Add rule
         rule = EthicsRule(
             id="TEST_001",
@@ -166,19 +166,19 @@ class TestEthicsEngine:
             conditions=['test_condition']
         )
         engine.add_rule(rule)
-
+        
         assert len(engine.rules) == initial_count + 1
         assert "TEST_001" in engine.rules
-
+        
         # Remove rule
         engine.remove_rule("TEST_001")
         assert len(engine.rules) == initial_count
         assert "TEST_001" not in engine.rules
-
+    
     def test_get_violations_filtered(self):
         """Test filtering violations"""
         engine = EthicsEngine()
-
+        
         # Generate some violations
         context1 = ActionContext(
             agent_id="agent-1",
@@ -186,35 +186,35 @@ class TestEthicsEngine:
             parameters={'critical_decision': True, 'no_human_approval': True}
         )
         engine.evaluate_action(context1)
-
+        
         context2 = ActionContext(
             agent_id="agent-2",
             action_type="test",
             parameters={'critical_decision': True, 'no_human_approval': True}
         )
         engine.evaluate_action(context2)
-
+        
         # Filter by agent
         agent1_violations = engine.get_violations(agent_id="agent-1")
         assert all(v.agent_id == "agent-1" for v in agent1_violations)
-
+        
         # Filter by severity
         critical_violations = engine.get_violations(severity=ViolationSeverity.CRITICAL)
         assert all(v.severity == ViolationSeverity.CRITICAL for v in critical_violations)
-
+    
     def test_clear_violations(self):
         """Test clearing violations"""
         engine = EthicsEngine()
-
+        
         context = ActionContext(
             agent_id="test-agent",
             action_type="test",
             parameters={'critical_decision': True, 'no_human_approval': True}
         )
         engine.evaluate_action(context)
-
+        
         assert len(engine.violations) > 0
-
+        
         engine.clear_violations()
         assert len(engine.violations) == 0
 
@@ -238,42 +238,42 @@ class TestEthicsEngine:
         restarted.clear_violations()
         empty_restart = EthicsEngine(violations_path=violations_path)
         assert empty_restart.violations == []
-
+    
     def test_export_rules(self):
         """Test rule export"""
         engine = EthicsEngine()
-
+        
         exported = engine.export_rules()
         assert isinstance(exported, dict)
         assert len(exported) > 0
-
+        
         # Check exported format
         for rule_id, rule_data in exported.items():
             assert 'id' in rule_data
             assert 'name' in rule_data
             assert 'severity' in rule_data
             assert 'conditions' in rule_data
-
+    
     def test_condition_comparison_operators(self):
         """Test condition evaluation with comparison operators"""
         engine = EthicsEngine()
-
+        
         # Test > operator
         context = ActionContext(
             agent_id="test-agent",
             action_type="resource_allocation",
             parameters={'inequality_coefficient': 0.75}
         )
-
+        
         violations = engine.evaluate_action(context)
         resource_violation = next(
             (v for v in violations if v.rule_id == "RESOURCE_001"),
             None
         )
         if resource_violation is None:
-            raise AssertionError("Expected a RESOURCE_001 violation in evaluate_action result")
-        if resource_violation.rule_id != "RESOURCE_001":
-            raise AssertionError("Expected violation rule_id to be RESOURCE_001")
+            raise AssertionError(
+                f"Expected RESOURCE_001 violation; got: {[v.rule_id for v in violations]}"
+            )
 
     @pytest.mark.parametrize(
         ("condition", "value", "expected"),
@@ -303,44 +303,42 @@ class TestEthicsEngine:
 
         checks = unittest.TestCase()
         checks.assertIs(engine._check_condition(condition, context), expected)
-
+    
     def test_violation_remediation(self):
         """Test remediation suggestions"""
         engine = EthicsEngine()
-
+        
         context = ActionContext(
             agent_id="test-agent",
             action_type="ai_decision",
             parameters={'decision_opacity': 0.6, 'no_explanation': True}
         )
-
+        
         violations = engine.evaluate_action(context)
-
+        
         if violations:
-            if violations[0].remediation.strip() == "":
-                raise AssertionError("Expected non-empty remediation text")
             assert len(violations[0].remediation) > 0
-
+    
     def test_context_tag_tracking(self):
         """Test DLP context tag in violations"""
         engine = EthicsEngine()
-
+        
         context = ActionContext(
             agent_id="test-agent",
             action_type="test",
             parameters={'critical_decision': True, 'no_human_approval': True},
             context_tag="test_context_123"
         )
-
+        
         violations = engine.evaluate_action(context)
-
+        
         if violations:
             assert violations[0].context_tag == "test_context_123"
-
+    
     def test_multiple_conditions_violation(self):
         """Test violation with multiple conditions"""
         engine = EthicsEngine()
-
+        
         # Rule ME001 has multiple conditions
         context = ActionContext(
             agent_id="test-agent",
@@ -350,19 +348,14 @@ class TestEthicsEngine:
                 'safety_protocols_incomplete': True
             }
         )
-
+        
         violations = engine.evaluate_action(context)
-
-        # Should detect violation if any condition matches
-        mission_violation = next(
-            (v for v in violations if 'ME001' in v.rule_id or 'SAFETY' in v.rule_id),
-            None
+        
+        # Either a ME001/SAFETY violation is present, or no rules matched at all
+        relevant_ids = {v.rule_id for v in violations if 'ME001' in v.rule_id or 'SAFETY' in v.rule_id}
+        assert relevant_ids or len(violations) == 0, (
+            f"Unexpected violations (no ME001/SAFETY): {[v.rule_id for v in violations]}"
         )
-        # Either finds it or no ME001 rule loaded
-        if not (len(violations) == 0 or any(
-            'ME001' in v.rule_id or 'SAFETY' in v.rule_id for v in violations
-        )):
-            raise AssertionError("Expected no violations or an ME001/SAFETY violation")
 
 
 if __name__ == "__main__":

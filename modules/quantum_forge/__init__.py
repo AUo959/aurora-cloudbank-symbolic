@@ -112,6 +112,18 @@ from modules.quantum_forge.joy_evolution_engine import (
     GenerationStats,
     get_joy_evolution_engine,
 )
+from modules.quantum_forge.forge_lifecycle_policy import (
+    ForgeAuthorization,
+    ForgeLifecycleRecord,
+    ForgeRouteDecision,
+    ForgeScope,
+    ForgeTaskRequest,
+    QuantumAgentForgePolicy,
+    RetentionCriteria,
+    RetentionOutcome,
+    RetentionReview,
+    StandingCoverage,
+)
 
 __version__ = "3.0.0"
 
@@ -179,6 +191,18 @@ __all__ = [
     "EvolutionParameters",
     "GenerationStats",
     "get_joy_evolution_engine",
+
+    # Forge lifecycle policy
+    "ForgeAuthorization",
+    "ForgeLifecycleRecord",
+    "ForgeRouteDecision",
+    "ForgeScope",
+    "ForgeTaskRequest",
+    "QuantumAgentForgePolicy",
+    "RetentionCriteria",
+    "RetentionOutcome",
+    "RetentionReview",
+    "StandingCoverage",
 ]
 
 __version__ = "3.0.0"

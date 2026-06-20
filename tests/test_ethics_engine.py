@@ -87,9 +87,10 @@ class TestEthicsEngine:
         assert len(violations) > 0
         
         safety_violation = next((v for v in violations if v.rule_id == "SAFETY_001"), None)
-        assert safety_violation is not None, (
-            f"Expected SAFETY_001 violation; got: {[v.rule_id for v in violations]}"
-        )
+        if safety_violation is None:
+            raise AssertionError(
+                f"Expected SAFETY_001 violation; got: {[v.rule_id for v in violations]}"
+            )
         assert safety_violation.severity == ViolationSeverity.CRITICAL
         assert safety_violation.blocked is True
     
@@ -269,9 +270,10 @@ class TestEthicsEngine:
             (v for v in violations if v.rule_id == "RESOURCE_001"),
             None
         )
-        assert resource_violation is not None, (
-            f"Expected RESOURCE_001 violation; got: {[v.rule_id for v in violations]}"
-        )
+        if resource_violation is None:
+            raise AssertionError(
+                f"Expected RESOURCE_001 violation; got: {[v.rule_id for v in violations]}"
+            )
 
     @pytest.mark.parametrize(
         ("condition", "value", "expected"),

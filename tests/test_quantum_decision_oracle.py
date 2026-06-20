@@ -177,7 +177,8 @@ class TestQuantumDecisionOracleEdgeCases:
             scenario={'action': 'minimal'},
             params={}
         )
-        assert result is not None
+        if result is None:
+            raise AssertionError("Expected predict_outcome to return a result")
         assert result.confidence > 0
     
     def test_predict_comprehensive_scenario(self):

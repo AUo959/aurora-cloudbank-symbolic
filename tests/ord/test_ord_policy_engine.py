@@ -107,6 +107,32 @@ class TestOrdPolicyEngine(unittest.TestCase):
         self.assertIsNotNone(order.transport_requirement)
         self.assertEqual(SensitivityClass.RESTRICTED, order.transport_requirement.sensitivity)
 
+    def test_high_risk_mission_enables_quantum_seal_controls(self) -> None:
+        mission = MissionBrief(
+            mission_id="tv-004f",
+            tool_name="fetch_url",
+            risk_level=self.engine.registry.quantum_seal_threshold,
+            destination="https://example.net/data",
+        )
+        order = self.engine.create_dispatch_order(mission)
+        self.assertEqual(
+            [DroneType.DELTA_SCOUT, DroneType.SHADOWFAX, DroneType.GAMMA_SWARM, DroneType.WISP],
+            order.drones_required,
+        )
+        self.assertTrue(order.special_instructions["delta_scout"]["full_scan"])
+        self.assertEqual(
+            self.engine.registry.quantum_seal_threshold,
+            order.special_instructions["delta_scout"]["threat_abort_threshold"],
+        )
+        self.assertEqual(
+            self.engine.registry.drift_threshold,
+            order.special_instructions["shadowfax"]["drift_threshold"],
+        )
+        self.assertTrue(order.special_instructions["shadowfax"]["quarantine_on_drift"])
+        self.assertIsNotNone(order.transport_requirement)
+        self.assertTrue(order.transport_requirement.quantum_seal_required)
+        self.assertTrue(order.special_instructions["wisp"]["quantum_seal"])
+
     def test_deterministic_receipt(self) -> None:
         mission = MissionBrief(
             mission_id="tv-005",

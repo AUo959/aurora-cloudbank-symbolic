@@ -161,11 +161,11 @@ class TestQuantumProcessingLayerInitialization:
         """Test quantum layer initializes with default qubits."""
         layer = QuantumProcessingLayer()
 
-        if layer is None:
-            raise AssertionError("Expected QuantumProcessingLayer to initialize")
+        if layer.quantum_circuits != {}:
+            raise AssertionError("Expected quantum_circuits to start empty")
         assert layer.num_qubits == 8
-        if not hasattr(layer, 'quantum_circuits'):
-            raise AssertionError("Expected QuantumProcessingLayer to expose quantum_circuits")
+        if not isinstance(layer.quantum_circuits, dict):
+            raise AssertionError("Expected quantum_circuits to be a dict")
 
     def test_quantum_layer_initialization_custom_qubits(self):
         """Test quantum layer with custom qubit count."""
@@ -387,8 +387,8 @@ class TestQuantumSymbolicIntegration:
         test_data = {"workflow": "test", "value": 123}
         anchor_result = anchor.anchor_quantum_symbolic_state(test_data)
 
-        if anchor_result is None:
-            raise AssertionError("Expected anchor_quantum_symbolic_state to return a result")
+        if set(anchor_result) != {"quantum_anchor", "symbolic_anchor", "hybrid_coordination"}:
+            raise AssertionError("Unexpected anchor_result keys")
         assert anchor_result["quantum_anchor"]["quantum_processed"] is True
         assert anchor_result["symbolic_anchor"]["symbolic_patterns_extracted"] is True
         assert anchor_result["hybrid_coordination"]["hybrid_mode"] == "active"
@@ -439,8 +439,8 @@ class TestQuantumCoreErrorHandling:
 
         # Should handle None gracefully
         result = anchor.process_quantum_state(None)
-        if result is None:
-            raise AssertionError("Expected process_quantum_state to handle None data")
+        if not result["quantum_processed"]:
+            raise AssertionError("Expected quantum_processed to be True")
 
     def test_symbolic_anchor_with_invalid_data_type(self):
         """Test symbolic anchor handles various data types."""
@@ -448,18 +448,18 @@ class TestQuantumCoreErrorHandling:
 
         # Test with string
         result_str = anchor.process_quantum_state("string_data")
-        if result_str is None:
-            raise AssertionError("Expected process_quantum_state to handle string data")
+        if not result_str["coherence_maintained"]:
+            raise AssertionError("Expected coherence_maintained to be True")
 
         # Test with list
         result_list = anchor.process_symbolic_state([1, 2, 3])
-        if result_list is None:
-            raise AssertionError("Expected process_symbolic_state to handle list data")
+        if not result_list["reasoning_chains_constructed"]:
+            raise AssertionError("Expected reasoning_chains_constructed to be True")
 
         # Test with number
         result_num = anchor.coordinate_hybrid_processing(42)
-        if result_num is None:
-            raise AssertionError("Expected coordinate_hybrid_processing to handle numeric data")
+        if result_num["processing_efficiency"] != "optimized":
+            raise AssertionError("Expected processing_efficiency to be optimized")
 
     @pytest.mark.skipif(not QUANTUM_LAYER_AVAILABLE, reason="Quantum layer not available")
     def test_quantum_layer_invalid_qubit_index(self):
@@ -507,8 +507,8 @@ class TestQuantumCoreGracefulDegradation:
         anchor = SymbolicCPUAnchor()
 
         result = anchor.anchor_quantum_symbolic_state({"test": "data"})
-        if result is None:
-            raise AssertionError("Expected symbolic anchor to work without external dependencies")
+        if not result["symbolic_anchor"]["logical_consistency_verified"]:
+            raise AssertionError("Expected logical_consistency_verified to be True")
 
     def test_quantum_layer_import_handles_missing_qiskit(self):
         """Test that quantum layer import handles missing qiskit gracefully."""
@@ -523,8 +523,8 @@ class TestQuantumCoreGracefulDegradation:
         # or provide meaningful error message
         try:
             layer = QuantumProcessingLayer(num_qubits=2)
-            if layer is None:
-                raise AssertionError("Expected QuantumProcessingLayer fallback to initialize")
+            if layer.num_qubits != 2:
+                raise AssertionError("Expected layer.num_qubits to be 2")
         except ImportError as e:
             # Acceptable to raise ImportError with clear message
             assert "qiskit not available" in str(e).lower() or "native implementation missing" in str(e).lower()

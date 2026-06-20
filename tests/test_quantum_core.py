@@ -439,8 +439,7 @@ class TestQuantumCoreErrorHandling:
 
         # Should handle None gracefully
         result = anchor.process_quantum_state(None)
-        if not result["quantum_processed"]:
-            raise AssertionError("Expected quantum_processed to be True")
+        assert result["quantum_processed"] is True
 
     def test_symbolic_anchor_with_invalid_data_type(self):
         """Test symbolic anchor handles various data types."""
@@ -448,13 +447,11 @@ class TestQuantumCoreErrorHandling:
 
         # Test with string
         result_str = anchor.process_quantum_state("string_data")
-        if not result_str["coherence_maintained"]:
-            raise AssertionError("Expected coherence_maintained to be True")
+        assert result_str["coherence_maintained"] is True
 
         # Test with list
         result_list = anchor.process_symbolic_state([1, 2, 3])
-        if not result_list["reasoning_chains_constructed"]:
-            raise AssertionError("Expected reasoning_chains_constructed to be True")
+        assert result_list["reasoning_chains_constructed"] is True
 
         # Test with number
         result_num = anchor.coordinate_hybrid_processing(42)
@@ -507,8 +504,7 @@ class TestQuantumCoreGracefulDegradation:
         anchor = SymbolicCPUAnchor()
 
         result = anchor.anchor_quantum_symbolic_state({"test": "data"})
-        if not result["symbolic_anchor"]["logical_consistency_verified"]:
-            raise AssertionError("Expected logical_consistency_verified to be True")
+        assert result["symbolic_anchor"]["logical_consistency_verified"] is True
 
     def test_quantum_layer_import_handles_missing_qiskit(self):
         """Test that quantum layer import handles missing qiskit gracefully."""

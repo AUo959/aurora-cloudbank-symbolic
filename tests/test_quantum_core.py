@@ -13,6 +13,7 @@ Target: 95%+ code coverage
 """
 
 import sys
+import unittest
 from pathlib import Path
 
 import pytest
@@ -439,7 +440,7 @@ class TestQuantumCoreErrorHandling:
 
         # Should handle None gracefully
         result = anchor.process_quantum_state(None)
-        assert result["quantum_processed"] is True
+        unittest.TestCase().assertIs(result["quantum_processed"], True)
 
     def test_symbolic_anchor_with_invalid_data_type(self):
         """Test symbolic anchor handles various data types."""
@@ -447,11 +448,11 @@ class TestQuantumCoreErrorHandling:
 
         # Test with string
         result_str = anchor.process_quantum_state("string_data")
-        assert result_str["coherence_maintained"] is True
+        unittest.TestCase().assertIs(result_str["coherence_maintained"], True)
 
         # Test with list
         result_list = anchor.process_symbolic_state([1, 2, 3])
-        assert result_list["reasoning_chains_constructed"] is True
+        unittest.TestCase().assertIs(result_list["reasoning_chains_constructed"], True)
 
         # Test with number
         result_num = anchor.coordinate_hybrid_processing(42)
@@ -504,7 +505,7 @@ class TestQuantumCoreGracefulDegradation:
         anchor = SymbolicCPUAnchor()
 
         result = anchor.anchor_quantum_symbolic_state({"test": "data"})
-        assert result["symbolic_anchor"]["logical_consistency_verified"] is True
+        unittest.TestCase().assertIs(result["symbolic_anchor"]["logical_consistency_verified"], True)
 
     def test_quantum_layer_import_handles_missing_qiskit(self):
         """Test that quantum layer import handles missing qiskit gracefully."""

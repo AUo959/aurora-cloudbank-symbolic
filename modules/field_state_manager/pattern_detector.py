@@ -388,7 +388,7 @@ class PatternDetector:
                         if n1 < n2 and n2 in node_interactions.get(n1, set()):
                             actual_connections += 1
                 
-                density = actual_connections / total_possible if total_possible > 0 else 0.0
+                density = actual_connections / total_possible if total_possible > 0 else 0.0  # NOSONAR - total_possible >= 1 when len(potential_coalition) >= 2, guard kept for clarity
                 
                 if density >= 0.6 and len(potential_coalition) >= min_coalition_size:  # High interconnection
                     coalitions.append(potential_coalition)

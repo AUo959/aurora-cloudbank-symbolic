@@ -19,7 +19,7 @@ import re
 try:
     import numpy as np
     _NUMPY_AVAILABLE = True
-except ImportError:
+except ImportError:  # NOSONAR - numpy is optional; math module provides all required fallbacks
     np = None  # type: ignore
     _NUMPY_AVAILABLE = False
 from datetime import datetime, timezone
@@ -183,6 +183,9 @@ class MemoryItem:
         effective_half_life = (self.half_life * (1 + self.importance) *
                              (1 + math.log(1 + self.access_count)) *
                              cultural_boost * anchor_boost)
+
+        if effective_half_life <= 0.0:
+            return
 
         # Exponential decay
         decay_constant = math.log(2) / effective_half_life

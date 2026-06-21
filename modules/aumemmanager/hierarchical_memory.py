@@ -1,1 +1,964 @@
-"""\nAuMemManager - Hierarchical Memory Management Module\nIntegrated with Aurora CloudBank's quantum-symbolic architecture\n\nThis module provides enterprise-grade memory management with:\n- Three-tier hierarchical storage (Active/Compressed/Archived)\n- Quantum-symbolic vector integration  \n- Attention-based retrieval with learned importance\n- DLP compliance and symbolic anchor support\n- Production-ready threading and performance optimization\n"""\n\nimport json\nimport math\nimport os\nimport time\nimport uuid\nimport re\ntry:\n    import numpy as np\n    _NUMPY_AVAILABLE = True\nexcept ImportError:  # NOSONAR - numpy is optional; math module provides all required fallbacks\n    np = None  # type: ignore\n    _NUMPY_AVAILABLE = False\nfrom datetime import datetime, timezone\nfrom typing import Dict, List, Optional, Any\nfrom dataclasses import dataclass, asdict, field\nfrom enum import Enum\nimport threading\nfrom collections import defaultdict\nimport logging\n\nfrom src.utils.atomic_io import atomic_write_json\n\n# Aurora CloudBank Integration Imports\n# Configure logging (early initialization for import error logging)\nlogging.basicConfig(level=logging.INFO)\nlogger = logging.getLogger(__name__)\n\ntry:\n    from src.core.native_dlp_export import NativeDLPTracker\n    AURORA_DLP_AVAILABLE = True\nexcept ImportError:\n    AURORA_DLP_AVAILABLE = False\n    logger.warning(\"Aurora DLP not available - running in standalone mode\")\n\ntry:\n    from src.utils.atomic_io import atomic_write_json\n    ATOMIC_IO_AVAILABLE = True\nexcept ImportError:\n    ATOMIC_IO_AVAILABLE = False\n    logger.warning(\"atomic_io not available - persistence will use non-atomic writes\")\n\n# Ledger hook is imported lazily in __init__ to avoid circular imports\n# (aumemmanager.__init__.py imports hierarchical_memory, so any module-level\n# import of ledger_hooks here would form a cycle via the package namespace)\n_LEDGER_HOOK_AVAILABLE = False\nAuMemLedgerHook = None  # type: ignore\n\n# Constants\nSUMMARY_MAX_LENGTH = 100  # Maximum length for content summaries in logs\n\nclass MemoryType(Enum):\n    \"\"\"Types of memory supported by Aurora CloudBank integration\"\"\"\n    AGENT = \"agent\"\n    FACTION = \"faction\"\n    NARRATIVE = \"narrative\"\n    QUANTUM_SYMBOLIC = \"quantum_symbolic\"\n    VECTOR_STATE = \"vector_state\"\n    FLIGHT_CONTROL = \"flight_control\"\n    AURORA_SYMBOLIC = \"aurora_symbolic\"     # Aurora CloudBank specific\n    CASK_CULTURAL = \"cask_cultural\"         # CASK integration\n    T1_ANCHOR = \"t1_anchor\"                 # Temporal anchors\n    SRB_BOUNDARY = \"srb_boundary\"           # Spatial-relational boundaries\n\nclass MemoryStatus(Enum):\n    \"\"\"Memory item status with Aurora CloudBank states\"\"\"\n    ACTIVE = \"active\"\n    ARCHIVED = \"archived\"\n    COMPRESSED = \"compressed\"\n    DECAY_QUEUED = \"decay_queued\"\n    QUANTUM_SUPERPOSED = \"quantum_superposed\"\n    AURORA_SEALED = \"aurora_sealed\"         # Memory sealed with SHA256\n    DLP_LOCKED = \"dlp_locked\"               # DLP compliance lock\n\n@dataclass\nclass QuantumSymbolicVector:\n    \"\"\"Quantum-symbolic vector with Aurora CloudBank integration\"\"\"\n    vector_id: str\n    magnitude: float\n    phase: float\n    entanglement_links: List[str] = field(default_factory=list)\n    superposition_states: List[Dict[str, Any]] = field(default_factory=list)\n    coherence_time: float = 1.0\n    \n    # Aurora CloudBank specific properties\n    symbolic_anchors: List[str] = field(default_factory=list)\n    t1_temporal_state: Optional[Dict[str, Any]] = None\n    srb_boundary_data: Optional[Dict[str, Any]] = None\n    dlp_classification: str = \"DLP_L1_OK\"\n    \n    def collapse_superposition(self, observation_state: str) -> Dict[str, Any]:\n        \"\"\"Collapse quantum superposition to observed state\"\"\"\n        for state in self.superposition_states:\n            if state.get('state_id') == observation_state:\n                return state\n        return self.superposition_states[0] if self.superposition_states else {}\n    \n    def add_aurora_anchor(self, anchor_protocol: str) -> None:\n        \"\"\"Add Aurora CloudBank symbolic anchor\"\"\"\n        if anchor_protocol not in self.symbolic_anchors:\n            self.symbolic_anchors.append(anchor_protocol)\n\n@dataclass\nclass AttentionWeight:\n    \"\"\"Attention weights for memory scoring with Aurora enhancements\"\"\"\n    relevance: float = 0.25\n    importance: float = 0.25\n    recency: float = 0.25\n    quantum_coherence: float = 0.15\n    cultural_relevance: float = 0.05    # CASK integration\n    aurora_symbolic: float = 0.05       # Aurora CloudBank symbols\n    \n    def normalize(self):\n        \"\"\"Normalize weights to sum to 1.0\"\"\"\n        total = (self.relevance + self.importance + self.recency + \n                self.quantum_coherence + self.cultural_relevance + self.aurora_symbolic)\n        if total > 0:\n            self.relevance /= total\n            self.importance /= total\n            self.recency /= total\n            self.quantum_coherence /= total\n            self.cultural_relevance /= total\n            self.aurora_symbolic /= total\n\n@dataclass\nclass MemoryItem:\n    \"\"\"Enhanced memory item with full Aurora CloudBank integration\"\"\"\n    id: str\n    content: Any\n    memory_type: MemoryType\n    owner: str\n    importance: float = 1.0\n    timestamp: float = field(default_factory=time.time)\n    last_access: float = field(default_factory=time.time)\n    access_count: int = 0\n    tags: List[str] = field(default_factory=list)\n    status: MemoryStatus = MemoryStatus.ACTIVE\n    \n    # Decay and persistence\n    strength: float = 1.0\n    half_life: float = 86400.0  # 1 day in seconds\n    decay_rate: float = 0.0001\n    \n    # Quantum-symbolic properties\n    quantum_vector: Optional[QuantumSymbolicVector] = None\n    symbolic_anchors: List[str] = field(default_factory=list)\n    entangled_memories: List[str] = field(default_factory=list)\n    \n    # Compression metadata\n    compression_ratio: float = 1.0\n    original_size: int = 0\n    \n    # Flight control properties\n    flight_trajectory: Optional[Dict[str, Any]] = None\n    control_parameters: Dict[str, float] = field(default_factory=dict)\n    \n    # Aurora CloudBank integration\n    dlp_tag_id: Optional[str] = None\n    aurora_hash_seal: Optional[str] = None\n    context_tag: str = \"aumemmanager_memory\"  # REQUIRED for continuity\n    cask_cultural_score: float = 0.0\n    \n    def decay_strength(self, elapsed_time: float) -> None:\n        \"\"\"Apply exponential decay with Aurora CloudBank enhancements\"\"\"\n        if self.strength <= 0 or self.half_life <= 0:\n            return\n            \n        # Dynamic half-life based on importance, access patterns, and Aurora factors\n        cultural_boost = 1.0 + (self.cask_cultural_score * 0.1)\n        anchor_boost = 1.0 + (len(self.symbolic_anchors) * 0.05)\n        \n        effective_half_life = (self.half_life * (1 + self.importance) *\n                             (1 + math.log(1 + self.access_count)) *\n                             cultural_boost * anchor_boost)\n\n        if effective_half_life <= 0.0:  # NOSONAR - defensive guard; callers may configure half_life=0\n            return\n\n        # Exponential decay\n        decay_constant = math.log(2) / effective_half_life\n        self.strength *= math.exp(-decay_constant * elapsed_time)\n        \n        # Threshold for archival\n        if self.strength < 0.001:\n            self.strength = 0.0\n            self.status = MemoryStatus.DECAY_QUEUED\n    \n    def reinforce(self, amount: float = 0.1) -> None:\n        \"\"\"Reinforce memory with Aurora CloudBank enhancements\"\"\"\n        # Cultural and symbolic reinforcement\n        cultural_multiplier = 1.0 + (self.cask_cultural_score * 0.1)\n        anchor_multiplier = 1.0 + (len(self.symbolic_anchors) * 0.05)\n        \n        effective_amount = amount * cultural_multiplier * anchor_multiplier\n        \n        self.strength = min(1.0, self.strength + effective_amount * (1.0 - self.strength))\n        self.last_access = time.time()\n        self.access_count += 1\n        \n        # Quantum coherence reinforcement\n        if self.quantum_vector:\n            self.quantum_vector.coherence_time *= (1 + effective_amount * 0.1)\n    \n    def compress(self, ratio: float = 0.5) -> None:\n        \"\"\"Apply lossy compression with Aurora CloudBank preservation\"\"\"\n        if self.status == MemoryStatus.COMPRESSED:\n            return\n            \n        self.original_size = len(str(self.content))\n        \n        # Always preserve Aurora CloudBank critical data\n        if isinstance(self.content, dict):\n            compressed_content = {}\n            # Critical keys for Aurora CloudBank\n            critical_keys = ['id', 'type', 'importance', 'symbolic_anchors', \n                           'context_tag', 'dlp_classification', 't1_anchors', 'srb_boundaries']\n            \n            for key in critical_keys:\n                if key in self.content:\n                    compressed_content[key] = self.content[key]\n            \n            # Preserve based on importance and Aurora factors\n            preserve_threshold = 7.0 - (len(self.symbolic_anchors) * 0.5) - (self.cask_cultural_score * 0.5)\n            \n            if self.importance > preserve_threshold:\n                compressed_content.update(self.content)\n            else:\n                # Sample important fields\n                other_keys = [k for k in self.content.keys() if k not in critical_keys]\n                sample_size = max(1, int(len(other_keys) * ratio))\n                for key in other_keys[:sample_size]:\n                    compressed_content[key] = self.content[key]\n            \n            self.content = compressed_content\n        else:\n            # For string content, preserve Aurora anchors\n            if isinstance(self.content, str) and len(self.content) > 100:\n                truncate_length = max(50, int(len(self.content) * ratio))\n                # Try to preserve anchor references\n                anchor_refs = []\n                for anchor in self.symbolic_anchors:\n                    if anchor in self.content:\n                        anchor_refs.append(f\" [{anchor}]\")\n                \n                self.content = self.content[:truncate_length] + \"...\" + \"\".join(anchor_refs)\n        \n        self.compression_ratio = ratio\n        self.status = MemoryStatus.COMPRESSED\n    \n    def add_dlp_tracking(self) -> Optional[str]:\n        \"\"\"Add Aurora CloudBank DLP tracking\"\"\"\n        if not AURORA_DLP_AVAILABLE:\n            return None\n            \n        try:\n            dlp_tracker = NativeDLPTracker()\n            tag_id = dlp_tracker.tag_symbolic_operation({\n                'memory_id': self.id,\n                'memory_type': self.memory_type.value,\n                'content_summary': str(self.content)[:SUMMARY_MAX_LENGTH] + \"...\" if len(str(self.content)) > SUMMARY_MAX_LENGTH else str(self.content),\n                'importance': self.importance\n            })\n            \n            tag = dlp_tracker.tags[tag_id]\n            tag.add_anchor_protocol(\"AUMEM_MEMORY_ITEM\")\n            if self.quantum_vector:\n                tag.add_anchor_protocol(\"QUANTUM_VECTOR_FLIGHT\")\n            \n            # Add symbolic anchors\n            for anchor in self.symbolic_anchors:\n                tag.add_anchor_protocol(anchor)\n            \n            tag.metadata.update({\n                'dlp_level': 'DLP_L1_OK' if self.importance < 7 else 'DLP_L2_LOCKED',\n                'memory_tier': self.status.value,\n                'context_tag': self.context_tag,  # REQUIRED\n                'symbolic_hash_validation': True\n            })\n            \n            self.dlp_tag_id = tag_id\n            return tag_id\n            \n        except Exception as e:\n            logger.warning(\"DLP tracking failed for memory %s: %s\", str(self.id)[:SUMMARY_MAX_LENGTH], str(e)[:SUMMARY_MAX_LENGTH])\n            return None\n\n\nclass HierarchicalMemoryManager:\n    \"\"\"Advanced hierarchical memory management with Aurora CloudBank integration\"\"\"\n    \n    def __init__(self, max_active_memories: int = 1000, persist_path: Optional[str] = None):\n        # Import the quantum flight controller\n        from .quantum_flight_control import QuantumFlightController\n\n        self.memory_stores: Dict[str, Dict[str, MemoryItem]] = defaultdict(dict)\n        self.attention_weights = AttentionWeight()\n        self.flight_controller = QuantumFlightController()\n\n        # Hierarchical storage tiers\n        self.active_tier: Dict[str, MemoryItem] = {}\n        self.compressed_tier: Dict[str, MemoryItem] = {}\n        self.archived_tier: Dict[str, MemoryItem] = {}\n\n        # Configuration\n        self.max_active_memories = max_active_memories\n        self.compression_threshold = 0.8 * max_active_memories\n        self.auto_compress = True\n        self.auto_decay = True\n\n        # Indexing for fast retrieval\n        self.importance_index: Dict[float, List[str]] = defaultdict(list)\n        self.tag_index: Dict[str, List[str]] = defaultdict(list)\n        self.type_index: Dict[MemoryType, List[str]] = defaultdict(list)\n\n        # Aurora CloudBank specific indexes\n        self.anchor_index: Dict[str, List[str]] = defaultdict(list)\n        self.cultural_index: Dict[float, List[str]] = defaultdict(list)\n\n        # Thread safety\n        self.lock = threading.RLock()\n        self._persist_lock = threading.Lock()\n\n        # Performance metrics\n        self.metrics = {\n            'total_memories': 0,\n            'active_memories': 0,\n            'compressed_memories': 0,\n            'archived_memories': 0,\n            'retrieval_count': 0,\n            'compression_count': 0,\n            'last_cleanup': time.time(),\n            'dlp_tracked_memories': 0,\n            'aurora_anchored_memories': 0\n        }\n\n        # Persistence configuration\n        # Prefer explicit argument; fall back to environment variable.\n        self._persist_path: Optional[str] = persist_path or os.environ.get(\"AURORA_AUMEM_PERSIST_PATH\")\n\n        if self._persist_path:\n            self._load_from_disk()\n\n        # Optional ledger integration — lazy import to avoid circular package load\n        self._ledger_hook = None\n        try:\n            from modules.aumemmanager.ledger_hooks import AuMemLedgerHook as _Hook\n            self._ledger_hook = _Hook.create()\n        except Exception as _exc:  # NOSONAR - ledger hook import may raise various exceptions\n            logger.debug(\"AuMemLedgerHook unavailable (%s) — ledger integration disabled\", _exc)\n    \n    # ------------------------------------------------------------------\n    # Persistence helpers\n    # ------------------------------------------------------------------\n\n    def _serialize_memory(self, memory: MemoryItem) -> Dict[str, Any]:\n        \"\"\"Convert a MemoryItem to a JSON-serialisable dict.\n\n        Enum fields are stored as their string value so they round-trip\n        through JSON without loss.\n        \"\"\"\n        raw = asdict(memory)\n        # Enums are preserved as their `.value` by asdict() in Python 3.11+\n        # but we make it explicit for safety.\n        raw[\"memory_type\"] = memory.memory_type.value\n        raw[\"status\"] = memory.status.value\n        return raw\n\n    def _deserialize_memory(self, raw: Dict[str, Any]) -> MemoryItem:\n        \"\"\"Reconstruct a MemoryItem from a persisted dict.\n\n        Unknown keys are silently ignored so old snapshots remain loadable\n        after the dataclass gains new fields.\n        \"\"\"\n        # Restore enum fields from their string values.\n        try:\n            raw[\"memory_type\"] = MemoryType(raw[\"memory_type\"])\n        except (KeyError, ValueError) as exc:\n            logger.debug(\"memory_type field missing or invalid (%s) — using default AGENT\", exc)\n            raw[\"memory_type\"] = MemoryType.AGENT\n\n        try:\n            raw[\"status\"] = MemoryStatus(raw[\"status\"])\n        except (KeyError, ValueError) as exc:\n            logger.debug(\"status field missing or invalid (%s) — using default ACTIVE\", exc)\n            raw[\"status\"] = MemoryStatus.ACTIVE\n\n        # Reconstruct nested QuantumSymbolicVector if present.\n        qv_data = raw.get(\"quantum_vector\")\n        if qv_data and isinstance(qv_data, dict):\n            try:\n                raw[\"quantum_vector\"] = QuantumSymbolicVector(**qv_data)\n            except Exception as exc:  # NOSONAR - QuantumSymbolicVector(**qv_data) may raise various exceptions\n                logger.debug(\"quantum_vector could not be restored from archive (%s) — using None\", exc)\n                raw[\"quantum_vector\"] = None\n        else:\n            raw[\"quantum_vector\"] = None\n\n        # Keep only fields that MemoryItem.__init__ accepts.\n        valid_fields = {f.name for f in MemoryItem.__dataclass_fields__.values()}\n        filtered = {k: v for k, v in raw.items() if k in valid_fields}\n\n        return MemoryItem(**filtered)\n\n    def save_to_disk(self) -> None:\n        \"\"\"Persist all memory tiers to *_persist_path* as a JSON snapshot.\n\n        The write is atomic (via :func:`atomic_write_json`) so readers will\n        never observe a half-written file.  This method is thread-safe and\n        is a no-op when *persist_path* was not configured.\n        \"\"\"\n        if not self._persist_path:\n            return\n\n        with self._persist_lock:\n            with self.lock:\n                memories = []\n                for tier_name, tier in [\n                    (\"active\", self.active_tier),\n                    (\"compressed\", self.compressed_tier),\n                    (\"archived\", self.archived_tier),\n                ]:\n                    for memory in tier.values():\n                        entry = self._serialize_memory(memory)\n                        entry[\"_tier\"] = tier_name\n                        memories.append(entry)\n\n            payload: Dict[str, Any] = {\n                \"_schema_version\": 1,\n                \"_saved_at\": datetime.now(timezone.utc).isoformat(),\n                \"memories\": memories,\n            }\n\n            try:\n                if ATOMIC_IO_AVAILABLE:\n                    atomic_write_json(self._persist_path, payload)\n                else:\n                    # Fallback: plain write (not atomic but functional)\n                    dest_dir = os.path.dirname(os.path.abspath(self._persist_path))\n                    os.makedirs(dest_dir, exist_ok=True)\n                    with open(self._persist_path, \"w\", encoding=\"utf-8\") as fh:\n                        json.dump(payload, fh, indent=2, default=str)\n\n                logger.info(\n                    \"AuMemManager: saved %d memories to %s\",\n                    len(memories),\n                    str(self._persist_path)[:SUMMARY_MAX_LENGTH],\n                )\n            except Exception as exc:\n                logger.error(\n                    \"AuMemManager: save_to_disk failed (%s): %s\",\n                    type(exc).__name__,\n                    str(exc)[:SUMMARY_MAX_LENGTH],\n                )\n\n    def _load_from_disk(self) -> None:\n        \"\"\"Restore memories from *_persist_path* if the file exists.\n\n        Handles three failure modes gracefully:\n        - Missing file: logs info and starts with empty memory (new install).\n        - Corrupt JSON: logs a warning and starts with empty memory.\n        - Individual bad records: skips the record and logs a warning.\n        \"\"\"\n        if not self._persist_path:\n            return\n\n        if not os.path.exists(self._persist_path):\n            logger.info(\n                \"AuMemManager: no persist file at %s — starting fresh\",\n                str(self._persist_path)[:SUMMARY_MAX_LENGTH],\n            )\n            return\n\n        try:\n            with open(self._persist_path, \"r\", encoding=\"utf-8\") as fh:\n                payload = json.load(fh)\n        except (json.JSONDecodeError, OSError) as exc:\n            logger.warning(\n                \"AuMemManager: could not read persist file %s (%s: %s) — starting with empty memory\",\n                str(self._persist_path)[:SUMMARY_MAX_LENGTH],\n                type(exc).__name__,\n                str(exc)[:SUMMARY_MAX_LENGTH],\n            )\n            return\n\n        memories_raw: List[Dict[str, Any]] = payload.get(\"memories\", [])\n        restored = 0\n\n        for raw in memories_raw:\n            try:\n                tier_name = raw.pop(\"_tier\", \"active\")\n                memory = self._deserialize_memory(raw)\n\n                # Place into correct tier.\n                if tier_name == \"compressed\":\n                    self.compressed_tier[memory.id] = memory\n                    self.metrics[\"compressed_memories\"] += 1\n                elif tier_name == \"archived\":\n                    self.archived_tier[memory.id] = memory\n                    self.metrics[\"archived_memories\"] += 1\n                else:\n                    self.active_tier[memory.id] = memory\n                    self.metrics[\"active_memories\"] += 1\n\n                # Rebuild owner store.\n                self.memory_stores[memory.owner][memory.id] = memory\n\n                # Rebuild search indexes.\n                self._update_indexes(memory)\n\n                self.metrics[\"total_memories\"] += 1\n                restored += 1\n            except Exception as exc:\n                logger.warning(\n                    \"AuMemManager: skipped corrupt record during load (%s: %s)\",\n                    type(exc).__name__,\n                    str(exc)[:SUMMARY_MAX_LENGTH],\n                )\n\n        logger.info(\n            \"AuMemManager: restored %d memories from %s\",\n            restored,\n            str(self._persist_path)[:SUMMARY_MAX_LENGTH],\n        )\n\n    def add_memory(self,\n                   content: Any,\n                   memory_type: MemoryType,\n                   owner: str,\n                   importance: float = 1.0,\n                   tags: Optional[List[str]] = None,\n                   quantum_properties: Optional[Dict[str, Any]] = None,\n                   aurora_anchors: Optional[List[str]] = None,\n                   cultural_score: float = 0.0) -> str:\n        \"\"\"Add a new memory item with Aurora CloudBank integration\"\"\"\n        \n        with self.lock:\n            memory_id = str(uuid.uuid4())\n            \n            # Create quantum vector if specified\n            quantum_vector = None\n            if quantum_properties:\n                qv_id = f\"qv_{memory_id}\"\n                quantum_vector = self.flight_controller.create_quantum_vector(\n                    qv_id,\n                    quantum_properties.get('magnitude', 1.0),\n                    quantum_properties.get('phase', 0.0),\n                    aurora_anchors=aurora_anchors\n                )\n            \n            memory = MemoryItem(\n                id=memory_id,\n                content=content,\n                memory_type=memory_type,\n                owner=owner,\n                importance=importance,\n                tags=tags or [],\n                quantum_vector=quantum_vector,\n                symbolic_anchors=aurora_anchors or [],\n                cask_cultural_score=cultural_score\n            )\n            \n            # Add DLP tracking for Aurora CloudBank compliance\n            if AURORA_DLP_AVAILABLE:\n                dlp_tag_id = memory.add_dlp_tracking()\n                if dlp_tag_id:\n                    self.metrics['dlp_tracked_memories'] += 1\n            \n            # Store in appropriate tier\n            self.active_tier[memory_id] = memory\n            self.memory_stores[owner][memory_id] = memory\n            \n            # Update indexes\n            self._update_indexes(memory)\n            \n            # Update metrics\n            self.metrics['total_memories'] += 1\n            self.metrics['active_memories'] += 1\n            \n            if aurora_anchors:\n                self.metrics['aurora_anchored_memories'] += 1\n            \n            # Auto-compress if needed\n            if self.auto_compress and len(self.active_tier) > self.compression_threshold:\n                self._auto_compress()\n            \n            # Secure logging to prevent log injection\n            logger.info(\"Added memory %s for %s with importance %s\",\n                        str(memory_id)[:50], str(owner)[:50], str(importance))\n\n        # Ledger hook outside the lock — non-blocking, optional, graceful\n        if self._ledger_hook:\n            self._ledger_hook.on_memory_added(\n                memory_id=memory_id,\n                owner=owner,\n                importance=importance,\n                memory_type=memory_type.value if hasattr(memory_type, \"value\") else str(memory_type),\n                tags=tags,\n                context_tag=memory.context_tag,\n            )\n        return memory_id\n    \n    def retrieve_memories(self,\n                         query: str,\n                         owner: Optional[str] = None,\n                         memory_type: Optional[MemoryType] = None,\n                         top_k: int = 5,\n                         include_quantum: bool = True,\n                         cultural_filter: Optional[float] = None) -> List[MemoryItem]:\n        \"\"\"Advanced memory retrieval with Aurora CloudBank enhancements\"\"\"\n        \n        # INPUT VALIDATION: HIGH-5 NoSQL Injection Prevention\n        # Validate query length and prevent injection\n        if not query or len(query) > 500:\n            raise ValueError(\"Query must be 1-500 characters\")\n        \n        # Sanitize owner parameter (alphanumeric + underscore/hyphen only)\n        if owner and not re.match(r'^[a-zA-Z0-9_-]+$', owner):\n            raise ValueError(\"Invalid owner identifier format (alphanumeric, underscore, hyphen only)\")\n        \n        # Validate top_k range to prevent resource exhaustion\n        if not (1 <= top_k <= 100):\n            raise ValueError(\"top_k must be between 1 and 100\")\n        \n        # Validate cultural_filter range\n        if cultural_filter is not None and not (0.0 <= cultural_filter <= 1.0):\n            raise ValueError(\"cultural_filter must be between 0.0 and 1.0\")\n        \n        with self.lock:\n            self.metrics['retrieval_count'] += 1\n            \n            # Get candidate memories\n            candidates = []\n            \n            if owner:\n                candidates.extend(self.memory_stores[owner].values())\n            else:\n                for store in self.memory_stores.values():\n                    candidates.extend(store.values())\n            \n            # Filter by type\n            if memory_type:\n                candidates = [m for m in candidates if m.memory_type == memory_type]\n            \n            # Filter by cultural score if specified\n            if cultural_filter is not None:\n                candidates = [m for m in candidates if m.cask_cultural_score >= cultural_filter]\n            \n            # Filter active memories with strength\n            candidates = [m for m in candidates if m.status == MemoryStatus.ACTIVE and m.strength > 0.01]\n            \n            # Score memories with Aurora CloudBank enhancements\n            scored_memories = []\n            current_time = time.time()\n            \n            for memory in candidates:\n                score = self._calculate_attention_score(memory, query, current_time)\n                scored_memories.append((score, memory))\n            \n            # Sort by score and take top k\n            scored_memories.sort(key=lambda x: x[0], reverse=True)\n            top_memories = [memory for _, memory in scored_memories[:top_k]]\n            \n            # Reinforce retrieved memories with Aurora CloudBank enhancements\n            for memory in top_memories:\n                reinforcement = 0.05\n                \n                # Extra reinforcement for Aurora anchored memories\n                if memory.symbolic_anchors:\n                    reinforcement += len(memory.symbolic_anchors) * 0.01\n                \n                # Cultural relevance reinforcement\n                if cultural_filter and memory.cask_cultural_score >= cultural_filter:\n                    reinforcement += 0.02\n                \n                memory.reinforce(reinforcement)\n            \n            # Handle quantum memories\n            if include_quantum:\n                quantum_memories = [m for m in top_memories if m.quantum_vector]\n                for memory in quantum_memories:\n                    # Quantum coherence affects retrieval\n                    if memory.quantum_vector.coherence_time > 0.5:\n                        memory.reinforce(0.1)  # Extra reinforcement for coherent memories\n                        # Reinforce quantum vector coherence\n                        self.flight_controller.reinforce_coherence(\n                            memory.quantum_vector.vector_id, 0.05\n                        )\n            \n            return top_memories\n    \n    def _calculate_attention_score(self, memory: MemoryItem, query: str, current_time: float) -> float:\n        \"\"\"Calculate attention-based score with Aurora CloudBank enhancements\"\"\"\n        \n        # Recency score (exponential decay from last access)\n        time_since_access = current_time - memory.last_access\n        recency_score = math.exp(-time_since_access / 3600.0)  # 1 hour decay constant\n        \n        # Importance score (normalized)\n        importance_score = min(1.0, memory.importance / 10.0)\n        \n        # Relevance score (enhanced keyword matching)\n        query_words = set(query.lower().split())\n        content_words = set(str(memory.content).lower().split())\n        tag_words = set([tag.lower() for tag in memory.tags])\n        anchor_words = set([anchor.lower() for anchor in memory.symbolic_anchors])\n        \n        all_memory_words = content_words | tag_words | anchor_words\n        overlap = len(query_words & all_memory_words)\n        relevance_score = overlap / max(1, len(query_words)) if query_words else 0.0\n        \n        # Quantum coherence score\n        quantum_score = 0.0\n        if memory.quantum_vector:\n            quantum_score = min(1.0, memory.quantum_vector.coherence_time / 10.0)\n        \n        # Cultural relevance score (CASK integration)\n        cultural_score = min(1.0, memory.cask_cultural_score)\n        \n        # Aurora symbolic anchor score\n        aurora_score = 0.0\n        if memory.symbolic_anchors:\n            # Check for important Aurora anchors\n            important_anchors = ['T1_ANCHOR', 'SRB_BOUNDARY', 'EOS_SEED_ORION', 'PICARD_DELTA_3']\n            anchor_importance = sum(1 for anchor in memory.symbolic_anchors if anchor in important_anchors)\n            aurora_score = min(1.0, anchor_importance / len(important_anchors))\n        \n        # Combine scores using enhanced attention weights\n        self.attention_weights.normalize()\n        total_score = (\n            self.attention_weights.recency * recency_score +\n            self.attention_weights.importance * importance_score +\n            self.attention_weights.relevance * relevance_score +\n            self.attention_weights.quantum_coherence * quantum_score +\n            self.attention_weights.cultural_relevance * cultural_score +\n            self.attention_weights.aurora_symbolic * aurora_score\n        )\n        \n        # Apply memory strength multiplier\n        return total_score * memory.strength\n    \n    def decay_memories(self, elapsed_time: float) -> Dict[str, int]:\n        \"\"\"Apply decay with Aurora CloudBank preservation logic\"\"\"\n        \n        with self.lock:\n            decay_stats = {'decayed': 0, 'archived': 0, 'removed': 0, 'aurora_preserved': 0}\n            memories_to_archive = []\n            \n            # Decay active memories\n            for memory_id, memory in list(self.active_tier.items()):\n                memory.decay_strength(elapsed_time)\n                \n                if memory.status == MemoryStatus.DECAY_QUEUED:\n                    # Aurora CloudBank preservation logic\n                    preserve_threshold = 5.0\n                    \n                    # Lower threshold for Aurora anchored memories\n                    if memory.symbolic_anchors:\n                        preserve_threshold -= len(memory.symbolic_anchors) * 0.5\n                    \n                    # Lower threshold for culturally significant memories\n                    if memory.cask_cultural_score > 0.7:\n                        preserve_threshold -= 1.0\n                    \n                    if memory.importance > preserve_threshold:\n                        # Archive important or Aurora-anchored memories\n                        memory.status = MemoryStatus.ARCHIVED\n                        memories_to_archive.append(memory_id)\n                        if memory.symbolic_anchors:\n                            decay_stats['aurora_preserved'] += 1\n                        else:\n                            decay_stats['archived'] += 1\n                    else:\n                        # Remove unimportant memories\n                        self._remove_memory(memory_id)\n                        decay_stats['removed'] += 1\n                else:\n                    decay_stats['decayed'] += 1\n            \n            # Move archived memories to archive tier\n            for memory_id in memories_to_archive:\n                memory = self.active_tier.pop(memory_id)\n                self.archived_tier[memory_id] = memory\n                self.metrics['active_memories'] -= 1\n                self.metrics['archived_memories'] += 1\n            \n            return decay_stats\n    \n    def compress_memories(self, \n                         compression_ratio: float = 0.5,\n                         importance_threshold: float = 5.0) -> Dict[str, int]:\n        \"\"\"Compress memories with Aurora CloudBank preservation\"\"\"\n        \n        with self.lock:\n            compression_stats = {'compressed': 0, 'skipped': 0, 'aurora_protected': 0}\n            \n            # Sort by importance (compress less important first)\n            memories_by_importance = sorted(\n                self.active_tier.values(),\n                key=lambda m: m.importance\n            )\n            \n            for memory in memories_by_importance:\n                # Aurora CloudBank protection logic\n                protected = False\n                \n                # Protect high-importance Aurora anchored memories\n                if memory.symbolic_anchors and memory.importance > 3.0:\n                    protected = True\n                    compression_stats['aurora_protected'] += 1\n                \n                # Protect culturally significant memories\n                if memory.cask_cultural_score > 0.8:\n                    protected = True\n                \n                if not protected and memory.importance < importance_threshold and memory.status == MemoryStatus.ACTIVE:\n                    memory.compress(compression_ratio)\n                    \n                    # Move to compressed tier\n                    self.compressed_tier[memory.id] = memory\n                    if memory.id in self.active_tier:\n                        del self.active_tier[memory.id]\n                        self.metrics['active_memories'] -= 1\n                        self.metrics['compressed_memories'] += 1\n                    \n                    compression_stats['compressed'] += 1\n                    self.metrics['compression_count'] += 1\n                else:\n                    compression_stats['skipped'] += 1\n            \n            return compression_stats\n    \n    def _auto_compress(self) -> None:\n        \"\"\"Automatically compress memories when threshold is reached\"\"\"\n        num_to_compress = len(self.active_tier) - int(self.compression_threshold)\n        if num_to_compress > 0:\n            self.compress_memories(importance_threshold=7.0)  # Compress lower importance memories\n    \n    def _update_indexes(self, memory: MemoryItem) -> None:\n        \"\"\"Update search indexes with Aurora CloudBank enhancements\"\"\"\n        self.importance_index[memory.importance].append(memory.id)\n        self.type_index[memory.memory_type].append(memory.id)\n        self.cultural_index[memory.cask_cultural_score].append(memory.id)\n        \n        for tag in memory.tags:\n            self.tag_index[tag].append(memory.id)\n        \n        # Aurora CloudBank anchor indexing\n        for anchor in memory.symbolic_anchors:\n            self.anchor_index[anchor].append(memory.id)\n    \n    def _remove_memory(self, memory_id: str) -> None:\n        \"\"\"Remove memory from all data structures\"\"\"\n        memory = None\n        \n        if memory_id in self.active_tier:\n            memory = self.active_tier.pop(memory_id)\n        elif memory_id in self.compressed_tier:\n            memory = self.compressed_tier.pop(memory_id)\n        elif memory_id in self.archived_tier:\n            memory = self.archived_tier.pop(memory_id)\n        \n        if not memory:\n            return\n        \n        # Remove from owner's store\n        for owner_memories in self.memory_stores.values():\n            if memory_id in owner_memories:\n                del owner_memories[memory_id]\n                break\n        \n        # Clean up indexes\n        self._cleanup_indexes(memory)\n        \n        # Clean up quantum vectors\n        if memory.quantum_vector:\n            qv_id = memory.quantum_vector.vector_id\n            if qv_id in self.flight_controller.active_vectors:\n                self.flight_controller._remove_vector(qv_id)\n    \n    def _cleanup_indexes(self, memory: MemoryItem) -> None:\n        \"\"\"Clean up search indexes\"\"\"\n        # Standard indexes\n        if memory.id in self.importance_index[memory.importance]:\n            self.importance_index[memory.importance].remove(memory.id)\n        \n        if memory.id in self.type_index[memory.memory_type]:\n            self.type_index[memory.memory_type].remove(memory.id)\n        \n        if memory.id in self.cultural_index[memory.cask_cultural_score]:\n            self.cultural_index[memory.cask_cultural_score].remove(memory.id)\n        \n        for tag in memory.tags:\n            if memory.id in self.tag_index[tag]:\n                self.tag_index[tag].remove(memory.id)\n        \n        # Aurora CloudBank anchor indexes\n        for anchor in memory.symbolic_anchors:\n            if memory.id in self.anchor_index[anchor]:\n                self.anchor_index[anchor].remove(memory.id)\n    \n    def get_metrics(self) -> Dict[str, Any]:\n        \"\"\"Get system performance metrics with Aurora CloudBank data\"\"\"\n        with self.lock:\n            quantum_analysis = self.flight_controller.get_entanglement_network_analysis()\n            \n            self.metrics.update({\n                'total_memories': len(self.active_tier) + len(self.compressed_tier) + len(self.archived_tier),\n                'active_memories': len(self.active_tier),\n                'compressed_memories': len(self.compressed_tier),\n                'archived_memories': len(self.archived_tier),\n                'quantum_vectors': len(self.flight_controller.active_vectors),\n                'entangled_pairs': quantum_analysis['total_entanglements'],\n                'aurora_anchor_coverage': len(self.anchor_index),\n                'average_cultural_score': (\n                    sum(m.cask_cultural_score for m in self.active_tier.values()) / len(self.active_tier)\n                    if self.active_tier else 0\n                ),\n                'quantum_network_density': quantum_analysis['network_density']\n            })\n            return self.metrics.copy()\n    \n    def export_state(self) -> Dict[str, Any]:\n        \"\"\"Export complete system state for persistence\"\"\"\n        with self.lock:\n            return {\n                'active_tier': {k: asdict(v) for k, v in self.active_tier.items()},\n                'compressed_tier': {k: asdict(v) for k, v in self.compressed_tier.items()},\n                'archived_tier': {k: asdict(v) for k, v in self.archived_tier.items()},\n                'attention_weights': asdict(self.attention_weights),\n                'metrics': self.metrics,\n                'quantum_vectors': {k: asdict(v) for k, v in self.flight_controller.active_vectors.items()},\n                'quantum_network_analysis': self.flight_controller.get_entanglement_network_analysis(),\n                'export_timestamp': time.time(),\n                'aurora_integration_version': '1.0.0'\n            }\n    \n    def save_to_file(self, filepath: str) -> None:\n        \"\"\"Save memory system to file with Aurora CloudBank metadata\"\"\"\n        state = self.export_state()\n        atomic_write_json(filepath, state)\n        logger.info(\"Aurora CloudBank memory system saved to %s\", str(filepath)[:SUMMARY_MAX_LENGTH])\n    \n    def batch_process_lifecycle(self) -> Dict[str, Dict[str, int]]:\n        \"\"\"Process memory lifecycle operations in batch\"\"\"\n        with self.lock:\n            results = {\n                'decay': self.decay_memories(3600.0),  # 1 hour decay\n                'compression': self.compress_memories(),\n                'quantum_cleanup': self.flight_controller.cleanup_decoherent_vectors()\n            }\n            \n            self.metrics['last_cleanup'] = time.time()\n            return results\n
+"""
+AuMemManager - Hierarchical Memory Management Module
+Integrated with Aurora CloudBank's quantum-symbolic architecture
+
+This module provides enterprise-grade memory management with:
+- Three-tier hierarchical storage (Active/Compressed/Archived)
+- Quantum-symbolic vector integration  
+- Attention-based retrieval with learned importance
+- DLP compliance and symbolic anchor support
+- Production-ready threading and performance optimization
+"""
+
+import json
+import math
+import os
+import time
+import uuid
+import re
+try:
+    import numpy as np
+    _NUMPY_AVAILABLE = True
+except ImportError:  # NOSONAR - numpy is optional; math module provides all required fallbacks
+    np = None  # type: ignore
+    _NUMPY_AVAILABLE = False
+from datetime import datetime, timezone
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass, asdict, field
+from enum import Enum
+import threading
+from collections import defaultdict
+import logging
+
+from src.utils.atomic_io import atomic_write_json
+
+# Aurora CloudBank Integration Imports
+# Configure logging (early initialization for import error logging)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+try:
+    from src.core.native_dlp_export import NativeDLPTracker
+    AURORA_DLP_AVAILABLE = True
+except ImportError:
+    AURORA_DLP_AVAILABLE = False
+    logger.warning("Aurora DLP not available - running in standalone mode")
+
+try:
+    from src.utils.atomic_io import atomic_write_json
+    ATOMIC_IO_AVAILABLE = True
+except ImportError:
+    ATOMIC_IO_AVAILABLE = False
+    logger.warning("atomic_io not available - persistence will use non-atomic writes")
+
+# Ledger hook is imported lazily in __init__ to avoid circular imports
+# (aumemmanager.__init__.py imports hierarchical_memory, so any module-level
+# import of ledger_hooks here would form a cycle via the package namespace)
+_LEDGER_HOOK_AVAILABLE = False
+AuMemLedgerHook = None  # type: ignore
+
+# Constants
+SUMMARY_MAX_LENGTH = 100  # Maximum length for content summaries in logs
+
+class MemoryType(Enum):
+    """Types of memory supported by Aurora CloudBank integration"""
+    AGENT = "agent"
+    FACTION = "faction"
+    NARRATIVE = "narrative"
+    QUANTUM_SYMBOLIC = "quantum_symbolic"
+    VECTOR_STATE = "vector_state"
+    FLIGHT_CONTROL = "flight_control"
+    AURORA_SYMBOLIC = "aurora_symbolic"     # Aurora CloudBank specific
+    CASK_CULTURAL = "cask_cultural"         # CASK integration
+    T1_ANCHOR = "t1_anchor"                 # Temporal anchors
+    SRB_BOUNDARY = "srb_boundary"           # Spatial-relational boundaries
+
+class MemoryStatus(Enum):
+    """Memory item status with Aurora CloudBank states"""
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+    COMPRESSED = "compressed"
+    DECAY_QUEUED = "decay_queued"
+    QUANTUM_SUPERPOSED = "quantum_superposed"
+    AURORA_SEALED = "aurora_sealed"         # Memory sealed with SHA256
+    DLP_LOCKED = "dlp_locked"               # DLP compliance lock
+
+@dataclass
+class QuantumSymbolicVector:
+    """Quantum-symbolic vector with Aurora CloudBank integration"""
+    vector_id: str
+    magnitude: float
+    phase: float
+    entanglement_links: List[str] = field(default_factory=list)
+    superposition_states: List[Dict[str, Any]] = field(default_factory=list)
+    coherence_time: float = 1.0
+    
+    # Aurora CloudBank specific properties
+    symbolic_anchors: List[str] = field(default_factory=list)
+    t1_temporal_state: Optional[Dict[str, Any]] = None
+    srb_boundary_data: Optional[Dict[str, Any]] = None
+    dlp_classification: str = "DLP_L1_OK"
+    
+    def collapse_superposition(self, observation_state: str) -> Dict[str, Any]:
+        """Collapse quantum superposition to observed state"""
+        for state in self.superposition_states:
+            if state.get('state_id') == observation_state:
+                return state
+        return self.superposition_states[0] if self.superposition_states else {}
+    
+    def add_aurora_anchor(self, anchor_protocol: str) -> None:
+        """Add Aurora CloudBank symbolic anchor"""
+        if anchor_protocol not in self.symbolic_anchors:
+            self.symbolic_anchors.append(anchor_protocol)
+
+@dataclass
+class AttentionWeight:
+    """Attention weights for memory scoring with Aurora enhancements"""
+    relevance: float = 0.25
+    importance: float = 0.25
+    recency: float = 0.25
+    quantum_coherence: float = 0.15
+    cultural_relevance: float = 0.05    # CASK integration
+    aurora_symbolic: float = 0.05       # Aurora CloudBank symbols
+    
+    def normalize(self):
+        """Normalize weights to sum to 1.0"""
+        total = (self.relevance + self.importance + self.recency + 
+                self.quantum_coherence + self.cultural_relevance + self.aurora_symbolic)
+        if total > 0:
+            self.relevance /= total
+            self.importance /= total
+            self.recency /= total
+            self.quantum_coherence /= total
+            self.cultural_relevance /= total
+            self.aurora_symbolic /= total
+
+@dataclass
+class MemoryItem:
+    """Enhanced memory item with full Aurora CloudBank integration"""
+    id: str
+    content: Any
+    memory_type: MemoryType
+    owner: str
+    importance: float = 1.0
+    timestamp: float = field(default_factory=time.time)
+    last_access: float = field(default_factory=time.time)
+    access_count: int = 0
+    tags: List[str] = field(default_factory=list)
+    status: MemoryStatus = MemoryStatus.ACTIVE
+    
+    # Decay and persistence
+    strength: float = 1.0
+    half_life: float = 86400.0  # 1 day in seconds
+    decay_rate: float = 0.0001
+    
+    # Quantum-symbolic properties
+    quantum_vector: Optional[QuantumSymbolicVector] = None
+    symbolic_anchors: List[str] = field(default_factory=list)
+    entangled_memories: List[str] = field(default_factory=list)
+    
+    # Compression metadata
+    compression_ratio: float = 1.0
+    original_size: int = 0
+    
+    # Flight control properties
+    flight_trajectory: Optional[Dict[str, Any]] = None
+    control_parameters: Dict[str, float] = field(default_factory=dict)
+    
+    # Aurora CloudBank integration
+    dlp_tag_id: Optional[str] = None
+    aurora_hash_seal: Optional[str] = None
+    context_tag: str = "aumemmanager_memory"  # REQUIRED for continuity
+    cask_cultural_score: float = 0.0
+    
+    def decay_strength(self, elapsed_time: float) -> None:
+        """Apply exponential decay with Aurora CloudBank enhancements"""
+        if self.strength <= 0 or self.half_life <= 0:
+            return
+            
+        # Dynamic half-life based on importance, access patterns, and Aurora factors
+        cultural_boost = 1.0 + (self.cask_cultural_score * 0.1)
+        anchor_boost = 1.0 + (len(self.symbolic_anchors) * 0.05)
+        
+        effective_half_life = (self.half_life * (1 + self.importance) *
+                             (1 + math.log(1 + self.access_count)) *
+                             cultural_boost * anchor_boost)
+
+        if effective_half_life <= 0.0:  # NOSONAR - defensive guard; callers may configure half_life=0
+            return
+
+        # Exponential decay
+        decay_constant = math.log(2) / effective_half_life
+        self.strength *= math.exp(-decay_constant * elapsed_time)
+        
+        # Threshold for archival
+        if self.strength < 0.001:
+            self.strength = 0.0
+            self.status = MemoryStatus.DECAY_QUEUED
+    
+    def reinforce(self, amount: float = 0.1) -> None:
+        """Reinforce memory with Aurora CloudBank enhancements"""
+        # Cultural and symbolic reinforcement
+        cultural_multiplier = 1.0 + (self.cask_cultural_score * 0.1)
+        anchor_multiplier = 1.0 + (len(self.symbolic_anchors) * 0.05)
+        
+        effective_amount = amount * cultural_multiplier * anchor_multiplier
+        
+        self.strength = min(1.0, self.strength + effective_amount * (1.0 - self.strength))
+        self.last_access = time.time()
+        self.access_count += 1
+        
+        # Quantum coherence reinforcement
+        if self.quantum_vector:
+            self.quantum_vector.coherence_time *= (1 + effective_amount * 0.1)
+    
+    def compress(self, ratio: float = 0.5) -> None:
+        """Apply lossy compression with Aurora CloudBank preservation"""
+        if self.status == MemoryStatus.COMPRESSED:
+            return
+            
+        self.original_size = len(str(self.content))
+        
+        # Always preserve Aurora CloudBank critical data
+        if isinstance(self.content, dict):
+            compressed_content = {}
+            # Critical keys for Aurora CloudBank
+            critical_keys = ['id', 'type', 'importance', 'symbolic_anchors', 
+                           'context_tag', 'dlp_classification', 't1_anchors', 'srb_boundaries']
+            
+            for key in critical_keys:
+                if key in self.content:
+                    compressed_content[key] = self.content[key]
+            
+            # Preserve based on importance and Aurora factors
+            preserve_threshold = 7.0 - (len(self.symbolic_anchors) * 0.5) - (self.cask_cultural_score * 0.5)
+            
+            if self.importance > preserve_threshold:
+                compressed_content.update(self.content)
+            else:
+                # Sample important fields
+                other_keys = [k for k in self.content.keys() if k not in critical_keys]
+                sample_size = max(1, int(len(other_keys) * ratio))
+                for key in other_keys[:sample_size]:
+                    compressed_content[key] = self.content[key]
+            
+            self.content = compressed_content
+        else:
+            # For string content, preserve Aurora anchors
+            if isinstance(self.content, str) and len(self.content) > 100:
+                truncate_length = max(50, int(len(self.content) * ratio))
+                # Try to preserve anchor references
+                anchor_refs = []
+                for anchor in self.symbolic_anchors:
+                    if anchor in self.content:
+                        anchor_refs.append(f" [{anchor}]")
+                
+                self.content = self.content[:truncate_length] + "..." + "".join(anchor_refs)
+        
+        self.compression_ratio = ratio
+        self.status = MemoryStatus.COMPRESSED
+    
+    def add_dlp_tracking(self) -> Optional[str]:
+        """Add Aurora CloudBank DLP tracking"""
+        if not AURORA_DLP_AVAILABLE:
+            return None
+            
+        try:
+            dlp_tracker = NativeDLPTracker()
+            tag_id = dlp_tracker.tag_symbolic_operation({
+                'memory_id': self.id,
+                'memory_type': self.memory_type.value,
+                'content_summary': str(self.content)[:SUMMARY_MAX_LENGTH] + "..." if len(str(self.content)) > SUMMARY_MAX_LENGTH else str(self.content),
+                'importance': self.importance
+            })
+            
+            tag = dlp_tracker.tags[tag_id]
+            tag.add_anchor_protocol("AUMEM_MEMORY_ITEM")
+            if self.quantum_vector:
+                tag.add_anchor_protocol("QUANTUM_VECTOR_FLIGHT")
+            
+            # Add symbolic anchors
+            for anchor in self.symbolic_anchors:
+                tag.add_anchor_protocol(anchor)
+            
+            tag.metadata.update({
+                'dlp_level': 'DLP_L1_OK' if self.importance < 7 else 'DLP_L2_LOCKED',
+                'memory_tier': self.status.value,
+                'context_tag': self.context_tag,  # REQUIRED
+                'symbolic_hash_validation': True
+            })
+            
+            self.dlp_tag_id = tag_id
+            return tag_id
+            
+        except Exception as e:
+            logger.warning("DLP tracking failed for memory %s: %s", str(self.id)[:SUMMARY_MAX_LENGTH], str(e)[:SUMMARY_MAX_LENGTH])
+            return None
+
+
+class HierarchicalMemoryManager:
+    """Advanced hierarchical memory management with Aurora CloudBank integration"""
+    
+    def __init__(self, max_active_memories: int = 1000, persist_path: Optional[str] = None):
+        # Import the quantum flight controller
+        from .quantum_flight_control import QuantumFlightController
+
+        self.memory_stores: Dict[str, Dict[str, MemoryItem]] = defaultdict(dict)
+        self.attention_weights = AttentionWeight()
+        self.flight_controller = QuantumFlightController()
+
+        # Hierarchical storage tiers
+        self.active_tier: Dict[str, MemoryItem] = {}
+        self.compressed_tier: Dict[str, MemoryItem] = {}
+        self.archived_tier: Dict[str, MemoryItem] = {}
+
+        # Configuration
+        self.max_active_memories = max_active_memories
+        self.compression_threshold = 0.8 * max_active_memories
+        self.auto_compress = True
+        self.auto_decay = True
+
+        # Indexing for fast retrieval
+        self.importance_index: Dict[float, List[str]] = defaultdict(list)
+        self.tag_index: Dict[str, List[str]] = defaultdict(list)
+        self.type_index: Dict[MemoryType, List[str]] = defaultdict(list)
+
+        # Aurora CloudBank specific indexes
+        self.anchor_index: Dict[str, List[str]] = defaultdict(list)
+        self.cultural_index: Dict[float, List[str]] = defaultdict(list)
+
+        # Thread safety
+        self.lock = threading.RLock()
+        self._persist_lock = threading.Lock()
+
+        # Performance metrics
+        self.metrics = {
+            'total_memories': 0,
+            'active_memories': 0,
+            'compressed_memories': 0,
+            'archived_memories': 0,
+            'retrieval_count': 0,
+            'compression_count': 0,
+            'last_cleanup': time.time(),
+            'dlp_tracked_memories': 0,
+            'aurora_anchored_memories': 0
+        }
+
+        # Persistence configuration
+        # Prefer explicit argument; fall back to environment variable.
+        self._persist_path: Optional[str] = persist_path or os.environ.get("AURORA_AUMEM_PERSIST_PATH")
+
+        if self._persist_path:
+            self._load_from_disk()
+
+        # Optional ledger integration — lazy import to avoid circular package load
+        self._ledger_hook = None
+        try:
+            from modules.aumemmanager.ledger_hooks import AuMemLedgerHook as _Hook
+            self._ledger_hook = _Hook.create()
+        except Exception as _exc:  # NOSONAR - ledger hook import may raise various exceptions
+            logger.debug("AuMemLedgerHook unavailable (%s) — ledger integration disabled", _exc)
+    
+    # ------------------------------------------------------------------
+    # Persistence helpers
+    # ------------------------------------------------------------------
+
+    def _serialize_memory(self, memory: MemoryItem) -> Dict[str, Any]:
+        """Convert a MemoryItem to a JSON-serialisable dict.
+
+        Enum fields are stored as their string value so they round-trip
+        through JSON without loss.
+        """
+        raw = asdict(memory)
+        # Enums are preserved as their `.value` by asdict() in Python 3.11+
+        # but we make it explicit for safety.
+        raw["memory_type"] = memory.memory_type.value
+        raw["status"] = memory.status.value
+        return raw
+
+    def _deserialize_memory(self, raw: Dict[str, Any]) -> MemoryItem:
+        """Reconstruct a MemoryItem from a persisted dict.
+
+        Unknown keys are silently ignored so old snapshots remain loadable
+        after the dataclass gains new fields.
+        """
+        # Restore enum fields from their string values.
+        try:
+            raw["memory_type"] = MemoryType(raw["memory_type"])
+        except (KeyError, ValueError) as exc:
+            logger.debug("memory_type field missing or invalid (%s) — using default AGENT", exc)
+            raw["memory_type"] = MemoryType.AGENT
+
+        try:
+            raw["status"] = MemoryStatus(raw["status"])
+        except (KeyError, ValueError) as exc:
+            logger.debug("status field missing or invalid (%s) — using default ACTIVE", exc)
+            raw["status"] = MemoryStatus.ACTIVE
+
+        # Reconstruct nested QuantumSymbolicVector if present.
+        qv_data = raw.get("quantum_vector")
+        if qv_data and isinstance(qv_data, dict):
+            try:
+                raw["quantum_vector"] = QuantumSymbolicVector(**qv_data)
+            except Exception as exc:  # NOSONAR - QuantumSymbolicVector(**qv_data) may raise various exceptions
+                logger.debug("quantum_vector could not be restored from archive (%s) — using None", exc)
+                raw["quantum_vector"] = None
+        else:
+            raw["quantum_vector"] = None
+
+        # Keep only fields that MemoryItem.__init__ accepts.
+        valid_fields = {f.name for f in MemoryItem.__dataclass_fields__.values()}
+        filtered = {k: v for k, v in raw.items() if k in valid_fields}
+
+        return MemoryItem(**filtered)
+
+    def save_to_disk(self) -> None:
+        """Persist all memory tiers to *_persist_path* as a JSON snapshot.
+
+        The write is atomic (via :func:`atomic_write_json`) so readers will
+        never observe a half-written file.  This method is thread-safe and
+        is a no-op when *persist_path* was not configured.
+        """
+        if not self._persist_path:
+            return
+
+        with self._persist_lock:
+            with self.lock:
+                memories = []
+                for tier_name, tier in [
+                    ("active", self.active_tier),
+                    ("compressed", self.compressed_tier),
+                    ("archived", self.archived_tier),
+                ]:
+                    for memory in tier.values():
+                        entry = self._serialize_memory(memory)
+                        entry["_tier"] = tier_name
+                        memories.append(entry)
+
+            payload: Dict[str, Any] = {
+                "_schema_version": 1,
+                "_saved_at": datetime.now(timezone.utc).isoformat(),
+                "memories": memories,
+            }
+
+            try:
+                if ATOMIC_IO_AVAILABLE:
+                    atomic_write_json(self._persist_path, payload)
+                else:
+                    # Fallback: plain write (not atomic but functional)
+                    dest_dir = os.path.dirname(os.path.abspath(self._persist_path))
+                    os.makedirs(dest_dir, exist_ok=True)
+                    with open(self._persist_path, "w", encoding="utf-8") as fh:
+                        json.dump(payload, fh, indent=2, default=str)
+
+                logger.info(
+                    "AuMemManager: saved %d memories to %s",
+                    len(memories),
+                    str(self._persist_path)[:SUMMARY_MAX_LENGTH],
+                )
+            except Exception as exc:
+                logger.error(
+                    "AuMemManager: save_to_disk failed (%s): %s",
+                    type(exc).__name__,
+                    str(exc)[:SUMMARY_MAX_LENGTH],
+                )
+
+    def _load_from_disk(self) -> None:
+        """Restore memories from *_persist_path* if the file exists.
+
+        Handles three failure modes gracefully:
+        - Missing file: logs info and starts with empty memory (new install).
+        - Corrupt JSON: logs a warning and starts with empty memory.
+        - Individual bad records: skips the record and logs a warning.
+        """
+        if not self._persist_path:
+            return
+
+        if not os.path.exists(self._persist_path):
+            logger.info(
+                "AuMemManager: no persist file at %s — starting fresh",
+                str(self._persist_path)[:SUMMARY_MAX_LENGTH],
+            )
+            return
+
+        try:
+            with open(self._persist_path, "r", encoding="utf-8") as fh:
+                payload = json.load(fh)
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning(
+                "AuMemManager: could not read persist file %s (%s: %s) — starting with empty memory",
+                str(self._persist_path)[:SUMMARY_MAX_LENGTH],
+                type(exc).__name__,
+                str(exc)[:SUMMARY_MAX_LENGTH],
+            )
+            return
+
+        memories_raw: List[Dict[str, Any]] = payload.get("memories", [])
+        restored = 0
+
+        for raw in memories_raw:
+            try:
+                tier_name = raw.pop("_tier", "active")
+                memory = self._deserialize_memory(raw)
+
+                # Place into correct tier.
+                if tier_name == "compressed":
+                    self.compressed_tier[memory.id] = memory
+                    self.metrics["compressed_memories"] += 1
+                elif tier_name == "archived":
+                    self.archived_tier[memory.id] = memory
+                    self.metrics["archived_memories"] += 1
+                else:
+                    self.active_tier[memory.id] = memory
+                    self.metrics["active_memories"] += 1
+
+                # Rebuild owner store.
+                self.memory_stores[memory.owner][memory.id] = memory
+
+                # Rebuild search indexes.
+                self._update_indexes(memory)
+
+                self.metrics["total_memories"] += 1
+                restored += 1
+            except Exception as exc:
+                logger.warning(
+                    "AuMemManager: skipped corrupt record during load (%s: %s)",
+                    type(exc).__name__,
+                    str(exc)[:SUMMARY_MAX_LENGTH],
+                )
+
+        logger.info(
+            "AuMemManager: restored %d memories from %s",
+            restored,
+            str(self._persist_path)[:SUMMARY_MAX_LENGTH],
+        )
+
+    def add_memory(self,
+                   content: Any,
+                   memory_type: MemoryType,
+                   owner: str,
+                   importance: float = 1.0,
+                   tags: Optional[List[str]] = None,
+                   quantum_properties: Optional[Dict[str, Any]] = None,
+                   aurora_anchors: Optional[List[str]] = None,
+                   cultural_score: float = 0.0) -> str:
+        """Add a new memory item with Aurora CloudBank integration"""
+        
+        with self.lock:
+            memory_id = str(uuid.uuid4())
+            
+            # Create quantum vector if specified
+            quantum_vector = None
+            if quantum_properties:
+                qv_id = f"qv_{memory_id}"
+                quantum_vector = self.flight_controller.create_quantum_vector(
+                    qv_id,
+                    quantum_properties.get('magnitude', 1.0),
+                    quantum_properties.get('phase', 0.0),
+                    aurora_anchors=aurora_anchors
+                )
+            
+            memory = MemoryItem(
+                id=memory_id,
+                content=content,
+                memory_type=memory_type,
+                owner=owner,
+                importance=importance,
+                tags=tags or [],
+                quantum_vector=quantum_vector,
+                symbolic_anchors=aurora_anchors or [],
+                cask_cultural_score=cultural_score
+            )
+            
+            # Add DLP tracking for Aurora CloudBank compliance
+            if AURORA_DLP_AVAILABLE:
+                dlp_tag_id = memory.add_dlp_tracking()
+                if dlp_tag_id:
+                    self.metrics['dlp_tracked_memories'] += 1
+            
+            # Store in appropriate tier
+            self.active_tier[memory_id] = memory
+            self.memory_stores[owner][memory_id] = memory
+            
+            # Update indexes
+            self._update_indexes(memory)
+            
+            # Update metrics
+            self.metrics['total_memories'] += 1
+            self.metrics['active_memories'] += 1
+            
+            if aurora_anchors:
+                self.metrics['aurora_anchored_memories'] += 1
+            
+            # Auto-compress if needed
+            if self.auto_compress and len(self.active_tier) > self.compression_threshold:
+                self._auto_compress()
+            
+            # Secure logging to prevent log injection
+            logger.info("Added memory %s for %s with importance %s",
+                        str(memory_id)[:50], str(owner)[:50], str(importance))
+
+        # Ledger hook outside the lock — non-blocking, optional, graceful
+        if self._ledger_hook:
+            self._ledger_hook.on_memory_added(
+                memory_id=memory_id,
+                owner=owner,
+                importance=importance,
+                memory_type=memory_type.value,
+                tags=tags,
+                context_tag=memory.context_tag,
+            )
+        return memory_id
+    
+    def retrieve_memories(self,
+                         query: str,
+                         owner: Optional[str] = None,
+                         memory_type: Optional[MemoryType] = None,
+                         top_k: int = 5,
+                         include_quantum: bool = True,
+                         cultural_filter: Optional[float] = None) -> List[MemoryItem]:
+        """Advanced memory retrieval with Aurora CloudBank enhancements"""
+        
+        # INPUT VALIDATION: HIGH-5 NoSQL Injection Prevention
+        # Validate query length and prevent injection
+        if not query or len(query) > 500:
+            raise ValueError("Query must be 1-500 characters")
+        
+        # Sanitize owner parameter (alphanumeric + underscore/hyphen only)
+        if owner and not re.match(r'^[a-zA-Z0-9_-]+$', owner):
+            raise ValueError("Invalid owner identifier format (alphanumeric, underscore, hyphen only)")
+        
+        # Validate top_k range to prevent resource exhaustion
+        if not (1 <= top_k <= 100):
+            raise ValueError("top_k must be between 1 and 100")
+        
+        # Validate cultural_filter range
+        if cultural_filter is not None and not (0.0 <= cultural_filter <= 1.0):
+            raise ValueError("cultural_filter must be between 0.0 and 1.0")
+        
+        with self.lock:
+            self.metrics['retrieval_count'] += 1
+            
+            # Get candidate memories
+            candidates = []
+            
+            if owner:
+                candidates.extend(self.memory_stores[owner].values())
+            else:
+                for store in self.memory_stores.values():
+                    candidates.extend(store.values())
+            
+            # Filter by type
+            if memory_type:
+                candidates = [m for m in candidates if m.memory_type == memory_type]
+            
+            # Filter by cultural score if specified
+            if cultural_filter is not None:
+                candidates = [m for m in candidates if m.cask_cultural_score >= cultural_filter]
+            
+            # Filter active memories with strength
+            candidates = [m for m in candidates if m.status == MemoryStatus.ACTIVE and m.strength > 0.01]
+            
+            # Score memories with Aurora CloudBank enhancements
+            scored_memories = []
+            current_time = time.time()
+            
+            for memory in candidates:
+                score = self._calculate_attention_score(memory, query, current_time)
+                scored_memories.append((score, memory))
+            
+            # Sort by score and take top k
+            scored_memories.sort(key=lambda x: x[0], reverse=True)
+            top_memories = [memory for _, memory in scored_memories[:top_k]]
+            
+            # Reinforce retrieved memories with Aurora CloudBank enhancements
+            for memory in top_memories:
+                reinforcement = 0.05
+                
+                # Extra reinforcement for Aurora anchored memories
+                if memory.symbolic_anchors:
+                    reinforcement += len(memory.symbolic_anchors) * 0.01
+                
+                # Cultural relevance reinforcement
+                if cultural_filter and memory.cask_cultural_score >= cultural_filter:
+                    reinforcement += 0.02
+                
+                memory.reinforce(reinforcement)
+            
+            # Handle quantum memories
+            if include_quantum:
+                quantum_memories = [m for m in top_memories if m.quantum_vector]
+                for memory in quantum_memories:
+                    # Quantum coherence affects retrieval
+                    if memory.quantum_vector.coherence_time > 0.5:
+                        memory.reinforce(0.1)  # Extra reinforcement for coherent memories
+                        # Reinforce quantum vector coherence
+                        self.flight_controller.reinforce_coherence(
+                            memory.quantum_vector.vector_id, 0.05
+                        )
+            
+            return top_memories
+    
+    def _calculate_attention_score(self, memory: MemoryItem, query: str, current_time: float) -> float:
+        """Calculate attention-based score with Aurora CloudBank enhancements"""
+        
+        # Recency score (exponential decay from last access)
+        time_since_access = current_time - memory.last_access
+        recency_score = math.exp(-time_since_access / 3600.0)  # 1 hour decay constant
+        
+        # Importance score (normalized)
+        importance_score = min(1.0, memory.importance / 10.0)
+        
+        # Relevance score (enhanced keyword matching)
+        query_words = set(query.lower().split())
+        content_words = set(str(memory.content).lower().split())
+        tag_words = set([tag.lower() for tag in memory.tags])
+        anchor_words = set([anchor.lower() for anchor in memory.symbolic_anchors])
+        
+        all_memory_words = content_words | tag_words | anchor_words
+        overlap = len(query_words & all_memory_words)
+        relevance_score = overlap / max(1, len(query_words)) if query_words else 0.0
+        
+        # Quantum coherence score
+        quantum_score = 0.0
+        if memory.quantum_vector:
+            quantum_score = min(1.0, memory.quantum_vector.coherence_time / 10.0)
+        
+        # Cultural relevance score (CASK integration)
+        cultural_score = min(1.0, memory.cask_cultural_score)
+        
+        # Aurora symbolic anchor score
+        aurora_score = 0.0
+        if memory.symbolic_anchors:
+            # Check for important Aurora anchors
+            important_anchors = ['T1_ANCHOR', 'SRB_BOUNDARY', 'EOS_SEED_ORION', 'PICARD_DELTA_3']
+            anchor_importance = sum(1 for anchor in memory.symbolic_anchors if anchor in important_anchors)
+            aurora_score = min(1.0, anchor_importance / len(important_anchors))
+        
+        # Combine scores using enhanced attention weights
+        self.attention_weights.normalize()
+        total_score = (
+            self.attention_weights.recency * recency_score +
+            self.attention_weights.importance * importance_score +
+            self.attention_weights.relevance * relevance_score +
+            self.attention_weights.quantum_coherence * quantum_score +
+            self.attention_weights.cultural_relevance * cultural_score +
+            self.attention_weights.aurora_symbolic * aurora_score
+        )
+        
+        # Apply memory strength multiplier
+        return total_score * memory.strength
+    
+    def decay_memories(self, elapsed_time: float) -> Dict[str, int]:
+        """Apply decay with Aurora CloudBank preservation logic"""
+        
+        with self.lock:
+            decay_stats = {'decayed': 0, 'archived': 0, 'removed': 0, 'aurora_preserved': 0}
+            memories_to_archive = []
+            
+            # Decay active memories
+            for memory_id, memory in list(self.active_tier.items()):
+                memory.decay_strength(elapsed_time)
+                
+                if memory.status == MemoryStatus.DECAY_QUEUED:
+                    # Aurora CloudBank preservation logic
+                    preserve_threshold = 5.0
+                    
+                    # Lower threshold for Aurora anchored memories
+                    if memory.symbolic_anchors:
+                        preserve_threshold -= len(memory.symbolic_anchors) * 0.5
+                    
+                    # Lower threshold for culturally significant memories
+                    if memory.cask_cultural_score > 0.7:
+                        preserve_threshold -= 1.0
+                    
+                    if memory.importance > preserve_threshold:
+                        # Archive important or Aurora-anchored memories
+                        memory.status = MemoryStatus.ARCHIVED
+                        memories_to_archive.append(memory_id)
+                        if memory.symbolic_anchors:
+                            decay_stats['aurora_preserved'] += 1
+                        else:
+                            decay_stats['archived'] += 1
+                    else:
+                        # Remove unimportant memories
+                        self._remove_memory(memory_id)
+                        decay_stats['removed'] += 1
+                else:
+                    decay_stats['decayed'] += 1
+            
+            # Move archived memories to archive tier
+            for memory_id in memories_to_archive:
+                memory = self.active_tier.pop(memory_id)
+                self.archived_tier[memory_id] = memory
+                self.metrics['active_memories'] -= 1
+                self.metrics['archived_memories'] += 1
+            
+            return decay_stats
+    
+    def compress_memories(self, 
+                         compression_ratio: float = 0.5,
+                         importance_threshold: float = 5.0) -> Dict[str, int]:
+        """Compress memories with Aurora CloudBank preservation"""
+        
+        with self.lock:
+            compression_stats = {'compressed': 0, 'skipped': 0, 'aurora_protected': 0}
+            
+            # Sort by importance (compress less important first)
+            memories_by_importance = sorted(
+                self.active_tier.values(),
+                key=lambda m: m.importance
+            )
+            
+            for memory in memories_by_importance:
+                # Aurora CloudBank protection logic
+                protected = False
+                
+                # Protect high-importance Aurora anchored memories
+                if memory.symbolic_anchors and memory.importance > 3.0:
+                    protected = True
+                    compression_stats['aurora_protected'] += 1
+                
+                # Protect culturally significant memories
+                if memory.cask_cultural_score > 0.8:
+                    protected = True
+                
+                if not protected and memory.importance < importance_threshold and memory.status == MemoryStatus.ACTIVE:
+                    memory.compress(compression_ratio)
+                    
+                    # Move to compressed tier
+                    self.compressed_tier[memory.id] = memory
+                    if memory.id in self.active_tier:
+                        del self.active_tier[memory.id]
+                        self.metrics['active_memories'] -= 1
+                        self.metrics['compressed_memories'] += 1
+                    
+                    compression_stats['compressed'] += 1
+                    self.metrics['compression_count'] += 1
+                else:
+                    compression_stats['skipped'] += 1
+            
+            return compression_stats
+    
+    def _auto_compress(self) -> None:
+        """Automatically compress memories when threshold is reached"""
+        num_to_compress = len(self.active_tier) - int(self.compression_threshold)
+        if num_to_compress > 0:
+            self.compress_memories(importance_threshold=7.0)  # Compress lower importance memories
+    
+    def _update_indexes(self, memory: MemoryItem) -> None:
+        """Update search indexes with Aurora CloudBank enhancements"""
+        self.importance_index[memory.importance].append(memory.id)
+        self.type_index[memory.memory_type].append(memory.id)
+        self.cultural_index[memory.cask_cultural_score].append(memory.id)
+        
+        for tag in memory.tags:
+            self.tag_index[tag].append(memory.id)
+        
+        # Aurora CloudBank anchor indexing
+        for anchor in memory.symbolic_anchors:
+            self.anchor_index[anchor].append(memory.id)
+    
+    def _remove_memory(self, memory_id: str) -> None:
+        """Remove memory from all data structures"""
+        memory = None
+        
+        if memory_id in self.active_tier:
+            memory = self.active_tier.pop(memory_id)
+        elif memory_id in self.compressed_tier:
+            memory = self.compressed_tier.pop(memory_id)
+        elif memory_id in self.archived_tier:
+            memory = self.archived_tier.pop(memory_id)
+        
+        if not memory:
+            return
+        
+        # Remove from owner's store
+        for owner_memories in self.memory_stores.values():
+            if memory_id in owner_memories:
+                del owner_memories[memory_id]
+                break
+        
+        # Clean up indexes
+        self._cleanup_indexes(memory)
+        
+        # Clean up quantum vectors
+        if memory.quantum_vector:
+            qv_id = memory.quantum_vector.vector_id
+            if qv_id in self.flight_controller.active_vectors:
+                self.flight_controller._remove_vector(qv_id)
+    
+    def _cleanup_indexes(self, memory: MemoryItem) -> None:
+        """Clean up search indexes"""
+        # Standard indexes
+        if memory.id in self.importance_index[memory.importance]:
+            self.importance_index[memory.importance].remove(memory.id)
+        
+        if memory.id in self.type_index[memory.memory_type]:
+            self.type_index[memory.memory_type].remove(memory.id)
+        
+        if memory.id in self.cultural_index[memory.cask_cultural_score]:
+            self.cultural_index[memory.cask_cultural_score].remove(memory.id)
+        
+        for tag in memory.tags:
+            if memory.id in self.tag_index[tag]:
+                self.tag_index[tag].remove(memory.id)
+        
+        # Aurora CloudBank anchor indexes
+        for anchor in memory.symbolic_anchors:
+            if memory.id in self.anchor_index[anchor]:
+                self.anchor_index[anchor].remove(memory.id)
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get system performance metrics with Aurora CloudBank data"""
+        with self.lock:
+            quantum_analysis = self.flight_controller.get_entanglement_network_analysis()
+            
+            self.metrics.update({
+                'total_memories': len(self.active_tier) + len(self.compressed_tier) + len(self.archived_tier),
+                'active_memories': len(self.active_tier),
+                'compressed_memories': len(self.compressed_tier),
+                'archived_memories': len(self.archived_tier),
+                'quantum_vectors': len(self.flight_controller.active_vectors),
+                'entangled_pairs': quantum_analysis['total_entanglements'],
+                'aurora_anchor_coverage': len(self.anchor_index),
+                'average_cultural_score': (
+                    sum(m.cask_cultural_score for m in self.active_tier.values()) / len(self.active_tier)
+                    if self.active_tier else 0
+                ),
+                'quantum_network_density': quantum_analysis['network_density']
+            })
+            return self.metrics.copy()
+    
+    def export_state(self) -> Dict[str, Any]:
+        """Export complete system state for persistence"""
+        with self.lock:
+            return {
+                'active_tier': {k: asdict(v) for k, v in self.active_tier.items()},
+                'compressed_tier': {k: asdict(v) for k, v in self.compressed_tier.items()},
+                'archived_tier': {k: asdict(v) for k, v in self.archived_tier.items()},
+                'attention_weights': asdict(self.attention_weights),
+                'metrics': self.metrics,
+                'quantum_vectors': {k: asdict(v) for k, v in self.flight_controller.active_vectors.items()},
+                'quantum_network_analysis': self.flight_controller.get_entanglement_network_analysis(),
+                'export_timestamp': time.time(),
+                'aurora_integration_version': '1.0.0'
+            }
+    
+    def save_to_file(self, filepath: str) -> None:
+        """Save memory system to file with Aurora CloudBank metadata"""
+        state = self.export_state()
+        atomic_write_json(filepath, state)
+        logger.info("Aurora CloudBank memory system saved to %s", str(filepath)[:SUMMARY_MAX_LENGTH])
+    
+    def batch_process_lifecycle(self) -> Dict[str, Dict[str, int]]:
+        """Process memory lifecycle operations in batch"""
+        with self.lock:
+            results = {
+                'decay': self.decay_memories(3600.0),  # 1 hour decay
+                'compression': self.compress_memories(),
+                'quantum_cleanup': self.flight_controller.cleanup_decoherent_vectors()
+            }
+            
+            self.metrics['last_cleanup'] = time.time()
+            return results

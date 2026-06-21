@@ -90,7 +90,7 @@ class FieldQuantizer:
         cfg = self.config.kv_cache
         sorted_abs = sorted(abs(v) for v in values)
         clip_idx = int(len(sorted_abs) * cfg.clip_ratio)
-        abs_max = sorted_abs[clip_idx] if clip_idx < len(sorted_abs) else sorted_abs[-1]
+        abs_max = sorted_abs[clip_idx] if clip_idx < len(sorted_abs) else sorted_abs[-1]  # NOSONAR - clip_ratio is configurable and may exceed 1.0
 
         if abs_max == 0.0:
             return [0] * len(values)
@@ -109,7 +109,7 @@ class FieldQuantizer:
 
         sorted_abs = sorted(abs(v) for v in original_values)
         clip_idx = int(len(sorted_abs) * self.config.kv_cache.clip_ratio)
-        abs_max = sorted_abs[clip_idx] if clip_idx < len(sorted_abs) else sorted_abs[-1]
+        abs_max = sorted_abs[clip_idx] if clip_idx < len(sorted_abs) else sorted_abs[-1]  # NOSONAR - clip_ratio is configurable and may exceed 1.0
 
         if abs_max == 0.0:
             return [0.0] * len(quantized)

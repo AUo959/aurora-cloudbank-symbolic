@@ -353,8 +353,8 @@ class HierarchicalMemoryManager:
         try:
             from modules.aumemmanager.ledger_hooks import AuMemLedgerHook as _Hook
             self._ledger_hook = _Hook.create()
-        except Exception:
-            pass  # Ledger unavailable or broken in this environment — safe to skip
+        except Exception as _exc:
+            logger.debug("AuMemLedgerHook unavailable (%s) — ledger integration disabled", _exc)
     
     # ------------------------------------------------------------------
     # Persistence helpers

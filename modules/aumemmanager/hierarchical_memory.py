@@ -385,12 +385,14 @@ class HierarchicalMemoryManager:
         # Restore enum fields from their string values.
         try:
             raw["memory_type"] = MemoryType(raw["memory_type"])
-        except (KeyError, ValueError):
+        except (KeyError, ValueError) as exc:
+            logger.debug("memory_type field missing or invalid (%s) — using default AGENT", exc)
             raw["memory_type"] = MemoryType.AGENT
 
         try:
             raw["status"] = MemoryStatus(raw["status"])
-        except (KeyError, ValueError):
+        except (KeyError, ValueError) as exc:
+            logger.debug("status field missing or invalid (%s) — using default ACTIVE", exc)
             raw["status"] = MemoryStatus.ACTIVE
 
         # Reconstruct nested QuantumSymbolicVector if present.
@@ -398,7 +400,8 @@ class HierarchicalMemoryManager:
         if qv_data and isinstance(qv_data, dict):
             try:
                 raw["quantum_vector"] = QuantumSymbolicVector(**qv_data)
-            except Exception:
+            except Exception as exc:
+                logger.debug("quantum_vector could not be restored from archive (%s) — using None", exc)
                 raw["quantum_vector"] = None
         else:
             raw["quantum_vector"] = None

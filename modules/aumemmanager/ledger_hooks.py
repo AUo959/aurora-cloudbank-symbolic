@@ -22,9 +22,10 @@ try:
     from modules.insight_ledger.ledger_core import InsightLedger
     from modules.insight_ledger.schemas import InsightRecord, InsightType
     _LEDGER_AVAILABLE = True
-except Exception:
+except Exception as _import_exc:
     # Catches ImportError AND environment failures (e.g. broken C-extension builds
     # that raise pyo3 panics — now handled by secure_storage.py's BaseException guard)
+    logger.debug("InsightLedger not available (%s) — ledger hook will be disabled", _import_exc)
     InsightLedger = None  # type: ignore
     InsightRecord = None  # type: ignore
     InsightType = None  # type: ignore
@@ -46,7 +47,8 @@ def _make_record(**kwargs: Any) -> Any:
         insight_type = kwargs.pop("insight_type_name", "audit")
         try:
             kwargs["insight_type"] = InsightType(insight_type)
-        except Exception:
+        except Exception as exc:
+            logger.debug("InsightType enum lookup failed for %r (%s) — using raw string", insight_type, exc)
             kwargs["insight_type"] = insight_type
         return InsightRecord(**kwargs)
     # Fallback: attribute-accessible namespace

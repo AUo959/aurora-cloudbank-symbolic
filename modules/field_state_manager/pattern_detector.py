@@ -372,6 +372,7 @@ class PatternDetector:
         
         # Find groups where nodes frequently interact with each other
         coalitions: List[Set[str]] = []
+        density = 0.0  # Initialize before loop; updated per-coalition below
         
         for node, neighbors in node_interactions.items():
             if len(neighbors) >= min_coalition_size - 1:
@@ -387,7 +388,7 @@ class PatternDetector:
                         if n1 < n2 and n2 in node_interactions.get(n1, set()):
                             actual_connections += 1
                 
-                density = actual_connections / total_possible if total_possible > 0 else 0
+                density = actual_connections / total_possible if total_possible > 0 else 0.0
                 
                 if density >= 0.6 and len(potential_coalition) >= min_coalition_size:  # High interconnection
                     coalitions.append(potential_coalition)

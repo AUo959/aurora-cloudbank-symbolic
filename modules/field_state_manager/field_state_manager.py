@@ -147,11 +147,11 @@ class FieldStateManager:
 
             for synapse in all_synapses:
                 if synapse.source_node == node_id or synapse.target_node == node_id:
-                    synapse_id = f"{synapse.source_node}_{synapse.target_node}"
-                    if synapse_id in self.synapse_registry.permanent:
-                        del self.synapse_registry.permanent[synapse_id]
-                    if synapse_id in self.synapse_registry.active:
-                        del self.synapse_registry.active[synapse_id]
+                    synapse_key = (synapse.source_node, synapse.target_node)
+                    if synapse_key in self.synapse_registry.permanent:
+                        del self.synapse_registry.permanent[synapse_key]
+                    if synapse_key in self.synapse_registry.active:
+                        del self.synapse_registry.active[synapse_key]
         else:
             # Simple dict pruning
             pruned = [
@@ -403,7 +403,7 @@ class FieldStateManager:
                 ethical_score=ethical_score,
                 success_rate=1.0
             )
-            self.synapse_registry.observe_synapse(synapse_id, synapse)
+            self.synapse_registry.observe_synapse(source_node_id, target_node_id, initial_weight, ethical_score)
         else:
             # Simple dict storage
             synapse = Synapse(
@@ -447,7 +447,7 @@ class FieldStateManager:
 
         # Update in registry
         if self.use_compressed_registry:
-            synapse = self.synapse_registry.get_synapse(synapse_id)
+            synapse = self.synapse_registry.get_synapse(source_node_id, target_node_id)
             if synapse:
                 synapse.usage_count += 1
                 synapse.last_used = datetime.now(UTC)
@@ -464,7 +464,9 @@ class FieldStateManager:
                     synapse.success_rate = (synapse.success_rate * (total - 1)) / total
 
                 # Re-observe to trigger compression check
-                self.synapse_registry.observe_synapse(synapse_id, synapse)
+                self.synapse_registry.observe_synapse(
+                    source_node_id, target_node_id, synapse.weight, synapse.ethical_score, success
+                )
         else:
             if synapse_id in self.synapses:
                 synapse = self.synapses[synapse_id]
@@ -739,4 +741,3 @@ class FieldStateManager:
         self.signal_propagator.cleanup_expired_signals()
 
         logger.debug("Field maintenance complete")
-

@@ -89,7 +89,7 @@ class NodeDeduplicator:
         which accumulates each time a node absorbs another.
         """
         total_weight = primary.merge_weight + secondary.merge_weight
-        if total_weight <= 0.0:
+        if total_weight <= 0.0:  # NOSONAR - defensive guard; callers may pass merge_weight=0.0
             # merge_weight defaults to 1.0 but callers may pass 0.0; fall back to equal weighting
             total_weight = 1.0
         all_dims = set(primary.capabilities) | set(secondary.capabilities)

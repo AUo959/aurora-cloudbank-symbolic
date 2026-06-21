@@ -31,6 +31,17 @@ Aurora is a multi-layer simulation and intelligence stewardship system. Its arch
 
 Layer boundaries are formally defined in `docs/LAYER_BOUNDARY_REFERENCE.md`. L1 (raw model telemetry) and L2 (scored institutional product) separation is enforced per QGIA doctrine — see `QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md`.
 
+### Registry Relationship Map (GAP-008 Resolution)
+
+Two agent registries coexist in the repo. They are parallel, non-competing namespaces:
+
+| Registry | Layer | Population | Function |
+|---|---|---|---|
+| `ORION_STATION_CANONICAL_STAFF_REGISTRY.json` | L1 Station Ops + L2/L3 Symbolic Mesh | 48 entities | Named crew, station AI, relay agents, framework systems |
+| `agents/qgia_agent_registry_full.json` | QGIA Analytical Population | 551 agents | Epistemic simulation population for forecasting runs |
+
+Cross-namespace bridges: L2 relay agents (HALO, STARLING, LIORA, OPPY, ARCHY, RIVERTHREAD) and L3 framework systems (Axiomera, Glyphon, Sentari, Caelion, Velatrix, Harmion) operate across both layers.
+
 ---
 
 ## Completed Milestones
@@ -41,80 +52,75 @@ Layer boundaries are formally defined in `docs/LAYER_BOUNDARY_REFERENCE.md`. L1 
 - Ported QGIA doctrine into 23 named axiom nodes (`01_QUANTUM_FORGE_AxiomManifest.md`)
 - Formalized SIM confidence scoring contract with six dimensions (DQ/SR/MR/TS/Composite/QC)
 - Defined WATCHCON escalation ladder (Levels 1–5) with trigger thresholds and routing
-- Encoded all violation signals (neutrality-fluff, rationale treadmill, L1/L2 conflation, etc.) into GUMAS audit routing
+- Encoded all violation signals into GUMAS audit routing
 - Built HTML Integration Console (visual operator dashboard)
 
 ### Stage 2 — QGIA Operator Layer ✅
 *Completed: 2026-06-20*
 
-- RESETCORE bootstrap prompt and JSON payload (`03_RESETCORE_Bootstrap.md`, `.json`)
-- GUMAS Audit Schema: 12-event ethics audit log with event codes and routing (`04_GUMAS_AuditSchema.md`)
-- PAT Command Sheet: full 10-section live session operator reference (`05_PAT_CommandSheet.md`)
+- RESETCORE bootstrap prompt and JSON payload
+- GUMAS Audit Schema: 12-event ethics audit log
+- PAT Command Sheet: full 10-section live session operator reference
 - `AU_CORE_MASTER_TREE.yaml` updated with `QGIA_INTEGRATION_MODULE` block
-- `docs/review-notes/` directory created with first session snapshot
+- `docs/review-notes/` directory created with session snapshots
 
 ### Agent Population ✅
 *Completed: 2026-03-12 (pre-integration)*
 
-- 551-agent QGIA population generated via Monte Carlo simulation with Beta-distributed epistemic parameters
+- 551-agent QGIA population via Monte Carlo simulation, Beta-distributed epistemic parameters
 - Four divisions: GMD (203), MAD (142), IID (138), SRD (68)
 - Eight analyst archetypes with full epistemic parameter profiles
-- Trust network: 7,407 directed edges across four edge types (collaborate, challenge, reinforce, inform)
+- Trust network: 7,407 directed edges, four edge types (collaborate, challenge, reinforce, inform)
 - Stochastic Block Model with archetype-weighted edge probabilities
 - Echo-chamber detection logic embedded in network statistics
+
+### Registry Alignment Review ✅
+*Completed: 2026-06-20*
+
+- Confirmed Orion Station registry and QGIA agent registry are parallel, non-competing namespaces
+- Mapped dual-role L2/L3 agents across both registries
+- Identified `simulation/` as next major unexplored directory
+- Registered GAP-009 (UNRESOLVED_HUMAN_001)
 
 ---
 
 ## Open Work Streams
 
 ### WS-001 — QUANTUM_FORGE Alignment Review
-**Priority:** Medium  
-**Gap:** GAP-005  
-**Description:** The pre-existing `docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md` (43 KB) and the new `01_QUANTUM_FORGE_AxiomManifest.md` cover overlapping territory. Their scope boundaries are undefined — it is unclear whether they are complementary, overlapping, or in conflict on any points.  
-**Action required:** Cross-reference review; produce a scope boundary memo or merge decision.  
-**Blocking:** Full QUANTUM_FORGE operational confidence.
+**Priority:** Medium | **Gap:** GAP-005  
+Cross-reference `docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md` vs `01_QUANTUM_FORGE_AxiomManifest.md`. Note: QGIA_ARCHITECTURE.md Section 8 names 10 computational modules (Lanchester, QSFE, EDM, ABCP, RPRN, TCA, etc.) not in the axiom manifest — these are complementary layers, not conflicts.
 
 ### WS-002 — Agent Registry Full Payload Push
-**Priority:** High  
-**Gap:** GAP-007  
-**Description:** The 551-agent registry (`agents/qgia_agent_registry_full.json`) and the 7,407-edge trust network (`agents/qgia_trust_network.json`) contain stub payloads in the repo — the full agent array and edge list exist only as session compute artifacts (`code_file:151`, `code_file:222`). The repo stubs preserve document structure but are not operationally complete.  
-**Action required:** Push full agent array and edge list into the repo files.  
-**Blocking:** Scenario simulation runs that load agent subgraphs; crisis response cell activation; echo-chamber detection.
+**Priority:** High | **Gap:** GAP-007  
+Full 551-agent array and 7,407-edge list exist only as session compute artifacts. Recovery required before any scenario simulation run.
 
-### WS-003 — Agent–Orion Registry Alignment
+### WS-003 — simulation/ Directory Exploration
+**Priority:** High | **Gap:** New (WS-003 replaces previous scope)  
+Six CODEX_PHASE registers (1–6), `L1_CANON_CHARACTER_ROSTER.md`, `CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md` — all unreviewd. Also resolves GAP-009 (UNRESOLVED_HUMAN_001).
+
+### WS-004 — SIM Module Enrichment
+**Priority:** Medium | **Gap:** Observation from QGIA_ARCHITECTURE.md review  
+Register drift threshold 0.002 (Velatrix hard ceiling) and HALO/Velatrix drift defense pair in `02_SIM_WATCHCON_Confidence_Module.md`.
+
+### WS-005 — docs/LAYER_BOUNDARY_REFERENCE.md Cross-Links
+**Priority:** Low | **Gap:** GAP-006  
+Add cross-reference links in `01_QUANTUM_FORGE_AxiomManifest.md` and `02_SIM_WATCHCON_Confidence_Module.md`.
+
+### WS-006 — Integration Console Push to Repo
+**Priority:** Low | **Gap:** GAP-003  
+Push `06_Integration_Console.html` to `QGIA_Integration/`.
+
+### WS-007 — CRC Activation Protocol Document
+**Priority:** Medium | **Gap:** Identified via QGIA_ARCHITECTURE.md Section 9  
+**Reclassified:** Section 9 of QGIA_ARCHITECTURE.md is already the protocol in operational form. WS-007 is now a formalization task — extract, expand, and link Section 9 into a standalone `CRC_ACTIVATION_PROTOCOL.md` in `QGIA_Integration/`.
+
+### WS-008 — .nexus_schematics/ Exploration
 **Priority:** Medium  
-**Gap:** GAP-008  
-**Description:** `ORION_STATION_CANONICAL_STAFF_REGISTRY.json` (15.9 KB, root level) defines canonical station staff. `agents/` contains the QGIA agent population. The relationship between these two registries is undefined — whether Orion staff are a subset of the 551-agent QGIA population, a parallel namespace, or a distinct operational layer is not documented.  
-**Action required:** Alignment review; produce a registry relationship map.  
-**Blocking:** PAT anchor routing clarity; station-level scenario scoping.
+Blueprint-level definitions; likely relevant to QUANTUM_FORGE module placement, anchor routing, L1/L2 boundary enforcement.
 
-### WS-004 — docs/LAYER_BOUNDARY_REFERENCE.md Cross-Links
-**Priority:** Low  
-**Gap:** GAP-006  
-**Description:** The L1/L2 boundary reference is highly relevant to QGIA doctrine but not linked from any QGIA integration artifact.  
-**Action required:** Add cross-reference links in `01_QUANTUM_FORGE_AxiomManifest.md` and `02_SIM_WATCHCON_Confidence_Module.md`.  
-**Blocking:** Nothing — discoverability only.
-
-### WS-005 — Integration Console Push to Repo
-**Priority:** Low  
-**Gap:** GAP-003  
-**Description:** The HTML visual dashboard built during Stage 1 exists as a Space artifact only.  
-**Action required:** Push `06_Integration_Console.html` to `QGIA_Integration/`.  
-**Blocking:** Nothing — visual artifact only.
-
-### WS-006 — .nexus_schematics/ Exploration
+### WS-009 — Remaining File Review Pass
 **Priority:** Medium  
-**Gap:** None registered yet  
-**Description:** The `.nexus_schematics/` directory has not been explored. It likely contains blueprint-level definitions relevant to QUANTUM_FORGE module placement, anchor routing, and L1/L2 boundary enforcement.  
-**Action required:** Read and document; assess whether any schematics conflict with or should reference QGIA axiom nodes.  
-**Blocking:** Unknown — scope undefined until explored.
-
-### WS-007 — Crisis Response Cell Activation Protocol
-**Priority:** Medium  
-**Gap:** None registered yet  
-**Description:** The trust network usage notes define a scenario activation pattern: load the subgraph of analysts assigned to a Crisis Response Cell, use challenge edges for analytical tension, and monitor reinforce clusters for groupthink. This pattern exists as documentation only — no activation protocol or SIM integration spec has been written.  
-**Action required:** Draft CRC Activation Protocol document; link to `02_SIM_WATCHCON_Confidence_Module.md` and `04_GUMAS_AuditSchema.md`.  
-**Blocking:** Live scenario runs.
+Unreviewed files identified: `threadcore_registry.json`, `staff_registry.json`, `symbolic_config.yaml`.
 
 ---
 
@@ -124,17 +130,21 @@ Layer boundaries are formally defined in `docs/LAYER_BOUNDARY_REFERENCE.md`. L1 
 |---|---|---|---|---|
 | GAP-001 | `docs/review-notes/` directory missing | Low | ✅ Resolved 2026-06-20 | — |
 | GAP-002 | `AU_CORE_MASTER_TREE.yaml` missing QGIA | Medium | ✅ Resolved 2026-06-20 | — |
-| GAP-003 | Integration Console HTML not in repo | Low | ⏳ Pending | WS-005 |
+| GAP-003 | Integration Console HTML not in repo | Low | ⏳ Pending | WS-006 |
 | GAP-004 | `docs/ROADMAP.md` did not exist | Medium | ✅ Resolved 2026-06-20 | — |
 | GAP-005 | QF V3 Guide vs Axiom Manifest scope undefined | Medium | ⏳ Pending | WS-001 |
-| GAP-006 | LAYER_BOUNDARY_REFERENCE not linked from QGIA | Low | ⏳ Pending | WS-004 |
-| GAP-007 | Agent registry and trust network are stubs only | High | ⏳ Pending | WS-002 |
-| GAP-008 | Orion registry vs QGIA agent namespace undefined | Medium | ⏳ Pending | WS-003 |
+| GAP-006 | LAYER_BOUNDARY_REFERENCE not linked from QGIA | Low | ⏳ Pending | WS-005 |
+| GAP-007 | Agent registry + trust network are stubs only | High | ⏳ Pending | WS-002 |
+| GAP-008 | Orion registry vs QGIA agent namespace undefined | Medium | ✅ Resolved 2026-06-20 | — |
+| GAP-009 | UNRESOLVED_HUMAN_001: missing 36th Orion human | Low-Medium | ⏳ Pending | WS-003 |
 
 ---
 
 ## Review Notes
 
-Session snapshots are logged in `docs/review-notes/` with ISO date filenames. Each entry records confirmed state, observed gaps, insights, and recommended next actions. The master tree (`AU_CORE_MASTER_TREE.yaml`) carries the `open_gaps` registry in machine-readable form.
-
-- [2026-06-20 Session Snapshot](review-notes/2026-06-20_snapshot-review.md) — QGIA integration completion; initial architectural review; 6 gaps registered.
+| Date | Note | Summary |
+|---|---|---|
+| 2026-06-20 | [Snapshot Review](review-notes/2026-06-20_snapshot-review.md) | QGIA integration completion; initial architectural review; GAP-001 through GAP-006 |
+| 2026-06-20 | [Agents Review](review-notes/2026-06-20_agents-review.md) | agents/ directory; GAP-007, GAP-008 registered |
+| 2026-06-20 | [QGIA Architecture Review](review-notes/2026-06-20_qgia-architecture-review.md) | QGIA_ARCHITECTURE.md deep read; computational modules; CRC protocol reclassification |
+| 2026-06-20 | [Orion Registry Review](review-notes/2026-06-20_orion-registry-review.md) | GAP-008 resolved; dual-role L2/L3 agents mapped; GAP-009 registered |

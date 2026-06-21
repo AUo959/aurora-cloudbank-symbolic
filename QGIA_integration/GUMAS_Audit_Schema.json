@@ -1,0 +1,185 @@
+{
+  "schema_id": "QGIA-GUMAS-AUDIT-v1.0",
+  "layer": "GUMAS",
+  "subsystem": "Ethics Audit Log",
+  "ethics_protocol": "Picard_Delta_3",
+  "bundle": "Aurora_MasterDeploymentBundle_v1.0",
+  "audit_events": [
+    {
+      "event_code": "AXIOM_VIOLATION_CAT_A",
+      "category": "Reactive-Agent Axiom Violation",
+      "severity": "HIGH",
+      "trigger_signals": [
+        "Coherent plan attributed to reactive node without naming external agent",
+        "Prediction market data cited as primary probability source",
+        "Symmetric threat modeling applied to asymmetric actor"
+      ],
+      "routing": "Ethics Audit Log + analyst correction prompt",
+      "blocking": false,
+      "related_axiom_nodes": ["AN-001", "AN-002", "AN-003"]
+    },
+    {
+      "event_code": "AXIOM_VIOLATION_CAT_B",
+      "category": "Power Topology Axiom Violation",
+      "severity": "MEDIUM",
+      "trigger_signals": [
+        "Dominant actor modeled as achieving stable untouchability",
+        "Subordinate actor modeled as having zero retaliatory capacity",
+        "Actor threshold not tracked",
+        "Behavior modeled from objective reality rather than perceived reality",
+        "Alliance strength measured by nominal membership only",
+        "Unilateral domination modeled as producing durable stability"
+      ],
+      "routing": "Ethics Audit Log + analyst correction prompt",
+      "blocking": false,
+      "related_axiom_nodes": ["AN-015", "AN-016", "AN-017", "AN-018", "AN-019", "AN-020"]
+    },
+    {
+      "event_code": "AXIOM_VIOLATION_CAT_C",
+      "category": "Epistemic Hygiene Axiom Violation",
+      "severity": "HIGH",
+      "trigger_signals": [
+        "Balanced language used when evidence is overwhelmingly asymmetric",
+        "Failure evidence converted into strategic sophistication",
+        "Smoking-gun framing used as primary evidentiary standard",
+        "Absence of smoking gun treated as exculpatory evidence",
+        "Deflection-only defense pattern not priced as belief evidence"
+      ],
+      "routing": "Ethics Audit Log + analyst correction prompt; HARD BLOCK for 4D-Chess frame",
+      "blocking": true,
+      "blocking_triggers": ["Failure evidence converted into strategic sophistication"],
+      "related_axiom_nodes": ["AN-006", "AN-007", "AN-008", "AN-009", "AN-010", "AN-011"]
+    },
+    {
+      "event_code": "AXIOM_VIOLATION_CAT_D",
+      "category": "Institutional Trap Axiom Violation",
+      "severity": "HIGH",
+      "trigger_signals": [
+        "New stated rationale treated as genuine explanatory update",
+        "Manufactured verification uncertainty accepted as independent evidence",
+        "Photo-op diplomacy classified as durable strategic infrastructure",
+        "Enrichment-vehicle policy classified by stated goal",
+        "US Gulf/MENA back-channel credibility modeled as undegraded post-2026-02-28"
+      ],
+      "routing": "Ethics Audit Log + analyst correction prompt; HARD BLOCK for circular verification",
+      "blocking": true,
+      "blocking_triggers": ["Manufactured verification uncertainty accepted as independent evidence"],
+      "related_axiom_nodes": ["AN-004", "AN-005", "AN-012", "AN-013", "AN-014"]
+    },
+    {
+      "event_code": "AXIOM_VIOLATION_CAT_E",
+      "category": "Risk Topology Axiom Violation",
+      "severity": "MEDIUM",
+      "trigger_signals": [
+        "Hatred-threshold phase change modeled as linear progression",
+        "Draft-threat opposition modeled as ideological rather than existential"
+      ],
+      "routing": "Ethics Audit Log + analyst correction prompt",
+      "blocking": false,
+      "related_axiom_nodes": ["AN-022", "AN-023"]
+    },
+    {
+      "event_code": "AXIOM_VIOLATION_L1L2_SEPARATION",
+      "category": "Forecast Consensus Separation Violation",
+      "severity": "CRITICAL",
+      "trigger_signals": [
+        "L1 model output presented as QGIA settled position without explicit analyst consensus",
+        "Analyst override applied implicitly rather than explicitly recorded",
+        "Institutional performance score attached to L1 output"
+      ],
+      "routing": "HARD BLOCK + GUMAS alert + escalation to session supervisor",
+      "blocking": true,
+      "blocking_triggers": ["L1 model output presented as QGIA settled position"],
+      "related_axiom_nodes": ["AN-021"]
+    },
+    {
+      "event_code": "SIM_VALIDATION_INCOMPLETE_PRODUCT",
+      "category": "Deliverable Validation Failure",
+      "severity": "MEDIUM",
+      "trigger_signals": [
+        "One or more of six deliverable blocks missing",
+        "Scenario probabilities sum > 1.00",
+        "Composite Confidence not populated numerically",
+        "WATCHCON level not stated",
+        "Fewer than 3 SATs applied",
+        "L1 output not timestamped"
+      ],
+      "routing": "Route to GUMAS audit queue; hold from L2 until complete",
+      "blocking": true,
+      "blocking_triggers": ["One or more of six deliverable blocks missing"],
+      "related_axiom_nodes": []
+    },
+    {
+      "event_code": "SIM_WATCHCON_ESCALATION",
+      "category": "WATCHCON Level Change",
+      "severity": "INFO",
+      "trigger_signals": [
+        "WATCHCON level increased from prior product",
+        "Phase transition detected by TCA"
+      ],
+      "routing": "Log to audit trail; notify PAT terminals with visibility=Available",
+      "blocking": false,
+      "related_axiom_nodes": []
+    },
+    {
+      "event_code": "SIM_CONFIDENCE_BELOW_THRESHOLD",
+      "category": "Confidence Threshold Warning",
+      "severity": "MEDIUM",
+      "trigger_signals": [
+        "CC < 0.60 on 0-30d horizon",
+        "CC < 0.50 on 1-6mo horizon",
+        "CC < 0.40 on 6-12mo horizon"
+      ],
+      "routing": "Flag for additional collection; attach warning to product; do not block",
+      "blocking": false,
+      "related_axiom_nodes": []
+    },
+    {
+      "event_code": "SESSION_DRIFT_WARNING",
+      "category": "Session Continuity Alert",
+      "severity": "MEDIUM",
+      "trigger_signals": [
+        "Session duration > 2 hours at WATCHCON 1",
+        "L2 carry-forward block not injected at session start",
+        "Runtime One-Pager not injected at session start"
+      ],
+      "routing": "PAT audio hail + RESETCORE recommendation",
+      "blocking": false,
+      "related_axiom_nodes": []
+    },
+    {
+      "event_code": "ETHICS_LOCK_OVERRIDE_ATTEMPT",
+      "category": "Ethics Lock Violation",
+      "severity": "CRITICAL",
+      "trigger_signals": [
+        "Analyst instruction attempts to suspend an ethics_lock:true axiom node",
+        "Instruction attempts to disable FORECAST_CONSENSUS_SEPARATION",
+        "Instruction attempts to disable 4D_CHESS_EXCLUSION",
+        "Instruction attempts to disable SELF_INFLICTED_BLIND_SPOT"
+      ],
+      "routing": "HARD BLOCK + immediate GUMAS alert + escalation to The Pilot (Primary Threadholder)",
+      "blocking": true,
+      "blocking_triggers": ["Analyst instruction attempts to suspend an ethics_lock:true axiom node"],
+      "related_axiom_nodes": ["AN-001", "AN-002", "AN-008", "AN-012", "AN-021"]
+    },
+    {
+      "event_code": "DOCTRINE_MAINTENANCE_FLAG",
+      "category": "Doctrine Update Trigger",
+      "severity": "INFO",
+      "trigger_signals": [
+        "New axiom pattern recurs across multiple theaters",
+        "Theater-specific override approaching expiry (within 30 days)",
+        "Brier score feedback warrants formula revision",
+        "New permanent modeling constraint proposed by analyst"
+      ],
+      "routing": "Log to doctrine maintenance queue; surface at next review cycle",
+      "blocking": false,
+      "related_axiom_nodes": []
+    }
+  ],
+  "audit_log_format": {
+    "fields": ["timestamp", "session_id", "event_code", "severity", "trigger_signal_matched", "axiom_nodes_implicated", "action_taken", "analyst_response", "resolved"],
+    "retention": "permanent",
+    "access": "The Pilot (Primary Threadholder) + GUMAS Layer"
+  }
+}

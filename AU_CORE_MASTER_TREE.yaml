@@ -1,6 +1,8 @@
 framework: Aurora
 ethics_protocol: Picard_Delta_3
 anchor_seed: EOS_SEED_ORION
+last_review: 2026-06-20
+review_note: docs/review-notes/2026-06-20_snapshot-review.md
 
 core_modules:
   - name: NARRATIVE_MEMORY_FUSER
@@ -19,6 +21,34 @@ core_modules:
     consent_anchor_required: true
     credential_mode: UC-secure + minimal disclosure
 
+  - name: QGIA_INTEGRATION_MODULE
+    function: >-
+      QGIA (Quantitative Geopolitical Intelligence Architecture) doctrine port into Aurora.
+      Provides axiom node definitions, confidence scoring contracts, WATCHCON escalation logic,
+      GUMAS audit schema, RESETCORE bootstrap, and PAT operator command sheet.
+    version: v1.0
+    integration_date: 2026-06-20
+    stage_1_artifacts:
+      - QGIA_Integration/01_QUANTUM_FORGE_AxiomManifest.md
+      - QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md
+    stage_2_artifacts:
+      - QGIA_Integration/03_RESETCORE_Bootstrap.md
+      - QGIA_Integration/03_RESETCORE_Bootstrap.json
+      - QGIA_Integration/04_GUMAS_AuditSchema.md
+      - QGIA_Integration/05_PAT_CommandSheet.md
+    axiom_node_count: 23
+    ethics_lock: true
+    ethics_protocol: Picard_Delta_3
+    gumas_tier: governed
+    watchcon_levels: [1, 2, 3, 4, 5]
+    confidence_dimensions: [DQ, SR, MR, TS, Composite, QC]
+    related_docs:
+      - docs/LAYER_BOUNDARY_REFERENCE.md
+      - docs/GEOMETRIC_ETHICS_ARCHITECTURE.md
+      - docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md
+    pending_alignment:
+      - docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md  # GAP-005: scope boundary review needed
+
 drift_monitoring:
   model_drift: true
   data_drift: true
@@ -26,6 +56,7 @@ drift_monitoring:
   report_channels:
     - RaR_trace
     - Ethical_drift_log
+    - GUMAS_audit_log  # added: routes QGIA violation signals
 
 persona_modes:
   - Clear
@@ -43,6 +74,7 @@ deployment_tags:
   - symbolic-quantum-adaptive
   - narrative-continuity-preserving
   - zero-knowledge-consent-bound
+  - qgia-integrated
 
 grafts:
   - type: capsule_graft
@@ -62,3 +94,21 @@ grafts:
       - system_interface
     link_mode: anchor-phrase
     ethics_protocol: Picard_Delta_3
+
+open_gaps:
+  - id: GAP-003
+    description: 06_Integration_Console.html not pushed to QGIA_Integration/
+    severity: low
+    action: pending
+  - id: GAP-004
+    description: docs/ROADMAP.md does not exist (root ROADMAP.md redirects to it)
+    severity: medium
+    action: pending
+  - id: GAP-005
+    description: Scope boundary between QUANTUM_FORGE_V3_COMPLETE_GUIDE.md and 01_QUANTUM_FORGE_AxiomManifest.md undefined
+    severity: medium
+    action: pending-cross-reference-review
+  - id: GAP-006
+    description: docs/LAYER_BOUNDARY_REFERENCE.md not linked from QGIA artifacts
+    severity: low
+    action: pending

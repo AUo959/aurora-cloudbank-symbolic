@@ -65,8 +65,8 @@ class FieldQuantizer:
         Discrete levels better reflect the underlying geometric structure
         of ethical dimensions.
         """
-        if not self.config.enabled:
-            return int(curvature * 255)
+        if not self.config.enabled or not self._curvature_levels:
+            return int(max(0, min(255, round(curvature * 255))))
 
         scaled = max(0.0, min(1.0, curvature)) * 255
         nearest = min(self._curvature_levels, key=lambda lvl: abs(lvl - scaled))

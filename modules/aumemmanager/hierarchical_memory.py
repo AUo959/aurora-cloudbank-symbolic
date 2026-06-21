@@ -456,7 +456,7 @@ class HierarchicalMemoryManager:
                     len(memories),
                     str(self._persist_path)[:SUMMARY_MAX_LENGTH],
                 )
-            except Exception as exc:
+            except Exception as exc:  # NOSONAR - file I/O may raise various exceptions
                 logger.error(
                     "AuMemManager: save_to_disk failed (%s): %s",
                     type(exc).__name__,
@@ -520,7 +520,7 @@ class HierarchicalMemoryManager:
 
                 self.metrics["total_memories"] += 1
                 restored += 1
-            except Exception as exc:
+            except Exception as exc:  # NOSONAR - deserialization of corrupt records may raise various exceptions
                 logger.warning(
                     "AuMemManager: skipped corrupt record during load (%s: %s)",
                     type(exc).__name__,

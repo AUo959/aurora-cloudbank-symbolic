@@ -32,7 +32,7 @@ AuMemLedgerHook = _hooks_mod.AuMemLedgerHook
 LEDGER_IMPORTANCE_THRESHOLD = _hooks_mod.LEDGER_IMPORTANCE_THRESHOLD
 
 
-# ── Hook lifecycle ────────────────────────────────────────────────────────────
+# ── Hook lifecycle ───────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
 class TestAuMemLedgerHookInit:
@@ -58,7 +58,7 @@ class TestAuMemLedgerHookInit:
         try:
             from modules.insight_ledger.ledger_core import InsightLedger  # noqa: F401
             ledger_available = True
-        except ImportError:
+        except ImportError:  # NOSONAR - availability probe; ImportError is expected when ledger is not installed
             ledger_available = False
 
         if not ledger_available:
@@ -69,7 +69,7 @@ class TestAuMemLedgerHookInit:
             assert hook.enabled is True
 
 
-# ── on_memory_added ───────────────────────────────────────────────────────────
+# ── on_memory_added ─────────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
 class TestOnMemoryAdded:
@@ -165,7 +165,7 @@ class TestOnMemoryAdded:
         assert record.context["context_tag"] == "special_ctx"
 
 
-# ── on_memory_retrieved ───────────────────────────────────────────────────────
+# ── on_memory_retrieved ──────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
 class TestOnMemoryRetrieved:
@@ -193,7 +193,7 @@ class TestOnMemoryRetrieved:
         assert len(record.context["query_preview"]) <= 100
 
 
-# ── on_capacity_warning ───────────────────────────────────────────────────────
+# ── on_capacity_warning ─────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
 class TestOnCapacityWarning:

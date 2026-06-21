@@ -12,14 +12,16 @@ import os
 from pathlib import Path
 from typing import Optional
 
-# Try to import cryptography for secure key storage
+# Try to import cryptography for secure key storage.
+# Catch BaseException (not just ImportError) because broken C-extension builds
+# (e.g. pyo3 Rust panic from missing _cffi_backend) raise non-ImportError exceptions.
 try:
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.backends import default_backend
     from cryptography.fernet import Fernet
     CRYPTOGRAPHY_AVAILABLE = True
-except ImportError:
+except BaseException:
     CRYPTOGRAPHY_AVAILABLE = False
     PBKDF2HMAC = None  # type: ignore
     Fernet = None  # type: ignore

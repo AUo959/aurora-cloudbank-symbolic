@@ -21,7 +21,7 @@ try:
     from cryptography.hazmat.backends import default_backend
     from cryptography.fernet import Fernet
     CRYPTOGRAPHY_AVAILABLE = True
-except BaseException:
+except BaseException:  # NOSONAR - pyo3_runtime.PanicException (Rust/cffi panic) is a BaseException, not Exception
     CRYPTOGRAPHY_AVAILABLE = False
     PBKDF2HMAC = None  # type: ignore
     Fernet = None  # type: ignore

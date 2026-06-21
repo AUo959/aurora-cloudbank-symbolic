@@ -110,7 +110,7 @@ class SparseFieldAttention:
                 scores[dim] = 1.0
 
         violated = [dim for dim, score in scores.items() if score < 0.5]
-        aggregate = sum(scores.values()) / len(scores) if scores else 1.0
+        aggregate = sum(scores.values()) / len(ETHICAL_DIMENSIONS)
 
         return aggregate, violated
 
@@ -121,8 +121,6 @@ class SparseFieldAttention:
         At typical workloads, 1-2 dimensions are active → sparsity ~0.6-0.8.
         """
         total = len(ETHICAL_DIMENSIONS)
-        if total == 0:
-            return 0.0
         skipped = max(0, total - active_count)
         return skipped / total
 

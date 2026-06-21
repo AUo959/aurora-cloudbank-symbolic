@@ -22,7 +22,7 @@ try:
     from modules.insight_ledger.ledger_core import InsightLedger
     from modules.insight_ledger.schemas import InsightRecord, InsightType
     _LEDGER_AVAILABLE = True
-except Exception as _import_exc:
+except Exception as _import_exc:  # NOSONAR - broad catch needed for pyo3 panics and broken C-extension builds
     # Catches ImportError AND environment failures (e.g. broken C-extension builds
     # that raise pyo3 panics — now handled by secure_storage.py's BaseException guard)
     logger.debug("InsightLedger not available (%s) — ledger hook will be disabled", _import_exc)
@@ -47,7 +47,7 @@ def _make_record(**kwargs: Any) -> Any:
         insight_type = kwargs.pop("insight_type_name", "audit")
         try:
             kwargs["insight_type"] = InsightType(insight_type)
-        except Exception as exc:
+        except Exception as exc:  # NOSONAR - InsightType enum may raise various exceptions
             logger.debug("InsightType enum lookup failed for %r (%s) — using raw string", insight_type, exc)
             kwargs["insight_type"] = insight_type
         return InsightRecord(**kwargs)
@@ -99,7 +99,7 @@ class AuMemLedgerHook:
             ledger = InsightLedger(storage_path=path)
             logger.info("AuMemLedgerHook: ledger wired at %s", path)
             return cls(ledger=ledger, importance_threshold=importance_threshold)
-        except Exception as exc:
+        except Exception as exc:  # NOSONAR - InsightLedger construction may raise various exceptions
             logger.warning("AuMemLedgerHook: failed to init ledger (%s) — disabled", exc)
             return cls(ledger=None, importance_threshold=importance_threshold)
 
@@ -141,7 +141,7 @@ class AuMemLedgerHook:
                 related_anchor=context_tag or None,
             )
             self._ledger.record_insight(record)
-        except Exception as exc:
+        except Exception as exc:  # NOSONAR - ledger operations may raise various exceptions
             logger.warning("AuMemLedgerHook.on_memory_added failed: %s", exc)
 
     def on_memory_retrieved(
@@ -176,7 +176,7 @@ class AuMemLedgerHook:
                 related_anchor=context_tag or None,
             )
             self._ledger.record_insight(record)
-        except Exception as exc:
+        except Exception as exc:  # NOSONAR - ledger operations may raise various exceptions
             logger.warning("AuMemLedgerHook.on_memory_retrieved failed: %s", exc)
 
     def on_capacity_warning(
@@ -208,5 +208,5 @@ class AuMemLedgerHook:
                 severity="warning",
             )
             self._ledger.record_insight(record)
-        except Exception as exc:
+        except Exception as exc:  # NOSONAR - ledger operations may raise various exceptions
             logger.warning("AuMemLedgerHook.on_capacity_warning failed: %s", exc)

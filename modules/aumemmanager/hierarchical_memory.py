@@ -184,7 +184,7 @@ class MemoryItem:
                              (1 + math.log(1 + self.access_count)) *
                              cultural_boost * anchor_boost)
 
-        if effective_half_life <= 0.0:
+        if effective_half_life <= 0.0:  # NOSONAR - defensive guard; callers may configure half_life=0
             return
 
         # Exponential decay
@@ -356,7 +356,7 @@ class HierarchicalMemoryManager:
         try:
             from modules.aumemmanager.ledger_hooks import AuMemLedgerHook as _Hook
             self._ledger_hook = _Hook.create()
-        except Exception as _exc:
+        except Exception as _exc:  # NOSONAR - ledger hook import may raise various exceptions
             logger.debug("AuMemLedgerHook unavailable (%s) — ledger integration disabled", _exc)
     
     # ------------------------------------------------------------------

@@ -84,7 +84,7 @@ class FieldQuantizer:
         scale factor based on the channel's value range, clipped at
         clip_ratio to handle outliers.
         """
-        if not self.config.enabled or not values:
+        if not self.config.enabled or not values:  # NOSONAR - enabled defaults to True but callers may pass FieldQuantizationConfig(enabled=False); values may be empty
             return [int(max(-128, min(127, v * 127))) for v in values]
 
         cfg = self.config.kv_cache
@@ -92,7 +92,7 @@ class FieldQuantizer:
         clip_idx = int(len(sorted_abs) * cfg.clip_ratio)
         abs_max = sorted_abs[clip_idx] if clip_idx < len(sorted_abs) else sorted_abs[-1]  # NOSONAR - clip_ratio is configurable and may exceed 1.0
 
-        if abs_max == 0.0:
+        if abs_max == 0.0:  # NOSONAR - abs_max is from sorted absolute values; 0.0 is possible when all inputs are zero
             return [0] * len(values)
 
         scale = 127.0 / abs_max
@@ -104,14 +104,14 @@ class FieldQuantizer:
 
         original_values provides the reference range for dequantization.
         """
-        if not original_values:
+        if not original_values:  # NOSONAR - original_values is a caller-supplied reference; empty list is a valid no-op input
             return []
 
         sorted_abs = sorted(abs(v) for v in original_values)
         clip_idx = int(len(sorted_abs) * self.config.kv_cache.clip_ratio)
         abs_max = sorted_abs[clip_idx] if clip_idx < len(sorted_abs) else sorted_abs[-1]  # NOSONAR - clip_ratio is configurable and may exceed 1.0
 
-        if abs_max == 0.0:
+        if abs_max == 0.0:  # NOSONAR - abs_max is from sorted absolute values; 0.0 is possible when all inputs are zero
             return [0.0] * len(quantized)
 
         scale = abs_max / 127.0

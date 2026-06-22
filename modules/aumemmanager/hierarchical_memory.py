@@ -291,7 +291,7 @@ class MemoryItem:
             self.dlp_tag_id = tag_id
             return tag_id
             
-        except Exception as e:
+        except Exception as e:  # NOSONAR - NativeDLPTracker may raise various exceptions
             logger.warning("DLP tracking failed for memory %s: %s", str(self.id)[:SUMMARY_MAX_LENGTH], str(e)[:SUMMARY_MAX_LENGTH])
             return None
 

@@ -152,7 +152,7 @@ class NodeDeduplicator:
 
     def deduplication_ratio(self, original_count: int, deduplicated_count: int) -> float:
         """Compression ratio: >1 means fewer nodes after dedup."""
-        if deduplicated_count == 0:
+        if deduplicated_count == 0:  # NOSONAR - callers may pass 0; guard prevents division by zero
             return float(original_count)
         return original_count / deduplicated_count
 

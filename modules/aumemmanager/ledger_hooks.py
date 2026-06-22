@@ -190,7 +190,7 @@ class AuMemLedgerHook:
             return
 
         try:
-            fill_pct = (current_count / capacity_limit * 100) if capacity_limit else 0
+            fill_pct = (current_count / capacity_limit * 100) if capacity_limit else 0  # NOSONAR - capacity_limit is int; 0 is valid when tier config omits limit
             record = _make_record(
                 insight_type_name="alert",
                 content=(

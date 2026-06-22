@@ -132,6 +132,6 @@ class SparseFieldAttention:
         At 1-2 active dims out of 5: 2.5-5× speedup.
         """
         total = len(ETHICAL_DIMENSIONS)
-        if active_count == 0:
+        if active_count == 0:  # NOSONAR - callers may pass 0; guard prevents division by zero
             return float(total)
         return total / active_count

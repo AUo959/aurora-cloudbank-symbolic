@@ -75,7 +75,7 @@ class SparseFieldAttention:
 
         for dim in ETHICAL_DIMENSIONS:
             signal = dimension_signals.get(dim, 0.0)
-            if dim in self.config.always_validate or signal >= self.config.violation_threshold:
+            if dim in self.config.always_validate or signal >= self.config.violation_threshold:  # NOSONAR - for always_validate dims (e.g. "safety"), first operand is always True with default config; other dims vary
                 active.append(dim)
 
         return active[: self.config.max_active_dims]

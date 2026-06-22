@@ -96,7 +96,7 @@ class AuMemLedgerHook:
 
         try:
             path = storage_path or ".aurora/ledger"
-            ledger = InsightLedger(storage_path=path)
+            ledger = InsightLedger(storage_path=path)  # NOSONAR - InsightLedger is not None here; guarded by 'is None' check above
             logger.info("AuMemLedgerHook: ledger wired at %s", path)
             return cls(ledger=ledger, importance_threshold=importance_threshold)
         except Exception as exc:  # NOSONAR - InsightLedger construction may raise various exceptions
@@ -140,7 +140,7 @@ class AuMemLedgerHook:
                 severity="info",
                 related_anchor=context_tag or None,
             )
-            self._ledger.record_insight(record)
+            self._ledger.record_insight(record)  # NOSONAR - not None here; self._enabled = (ledger is not None) guarantees _ledger is set
         except Exception as exc:  # NOSONAR - ledger operations may raise various exceptions
             logger.warning("AuMemLedgerHook.on_memory_added failed: %s", exc)
 
@@ -175,7 +175,7 @@ class AuMemLedgerHook:
                 severity="info",
                 related_anchor=context_tag or None,
             )
-            self._ledger.record_insight(record)
+            self._ledger.record_insight(record)  # NOSONAR - not None here; self._enabled = (ledger is not None) guarantees _ledger is set
         except Exception as exc:  # NOSONAR - ledger operations may raise various exceptions
             logger.warning("AuMemLedgerHook.on_memory_retrieved failed: %s", exc)
 
@@ -207,6 +207,6 @@ class AuMemLedgerHook:
                 tags=["aumemmanager", "capacity_warning", tier],
                 severity="warning",
             )
-            self._ledger.record_insight(record)
+            self._ledger.record_insight(record)  # NOSONAR - not None here; self._enabled = (ledger is not None) guarantees _ledger is set
         except Exception as exc:  # NOSONAR - ledger operations may raise various exceptions
             logger.warning("AuMemLedgerHook.on_capacity_warning failed: %s", exc)

@@ -372,7 +372,7 @@ class PatternDetector:
         
         # Find groups where nodes frequently interact with each other
         coalitions: List[Set[str]] = []
-        density = 0.0  # Initialize before loop; updated per-coalition below
+        density = 0.0  # NOSONAR - defensive default; read after loop if no coalition qualifies (empty node_interactions or no node meets min_coalition_size)
         
         for node, neighbors in node_interactions.items():
             if len(neighbors) >= min_coalition_size - 1:

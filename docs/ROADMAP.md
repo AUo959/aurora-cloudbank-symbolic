@@ -4,7 +4,7 @@
 
 **Framework:** Aurora v2.2.5  
 **Ethics Protocol:** Picard_Delta_3  
-**Last Updated:** 2026-06-20  
+**Last Updated:** 2026-06-22  
 **Canonical Architecture Reference:** `AU_CORE_MASTER_TREE.yaml`
 
 ---
@@ -82,6 +82,14 @@ Cross-namespace bridges: L2 relay agents (HALO, STARLING, LIORA, OPPY, ARCHY, RI
 - Identified `simulation/` as next major unexplored directory
 - Registered GAP-009 (UNRESOLVED_HUMAN_001)
 
+### AI Contributor Review Governance ✅
+*Completed: 2026-06-22*
+
+- Documented GAP-010: assert-before-read protocol violation by AI contributor during review session
+- Patched `ops/work_queue/session_open_ritual.md` v1.1.0 with Step 0 Review Conduct Clause
+- Created `docs/REVIEW_PROTOCOL.md` as standalone review standard for all agents and contributors
+- Full incident record: `docs/review-notes/2026-06-22_general-review-and-gap-010.md`
+
 ---
 
 ## Open Work Streams
@@ -96,7 +104,7 @@ Full 551-agent array and 7,407-edge list exist only as session compute artifacts
 
 ### WS-003 — simulation/ Directory Exploration
 **Priority:** High | **Gap:** New (WS-003 replaces previous scope)  
-Six CODEX_PHASE registers (1–6), `L1_CANON_CHARACTER_ROSTER.md`, `CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md` — all unreviewd. Also resolves GAP-009 (UNRESOLVED_HUMAN_001).
+Six CODEX_PHASE registers (1–6), `L1_CANON_CHARACTER_ROSTER.md`, `CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md` — all unreviewed. Also resolves GAP-009 (UNRESOLVED_HUMAN_001).
 
 ### WS-004 — SIM Module Enrichment
 **Priority:** Medium | **Gap:** Observation from QGIA_ARCHITECTURE.md review  
@@ -122,6 +130,13 @@ Blueprint-level definitions; likely relevant to QUANTUM_FORGE module placement, 
 **Priority:** Medium  
 Unreviewed files identified: `threadcore_registry.json`, `staff_registry.json`, `symbolic_config.yaml`.
 
+### WS-010 — Review Governance Hardening
+**Priority:** High | **Gap:** GAP-010  
+Follow-on work from the 2026-06-22 assert-before-read incident. Three sub-tasks remain open:
+- Verify `CLAUDE.md`, `COPILOT_INSTRUCTIONS.md`, and `CONTRIBUTING.md` all reference `ops/work_queue/` as the authoritative task surface for agent and human contributors
+- Consolidate `QGIA_Integration/` and `QGIA_integration/` case split at root
+- Evaluate whether root-level operational artifacts (`aurora_dashboard.html`, `AU_CORE_MASTER_TREE.yaml`, `activate_aurora.sh`, etc.) should migrate into `ops/` or retain root placement with explicit justification
+
 ---
 
 ## Gap Register Summary
@@ -137,6 +152,7 @@ Unreviewed files identified: `threadcore_registry.json`, `staff_registry.json`, 
 | GAP-007 | Agent registry + trust network are stubs only | High | ⏳ Pending | WS-002 |
 | GAP-008 | Orion registry vs QGIA agent namespace undefined | Medium | ✅ Resolved 2026-06-20 | — |
 | GAP-009 | UNRESOLVED_HUMAN_001: missing 36th Orion human | Low-Medium | ⏳ Pending | WS-003 |
+| GAP-010 | Assert-before-read protocol violation by AI contributor | High | ✅ Mitigated 2026-06-22 — monitoring open | WS-010 |
 
 ---
 
@@ -148,3 +164,4 @@ Unreviewed files identified: `threadcore_registry.json`, `staff_registry.json`, 
 | 2026-06-20 | [Agents Review](review-notes/2026-06-20_agents-review.md) | agents/ directory; GAP-007, GAP-008 registered |
 | 2026-06-20 | [QGIA Architecture Review](review-notes/2026-06-20_qgia-architecture-review.md) | QGIA_ARCHITECTURE.md deep read; computational modules; CRC protocol reclassification |
 | 2026-06-20 | [Orion Registry Review](review-notes/2026-06-20_orion-registry-review.md) | GAP-008 resolved; dual-role L2/L3 agents mapped; GAP-009 registered |
+| 2026-06-22 | [General Review & GAP-010](review-notes/2026-06-22_general-review-and-gap-010.md) | General repo review; assert-before-read incident; GAP-010 registered; session ritual v1.1.0 patched |

@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Aurora-aware work queue. Machine-readable mirror of QUEUE.md. Aurora holds contextual authority. Do not edit rank order without Aurora annotation.",
-    "last_aurora_review": "2026-06-22T16:49:00Z",
-    "schema": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/ops/work_queue/QUEUE.md"
+    "last_aurora_review": "2026-06-22T21:40:00Z",
+    "schema": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/ops/work_queue/queue_schema.json"
   },
   "active": [
     {
@@ -52,6 +52,28 @@
     },
     {
       "rank": 5,
+      "id": "sim/SENTINEL-phase0",
+      "title": "PROJECT SENTINEL — Phase 0: Ethics review board constitution",
+      "status": "needs-decision",
+      "owner": null,
+      "depends_on": [],
+      "tags": ["simulation", "ethics", "SENTINEL", "governance", "Picard_Delta_3"],
+      "aurora_note": "No engineering blocking condition. Requires Commander Thorne + Sorensen + Sato governance decision only. Phase 0 deliverable: ethics review board constituted and layer boundary document drafted. Surfaces from review note 2026-06-22. See simulation/RD_PROPOSAL_SENTINEL.md.",
+      "aurora_authority": true
+    },
+    {
+      "rank": 6,
+      "id": "ops/QGIA-doctrine-store",
+      "title": "QGIA analytical framework — store in ops/analytical_frameworks/QGIA/",
+      "status": "open",
+      "owner": null,
+      "depends_on": [],
+      "tags": ["QGIA", "analytical-framework", "ops", "non-canonical"],
+      "aurora_note": "QGIA Runtime One-Pager v4.2.1 and Axiom Doctrine Narrative v1.0 reviewed 2026-06-22. Store as portable external tooling in ops/analytical_frameworks/QGIA/. Do NOT elevate to canonical station doctrine until Thorne/Noor crew review. Unblocks feat/QGIA annotation update.",
+      "aurora_authority": true
+    },
+    {
+      "rank": 7,
       "id": "docs/api-reference",
       "title": "API reference documentation",
       "status": "open",
@@ -62,14 +84,14 @@
       "aurora_authority": true
     },
     {
-      "rank": 6,
+      "rank": 8,
       "id": "feat/QGIA",
       "title": "QGIA integration hooks",
       "status": "needs-decision",
       "owner": null,
-      "depends_on": ["arch/layer-canonization"],
+      "depends_on": ["arch/layer-canonization", "ops/QGIA-doctrine-store"],
       "tags": ["feature", "QGIA", "PAT", "integration"],
-      "aurora_note": "Pending architecture decision on PAT routing. Aurora will annotate when ready to proceed.",
+      "aurora_note": "Doctrine now available (QGIA Runtime One-Pager v4.2.1 + Axiom Doctrine Narrative v1.0, reviewed 2026-06-22). Two-layer discipline (Layer 1 = Aurora raw output, Layer 2 = crew-ratified consensus) maps directly to Triplex Handshake Protocol — no architectural conflict. Integration path: ops/QGIA-doctrine-store must land first, then PAT routing decision. Crew sign-off required before any QGIA axiom becomes operationally binding in station context.",
       "aurora_authority": true
     }
   ],

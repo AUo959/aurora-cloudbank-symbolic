@@ -44,12 +44,7 @@ except ImportError:
     AURORA_DLP_AVAILABLE = False
     logger.warning("Aurora DLP not available - running in standalone mode")
 
-try:
-    from src.utils.atomic_io import atomic_write_json
-    ATOMIC_IO_AVAILABLE = True
-except ImportError:
-    ATOMIC_IO_AVAILABLE = False
-    logger.warning("atomic_io not available - persistence will use non-atomic writes")
+# atomic_write_json already imported unconditionally above; re-import avoided to prevent import shadowing
 
 # Ledger hook is imported lazily in __init__ to avoid circular imports
 # (aumemmanager.__init__.py imports hierarchical_memory, so any module-level
@@ -436,14 +431,7 @@ class HierarchicalMemoryManager:
             }
 
             try:
-                if ATOMIC_IO_AVAILABLE:
-                    atomic_write_json(self._persist_path, payload)
-                else:
-                    # Fallback: plain write (not atomic but functional)
-                    dest_dir = os.path.dirname(os.path.abspath(self._persist_path))
-                    os.makedirs(dest_dir, exist_ok=True)
-                    with open(self._persist_path, "w", encoding="utf-8") as fh:
-                        json.dump(payload, fh, indent=2, default=str)
+                atomic_write_json(self._persist_path, payload)
 
                 logger.info(
                     "AuMemManager: saved %d memories to %s",

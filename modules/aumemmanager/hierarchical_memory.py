@@ -19,7 +19,7 @@ import re
 try:
     import numpy as np
     _NUMPY_AVAILABLE = True
-except ImportError:  # NOSONAR - numpy is optional; math module provides all required fallbacks
+except ImportError:
     np = None  # type: ignore
     _NUMPY_AVAILABLE = False
 from datetime import datetime, timezone
@@ -54,8 +54,8 @@ except ImportError:
 # Ledger hook is imported lazily in __init__ to avoid circular imports
 # (aumemmanager.__init__.py imports hierarchical_memory, so any module-level
 # import of ledger_hooks here would form a cycle via the package namespace)
-_LEDGER_HOOK_AVAILABLE = False
-AuMemLedgerHook = None  # type: ignore
+_LEDGER_HOOK_AVAILABLE = False  # NOSONAR - sentinel assigned here for documentation; actual check uses lazy local import in __init__
+AuMemLedgerHook = None  # type: ignore  # NOSONAR - placeholder; __init__ imports AuMemLedgerHook locally as _Hook to avoid circular imports
 
 # Constants
 SUMMARY_MAX_LENGTH = 100  # Maximum length for content summaries in logs
@@ -184,9 +184,6 @@ class MemoryItem:
                              (1 + math.log(1 + self.access_count)) *
                              cultural_boost * anchor_boost)
 
-        if effective_half_life <= 0.0:  # NOSONAR - defensive guard; callers may configure half_life=0
-            return
-
         # Exponential decay
         decay_constant = math.log(2) / effective_half_life
         self.strength *= math.exp(-decay_constant * elapsed_time)
@@ -291,7 +288,7 @@ class MemoryItem:
             self.dlp_tag_id = tag_id
             return tag_id
             
-        except Exception as e:  # NOSONAR - NativeDLPTracker may raise various exceptions
+        except Exception as e:
             logger.warning("DLP tracking failed for memory %s: %s", str(self.id)[:SUMMARY_MAX_LENGTH], str(e)[:SUMMARY_MAX_LENGTH])
             return None
 
@@ -348,7 +345,7 @@ class HierarchicalMemoryManager:
         # Prefer explicit argument; fall back to environment variable.
         self._persist_path: Optional[str] = persist_path or os.environ.get("AURORA_AUMEM_PERSIST_PATH")
 
-        if self._persist_path:  # NOSONAR - persist_path is None by default; env var may also be unset; both branches are reachable
+        if self._persist_path:
             self._load_from_disk()
 
         # Optional ledger integration — lazy import to avoid circular package load
@@ -356,7 +353,7 @@ class HierarchicalMemoryManager:
         try:
             from modules.aumemmanager.ledger_hooks import AuMemLedgerHook as _Hook
             self._ledger_hook = _Hook.create()
-        except Exception as _exc:  # NOSONAR - ledger hook import may raise various exceptions
+        except Exception as _exc:
             logger.debug("AuMemLedgerHook unavailable (%s) — ledger integration disabled", _exc)
     
     # ------------------------------------------------------------------
@@ -385,14 +382,12 @@ class HierarchicalMemoryManager:
         # Restore enum fields from their string values.
         try:
             raw["memory_type"] = MemoryType(raw["memory_type"])
-        except (KeyError, ValueError) as exc:
-            logger.debug("memory_type field missing or invalid (%s) — using default AGENT", exc)
+        except (KeyError, ValueError):
             raw["memory_type"] = MemoryType.AGENT
 
         try:
             raw["status"] = MemoryStatus(raw["status"])
-        except (KeyError, ValueError) as exc:
-            logger.debug("status field missing or invalid (%s) — using default ACTIVE", exc)
+        except (KeyError, ValueError):
             raw["status"] = MemoryStatus.ACTIVE
 
         # Reconstruct nested QuantumSymbolicVector if present.
@@ -400,8 +395,7 @@ class HierarchicalMemoryManager:
         if qv_data and isinstance(qv_data, dict):
             try:
                 raw["quantum_vector"] = QuantumSymbolicVector(**qv_data)
-            except Exception as exc:  # NOSONAR - QuantumSymbolicVector(**qv_data) may raise various exceptions
-                logger.debug("quantum_vector could not be restored from archive (%s) — using None", exc)
+            except Exception:
                 raw["quantum_vector"] = None
         else:
             raw["quantum_vector"] = None
@@ -419,7 +413,7 @@ class HierarchicalMemoryManager:
         never observe a half-written file.  This method is thread-safe and
         is a no-op when *persist_path* was not configured.
         """
-        if not self._persist_path:  # NOSONAR - _persist_path is Optional[str]; callers that bypass __init__ or unset the path after construction may reach this branch
+        if not self._persist_path:
             return
 
         with self._persist_lock:
@@ -442,7 +436,7 @@ class HierarchicalMemoryManager:
             }
 
             try:
-                if ATOMIC_IO_AVAILABLE:  # NOSONAR - ATOMIC_IO_AVAILABLE may be False when atomic_io is unavailable at import time; both branches are reachable
+                if ATOMIC_IO_AVAILABLE:
                     atomic_write_json(self._persist_path, payload)
                 else:
                     # Fallback: plain write (not atomic but functional)
@@ -456,7 +450,7 @@ class HierarchicalMemoryManager:
                     len(memories),
                     str(self._persist_path)[:SUMMARY_MAX_LENGTH],
                 )
-            except Exception as exc:  # NOSONAR - file I/O may raise various exceptions
+            except Exception as exc:
                 logger.error(
                     "AuMemManager: save_to_disk failed (%s): %s",
                     type(exc).__name__,
@@ -471,10 +465,10 @@ class HierarchicalMemoryManager:
         - Corrupt JSON: logs a warning and starts with empty memory.
         - Individual bad records: skips the record and logs a warning.
         """
-        if not self._persist_path:  # NOSONAR - defensive guard; _load_from_disk may be called directly in tests or subclasses where _persist_path could be None
+        if not self._persist_path:
             return
 
-        if not os.path.exists(self._persist_path):  # NOSONAR - runtime filesystem check; file may or may not exist at startup
+        if not os.path.exists(self._persist_path):
             logger.info(
                 "AuMemManager: no persist file at %s — starting fresh",
                 str(self._persist_path)[:SUMMARY_MAX_LENGTH],
@@ -502,10 +496,10 @@ class HierarchicalMemoryManager:
                 memory = self._deserialize_memory(raw)
 
                 # Place into correct tier.
-                if tier_name == "compressed":  # NOSONAR - tier_name is read from persisted data; "compressed" and "archived" are valid stored values
+                if tier_name == "compressed":
                     self.compressed_tier[memory.id] = memory
                     self.metrics["compressed_memories"] += 1
-                elif tier_name == "archived":  # NOSONAR - tier_name may be "archived" for previously-archived memories
+                elif tier_name == "archived":
                     self.archived_tier[memory.id] = memory
                     self.metrics["archived_memories"] += 1
                 else:
@@ -520,7 +514,7 @@ class HierarchicalMemoryManager:
 
                 self.metrics["total_memories"] += 1
                 restored += 1
-            except Exception as exc:  # NOSONAR - deserialization of corrupt records may raise various exceptions
+            except Exception as exc:
                 logger.warning(
                     "AuMemManager: skipped corrupt record during load (%s: %s)",
                     type(exc).__name__,
@@ -599,12 +593,12 @@ class HierarchicalMemoryManager:
                         str(memory_id)[:50], str(owner)[:50], str(importance))
 
         # Ledger hook outside the lock — non-blocking, optional, graceful
-        if self._ledger_hook:  # NOSONAR - _ledger_hook is None when ledger is unavailable; non-None when create() succeeds
+        if self._ledger_hook:
             self._ledger_hook.on_memory_added(
                 memory_id=memory_id,
                 owner=owner,
                 importance=importance,
-                memory_type=memory_type.value,
+                memory_type=memory_type.value if hasattr(memory_type, "value") else str(memory_type),
                 tags=tags,
                 context_tag=memory.context_tag,
             )
@@ -924,7 +918,7 @@ class HierarchicalMemoryManager:
                 'aurora_anchor_coverage': len(self.anchor_index),
                 'average_cultural_score': (
                     sum(m.cask_cultural_score for m in self.active_tier.values()) / len(self.active_tier)
-                    if self.active_tier else 0  # NOSONAR - active_tier is {} at construction; both empty and non-empty states are reachable at runtime
+                    if self.active_tier else 0
                 ),
                 'quantum_network_density': quantum_analysis['network_density']
             })

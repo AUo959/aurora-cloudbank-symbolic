@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "description": "Scoring weights used by Aurora and any automated sync scripts to compute priority_score for queue items.",
+  "rules": [
+    { "condition": "labels includes 'blocking'", "score_delta": 40, "reason": "Blocking tasks gate all dependent work — highest urgency." },
+    { "condition": "labels includes 'security' OR labels includes 'pentest'", "score_delta": 30, "reason": "Security posture and pentest readiness directly affect engagement timelines." },
+    { "condition": "area == 'architecture' OR labels includes 'architecture'", "score_delta": 25, "reason": "Unresolved architecture issues create persistent terminology and design drift across agents and contributors." },
+    { "condition": "title OR summary contains 'stale', 'unclear', 'unresolved', 'scope', 'mismatch'", "score_delta": 20, "reason": "Live docs mismatch and stale scope create compound risk when picked up by agents without context." },
+    { "condition": "decision_required == true", "score_delta": 10, "reason": "Decision gates must be elevated so they are not missed by agents scanning the queue." },
+    { "condition": "blocks array is non-empty", "score_delta": 8, "reason": "Items that block downstream work should be resolved ahead of the blocked items." },
+    { "condition": "depends_on array is non-empty", "score_delta": -6, "reason": "Blocked items cannot be started — deprioritize in the ranked view." }
+  ],
+  "priority_bands": {
+    "CRITICAL": { "min": 80, "note": "Must resolve before downstream work. Surface immediately to Aurora and operator." },
+    "HIGH": { "min": 60, "max": 79, "note": "Resolve within current sprint or session. Do not leave unassigned." },
+    "MEDIUM": { "min": 30, "max": 59, "note": "Resolve this cycle. Safe for agents with appropriate context packs." },
+    "LOW": { "min": 0, "max": 29, "note": "Queue for next sprint. Review if it ages past 30 days without progress." }
+  },
+  "escalation_triggers": [
+    "Any item in state 'blocked' for > 7 days: escalate to Aurora.",
+    "Any item with decision_required == true and no activity for > 3 days: hail operator via PAT.",
+    "Any new issue with labels 'security' or 'blocking': auto-add to queue with score >= 30."
+  ]
+}

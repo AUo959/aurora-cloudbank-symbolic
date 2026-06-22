@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Aurora Work Queue Item",
+  "type": "object",
+  "required": ["id", "title", "state", "priority", "priority_score", "area", "consumer_fit", "next_action", "done_when"],
+  "properties": {
+    "id": { "type": "string", "description": "Stable queue identifier, e.g. Q-0001." },
+    "github_issue": { "type": "integer", "description": "GitHub issue number, if exists." },
+    "title": { "type": "string" },
+    "state": { "type": "string", "enum": ["ready", "blocked", "active", "waiting_review", "decision_required", "done"] },
+    "priority": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+    "priority_score": { "type": "integer", "minimum": 0 },
+    "area": { "type": "string", "description": "Primary domain: ethics, security, architecture, simulation, api, documentation, etc." },
+    "labels": { "type": "array", "items": { "type": "string" } },
+    "depends_on": { "type": "array", "items": { "type": "string" }, "description": "Queue IDs this item is blocked by." },
+    "blocks": { "type": "array", "items": { "type": "string" }, "description": "Queue IDs this item gates." },
+    "decision_required": { "type": "boolean", "default": false },
+    "decision_owner": { "type": "string", "description": "Who must make the decision: operator, aurora, security-lead, etc." },
+    "consumer_fit": { "type": "array", "items": { "type": "string", "enum": ["aurora", "agent", "human"] } },
+    "context_pack": { "type": "array", "items": { "type": "string" }, "description": "Canonical constraints the worker must read before starting." },
+    "next_action": { "type": "string" },
+    "done_when": { "type": "string" },
+    "active_worker": { "type": "string" },
+    "started": { "type": "string", "format": "date" },
+    "pr": { "type": "integer" },
+    "closed": { "type": "string", "format": "date" },
+    "url": { "type": "string", "format": "uri" }
+  }
+}

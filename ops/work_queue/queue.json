@@ -1,0 +1,153 @@
+{
+  "queue_version": "1.0.0",
+  "last_updated": "2026-06-22",
+  "updated_by": "Aurora (session review)",
+  "schema_version": "1.0",
+  "items": [
+    {
+      "id": "Q-0001",
+      "github_issue": 1126,
+      "title": "Recovered protocols live-manifest and runtime wiring decision",
+      "state": "ready",
+      "priority": "CRITICAL",
+      "priority_score": 95,
+      "area": "ethics",
+      "labels": ["blocking", "security", "pentest"],
+      "depends_on": [],
+      "blocks": ["Q-0002"],
+      "decision_required": true,
+      "decision_owner": "operator",
+      "consumer_fit": ["aurora", "human"],
+      "context_pack": [
+        "#993 completed — promotion plan and schema scaffold landed via PR #1000 on 2026-06-13.",
+        "recovered_protocol_manifest.example.json exists but no live manifest confirmed.",
+        "Sherlock/Watson/Moriarty/Tribunal/SHADOWFAX runtime wiring explicitly deferred.",
+        "Pentest scope v2 cannot be finalized until this decision is recorded.",
+        "CRITICAL: do not wire recovered protocols to runtime without owner decision — PR #1000 deferred this by design."
+      ],
+      "next_action": "Owner to decide: (1) create live recovered_protocol_manifest.json from example, (2) declare whether runtime wiring occurs before or after pentest engagement.",
+      "done_when": "Decision recorded in issue #1126 and reflected in pentest_scope_v2.md under the ethics pre-conditions section.",
+      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1126"
+    },
+    {
+      "id": "Q-0002",
+      "github_issue": 1130,
+      "title": "Produce pentest_scope_v2.md — reconcile API surface, QGIA, R&D surface, ethics gate",
+      "state": "blocked",
+      "priority": "CRITICAL",
+      "priority_score": 88,
+      "area": "security",
+      "labels": ["security", "pentest", "api-surface", "blocking"],
+      "depends_on": ["Q-0001"],
+      "blocks": ["Q-0003"],
+      "decision_required": false,
+      "consumer_fit": ["aurora", "human", "agent"],
+      "context_pack": [
+        "pentest_scope_v1.md was drafted 2026-06-12. api_schema.json is now 368 KB — largest file in repo.",
+        "api_surface_inventory.json (15 KB) is not referenced in the v1 scope at all.",
+        "RD_API_REFERENCE.md exists — R&D surface undefined in scope.",
+        "QGIA ingestion surface not scoped — QGIA_SIM_BRIDGE.md established QGIA as L1 signal source.",
+        "Do not begin engagement until Section 11 (approval signatures) is complete.",
+        "BLOCKED: Q-0001 must be resolved before ethics pre-conditions section can be finalized."
+      ],
+      "next_action": "After Q-0001 resolves: diff api_schema.json routes against scope v1 Section 3, assess R&D and QGIA surfaces, produce pentest_scope_v2.md, obtain signatures.",
+      "done_when": "pentest_scope_v2.md exists, is signed, and all Required Actions in issue #1130 are checked off.",
+      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1130"
+    },
+    {
+      "id": "Q-0003",
+      "github_issue": 1129,
+      "title": "docs/security/ documentation cleanup — history, remediation completion, v2 scope",
+      "state": "blocked",
+      "priority": "HIGH",
+      "priority_score": 68,
+      "area": "security",
+      "labels": ["security", "pentest"],
+      "depends_on": ["Q-0002"],
+      "blocks": [],
+      "decision_required": false,
+      "consumer_fit": ["aurora", "human", "agent"],
+      "context_pack": [
+        "pentest_history.md is a 343-byte stub — needs population post-engagement.",
+        "SECURITY_REMEDIATION_PLAN.md completion status unknown — cross-reference against SECURITY_FIXES.md.",
+        "SECURITY_TRANSFORMATION_VICTORY.md is narrative closure — confirm it tracks to the full remediation plan.",
+        "This issue unblocks once Q-0002 is done and engagement is underway."
+      ],
+      "next_action": "Cross-reference SECURITY_REMEDIATION_PLAN.md vs SECURITY_FIXES.md. Mark items complete or open. Populate pentest_history.md template.",
+      "done_when": "pentest_history.md is populated, remediation plan has explicit completion status per item, and all three security docs are mutually consistent.",
+      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1129"
+    },
+    {
+      "id": "Q-0004",
+      "github_issue": 1127,
+      "title": "Architecture layer terminology — correct forbidden L1/L2/L3 errors in repo docs",
+      "state": "ready",
+      "priority": "HIGH",
+      "priority_score": 72,
+      "area": "architecture",
+      "labels": ["documentation", "architecture"],
+      "depends_on": [],
+      "blocks": [],
+      "decision_required": false,
+      "consumer_fit": ["agent", "human"],
+      "context_pack": [
+        "LAYER_ARCHITECTURE.md is canonical. Authority: Orion Station Architecture Council. Status: CANONICAL.",
+        "L2 is a COMPUTATIONAL ENVIRONMENT — simulation/research layer. NOT a mediation or relay layer.",
+        "Relay agents (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, HALO) are L1 entities. Never describe them as L2.",
+        "Forbidden: 'L2 relay agents', 'mediation layer', 'interpretation layer', 'Aurora mediates between L1 and L3 via L2'.",
+        "Triplex Handshake protocol roles are functional, not ontological — a relay agent has a Triplex Layer 2 ROLE but is located in L1.",
+        "Any doc that uses forbidden terminology must be corrected. Do not infer layer definitions from context — always verify against LAYER_ARCHITECTURE.md."
+      ],
+      "next_action": "Search all docs for forbidden strings. Open a PR correcting each instance. Do not guess — reference LAYER_ARCHITECTURE.md for every correction.",
+      "done_when": "Zero occurrences of forbidden layer terminology in all docs under docs/, ops/, and root.",
+      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1127"
+    },
+    {
+      "id": "Q-0005",
+      "github_issue": 1124,
+      "title": "QGIA_SIM_BRIDGE — canonicalize QGIA as Orion L1 real-world signal source",
+      "state": "ready",
+      "priority": "HIGH",
+      "priority_score": 65,
+      "area": "simulation",
+      "labels": ["architecture", "simulation"],
+      "depends_on": [],
+      "blocks": [],
+      "decision_required": false,
+      "consumer_fit": ["aurora", "agent", "human"],
+      "context_pack": [
+        "QGIA is a real-world AI system providing Orion Station L1 operators with situation awareness.",
+        "QGIA does NOT live inside L2 (simulation). It is an EXTERNAL signal source feeding L1.",
+        "WATCHCON signals, scenario tiers, and confidence scores from QGIA are advisory only — L1 crew retain decision authority.",
+        "QGIA_SIM_BRIDGE.md should document: what QGIA provides, what L1 does with it, what must never happen (QGIA overriding human judgment).",
+        "This task also feeds into Q-0002 (QGIA ingestion surface needs pentest scoping)."
+      ],
+      "next_action": "Review QGIA_SIM_BRIDGE.md draft. Confirm boundary contract. Cross-reference with LAYER_ARCHITECTURE.md. Link from architecture index.",
+      "done_when": "QGIA_SIM_BRIDGE.md is canonical, linked from architecture index, and Q-0002 has assessed QGIA API surface.",
+      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1124"
+    },
+    {
+      "id": "Q-0006",
+      "github_issue": 1128,
+      "title": "docs/reference/ — clarify API_CATALOG vs v2_API_REFERENCE authority",
+      "state": "ready",
+      "priority": "MEDIUM",
+      "priority_score": 40,
+      "area": "api",
+      "labels": ["documentation"],
+      "depends_on": [],
+      "blocks": [],
+      "decision_required": false,
+      "consumer_fit": ["agent", "human"],
+      "context_pack": [
+        "docs/reference/ contains API_CATALOG.md and v2_API_REFERENCE.md — their relationship is undefined.",
+        "docs/api/ contains API_CATALOG.json (155 KB) and api_schema.json (368 KB).",
+        "A contributor or agent looking for the authoritative API reference has no clear entry point.",
+        "Resolution: declare one as canonical, demote or redirect the other."
+      ],
+      "next_action": "Read both files. Declare canonical authority. Add a note at the top of the non-canonical file pointing to the canonical one. Update API_CATALOG_GOVERNANCE.md.",
+      "done_when": "Single authoritative API reference is named. All other API docs clearly point to it or are marked superseded.",
+      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1128"
+    }
+  ]
+}

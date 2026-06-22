@@ -442,7 +442,7 @@ class HierarchicalMemoryManager:
             }
 
             try:
-                if ATOMIC_IO_AVAILABLE:
+                if ATOMIC_IO_AVAILABLE:  # NOSONAR - ATOMIC_IO_AVAILABLE may be False when atomic_io is unavailable at import time; both branches are reachable
                     atomic_write_json(self._persist_path, payload)
                 else:
                     # Fallback: plain write (not atomic but functional)
@@ -599,7 +599,7 @@ class HierarchicalMemoryManager:
                         str(memory_id)[:50], str(owner)[:50], str(importance))
 
         # Ledger hook outside the lock — non-blocking, optional, graceful
-        if self._ledger_hook:
+        if self._ledger_hook:  # NOSONAR - _ledger_hook is None when ledger is unavailable; non-None when create() succeeds
             self._ledger_hook.on_memory_added(
                 memory_id=memory_id,
                 owner=owner,

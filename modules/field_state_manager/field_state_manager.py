@@ -465,7 +465,7 @@ class FieldStateManager:
 
                 # Re-observe to trigger compression check
                 self.synapse_registry.observe_synapse(
-                    source_node_id, target_node_id, synapse.weight, synapse.ethical_score, success
+                    source_node_id, target_node_id, synapse.weight, synapse.ethical_score, success  # NOSONAR - synapse is non-None inside 'if synapse:' guard; SonarCloud may not propagate Optional constraint through truthy check
                 )
         else:
             if synapse_id in self.synapses:

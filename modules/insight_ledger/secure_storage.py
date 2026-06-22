@@ -8,23 +8,22 @@ Anchor: T1-TIL-SEC-001
 """
 
 import base64
+import importlib
 import os
 from pathlib import Path
 from typing import Optional
 
-# Try to import cryptography for secure key storage.
+# Probe whether the cryptography package is importable.
 # Catch BaseException (not just ImportError) because broken C-extension builds
 # (e.g. pyo3 Rust panic from missing _cffi_backend) raise non-ImportError exceptions.
+# The actual class imports happen locally inside _derive_key() so that no module-level
+# variable ever holds a None class reference.
 try:
-    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-    from cryptography.hazmat.primitives import hashes
-    from cryptography.hazmat.backends import default_backend
-    from cryptography.fernet import Fernet
+    importlib.import_module("cryptography.hazmat.primitives.kdf.pbkdf2")
+    importlib.import_module("cryptography.fernet")
     CRYPTOGRAPHY_AVAILABLE = True
-except BaseException:  # NOSONAR - pyo3_runtime.PanicException (Rust/cffi panic) is a BaseException, not Exception
+except BaseException:
     CRYPTOGRAPHY_AVAILABLE = False
-    PBKDF2HMAC = None  # type: ignore
-    Fernet = None  # type: ignore
 
 
 class SecureStorage:
@@ -51,6 +50,8 @@ class SecureStorage:
         """
         self.storage_path = storage_path
         self.encrypted = CRYPTOGRAPHY_AVAILABLE
+        # Initialized by _derive_key(); None here so attribute is always defined.
+        self._fernet = None
 
         if not self.encrypted:
             raise RuntimeError(
@@ -70,6 +71,13 @@ class SecureStorage:
 
     def _derive_key(self) -> None:
         """Derive encryption key from password using PBKDF2HMAC."""
+        # Local imports: only reachable when CRYPTOGRAPHY_AVAILABLE is True (guarded by __init__),
+        # so these imports always succeed and the local names are non-Optional.
+        from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.backends import default_backend
+        from cryptography.fernet import Fernet
+
         # Use a salt from file or generate new one
         salt_file = self.storage_path.parent / f"{self.storage_path.name}.salt"
 
@@ -102,8 +110,13 @@ class SecureStorage:
         if not self.encrypted:
             raise RuntimeError("Cryptography library not available")
 
+        # Use local variable so type-narrowing can track the None check.
+        _fernet = self._fernet
+        if _fernet is None:
+            raise RuntimeError("Encryption not initialized")
+
         # Encrypt the key data
-        encrypted_data = self._fernet.encrypt(key_data.encode('utf-8'))
+        encrypted_data = _fernet.encrypt(key_data.encode('utf-8'))
 
         # Write to file
         self.storage_path.write_bytes(encrypted_data)
@@ -126,12 +139,17 @@ class SecureStorage:
         if not self.storage_path.exists():
             raise FileNotFoundError(f"Key file not found: {self.storage_path}")
 
+        # Use local variable so type-narrowing can track the None check.
+        _fernet = self._fernet
+        if _fernet is None:
+            raise RuntimeError("Encryption not initialized")
+
         # Read encrypted data
         encrypted_data = self.storage_path.read_bytes()
 
         # Decrypt
         try:
-            decrypted_data = self._fernet.decrypt(encrypted_data)
+            decrypted_data = _fernet.decrypt(encrypted_data)
             return decrypted_data.decode('utf-8')
         except Exception as e:
             raise ValueError(f"Failed to decrypt key data: {e}")

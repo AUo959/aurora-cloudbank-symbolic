@@ -12,6 +12,7 @@ succeed silently with no ledger writes.
 DLP: context_tag=aumemmanager_ledger_hook
 """
 
+import importlib
 import logging
 from types import SimpleNamespace
 from typing import Any, Optional
@@ -19,8 +20,11 @@ from typing import Any, Optional
 logger = logging.getLogger(__name__)
 
 try:
-    from modules.insight_ledger.ledger_core import InsightLedger as _InsightLedger  # noqa: F401
-    from modules.insight_ledger.schemas import InsightRecord as _InsightRecord, InsightType as _InsightType  # noqa: F401
+    # Probe availability without storing class references at module scope.
+    # Actual class imports happen locally inside create() and _make_record()
+    # so no module-level variable ever holds a None class reference.
+    importlib.import_module("modules.insight_ledger.ledger_core")
+    importlib.import_module("modules.insight_ledger.schemas")
     _LEDGER_AVAILABLE = True
 except Exception as _import_exc:
     # Catches ImportError AND environment failures (e.g. broken C-extension builds).

@@ -682,9 +682,9 @@ numpy==2.4.6 \
     #   qiskit-aer
     #   rustworkx
     #   scipy
-openai==2.41.0 \
-    --hash=sha256:20cc7952e8501c7e5773dd2ef7be437bae9cb549044902e1041a83a54516e375 \
-    --hash=sha256:db5c362acd6604b84f076abbefa66826ea4b46ecba2954ed866e6a149a1352c0
+openai==2.43.0 \
+    --hash=sha256:65a670b54fadf2268c9e1330133373c963eb779ee969e5cbad419ec2c21dce97 \
+    --hash=sha256:e74d238200a26868977002190fb6631613480a93dfe0c9c982e77021ed60a017
     # via -r requirements.txt
 packaging==26.2 \
     --hash=sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e \

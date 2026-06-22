@@ -139,19 +139,13 @@ class FieldStateManager:
 
         # Prune all synapses involving this node
         if self.use_compressed_registry:
-            # Get all synapses
-            permanent_synapses = list(self.synapse_registry.permanent.values())
-            active_synapses = list(self.synapse_registry.active.values())
-
-            all_synapses = permanent_synapses + active_synapses
-
-            for synapse in all_synapses:
-                if synapse.source_node == node_id or synapse.target_node == node_id:  # NOSONAR - synapse is a Synapse object from permanent/active lists; both attributes are always set in Synapse.__init__
-                    synapse_key = (synapse.source_node, synapse.target_node)  # NOSONAR - synapse is a Synapse object from permanent/active lists; attribute access is safe
-                    if synapse_key in self.synapse_registry.permanent:  # NOSONAR - synapse_registry.permanent is a dict; 'in' check is always valid
-                        del self.synapse_registry.permanent[synapse_key]  # NOSONAR - key confirmed present by 'in' check above
-                    if synapse_key in self.synapse_registry.active:  # NOSONAR - synapse_registry.active is a dict; 'in' check is always valid
-                        del self.synapse_registry.active[synapse_key]  # NOSONAR - key confirmed present by 'in' check above
+            for _syn_dict in (self.synapse_registry.permanent, self.synapse_registry.active):
+                _keys_to_remove = [
+                    k for k, v in _syn_dict.items()
+                    if v.source_node == node_id or v.target_node == node_id
+                ]
+                for k in _keys_to_remove:
+                    _syn_dict.pop(k, None)
         else:
             # Simple dict pruning
             pruned = [
@@ -447,24 +441,24 @@ class FieldStateManager:
 
         # Update in registry
         if self.use_compressed_registry:
-            synapse = self.synapse_registry.get_synapse(source_node_id, target_node_id)  # NOSONAR - get_synapse returns Optional[Synapse]; None check follows on next line
-            if synapse is not None:  # NOSONAR - explicit None guard; all attribute accesses below are inside this block
-                synapse.usage_count += 1  # NOSONAR - synapse is non-None inside 'if synapse is not None:' guard above
-                synapse.last_used = datetime.now(UTC)  # NOSONAR - synapse is non-None inside 'if synapse is not None:' guard above
-
-                if success:
-                    synapse.weight = min(1.0, synapse.weight + 0.1)  # NOSONAR - synapse is non-None inside 'if synapse is not None:' guard above
-                    # Update success rate
-                    total = synapse.usage_count  # NOSONAR - synapse is non-None inside 'if synapse is not None:' guard above
-                    synapse.success_rate = (synapse.success_rate * (total - 1) + 1.0) / total  # NOSONAR - synapse is non-None inside 'if synapse is not None:' guard above
-                else:
-                    synapse.weight = max(0.0, synapse.weight - 0.05)  # NOSONAR - synapse is non-None inside 'if synapse is not None:' guard above
-                    # Update success rate
-                    total = synapse.usage_count  # NOSONAR - synapse is non-None inside 'if synapse is not None:' guard above
-                    synapse.success_rate = (synapse.success_rate * (total - 1)) / total  # NOSONAR - synapse is non-None inside 'if synapse is not None:' guard above
-
-                # Re-observe to trigger compression check
-                self.synapse_registry.observe_synapse(source_node_id, target_node_id, synapse.weight, synapse.ethical_score, success)  # NOSONAR - synapse is non-None inside 'if synapse is not None:' guard; SonarCloud may not propagate Optional narrowing into call args
+            _key = (source_node_id, target_node_id)
+            for _syn_dict in (self.synapse_registry.permanent, self.synapse_registry.active):
+                if _key in _syn_dict:
+                    _syn = _syn_dict[_key]
+                    _syn.usage_count += 1
+                    _syn.last_used = datetime.now(UTC)
+                    if success:
+                        _syn.weight = min(1.0, _syn.weight + 0.1)
+                        _total = _syn.usage_count
+                        _syn.success_rate = (_syn.success_rate * (_total - 1) + 1.0) / _total
+                    else:
+                        _syn.weight = max(0.0, _syn.weight - 0.05)
+                        _total = _syn.usage_count
+                        _syn.success_rate = (_syn.success_rate * (_total - 1)) / _total
+                    self.synapse_registry.observe_synapse(
+                        source_node_id, target_node_id, _syn.weight, _syn.ethical_score, success
+                    )
+                    break
         else:
             if synapse_id in self.synapses:
                 synapse = self.synapses[synapse_id]

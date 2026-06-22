@@ -371,42 +371,37 @@ class PatternDetector:
                 node_interactions[target].add(source)
         
         # Find groups where nodes frequently interact with each other
-        coalitions: List[Set[str]] = []
-        density = 0.0  # NOSONAR - defensive default; read after loop if no coalition qualifies (empty node_interactions or no node meets min_coalition_size)
-        
+        qualified: List[tuple] = []  # (coalition: Set[str], density: float) pairs
+
         for node, neighbors in node_interactions.items():
             if len(neighbors) >= min_coalition_size - 1:
                 # Check if neighbors also interact with each other
                 potential_coalition = {node} | neighbors
-                
+
                 # Calculate interconnection density
-                total_possible = len(potential_coalition) * (len(potential_coalition) - 1) / 2
-                actual_connections = 0
-                
-                for n1 in potential_coalition:
-                    for n2 in potential_coalition:
-                        if n1 < n2 and n2 in node_interactions.get(n1, set()):
-                            actual_connections += 1
-                
-                density = actual_connections / total_possible if total_possible > 0 else 0.0  # NOSONAR - total_possible >= 1 when len(potential_coalition) >= 2, guard kept for clarity
-                
-                if density >= 0.6 and len(potential_coalition) >= min_coalition_size:  # High interconnection
-                    coalitions.append(potential_coalition)
-        
+                n = len(potential_coalition)
+                total_possible = n * (n - 1) / 2
+                actual_connections = sum(
+                    1 for n1 in potential_coalition for n2 in potential_coalition
+                    if n1 < n2 and n2 in node_interactions.get(n1, set())
+                )
+                coalition_density = actual_connections / total_possible if total_possible > 0 else 0.0
+
+                if coalition_density >= 0.6 and n >= min_coalition_size:  # High interconnection
+                    qualified.append((potential_coalition, coalition_density))
+
         # Remove duplicate coalitions (subsets of larger ones)
-        unique_coalitions = []
-        for coalition in coalitions:
-            is_subset = any(
-                coalition < other for other in coalitions if other != coalition
-            )
-            if not is_subset:
-                unique_coalitions.append(coalition)
-        
+        qualified_sets = [c for c, _ in qualified]
+        unique_qualified: List[tuple] = [
+            (coalition, density) for coalition, density in qualified
+            if not any(coalition < other for other in qualified_sets if other != coalition)
+        ]
+
         # Convert to patterns
         patterns = []
         now = datetime.now()
-        
-        for idx, coalition in enumerate(unique_coalitions):
+
+        for idx, (coalition, density) in enumerate(unique_qualified):
             pattern = Pattern(
                 pattern_id=f"coalition_{idx}",
                 pattern_type="coalition",

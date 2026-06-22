@@ -49,8 +49,6 @@ except ImportError:
 # Ledger hook is imported lazily in __init__ to avoid circular imports
 # (aumemmanager.__init__.py imports hierarchical_memory, so any module-level
 # import of ledger_hooks here would form a cycle via the package namespace)
-_LEDGER_HOOK_AVAILABLE = False  # NOSONAR - sentinel assigned here for documentation; actual check uses lazy local import in __init__
-AuMemLedgerHook = None  # type: ignore  # NOSONAR - placeholder; __init__ imports AuMemLedgerHook locally as _Hook to avoid circular imports
 
 # Constants
 SUMMARY_MAX_LENGTH = 100  # Maximum length for content summaries in logs
@@ -347,7 +345,9 @@ class HierarchicalMemoryManager:
         self._ledger_hook = None
         try:
             from modules.aumemmanager.ledger_hooks import AuMemLedgerHook as _Hook
-            self._ledger_hook = _Hook.create()
+            _candidate = _Hook.create()
+            if _candidate.enabled:
+                self._ledger_hook = _candidate
         except Exception as _exc:  # NOSONAR - import may fail in restricted environments or during testing
             logger.debug("AuMemLedgerHook unavailable (%s) — ledger integration disabled", _exc)
     

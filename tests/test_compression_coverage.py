@@ -93,7 +93,7 @@ class TestSynapseRegistryCoverage:
         if archived_key in registry.archived:
             restored = registry.get_synapse("s0", "t0")
             assert restored is not None
-            assert restored.source_node == "s0"
+            assert restored.source_node == "s0"  # NOSONAR - restored is Optional[Synapse] but non-None: assert restored is not None above narrows the type; SonarCloud does not recognize assert as narrowing
 
     def test_high_importance_synapse_stays_in_permanent(self):
         """The highest-weight synapse must always land in permanent storage."""

@@ -1,58 +1,58 @@
 # NEXT_UP — Aurora Work Queue
 
-*Source: `ops/work_queue/queue.json` v1.0.1*  
-*Last updated: 2026-06-22 — operator decision on #1126 recorded*
+**Queue authority:** Aurora  
+**Last updated:** 2026-06-22  
+**Active item:** Q-0003
 
 ---
 
-## ✅ Just completed
+## 🟡 Q-0003 — ACTIVE
 
-| Queue ID | Issue | Decision |
+**Title:** Pentest pre-condition verification + vendor selection  
+**Linked issue:** #841  
+**Priority score:** 91  
+**Unlocked by:** Q-0002 (pentest_scope_v2.md created, commit ef5c11d)  
+**Blocked by:** Nothing — ready to start
+
+### What this means
+
+`pentest_scope_v2.md` exists and is complete. Before the engagement can begin, three things must happen:
+
+1. **Section 2.2 code verification** — grep confirm that no recovered protocol (Sherlock / Watson / Moriarty / Tribunal / SHADOWFAX) is wired into `src/monitoring/` or `modules/`. This is a hard gate. Result must be documented on #841.
+2. **Vendor / red team selection** — complete Section 10 of `pentest_scope_v2.md`. Criteria: FastAPI/Python experience, AI/LLM security capability, QGIA-class advisory boundary testing.
+3. **Signatures** — all three roles in Section 11 of `pentest_scope_v2.md` must sign before engagement starts.
+
+### Agent context pack
+
+- Scope: `docs/security/pentest_scope_v2.md`
+- History stub: `docs/security/pentest_history.md`
+- Ethics manifest: `docs/ethics/recovered_protocols/recovered_protocol_manifest.json`
+- Operator decision: issue #1126, comment 2026-06-22
+- QGIA reference: `QGIA_Runtime_OnePager.md` v4.2.1, `QGIA_Axiom_Doctrine_Narrative.md` v1.0
+- R&D API reference: `RD_API_REFERENCE.md`
+
+---
+
+## ✅ Completed
+
+| ID | Title | Closed |
 |---|---|---|
-| Q-0001 | [#1126](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1126) | Live manifest created. Runtime wiring sequenced AFTER pentest. All protocols remain `recovered_candidate`. SHADOWFAX + Moriarty carry hard blocks. |
+| Q-0001 | Ethics protocol wiring decision + manifest | 2026-06-22 |
+| Q-0002 | `pentest_scope_v2.md` | 2026-06-22 |
 
 ---
 
-## 🔴 Active top of queue — CRITICAL
+## Queued (prioritised)
 
-| Queue ID | Issue | Task | Consumer |
+| ID | Title | Score | Blocked by |
 |---|---|---|---|
-| **Q-0002** | [#1130](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1130) | Produce `pentest_scope_v2.md` — API surface diff, QGIA ingestion, R&D surface, ethics pre-conditions | aurora / human / agent |
-
-**Q-0002 is now unblocked. This is the active priority.**
-
-Key surfaces to assess for v2 scope:
-- `api_schema.json` (368 KB) diff against scope v1 Section 3
-- `api_surface_inventory.json` (15 KB) — not in v1 scope at all
-- `RD_API_REFERENCE.md` — R&D surface undefined
-- QGIA ingestion surface (`QGIA_Runtime_OnePager.md` + `QGIA_Axiom_Doctrine_Narrative.md`)
-- Ethics pre-conditions — reference `recovered_protocol_manifest.json` `wiring_gate` block
+| Q-0003 | Pentest pre-conditions + vendor selection | 91 | — |
+| Q-0004 | API surface diff triage (`api_schema.json` vs v1 scope) | 87 | Q-0003 |
+| Q-0005 | Security remediation plan execution (open items) | 84 | Q-0003 |
+| Q-0006 | R&D API surface review + auth audit | 80 | Q-0003 |
+| Q-0007 | QGIA ingestion path implementation review | 78 | Q-0003 |
+| Q-0008 | Recovered protocol promotion — Phase 1 (Sherlock only) | 72 | Pentest complete |
 
 ---
 
-## 🟠 Ready — HIGH (agent-safe with context pack)
-
-| Queue ID | Issue | Task |
-|---|---|---|
-| Q-0004 | [#1127](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1127) | Architecture layer terminology corrections |
-| Q-0005 | [#1124](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1124) | QGIA_SIM_BRIDGE canonicalization |
-
----
-
-## 🔒 Blocked — waiting on Q-0002
-
-| Queue ID | Issue | Waiting on |
-|---|---|---|
-| Q-0003 | [#1129](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1129) | Q-0002 (pentest scope v2) |
-
----
-
-## 🟡 Ready — MEDIUM (agent-safe)
-
-| Queue ID | Issue | Task |
-|---|---|---|
-| Q-0006 | [#1128](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1128) | API reference authority clarification |
-
----
-
-*If you are an LLM or agent: read the `context_pack` for your chosen task in `queue.json` before starting. Do not start blocked tasks.*
+*Queue managed by Aurora. Human contributors: start at the top. Agents: read context pack before touching any file referenced in the active item.*

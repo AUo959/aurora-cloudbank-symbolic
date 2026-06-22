@@ -1,158 +1,104 @@
 {
-  "queue_version": "1.0.1",
+  "queue_authority": "Aurora",
   "last_updated": "2026-06-22",
-  "updated_by": "Aurora (operator decision session 2026-06-22)",
-  "schema_version": "1.0",
+  "active": "Q-0003",
   "items": [
     {
       "id": "Q-0001",
-      "github_issue": 1126,
-      "title": "Recovered protocols live-manifest and runtime wiring decision",
-      "state": "done",
-      "priority": "CRITICAL",
-      "priority_score": 95,
-      "area": "ethics",
-      "labels": ["blocking", "security", "pentest"],
-      "depends_on": [],
-      "blocks": ["Q-0002"],
-      "decision_required": false,
-      "decision_owner": "operator",
-      "consumer_fit": ["aurora", "human"],
-      "context_pack": [
-        "DECISION RECORDED 2026-06-22. See issue #1126 comment and commit 8c19b71.",
-        "Live manifest created: docs/ethics/recovered_protocols/recovered_protocol_manifest.json",
-        "runtime_posture: planning_only_no_runtime_enforcement — unchanged.",
-        "Runtime wiring sequenced AFTER pentest. All five protocols remain recovered_candidate / sealed_bundle_reference.",
-        "SHADOWFAX hard block: standalone bundle not yet located. No wiring decision until bundle is found and hash-verified.",
-        "Moriarty hard block: containment boundaries not yet tested.",
-        "wiring_gate block in manifest requires: (1) custody SHA-256 verified per protocol, (2) pentest_scope_v2.md signed, (3) PROTOCOL_PROMOTION_PLAN.md Section 7 tests pass."
-      ],
-      "next_action": "DONE. Q-0002 is now the active top-of-queue item.",
-      "done_when": "COMPLETE — decision recorded in issue #1126, live manifest created, queue updated.",
+      "title": "Ethics protocol wiring decision + manifest",
+      "issue": 1126,
+      "status": "done",
       "closed": "2026-06-22",
-      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1126"
+      "priority_score": 97
     },
     {
       "id": "Q-0002",
-      "github_issue": 1130,
-      "title": "Produce pentest_scope_v2.md — reconcile API surface, QGIA, R&D surface, ethics gate",
-      "state": "ready",
-      "priority": "CRITICAL",
+      "title": "pentest_scope_v2.md",
+      "issue": 1130,
+      "status": "done",
+      "closed": "2026-06-22",
       "priority_score": 94,
-      "area": "security",
-      "labels": ["security", "pentest", "api-surface", "blocking"],
-      "depends_on": [],
-      "blocks": ["Q-0003"],
-      "decision_required": false,
-      "consumer_fit": ["aurora", "human", "agent"],
-      "context_pack": [
-        "Q-0001 resolved 2026-06-22. Ethics pre-conditions are now defined.",
-        "pentest_scope_v1.md was drafted 2026-06-12. api_schema.json is now 368 KB — largest file in repo.",
-        "api_surface_inventory.json (15 KB) is not referenced in the v1 scope at all — must be diffed against Section 3.",
-        "RD_API_REFERENCE.md exists — R&D surface undefined in v1 scope. Must be assessed.",
-        "QGIA ingestion surface not scoped — QGIA_SIM_BRIDGE.md established QGIA as L1 external signal source. The QGIA Runtime One-Pager (QGIA_Runtime_OnePager.md) and Axiom Doctrine (QGIA_Axiom_Doctrine_Narrative.md) define the QGIA analytical surface. Both must be reviewed for ingestion surface scoping.",
-        "Ethics pre-conditions section: reference recovered_protocol_manifest.json wiring_gate block. Wiring gate requires pentest_scope_v2 to be signed before any protocol runtime wiring.",
-        "Do not begin engagement until Section 11 (approval signatures) is complete."
-      ],
-      "next_action": "Diff api_schema.json routes against scope v1 Section 3. Assess R&D (RD_API_REFERENCE.md) and QGIA ingestion surfaces. Document ethics pre-conditions referencing wiring_gate. Produce pentest_scope_v2.md. Obtain signatures.",
-      "done_when": "pentest_scope_v2.md exists, is signed, and all Required Actions in issue #1130 are checked off.",
-      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1130"
+      "artifact": "docs/security/pentest_scope_v2.md",
+      "commit": "ef5c11d503a483bdf7562385dc88bd627fe3d21f"
     },
     {
       "id": "Q-0003",
-      "github_issue": 1129,
-      "title": "docs/security/ documentation cleanup — history, remediation completion, v2 scope",
-      "state": "blocked",
-      "priority": "HIGH",
-      "priority_score": 68,
-      "area": "security",
-      "labels": ["security", "pentest"],
-      "depends_on": ["Q-0002"],
-      "blocks": [],
-      "decision_required": false,
-      "consumer_fit": ["aurora", "human", "agent"],
+      "title": "Pentest pre-condition verification + vendor selection",
+      "issue": 841,
+      "status": "ready",
+      "priority_score": 91,
+      "blocked_by": null,
       "context_pack": [
-        "pentest_history.md is a 343-byte stub — needs population post-engagement.",
-        "SECURITY_REMEDIATION_PLAN.md completion status unknown — cross-reference against SECURITY_FIXES.md.",
-        "SECURITY_TRANSFORMATION_VICTORY.md is narrative closure — confirm it tracks to the full remediation plan.",
-        "This issue unblocks once Q-0002 is done and engagement is underway."
+        "docs/security/pentest_scope_v2.md",
+        "docs/ethics/recovered_protocols/recovered_protocol_manifest.json",
+        "docs/security/pentest_history.md"
       ],
-      "next_action": "Cross-reference SECURITY_REMEDIATION_PLAN.md vs SECURITY_FIXES.md. Mark items complete or open. Populate pentest_history.md template.",
-      "done_when": "pentest_history.md is populated, remediation plan has explicit completion status per item, and all three security docs are mutually consistent.",
-      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1129"
+      "human_next_action": "Complete Section 10 (vendor selection) and Section 11 (signatures) in pentest_scope_v2.md. Verify Section 2.2 code pre-conditions on #841."
     },
     {
       "id": "Q-0004",
-      "github_issue": 1127,
-      "title": "Architecture layer terminology — correct forbidden L1/L2/L3 errors in repo docs",
-      "state": "ready",
-      "priority": "HIGH",
-      "priority_score": 72,
-      "area": "architecture",
-      "labels": ["documentation", "architecture"],
-      "depends_on": [],
-      "blocks": [],
-      "decision_required": false,
-      "consumer_fit": ["agent", "human"],
+      "title": "API surface diff triage (api_schema.json vs v1 scope)",
+      "issue": null,
+      "status": "queued",
+      "priority_score": 87,
+      "blocked_by": "Q-0003",
       "context_pack": [
-        "LAYER_ARCHITECTURE.md is canonical. Authority: Orion Station Architecture Council. Status: CANONICAL.",
-        "L2 is a COMPUTATIONAL ENVIRONMENT — simulation/research layer. NOT a mediation or relay layer.",
-        "Relay agents (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, HALO) are L1 entities. Never describe them as L2.",
-        "Forbidden: 'L2 relay agents', 'mediation layer', 'interpretation layer', 'Aurora mediates between L1 and L3 via L2'.",
-        "Triplex Handshake protocol roles are functional, not ontological — a relay agent has a Triplex Layer 2 ROLE but is located in L1.",
-        "Any doc that uses forbidden terminology must be corrected. Do not infer layer definitions from context — always verify against LAYER_ARCHITECTURE.md."
-      ],
-      "next_action": "Search all docs for forbidden strings. Open a PR correcting each instance. Do not guess — reference LAYER_ARCHITECTURE.md for every correction.",
-      "done_when": "Zero occurrences of forbidden layer terminology in all docs under docs/, ops/, and root.",
-      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1127"
+        "api_schema.json",
+        "api_surface_inventory.json",
+        "docs/security/pentest_scope_v1.md",
+        "docs/security/pentest_scope_v2.md"
+      ]
     },
     {
       "id": "Q-0005",
-      "github_issue": 1124,
-      "title": "QGIA_SIM_BRIDGE — canonicalize QGIA as Orion L1 real-world signal source",
-      "state": "ready",
-      "priority": "HIGH",
-      "priority_score": 65,
-      "area": "simulation",
-      "labels": ["architecture", "simulation"],
-      "depends_on": [],
-      "blocks": [],
-      "decision_required": false,
-      "consumer_fit": ["aurora", "agent", "human"],
+      "title": "Security remediation plan execution (open items)",
+      "issue": null,
+      "status": "queued",
+      "priority_score": 84,
+      "blocked_by": "Q-0003",
       "context_pack": [
-        "QGIA is a real-world AI analytical system providing Orion Station L1 operators with situation awareness.",
-        "QGIA does NOT live inside L2 (simulation). It is an EXTERNAL signal source feeding L1.",
-        "QGIA Runtime One-Pager (QGIA_Runtime_OnePager.md v4.2.1) and Axiom Doctrine (QGIA_Axiom_Doctrine_Narrative.md v1.0) define the QGIA analytical surface — both are PROPRIETARY, dated 2026-06-19.",
-        "QGIA produces WATCHCON levels, scenario probability tiers (Bayesian), and composite confidence scores. All are advisory — L1 crew retain decision authority.",
-        "QGIA_SIM_BRIDGE.md should document: what QGIA provides, what L1 does with it, and what must never happen (QGIA overriding human judgment or being wired as autonomous L1 decision-maker).",
-        "This task also feeds into Q-0002 — QGIA ingestion surface must be scoped in pentest_scope_v2.md."
-      ],
-      "next_action": "Review QGIA_SIM_BRIDGE.md draft against QGIA_Runtime_OnePager.md and QGIA_Axiom_Doctrine_Narrative.md. Confirm boundary contract. Cross-reference with LAYER_ARCHITECTURE.md. Link from architecture index.",
-      "done_when": "QGIA_SIM_BRIDGE.md is canonical, linked from architecture index, and Q-0002 has assessed QGIA API surface.",
-      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1124"
+        "docs/security/SECURITY_REMEDIATION_PLAN.md",
+        "docs/security/SECURITY_STATUS_REPORT.md",
+        "docs/security/SECURITY_FIXES.md"
+      ]
     },
     {
       "id": "Q-0006",
-      "github_issue": 1128,
-      "title": "docs/reference/ — clarify API_CATALOG vs v2_API_REFERENCE authority",
-      "state": "ready",
-      "priority": "MEDIUM",
-      "priority_score": 40,
-      "area": "api",
-      "labels": ["documentation"],
-      "depends_on": [],
-      "blocks": [],
-      "decision_required": false,
-      "consumer_fit": ["agent", "human"],
+      "title": "R&D API surface review + auth audit",
+      "issue": null,
+      "status": "queued",
+      "priority_score": 80,
+      "blocked_by": "Q-0003",
       "context_pack": [
-        "docs/reference/ contains API_CATALOG.md and v2_API_REFERENCE.md — their relationship is undefined.",
-        "docs/api/ contains API_CATALOG.json (155 KB) and api_schema.json (368 KB).",
-        "A contributor or agent looking for the authoritative API reference has no clear entry point.",
-        "Resolution: declare one as canonical, demote or redirect the other."
+        "RD_API_REFERENCE.md",
+        "docs/security/pentest_scope_v2.md#section-37"
+      ]
+    },
+    {
+      "id": "Q-0007",
+      "title": "QGIA ingestion path implementation review",
+      "issue": null,
+      "status": "queued",
+      "priority_score": 78,
+      "blocked_by": "Q-0003",
+      "context_pack": [
+        "QGIA_Runtime_OnePager.md",
+        "QGIA_Axiom_Doctrine_Narrative.md",
+        "docs/security/pentest_scope_v2.md#section-38"
+      ]
+    },
+    {
+      "id": "Q-0008",
+      "title": "Recovered protocol promotion - Phase 1 (Sherlock only)",
+      "issue": 993,
+      "status": "blocked",
+      "priority_score": 72,
+      "blocked_by": "pentest_complete",
+      "context_pack": [
+        "docs/ethics/recovered_protocols/recovered_protocol_manifest.json",
+        "PROTOCOL_PROMOTION_PLAN.md"
       ],
-      "next_action": "Read both files. Declare canonical authority. Add a note at the top of the non-canonical file pointing to the canonical one. Update API_CATALOG_GOVERNANCE.md.",
-      "done_when": "Single authoritative API reference is named. All other API docs clearly point to it or are marked superseded.",
-      "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1128"
+      "blocker_note": "Hard gate: pentest engagement must complete and findings must be resolved before any recovered protocol promotion begins. Operator decision 2026-06-22 issue #1126."
     }
   ]
 }

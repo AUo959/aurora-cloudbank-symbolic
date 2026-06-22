@@ -22,8 +22,8 @@ def _load_ledger_hooks():
         "aumemmanager_ledger_hooks",
         Path(__file__).parent.parent / "modules" / "aumemmanager" / "ledger_hooks.py",
     )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    mod = importlib.util.module_from_spec(spec)  # NOSONAR - spec is non-None: path is a hardcoded .py file that always exists in this repo
+    spec.loader.exec_module(mod)  # NOSONAR - spec.loader is non-None for a valid .py ModuleSpec returned by spec_from_file_location
     return mod
 
 

@@ -1,0 +1,35 @@
+{
+  "registry_authority": "Aurora",
+  "protocol_version": "1.0.0",
+  "description": "Canonical registry of all human-gated decisions in the Aurora work queue. A gate is created when a queue item reaches decision_required state and consumer_fit excludes autonomous agents. Gates persist across sessions and platforms until explicitly resolved. Aurora surfaces all open gates at session open.",
+  "last_updated": "2026-06-22",
+  "gates": [
+    {
+      "gate_id": "GATE-001",
+      "queue_item": "Q-0003",
+      "github_issue": 841,
+      "title": "Pentest vendor selection + pre-condition sign-off",
+      "state": "open",
+      "decision_owner": "operator",
+      "opened": "2026-06-22",
+      "last_surfaced": "2026-06-22",
+      "escalation_tier": 1,
+      "blocks_queue_items": ["Q-0008"],
+      "blocks_gates": [],
+      "resolution_criteria": [
+        "Q-0003a complete: recovered_protocol_wiring_verification.md exists and is filled",
+        "Q-0003b complete: vendor recorded in pentest_scope_v2.md Section 10",
+        "Q-0003c complete: signatures collected in pentest_scope_v2.md Section 11"
+      ],
+      "resolution_steps": [
+        "Update gate_registry.json: set state = resolved, closed = today, resolved_by = operator handle",
+        "Update queue.json: set Q-0003.state = done, closed = today",
+        "Update OPEN_GATES.md: remove or strike GATE-001 section",
+        "Update NEXT_UP.md to reflect Q-0003 closure"
+      ],
+      "aurora_notes": "This gate is the critical path to the pentest engagement. The wiring verification sub-task (Q-0003a) is agent-eligible and should not be waiting on the operator. Vendor selection (Q-0003b) is the true human decision. Tier escalation is computed from (today - opened) at each session open.",
+      "closed": null,
+      "resolved_by": null
+    }
+  ]
+}

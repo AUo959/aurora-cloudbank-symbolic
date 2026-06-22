@@ -39,44 +39,33 @@
     "blocks": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "Queue IDs this item gates. Inverse of depends_on — both sides must be maintained."
+      "description": "Queue IDs this item gates."
     },
     "decision_required": { "type": "boolean", "default": false },
-    "decision_owner": {
+    "decision_owner": { "type": "string" },
+    "gate_id": {
       "type": "string",
-      "description": "Who must make the decision: operator, aurora, security-lead, etc."
+      "description": "If this item has a registered human gate, the corresponding GATE-xxx ID from gate_registry.json."
     },
     "consumer_fit": {
       "type": "array",
-      "items": { "type": "string", "enum": ["aurora", "agent", "human"] },
-      "description": "Who may work this item. Agents must not start human-only items."
+      "items": { "type": "string", "enum": ["aurora", "agent", "human"] }
     },
     "context_pack": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "Canonical files the worker MUST read before starting. Not optional."
+      "items": { "type": "string" }
     },
-    "next_action": { "type": "string", "description": "One-line description of the immediate next step." },
-    "done_when": { "type": "string", "description": "Explicit completion criterion." },
-    "aurora_notes": {
-      "type": "string",
-      "description": "Aurora-authored contextual guidance, re-rank rationale, or session carryover note. Written by Aurora, read by all consumers."
-    },
-    "is_stale_scope": {
-      "type": "boolean",
-      "default": false,
-      "description": "Set true when the reason for urgency is a docs/scope mismatch or stale design state. Triggers +20 score delta in triage_rules."
-    },
-    "parallel_group": {
-      "type": "string",
-      "description": "Optional group name for independently actionable items that may be worked simultaneously. Items in the same group do not block each other."
-    },
-    "active_worker": { "type": "string", "description": "GitHub username or agent ID currently working this item." },
+    "next_action": { "type": "string" },
+    "done_when": { "type": "string" },
+    "aurora_notes": { "type": "string" },
+    "is_stale_scope": { "type": "boolean", "default": false },
+    "parallel_group": { "type": "string" },
+    "active_worker": { "type": "string" },
     "started": { "type": "string", "format": "date" },
-    "pr": { "type": "integer", "description": "Pull request number if state is waiting_review." },
-    "opened": { "type": "string", "format": "date", "description": "Date item was added to the queue. Required for escalation timer evaluation." },
-    "last_updated": { "type": "string", "format": "date", "description": "Date of most recent state change or aurora_notes update. Required for escalation timer evaluation." },
+    "pr": { "type": "integer" },
+    "opened": { "type": "string", "format": "date" },
+    "last_updated": { "type": "string", "format": "date" },
     "closed": { "type": "string", "format": "date" },
-    "url": { "type": "string", "format": "uri", "description": "GitHub issue or PR URL if applicable." }
+    "url": { "type": "string", "format": "uri" }
   }
 }

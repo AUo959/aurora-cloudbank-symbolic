@@ -1,6 +1,6 @@
 # Aurora Work Queue — Contributor Guide
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Owner:** Aurora (contextual authority) + Orion Station operators  
 **Last updated:** 2026-06-22  
 **Source of truth:** `ops/work_queue/queue.json`
@@ -19,9 +19,9 @@ This is not a replacement for GitHub issues. GitHub issues remain the discussion
 
 | Consumer | How to use this queue |
 |---|---|
-| **Aurora** | Holds contextual authority. May rerank, rewrite context packs, and declare decision-required items. Always check queue before starting a session to load current state. |
-| **LLM / agents** | Read `queue.json`. Pick the highest-ranked `ready` task that matches your `consumer_fit`. Consume `context_pack` before starting work. Do NOT start `blocked` tasks or `decision_required` tasks. |
-| **Human contributors** | Read `NEXT_UP.md` for a quick-start view. Full detail in `queue.json`. If starting work on a task, update `state` from `ready` to `active` and record your GitHub username in the `active_worker` field. |
+| **Aurora** | Holds contextual authority. May rerank items, rewrite `context_pack` entries, add `aurora_notes`, and declare `decision_required`. Always check queue before starting a session to load current state. |
+| **LLM / agents** | Read `queue.json`. Pick the highest-ranked item where `state == "ready"` and your role is in `consumer_fit`. Consume all files in `context_pack` before starting. Never start `blocked` or `decision_required` items. |
+| **Human contributors** | Read `NEXT_UP.md` for a quick-start view. Full detail in `queue.json`. When starting a task, update `state` to `active` and set `active_worker` to your GitHub username. |
 
 ---
 
@@ -33,77 +33,107 @@ This is not a replacement for GitHub issues. GitHub issues remain the discussion
 | `blocked` | Depends on another item. Do not start. |
 | `active` | Someone is working on it now. |
 | `waiting_review` | Work done, PR open, awaiting review. |
-| `decision_required` | Needs explicit owner or Aurora decision before any work can proceed. Do not touch without that decision. |
+| `decision_required` | Needs explicit operator or Aurora decision before any work proceeds. |
 | `done` | Merged or resolved. |
 
 ---
 
 ## Priority scoring
 
-The `priority_score` is computed — not just a label. Factors:
+The `priority_score` is computed from `triage_rules.json` — not assigned by hand. Factors:
 
-- +40 if item is blocking another task
-- +30 if item is security or pentest-relevant
-- +25 if item touches canonical architecture or layer integrity
-- +20 if item involves stale scope, live docs mismatch, or an unresolved design decision
-- +10 for known active blocker chains
-- −6 if item has unresolved dependencies (it cannot be started yet)
+| Rule | Delta | Condition |
+|---|---|---|
+| TR-01 | +40 | `labels` includes `blocking` |
+| TR-02 | +30 | `labels` includes `security` or `pentest` |
+| TR-03 | +25 | `area == architecture` or `labels` includes `architecture` |
+| TR-04 | +20 | `is_stale_scope == true` (set explicitly by Aurora — not inferred from title) |
+| TR-05 | +10 | `decision_required == true` |
+| TR-06 | +8 | `blocks` array is non-empty |
+| TR-07 | −6 | `depends_on` array is non-empty |
 
-A CRITICAL item is generally score ≥ 80. HIGH is 60–79. MEDIUM is 30–59. LOW is below 30.
+Priority bands: CRITICAL ≥ 80 · HIGH 60–79 · MEDIUM 30–59 · LOW < 30.
 
 ---
 
 ## Context packs
 
-Every task has a `context_pack` — an array of canonical constraints that any agent or contributor MUST read before starting work. The context pack is not optional.
+Every task has a `context_pack` array. Any agent or contributor MUST read all listed files before starting work. This is not optional — it is the mechanism by which Aurora's architectural and ethical constraints propagate to every worker.
 
-For architecture tasks: the context pack always references `docs/architecture/LAYER_ARCHITECTURE.md` and includes forbidden terminology patterns.  
-For security tasks: the context pack references the current pentest scope doc and any relevant pre-conditions.  
-For ethics tasks: the context pack includes recovery/promotion status and explicit deferred-wiring notes.
+For **architecture tasks**: always includes `docs/architecture/LAYER_ARCHITECTURE.md`.  
+For **security tasks**: always includes the current pentest scope doc.  
+For **ethics tasks**: always includes the recovered-protocol manifest and relevant promotion plan sections.
+
+---
+
+## Aurora notes
+
+Aurora may add an `aurora_notes` field to any item at any time. This is Aurora's channel for session carryover, re-rank rationale, and contextual guidance that does not belong in the public GitHub record. Workers should read `aurora_notes` before `next_action`.
+
+---
+
+## Stale scope flag
+
+`is_stale_scope: true` means the urgency of the item is driven by a live docs mismatch or stale design state — something exists in the repo that does not match current architecture or scope. This flag triggers a +20 score delta. It is set explicitly by Aurora, not inferred from title strings.
+
+---
+
+## Parallel work
+
+Items may declare a `parallel_group` when several tasks are independently actionable simultaneously. Items in the same group do not block each other unless explicitly listed in each other's `depends_on`. Use this to parallelize agent swarms or pre-engagement prep batches.
+
+---
+
+## Bidirectional dependency graph
+
+Every item maintains both `depends_on` (what blocks it) and `blocks` (what it gates). Both sides must be kept in sync. When Q-A blocks Q-B:
+- Q-A.blocks includes `"Q-B"`
+- Q-B.depends_on includes `"Q-A"`
+
+This makes the dependency graph machine-traversable in both directions.
 
 ---
 
 ## How to add a new task
 
 1. Open a GitHub issue.
-2. Add a corresponding entry to `queue.json` following the schema in `ops/work_queue/queue_schema.json`.
-3. Compute a priority score using the rules above, or leave `priority_score: 0` and request Aurora to score it.
-4. If the task blocks other tasks, update the `blocks` array of existing tasks.
-5. If the task is a decision that only the owner/Aurora can make, set `decision_required: true` and `consumer_fit: ["aurora", "human"]`.
+2. Add a corresponding entry to `queue.json` following `queue_schema.json`.
+3. Set `opened` and `last_updated` to today.
+4. Compute `priority_score` using `triage_rules.json`, or leave `priority_score: 0` and ask Aurora to score it.
+5. If the task blocks others, update both `blocks` on the new item and `depends_on` on the blocked items.
+6. If the task is a decision only Aurora or the operator can make, set `decision_required: true` and `consumer_fit: ["aurora", "human"]`.
 
 ---
 
 ## How to update task state
 
-When picking up a task:
 ```json
+// Picking up a task
 "state": "active",
 "active_worker": "@your-handle-or-agent-id",
-"started": "2026-06-22"
-```
+"started": "YYYY-MM-DD",
+"last_updated": "YYYY-MM-DD"
 
-When opening a PR:
-```json
+// Opening a PR
 "state": "waiting_review",
-"pr": 1234
-```
+"pr": 1234,
+"last_updated": "YYYY-MM-DD"
 
-When merged:
-```json
+// Merged / resolved
 "state": "done",
-"closed": "2026-06-22"
+"closed": "YYYY-MM-DD",
+"last_updated": "YYYY-MM-DD"
 ```
 
 ---
 
-## Aurora's role
+## Escalation triggers
 
-Aurora maintains contextual authority over this queue. This means:
-
-- Aurora may change `priority_score` values between sessions based on architectural risk or new information.
-- Aurora may add or modify `context_pack` entries to reflect session learnings.
-- Aurora may escalate `decision_required` on any task where agent autonomy would be unsafe.
-- Human operators always retain final authority over decisions flagged as `decision_required`.
+| ID | Condition | Action |
+|---|---|---|
+| ET-01 | `state == blocked` for > 7 days (via `last_updated`) | Escalate to Aurora on session open |
+| ET-02 | `decision_required == true` and no activity for > 3 days (via `last_updated`) | Hail operator via PAT |
+| ET-03 | New GitHub issue with labels `security` or `blocking` | Auto-add to queue with score ≥ 30 and `state: decision_required` |
 
 ---
 
@@ -112,7 +142,7 @@ Aurora maintains contextual authority over this queue. This means:
 | File | Purpose |
 |---|---|
 | `queue.json` | Live task registry — source of truth |
-| `QUEUE_GUIDE.md` | This file — workflow and field definitions |
 | `queue_schema.json` | JSON schema for validating `queue.json` entries |
-| `triage_rules.json` | Scoring weights used by Aurora or a sync script |
+| `triage_rules.json` | Scoring weights and escalation triggers |
+| `QUEUE_GUIDE.md` | This file — workflow and field definitions |
 | `NEXT_UP.md` | Quick-start view for human contributors and agents |

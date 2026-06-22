@@ -19,7 +19,7 @@ import re
 try:
     import numpy as np
     _NUMPY_AVAILABLE = True
-except ImportError:
+except ImportError:  # NOSONAR - numpy is optional; fallback np=None allows graceful degradation when not installed
     np = None  # type: ignore
     _NUMPY_AVAILABLE = False
 from datetime import datetime, timezone
@@ -348,7 +348,7 @@ class HierarchicalMemoryManager:
         try:
             from modules.aumemmanager.ledger_hooks import AuMemLedgerHook as _Hook
             self._ledger_hook = _Hook.create()
-        except Exception as _exc:
+        except Exception as _exc:  # NOSONAR - import may fail in restricted environments or during testing
             logger.debug("AuMemLedgerHook unavailable (%s) — ledger integration disabled", _exc)
     
     # ------------------------------------------------------------------
@@ -581,7 +581,7 @@ class HierarchicalMemoryManager:
                         str(memory_id)[:50], str(owner)[:50], str(importance))
 
         # Ledger hook outside the lock — non-blocking, optional, graceful
-        if self._ledger_hook:
+        if self._ledger_hook:  # NOSONAR - may be None if import failed in restricted environments; AuMemLedgerHook.create() always returns non-None when import succeeds
             self._ledger_hook.on_memory_added(
                 memory_id=memory_id,
                 owner=owner,

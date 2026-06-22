@@ -65,7 +65,9 @@ class FieldQuantizer:
         Discrete levels better reflect the underlying geometric structure
         of ethical dimensions.
         """
-        if not self.config.enabled or not self._curvature_levels:  # NOSONAR - _curvature_levels may be replaced by caller passing config with empty levels
+        if not self.config.enabled:
+            return int(max(0, min(255, round(curvature * 255))))
+        if not self._curvature_levels:
             return int(max(0, min(255, round(curvature * 255))))
 
         scaled = max(0.0, min(1.0, curvature)) * 255
@@ -84,13 +86,15 @@ class FieldQuantizer:
         scale factor based on the channel's value range, clipped at
         clip_ratio to handle outliers.
         """
-        if not self.config.enabled or not values:  # NOSONAR - enabled defaults to True but callers may pass FieldQuantizationConfig(enabled=False); values may be empty
+        if not self.config.enabled:
+            return [int(max(-128, min(127, v * 127))) for v in values]
+        if not values:
             return [int(max(-128, min(127, v * 127))) for v in values]
 
         cfg = self.config.kv_cache
         sorted_abs = sorted(abs(v) for v in values)
         clip_idx = int(len(sorted_abs) * cfg.clip_ratio)
-        abs_max = sorted_abs[clip_idx] if clip_idx < len(sorted_abs) else sorted_abs[-1]  # NOSONAR - clip_ratio is configurable and may exceed 1.0
+        abs_max = sorted_abs[min(clip_idx, len(sorted_abs) - 1)]
 
         if abs_max == 0.0:  # NOSONAR - abs_max is from sorted absolute values; 0.0 is possible when all inputs are zero
             return [0] * len(values)
@@ -109,7 +113,7 @@ class FieldQuantizer:
 
         sorted_abs = sorted(abs(v) for v in original_values)
         clip_idx = int(len(sorted_abs) * self.config.kv_cache.clip_ratio)
-        abs_max = sorted_abs[clip_idx] if clip_idx < len(sorted_abs) else sorted_abs[-1]  # NOSONAR - clip_ratio is configurable and may exceed 1.0
+        abs_max = sorted_abs[min(clip_idx, len(sorted_abs) - 1)]
 
         if abs_max == 0.0:  # NOSONAR - abs_max is from sorted absolute values; 0.0 is possible when all inputs are zero
             return [0.0] * len(quantized)

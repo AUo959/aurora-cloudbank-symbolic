@@ -124,7 +124,7 @@ class AuMemLedgerHook:
     ) -> None:
         """Record a high-importance memory creation in the ledger."""
         _ledger = self._ledger
-        if not self._enabled or _ledger is None or importance < self._threshold:
+        if _ledger is None or importance < self._threshold:
             return
 
         try:
@@ -161,7 +161,7 @@ class AuMemLedgerHook:
     ) -> None:
         """Record retrieval of a high-importance memory in the ledger."""
         _ledger = self._ledger
-        if not self._enabled or _ledger is None or importance < self._threshold:
+        if _ledger is None or importance < self._threshold:
             return
 
         try:
@@ -195,7 +195,7 @@ class AuMemLedgerHook:
     ) -> None:
         """Record a capacity warning alert in the ledger."""
         _ledger = self._ledger
-        if not self._enabled or _ledger is None:
+        if _ledger is None:
             return
 
         try:

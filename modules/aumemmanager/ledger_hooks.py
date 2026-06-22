@@ -46,11 +46,11 @@ def _make_record(**kwargs: Any) -> Any:
     if InsightRecord is not None and InsightType is not None:  # NOSONAR - both are non-None on the real exec path; else branch handles mock-ledger tests where _LEDGER_AVAILABLE is False
         insight_type = kwargs.pop("insight_type_name", "audit")
         try:
-            kwargs["insight_type"] = InsightType(insight_type)
+            kwargs["insight_type"] = InsightType(insight_type)  # NOSONAR - InsightType is not None here; guarded by the 'is not None' check above; SonarCloud cannot propagate the constraint across lines for module-level variables
         except Exception as exc:  # NOSONAR - InsightType enum may raise various exceptions
             logger.debug("InsightType enum lookup failed for %r (%s) — using raw string", insight_type, exc)
             kwargs["insight_type"] = insight_type
-        return InsightRecord(**kwargs)
+        return InsightRecord(**kwargs)  # NOSONAR - InsightRecord is not None here; guarded by the 'is not None' check above; SonarCloud cannot propagate the constraint across lines for module-level variables
     # Fallback: attribute-accessible namespace
     return SimpleNamespace(**kwargs)
 

@@ -94,7 +94,7 @@ class SparseFieldAttention:
         If active_dimensions is None, auto-detects via detect_active_dimensions.
         Dimensions not in the active set are assumed clean (score=1.0).
         """
-        if active_dimensions is None:
+        if active_dimensions is None:  # NOSONAR - callers may pass None to trigger auto-detection; both branches are reachable
             active_dimensions = self.detect_active_dimensions(dimension_signals)
 
         scores: Dict[str, float] = {}

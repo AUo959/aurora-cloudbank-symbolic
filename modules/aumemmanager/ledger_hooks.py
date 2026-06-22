@@ -43,7 +43,7 @@ def _make_record(**kwargs: Any) -> Any:
     to InsightRecord objects, making tests with mock ledgers work even when the
     real InsightRecord type cannot be imported (e.g. broken cryptography package).
     """
-    if InsightRecord is not None and InsightType is not None:
+    if InsightRecord is not None and InsightType is not None:  # NOSONAR - both are non-None on the real exec path; else branch handles mock-ledger tests where _LEDGER_AVAILABLE is False
         insight_type = kwargs.pop("insight_type_name", "audit")
         try:
             kwargs["insight_type"] = InsightType(insight_type)
@@ -90,7 +90,7 @@ class AuMemLedgerHook:
 
         Returns a disabled no-op hook if insight_ledger is unavailable.
         """
-        if not _LEDGER_AVAILABLE or InsightLedger is None:
+        if not _LEDGER_AVAILABLE or InsightLedger is None:  # NOSONAR - _LEDGER_AVAILABLE is False when imports fail; both branches are reachable depending on environment
             logger.debug("InsightLedger not available — AuMemLedgerHook disabled")
             return cls(ledger=None, importance_threshold=importance_threshold)
 
@@ -117,7 +117,7 @@ class AuMemLedgerHook:
         context_tag: str = "",
     ) -> None:
         """Record a high-importance memory creation in the ledger."""
-        if not self._enabled or importance < self._threshold:
+        if not self._enabled or importance < self._threshold:  # NOSONAR - _enabled is False when no ledger; importance may be below threshold; both branches are reachable
             return
 
         try:
@@ -153,7 +153,7 @@ class AuMemLedgerHook:
         context_tag: str = "",
     ) -> None:
         """Record retrieval of a high-importance memory in the ledger."""
-        if not self._enabled or importance < self._threshold:
+        if not self._enabled or importance < self._threshold:  # NOSONAR - _enabled is False when no ledger; importance may be below threshold; both branches are reachable
             return
 
         try:
@@ -186,7 +186,7 @@ class AuMemLedgerHook:
         tier: str,
     ) -> None:
         """Record a capacity warning alert in the ledger."""
-        if not self._enabled:
+        if not self._enabled:  # NOSONAR - _enabled is False when no ledger; both branches are reachable
             return
 
         try:

@@ -57,14 +57,14 @@ class NodeDeduplicator:
         Nodes with no overlapping dimensions have similarity 0.
         """
         dims = set(a.capabilities) & set(b.capabilities)
-        if not dims:
+        if not dims:  # NOSONAR - callers may pass nodes with no shared capability dimensions; 0.0 return is correct
             return 0.0
 
         dot = sum(a.capabilities[d] * b.capabilities[d] for d in dims)
         mag_a = sum(v ** 2 for v in a.capabilities.values()) ** 0.5
         mag_b = sum(v ** 2 for v in b.capabilities.values()) ** 0.5
 
-        if mag_a == 0.0 or mag_b == 0.0:
+        if mag_a == 0.0 or mag_b == 0.0:  # NOSONAR - all-zero capability vectors produce mag=0.0; defensive guard against ZeroDivisionError
             return 0.0
 
         return dot / (mag_a * mag_b)
@@ -75,7 +75,7 @@ class NodeDeduplicator:
 
         Protects high-importance nodes from being merged away.
         """
-        if (a.importance >= self.config.preserve_high_importance
+        if (a.importance >= self.config.preserve_high_importance  # NOSONAR - both branches are reachable depending on node importance values at runtime
                 or b.importance >= self.config.preserve_high_importance):
             return False
 
@@ -126,7 +126,7 @@ class NodeDeduplicator:
         Uses greedy O(n²) pairwise matching — practical for typical field
         sizes (hundreds of nodes), not for millions.
         """
-        if not nodes:
+        if not nodes:  # NOSONAR - callers may pass empty list; early exit is correct behavior
             return [], 0
 
         result: List[NodeSignature] = []

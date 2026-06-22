@@ -586,7 +586,7 @@ class HierarchicalMemoryManager:
                 memory_id=memory_id,
                 owner=owner,
                 importance=importance,
-                memory_type=memory_type.value if hasattr(memory_type, "value") else str(memory_type),
+                memory_type=memory_type.value,
                 tags=tags,
                 context_tag=memory.context_tag,
             )

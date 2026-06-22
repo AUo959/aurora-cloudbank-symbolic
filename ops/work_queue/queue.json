@@ -26,72 +26,109 @@
       "title": "Pentest pre-condition verification + vendor selection",
       "issue": 841,
       "status": "ready",
+      "consumer": "human",
+      "consumer_note": "Vendor selection (Section 10) and signatures (Section 11) require human decision and real names. Agents: skip this item and proceed to any Q-0004 through Q-0007 in parallel_group pentest_prep.",
       "priority_score": 91,
       "blocked_by": null,
+      "sub_tasks": [
+        {
+          "id": "Q-0003a",
+          "title": "Section 2.2 code verification — grep confirm no recovered protocol wired",
+          "consumer": "agent_or_human",
+          "artifact_slot": "docs/security/recovered_protocol_wiring_verification.md",
+          "status": "ready"
+        },
+        {
+          "id": "Q-0003b",
+          "title": "Section 10 — vendor / red team selection",
+          "consumer": "human",
+          "status": "ready"
+        },
+        {
+          "id": "Q-0003c",
+          "title": "Section 11 — approval signatures",
+          "consumer": "human",
+          "status": "blocked_by": "Q-0003b"
+        }
+      ],
       "context_pack": [
         "docs/security/pentest_scope_v2.md",
+        "docs/security/recovered_protocol_wiring_verification.md",
         "docs/ethics/recovered_protocols/recovered_protocol_manifest.json",
         "docs/security/pentest_history.md"
       ],
-      "human_next_action": "Complete Section 10 (vendor selection) and Section 11 (signatures) in pentest_scope_v2.md. Verify Section 2.2 code pre-conditions on #841."
+      "human_next_action": "Complete Section 10 (vendor selection) and Section 11 (signatures) in pentest_scope_v2.md. Run verification procedure in recovered_protocol_wiring_verification.md and fill in results."
     },
     {
       "id": "Q-0004",
       "title": "API surface diff triage (api_schema.json vs v1 scope)",
       "issue": null,
-      "status": "queued",
+      "status": "ready",
+      "consumer": "agent_or_human",
+      "parallel_group": "pentest_prep",
+      "blocked_by": null,
       "priority_score": 87,
-      "blocked_by": "Q-0003",
       "context_pack": [
         "api_schema.json",
         "api_surface_inventory.json",
         "docs/security/pentest_scope_v1.md",
         "docs/security/pentest_scope_v2.md"
-      ]
+      ],
+      "agent_instruction": "Diff all routes in api_schema.json against the route table in pentest_scope_v1.md Section 3.1. Produce a markdown table of net-new routes with auth requirement, HTTP method, and suggested test priority. Output to docs/security/api_surface_diff_v1_v2.md."
     },
     {
       "id": "Q-0005",
       "title": "Security remediation plan execution (open items)",
       "issue": null,
-      "status": "queued",
+      "status": "ready",
+      "consumer": "agent_or_human",
+      "parallel_group": "pentest_prep",
+      "blocked_by": null,
       "priority_score": 84,
-      "blocked_by": "Q-0003",
       "context_pack": [
         "docs/security/SECURITY_REMEDIATION_PLAN.md",
         "docs/security/SECURITY_STATUS_REPORT.md",
         "docs/security/SECURITY_FIXES.md"
-      ]
+      ],
+      "agent_instruction": "Read SECURITY_REMEDIATION_PLAN.md and SECURITY_STATUS_REPORT.md. Identify all items not yet marked resolved. For each open item, determine if it is pre-pentest (must be fixed before engagement) or post-pentest (can follow). Output a triage table to docs/security/remediation_triage.md."
     },
     {
       "id": "Q-0006",
       "title": "R&D API surface review + auth audit",
       "issue": null,
-      "status": "queued",
+      "status": "ready",
+      "consumer": "agent_or_human",
+      "parallel_group": "pentest_prep",
+      "blocked_by": null,
       "priority_score": 80,
-      "blocked_by": "Q-0003",
       "context_pack": [
         "RD_API_REFERENCE.md",
-        "docs/security/pentest_scope_v2.md#section-37"
-      ]
+        "docs/security/pentest_scope_v2.md"
+      ],
+      "agent_instruction": "Read RD_API_REFERENCE.md. For each route: (1) confirm auth requirement against pentest_scope_v2.md Section 3.7 criteria, (2) flag any route with no auth, weak auth, or unclear isolation boundary, (3) flag any route that could reach production data or ethics state. Output findings to docs/security/rd_api_auth_audit.md."
     },
     {
       "id": "Q-0007",
       "title": "QGIA ingestion path implementation review",
       "issue": null,
-      "status": "queued",
+      "status": "ready",
+      "consumer": "agent_or_human",
+      "parallel_group": "pentest_prep",
+      "blocked_by": null,
       "priority_score": 78,
-      "blocked_by": "Q-0003",
       "context_pack": [
         "QGIA_Runtime_OnePager.md",
         "QGIA_Axiom_Doctrine_Narrative.md",
-        "docs/security/pentest_scope_v2.md#section-38"
-      ]
+        "docs/security/pentest_scope_v2.md"
+      ],
+      "agent_instruction": "Review the codebase for any existing QGIA ingestion implementation. Cross-reference against the 7 test objectives in pentest_scope_v2.md Section 3.8. For each objective: (1) identify the relevant code path if it exists, (2) flag any implementation that does not satisfy the objective, (3) flag any objective with no implementation (ingestion path not yet built). Output to docs/security/qgia_ingestion_review.md."
     },
     {
       "id": "Q-0008",
       "title": "Recovered protocol promotion - Phase 1 (Sherlock only)",
       "issue": 993,
       "status": "blocked",
+      "consumer": "human",
       "priority_score": 72,
       "blocked_by": "pentest_complete",
       "context_pack": [

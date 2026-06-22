@@ -348,7 +348,7 @@ class HierarchicalMemoryManager:
         # Prefer explicit argument; fall back to environment variable.
         self._persist_path: Optional[str] = persist_path or os.environ.get("AURORA_AUMEM_PERSIST_PATH")
 
-        if self._persist_path:
+        if self._persist_path:  # NOSONAR - persist_path is None by default; env var may also be unset; both branches are reachable
             self._load_from_disk()
 
         # Optional ledger integration — lazy import to avoid circular package load
@@ -419,7 +419,7 @@ class HierarchicalMemoryManager:
         never observe a half-written file.  This method is thread-safe and
         is a no-op when *persist_path* was not configured.
         """
-        if not self._persist_path:
+        if not self._persist_path:  # NOSONAR - _persist_path is Optional[str]; callers that bypass __init__ or unset the path after construction may reach this branch
             return
 
         with self._persist_lock:
@@ -471,10 +471,10 @@ class HierarchicalMemoryManager:
         - Corrupt JSON: logs a warning and starts with empty memory.
         - Individual bad records: skips the record and logs a warning.
         """
-        if not self._persist_path:
+        if not self._persist_path:  # NOSONAR - defensive guard; _load_from_disk may be called directly in tests or subclasses where _persist_path could be None
             return
 
-        if not os.path.exists(self._persist_path):
+        if not os.path.exists(self._persist_path):  # NOSONAR - runtime filesystem check; file may or may not exist at startup
             logger.info(
                 "AuMemManager: no persist file at %s — starting fresh",
                 str(self._persist_path)[:SUMMARY_MAX_LENGTH],
@@ -502,10 +502,10 @@ class HierarchicalMemoryManager:
                 memory = self._deserialize_memory(raw)
 
                 # Place into correct tier.
-                if tier_name == "compressed":
+                if tier_name == "compressed":  # NOSONAR - tier_name is read from persisted data; "compressed" and "archived" are valid stored values
                     self.compressed_tier[memory.id] = memory
                     self.metrics["compressed_memories"] += 1
-                elif tier_name == "archived":
+                elif tier_name == "archived":  # NOSONAR - tier_name may be "archived" for previously-archived memories
                     self.archived_tier[memory.id] = memory
                     self.metrics["archived_memories"] += 1
                 else:
@@ -924,7 +924,7 @@ class HierarchicalMemoryManager:
                 'aurora_anchor_coverage': len(self.anchor_index),
                 'average_cultural_score': (
                     sum(m.cask_cultural_score for m in self.active_tier.values()) / len(self.active_tier)
-                    if self.active_tier else 0
+                    if self.active_tier else 0  # NOSONAR - active_tier is {} at construction; both empty and non-empty states are reachable at runtime
                 ),
                 'quantum_network_density': quantum_analysis['network_density']
             })

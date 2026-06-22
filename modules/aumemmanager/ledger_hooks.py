@@ -19,16 +19,12 @@ from typing import Any, Optional
 logger = logging.getLogger(__name__)
 
 try:
-    from modules.insight_ledger.ledger_core import InsightLedger
-    from modules.insight_ledger.schemas import InsightRecord, InsightType
+    from modules.insight_ledger.ledger_core import InsightLedger as _InsightLedger  # noqa: F401
+    from modules.insight_ledger.schemas import InsightRecord as _InsightRecord, InsightType as _InsightType  # noqa: F401
     _LEDGER_AVAILABLE = True
-except Exception as _import_exc:  # NOSONAR - broad catch needed for pyo3 panics and broken C-extension builds
-    # Catches ImportError AND environment failures (e.g. broken C-extension builds
-    # that raise pyo3 panics — now handled by secure_storage.py's BaseException guard)
+except Exception as _import_exc:
+    # Catches ImportError AND environment failures (e.g. broken C-extension builds).
     logger.debug("InsightLedger not available (%s) — ledger hook will be disabled", _import_exc)
-    InsightLedger = None  # type: ignore
-    InsightRecord = None  # type: ignore
-    InsightType = None  # type: ignore
     _LEDGER_AVAILABLE = False
 
 
@@ -41,18 +37,23 @@ def _make_record(**kwargs: Any) -> Any:
 
     SimpleNamespace provides attribute access (.content, .source, etc.) identical
     to InsightRecord objects, making tests with mock ledgers work even when the
-    real InsightRecord type cannot be imported (e.g. broken cryptography package).
+    real InsightRecord type cannot be imported.
     """
-    if InsightRecord is not None and InsightType is not None:  # NOSONAR - both are non-None on the real exec path; else branch handles mock-ledger tests where _LEDGER_AVAILABLE is False
+    if not _LEDGER_AVAILABLE:
+        kwargs.pop("insight_type_name", None)
+        return SimpleNamespace(**kwargs)
+    try:
+        from modules.insight_ledger.schemas import InsightRecord as _IR, InsightType as _IT
         insight_type = kwargs.pop("insight_type_name", "audit")
         try:
-            kwargs["insight_type"] = InsightType(insight_type)  # NOSONAR - InsightType is not None here; guarded by the 'is not None' check above; SonarCloud cannot propagate the constraint across lines for module-level variables
-        except Exception as exc:  # NOSONAR - InsightType enum may raise various exceptions
+            kwargs["insight_type"] = _IT(insight_type)
+        except Exception as exc:
             logger.debug("InsightType enum lookup failed for %r (%s) — using raw string", insight_type, exc)
             kwargs["insight_type"] = insight_type
-        return InsightRecord(**kwargs)  # NOSONAR - InsightRecord is not None here; guarded by the 'is not None' check above; SonarCloud cannot propagate the constraint across lines for module-level variables
-    # Fallback: attribute-accessible namespace
-    return SimpleNamespace(**kwargs)
+        return _IR(**kwargs)
+    except Exception:
+        kwargs.pop("insight_type_name", None)
+        return SimpleNamespace(**kwargs)
 
 
 class AuMemLedgerHook:
@@ -90,16 +91,17 @@ class AuMemLedgerHook:
 
         Returns a disabled no-op hook if insight_ledger is unavailable.
         """
-        if not _LEDGER_AVAILABLE or InsightLedger is None:  # NOSONAR - _LEDGER_AVAILABLE is False when imports fail; both branches are reachable depending on environment
+        if not _LEDGER_AVAILABLE:
             logger.debug("InsightLedger not available — AuMemLedgerHook disabled")
             return cls(ledger=None, importance_threshold=importance_threshold)
 
         try:
+            from modules.insight_ledger.ledger_core import InsightLedger as _LedgerClass
             path = storage_path or ".aurora/ledger"
-            ledger = InsightLedger(storage_path=path)  # NOSONAR - InsightLedger is not None here; guarded by 'is None' check above
+            ledger = _LedgerClass(storage_path=path)
             logger.info("AuMemLedgerHook: ledger wired at %s", path)
             return cls(ledger=ledger, importance_threshold=importance_threshold)
-        except Exception as exc:  # NOSONAR - InsightLedger construction may raise various exceptions
+        except Exception as exc:
             logger.warning("AuMemLedgerHook: failed to init ledger (%s) — disabled", exc)
             return cls(ledger=None, importance_threshold=importance_threshold)
 
@@ -117,7 +119,8 @@ class AuMemLedgerHook:
         context_tag: str = "",
     ) -> None:
         """Record a high-importance memory creation in the ledger."""
-        if not self._enabled or importance < self._threshold:  # NOSONAR - _enabled is False when no ledger; importance may be below threshold; both branches are reachable
+        _ledger = self._ledger
+        if not self._enabled or _ledger is None or importance < self._threshold:
             return
 
         try:
@@ -140,8 +143,8 @@ class AuMemLedgerHook:
                 severity="info",
                 related_anchor=context_tag or None,
             )
-            self._ledger.record_insight(record)  # NOSONAR - not None here; self._enabled = (ledger is not None) guarantees _ledger is set
-        except Exception as exc:  # NOSONAR - ledger operations may raise various exceptions
+            _ledger.record_insight(record)
+        except Exception as exc:
             logger.warning("AuMemLedgerHook.on_memory_added failed: %s", exc)
 
     def on_memory_retrieved(
@@ -153,7 +156,8 @@ class AuMemLedgerHook:
         context_tag: str = "",
     ) -> None:
         """Record retrieval of a high-importance memory in the ledger."""
-        if not self._enabled or importance < self._threshold:  # NOSONAR - _enabled is False when no ledger; importance may be below threshold; both branches are reachable
+        _ledger = self._ledger
+        if not self._enabled or _ledger is None or importance < self._threshold:
             return
 
         try:
@@ -175,8 +179,8 @@ class AuMemLedgerHook:
                 severity="info",
                 related_anchor=context_tag or None,
             )
-            self._ledger.record_insight(record)  # NOSONAR - not None here; self._enabled = (ledger is not None) guarantees _ledger is set
-        except Exception as exc:  # NOSONAR - ledger operations may raise various exceptions
+            _ledger.record_insight(record)
+        except Exception as exc:
             logger.warning("AuMemLedgerHook.on_memory_retrieved failed: %s", exc)
 
     def on_capacity_warning(
@@ -186,11 +190,12 @@ class AuMemLedgerHook:
         tier: str,
     ) -> None:
         """Record a capacity warning alert in the ledger."""
-        if not self._enabled:  # NOSONAR - _enabled is False when no ledger; both branches are reachable
+        _ledger = self._ledger
+        if not self._enabled or _ledger is None:
             return
 
         try:
-            fill_pct = (current_count / capacity_limit * 100) if capacity_limit else 0  # NOSONAR - capacity_limit is int; 0 is valid when tier config omits limit
+            fill_pct = (current_count / capacity_limit * 100) if capacity_limit else 0
             record = _make_record(
                 insight_type_name="alert",
                 content=(
@@ -207,6 +212,6 @@ class AuMemLedgerHook:
                 tags=["aumemmanager", "capacity_warning", tier],
                 severity="warning",
             )
-            self._ledger.record_insight(record)  # NOSONAR - not None here; self._enabled = (ledger is not None) guarantees _ledger is set
-        except Exception as exc:  # NOSONAR - ledger operations may raise various exceptions
+            _ledger.record_insight(record)
+        except Exception as exc:
             logger.warning("AuMemLedgerHook.on_capacity_warning failed: %s", exc)

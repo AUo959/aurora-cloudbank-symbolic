@@ -581,8 +581,10 @@ class HierarchicalMemoryManager:
                         str(memory_id)[:50], str(owner)[:50], str(importance))
 
         # Ledger hook outside the lock — non-blocking, optional, graceful
-        if self._ledger_hook is not None:  # NOSONAR - _ledger_hook starts as None and is set once in __init__; both branches are reachable depending on whether ledger init succeeded
-            self._ledger_hook.on_memory_added(  # NOSONAR - _ledger_hook is non-None inside the 'is not None' guard above; SonarCloud does not narrow class attribute Optional through is-not-None checks
+        # Use local variable so type-narrowing tracks the None check correctly.
+        _hook = self._ledger_hook
+        if _hook is not None:
+            _hook.on_memory_added(
                 memory_id=memory_id,
                 owner=owner,
                 importance=importance,

@@ -1,8 +1,9 @@
 # Aurora Session Open Ritual
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Authority:** Aurora  
 **Applies to:** All platforms — Aurora Space (Perplexity), ChatGPT Stellar Accord, any future operator interface  
+**Changelog:** v1.1.0 (2026-06-22) — Added Step 0: Review Conduct Clause (GAP-010 mitigation)
 
 This document defines the mandatory steps Aurora executes at the start of every session before engaging with any queue work, new requests, or contributor questions. It is self-contained by design — no institutional memory from the operator is required.
 
@@ -13,6 +14,39 @@ This document defines the mandatory steps Aurora executes at the start of every 
 Human gates, pending decisions, and critical blockers must not be lost between sessions, between operators, or across platforms. Without an explicit ritual, the risk is that a new session starts fresh, picks up queue work, and bypasses an unresolved gate that was established in a previous session.
 
 This ritual ensures continuity flows through the repo, not through any individual's memory.
+
+---
+
+## Step 0 — Review Conduct Clause ⚠️
+
+**This step applies to any agent or AI contributor performing a review, audit, or assessment of repo state. It is not optional.**
+
+`CANON_INDEX.md` states:
+
+> *"Do not reason from search result fragments, code snippets, or file path inference. The correct answer is in the document. Read it first. This applies even if you believe you already know the answer."*
+
+This clause extends to all repo review activity. The following behaviors are explicitly prohibited:
+
+### Prohibited
+
+- **Assert-before-read:** Claiming a file, directory, or artifact does or does not exist based on a listing without reading the actual path
+- **Size-based inference:** Drawing conclusions about content from file size alone (e.g., "463 bytes = stub = useless")
+- **Root-level assumption:** Assuming a repo artifact does not exist because it was not found at root — subdirectories must be traversed
+- **Redirect ignoring:** Treating a stub/redirect file as the destination without following the redirect
+- **Prior session assumption:** Asserting current repo state from memory of a past session without re-reading the file
+
+### Required before any assertion about repo state
+
+1. **Read the file** — not just its listing entry, its name, or its size
+2. **Follow redirects** — if a file says "see X", read X before forming an opinion about the original file
+3. **Traverse paths** — if you are looking for `ops/work_queue/queue.json`, you must check `ops/work_queue/`, not just root
+4. **Verify, then report** — the sequence is: find → read → verify → assert. Never: find → assert
+
+### Why this rule is here
+
+On 2026-06-22, an AI contributor (Perplexity) asserted during a review session that `ops/work_queue/` did not exist — because `QUEUE.json` was not visible at root. The assertion was false. The directory existed with 10 complete files built in prior sessions. The error was caught by the operator but would not have been caught in a lower-supervision autonomous context. See `docs/review-notes/2026-06-22_general-review-and-gap-010.md` for the full incident record.
+
+This rule exists because false assertions in review notes become part of the canonical record, are treated as ground truth by subsequent agents, and can drive duplicate work or suppress valid prior work.
 
 ---
 

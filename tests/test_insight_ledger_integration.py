@@ -22,8 +22,13 @@ def _load_ledger_hooks():
         "aumemmanager_ledger_hooks",
         Path(__file__).parent.parent / "modules" / "aumemmanager" / "ledger_hooks.py",
     )
-    mod = importlib.util.module_from_spec(spec)  # NOSONAR - spec is non-None: path is a hardcoded .py file that always exists in this repo
-    spec.loader.exec_module(mod)  # NOSONAR - spec.loader is non-None for a valid .py ModuleSpec returned by spec_from_file_location
+    if spec is None:
+        raise ImportError("Cannot locate ledger_hooks module spec")
+    _loader = spec.loader
+    if _loader is None:
+        raise ImportError("Cannot load ledger_hooks: ModuleSpec has no loader")
+    mod = importlib.util.module_from_spec(spec)
+    _loader.exec_module(mod)
     return mod
 
 
@@ -32,7 +37,7 @@ AuMemLedgerHook = _hooks_mod.AuMemLedgerHook
 LEDGER_IMPORTANCE_THRESHOLD = _hooks_mod.LEDGER_IMPORTANCE_THRESHOLD
 
 
-# ── Hook lifecycle ───────────────────────────────────────────────────────────────
+# ── Hook lifecycle ───────────────────────────────────────────────────
 
 @pytest.mark.unit
 class TestAuMemLedgerHookInit:
@@ -58,7 +63,7 @@ class TestAuMemLedgerHookInit:
         try:
             from modules.insight_ledger.ledger_core import InsightLedger  # noqa: F401
             ledger_available = True
-        except ImportError:  # NOSONAR - availability probe; ImportError is expected when ledger is not installed
+        except ImportError:
             ledger_available = False
 
         if not ledger_available:
@@ -69,7 +74,7 @@ class TestAuMemLedgerHookInit:
             assert hook.enabled is True
 
 
-# ── on_memory_added ─────────────────────────────────────────────────────────────────
+# ── on_memory_added ────────────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
 class TestOnMemoryAdded:
@@ -146,26 +151,35 @@ class TestOnMemoryAdded:
             importance=8.5,
             memory_type="aurora_symbolic",
         )
-        call_args = mock_ledger.record_insight.call_args  # NOSONAR - call_args is non-None here: assert_called_once() above guarantees the mock was called
-        record = call_args[0][0]  # NOSONAR - call_args is Optional[_Call] but non-None when assert_called_once() passed
+        mock_ledger.record_insight.assert_called_once()
+        _args = mock_ledger.record_insight.call_args
+        if _args is None:
+            pytest.fail("record_insight was not called")
+        record = _args[0][0]
         assert "test_mem_xyz" in record.content
 
     def test_insight_record_source_is_aumemmanager(self):
         """Insight record source must be 'aumemmanager'."""
         hook, mock_ledger = self._hook_with_mock(threshold=7.0)
         hook.on_memory_added("m1", "owner", 8.0, "agent")
-        record = mock_ledger.record_insight.call_args[0][0]  # NOSONAR - call_args is Optional[_Call] but non-None: assert_called_once() guarantees the mock was called
+        _args = mock_ledger.record_insight.call_args
+        if _args is None:
+            pytest.fail("record_insight was not called")
+        record = _args[0][0]
         assert record.source == "aumemmanager"
 
     def test_context_tag_propagated_to_insight(self):
         """context_tag must appear in the insight's context dict."""
         hook, mock_ledger = self._hook_with_mock(threshold=7.0)
         hook.on_memory_added("m2", "owner", 8.0, "agent", context_tag="special_ctx")
-        record = mock_ledger.record_insight.call_args[0][0]  # NOSONAR - call_args is Optional[_Call] but non-None: assert_called_once() guarantees the mock was called
+        _args = mock_ledger.record_insight.call_args
+        if _args is None:
+            pytest.fail("record_insight was not called")
+        record = _args[0][0]
         assert record.context["context_tag"] == "special_ctx"
 
 
-# ── on_memory_retrieved ──────────────────────────────────────────────────────────────
+# ── on_memory_retrieved ──────────────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
 class TestOnMemoryRetrieved:
@@ -189,11 +203,14 @@ class TestOnMemoryRetrieved:
         hook = AuMemLedgerHook(ledger=mock_ledger, importance_threshold=7.0)
         long_query = "q" * 500
         hook.on_memory_retrieved("m1", "owner", 8.0, query=long_query)
-        record = mock_ledger.record_insight.call_args[0][0]  # NOSONAR - call_args is Optional[_Call] but non-None: assert_called_once() guarantees the mock was called
+        _args = mock_ledger.record_insight.call_args
+        if _args is None:
+            pytest.fail("record_insight was not called")
+        record = _args[0][0]
         assert len(record.context["query_preview"]) <= 100
 
 
-# ── on_capacity_warning ─────────────────────────────────────────────────────────────
+# ── on_capacity_warning ─────────────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
 class TestOnCapacityWarning:
@@ -209,7 +226,10 @@ class TestOnCapacityWarning:
         mock_ledger = MagicMock()
         hook = AuMemLedgerHook(ledger=mock_ledger)
         hook.on_capacity_warning(900, 1000, "active")
-        record = mock_ledger.record_insight.call_args[0][0]  # NOSONAR - call_args is Optional[_Call] but non-None: assert_called_once() guarantees the mock was called
+        _args = mock_ledger.record_insight.call_args
+        if _args is None:
+            pytest.fail("record_insight was not called")
+        record = _args[0][0]
         assert "90.0" in record.content or record.context["fill_percent"] == pytest.approx(90.0)
 
     def test_capacity_warning_severity_is_warning(self):
@@ -217,7 +237,10 @@ class TestOnCapacityWarning:
         mock_ledger = MagicMock()
         hook = AuMemLedgerHook(ledger=mock_ledger)
         hook.on_capacity_warning(800, 1000, "compressed")
-        record = mock_ledger.record_insight.call_args[0][0]  # NOSONAR - call_args is Optional[_Call] but non-None: assert_called_once() guarantees the mock was called
+        _args = mock_ledger.record_insight.call_args
+        if _args is None:
+            pytest.fail("record_insight was not called")
+        record = _args[0][0]
         assert record.severity == "warning"
 
     def test_disabled_hook_skips_capacity_warning(self):

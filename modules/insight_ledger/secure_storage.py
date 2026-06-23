@@ -107,9 +107,6 @@ class SecureStorage:
         Args:
             key_data: Key data to store (hex string)
         """
-        if not self.encrypted:
-            raise RuntimeError("Cryptography library not available")
-
         # Use local variable so type-narrowing can track the None check.
         _fernet = self._fernet
         if _fernet is None:
@@ -133,9 +130,6 @@ class SecureStorage:
             FileNotFoundError: If key file doesn't exist
             ValueError: If decryption fails
         """
-        if not self.encrypted:
-            raise RuntimeError("Cryptography library not available")
-
         if not self.storage_path.exists():
             raise FileNotFoundError(f"Key file not found: {self.storage_path}")
 

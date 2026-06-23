@@ -124,7 +124,9 @@ class AuMemLedgerHook:
     ) -> None:
         """Record a high-importance memory creation in the ledger."""
         _ledger = self._ledger
-        if _ledger is None or importance < self._threshold:
+        if _ledger is None:
+            return
+        if importance < self._threshold:
             return
 
         try:
@@ -161,7 +163,9 @@ class AuMemLedgerHook:
     ) -> None:
         """Record retrieval of a high-importance memory in the ledger."""
         _ledger = self._ledger
-        if _ledger is None or importance < self._threshold:
+        if _ledger is None:
+            return
+        if importance < self._threshold:
             return
 
         try:

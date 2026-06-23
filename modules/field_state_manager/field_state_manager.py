@@ -509,7 +509,10 @@ class FieldStateManager:
         # Get synapse stats
         if self.use_compressed_registry:
             _registry = self.synapse_registry
-            synapse_stats = _registry.memory_stats() if _registry is not None else {"compression_ratio": 1.0, "permanent_count": 0, "active_count": 0}
+            if _registry is not None:
+                synapse_stats = _registry.memory_stats()
+            else:
+                synapse_stats = {"compression_ratio": 1.0, "permanent_count": 0, "active_count": 0}
             total_synapses = synapse_stats["permanent_count"] + synapse_stats["active_count"]
         else:
             total_synapses = len(self.synapses)
@@ -723,7 +726,7 @@ class FieldStateManager:
 
         # Get current coherence
         coherence = self.get_field_coherence()
-        if not coherence:
+        if coherence is None:
             return []
 
         recommendations = _detector.generate_recommendations(coherence)

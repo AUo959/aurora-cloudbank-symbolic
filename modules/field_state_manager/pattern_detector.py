@@ -385,7 +385,7 @@ class PatternDetector:
                     1 for n1 in potential_coalition for n2 in potential_coalition
                     if n1 < n2 and n2 in node_interactions.get(n1, set())
                 )
-                coalition_density = actual_connections / total_possible if total_possible > 0 else 0.0
+                coalition_density = actual_connections / max(total_possible, 1e-10)
 
                 if coalition_density >= 0.6 and n >= min_coalition_size:  # High interconnection
                     qualified.append((potential_coalition, coalition_density))

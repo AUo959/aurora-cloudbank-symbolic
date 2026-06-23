@@ -154,7 +154,7 @@ class TestOnMemoryAdded:
         mock_ledger.record_insight.assert_called_once()
         _args = mock_ledger.record_insight.call_args
         if _args is None:
-            pytest.fail("record_insight was not called")
+            raise AssertionError("record_insight was not called")
         record = _args[0][0]
         assert "test_mem_xyz" in record.content
 
@@ -164,7 +164,7 @@ class TestOnMemoryAdded:
         hook.on_memory_added("m1", "owner", 8.0, "agent")
         _args = mock_ledger.record_insight.call_args
         if _args is None:
-            pytest.fail("record_insight was not called")
+            raise AssertionError("record_insight was not called")
         record = _args[0][0]
         assert record.source == "aumemmanager"
 
@@ -174,7 +174,7 @@ class TestOnMemoryAdded:
         hook.on_memory_added("m2", "owner", 8.0, "agent", context_tag="special_ctx")
         _args = mock_ledger.record_insight.call_args
         if _args is None:
-            pytest.fail("record_insight was not called")
+            raise AssertionError("record_insight was not called")
         record = _args[0][0]
         assert record.context["context_tag"] == "special_ctx"
 
@@ -205,7 +205,7 @@ class TestOnMemoryRetrieved:
         hook.on_memory_retrieved("m1", "owner", 8.0, query=long_query)
         _args = mock_ledger.record_insight.call_args
         if _args is None:
-            pytest.fail("record_insight was not called")
+            raise AssertionError("record_insight was not called")
         record = _args[0][0]
         assert len(record.context["query_preview"]) <= 100
 
@@ -228,7 +228,7 @@ class TestOnCapacityWarning:
         hook.on_capacity_warning(900, 1000, "active")
         _args = mock_ledger.record_insight.call_args
         if _args is None:
-            pytest.fail("record_insight was not called")
+            raise AssertionError("record_insight was not called")
         record = _args[0][0]
         assert "90.0" in record.content or record.context["fill_percent"] == pytest.approx(90.0)
 
@@ -239,7 +239,7 @@ class TestOnCapacityWarning:
         hook.on_capacity_warning(800, 1000, "compressed")
         _args = mock_ledger.record_insight.call_args
         if _args is None:
-            pytest.fail("record_insight was not called")
+            raise AssertionError("record_insight was not called")
         record = _args[0][0]
         assert record.severity == "warning"
 

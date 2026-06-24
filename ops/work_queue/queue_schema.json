@@ -1,71 +1,186 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Aurora Work Queue Item",
+  "title": "Aurora Work Queue",
+  "description": "Compatibility schema for the live Aurora work queue file. Supports the current rank/status renderer model and the planned state/bridge-field model.",
   "type": "object",
   "required": [
-    "id",
-    "title",
-    "state",
-    "priority",
-    "priority_score",
-    "area",
-    "consumer_fit",
-    "context_pack",
-    "next_action",
-    "done_when",
-    "opened",
-    "last_updated"
+    "_meta",
+    "active",
+    "completed"
   ],
+  "additionalProperties": true,
   "properties": {
-    "id": { "type": "string", "description": "Stable queue identifier, e.g. Q-0001." },
-    "github_issue": { "type": ["integer", "null"], "description": "GitHub issue number, if exists." },
-    "title": { "type": "string" },
-    "state": {
+    "_meta": {
+      "type": "object",
+      "required": [
+        "version",
+        "description",
+        "last_aurora_review",
+        "schema"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "version": { "type": "string" },
+        "description": { "type": "string" },
+        "last_aurora_review": { "type": "string" },
+        "schema": { "type": "string" }
+      }
+    },
+    "active": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/queueItem" }
+    },
+    "completed": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/completedItem" }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "queueStatus": {
       "type": "string",
-      "enum": ["ready", "blocked", "active", "waiting_review", "decision_required", "done"]
+      "enum": [
+        "open",
+        "blocked",
+        "needs-decision",
+        "in-progress",
+        "waiting-review",
+        "done"
+      ]
     },
-    "priority": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
-    "priority_score": { "type": "integer", "minimum": 0 },
-    "area": {
+    "queueState": {
       "type": "string",
-      "description": "Primary domain: ethics, security, architecture, simulation, api, documentation, operations, etc."
+      "enum": [
+        "ready",
+        "blocked",
+        "active",
+        "waiting_review",
+        "decision_required",
+        "done"
+      ]
     },
-    "labels": { "type": "array", "items": { "type": "string" } },
-    "depends_on": {
-      "type": "array",
-      "items": { "type": "string" },
-      "description": "Queue IDs this item is blocked by."
-    },
-    "blocks": {
-      "type": "array",
-      "items": { "type": "string" },
-      "description": "Queue IDs this item gates."
-    },
-    "decision_required": { "type": "boolean", "default": false },
-    "decision_owner": { "type": "string" },
-    "gate_id": {
+    "priority": {
       "type": "string",
-      "description": "If this item has a registered human gate, the corresponding GATE-xxx ID from gate_registry.json."
+      "enum": [
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
     },
-    "consumer_fit": {
-      "type": "array",
-      "items": { "type": "string", "enum": ["aurora", "agent", "human"] }
+    "platform": {
+      "type": "string",
+      "enum": [
+        "aurora",
+        "codex",
+        "claude-code",
+        "perplexity",
+        "human",
+        "either"
+      ]
     },
-    "context_pack": {
-      "type": "array",
-      "items": { "type": "string" }
+    "queueItem": {
+      "type": "object",
+      "required": [
+        "id",
+        "title"
+      ],
+      "additionalProperties": true,
+      "anyOf": [
+        { "required": ["status"] },
+        { "required": ["state"] }
+      ],
+      "properties": {
+        "rank": { "type": "integer", "minimum": 1 },
+        "id": { "type": "string" },
+        "github_issue": { "type": ["integer", "null"] },
+        "linked_prs": {
+          "type": "array",
+          "items": { "type": "integer" }
+        },
+        "title": { "type": "string" },
+        "status": { "$ref": "#/definitions/queueStatus" },
+        "state": { "$ref": "#/definitions/queueState" },
+        "priority": { "$ref": "#/definitions/priority" },
+        "priority_score": { "type": "integer", "minimum": 0 },
+        "area": { "type": "string" },
+        "owner": { "type": ["string", "null"] },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "depends_on": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "blocks": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "decision_required": { "type": "boolean" },
+        "decision_owner": { "type": "string" },
+        "gate_id": { "type": "string" },
+        "consumer_fit": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["aurora", "agent", "human"] }
+        },
+        "context_pack": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "next_action": { "type": "string" },
+        "done_when": { "type": "string" },
+        "aurora_note": { "type": "string" },
+        "aurora_notes": { "type": "string" },
+        "aurora_authority": { "type": "boolean" },
+        "is_stale_scope": { "type": "boolean" },
+        "parallel_group": { "type": "string" },
+        "active_worker": { "type": "string" },
+        "started": { "type": "string" },
+        "pr": { "type": "integer" },
+        "opened": { "type": "string" },
+        "last_updated": { "type": "string" },
+        "closed": { "type": "string" },
+        "url": { "type": "string" },
+        "preferred_platform": { "$ref": "#/definitions/platform" },
+        "claim_required": { "type": "boolean" },
+        "claim_paths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "session_state_ref": { "type": ["string", "null"] },
+        "review_class": { "type": "string" },
+        "handoff_surface": { "type": "string" },
+        "coordination_notes": { "type": "string" },
+        "metrics_tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
     },
-    "next_action": { "type": "string" },
-    "done_when": { "type": "string" },
-    "aurora_notes": { "type": "string" },
-    "is_stale_scope": { "type": "boolean", "default": false },
-    "parallel_group": { "type": "string" },
-    "active_worker": { "type": "string" },
-    "started": { "type": "string", "format": "date" },
-    "pr": { "type": "integer" },
-    "opened": { "type": "string", "format": "date" },
-    "last_updated": { "type": "string", "format": "date" },
-    "closed": { "type": "string", "format": "date" },
-    "url": { "type": "string", "format": "uri" }
+    "completedItem": {
+      "type": "object",
+      "required": [
+        "id",
+        "title"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "closed": { "type": "string" },
+        "status": { "$ref": "#/definitions/queueStatus" },
+        "state": { "$ref": "#/definitions/queueState" },
+        "github_issue": { "type": ["integer", "null"] },
+        "pr": { "type": "integer" }
+      }
+    }
   }
 }

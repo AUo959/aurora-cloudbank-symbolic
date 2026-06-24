@@ -1,8 +1,10 @@
 {
   "manifest_id": "recovered-ethics-protocols-custody-live",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "custody_fixture",
   "created": "2026-06-22",
+  "updated": "2026-06-24",
+  "update_ref": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1148",
   "decision_recorded_by": "operator (session 2026-06-22)",
   "decision_ref": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1126",
 
@@ -24,23 +26,26 @@
   "protocols": [
     {
       "protocol_id": "sherlock",
-      "version": "unverified-recovered-candidate",
-      "status": "recovered_candidate",
       "role": "Investigation, traceability, causal mapping, transparency reporting, and doctrine verification.",
-      "source_classification": "recovered_candidate",
-      "custody": {
-        "source_package": "pending-custody-inventory",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
         "source_package_sha256": "PENDING",
-        "internal_path": "pending/sherlock",
+        "internal_file_path": "PENDING",
         "internal_file_sha256": "PENDING",
-        "verified_at": "PENDING",
-        "verified_by": "PENDING",
-        "blockers": [
-          "Exact source package hash not yet verified.",
-          "Internal file hash not yet verified.",
+        "observed_version": "unverified-recovered-candidate",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified.",
           "Protocol-specific schema not yet promoted."
-        ]
+        ],
+        "promotion_decision": "pending_custody_verification"
       },
+
       "allowed_actions": ["investigate", "trace", "verify_doctrine", "produce_transparency_report"],
       "forbidden_actions": ["mutate_subject_state", "enforce_containment", "adjudicate_appeals"],
       "required_evidence": [
@@ -69,25 +74,29 @@
       "appeal_requirements": ["Findings may be challenged through Tribunal review before runtime use."],
       "protocol_specific": { "investigation_scope": "custody-and-trace-review" }
     },
+
     {
       "protocol_id": "watson",
-      "version": "unverified-recovered-candidate",
-      "status": "recovered_candidate",
       "role": "Context retention, rigidity moderation, evidence correlation, and operator-readable briefing.",
-      "source_classification": "recovered_candidate",
-      "custody": {
-        "source_package": "pending-custody-inventory",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
         "source_package_sha256": "PENDING",
-        "internal_path": "pending/watson",
+        "internal_file_path": "PENDING",
         "internal_file_sha256": "PENDING",
-        "verified_at": "PENDING",
-        "verified_by": "PENDING",
-        "blockers": [
-          "Exact source package hash not yet verified.",
-          "Internal file hash not yet verified.",
+        "observed_version": "unverified-recovered-candidate",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified.",
           "Protocol-specific schema not yet promoted."
-        ]
+        ],
+        "promotion_decision": "pending_custody_verification"
       },
+
       "allowed_actions": ["retain_context", "correlate_evidence", "generate_operator_brief", "moderate_rigidity"],
       "forbidden_actions": ["alter_sherlock_logs", "enforce_containment", "adjudicate_disputes"],
       "required_evidence": [
@@ -112,25 +121,29 @@
       "appeal_requirements": ["Brief conclusions may be challenged through Tribunal review before runtime use."],
       "protocol_specific": { "brief_generation_rules": "operator-readable-evidence-cited" }
     },
+
     {
       "protocol_id": "moriarty",
-      "version": "unverified-recovered-candidate",
-      "status": "recovered_candidate",
       "role": "Anomaly containment, quarantine, review-only translation, ethics audit, anchor validation, and rollback-over-compromise posture.",
-      "source_classification": "recovered_candidate",
-      "custody": {
-        "source_package": "pending-custody-inventory",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
         "source_package_sha256": "PENDING",
-        "internal_path": "pending/moriarty",
+        "internal_file_path": "PENDING",
         "internal_file_sha256": "PENDING",
-        "verified_at": "PENDING",
-        "verified_by": "PENDING",
-        "blockers": [
-          "Exact source package hash not yet verified.",
-          "Internal file hash not yet verified.",
+        "observed_version": "unverified-recovered-candidate",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified.",
           "Runtime containment boundaries not yet tested — HARD BLOCK on wiring."
-        ]
+        ],
+        "promotion_decision": "pending_custody_verification"
       },
+
       "allowed_actions": ["identify_anomaly_candidate", "recommend_quarantine", "perform_anchor_check", "recommend_rollback"],
       "forbidden_actions": [
         "treat_containment_as_narrative_escalation",
@@ -169,25 +182,29 @@
       "appeal_requirements": ["Containment recommendations must be appealable through Tribunal review."],
       "protocol_specific": { "quarantine_rules": "review-only-no-runtime-enforcement" }
     },
+
     {
       "protocol_id": "tribunal",
-      "version": "unverified-recovered-candidate",
-      "status": "recovered_candidate",
       "role": "Dispute and appeal adjudication for memory, narrative integrity, drift, and containment questions.",
-      "source_classification": "recovered_candidate",
-      "custody": {
-        "source_package": "pending-custody-inventory",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
         "source_package_sha256": "PENDING",
-        "internal_path": "pending/tribunal",
+        "internal_file_path": "PENDING",
         "internal_file_sha256": "PENDING",
-        "verified_at": "PENDING",
-        "verified_by": "PENDING",
-        "blockers": [
-          "Exact source package hash not yet verified.",
-          "Internal file hash not yet verified.",
+        "observed_version": "unverified-recovered-candidate",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified.",
           "Quorum and appeal semantics not yet verified."
-        ]
+        ],
+        "promotion_decision": "pending_custody_verification"
       },
+
       "allowed_actions": ["adjudicate_dispute", "review_containment_appeal", "record_ruling", "recommend_reopen"],
       "forbidden_actions": ["perform_primary_investigation", "secretly_enforce_containment", "rule_without_evidence"],
       "required_evidence": [
@@ -215,25 +232,29 @@
       "appeal_requirements": ["Every ruling must define appeal and reopen rules."],
       "protocol_specific": { "jurisdiction": "recovered-protocol-dispute-and-appeal-review" }
     },
+
     {
       "protocol_id": "shadowfax",
-      "version": "unverified-partial-lineage",
-      "status": "sealed_bundle_reference",
       "role": "Stillness, supervisory review, paradox escalation, and boundary-instability oversight.",
-      "source_classification": "sealed_bundle_reference",
-      "custody": {
-        "source_package": "pending-standalone-shadowfax-bundle-location",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
         "source_package_sha256": "PENDING",
-        "internal_path": "pending/shadowfax",
+        "internal_file_path": "PENDING",
         "internal_file_sha256": "PENDING",
-        "verified_at": "PENDING",
-        "verified_by": "PENDING",
-        "blockers": [
+        "observed_version": "unverified-partial-lineage",
+        "observed_status": "sealed_bundle_reference",
+        "source_classification": "missing_dependency",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
           "Standalone SHADOWFAX bundle not yet located — HARD BLOCK on any wiring decision.",
-          "Exact source package hash not yet verified.",
-          "Internal file hash not yet verified."
-        ]
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified."
+        ],
+        "promotion_decision": "blocked_pending_bundle_location"
       },
+
       "allowed_actions": [
         "recommend_stillness",
         "escalate_paradox_for_review",

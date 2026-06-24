@@ -100,6 +100,19 @@ git commit -m "refactor: simplify signal propagation logic"
 - `test`: Adding or updating tests
 - `chore`: Build process, dependencies, tooling
 - `ci`: CI/CD workflow changes
+- `aurora(queue):` **Aurora work-queue authority events** — re-ranks, new items, gate closures, view regeneration. See [`ops/work_queue/README.md`](ops/work_queue/README.md) for full convention.
+
+**`aurora(queue):` examples:**
+```bash
+git commit -m "aurora(queue): re-rank #1140 above #1141 — topology contradiction is active QGIA blocker"
+git commit -m "aurora(queue): add item docs/archive-audit — zero coverage gap identified in review"
+git commit -m "aurora(queue): close #1148 — custody inventory complete, SHA verified"
+git commit -m "aurora(queue): regenerate views"
+```
+
+> ⚠️ `QUEUE.md`, `NEXT_UP.md`, and `OPEN_GATES.md` are **generated files**. Never edit them directly.
+> Edit `queue.json` then run `python ops/work_queue/sync_queue.py` and commit the result.
+> CI will block any PR where the generated views are stale.
 
 ### 5. Push and Create PR
 
@@ -243,6 +256,7 @@ python -c "from modules.field_state_manager import FieldStateManager; print('✅
 - `CONTRIBUTING.md` - This file
 - `docs/LOCAL_TESTING_GUIDE.md` - Testing workflow
 - `docs/CI_WORKFLOW_FIX.md` - CI strategy
+- `ops/work_queue/README.md` - Work queue authority model and `aurora(queue):` convention
 
 ## 🎯 Aurora-Specific Guidelines
 
@@ -321,6 +335,7 @@ Before submitting your PR, ensure:
   - [ ] Field dynamics preserved (organic, not centralized)
   - [ ] Ethical validation maintained
   - [ ] Thread continuity respected
+- [ ] If touching `ops/work_queue/**`: edited `queue.json` (not generated views), ran `sync_queue.py`, committed regenerated files
 
 ## 🏆 Recognition
 
@@ -335,6 +350,7 @@ Contributors are recognized in several ways:
 - [Local Testing Guide](docs/LOCAL_TESTING_GUIDE.md)
 - [CI Workflow Strategy](docs/CI_WORKFLOW_FIX.md)
 - [Aurora Documentation](https://auo959.github.io/aurora-cloudbank-symbolic)
+- [Work Queue Guide](ops/work_queue/QUEUE_GUIDE.md)
 
 ## ❓ Questions?
 

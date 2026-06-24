@@ -1,0 +1,48 @@
+{
+  "_fixture_meta": {
+    "fixture_for": "shadowfax",
+    "description": "Canonical sanitized example for the SHADOWFAX recovered protocol. source_classification is missing_dependency and promotion_decision is blocked_pending_bundle_location — both are schema-enforced via the if/then constraint in custody_record.schema.json. The standalone SHADOWFAX bundle has not been located. No wiring decision may be made until the bundle is found and hash-verified.",
+    "schema_refs": [
+      "../schemas/custody_record.schema.json",
+      "../schemas/recovered_protocol_manifest.schema.json"
+    ],
+    "intake_status": "sanitized_canonical_example",
+    "validation_command": "ajv validate -s docs/ethics/recovered_protocols/schemas/custody_record.schema.json -d docs/ethics/recovered_protocols/fixtures/shadowfax.fixture.json --spec=draft2020",
+    "sanitization_notes": "No real source packages, file paths, or hashes are present. The missing_dependency classification and blocked_pending_bundle_location promotion_decision are correct and schema-enforced. Do not change promotion_decision without locating the standalone bundle and obtaining operator approval."
+  },
+  "protocol_id": "shadowfax",
+  "role": "Stillness, supervisory review, paradox escalation, and boundary-instability oversight.",
+  "custody_record": {
+    "source_package_name": "PENDING",
+    "source_package_sha256": "PENDING",
+    "internal_file_path": "PENDING",
+    "internal_file_sha256": "PENDING",
+    "observed_version": "unverified-partial-lineage",
+    "observed_status": "sealed_bundle_reference",
+    "source_classification": "missing_dependency",
+    "verification_date": "PENDING",
+    "reviewer_or_agent_surface": "PENDING",
+    "unresolved_blockers": [
+      "Standalone SHADOWFAX bundle not yet located — HARD BLOCK on any wiring decision.",
+      "Exact source package name and hash not yet verified.",
+      "Internal file path and hash not yet verified."
+    ],
+    "promotion_decision": "blocked_pending_bundle_location"
+  },
+  "allowed_actions": [
+    "recommend_stillness",
+    "escalate_paradox_for_review",
+    "flag_boundary_instability",
+    "request_supervisory_review"
+  ],
+  "forbidden_actions": ["bypass_evidence", "erase_review_paths", "convert_instability_into_proof", "override_without_audit"],
+  "layer_boundaries": {
+    "l1": "May recommend pause/escalation only after review.",
+    "l2": "May flag simulation boundary instability as non-canonical evidence.",
+    "l3": "May flag THREADCORE paradox or continuity instability for review.",
+    "cross_layer_rules": [
+      "Stillness cannot bypass audit.",
+      "Boundary instability is not proof by itself."
+    ]
+  }
+}

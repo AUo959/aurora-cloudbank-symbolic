@@ -5,10 +5,10 @@
 
 # Aurora Work Queue
 
-**Schema version:** `1.2.0`  
-**Last Aurora review:** `2026-06-23T01:59:00Z`  
-**Generated:** `2026-06-23T22:43:00Z`  
-**Items:** 27 active · 0 completed
+**Schema version:** `1.2.1`  
+**Last Aurora review:** `2026-06-24T03:45:00Z`  
+**Generated:** `2026-06-24T03:45:00Z`  
+**Items:** 23 active · 4 completed
 
 > Aurora holds contextual authority over rank order.
 > Do not edit rank or `aurora_note` fields without an `aurora(queue):` commit.
@@ -18,23 +18,7 @@
 
 ## Active Queue
 
-### 1. 🟢 #1147 — Work queue automation (sync_queue.py, GitHub Actions, aurora(queue): hook)
-
-| Field | Value |
-|---|---|
-| **Status** | `open` |
-| **Owner** | _unassigned_ |
-| **Depends on** | — |
-| **Blocks** | — |
-| **Tags** | `ops` `automation` `coordination` `blocker` |
-
-**Aurora note:**
-
-> The queue is not functional without automation. It is currently a manually-maintained document — any agent reading it as a work selection source is operating on a stale map. This must land before the queue can be trusted as a coordination layer for anything else. Three deliverables: sync_queue.py (CI validator), GitHub Actions workflow (auto-post on push), aurora(queue): convention in CONTRIBUTING.md.
-
----
-
-### 2. 🟢 #1126 — FastAPI lifespan migration (deprecation fix)
+### 1. 🟢 #1126 — FastAPI lifespan migration (deprecation fix)
 
 | Field | Value |
 |---|---|
@@ -50,7 +34,7 @@
 
 ---
 
-### 3. 🟢 #1130 — CI green-path stabilization
+### 2. 🟢 #1130 — CI green-path stabilization
 
 | Field | Value |
 |---|---|
@@ -66,7 +50,7 @@
 
 ---
 
-### 4. 🟢 security/CVE-audit — CVE dependency audit (Sprint 311 follow-on)
+### 3. 🟢 security/CVE-audit — CVE dependency audit (Sprint 311 follow-on)
 
 | Field | Value |
 |---|---|
@@ -82,7 +66,7 @@
 
 ---
 
-### 5. 🟢 #1139 — docs/ethics — create top-level README and navigation index
+### 4. 🟢 #1139 — docs/ethics — create top-level README and navigation index
 
 | Field | Value |
 |---|---|
@@ -98,7 +82,7 @@
 
 ---
 
-### 6. 🟢 #1140 — docs/architecture — fix RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md contradiction re: mesh/agents routes and QGIA
+### 5. 🟢 #1140 — docs/architecture — fix RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md contradiction re: mesh/agents routes and QGIA
 
 | Field | Value |
 |---|---|
@@ -114,103 +98,55 @@
 
 ---
 
-### 7. 🟢 #1148 — Protocol custody inventory — machine-readable manifest of recovered package/file hashes and blockers
+### 6. 🔵 #1151 — Runtime mapping design — map protocol decisions to EthicsEngine, ethics_gate, compliance monitor, geometric ethics
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
+| **Status** | `in-progress` |
 | **Owner** | _unassigned_ |
 | **Depends on** | — |
-| **Blocks** | #1149, #1150, #1151, #1152, #1153 |
-| **Tags** | `ethics` `protocols` `custody` `gate` |
-
-**Aurora note:**
-
-> Gate for the entire Section 8 protocol promotion chain. All five protocol custody records are PENDING — no SHA verification has been performed. Blocks #1149, #1150, #1151, #1152, #1153. Nothing in the recovered protocol chain can advance until this closes.
-
----
-
-### 8. 🔴 #1149 — Protocol JSON schemas — add schema files and validation tests for all five protocols
-
-| Field | Value |
-|---|---|
-| **Status** | `blocked` |
-| **Owner** | _unassigned_ |
-| **Depends on** | #1148 |
-| **Blocks** | #1150, #1151, #1152, #1153 |
-| **Tags** | `ethics` `protocols` `schemas` |
-
-**Aurora note:**
-
-> Blocked by #1148 (custody inventory). Schemas cannot be finalized until custody classification is confirmed for each protocol artifact.
-
----
-
-### 9. 🔴 #1150 — Protocol fixture intake — sanitized canonical examples for all five protocols
-
-| Field | Value |
-|---|---|
-| **Status** | `blocked` |
-| **Owner** | _unassigned_ |
-| **Depends on** | #1148, #1149 |
-| **Blocks** | #1151, #1152, #1153 |
-| **Tags** | `ethics` `protocols` `fixtures` |
-
-**Aurora note:**
-
-> Blocked by #1148 and #1149. Fixtures must validate against schemas from #1149 and must not promote raw recovered payloads without custody review.
-
----
-
-### 10. 🔴 #1151 — Runtime mapping design — map protocol decisions to EthicsEngine, ethics_gate, compliance monitor, geometric ethics
-
-| Field | Value |
-|---|---|
-| **Status** | `blocked` |
-| **Owner** | _unassigned_ |
-| **Depends on** | #1148, #1149, #1150 |
 | **Blocks** | #1152, #1153 |
 | **Tags** | `ethics` `protocols` `runtime` `design` |
 
 **Aurora note:**
 
-> Blocked by #1148–#1150. Design-only artifact — no runtime wiring. Must not begin until artifacts are custody-verified.
+> Previously blocked by #1148–#1150; those prerequisite issues are now completed. PR #1157 is open and mergeable. Review first in the recovered-protocol chain. Documentation-only artifact — no runtime wiring.
 
 ---
 
-### 11. 🔴 #1152 — Moriarty containment tests — anomaly quarantine/review-only/rollback without L2-to-L1 bleed
+### 7. 🔵 #1152 — Moriarty containment tests — anomaly quarantine/review-only/rollback without L2-to-L1 bleed
 
 | Field | Value |
 |---|---|
-| **Status** | `blocked` |
+| **Status** | `in-progress` |
 | **Owner** | _unassigned_ |
-| **Depends on** | #1148, #1149, #1150, #1151 |
+| **Depends on** | #1151 |
 | **Blocks** | — |
 | **Tags** | `ethics` `protocols` `moriarty` `tests` |
 
 **Aurora note:**
 
-> Blocked by #1148–#1151. Tests run against fixtures from #1150, not raw recovered payloads. No active L2-to-L1 behavior introduced.
+> Previously blocked by #1148–#1151. PR #1158 is open and mergeable, but review/merge should follow #1157 because the appeal and mapping assumptions depend on the runtime mapping design. No active L2-to-L1 behavior introduced.
 
 ---
 
-### 12. 🔴 #1153 — Tribunal appeal tests — dispute/appeal record requirements without runtime enforcement
+### 8. 🔵 #1153 — Tribunal appeal tests — dispute/appeal record requirements without runtime enforcement
 
 | Field | Value |
 |---|---|
-| **Status** | `blocked` |
+| **Status** | `in-progress` |
 | **Owner** | _unassigned_ |
-| **Depends on** | #1148, #1149, #1150, #1151 |
+| **Depends on** | #1151 |
 | **Blocks** | — |
 | **Tags** | `ethics` `protocols` `tribunal` `tests` |
 
 **Aurora note:**
 
-> Blocked by #1148–#1151. Parallel with #1152 once unblocked. No runtime enforcement wiring introduced.
+> Previously blocked by #1148–#1151. PR #1159 is open and mergeable, but Codacy reported two minor CodeStyle issues; review/merge should follow #1157 and preferably coordinate with #1158. No runtime enforcement wiring introduced.
 
 ---
 
-### 13. 🟢 #1137 — docs/ethics — geometric curvature v2 supplemental warning layer has no follow-up implementation issue
+### 9. 🟢 #1137 — docs/ethics — geometric curvature v2 supplemental warning layer has no follow-up implementation issue
 
 | Field | Value |
 |---|---|
@@ -226,7 +162,7 @@
 
 ---
 
-### 14. 🟢 #1138 — docs/ethics/recovered_protocols — all five custody records PENDING; custody inventory work not started
+### 10. 🟢 #1138 — docs/ethics/recovered_protocols — all five custody records PENDING; custody inventory work not started
 
 | Field | Value |
 |---|---|
@@ -238,11 +174,11 @@
 
 **Aurora note:**
 
-> Surfaces the manifest side of the same work as #1148. Both must close together. Locate source packages, compute SHAs, record verified_at/verified_by. SHADOWFAX is a hard block — standalone bundle must be located or formally recorded as missing dependency.
+> Partially superseded by completed #1148, #1149, and #1150: custody fixture, schema, and sanitized fixture scaffolding now exist. Remaining live work is true custody verification: source/internal SHA resolution, verified_at/verified_by fields, and SHADOWFAX standalone bundle disposition.
 
 ---
 
-### 15. 🟢 #1142 — docs/architecture — RUNTIME_PATH_DRIFT_LEDGER.md: two unresolved items with no tracking issue
+### 11. 🟢 #1142 — docs/architecture — RUNTIME_PATH_DRIFT_LEDGER.md: two unresolved items with no tracking issue
 
 | Field | Value |
 |---|---|
@@ -258,7 +194,7 @@
 
 ---
 
-### 16. 🟢 #1141 — docs/architecture — QGIA_L1_NODE_REGISTRATION.md: agent registry pending 102 days, no exchange router defined
+### 12. 🟢 #1141 — docs/architecture — QGIA_L1_NODE_REGISTRATION.md: agent registry pending 102 days, no exchange router defined
 
 | Field | Value |
 |---|---|
@@ -274,7 +210,7 @@
 
 ---
 
-### 17. 🔴 #1144 — docs/api — api_surface_inventory.json missing four surfaces
+### 13. 🟢 #1144 — docs/api — api_surface_inventory.json missing four surfaces
 
 | Field | Value |
 |---|---|
@@ -290,7 +226,7 @@
 
 ---
 
-### 18. 🟢 #1143 — docs/architecture — scaling_plan.md has no issue coverage and no relationship to current runtime topology
+### 14. 🟢 #1143 — docs/architecture — scaling_plan.md has no issue coverage and no relationship to current runtime topology
 
 | Field | Value |
 |---|---|
@@ -306,7 +242,7 @@
 
 ---
 
-### 19. 🔴 #1145 — docs/api — RD_API_REFERENCE.md version 1.0.0 (2025-11-12, 7 months stale); three gaps
+### 15. 🟢 #1145 — docs/api — RD_API_REFERENCE.md version 1.0.0 (2025-11-12, 7 months stale); three gaps
 
 | Field | Value |
 |---|---|
@@ -322,7 +258,7 @@
 
 ---
 
-### 20. 🔴 #1146 — docs/api — API_CATALOG_GOVERNANCE.md: three governance rules currently violated
+### 16. 🟢 #1146 — docs/api — API_CATALOG_GOVERNANCE.md: three governance rules currently violated
 
 | Field | Value |
 |---|---|
@@ -338,7 +274,7 @@
 
 ---
 
-### 21. 🟢 #1135 — simulation/ — L1_CANON_CHARACTER_ROSTER.md (165 KB) has no validation against QGIA or Orion registries
+### 17. 🟢 #1135 — simulation/ — L1_CANON_CHARACTER_ROSTER.md (165 KB) has no validation against QGIA or Orion registries
 
 | Field | Value |
 |---|---|
@@ -354,7 +290,7 @@
 
 ---
 
-### 22. 🟢 #1136 — simulation/ — ORION_STATION_ENHANCEMENT_PROPOSAL.md (38 KB) has no implementation tracking
+### 18. 🟢 #1136 — simulation/ — ORION_STATION_ENHANCEMENT_PROPOSAL.md (38 KB) has no implementation tracking
 
 | Field | Value |
 |---|---|
@@ -370,7 +306,7 @@
 
 ---
 
-### 23. 🟢 arch/layer-canonization — Layer architecture canonization (L1/L2/L3 enforcement in code)
+### 19. 🟢 arch/layer-canonization — Layer architecture canonization (L1/L2/L3 enforcement in code)
 
 | Field | Value |
 |---|---|
@@ -382,11 +318,11 @@
 
 **Aurora note:**
 
-> Ensures no code path violates the canonical layer definitions. Foundational for all new agent work. Repositioned to Rank 23 — docs/architecture cluster work (#1140, #1141, #1143) should complete first to ensure canonization is working from current topology.
+> Ensures no code path violates the canonical layer definitions. Foundational for all new agent work. Repositioned after docs/architecture cluster work (#1140, #1141, #1143) so canonization works from current topology.
 
 ---
 
-### 24. 🟡 sim/SENTINEL-phase0 — PROJECT SENTINEL — Phase 0: Ethics review board constitution
+### 20. 🟡 sim/SENTINEL-phase0 — PROJECT SENTINEL — Phase 0: Ethics review board constitution
 
 | Field | Value |
 |---|---|
@@ -402,7 +338,7 @@
 
 ---
 
-### 25. 🟢 ops/QGIA-doctrine-store — QGIA analytical framework — store in ops/analytical_frameworks/QGIA/
+### 21. 🟢 ops/QGIA-doctrine-store — QGIA analytical framework — store in ops/analytical_frameworks/QGIA/
 
 | Field | Value |
 |---|---|
@@ -418,7 +354,7 @@
 
 ---
 
-### 26. 🟢 docs/api-reference — API reference documentation
+### 22. 🟢 docs/api-reference — API reference documentation
 
 | Field | Value |
 |---|---|
@@ -434,7 +370,7 @@
 
 ---
 
-### 27. 🟡 feat/QGIA — QGIA integration hooks
+### 23. 🟡 feat/QGIA — QGIA integration hooks
 
 | Field | Value |
 |---|---|
@@ -449,3 +385,12 @@
 > Doctrine now available (QGIA Runtime One-Pager v4.2.1 + Axiom Doctrine Narrative v1.0, reviewed 2026-06-22). Two-layer discipline maps cleanly to Triplex Handshake. ops/QGIA-doctrine-store must land first, then PAT routing decision. Crew sign-off required before any QGIA axiom becomes operationally binding.
 
 ---
+
+## Completed
+
+| ID | Title |
+|---|---|
+| #1147 | feat: Aurora-Aware Work Queue System (ops/work_queue/) |
+| #1148 | Protocol custody inventory — machine-readable manifest of recovered package/file hashes and blockers |
+| #1149 | Protocol JSON schemas — add schema files and validation tests for Sherlock, Watson, Moriarty, Tribunal, SHADOWFAX |
+| #1150 | Protocol fixture intake — add sanitized canonical examples for Sherlock, Watson, Moriarty, Tribunal, SHADOWFAX |

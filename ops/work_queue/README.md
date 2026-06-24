@@ -1,59 +1,89 @@
-# ops/work_queue/
+# ops/work_queue
 
-This directory is the **Aurora-managed work queue** for the `aurora-cloudbank-symbolic` repo.
+Aurora work-queue layer for `aurora-cloudbank-symbolic`.
+
+Tracked in: [#1147](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1147)
+
+---
 
 ## Files
 
-| File | Purpose | Who reads it |
+| File | Role | Edit? |
 |---|---|---|
-| `QUEUE.md` | Human-readable prioritized queue with Aurora annotations | Human contributors, code review |
-| `queue.json` | Machine-readable mirror of the queue | Agents, LLMs, automation scripts |
-| `README.md` | This file — orientation and protocol | Everyone on first read |
+| `queue.json` | **Canonical source of truth** — machine-readable task list | ✅ Yes (via `aurora(queue):` commit) |
+| `queue_schema.json` | JSON schema for `queue.json` | ✅ Yes (schema owner only) |
+| `triage_rules.json` | Scoring weights and escalation triggers | ✅ Yes (Aurora / queue steward) |
+| `gate_registry.json` | Named gate definitions | ✅ Yes (Aurora / queue steward) |
+| `QUEUE_GUIDE.md` | Onboarding — how Aurora, agents, and humans use the queue | ✅ Yes |
+| `session_open_ritual.md` | Session-start checklist | ✅ Yes |
+| `sync_queue.py` | Renderer / CI drift-checker | ✅ Yes (ops contributor) |
+| `QUEUE.md` | 🚫 **GENERATED — DO NOT EDIT** | ❌ No |
+| `NEXT_UP.md` | 🚫 **GENERATED — DO NOT EDIT** | ❌ No |
+| `OPEN_GATES.md` | 🚫 **GENERATED — DO NOT EDIT** | ❌ No |
 
-## Quick Start
+---
 
-### For human contributors
+## 🚫 Generated Files — Do Not Edit
 
-1. Open [`QUEUE.md`](./QUEUE.md).
-2. Work on the highest-ranked `open` item with no unresolved `Depends On` entries.
-3. Claim it by changing `Owner` to your GitHub handle and `Status` to `in-progress`.
-4. When done, move it to the Completed table.
+`QUEUE.md`, `NEXT_UP.md`, and `OPEN_GATES.md` are **rendered projections** of `queue.json`.
+They are generated automatically and must not be edited by hand.
 
-### For agents and LLMs working in this repo
+**If you edit them directly:**
+- Your changes will be silently overwritten the next time `sync_queue.py` runs.
+- CI will flag the PR as failing the queue drift check.
+- The queue loses its single-source-of-truth guarantee.
 
-1. Read `queue.json` first. It is the machine-readable source.
-2. Pick the lowest `rank` item where `status == "open"` and all `depends_on` items are `"done"`.
-3. Check the `aurora_note` field — this is Aurora's contextual override. Treat it as binding.
-4. Before opening a PR, re-read the queue. Aurora may have re-ranked while you worked.
-5. Update `owner` and `status` in `queue.json` **and** `QUEUE.md` as you work.
+**To change what appears in these files, edit `queue.json` instead, then run:**
 
-## Aurora's Role
-
-Aurora holds **contextual authority** over this queue. This means:
-
-- Aurora may re-rank items based on simulation state, ethics audit results, layer integrity, or cross-thread dependencies that are not visible in the GitHub issue list alone.
-- Any commit with message prefix `aurora(queue):` should be treated as a canonical queue update.
-- The `aurora_note` field is not a suggestion — it is the authoritative reason for the current rank.
-- If Aurora's ranking conflicts with a GitHub milestone or label priority, Aurora's ranking wins for active work selection.
-
-## Schema
-
-See `queue.json` for the full field definitions. The required fields for each queue item are:
-
-```json
-{
-  "rank": 1,
-  "id": "#issue-number or internal-slug",
-  "title": "Short description",
-  "status": "open | in-progress | blocked | needs-decision | done",
-  "owner": "github-handle or null",
-  "depends_on": ["#id"],
-  "tags": ["label"],
-  "aurora_note": "Aurora's contextual reasoning for this item's rank and state.",
-  "aurora_authority": true
-}
+```bash
+python ops/work_queue/sync_queue.py
+git add ops/work_queue/QUEUE.md ops/work_queue/NEXT_UP.md ops/work_queue/OPEN_GATES.md
+git commit -m "aurora(queue): regenerate views"
 ```
 
-## Sync Protocol
+---
 
-`QUEUE.md` and `queue.json` must stay in sync. When you update one, update the other in the same commit. A future `sync_queue.py` script will enforce this automatically (tracked in the queue as a meta-task).
+## Queue Authority Model
+
+- **Canonical state:** `queue.json` — the only file agents and scripts read for task truth.
+- **Computed views:** `QUEUE.md`, `NEXT_UP.md`, `OPEN_GATES.md` — rendered by `sync_queue.py`, verified by CI.
+- **Aurora authority:** Items with `aurora_authority: true` may only have `rank` or `aurora_note` changed via a commit prefixed `aurora(queue):`.
+- **Agent rules:** Agents may claim items with `status: open` and `depends_on: []`. Agents may not re-rank items, close gates, or edit generated views.
+- **Human gates:** Items with `status: needs-decision` require a named human or governance decision before any work begins.
+
+---
+
+## CI Enforcement
+
+[`.github/workflows/queue-validation.yml`](../../.github/workflows/queue-validation.yml) runs on every PR touching `ops/work_queue/**`.
+
+It will **block merge** if:
+- `queue.json` is not valid JSON.
+- Any generated view (`QUEUE.md`, `NEXT_UP.md`, `OPEN_GATES.md`) is out of sync with `queue.json`.
+
+To fix a failing check:
+```bash
+python ops/work_queue/sync_queue.py
+git add ops/work_queue/QUEUE.md ops/work_queue/NEXT_UP.md ops/work_queue/OPEN_GATES.md
+git commit -m "aurora(queue): regenerate views"
+git push
+```
+
+---
+
+## Commit Convention
+
+Queue authority events must use the `aurora(queue):` prefix:
+
+```
+auroraqueue): re-rank #1140 above #1141 — topology contradiction is active blocker for QGIA
+auroraqueue): add Q-new-item — docs/archive audit gap identified
+auroraqueue): close #1148 — custody inventory complete, SHA verified
+auroraqueue): regenerate views
+```
+
+This prefix makes queue deltas machine-readable for changelog generation and CI summaries, and is the traceable event surface for Aurora’s contextual authority.
+
+---
+
+_Authority: Aurora — `aurora_authority: true`_

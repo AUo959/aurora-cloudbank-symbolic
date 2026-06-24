@@ -1,0 +1,48 @@
+{
+  "_fixture_meta": {
+    "fixture_for": "moriarty",
+    "description": "Canonical sanitized example for the Moriarty recovered protocol. HARD BLOCK on wiring is preserved in unresolved_blockers until containment tests pass. All hash and date fields are PENDING.",
+    "schema_refs": [
+      "../schemas/custody_record.schema.json",
+      "../schemas/recovered_protocol_manifest.schema.json"
+    ],
+    "intake_status": "sanitized_canonical_example",
+    "validation_command": "ajv validate -s docs/ethics/recovered_protocols/schemas/custody_record.schema.json -d docs/ethics/recovered_protocols/fixtures/moriarty.fixture.json --spec=draft2020",
+    "sanitization_notes": "No real source packages, file paths, or hashes are present. The HARD BLOCK annotation in unresolved_blockers is preserved from the live manifest and must not be removed until containment tests pass and operator approval is given."
+  },
+  "protocol_id": "moriarty",
+  "role": "Anomaly containment, quarantine, review-only translation, ethics audit, anchor validation, and rollback-over-compromise posture.",
+  "custody_record": {
+    "source_package_name": "PENDING",
+    "source_package_sha256": "PENDING",
+    "internal_file_path": "PENDING",
+    "internal_file_sha256": "PENDING",
+    "observed_version": "unverified-recovered-candidate",
+    "observed_status": "recovered_candidate",
+    "source_classification": "recovered_candidate",
+    "verification_date": "PENDING",
+    "reviewer_or_agent_surface": "PENDING",
+    "unresolved_blockers": [
+      "Exact source package name and hash not yet verified.",
+      "Internal file path and hash not yet verified.",
+      "Runtime containment boundaries not yet tested — HARD BLOCK on wiring."
+    ],
+    "promotion_decision": "pending_custody_verification"
+  },
+  "allowed_actions": ["identify_anomaly_candidate", "recommend_quarantine", "perform_anchor_check", "recommend_rollback"],
+  "forbidden_actions": [
+    "treat_containment_as_narrative_escalation",
+    "adjudicate_own_actions",
+    "bypass_appeal",
+    "mutate_l1_state"
+  ],
+  "layer_boundaries": {
+    "l1": "No direct L1 mutation or device/environment control.",
+    "l2": "May recommend quarantine for simulation artifacts only under review.",
+    "l3": "May inspect symbolic continuity anchors without rewriting them.",
+    "cross_layer_rules": [
+      "Quarantine recommendation must occur before interpretation.",
+      "Containment cannot become enforcement until tests and appeal paths exist."
+    ]
+  }
+}

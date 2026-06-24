@@ -1,0 +1,43 @@
+{
+  "_fixture_meta": {
+    "fixture_for": "sherlock",
+    "description": "Canonical sanitized example for the Sherlock recovered protocol. All custody_record fields present and schema-valid. Hash and date fields are PENDING until real custody verification is performed.",
+    "schema_refs": [
+      "../schemas/custody_record.schema.json",
+      "../schemas/recovered_protocol_manifest.schema.json"
+    ],
+    "intake_status": "sanitized_canonical_example",
+    "validation_command": "ajv validate -s docs/ethics/recovered_protocols/schemas/custody_record.schema.json -d docs/ethics/recovered_protocols/fixtures/sherlock.fixture.json --spec=draft2020",
+    "sanitization_notes": "No real source packages, file paths, or hashes are present. PENDING is the correct value for all unverified fields."
+  },
+  "protocol_id": "sherlock",
+  "role": "Investigation, traceability, causal mapping, transparency reporting, and doctrine verification.",
+  "custody_record": {
+    "source_package_name": "PENDING",
+    "source_package_sha256": "PENDING",
+    "internal_file_path": "PENDING",
+    "internal_file_sha256": "PENDING",
+    "observed_version": "unverified-recovered-candidate",
+    "observed_status": "recovered_candidate",
+    "source_classification": "recovered_candidate",
+    "verification_date": "PENDING",
+    "reviewer_or_agent_surface": "PENDING",
+    "unresolved_blockers": [
+      "Exact source package name and hash not yet verified.",
+      "Internal file path and hash not yet verified.",
+      "Protocol-specific schema not yet promoted."
+    ],
+    "promotion_decision": "pending_custody_verification"
+  },
+  "allowed_actions": ["investigate", "trace", "verify_doctrine", "produce_transparency_report"],
+  "forbidden_actions": ["mutate_subject_state", "enforce_containment", "adjudicate_appeals"],
+  "layer_boundaries": {
+    "l1": "May produce operator-readable reports only after review.",
+    "l2": "May analyze simulation artifacts as evidence candidates.",
+    "l3": "May reference THREADCORE continuity and doctrine traces.",
+    "cross_layer_rules": [
+      "No L2-to-L1 promotion without custody review.",
+      "Investigation output is not enforcement authority."
+    ]
+  }
+}

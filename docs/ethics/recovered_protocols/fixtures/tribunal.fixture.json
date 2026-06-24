@@ -1,0 +1,43 @@
+{
+  "_fixture_meta": {
+    "fixture_for": "tribunal",
+    "description": "Canonical sanitized example for the Tribunal recovered protocol. All custody_record fields present and schema-valid. Hash and date fields are PENDING until real custody verification is performed.",
+    "schema_refs": [
+      "../schemas/custody_record.schema.json",
+      "../schemas/recovered_protocol_manifest.schema.json"
+    ],
+    "intake_status": "sanitized_canonical_example",
+    "validation_command": "ajv validate -s docs/ethics/recovered_protocols/schemas/custody_record.schema.json -d docs/ethics/recovered_protocols/fixtures/tribunal.fixture.json --spec=draft2020",
+    "sanitization_notes": "No real source packages, file paths, or hashes are present. PENDING is the correct value for all unverified fields."
+  },
+  "protocol_id": "tribunal",
+  "role": "Dispute and appeal adjudication for memory, narrative integrity, drift, and containment questions.",
+  "custody_record": {
+    "source_package_name": "PENDING",
+    "source_package_sha256": "PENDING",
+    "internal_file_path": "PENDING",
+    "internal_file_sha256": "PENDING",
+    "observed_version": "unverified-recovered-candidate",
+    "observed_status": "recovered_candidate",
+    "source_classification": "recovered_candidate",
+    "verification_date": "PENDING",
+    "reviewer_or_agent_surface": "PENDING",
+    "unresolved_blockers": [
+      "Exact source package name and hash not yet verified.",
+      "Internal file path and hash not yet verified.",
+      "Quorum and appeal semantics not yet verified."
+    ],
+    "promotion_decision": "pending_custody_verification"
+  },
+  "allowed_actions": ["adjudicate_dispute", "review_containment_appeal", "record_ruling", "recommend_reopen"],
+  "forbidden_actions": ["perform_primary_investigation", "secretly_enforce_containment", "rule_without_evidence"],
+  "layer_boundaries": {
+    "l1": "May produce reviewed adjudication records only.",
+    "l2": "May adjudicate simulation disputes without promoting them to L1 canon.",
+    "l3": "May review symbolic drift disputes with evidence bundles.",
+    "cross_layer_rules": [
+      "No ruling without minimum evidence.",
+      "Adjudication cannot secretly enforce containment."
+    ]
+  }
+}

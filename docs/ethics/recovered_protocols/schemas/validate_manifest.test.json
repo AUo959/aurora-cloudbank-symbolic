@@ -1,0 +1,137 @@
+{
+  "$schema_under_test": "./recovered_protocol_manifest.schema.json",
+  "$custody_schema_under_test": "./custody_record.schema.json",
+  "description": "Machine-readable validation test fixture for the recovered protocol manifest schemas. Run with any JSON Schema Draft 2020-12 validator (e.g. ajv, jsonschema). All cases reference the live manifest at docs/ethics/recovered_protocols/recovered_protocol_manifest.json.",
+  "validator_invocation": {
+    "tool": "ajv",
+    "example": "ajv validate -s docs/ethics/recovered_protocols/schemas/recovered_protocol_manifest.schema.json -d docs/ethics/recovered_protocols/recovered_protocol_manifest.json --spec=draft2020"
+  },
+  "test_cases": [
+    {
+      "id": "TC-001",
+      "description": "Live manifest validates against recovered_protocol_manifest.schema.json",
+      "schema": "./recovered_protocol_manifest.schema.json",
+      "instance": "../recovered_protocol_manifest.json",
+      "expected": "valid",
+      "rationale": "The live manifest must always satisfy its own schema. Failure here means either the manifest or the schema drifted."
+    },
+    {
+      "id": "TC-002",
+      "description": "Each protocol entry's custody_record validates against custody_record.schema.json",
+      "schema": "./custody_record.schema.json",
+      "instance_paths": [
+        "../recovered_protocol_manifest.json#/protocols/0/custody_record",
+        "../recovered_protocol_manifest.json#/protocols/1/custody_record",
+        "../recovered_protocol_manifest.json#/protocols/2/custody_record",
+        "../recovered_protocol_manifest.json#/protocols/3/custody_record",
+        "../recovered_protocol_manifest.json#/protocols/4/custody_record"
+      ],
+      "expected": "valid",
+      "rationale": "Every custody_record must conform independently. Validates field names, enum values, and SHA patterns."
+    },
+    {
+      "id": "TC-003",
+      "description": "SHADOWFAX custody_record: source_classification=missing_dependency enforces promotion_decision=blocked_pending_bundle_location",
+      "schema": "./custody_record.schema.json",
+      "instance_path": "../recovered_protocol_manifest.json#/protocols/4/custody_record",
+      "expected": "valid",
+      "rationale": "The if/then branch in custody_record.schema.json must bind correctly for SHADOWFAX."
+    },
+    {
+      "id": "TC-004",
+      "description": "Manifest runtime_posture is planning_only_no_runtime_enforcement",
+      "schema": "./recovered_protocol_manifest.schema.json",
+      "instance": "../recovered_protocol_manifest.json",
+      "assertion": "$.runtime_posture === 'planning_only_no_runtime_enforcement'",
+      "expected": "valid",
+      "rationale": "Wiring gate requires this posture until all protocols are custody-verified and pentest is signed."
+    },
+    {
+      "id": "TC-NEG-001",
+      "description": "NEGATIVE: custody_record missing required field source_package_sha256 must fail",
+      "schema": "./custody_record.schema.json",
+      "inline_instance": {
+        "source_package_name": "PENDING",
+        "internal_file_path": "PENDING",
+        "internal_file_sha256": "PENDING",
+        "observed_version": "unverified-recovered-candidate",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [],
+        "promotion_decision": "pending_custody_verification"
+      },
+      "expected": "invalid",
+      "expected_error": "missing required property: source_package_sha256",
+      "rationale": "All 11 fields are required. A manifest entry missing any of them must be rejected by the schema."
+    },
+    {
+      "id": "TC-NEG-002",
+      "description": "NEGATIVE: invalid source_package_sha256 format (not PENDING and not 64-char hex) must fail",
+      "schema": "./custody_record.schema.json",
+      "inline_instance": {
+        "source_package_name": "some-package",
+        "source_package_sha256": "not-a-valid-hash",
+        "internal_file_path": "protocols/sherlock.json",
+        "internal_file_sha256": "PENDING",
+        "observed_version": "1.0.0",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "2026-06-24",
+        "reviewer_or_agent_surface": "aurora",
+        "unresolved_blockers": [],
+        "promotion_decision": "pending_custody_verification"
+      },
+      "expected": "invalid",
+      "expected_error": "pattern mismatch on source_package_sha256",
+      "rationale": "Hash fields must be either 'PENDING' or a valid 64-char lowercase hex string."
+    },
+    {
+      "id": "TC-NEG-003",
+      "description": "NEGATIVE: SHADOWFAX with source_classification=missing_dependency and promotion_decision=pending_custody_verification must fail",
+      "schema": "./custody_record.schema.json",
+      "inline_instance": {
+        "source_package_name": "PENDING",
+        "source_package_sha256": "PENDING",
+        "internal_file_path": "PENDING",
+        "internal_file_sha256": "PENDING",
+        "observed_version": "unverified-partial-lineage",
+        "observed_status": "sealed_bundle_reference",
+        "source_classification": "missing_dependency",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": ["Standalone bundle not located"],
+        "promotion_decision": "pending_custody_verification"
+      },
+      "expected": "invalid",
+      "expected_error": "if/then violation: source_classification=missing_dependency requires promotion_decision=blocked_pending_bundle_location",
+      "rationale": "The SHADOWFAX hard-block constraint must be enforced by the schema, not just by convention."
+    },
+    {
+      "id": "TC-NEG-004",
+      "description": "NEGATIVE: manifest with runtime_posture absent must fail",
+      "schema": "./recovered_protocol_manifest.schema.json",
+      "inline_instance": {
+        "manifest_id": "test",
+        "version": "1.0.0",
+        "status": "custody_fixture",
+        "canon_posture": "Recovered protocol records are custody fixtures only.",
+        "wiring_gate": {
+          "condition": "ALL must be true",
+          "gates": ["pentest signed"],
+          "authority": "Operator + Aurora"
+        },
+        "protocols": []
+      },
+      "expected": "invalid",
+      "expected_error": "missing required property: runtime_posture",
+      "rationale": "runtime_posture is a required field. Its absence removes the planning-only safety constraint."
+    }
+  ],
+  "coverage_notes": [
+    "TC-001 through TC-004 are minimum passing tests. All must pass before #1150 (fixture intake) proceeds.",
+    "TC-NEG-001 through TC-NEG-004 are regression guards. Any schema change that causes a NEG test to pass is a regression.",
+    "Additional protocol-specific tests (per #1152 and #1153) will extend this file for Moriarty containment and Tribunal appeal field validation."
+  ]
+}

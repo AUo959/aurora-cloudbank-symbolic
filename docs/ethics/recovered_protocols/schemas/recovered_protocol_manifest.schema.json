@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AUo959/aurora-cloudbank-symbolic/docs/ethics/recovered_protocols/schemas/recovered_protocol_manifest.schema.json",
+  "title": "RecoveredProtocolManifest",
+  "description": "Schema for recovered_protocol_manifest.json. Validates the top-level manifest structure, wiring gate, and per-protocol entries including custody_record fields. Enforces planning_only_no_runtime_enforcement posture until all wiring gates are met.",
+  "type": "object",
+  "required": [
+    "manifest_id",
+    "version",
+    "status",
+    "runtime_posture",
+    "canon_posture",
+    "wiring_gate",
+    "protocols"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "manifest_id": {
+      "type": "string",
+      "description": "Unique identifier for this manifest file."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the manifest schema in use.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "status": {
+      "type": "string",
+      "description": "Lifecycle status of the manifest itself.",
+      "enum": ["custody_fixture", "active", "archived", "deprecated"]
+    },
+    "runtime_posture": {
+      "type": "string",
+      "description": "Governs what the manifest authorizes at runtime. MUST be 'planning_only_no_runtime_enforcement' until all wiring gates are met for all protocols.",
+      "enum": ["planning_only_no_runtime_enforcement", "partial_runtime_authorized", "full_runtime_authorized"]
+    },
+    "canon_posture": {
+      "type": "string",
+      "description": "Human-readable statement of what the manifest does and does not authorize.",
+      "minLength": 20
+    },
+    "wiring_gate": {
+      "type": "object",
+      "description": "Conditions that must ALL be true before any protocol may be wired to runtime (EthicsEngine, ethics_gate, compliance monitor, or geometric ethics).",
+      "required": ["condition", "gates", "authority"],
+      "additionalProperties": false,
+      "properties": {
+        "condition": { "type": "string" },
+        "gates": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "authority": { "type": "string" }
+      }
+    },
+    "protocols": {
+      "type": "array",
+      "description": "List of recovered protocol entries. Each entry must have a protocol_id and a custody_record conforming to CustodyRecord schema.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["protocol_id", "role", "custody_record", "allowed_actions", "forbidden_actions", "layer_boundaries"],
+        "additionalProperties": true,
+        "properties": {
+          "protocol_id": {
+            "type": "string",
+            "description": "Unique identifier for the protocol.",
+            "enum": ["sherlock", "watson", "moriarty", "tribunal", "shadowfax"]
+          },
+          "role": {
+            "type": "string",
+            "description": "Human-readable description of the protocol's function.",
+            "minLength": 10
+          },
+          "custody_record": {
+            "$ref": "./custody_record.schema.json"
+          },
+          "allowed_actions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "forbidden_actions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "layer_boundaries": {
+            "type": "object",
+            "required": ["l1", "l2", "l3", "cross_layer_rules"],
+            "properties": {
+              "l1": { "type": "string" },
+              "l2": { "type": "string" },
+              "l3": { "type": "string" },
+              "cross_layer_rules": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "created": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "updated": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "update_ref": { "type": "string" },
+    "decision_recorded_by": { "type": "string" },
+    "decision_ref": { "type": "string" }
+  }
+}

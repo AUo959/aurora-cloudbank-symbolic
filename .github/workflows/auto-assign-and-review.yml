@@ -47,7 +47,11 @@ jobs:
               });
               console.log(`Assigned to repository owner: ${owner}`);
             } catch (error) {
-              if (error.status === 422) {
+              // Only swallow the duplicate-assignee 422 ("Assignee has already been taken").
+              // Any other 422 (e.g. a non-assignable owner/org) must still fail so a broken
+              // assignment configuration stays visible.
+              const alreadyAssigned = error.status === 422 && /already been taken/i.test(error.message || "");
+              if (alreadyAssigned) {
                 console.log(`Owner ${owner} is already assigned; nothing to do.`);
               } else {
                 throw error;
@@ -87,7 +91,9 @@ jobs:
                 });
                 console.log(`Assigned to ${labelAssignments[labelName].join(', ')} based on label: ${labelName}`);
               } catch (error) {
-                if (error.status === 422) {
+                // Only swallow the duplicate-assignee 422; re-throw any other validation error.
+                const alreadyAssigned = error.status === 422 && /already been taken/i.test(error.message || "");
+                if (alreadyAssigned) {
                   console.log(`Assignee(s) for label ${labelName} already set; nothing to do.`);
                 } else {
                   throw error;

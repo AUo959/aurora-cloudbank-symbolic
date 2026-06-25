@@ -34,16 +34,25 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const issueNumber = context.issue.number;
-            
-            // Assign to repository owner as fallback/triage
-            await github.rest.issues.addAssignees({
-              owner,
-              repo,
-              issue_number: issueNumber,
-              assignees: [owner]
-            });
-            
-            console.log(`Assigned to repository owner: ${owner}`);
+
+            // Assign to repository owner as fallback/triage.
+            // Idempotent: a 422 "Assignee has already been taken" just means the
+            // owner is already assigned (e.g. owner-authored PR), which is not a failure.
+            try {
+              await github.rest.issues.addAssignees({
+                owner,
+                repo,
+                issue_number: issueNumber,
+                assignees: [owner]
+              });
+              console.log(`Assigned to repository owner: ${owner}`);
+            } catch (error) {
+              if (error.status === 422) {
+                console.log(`Owner ${owner} is already assigned; nothing to do.`);
+              } else {
+                throw error;
+              }
+            }
 
   # Label-based assignment for priority issues
   label-based-assignment:
@@ -68,14 +77,22 @@ jobs:
             };
             
             if (labelAssignments[labelName]) {
-              await github.rest.issues.addAssignees({
-                owner,
-                repo,
-                issue_number: issueNumber,
-                assignees: labelAssignments[labelName]
-              });
-              
-              console.log(`Assigned to ${labelAssignments[labelName].join(', ')} based on label: ${labelName}`);
+              // Idempotent: ignore 422 when the assignee is already set.
+              try {
+                await github.rest.issues.addAssignees({
+                  owner,
+                  repo,
+                  issue_number: issueNumber,
+                  assignees: labelAssignments[labelName]
+                });
+                console.log(`Assigned to ${labelAssignments[labelName].join(', ')} based on label: ${labelName}`);
+              } catch (error) {
+                if (error.status === 422) {
+                  console.log(`Assignee(s) for label ${labelName} already set; nothing to do.`);
+                } else {
+                  throw error;
+                }
+              }
             } else {
               console.log(`No assignment rule for label: ${labelName}`);
             }

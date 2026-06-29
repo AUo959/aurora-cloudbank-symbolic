@@ -40,7 +40,7 @@ dev = [
     "pytest>=9.1.0",
     "pytest-asyncio>=1.4.0",
     "mypy>=2.1.0",
-    "ruff>=0.15.17",
+    "ruff>=0.15.20",
     "black>=26.5.1",
 ]
 

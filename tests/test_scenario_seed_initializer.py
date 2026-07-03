@@ -59,6 +59,8 @@ def assert_raises_message(
     message_fragment: str,
     action: Callable[[], object],
 ) -> None:
+    """Assert that an action raises an expected exception message fragment."""
+
     try:
         action()
     except exc_type as exc:

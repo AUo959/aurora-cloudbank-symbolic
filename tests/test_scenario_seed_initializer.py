@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import pytest
+from collections.abc import Callable
 
 from simulation.scenario_seed_initializer import (
     ScenarioSeedInitializationError,
@@ -54,6 +54,19 @@ def sample_packet() -> dict:
     }
 
 
+def assert_raises_message(
+    exc_type: type[Exception],
+    message_fragment: str,
+    action: Callable[[], object],
+) -> None:
+    try:
+        action()
+    except exc_type as exc:
+        assert message_fragment in str(exc)
+        return
+    raise AssertionError(f"Expected {exc_type.__name__} containing {message_fragment!r}")
+
+
 def test_initialize_from_root_uptake_packet_preserves_open_outcome_contract():
     initializer = initialize_from_uptake_packet(sample_packet())
 
@@ -82,27 +95,39 @@ def test_rejects_nested_write_or_canon_promotion_authorization():
     packet = sample_packet()
     packet["boundary_assertions"]["writes_nested_repos"] = True
 
-    with pytest.raises(ScenarioSeedInitializationError, match="nested repo writes"):
-        initialize_from_uptake_packet(packet)
+    assert_raises_message(
+        ScenarioSeedInitializationError,
+        "nested repo writes",
+        lambda: initialize_from_uptake_packet(packet),
+    )
 
     packet = sample_packet()
     packet["boundary_assertions"]["canonrec_promotion"] = "authorized"
 
-    with pytest.raises(ScenarioSeedInitializationError, match="CanonRec promotion"):
-        initialize_from_uptake_packet(packet)
+    assert_raises_message(
+        ScenarioSeedInitializationError,
+        "CanonRec promotion",
+        lambda: initialize_from_uptake_packet(packet),
+    )
 
 
 def test_rejects_scripted_outcome_semantics():
     packet = sample_packet()
     packet["consumer_payloads"]["simulation_initializer"]["scripted_outcome"] = "Civil authority wins"
 
-    with pytest.raises(ScenarioSeedInitializationError, match="scripted_outcome"):
-        initialize_from_uptake_packet(packet)
+    assert_raises_message(
+        ScenarioSeedInitializationError,
+        "scripted_outcome",
+        lambda: initialize_from_uptake_packet(packet),
+    )
 
 
 def test_rejects_low_emergence_capacity_payloads():
     packet = sample_packet()
     packet["consumer_payloads"]["simulation_initializer"]["initial_condition_vector"]["roles"] = ["one"]
 
-    with pytest.raises(ScenarioSeedInitializationError, match="roles"):
-        initialize_from_uptake_packet(packet)
+    assert_raises_message(
+        ScenarioSeedInitializationError,
+        "roles",
+        lambda: initialize_from_uptake_packet(packet),
+    )

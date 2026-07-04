@@ -889,6 +889,16 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate Crew Agents routes: %s", e)
 
+# Include L1 Station API routes
+try:
+    from src.api.l1_station_api import router as l1_station_router
+    app.include_router(l1_station_router)
+    logger.info("✅ L1 Station API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ L1 Station routes not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate L1 Station routes: %s", e)
+
 # Include L2 Meta-Agent Bridge API routes
 try:
     from src.api.l2_meta_agent_api import router as l2_meta_agent_router

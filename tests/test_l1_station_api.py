@@ -59,3 +59,18 @@ def test_l1_state_is_read_only():
     first = client.get("/api/aurora/simulation/state").json()
     second = client.get("/api/aurora/simulation/state").json()
     case.assertEqual(first, second)
+
+
+@pytest.mark.unit
+@pytest.mark.api
+def test_l1_health_degrades_on_corrupt_state(tmp_path, monkeypatch):
+    """A non-UTF8/corrupt state file degrades to invalid, never 5xx."""
+    bad = tmp_path / "SIMULATION_STATE.json"
+    bad.write_bytes(b"\xff\xfe\x00 not-valid-utf8")
+    monkeypatch.setattr("src.api.l1_station_api._STATE_FILE", bad)
+
+    resp = client.get("/api/aurora/health/l1")
+    case.assertEqual(resp.status_code, 200)
+    data = resp.json()
+    case.assertEqual(data["state_file"], "invalid")
+    case.assertEqual(data["status"], "degraded")

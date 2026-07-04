@@ -46,7 +46,10 @@ def _load_state() -> tuple[Optional[Dict[str, Any]], str]:
     try:
         with _STATE_FILE.open("r", encoding="utf-8") as fh:
             return json.load(fh), "loaded"
-    except (json.JSONDecodeError, OSError):
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError):
+        # UnicodeDecodeError (a ValueError, not an OSError) covers a
+        # non-UTF8/corrupt file, so the endpoint degrades to "invalid"
+        # instead of surfacing a 5xx.
         return None, "invalid"
 
 

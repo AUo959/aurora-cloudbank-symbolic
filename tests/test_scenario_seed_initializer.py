@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from unittest import TestCase
 
 from simulation.scenario_seed_initializer import (
     ScenarioSeedInitializationError,
     initialize_from_uptake_packet,
 )
+
+CHECK = TestCase()
 
 
 def sample_packet() -> dict:
@@ -64,7 +67,7 @@ def assert_raises_message(
     try:
         action()
     except exc_type as exc:
-        assert message_fragment in str(exc)
+        CHECK.assertIn(message_fragment, str(exc))
         return
     raise AssertionError(f"Expected {exc_type.__name__} containing {message_fragment!r}")
 
@@ -72,16 +75,22 @@ def assert_raises_message(
 def test_initialize_from_root_uptake_packet_preserves_open_outcome_contract():
     initializer = initialize_from_uptake_packet(sample_packet())
 
-    assert initializer.source_card_id == "SCN-0903"
-    assert initializer.seed == 903
-    assert initializer.ticks == 4
-    assert initializer.anchor_seed == "EOS_SEED_ORION"
-    assert "multi_outcome_branch_observation" in initializer.runtime_freedoms
+    CHECK.assertEqual(initializer.source_card_id, "SCN-0903")
+    CHECK.assertEqual(initializer.seed, 903)
+    CHECK.assertEqual(initializer.ticks, 4)
+    CHECK.assertEqual(initializer.anchor_seed, "EOS_SEED_ORION")
+    CHECK.assertIn("multi_outcome_branch_observation", initializer.runtime_freedoms)
 
     initial_state = initializer.to_initial_state()
-    assert initial_state["initial_condition_vector"]["roles"][0] == "Veteran Trainer"
-    assert "expected_end_states" not in initial_state
-    assert "required runtime endings" in initial_state["expected_end_state_handling"]
+    CHECK.assertEqual(
+        initial_state["initial_condition_vector"]["roles"][0],
+        "Veteran Trainer",
+    )
+    CHECK.assertNotIn("expected_end_states", initial_state)
+    CHECK.assertIn(
+        "required runtime endings",
+        initial_state["expected_end_state_handling"],
+    )
 
 
 def test_initialize_from_direct_simulation_payload_is_supported():
@@ -89,8 +98,8 @@ def test_initialize_from_direct_simulation_payload_is_supported():
 
     initializer = initialize_from_uptake_packet(payload)
 
-    assert initializer.source_card_id == "unknown"
-    assert initializer.to_initial_state()["seed"] == 903
+    CHECK.assertEqual(initializer.source_card_id, "unknown")
+    CHECK.assertEqual(initializer.to_initial_state()["seed"], 903)
 
 
 def test_rejects_nested_write_or_canon_promotion_authorization():

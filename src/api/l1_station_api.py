@@ -19,12 +19,13 @@ intentionally out of scope for this slice.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter
 from pydantic import BaseModel, ConfigDict, Field
+
+from src.core.time_utils import utc_iso
 
 router = APIRouter(prefix="/api/aurora", tags=["L1 Station"])
 
@@ -80,7 +81,7 @@ class SimulationStateResponse(BaseModel):
 async def get_l1_health() -> L1HealthResponse:
     """Return L1 Station layer health derived from the canonical state."""
     state, file_status = _load_state()
-    now = datetime.now(timezone.utc).isoformat()
+    now = utc_iso()
 
     if state is None:
         return L1HealthResponse(

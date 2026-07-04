@@ -30,14 +30,13 @@ def test_l1_health_endpoint():
     case.assertEqual(resp.status_code, 200)
     data = resp.json()
     case.assertEqual(data["layer"], "L1")
-    case.assertIn(data["status"], ("operational", "degraded"))
-    case.assertIn(data["state_file"], ("loaded", "missing", "invalid"))
     case.assertIn("timestamp", data)
-    # With the canonical state present, the layer should be operational.
-    if data["state_file"] == "loaded":
-        case.assertEqual(data["status"], "operational")
-        case.assertIsNotNone(data["simulation_status"])
-        case.assertIsNotNone(data["station_name"])
+    # The canonical state file ships with this PR, so it must load and the
+    # layer must report operational — a broken state-file path is a regression.
+    case.assertEqual(data["state_file"], "loaded")
+    case.assertEqual(data["status"], "operational")
+    case.assertIsNotNone(data["simulation_status"])
+    case.assertIsNotNone(data["station_name"])
 
 
 @pytest.mark.unit
@@ -46,11 +45,11 @@ def test_l1_simulation_state_endpoint():
     resp = client.get("/api/aurora/simulation/state")
     case.assertEqual(resp.status_code, 200)
     data = resp.json()
-    case.assertIn(data["state_file"], ("loaded", "missing", "invalid"))
-    if data["state_file"] == "loaded":
-        case.assertEqual(data["status"], "success")
-        case.assertIsInstance(data["state"], dict)
-        case.assertIn("simulation", data["state"])
+    # The canonical state file ships with this PR, so it must load.
+    case.assertEqual(data["state_file"], "loaded")
+    case.assertEqual(data["status"], "success")
+    case.assertIsInstance(data["state"], dict)
+    case.assertIn("simulation", data["state"])
 
 
 @pytest.mark.unit

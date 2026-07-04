@@ -55,7 +55,9 @@ class L1HealthResponse(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
     layer: str = "L1"
-    status: str = Field(description="operational when the state file loads, else degraded")
+    status: str = Field(
+        description="operational when the state file loads, else degraded"
+    )
     state_file: str = Field(description="loaded | missing | invalid")
     simulation_status: Optional[str] = None
     station_name: Optional[str] = None

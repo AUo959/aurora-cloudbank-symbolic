@@ -93,6 +93,6 @@ jsonschema>=4.17.0                  # JSON Schema validation (MCP tool inputSche
 requests>=2.34.2                    # HTTP library
 urllib3>=2.7.0                      # HTTP connection pooling
 certifi>=2026.5.20                   # SSL certificates
-charset-normalizer>=3.4.3           # Character encoding detection
+charset-normalizer>=3.4.7           # Character encoding detection
 idna>=3.18                          # Internationalized domain names
 psutil>=7.2.2                       # Process and system monitoring (for R-2 telemetry)

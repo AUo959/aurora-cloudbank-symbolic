@@ -22,7 +22,7 @@ if [[ -f "$REPO_ROOT/.env" ]]; then
 	set +a
 fi
 
-echo "🚀 Launching Aurora CloudBank Quantum VSA Demo..."
+echo "Launching Aurora CloudBank Simulation Console..."
 echo "📍 Local server: http://localhost:8000"
 echo "🌐 Public demo: https://auo959.github.io/aurora-cloudbank-symbolic"
 echo ""

@@ -22,7 +22,7 @@ Four surfaces exist in the Orion Station ethics architecture that recovered prot
 ### `EthicsEngine`
 
 | Property | Value |
-|---|---|
+| --- | --- |
 | Current status | **Not wired to any recovered protocol** |
 | Function | Core ethics evaluation — assesses proposed actions against ethical anchors before execution |
 | Layer | L1 operational decision layer |
@@ -31,7 +31,7 @@ Four surfaces exist in the Orion Station ethics architecture that recovered prot
 ### `ethics_gate`
 
 | Property | Value |
-|---|---|
+| --- | --- |
 | Current status | **Not wired to any recovered protocol** |
 | Function | Binary gate — allows or blocks an action based on EthicsEngine output |
 | Layer | L1, inline with action dispatch |
@@ -40,7 +40,7 @@ Four surfaces exist in the Orion Station ethics architecture that recovered prot
 ### `compliance_monitor`
 
 | Property | Value |
-|---|---|
+| --- | --- |
 | Current status | **Not wired to any recovered protocol** |
 | Function | Continuous background monitoring — flags drift, anomalies, and doctrine violations |
 | Layer | L1/L2 boundary observer |
@@ -49,7 +49,7 @@ Four surfaces exist in the Orion Station ethics architecture that recovered prot
 ### `geometric_ethics`
 
 | Property | Value |
-|---|---|
+| --- | --- |
 | Current status | **Not wired to any recovered protocol** |
 | Function | Spatial/relational ethics reasoning — evaluates multi-agent and cross-layer ethical geometry |
 | Layer | L3 framework layer (Axiomera, Caelion, Sentari, Velatrix) |
@@ -62,7 +62,7 @@ Four surfaces exist in the Orion Station ethics architecture that recovered prot
 This table describes **intended eventual mapping only**. All entries are conditional on all promotion gates being met. "Eligible" means the protocol's design is compatible with that surface — it does not mean wiring is authorized.
 
 | Protocol | EthicsEngine | ethics_gate | compliance_monitor | geometric_ethics | Notes |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **Sherlock** | Eligible (evidence input) | Not eligible (investigation ≠ enforcement) | Eligible (traceability feed) | Eligible (doctrine verification) | Sherlock produces inputs and reports; it does not enforce. Must never be wired to ethics_gate directly. |
 | **Watson** | Eligible (context input) | Not eligible (briefing ≠ gate decision) | Eligible (context correlation) | Not eligible | Watson moderates and correlates; it does not adjudicate. ethics_gate wiring explicitly excluded. |
 | **Moriarty** | Eligible (anomaly signal) | **Conditional** (quarantine recommendation only, not auto-enforce) | Eligible (anomaly detection feed) | Eligible (anchor validation) | **HARD BLOCK**: containment boundaries must be tested before any ethics_gate wiring is considered. Quarantine must remain a recommendation, not an automatic gate action, until tests pass. |
@@ -137,7 +137,7 @@ This document does **not**:
 ## Relationship to Other Section 8 Artifacts
 
 | Artifact | Role |
-|---|---|
+| --- | --- |
 | `recovered_protocol_manifest.json` | Authoritative custody state and wiring gate |
 | `schemas/custody_record.schema.json` | Validates custody_record fields (#1149) |
 | `schemas/recovered_protocol_manifest.schema.json` | Validates full manifest (#1149) |

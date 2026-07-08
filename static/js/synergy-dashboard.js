@@ -15,6 +15,7 @@ class SynergyDashboard {
         this.synergyScores = [];
         this.metrics = null;
         this.ws = null;
+        this.realtimeEnabled = new URLSearchParams(window.location.search).get('realtime') === '1';
         
         this.init();
     }
@@ -28,6 +29,10 @@ class SynergyDashboard {
     }
     
     setupWebSocket() {
+        if (!this.realtimeEnabled) {
+            return;
+        }
+
         // WebSocket for real-time updates
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${wsProtocol}//${window.location.host}/agent/stream?token=demo`;
@@ -44,16 +49,19 @@ class SynergyDashboard {
                 this.handleWebSocketMessage(data);
             };
             
-            this.ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
+            this.ws.onerror = () => {
+                console.info('Synergy real-time stream unavailable; continuing with HTTP refresh.');
             };
             
             this.ws.onclose = () => {
-                console.log('WebSocket closed, reconnecting...');
+                if (!this.realtimeEnabled) {
+                    return;
+                }
+                console.info('Synergy real-time stream closed, reconnecting...');
                 setTimeout(() => this.setupWebSocket(), 5000);
             };
         } catch (error) {
-            console.error('Failed to setup WebSocket:', error);
+            console.info('Synergy real-time stream setup skipped:', error);
         }
     }
     
@@ -209,6 +217,24 @@ class SynergyDashboard {
             </div>
         `;
     }
+
+    formatPercent(value) {
+        return typeof value === 'number' && Number.isFinite(value)
+            ? `${value.toFixed(1)}%`
+            : 'n/a';
+    }
+
+    formatMemory(value) {
+        return typeof value === 'number' && Number.isFinite(value)
+            ? `${value.toFixed(0)}MB`
+            : 'n/a';
+    }
+
+    formatUptime(seconds) {
+        return typeof seconds === 'number' && Number.isFinite(seconds)
+            ? `${Math.floor(seconds / 3600)}h`
+            : 'n/a';
+    }
     
     renderComponents() {
         const container = document.getElementById('components-list');
@@ -216,7 +242,11 @@ class SynergyDashboard {
         
         container.innerHTML = this.components.map(comp => {
             const statusColor = this.getStatusColor(comp.status);
-            const healthColor = this.getHealthColor(comp.health_score);
+            const healthScore = typeof comp.health_score === 'number' && Number.isFinite(comp.health_score)
+                ? comp.health_score
+                : 0;
+            const resourceUsage = comp.resource_usage || {};
+            const healthColor = this.getHealthColor(healthScore);
             
             return `
                 <div class="component-card" data-component-id="${comp.component_id}">
@@ -228,12 +258,12 @@ class SynergyDashboard {
                     </div>
                     <div class="component-body">
                         <div class="health-bar-container">
-                            <div class="health-bar" style="width: ${comp.health_score}%; background: ${healthColor};"></div>
+                            <div class="health-bar" style="width: ${healthScore}%; background: ${healthColor};"></div>
                         </div>
                         <div class="component-stats">
-                            <span>Health: ${comp.health_score.toFixed(1)}%</span>
-                            <span>CPU: ${comp.resource_usage.cpu_percent.toFixed(1)}%</span>
-                            <span>Memory: ${comp.resource_usage.memory_mb.toFixed(0)}MB</span>
+                            <span>Health: ${this.formatPercent(comp.health_score)}</span>
+                            <span>CPU: ${this.formatPercent(resourceUsage.cpu_percent)}</span>
+                            <span>Memory: ${this.formatMemory(resourceUsage.memory_mb)}</span>
                         </div>
                     </div>
                     <button class="detail-button" data-component-id="${comp.component_id}">
@@ -430,6 +460,7 @@ class SynergyDashboard {
         const componentInteractions = this.interactions.filter(
             inter => inter.source_id === componentId || inter.target_id === componentId
         );
+        const resourceUsage = component.resource_usage || {};
         
         // Create modal content
         const modal = document.createElement('div');
@@ -444,13 +475,13 @@ class SynergyDashboard {
                     <div class="detail-section">
                         <h3>Status</h3>
                         <p>Status: <span class="badge">${component.status}</span></p>
-                        <p>Health: ${component.health_score.toFixed(1)}%</p>
-                        <p>Uptime: ${Math.floor(component.uptime_seconds / 3600)}h</p>
+                        <p>Health: ${this.formatPercent(component.health_score)}</p>
+                        <p>Uptime: ${this.formatUptime(component.uptime_seconds)}</p>
                     </div>
                     <div class="detail-section">
                         <h3>Resource Usage</h3>
-                        <p>CPU: ${component.resource_usage.cpu_percent.toFixed(1)}%</p>
-                        <p>Memory: ${component.resource_usage.memory_mb.toFixed(0)}MB</p>
+                        <p>CPU: ${this.formatPercent(resourceUsage.cpu_percent)}</p>
+                        <p>Memory: ${this.formatMemory(resourceUsage.memory_mb)}</p>
                     </div>
                     <div class="detail-section">
                         <h3>Interactions (${componentInteractions.length})</h3>

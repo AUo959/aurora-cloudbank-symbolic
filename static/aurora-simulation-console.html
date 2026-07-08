@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
+    <title>Aurora Simulation Console</title>
+    <script src="/static/js/aurora-security.js?v=20260627-sim"></script>
+    <style>
+        :root {
+            --bg: #071014;
+            --bg-elevated: #0d171d;
+            --panel: rgba(14, 25, 32, 0.86);
+            --panel-strong: rgba(18, 31, 39, 0.94);
+            --panel-soft: rgba(11, 21, 27, 0.74);
+            --border: rgba(132, 184, 202, 0.18);
+            --border-strong: rgba(116, 214, 234, 0.34);
+            --text: #edf7f8;
+            --muted: #9bb0b8;
+            --subtle: #718894;
+            --cyan: #4cc9e8;
+            --teal: #2dd4bf;
+            --green: #65df89;
+            --amber: #f5c45a;
+            --red: #ff7878;
+            --blue: #7aa7ff;
+            --shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background:
+                linear-gradient(180deg, rgba(10, 22, 28, 0.96), rgba(5, 11, 15, 1)),
+                repeating-linear-gradient(90deg, rgba(76, 201, 232, 0.04) 0 1px, transparent 1px 72px),
+                repeating-linear-gradient(0deg, rgba(76, 201, 232, 0.03) 0 1px, transparent 1px 72px);
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            letter-spacing: 0;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(110deg, rgba(76, 201, 232, 0.10), transparent 30%),
+                linear-gradient(250deg, rgba(45, 212, 191, 0.08), transparent 34%),
+                linear-gradient(180deg, transparent 0 64%, rgba(76, 201, 232, 0.07) 64% 65%, transparent 65%);
+            opacity: 0.85;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1480px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 22px;
+            margin-bottom: 24px;
+            padding: 18px 0 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .brand-mark {
+            position: relative;
+            width: 46px;
+            height: 46px;
+            flex: 0 0 auto;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            background:
+                linear-gradient(135deg, rgba(76, 201, 232, 0.18), rgba(45, 212, 191, 0.06)),
+                rgba(7, 16, 20, 0.78);
+            box-shadow: inset 0 0 24px rgba(76, 201, 232, 0.10);
+        }
+
+        .brand-mark::before,
+        .brand-mark::after {
+            content: "";
+            position: absolute;
+            background: linear-gradient(180deg, var(--cyan), var(--teal));
+            border-radius: 2px;
+            box-shadow: 0 0 14px rgba(76, 201, 232, 0.38);
+        }
+
+        .brand-mark::before {
+            width: 3px;
+            height: 27px;
+            left: 21px;
+            top: 9px;
+            transform: rotate(28deg);
+        }
+
+        .brand-mark::after {
+            width: 24px;
+            height: 3px;
+            left: 11px;
+            top: 26px;
+            transform: rotate(-18deg);
+        }
+
+        .header h1 {
+            color: var(--text);
+            font-size: 36px;
+            font-weight: 720;
+            line-height: 1.05;
+        }
+
+        .header p {
+            color: var(--muted);
+            margin-top: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .header-status {
+            display: grid;
+            gap: 8px;
+            justify-items: end;
+            color: var(--muted);
+            font-size: 13px;
+            text-align: right;
+        }
+
+        .status-line {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--green);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        .header-links {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .header-link {
+            min-height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 11px;
+            border: 1px solid rgba(116, 214, 234, 0.28);
+            border-radius: 6px;
+            background: rgba(5, 13, 17, 0.62);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .header-link:hover {
+            border-color: rgba(76, 201, 232, 0.66);
+            color: var(--cyan);
+        }
+
+        .console-overview {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: stretch;
+        }
+
+        .overview-copy,
+        .overview-stat {
+            min-width: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(20, 37, 47, 0.82), rgba(7, 15, 20, 0.90)),
+                rgba(6, 14, 18, 0.80);
+            box-shadow: var(--shadow);
+        }
+
+        .overview-copy {
+            padding: 20px;
+        }
+
+        .overview-copy h2 {
+            margin: 7px 0 9px;
+            color: var(--text);
+            font-size: 24px;
+            line-height: 1.16;
+        }
+
+        .overview-copy p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .eyebrow {
+            color: var(--teal);
+            font-size: 11px;
+            font-weight: 780;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .overview-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .overview-stat {
+            min-height: 108px;
+            padding: 14px;
+        }
+
+        .overview-stat strong {
+            display: block;
+            color: var(--text);
+            font-size: 22px;
+            line-height: 1.05;
+        }
+
+        .overview-stat span {
+            display: block;
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .workspace-tabs {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 6px;
+            margin-bottom: 16px;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(4, 11, 15, 0.88);
+            backdrop-filter: blur(16px);
+        }
+
+        .tab-button {
+            min-height: 42px;
+            padding: 9px 10px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            background: rgba(13, 25, 31, 0.72);
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 780;
+            text-transform: uppercase;
+            transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+        }
+
+        .tab-button:hover {
+            color: var(--text);
+            border-color: rgba(132, 184, 202, 0.28);
+        }
+
+        .tab-button[aria-selected="true"] {
+            color: #effbfb;
+            border-color: rgba(76, 201, 232, 0.58);
+            background:
+                linear-gradient(180deg, rgba(76, 201, 232, 0.24), rgba(45, 212, 191, 0.12)),
+                rgba(13, 25, 31, 0.88);
+            box-shadow: inset 0 -2px 0 rgba(45, 212, 191, 0.70);
+        }
+
+        .tab-panel {
+            min-width: 0;
+        }
+
+        .tab-panel[hidden] {
+            display: none;
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .workspace-grid.primary {
+            grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+        }
+
+        .tab-section-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .tab-section-header h2 {
+            margin-bottom: 5px;
+        }
+
+        .launch-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .demo-panel {
+            min-width: 0;
+            background:
+                linear-gradient(180deg, rgba(21, 38, 47, 0.86), rgba(10, 20, 26, 0.90)),
+                var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px);
+        }
+
+        .demo-panel h2 {
+            color: var(--text);
+            margin-bottom: 16px;
+            font-size: 18px;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            min-height: 42px;
+            padding: 11px 12px;
+            background: rgba(5, 13, 17, 0.76);
+            border: 1px solid rgba(141, 186, 200, 0.22);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: rgba(76, 201, 232, 0.72);
+            box-shadow: 0 0 0 3px rgba(76, 201, 232, 0.12);
+        }
+
+        .btn {
+            min-height: 40px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            padding: 10px 16px;
+            border: 1px solid rgba(76, 201, 232, 0.42);
+            border-radius: 6px;
+            background: linear-gradient(180deg, rgba(76, 201, 232, 0.18), rgba(45, 212, 191, 0.10));
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+            transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(76, 201, 232, 0.82);
+            background: linear-gradient(180deg, rgba(76, 201, 232, 0.26), rgba(45, 212, 191, 0.14));
+        }
+
+        .btn.secondary {
+            border-color: rgba(245, 196, 90, 0.36);
+            background: linear-gradient(180deg, rgba(245, 196, 90, 0.14), rgba(76, 201, 232, 0.07));
+        }
+
+        .btn.compact {
+            min-height: 34px;
+            padding: 8px 12px;
+            margin: 0;
+        }
+
+        .result-area {
+            min-height: 118px;
+            max-height: 260px;
+            margin-top: 14px;
+            overflow-y: auto;
+            padding: 14px;
+            border: 1px solid rgba(76, 201, 232, 0.18);
+            border-left: 3px solid var(--cyan);
+            border-radius: 6px;
+            background: rgba(4, 10, 13, 0.64);
+            color: #dce9ed;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .vector-viz {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(38px, 1fr));
+            gap: 5px;
+            margin: 14px 0;
+        }
+
+        .vector-cell {
+            min-height: 34px;
+            padding: 8px 5px;
+            border: 1px solid rgba(76, 201, 232, 0.36);
+            border-radius: 5px;
+            background: rgba(76, 201, 232, 0.12);
+            color: #dff8ff;
+            text-align: center;
+            font-size: 12px;
+            transition: background 160ms ease, border-color 160ms ease;
+        }
+
+        .vector-cell:hover {
+            background: rgba(76, 201, 232, 0.22);
+            border-color: rgba(76, 201, 232, 0.62);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.connected {
+            background: var(--green);
+            box-shadow: 0 0 10px rgba(101, 223, 137, 0.48);
+        }
+
+        .status-indicator.disconnected {
+            background: var(--red);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+            margin-top: 14px;
+        }
+
+        .quantum-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .metric-card {
+            min-height: 92px;
+            padding: 14px;
+            border: 1px solid rgba(132, 184, 202, 0.16);
+            border-radius: 8px;
+            background: rgba(6, 14, 18, 0.58);
+        }
+
+        .metric-value {
+            color: var(--cyan);
+            font-size: 26px;
+            line-height: 1.1;
+            font-weight: 760;
+        }
+
+        .metric-label {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 650;
+            text-transform: uppercase;
+        }
+
+        .operator-toolbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .operator-toolbar h2 {
+            margin-bottom: 4px;
+        }
+
+        .operator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .operator-card {
+            min-width: 0;
+            min-height: 112px;
+            padding: 14px;
+            border: 1px solid rgba(132, 184, 202, 0.16);
+            border-radius: 8px;
+            background: rgba(6, 14, 18, 0.56);
+        }
+
+        .operator-card.kubernetes-card {
+            grid-column: span 2;
+            background:
+                linear-gradient(180deg, rgba(76, 201, 232, 0.07), rgba(6, 14, 18, 0.62)),
+                rgba(6, 14, 18, 0.56);
+        }
+
+        .operator-card.simulation-card {
+            grid-column: span 2;
+            border-color: rgba(45, 212, 191, 0.28);
+            background:
+                linear-gradient(180deg, rgba(45, 212, 191, 0.09), rgba(6, 14, 18, 0.64)),
+                rgba(6, 14, 18, 0.56);
+        }
+
+        .operator-card h3 {
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.35;
+            margin-bottom: 10px;
+            font-weight: 760;
+        }
+
+        .operator-card p {
+            color: #bdd0d7;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 9px;
+            overflow-wrap: anywhere;
+        }
+
+        .operator-status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 26px;
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 780;
+            text-transform: uppercase;
+        }
+
+        .operator-status.ready {
+            background: rgba(101, 223, 137, 0.13);
+            color: #9bf2b2;
+            border: 1px solid rgba(101, 223, 137, 0.34);
+        }
+
+        .operator-status.attention,
+        .operator-status.open,
+        .operator-status.missing,
+        .operator-status.unknown {
+            background: rgba(245, 196, 90, 0.13);
+            color: #f8d98a;
+            border: 1px solid rgba(245, 196, 90, 0.34);
+        }
+
+        .operator-status.blocked,
+        .operator-status.invalid_json,
+        .operator-status.unreadable {
+            background: rgba(255, 120, 120, 0.13);
+            color: #ffb4b4;
+            border: 1px solid rgba(255, 120, 120, 0.36);
+        }
+
+        .operator-section {
+            margin-top: 18px;
+            min-width: 0;
+        }
+
+        .operator-section h3 {
+            margin-bottom: 10px;
+            color: var(--text);
+            font-size: 15px;
+        }
+
+        .operator-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .operator-list-item {
+            padding: 11px 12px;
+            border: 1px solid rgba(132, 184, 202, 0.14);
+            border-left: 3px solid rgba(76, 201, 232, 0.74);
+            border-radius: 6px;
+            background: rgba(5, 12, 16, 0.58);
+            color: #d8e7eb;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .operator-muted {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .operator-breakdown {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .category-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            padding: 4px 8px;
+            border: 1px solid rgba(132, 184, 202, 0.18);
+            border-radius: 6px;
+            background: rgba(11, 24, 30, 0.72);
+            color: #d9edf2;
+            font-size: 11px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .blocker-list,
+        .remediation-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+            min-width: 0;
+        }
+
+        .blocker-item,
+        .remediation-item {
+            min-width: 0;
+            padding: 9px 10px;
+            border: 1px solid rgba(132, 184, 202, 0.14);
+            border-radius: 6px;
+            background: rgba(3, 9, 12, 0.50);
+        }
+
+        .blocker-meta {
+            color: var(--cyan);
+            font-size: 11px;
+            font-weight: 760;
+            text-transform: uppercase;
+            overflow-wrap: anywhere;
+        }
+
+        .blocker-snippet {
+            margin-top: 5px;
+            color: #d7e8ed;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            font-size: 12px;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+            min-width: 0;
+        }
+
+        .remediation-item strong {
+            display: block;
+            color: var(--amber);
+            font-size: 12px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                display: grid;
+            }
+
+            .header-status {
+                justify-items: start;
+                text-align: left;
+            }
+
+            .console-overview,
+            .workspace-grid,
+            .workspace-grid.primary {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .workspace-tabs {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .operator-card.kubernetes-card {
+                grid-column: span 1;
+            }
+
+            .operator-card.simulation-card {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .brand-mark {
+                width: 40px;
+                height: 40px;
+            }
+
+            .demo-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .operator-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .operator-toolbar {
+                display: grid;
+            }
+
+            .workspace-tabs {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .tab-button {
+                font-size: 11px;
+            }
+
+            .overview-stats {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="brand-lockup">
+                <div class="brand-mark" aria-hidden="true"></div>
+                <div>
+                    <h1>Aurora Simulation Console</h1>
+                    <p>Local CloudBank surface for simulation smoke checks, vector experiments, readiness gates, and deployment evidence.</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <span class="status-line"><span class="status-indicator connected"></span>CloudBank API connected</span>
+                <span>Snapshot-backed console. No cluster mutation from this page.</span>
+                <div class="header-links" aria-label="Console links">
+                    <a class="header-link" href="/synergy-dashboard?console=20260627-console2">Synergy Dashboard</a>
+                    <a class="header-link" href="/legacy/vsa">Retired VSA</a>
+                </div>
+            </div>
+        </div>
+
+        <section class="console-overview" aria-label="Console overview">
+            <div class="overview-copy">
+                <span class="eyebrow">Simulation-first surface</span>
+                <h2>Runtime readiness, execution paths, deployment gates, and supporting dashboards.</h2>
+                <p id="operator-updated">Waiting for mounted root snapshot.</p>
+            </div>
+            <div id="console-overview-stats" class="overview-stats">
+                <div class="overview-stat"><strong>--</strong><span>Simulation</span></div>
+                <div class="overview-stat"><strong>--</strong><span>Docker</span></div>
+                <div class="overview-stat"><strong>--</strong><span>Kubernetes</span></div>
+                <div class="overview-stat"><strong>--</strong><span>Commands</span></div>
+            </div>
+        </section>
+
+        <nav class="workspace-tabs" role="tablist" aria-label="Simulation console workspaces">
+            <button id="tab-button-simulation" class="tab-button" type="button" role="tab" aria-selected="true" aria-controls="tab-simulation" data-tab-target="tab-simulation">Simulation</button>
+            <button id="tab-button-readiness" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="tab-readiness" data-tab-target="tab-readiness">Readiness</button>
+            <button id="tab-button-deployment" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="tab-deployment" data-tab-target="tab-deployment">Docker + K8s</button>
+            <button id="tab-button-command" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="tab-command" data-tab-target="tab-command">Command</button>
+            <button id="tab-button-synergy" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="tab-synergy" data-tab-target="tab-synergy">Synergy</button>
+            <button id="tab-button-vector" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="tab-vector" data-tab-target="tab-vector">Vector Lab</button>
+        </nav>
+
+        <section id="tab-simulation" class="tab-panel" role="tabpanel" aria-labelledby="tab-button-simulation">
+            <div class="workspace-grid primary">
+                <div class="demo-panel">
+                    <div class="tab-section-header">
+                        <div>
+                            <h2>Simulation Runtime</h2>
+                            <p class="operator-muted">GUMAS, scenario bridge, event ledgers, and bounded smoke evidence.</p>
+                        </div>
+                        <button class="btn secondary compact" onclick="loadOperatorSnapshot()">Refresh</button>
+                    </div>
+                    <div id="simulation-runtime-focus" class="operator-grid">
+                        <div class="operator-card">
+                            <h3>Simulation</h3>
+                            <span class="operator-status unknown">Loading</span>
+                            <p>Waiting for root operator snapshot.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-panel">
+                    <h2>Execution Paths</h2>
+                    <div id="simulation-paths" class="operator-list">
+                        <div class="operator-list-item">Waiting for simulation execution paths.</div>
+                    </div>
+                </div>
+                <div class="demo-panel full-width">
+                    <h2>Simulation Surfaces</h2>
+                    <div id="simulation-surfaces" class="operator-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-readiness" class="tab-panel" role="tabpanel" aria-labelledby="tab-button-readiness" hidden>
+            <div class="demo-panel full-width">
+                <div class="operator-toolbar">
+                    <div>
+                        <h2>Aurora Operator Console</h2>
+                        <p class="operator-muted">Persisted root snapshot. No cluster mutation, live command execution, nested repo writes, or canon promotion.</p>
+                    </div>
+                    <button class="btn secondary compact" onclick="loadOperatorSnapshot()">Refresh Snapshot</button>
+                </div>
+                <div id="operator-summary" class="operator-grid">
+                    <div class="operator-card">
+                        <h3>Snapshot</h3>
+                        <span class="operator-status unknown">Loading</span>
+                        <p>Waiting for root operator snapshot.</p>
+                    </div>
+                </div>
+                <div class="operator-section">
+                    <h3>Readiness Lanes</h3>
+                    <div id="operator-lanes" class="operator-grid"></div>
+                </div>
+                <div class="operator-section">
+                    <h3>Recommended Actions</h3>
+                    <div id="operator-actions" class="operator-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-deployment" class="tab-panel" role="tabpanel" aria-labelledby="tab-button-deployment" hidden>
+            <div class="workspace-grid">
+                <div class="demo-panel">
+                    <div class="tab-section-header">
+                        <div>
+                            <h2>Docker Runtime</h2>
+                            <p class="operator-muted">Local compose services, GUI endpoints, command node, and GPU profile gate.</p>
+                        </div>
+                        <button class="btn secondary compact" onclick="loadOperatorSnapshot()">Refresh</button>
+                    </div>
+                    <div id="deployment-lanes" class="operator-grid"></div>
+                </div>
+                <div class="demo-panel">
+                    <h2>Kubernetes Apply Gate</h2>
+                    <div id="deployment-actions" class="operator-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-command" class="tab-panel" role="tabpanel" aria-labelledby="tab-button-command" hidden>
+            <div class="workspace-grid primary">
+                <div class="demo-panel">
+                    <h2>Command Intent Gateway</h2>
+                    <div id="command-intent-detail" class="operator-grid"></div>
+                </div>
+                <div class="demo-panel">
+                    <h2>Boundary Markers</h2>
+                    <div id="command-boundary-markers" class="operator-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-synergy" class="tab-panel" role="tabpanel" aria-labelledby="tab-button-synergy" hidden>
+            <div class="workspace-grid primary">
+                <div class="demo-panel">
+                    <div class="tab-section-header">
+                        <div>
+                            <h2>Synergy Dashboard</h2>
+                            <p class="operator-muted">Component graph and health data from the CloudBank Synergy API.</p>
+                        </div>
+                        <button class="btn secondary compact" onclick="loadSynergyComponents()">Refresh</button>
+                    </div>
+                    <div id="synergy-components" class="operator-grid">
+                        <div class="operator-card">
+                            <h3>Synergy</h3>
+                            <span class="operator-status unknown">Loading</span>
+                            <p>Waiting for component API.</p>
+                        </div>
+                    </div>
+                    <div class="launch-row">
+                        <a class="header-link" href="/synergy-dashboard?console=20260627-tabs">Open full Synergy Dashboard</a>
+                    </div>
+                </div>
+                <div class="demo-panel">
+                    <h2>Synergy Notes</h2>
+                    <div id="synergy-notes" class="operator-list">
+                        <div class="operator-list-item">Component cards will populate after the API responds.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-vector" class="tab-panel" role="tabpanel" aria-labelledby="tab-button-vector" hidden>
+            <div class="demo-grid">
+                <div class="demo-panel">
+                    <h2>Quantum Symbolic Vector Generator</h2>
+                    <div class="input-group">
+                        <label for="symbol-input">Symbol/Concept:</label>
+                        <input type="text" id="symbol-input" placeholder="e.g., love, quantum, aurora" value="aurora">
+                    </div>
+                    <div class="input-group">
+                        <label for="vector-dim">Vector Dimension:</label>
+                        <select id="vector-dim">
+                            <option value="8">8 (Demo)</option>
+                            <option value="16">16 (Small)</option>
+                            <option value="32">32 (Medium)</option>
+                            <option value="64">64 (Large)</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="generateQuantumVector()">Generate Vector</button>
+                    <button class="btn secondary" onclick="generateMultipleVectors()">Batch Generate</button>
+
+                    <div id="quantum-result" class="result-area">
+                        <p>Enter a symbol above to inspect quantum-enhanced symbolic encoding.</p>
+                    </div>
+
+                    <div id="vector-visualization" class="vector-viz"></div>
+                </div>
+
+                <div class="demo-panel">
+                    <h2>Geometric Algebra Engine</h2>
+                    <div class="input-group">
+                        <label for="vector-a">Vector A (coefficients):</label>
+                        <input type="text" id="vector-a" placeholder="e.g., 2, 3, 1" value="2, 3, 1">
+                    </div>
+                    <div class="input-group">
+                        <label for="vector-b">Vector B (coefficients):</label>
+                        <input type="text" id="vector-b" placeholder="e.g., 1, 2, 4" value="1, 2, 4">
+                    </div>
+                    <button class="btn" onclick="computeGeometricProduct()">Geometric Product</button>
+                    <button class="btn secondary" onclick="computeMultiple()">All Operations</button>
+
+                    <div id="geometric-result" class="result-area">
+                        <p>Enter vector coefficients to inspect geometric algebra operations.</p>
+                    </div>
+                </div>
+
+                <div class="demo-panel">
+                    <h2>Symbolic Reasoning Engine</h2>
+                    <div class="input-group">
+                        <label for="concept-a">Concept A:</label>
+                        <input type="text" id="concept-a" placeholder="e.g., artificial" value="artificial">
+                    </div>
+                    <div class="input-group">
+                        <label for="concept-b">Concept B:</label>
+                        <input type="text" id="concept-b" placeholder="e.g., intelligence" value="intelligence">
+                    </div>
+                    <div class="input-group">
+                        <label for="operation">Symbolic Operation:</label>
+                        <select id="operation">
+                            <option value="bind">Bind (Concept Combination)</option>
+                            <option value="similarity">Similarity Measure</option>
+                            <option value="superpose">Superposition</option>
+                            <option value="analogy">Analogy Detection</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="performSymbolicReasoning()">Reason</button>
+                    <button class="btn secondary" onclick="exploreRelationships()">Explore</button>
+
+                    <div id="reasoning-result" class="result-area">
+                        <p>Explore how concepts relate in high-dimensional quantum-symbolic space.</p>
+                    </div>
+                </div>
+
+                <div class="demo-panel">
+                    <h2>Real-time Collaboration Hub</h2>
+                    <div class="input-group">
+                        <label for="message-input">Share Symbolic Discovery:</label>
+                        <textarea id="message-input" rows="3" placeholder="Describe your quantum VSA experiment..."></textarea>
+                    </div>
+                    <button class="btn" onclick="shareDiscovery()">Broadcast</button>
+                    <button class="btn secondary" onclick="clearCollaboration()">Clear</button>
+
+                    <div id="collaboration-feed" class="result-area">
+                        <p>Collaboration messages appear here when the WebSocket lane is available.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-panel full-width">
+                <h2>Quantum Performance Metrics</h2>
+                <div class="quantum-metrics">
+                    <div class="metric-card">
+                        <div class="metric-value" id="vectors-generated">0</div>
+                        <div class="metric-label">Vectors Generated</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="operations-performed">0</div>
+                        <div class="metric-label">Operations Performed</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="quantum-efficiency">--</div>
+                        <div class="metric-label">Quantum Efficiency</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="entanglement-depth">--</div>
+                        <div class="metric-label">Symbolic Entanglement</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="coherence-time">--</div>
+                        <div class="metric-label">Coherence Time (ms)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="active-users">1</div>
+                        <div class="metric-label">Active Researchers</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Aurora Simulation Console application
+        const API_BASE = window.location.origin;
+        let metricsData = {
+            vectorsGenerated: 0,
+            operationsPerformed: 0,
+            quantumEfficiency: 0,
+            entanglementDepth: 0,
+            coherenceTime: 0
+        };
+
+        // WebSocket connection for real-time collaboration
+        let ws;
+        let securitySession;
+        let latestOperatorSnapshot = null;
+
+        function setActiveTab(targetId, updateHash = true) {
+            const targetPanel = document.getElementById(targetId);
+            if (!targetPanel) {
+                return;
+            }
+
+            document.querySelectorAll('.tab-button').forEach(button => {
+                const selected = button.dataset.tabTarget === targetId;
+                button.setAttribute('aria-selected', selected ? 'true' : 'false');
+            });
+
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.hidden = panel.id !== targetId;
+            });
+
+            if (updateHash) {
+                const tabName = targetId.replace(/^tab-/, '');
+                window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${tabName}`);
+            }
+
+            if (targetId === 'tab-synergy') {
+                loadSynergyComponents();
+            }
+        }
+
+        function initializeTabs() {
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => setActiveTab(button.dataset.tabTarget));
+            });
+
+            const hashTarget = window.location.hash ? `tab-${window.location.hash.slice(1)}` : 'tab-simulation';
+            setActiveTab(document.getElementById(hashTarget) ? hashTarget : 'tab-simulation', false);
+        }
+
+        async function initializeSecuritySession() {
+            if (securitySession) {
+                return securitySession;
+            }
+
+            const response = await fetch(`${API_BASE}/api/security/session`);
+            if (!response.ok) {
+                throw new Error(`Security session failed: HTTP ${response.status}`);
+            }
+            securitySession = await response.json();
+            return securitySession;
+        }
+
+        async function ensureSecuritySession() {
+            try {
+                return await initializeSecuritySession();
+            } catch (error) {
+                console.error('Failed to initialize security session:', error);
+                return null;
+            }
+        }
+
+        async function initializeWebSocket() {
+            try {
+                const session = await ensureSecuritySession();
+                if (!session || !session.ws_token) {
+                    console.log('WebSocket not available, continuing with HTTP only');
+                    return;
+                }
+                const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                ws = new WebSocket(
+                    `${wsProtocol}//${window.location.host}/api/ws/collaboration?token=${encodeURIComponent(session.ws_token)}`
+                );
+                ws.onopen = () => {
+                    console.log('WebSocket connected to collaboration hub.');
+                    const collaborationFeed = document.getElementById('collaboration-feed');
+                    const connectionMsg = AuroraSecurity.createSafeElement('p', 'Connected to Aurora VSA collaboration network.', {
+                        style: 'color: #4ade80;'
+                    });
+                    collaborationFeed.appendChild(connectionMsg);
+                };
+                ws.onmessage = (event) => {
+                    try {
+                        const rawData = JSON.parse(event.data);
+                        const data = AuroraSecurity.sanitizeWebSocketData(rawData);
+                        const collaborationFeed = document.getElementById('collaboration-feed');
+                        const timestamp = new Date().toLocaleTimeString();
+
+                        if (data.type === 'welcome') {
+                            const welcomeMsg = AuroraSecurity.createSafeElement('p',
+                                `${data.message || 'Welcome'} (${data.current_vectors || 0} vectors active)`,
+                                { style: 'color: #4ade80;' }
+                            );
+                            collaborationFeed.appendChild(welcomeMsg);
+                        } else if (data.type === 'vsa_update') {
+                            const updateMsg = AuroraSecurity.createSafeElement('p');
+                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}] ${data.user || 'Unknown'}:`);
+                            const operation_text = document.createTextNode(` ${data.operation || 'Unknown operation'} on "${data.symbol || 'Unknown symbol'}"`);
+                            updateMsg.appendChild(timestamp_span);
+                            updateMsg.appendChild(operation_text);
+                            collaborationFeed.appendChild(updateMsg);
+                        } else {
+                            const genericMsg = AuroraSecurity.createSafeElement('p');
+                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}]`);
+                            const content_text = document.createTextNode(` ${JSON.stringify(data)}`);
+                            genericMsg.appendChild(timestamp_span);
+                            genericMsg.appendChild(content_text);
+                            collaborationFeed.appendChild(genericMsg);
+                        }
+                        collaborationFeed.scrollTop = collaborationFeed.scrollHeight;
+                    } catch (error) {
+                        console.error('Error processing WebSocket message:', error);
+                    }
+                };
+            } catch (error) {
+                console.log('WebSocket not available, continuing with HTTP only');
+            }
+        }
+
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (method !== 'GET') {
+                const session = await ensureSecuritySession();
+                if (session && session.csrf_token) {
+                    options.headers.Authorization = `Bearer ${session.csrf_token}`;
+                }
+            }
+            if (body) options.body = JSON.stringify(body);
+
+            try {
+                const response = await fetch(API_BASE + endpoint, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                return { error: error.message };
+            }
+        }
+
+        async function generateQuantumVector() {
+            const symbol = document.getElementById('symbol-input').value;
+            const dim = parseInt(document.getElementById('vector-dim').value);
+
+            if (!symbol.trim()) {
+                alert('Please enter a symbol!');
+                return;
+            }
+
+            const startTime = performance.now();
+            const result = await apiCall('/api/vsa/generate', 'POST', {
+                symbol,
+                dimension: dim,
+                operation_type: 'generate'
+            });
+            const endTime = performance.now();
+
+            if (result.error) {
+                document.getElementById('quantum-result').innerHTML = AuroraSecurity.sanitizeHTML(`<p style="color: #f87171;">Error: ${AuroraSecurity.escapeHtml(result.error)}</p>`);
+                return;
+            }
+
+            metricsData.vectorsGenerated++;
+            metricsData.coherenceTime = Math.round(endTime - startTime);
+            metricsData.quantumEfficiency = Math.min(95, metricsData.vectorsGenerated * 3.2);
+            updateMetrics();
+
+            // Broadcast to WebSocket
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'vsa_operation',
+                    operation: 'generate',
+                    symbol: symbol,
+                    timestamp: new Date().toISOString(),
+                    user: 'demo_user'
+                }));
+            }
+
+            const resultDiv = document.getElementById('quantum-result');
+            resultDiv.innerHTML = AuroraSecurity.sanitizeHTML(`
+                <h3>Quantum Vector for "${AuroraSecurity.escapeHtml(symbol)}"</h3>
+                <p><strong>Dimension:</strong> ${AuroraSecurity.escapeHtml(result.dimension)}</p>
+                <p><strong>Vector Type:</strong> ${AuroraSecurity.escapeHtml(result.vector_type || 'bipolar')}</p>
+                <p><strong>Quantum Generated:</strong> ${result.quantum_generated ? 'yes' : 'no'}</p>
+                <p><strong>Generation Time:</strong> ${AuroraSecurity.escapeHtml(metricsData.coherenceTime)}ms</p>
+                <p><strong>Full Length:</strong> ${AuroraSecurity.escapeHtml(result.vector_full_length)} elements</p>
+            `);
+
+            visualizeVector(result.vector, 'vector-visualization');
+        }
+
+        async function generateMultipleVectors() {
+            const baseSymbol = document.getElementById('symbol-input').value;
+            if (!baseSymbol.trim()) {
+                alert('Please enter a base symbol!');
+                return;
+            }
+
+            const variations = [baseSymbol, baseSymbol + '_quantum', baseSymbol + '_enhanced'];
+
+            for (const symbol of variations) {
+                document.getElementById('symbol-input').value = symbol;
+                await generateQuantumVector();
+                await new Promise(resolve => setTimeout(resolve, 800)); // Delay for effect
+            }
+        }
+
+        async function computeGeometricProduct() {
+            const aStr = document.getElementById('vector-a').value;
+            const bStr = document.getElementById('vector-b').value;
+
+            try {
+                // Enhanced geometric algebra operation
+                const vectors = [
+                    { e1: parseFloat(aStr.split(',')[0]) || 1.0, e2: parseFloat(aStr.split(',')[1]) || 0.0 },
+                    { e1: parseFloat(bStr.split(',')[0]) || 1.0, e2: parseFloat(bStr.split(',')[1]) || 0.0 }
+                ];
+
+                const result = await apiCall('/api/geometric/advanced', 'POST', {
+                    operation: 'product',
+                    vectors: vectors
+                });
+
+                metricsData.operationsPerformed++;
+                metricsData.entanglementDepth = Math.min(10, metricsData.operationsPerformed * 0.5);
+                updateMetrics();
+
+                document.getElementById('geometric-result').innerHTML = AuroraSecurity.sanitizeHTML(`
+                    <h3>⊗ Geometric Product Result</h3>
+                    <p><strong>Operation:</strong> ${AuroraSecurity.escapeHtml(result.operation)}</p>
+                    <p><strong>Input Vectors:</strong> ${AuroraSecurity.escapeHtml(JSON.stringify(result.input_vectors))}</p>
+                    <p><strong>Result:</strong> ${AuroraSecurity.escapeHtml(result.results[0]?.result || 'N/A')}</p>
+                    <p><strong>Mock Mode:</strong> ${result.mock_mode ? 'Simplified' : 'Full Clifford'}</p>
+                `);
+            } catch (error) {
+                document.getElementById('geometric-result').innerHTML = AuroraSecurity.sanitizeHTML(`<p style="color: #f87171;">Error: ${AuroraSecurity.escapeHtml(error.message)}</p>`);
+            }
+        }
+
+        async function computeMultiple() {
+            await computeGeometricProduct();
+
+            // Also compute commutator
+            const aStr = document.getElementById('vector-a').value;
+            const bStr = document.getElementById('vector-b').value;
+
+            const vectors = [
+                { e1: parseFloat(aStr.split(',')[0]) || 1.0, e2: parseFloat(aStr.split(',')[1]) || 0.0 },
+                { e1: parseFloat(bStr.split(',')[0]) || 1.0, e2: parseFloat(bStr.split(',')[1]) || 0.0 }
+            ];
+
+            const commutatorResult = await apiCall('/api/geometric/advanced', 'POST', {
+                operation: 'commutator',
+                vectors: vectors
+            });
+
+            document.getElementById('geometric-result').innerHTML += AuroraSecurity.sanitizeHTML(`
+                <br><h4>Commutator [A,B]</h4>
+                <p><strong>Result:</strong> ${AuroraSecurity.escapeHtml(commutatorResult.results[0]?.result || 'N/A')}</p>
+            `);
+
+            metricsData.operationsPerformed += 2;
+            metricsData.quantumEfficiency = Math.min(98, metricsData.quantumEfficiency + 3);
+            updateMetrics();
+        }
+
+        async function performSymbolicReasoning() {
+            const conceptA = document.getElementById('concept-a').value;
+            const conceptB = document.getElementById('concept-b').value;
+            const operation = document.getElementById('operation').value;
+
+            if (!conceptA.trim() || !conceptB.trim()) {
+                alert('Please enter both concepts!');
+                return;
+            }
+
+            let resultText = '';
+            let similarity = 0;
+
+            try {
+                if (operation === 'bind') {
+                    // Use the new bind endpoint
+                    const bindResult = await apiCall('/api/vsa/bind', 'POST', {
+                        symbol_a: conceptA,
+                        symbol_b: conceptB,
+                        result_name: `${conceptA}_BIND_${conceptB}`,
+                        dimension: 256
+                    });
+
+                    if (bindResult.error) {
+                        throw new Error(bindResult.error);
+                    }
+
+                    similarity = bindResult.similarity_a;
+                    resultText = `Concept Binding: "${conceptA}" ⊗ "${conceptB}"<br>
+                                 Result: "${bindResult.result_name}"<br>
+                                 Similarity to A: ${(bindResult.similarity_a * 100).toFixed(1)}%<br>
+                                 Similarity to B: ${(bindResult.similarity_b * 100).toFixed(1)}%<br>
+                                 Dimension: ${bindResult.dimension}D quantum space`;
+
+                    visualizeVector(bindResult.result_vector, 'vector-visualization');
+
+                } else if (operation === 'similarity') {
+                    // Use the similarity endpoint
+                    const simResult = await apiCall('/api/vsa/similarity', 'POST', {
+                        symbol_a: conceptA,
+                        symbol_b: conceptB
+                    });
+
+                    if (simResult.error) {
+                        throw new Error(simResult.error);
+                    }
+
+                    similarity = simResult.cosine_similarity;
+                    resultText = `Semantic Similarity Analysis<br>
+                                 Cosine Similarity: ${similarity.toFixed(3)}<br>
+                                 Hamming Distance: ${simResult.hamming_distance.toFixed(3)}<br>
+                                 Dot Product: ${simResult.dot_product.toFixed(1)}<br>
+                                 Interpretation: ${similarity > 0.5 ? 'Highly related' : similarity > 0 ? 'Moderately related' : 'Weakly related'}`;
+
+                } else {
+                    // Generate quantum circuits for both concepts
+                    const circuitA = await apiCall('/api/quantum/circuit', 'POST', {
+                        symbol: conceptA,
+                        depth: 3,
+                        qubits: 8
+                    });
+
+                    const circuitB = await apiCall('/api/quantum/circuit', 'POST', {
+                        symbol: conceptB,
+                        depth: 3,
+                        qubits: 8
+                    });
+
+                    if (operation === 'superpose') {
+                        resultText = `Quantum Superposition Analysis<br>
+                                     "${conceptA}": ${circuitA.most_frequent_probability * 100}% → |${circuitA.most_frequent_state}⟩<br>
+                                     "${conceptB}": ${circuitB.most_frequent_probability * 100}% → |${circuitB.most_frequent_state}⟩<br>
+                                     Combined Gates: ${circuitA.circuit_gates + circuitB.circuit_gates}<br>
+                                     Coherence: ${Math.random() * 85 + 10}%`;
+                    } else if (operation === 'analogy') {
+                        resultText = `Quantum Analogy Detection<br>
+                                     Pattern A (${conceptA}): ${circuitA.circuit_gates} quantum gates<br>
+                                     Pattern B (${conceptB}): ${circuitB.circuit_gates} quantum gates<br>
+                                     Structural similarity: ${Math.abs(circuitA.circuit_gates - circuitB.circuit_gates) < 3 ? 'High' : 'Moderate'}<br>
+                                     Analogy strength: ${Math.random() * 40 + 50}%`;
+                    }
+                }
+
+                metricsData.entanglementDepth = Math.abs(similarity * 10);
+
+            } catch (error) {
+                resultText = `Error: ${error.message}`;
+            }
+
+            document.getElementById('reasoning-result').innerHTML = AuroraSecurity.sanitizeHTML(`
+                <h3>Symbolic Reasoning Result</h3>
+                <p>${AuroraSecurity.escapeHtml(resultText)}</p>
+                <p><strong>Operation:</strong> ${AuroraSecurity.escapeHtml(operation)}</p>
+                <p><strong>Computation:</strong> Quantum-enhanced VSA</p>
+            `);
+
+            metricsData.operationsPerformed++;
+            updateMetrics();
+        }
+
+        async function exploreRelationships() {
+            await performSymbolicReasoning();
+
+            // Also show stored vectors
+            const vectorList = await apiCall('/api/vsa/list');
+            if (vectorList && vectorList.vectors) {
+                document.getElementById('reasoning-result').innerHTML += AuroraSecurity.sanitizeHTML(`
+                    <br><h4>📦 Vector Store (${vectorList.count} vectors)</h4>
+                    <p>${AuroraSecurity.escapeHtml(vectorList.vectors.map(v => `"${v.symbol}" (${v.dimension}D)`).join(', '))}</p>
+                `);
+            }
+
+            metricsData.operationsPerformed += 2;
+            metricsData.quantumEfficiency = Math.min(98, metricsData.quantumEfficiency + 5);
+            updateMetrics();
+        }
+
+        function shareDiscovery() {
+            const message = document.getElementById('message-input').value;
+            if (!message.trim()) {
+                alert('Please enter a discovery to share!');
+                return;
+            }
+
+            const discoveryData = {
+                type: 'discovery',
+                message: message,
+                timestamp: new Date().toISOString(),
+                metrics: metricsData,
+                user: 'demo_user'
+            };
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(discoveryData));
+                document.getElementById('message-input').value = '';
+            } else {
+                // Fallback to local display
+                const collaborationFeed = document.getElementById('collaboration-feed');
+                const timestamp = new Date().toLocaleTimeString();
+                const tempEl = AuroraSecurity.createSafeElement('div', '<p><strong>[${timestamp}] You:</strong> ' + message + '</p>'); collaborationFeed.appendChild(tempEl);
+                document.getElementById('message-input').value = '';
+            }
+        }
+
+        async function clearCollaboration() {
+            document.getElementById('collaboration-feed').innerHTML = AuroraSecurity.sanitizeHTML('<p>Collaboration feed cleared.</p>');
+
+            // Also clear VSA store
+            try {
+                const result = await apiCall('/api/vsa/clear', 'DELETE');
+                if (result.message) {
+                    document.getElementById('collaboration-feed').innerHTML += AuroraSecurity.sanitizeHTML(`<p style="color: #fbbf24;">${AuroraSecurity.escapeHtml(result.message)}</p>`);
+                    metricsData.vectorsGenerated = 0;
+                    updateMetrics();
+                }
+            } catch (error) {
+                console.error('Failed to clear VSA store:', error);
+            }
+        }
+
+        function visualizeVector(vector, containerId) {
+            const container = document.getElementById(containerId);
+            container.textContent = '';
+
+            if (!vector || !Array.isArray(vector)) {
+                container.textContent = '<p>No vector data to display</p>';
+                return;
+            }
+
+            vector.slice(0, Math.min(32, vector.length)).forEach((value, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'vector-cell';
+                cell.textContent = typeof value === 'number' ? value.toFixed(2) : value.toString();
+
+                // Color coding for bipolar vectors
+                if (value > 0) {
+                    cell.style.backgroundColor = 'rgba(74, 222, 128, 0.3)';
+                    cell.style.borderColor = 'rgba(74, 222, 128, 0.6)';
+                } else {
+                    cell.style.backgroundColor = 'rgba(248, 113, 113, 0.3)';
+                    cell.style.borderColor = 'rgba(248, 113, 113, 0.6)';
+                }
+
+                cell.title = `Position ${index}: ${value}`;
+                container.appendChild(cell);
+            });
+
+            if (vector.length > 32) {
+                const moreCell = document.createElement('div');
+                moreCell.className = 'vector-cell';
+                moreCell.textContent = `+${vector.length - 32}`;
+                moreCell.style.backgroundColor = 'rgba(156, 163, 175, 0.3)';
+                moreCell.title = `${vector.length - 32} more elements...`;
+                container.appendChild(moreCell);
+            }
+        }
+
+        function updateMetrics() {
+            document.getElementById('vectors-generated').textContent = metricsData.vectorsGenerated;
+            document.getElementById('operations-performed').textContent = metricsData.operationsPerformed;
+            document.getElementById('quantum-efficiency').textContent = Math.round(metricsData.quantumEfficiency) + '%';
+            document.getElementById('entanglement-depth').textContent = Math.round(metricsData.entanglementDepth * 10) / 10;
+            document.getElementById('coherence-time').textContent = metricsData.coherenceTime + 'ms';
+        }
+
+        function clearElement(element) {
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
+            }
+        }
+
+        function statusClass(status) {
+            const normalized = String(status || 'unknown').toLowerCase();
+            if (normalized === 'ready') return 'ready';
+            if (normalized === 'blocked' || normalized === 'invalid_json' || normalized === 'unreadable') return normalized;
+            if (normalized === 'attention' || normalized === 'open' || normalized === 'missing') return normalized;
+            return 'unknown';
+        }
+
+        function createStatus(status) {
+            const span = document.createElement('span');
+            span.className = `operator-status ${statusClass(status)}`;
+            span.textContent = status || 'unknown';
+            return span;
+        }
+
+        function appendTextBlock(parent, tagName, text, className) {
+            if (!text) {
+                return null;
+            }
+            const element = AuroraSecurity.createSafeElement(tagName, text);
+            if (className) {
+                element.className = className;
+            }
+            parent.appendChild(element);
+            return element;
+        }
+
+        function categoryLabel(category) {
+            return String(category || 'unknown').replace(/_/g, ' ');
+        }
+
+        function createOperatorCard(title, status, detail, cardClass = '') {
+            const card = document.createElement('div');
+            card.className = `operator-card ${cardClass}`.trim();
+            card.appendChild(AuroraSecurity.createSafeElement('h3', title || 'Untitled'));
+            card.appendChild(createStatus(status || 'unknown'));
+            if (detail) {
+                card.appendChild(AuroraSecurity.createSafeElement('p', detail));
+            }
+            return card;
+        }
+
+        function appendCategoryBreakdown(parent, categoryCounts) {
+            const categories = Object.entries(categoryCounts || {});
+            if (!categories.length) {
+                return;
+            }
+
+            const breakdown = document.createElement('div');
+            breakdown.className = 'operator-breakdown';
+            categories.forEach(([category, count]) => {
+                breakdown.appendChild(AuroraSecurity.createSafeElement(
+                    'span',
+                    `${categoryLabel(category)} ${count}`,
+                    { class: 'category-pill' }
+                ));
+            });
+            parent.appendChild(breakdown);
+        }
+
+        function appendKubernetesDetails(card, readiness) {
+            const summary = readiness.summary || {};
+            const totalBlockers = readiness.apply_blocker_total !== undefined
+                ? readiness.apply_blocker_total
+                : summary.apply_blocker_count || 0;
+
+            appendCategoryBreakdown(card, summary.apply_blocker_category_counts || {});
+
+            const blockers = Array.isArray(readiness.apply_blockers) ? readiness.apply_blockers : [];
+            if (blockers.length) {
+                appendTextBlock(card, 'p', `First ${blockers.length} of ${totalBlockers} apply blockers`, 'operator-muted');
+                const blockerList = document.createElement('div');
+                blockerList.className = 'blocker-list';
+                blockers.slice(0, 4).forEach(blocker => {
+                    const item = document.createElement('div');
+                    item.className = 'blocker-item';
+                    const path = blocker.path || 'unknown path';
+                    const line = blocker.line !== undefined ? blocker.line : '?';
+                    appendTextBlock(item, 'div', `${categoryLabel(blocker.category)} - ${path}:${line}`, 'blocker-meta');
+                    appendTextBlock(item, 'div', blocker.snippet || blocker.detail || 'No snippet available.', 'blocker-snippet');
+                    blockerList.appendChild(item);
+                });
+                card.appendChild(blockerList);
+            }
+
+            const remediation = Array.isArray(readiness.remediation_plan) ? readiness.remediation_plan : [];
+            if (remediation.length) {
+                const remediationList = document.createElement('div');
+                remediationList.className = 'remediation-list';
+                remediation.slice(0, 4).forEach(action => {
+                    const item = document.createElement('div');
+                    item.className = 'remediation-item';
+                    item.appendChild(AuroraSecurity.createSafeElement(
+                        'strong',
+                        `${categoryLabel(action.category)} (${action.blocker_count || 0})`
+                    ));
+                    appendTextBlock(item, 'div', action.recommended_next_action || 'Resolve before apply.', 'operator-muted');
+                    remediationList.appendChild(item);
+                });
+                card.appendChild(remediationList);
+            }
+        }
+
+        function appendSimulationDetails(card, readiness) {
+            const summary = readiness.summary || {};
+            const smoke = readiness.smoke_probe || {};
+            const surfaces = Array.isArray(readiness.surfaces) ? readiness.surfaces : [];
+            const paths = Array.isArray(readiness.execution_paths) ? readiness.execution_paths : [];
+
+            appendCategoryBreakdown(card, {
+                surfaces: summary.ready_surface_count || 0,
+                paths: summary.available_execution_path_count || 0,
+                events: summary.primary_event_ledger_records || 0
+            });
+
+            appendTextBlock(
+                card,
+                'p',
+                `Persisted turn ${summary.persisted_output_turn || 'unknown'} · smoke ${smoke.status || summary.smoke_probe_status || 'not_run'}`,
+                'operator-muted'
+            );
+
+            if (smoke.result && smoke.result.engine_class) {
+                appendTextBlock(
+                    card,
+                    'p',
+                    `${smoke.result.engine_class} completed ${smoke.result.turns_completed || 0} turns for seed ${smoke.seed || 'unknown'}.`,
+                    'operator-muted'
+                );
+            }
+
+            if (surfaces.length) {
+                const surfaceList = document.createElement('div');
+                surfaceList.className = 'blocker-list';
+                surfaces.slice(0, 4).forEach(surface => {
+                    const item = document.createElement('div');
+                    item.className = 'blocker-item';
+                    appendTextBlock(item, 'div', `${surface.status || 'unknown'} - ${surface.title || surface.surface_id}`, 'blocker-meta');
+                    appendTextBlock(item, 'div', surface.role || surface.execution_boundary || surface.repo || 'Simulation surface', 'operator-muted');
+                    surfaceList.appendChild(item);
+                });
+                card.appendChild(surfaceList);
+            }
+
+            if (paths.length) {
+                const pathList = document.createElement('div');
+                pathList.className = 'operator-breakdown';
+                paths.slice(0, 3).forEach(path => {
+                    pathList.appendChild(AuroraSecurity.createSafeElement(
+                        'span',
+                        `${path.status || 'unknown'} ${path.path_id || 'path'}`,
+                        { class: 'category-pill' }
+                    ));
+                });
+                card.appendChild(pathList);
+            }
+        }
+
+        function createOperatorLaneCard(lane) {
+            let cardClass = '';
+            if (lane && lane.lane_id === 'kubernetes-readiness') {
+                cardClass = 'kubernetes-card';
+            }
+            if (lane && lane.lane_id === 'simulation-runtime-readiness') {
+                cardClass = 'simulation-card';
+            }
+            const card = createOperatorCard(
+                lane.title || lane.lane_id,
+                lane.status,
+                operatorLaneDetail(lane),
+                cardClass
+            );
+            if (lane.simulation_readiness && lane.simulation_readiness.available) {
+                appendSimulationDetails(card, lane.simulation_readiness);
+            }
+            if (lane.kubernetes_readiness && lane.kubernetes_readiness.available) {
+                appendKubernetesDetails(card, lane.kubernetes_readiness);
+            }
+            return card;
+        }
+
+        function operatorLaneDetail(lane) {
+            if (lane.stack_validation && lane.stack_validation.available) {
+                const summary = lane.stack_validation.summary || {};
+                const required = `${summary.required_ready || 0}/${summary.required_total || 0}`;
+                const endpoints = `${summary.endpoint_ready || 0}/${summary.endpoint_total || 0}`;
+                return `Docker ${required} required, endpoints ${endpoints}, GPU ${summary.gpu_profile_status || 'unknown'}`;
+            }
+            if (lane.demo_readiness && lane.demo_readiness.available) {
+                const summary = lane.demo_readiness.summary || {};
+                const required = `${summary.required_ready || 0}/${summary.required_total || 0}`;
+                const optional = `${summary.optional_ready || 0}/${summary.optional_total || 0}`;
+                const blocked = summary.blocked_gate_count !== undefined ? summary.blocked_gate_count : 0;
+                const attention = summary.attention_gate_count !== undefined ? summary.attention_gate_count : 0;
+                return `Required gates ${required}, optional ${optional}, blocked ${blocked}, attention ${attention}`;
+            }
+            if (lane.kubernetes_readiness && lane.kubernetes_readiness.available) {
+                const summary = lane.kubernetes_readiness.summary || {};
+                const required = `${summary.required_ready || 0}/${summary.required_total || 0}`;
+                const manifests = summary.manifest_file_count !== undefined ? summary.manifest_file_count : 0;
+                const resources = summary.resource_count !== undefined ? summary.resource_count : 0;
+                const blockers = summary.apply_blocker_count !== undefined ? summary.apply_blocker_count : 0;
+                const clusterProbe = lane.kubernetes_readiness.cluster_probe || {};
+                return `K8s required ${required}, manifests ${manifests}, resources ${resources}, apply blockers ${blockers}, cluster ${clusterProbe.status || 'unknown'}`;
+            }
+            if (lane.simulation_readiness && lane.simulation_readiness.available) {
+                const summary = lane.simulation_readiness.summary || {};
+                const required = `${summary.ready_required_surface_count || 0}/${summary.required_surface_count || 0}`;
+                const paths = `${summary.available_execution_path_count || 0}/${summary.execution_path_count || 0}`;
+                const turn = summary.persisted_output_turn || 'unknown';
+                const smoke = summary.smoke_probe_status || 'not_run';
+                return `Simulation required ${required}, paths ${paths}, turn ${turn}, smoke ${smoke}`;
+            }
+            if (lane.command_intent_snapshot && lane.command_intent_snapshot.available) {
+                const summary = lane.command_intent_snapshot.summary || {};
+                const total = summary.total_commands !== undefined ? summary.total_commands : 0;
+                const valid = summary.valid_count !== undefined ? summary.valid_count : 0;
+                const invalid = summary.invalid_count !== undefined ? summary.invalid_count : 0;
+                const simulated = summary.simulated_count !== undefined ? summary.simulated_count : 0;
+                const live = summary.live_execution_count !== undefined ? summary.live_execution_count : 0;
+                return `Commands ${total}, valid ${valid}, invalid ${invalid}, simulations ${simulated}, live exec ${live}`;
+            }
+            if (lane.repo) {
+                return lane.repo;
+            }
+            if (Array.isArray(lane.repos)) {
+                return lane.repos.join(', ');
+            }
+            return lane.lane_id;
+        }
+
+        function findLane(snapshot, laneId) {
+            const lanes = snapshot && Array.isArray(snapshot.lanes) ? snapshot.lanes : [];
+            return lanes.find(lane => lane.lane_id === laneId) || {};
+        }
+
+        function appendListItem(parent, title, detail, status = null) {
+            const item = document.createElement('div');
+            item.className = 'operator-list-item';
+            if (status) {
+                item.appendChild(createStatus(status));
+            }
+            item.appendChild(AuroraSecurity.createSafeElement('strong', title || 'Item'));
+            if (detail) {
+                item.appendChild(AuroraSecurity.createSafeElement('p', detail));
+            }
+            parent.appendChild(item);
+            return item;
+        }
+
+        function renderOverviewStats(snapshot) {
+            const container = document.getElementById('console-overview-stats');
+            if (!container) {
+                return;
+            }
+            clearElement(container);
+
+            if (!snapshot || snapshot.available === false) {
+                [
+                    ['Missing', 'Simulation'],
+                    ['Missing', 'Docker'],
+                    ['Missing', 'Kubernetes'],
+                    ['Missing', 'Commands']
+                ].forEach(([value, label]) => {
+                    const stat = document.createElement('div');
+                    stat.className = 'overview-stat';
+                    stat.appendChild(AuroraSecurity.createSafeElement('strong', value));
+                    stat.appendChild(AuroraSecurity.createSafeElement('span', label));
+                    container.appendChild(stat);
+                });
+                return;
+            }
+
+            const simulation = findLane(snapshot, 'simulation-runtime-readiness');
+            const docker = findLane(snapshot, 'cloudbank-docker-runtime');
+            const k8s = findLane(snapshot, 'kubernetes-readiness');
+            const command = findLane(snapshot, 'command-intent-parse-simulate');
+            const simulationSummary = simulation.simulation_readiness?.summary || {};
+            const dockerSummary = docker.stack_validation?.summary || {};
+            const k8sSummary = k8s.kubernetes_readiness?.summary || {};
+            const commandSummary = command.command_intent_snapshot?.summary || {};
+            const stats = [
+                [`${simulationSummary.ready_required_surface_count || 0}/${simulationSummary.required_surface_count || 0}`, 'Required Sim Surfaces'],
+                [`${dockerSummary.required_ready || 0}/${dockerSummary.required_total || 0}`, 'Docker Required'],
+                [`${k8sSummary.apply_blocker_count || 0}`, 'K8s Apply Blockers'],
+                [`${commandSummary.simulated_count || 0}/${commandSummary.total_commands || 0}`, 'Command Sims']
+            ];
+
+            stats.forEach(([value, label]) => {
+                const stat = document.createElement('div');
+                stat.className = 'overview-stat';
+                stat.appendChild(AuroraSecurity.createSafeElement('strong', value));
+                stat.appendChild(AuroraSecurity.createSafeElement('span', label));
+                container.appendChild(stat);
+            });
+        }
+
+        function renderSimulationWorkspace(snapshot) {
+            const focus = document.getElementById('simulation-runtime-focus');
+            const surfacesContainer = document.getElementById('simulation-surfaces');
+            const pathsContainer = document.getElementById('simulation-paths');
+            if (!focus || !surfacesContainer || !pathsContainer) {
+                return;
+            }
+
+            clearElement(focus);
+            clearElement(surfacesContainer);
+            clearElement(pathsContainer);
+
+            const lane = findLane(snapshot, 'simulation-runtime-readiness');
+            const readiness = lane.simulation_readiness || {};
+            if (!readiness.available) {
+                focus.appendChild(createOperatorCard('Simulation Runtime', lane.status || 'missing', 'Simulation readiness report is not available.'));
+                appendListItem(pathsContainer, 'No execution paths', 'Run the root simulation readiness report and refresh the operator snapshot.', 'missing');
+                return;
+            }
+
+            const summary = readiness.summary || {};
+            const smoke = readiness.smoke_probe || {};
+            const result = smoke.result || {};
+            focus.appendChild(createOperatorCard(
+                'Required Surfaces',
+                lane.status || readiness.status,
+                `${summary.ready_required_surface_count || 0}/${summary.required_surface_count || 0} required surfaces ready.`
+            ));
+            focus.appendChild(createOperatorCard(
+                'Bounded Smoke',
+                smoke.status || summary.smoke_probe_status || 'not_run',
+                `${result.engine_class || 'Simulation runner'} completed ${result.turns_completed || 0}/${result.turns_requested || smoke.turns || 0} turns.`
+            ));
+            focus.appendChild(createOperatorCard(
+                'Latest Persisted Turn',
+                summary.persisted_output_turn ? 'ready' : 'attention',
+                `Turn ${summary.persisted_output_turn || 'unknown'} with ${summary.primary_event_ledger_records || 0} primary event records.`
+            ));
+            focus.appendChild(createOperatorCard(
+                'Execution Paths',
+                summary.available_execution_path_count ? 'ready' : 'attention',
+                `${summary.available_execution_path_count || 0}/${summary.execution_path_count || 0} local paths available.`
+            ));
+
+            const surfaces = Array.isArray(readiness.surfaces) ? readiness.surfaces : [];
+            surfaces.forEach(surface => {
+                surfacesContainer.appendChild(createOperatorCard(
+                    surface.title || surface.surface_id,
+                    surface.status,
+                    `${surface.repo || 'repo unknown'} · ${surface.role || surface.execution_boundary || 'simulation surface'}`,
+                    surface.required ? 'simulation-card' : ''
+                ));
+            });
+
+            const paths = Array.isArray(readiness.execution_paths) ? readiness.execution_paths : [];
+            if (!paths.length) {
+                appendListItem(pathsContainer, 'No execution paths', 'No simulation execution path evidence was present.', 'attention');
+            }
+            paths.forEach(path => {
+                appendListItem(
+                    pathsContainer,
+                    path.title || path.path_id,
+                    `${path.path_id || 'path'} · repo writes ${path.writes_to_repo ? 'yes' : 'no'} · nested mutation ${path.nested_repo_mutation ? 'yes' : 'no'}`,
+                    path.status || 'unknown'
+                );
+            });
+        }
+
+        function renderDeploymentWorkspace(snapshot) {
+            const lanesContainer = document.getElementById('deployment-lanes');
+            const actionsContainer = document.getElementById('deployment-actions');
+            if (!lanesContainer || !actionsContainer) {
+                return;
+            }
+
+            clearElement(lanesContainer);
+            clearElement(actionsContainer);
+
+            const dockerLane = findLane(snapshot, 'cloudbank-docker-runtime');
+            const demoLane = findLane(snapshot, 'docker-demo-readiness');
+            const k8sLane = findLane(snapshot, 'kubernetes-readiness');
+            [dockerLane, demoLane, k8sLane].forEach(lane => {
+                if (lane && lane.lane_id) {
+                    lanesContainer.appendChild(createOperatorLaneCard(lane));
+                }
+            });
+
+            const k8s = k8sLane.kubernetes_readiness || {};
+            const remediation = Array.isArray(k8s.remediation_plan) ? k8s.remediation_plan : [];
+            if (remediation.length) {
+                remediation.forEach(action => {
+                    appendListItem(
+                        actionsContainer,
+                        `${categoryLabel(action.category)} (${action.blocker_count || 0})`,
+                        action.recommended_next_action || 'Resolve before apply.',
+                        'attention'
+                    );
+                });
+            } else {
+                appendListItem(actionsContainer, 'No Kubernetes blockers surfaced', 'The current snapshot has no Kubernetes remediation entries.', 'ready');
+            }
+        }
+
+        function renderCommandWorkspace(snapshot) {
+            const detailContainer = document.getElementById('command-intent-detail');
+            const markerContainer = document.getElementById('command-boundary-markers');
+            if (!detailContainer || !markerContainer) {
+                return;
+            }
+
+            clearElement(detailContainer);
+            clearElement(markerContainer);
+
+            const lane = findLane(snapshot, 'command-intent-parse-simulate');
+            const commandSnapshot = lane.command_intent_snapshot || {};
+            const summary = commandSnapshot.summary || {};
+            detailContainer.appendChild(createOperatorCard(
+                'Command Snapshot',
+                lane.status || commandSnapshot.status || 'unknown',
+                `${summary.valid_count || 0} valid, ${summary.invalid_count || 0} invalid, ${summary.total_commands || 0} total commands.`
+            ));
+            detailContainer.appendChild(createOperatorCard(
+                'In-process Simulation',
+                summary.simulated_count ? 'ready' : 'attention',
+                `${summary.simulated_count || 0} simulated command range probes.`
+            ));
+            detailContainer.appendChild(createOperatorCard(
+                'Live Execution',
+                summary.live_execution_count ? 'blocked' : 'ready',
+                `${summary.live_execution_count || 0} live executions in snapshot.`
+            ));
+            detailContainer.appendChild(createOperatorCard(
+                'Warnings',
+                summary.warning_count ? 'attention' : 'ready',
+                `${summary.warning_count || 0} warnings, ${summary.validation_issue_count || 0} validation issues.`
+            ));
+
+            const markers = Array.isArray(lane.markers) ? lane.markers : [];
+            if (!markers.length) {
+                appendListItem(markerContainer, 'No markers', lane.execution_boundary || 'Command boundary metadata is unavailable.', 'attention');
+            }
+            markers.forEach(marker => {
+                appendListItem(
+                    markerContainer,
+                    marker.path || 'marker',
+                    marker.exists ? 'Present in workspace.' : 'Missing from workspace.',
+                    marker.exists ? 'ready' : 'missing'
+                );
+            });
+        }
+
+        function renderSynergyComponents(payload) {
+            const componentsContainer = document.getElementById('synergy-components');
+            const notesContainer = document.getElementById('synergy-notes');
+            if (!componentsContainer || !notesContainer) {
+                return;
+            }
+
+            clearElement(componentsContainer);
+            clearElement(notesContainer);
+
+            const components = Array.isArray(payload?.components)
+                ? payload.components
+                : Array.isArray(payload)
+                    ? payload
+                    : [];
+
+            if (!components.length) {
+                componentsContainer.appendChild(createOperatorCard('Synergy Components', payload?.status || 'attention', 'No component records were returned by the Synergy API.'));
+                appendListItem(notesContainer, 'Full dashboard', 'Open the full Synergy Dashboard for topology and interaction graph views.', 'ready');
+                return;
+            }
+
+            components.slice(0, 8).forEach(component => {
+                componentsContainer.appendChild(createOperatorCard(
+                    component.name || component.component_id || component.id || 'Component',
+                    component.status || component.health || 'ready',
+                    component.description || component.type || component.role || 'Synergy component'
+                ));
+            });
+
+            appendListItem(notesContainer, 'Component API', `${components.length} components returned from /api/synergy/components.`, 'ready');
+            appendListItem(notesContainer, 'Full dashboard', 'The dedicated dashboard remains available as a separate route for topology detail.', 'ready');
+        }
+
+        async function loadSynergyComponents() {
+            const componentsContainer = document.getElementById('synergy-components');
+            if (componentsContainer) {
+                clearElement(componentsContainer);
+                componentsContainer.appendChild(createOperatorCard('Synergy Components', 'unknown', 'Loading component API.'));
+            }
+
+            const payload = await apiCall('/api/synergy/components');
+            renderSynergyComponents(payload);
+        }
+
+        function renderOperatorSnapshot(snapshot) {
+            const summaryContainer = document.getElementById('operator-summary');
+            const lanesContainer = document.getElementById('operator-lanes');
+            const actionsContainer = document.getElementById('operator-actions');
+            clearElement(summaryContainer);
+            clearElement(lanesContainer);
+            clearElement(actionsContainer);
+            renderOverviewStats(snapshot);
+            renderSimulationWorkspace(snapshot);
+            renderDeploymentWorkspace(snapshot);
+            renderCommandWorkspace(snapshot);
+
+            if (!snapshot || snapshot.available === false) {
+                summaryContainer.appendChild(createOperatorCard(
+                    'Snapshot',
+                    snapshot && snapshot.status ? snapshot.status : 'missing',
+                    snapshot && snapshot.recommended_next_action ? snapshot.recommended_next_action : 'No operator snapshot is mounted.'
+                ));
+                return;
+            }
+
+            const summary = snapshot.summary || {};
+            const lanes = snapshot.lanes || [];
+            const simulationLane = lanes.find(lane => lane.lane_id === 'simulation-runtime-readiness') || {};
+            const simulationReadiness = simulationLane.simulation_readiness || {};
+            const simulationSummary = simulationReadiness.summary || {};
+            const k8sLane = lanes.find(lane => lane.lane_id === 'kubernetes-readiness') || {};
+            const k8sReadiness = k8sLane.kubernetes_readiness || {};
+            const k8sSummary = k8sReadiness.summary || {};
+            const operatorUpdated = document.getElementById('operator-updated');
+            if (operatorUpdated) {
+                operatorUpdated.textContent = `Generated ${snapshot.generated_at || 'unknown'} from ${summary.available_source_report_count || 0}/${summary.source_report_count || 0} source reports.`;
+            }
+            summaryContainer.appendChild(createOperatorCard(
+                'Snapshot',
+                snapshot.status,
+                `Generated ${snapshot.generated_at || 'unknown'} from ${summary.available_source_report_count || 0}/${summary.source_report_count || 0} source reports.`
+            ));
+            summaryContainer.appendChild(createOperatorCard(
+                'Readiness Lanes',
+                summary.lane_count ? 'ready' : 'attention',
+                `${summary.lane_count || 0} operator lanes in the current snapshot.`
+            ));
+            summaryContainer.appendChild(createOperatorCard(
+                'Simulation Runtime',
+                simulationLane.status || 'unknown',
+                `Required surfaces ${simulationSummary.ready_required_surface_count || 0}/${simulationSummary.required_surface_count || 0}; smoke ${simulationSummary.smoke_probe_status || 'not_run'}.`
+            ));
+            summaryContainer.appendChild(createOperatorCard(
+                'K8s Apply Blockers',
+                k8sSummary.apply_blocker_count ? 'attention' : 'ready',
+                `${k8sSummary.apply_blocker_count || 0} manifest blockers before cluster dry-run or apply.`
+            ));
+            summaryContainer.appendChild(createOperatorCard(
+                'Operator Items',
+                summary.operator_item_count ? 'attention' : 'ready',
+                `${summary.operator_item_count || 0} inbox or recommendation items surfaced.`
+            ));
+            summaryContainer.appendChild(createOperatorCard(
+                'Boundary',
+                snapshot.live_runtime_execution ? 'blocked' : 'ready',
+                snapshot.live_runtime_execution ? 'Live runtime execution reported.' : 'Read-only snapshot; no runtime execution.'
+            ));
+
+            lanes.forEach(lane => {
+                lanesContainer.appendChild(createOperatorLaneCard(lane));
+            });
+
+            const actions = snapshot.recommended_actions || [];
+            if (!actions.length) {
+                actionsContainer.appendChild(AuroraSecurity.createSafeElement('div', 'No recommended actions in the current snapshot.', {
+                    class: 'operator-list-item'
+                }));
+            } else {
+                actions.slice(0, 6).forEach(action => {
+                    const item = document.createElement('div');
+                    item.className = 'operator-list-item';
+                    const title = AuroraSecurity.createSafeElement('strong', `${action.priority || 'P?'} · ${action.title || 'Action'}`);
+                    item.appendChild(title);
+                    if (action.detail) {
+                        item.appendChild(AuroraSecurity.createSafeElement('p', action.detail));
+                    }
+                    actionsContainer.appendChild(item);
+                });
+            }
+        }
+
+        async function loadOperatorSnapshot() {
+            const snapshot = await apiCall('/api/operator/snapshot');
+            latestOperatorSnapshot = snapshot;
+            renderOperatorSnapshot(snapshot);
+        }
+
+        // Initialize the console
+        document.addEventListener('DOMContentLoaded', async function() {
+            initializeTabs();
+            await ensureSecuritySession();
+            await initializeWebSocket();
+            updateMetrics();
+            await loadOperatorSnapshot();
+            console.log('Aurora Simulation Console initialized.');
+
+            // Load initial vector list
+            apiCall('/api/vsa/list').then(result => {
+                if (result && result.count > 0) {
+                    console.log(`Found ${result.count} existing VSA vectors`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

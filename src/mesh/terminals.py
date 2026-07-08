@@ -199,18 +199,23 @@ class TerminalDirectory:
         return TerminalGroup(lookup_key=value, members=matches).to_dict()
 
 
+def _apply_manifest_to_profile(profile: PersonalTerminalProfile, manifest: AgentManifest) -> None:
+    """Fill in a profile's blank fields from its owning agent manifest, in place."""
+
+    if not profile.owner_display_name:
+        profile.owner_display_name = manifest.display_name
+    if not profile.mesh_route.owner_agent_id:
+        profile.mesh_route.owner_agent_id = manifest.id
+    if not profile.mesh_route.channel_id:
+        profile.mesh_route.channel_id = manifest.default_channel
+    profile.aliases.extend(alias for alias in manifest.aliases if alias not in profile.aliases)
+
+
 def _reconcile_profile_with_manifest(profile: PersonalTerminalProfile, manifests: Dict[str, AgentManifest]) -> None:
     """Fill in profile fields from its owning agent manifest, or mark it non-routable if orphaned."""
 
     if profile.owner_agent_id and profile.owner_agent_id in manifests:
-        manifest = manifests[profile.owner_agent_id]
-        if not profile.owner_display_name:
-            profile.owner_display_name = manifest.display_name
-        if not profile.mesh_route.owner_agent_id:
-            profile.mesh_route.owner_agent_id = manifest.id
-        if not profile.mesh_route.channel_id:
-            profile.mesh_route.channel_id = manifest.default_channel
-        profile.aliases.extend(alias for alias in manifest.aliases if alias not in profile.aliases)
+        _apply_manifest_to_profile(profile, manifests[profile.owner_agent_id])
     elif profile.mesh_route.routable:
         profile.mesh_route.routable = False
 

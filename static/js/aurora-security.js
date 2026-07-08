@@ -38,14 +38,9 @@ class AuroraSecurityUtils {
       return '';
     }
 
-    // Use DOMPurify to sanitize the input
-    const DOMPurify = require('dompurify');
-    const { JSDOM } = require('jsdom');
-    const window = new JSDOM('').window;
-    const purify = DOMPurify(window);
-
-    const sanitized = purify.sanitize(text);
-    return sanitized;
+    // This file runs directly in the browser, so avoid Node-only sanitizers.
+    // Callers render the returned value through textContent or safe attributes.
+    return text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '');
   }
 
   /**

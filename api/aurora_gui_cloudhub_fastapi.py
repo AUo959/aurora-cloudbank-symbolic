@@ -2,6 +2,9 @@ import logging
 import os
 import uuid
 import hashlib
+import json
+import importlib.util
+import sys
 import uvicorn
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional, Any
@@ -10,7 +13,13 @@ import aiofiles
 import numpy as np
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPAuthorizationCredentials
-from src.middleware.fastapi_security import security, verify_csrf_token, verify_ws_token
+from src.middleware.fastapi_security import (
+    generate_csrf_token,
+    generate_ws_token,
+    security,
+    verify_csrf_token,
+    verify_ws_token,
+)
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -64,7 +73,18 @@ except ImportError:
     AerSimulator = None
     QISKIT_AVAILABLE = False
 
-app = FastAPI(title="Aurora Quantum VSA Playground")
+MODULE_DIR = Path(__file__).resolve().parent
+REPO_ROOT = MODULE_DIR.parent if MODULE_DIR.name == "api" else MODULE_DIR
+STATIC_DIR = REPO_ROOT / "static"
+SIMULATION_CONSOLE_PATH = STATIC_DIR / "aurora-simulation-console.html"
+SYNERGY_DASHBOARD_PATH = STATIC_DIR / "synergy-dashboard.html"
+LEGACY_VSA_ARCHIVE_PATH = STATIC_DIR / "archive" / "index_old_quantum_playground.html"
+
+app = FastAPI(title="Aurora Simulation Console")
+
+
+def html_file_response(path: Path) -> FileResponse:
+    return FileResponse(path, headers={"Cache-Control": "no-store"})
 
 # Add CORS middleware for frontend integration
 # SECURITY FIX: Use specific origins instead of wildcard when credentials are enabled
@@ -141,10 +161,30 @@ def _cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
     return float(np.dot(vec_a, vec_b) / denominator)
 
 # Serve static files if needed in the future
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# The lightweight Docker GUI serves the Synergy Dashboard UI directly. Mount the
+# read-only dashboard router here so that surface is functional without the full
+# aurora_api application.
+try:
+    synergy_dashboard_spec = importlib.util.spec_from_file_location(
+        "cloudhub_synergy_dashboard_api",
+        REPO_ROOT / "src" / "synergy" / "dashboard_api.py",
+    )
+    if synergy_dashboard_spec is None or synergy_dashboard_spec.loader is None:
+        raise ImportError("Could not load src/synergy/dashboard_api.py")
+    synergy_dashboard_module = importlib.util.module_from_spec(synergy_dashboard_spec)
+    sys.modules[synergy_dashboard_spec.name] = synergy_dashboard_module
+    synergy_dashboard_spec.loader.exec_module(synergy_dashboard_module)
+    app.include_router(synergy_dashboard_module.router)
+    logger.info("Synergy Dashboard API routes integrated successfully")
+except Exception as exc:
+    logger.warning("Synergy Dashboard API routes not available: %s", exc)
 
 # Store for VSA operations (in-memory for demo)
 vsa_store: Dict[str, QuantumSymbolicVector] = {}
+
+DEFAULT_OPERATOR_SNAPSHOT_PATH = "/app/operator_snapshot/aurora_operator_snapshot_latest.json"
 
 # === Enhanced Data Models ===
 
@@ -180,9 +220,92 @@ class GeometricAlgebraRequest(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    """Serve the quantum VSA demo application"""
+    """Serve the primary Aurora simulation/operator console."""
 
-    return FileResponse("static/quantum-vsa-demo.html")
+    return html_file_response(SIMULATION_CONSOLE_PATH)
+
+
+@app.get("/simulation-console", response_class=HTMLResponse)
+async def simulation_console():
+    """Stable alias for the primary Aurora simulation/operator console."""
+
+    return html_file_response(SIMULATION_CONSOLE_PATH)
+
+
+@app.get("/synergy-dashboard", response_class=HTMLResponse)
+async def synergy_dashboard():
+    """Serve the component synergy dashboard UI."""
+
+    return html_file_response(SYNERGY_DASHBOARD_PATH)
+
+
+@app.get("/legacy/vsa", response_class=HTMLResponse, include_in_schema=False)
+async def legacy_vsa_retired():
+    """Retired route for the archived Quantum VSA playground."""
+
+    archive_state = "available" if LEGACY_VSA_ARCHIVE_PATH.exists() else "missing"
+    return HTMLResponse(
+        status_code=410,
+        content=f"""
+        <!doctype html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; object-src 'none'; frame-src 'none';" />
+            <title>Aurora VSA Playground Retired</title>
+            <style>
+                body {{
+                    margin: 0;
+                    min-height: 100vh;
+                    display: grid;
+                    place-items: center;
+                    background: #071014;
+                    color: #edf7f8;
+                    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                }}
+                main {{
+                    width: min(680px, calc(100vw - 40px));
+                    border: 1px solid rgba(116, 214, 234, 0.28);
+                    border-radius: 8px;
+                    padding: 28px;
+                    background: rgba(14, 25, 32, 0.88);
+                    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+                }}
+                h1 {{
+                    margin: 0 0 12px;
+                    font-size: 28px;
+                    line-height: 1.1;
+                }}
+                p {{
+                    margin: 0 0 16px;
+                    color: #9bb0b8;
+                    line-height: 1.55;
+                }}
+                a {{
+                    color: #4cc9e8;
+                    font-weight: 700;
+                }}
+                .state {{
+                    margin-top: 18px;
+                    font-size: 12px;
+                    color: #65df89;
+                    text-transform: uppercase;
+                    letter-spacing: 0;
+                }}
+            </style>
+        </head>
+        <body>
+            <main>
+                <h1>Quantum VSA Playground Retired</h1>
+                <p>The Docker app now opens the Aurora Simulation Console. The old playground is preserved only as archived project material and is no longer the primary operator surface.</p>
+                <p><a href="/simulation-console">Open Simulation Console</a> or <a href="/synergy-dashboard">open Synergy Dashboard</a>.</p>
+                <div class="state">Archive state: {archive_state}</div>
+            </main>
+        </body>
+        </html>
+        """,
+    )
 
 
 @app.get("/legacy", response_class=HTMLResponse)
@@ -211,6 +334,61 @@ async def legacy_upload():
     </body>
     </html>
     """
+
+
+@app.get("/api/security/session", summary="Issue browser security tokens")
+async def browser_security_session():
+    """Issue short-lived same-origin tokens for the static GUI."""
+    session_id = uuid.uuid4().hex
+    return {
+        "session_id": session_id,
+        "csrf_token": generate_csrf_token(session_id),
+        "ws_token": generate_ws_token(session_id),
+    }
+
+
+@app.get("/api/operator/snapshot", summary="Read Aurora operator-console snapshot")
+async def operator_snapshot():
+    """Return the read-only root operator snapshot mounted into the GUI container."""
+    snapshot_path = Path(os.getenv("AURORA_OPERATOR_SNAPSHOT_PATH", DEFAULT_OPERATOR_SNAPSHOT_PATH))
+    if not snapshot_path.exists():
+        return {
+            "available": False,
+            "status": "missing",
+            "snapshot_path": str(snapshot_path),
+            "recommended_next_action": (
+                "Run `make operator-snapshot-report` in the Aurora root workspace and mount "
+                "reports/analysis read-only into the GUI container."
+            ),
+        }
+
+    try:
+        payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return {
+            "available": False,
+            "status": "invalid_json",
+            "snapshot_path": str(snapshot_path),
+            "error": exc.msg,
+        }
+    except OSError as exc:
+        return {
+            "available": False,
+            "status": "unreadable",
+            "snapshot_path": str(snapshot_path),
+            "error": str(exc),
+        }
+
+    if not isinstance(payload, dict):
+        return {
+            "available": False,
+            "status": "invalid_payload",
+            "snapshot_path": str(snapshot_path),
+        }
+    payload.setdefault("available", True)
+    payload.setdefault("snapshot_path", str(snapshot_path))
+    return payload
+
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MiB
 CSRF_INVALID_MSG = "Invalid CSRF token"

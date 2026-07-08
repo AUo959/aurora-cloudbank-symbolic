@@ -499,6 +499,11 @@ bottlenecks = analyzer.identify_bottlenecks()
 - `GET /api/synergy/synergy-scores` - Get scores
 - `GET /api/synergy/metrics` - Aggregated metrics
 
+**Docker GUI Routes:**
+- `/` and `/simulation-console` - Aurora Simulation Console
+- `/synergy-dashboard` - Component Synergy Dashboard UI
+- `/legacy/vsa` - Retired Quantum VSA playground notice
+
 **Documentation:** [Synergy Dashboard](SYNERGY_DASHBOARD_IMPLEMENTATION.md)
 
 ---

@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 import sys
 import asyncio
+import unittest
 from pathlib import Path
 
 
@@ -29,11 +30,12 @@ def test_mesh_runtime_initializes_from_agent_manifests(tmp_path: Path) -> None:
     runtime = MeshRuntime(tmp_path)
     status = runtime.get_status()
 
+    checks = unittest.TestCase()
     assert status["mesh_status"] == "operational"
     assert status["total_agents"] == len(manifest_paths)
-    assert status["total_terminals"] > status["total_agents"]
-    assert runtime.get_agent("captain alex line")["agent_id"] == "alex_thorne"
-    assert runtime.get_terminal("core_development.carmen.term")["owner_agent_id"] == "carmen_rivas"
+    checks.assertGreater(status["total_terminals"], status["total_agents"])
+    checks.assertEqual(runtime.get_agent("captain alex line")["agent_id"], "alex_thorne")
+    checks.assertEqual(runtime.get_terminal("core_development.carmen.term")["owner_agent_id"], "carmen_rivas")
     assert (tmp_path / "config" / "mesh" / "memory" / "alex_thorne.md").exists()
 
 
@@ -73,7 +75,8 @@ def test_mesh_runtime_routes_terminal_namespace_to_owner_channel(tmp_path: Path)
         )
     )
 
-    assert result["status"] == "accepted"
-    assert result["targets"] == ["carmen_rivas"]
-    assert result["target_terminals"] == ["l1_carmen_rivas_terminal"]
-    assert result["channel_id"] == "private:crew:carmen_rivas"
+    checks = unittest.TestCase()
+    checks.assertEqual(result["status"], "accepted")
+    checks.assertEqual(result["targets"], ["carmen_rivas"])
+    checks.assertEqual(result["target_terminals"], ["l1_carmen_rivas_terminal"])
+    checks.assertEqual(result["channel_id"], "private:crew:carmen_rivas")

@@ -199,6 +199,37 @@ class TerminalDirectory:
         return TerminalGroup(lookup_key=value, members=matches).to_dict()
 
 
+def _reconcile_profile_with_manifest(profile: PersonalTerminalProfile, manifests: Dict[str, AgentManifest]) -> None:
+    """Fill in profile fields from its owning agent manifest, or mark it non-routable if orphaned."""
+
+    if profile.owner_agent_id and profile.owner_agent_id in manifests:
+        manifest = manifests[profile.owner_agent_id]
+        if not profile.owner_display_name:
+            profile.owner_display_name = manifest.display_name
+        if not profile.mesh_route.owner_agent_id:
+            profile.mesh_route.owner_agent_id = manifest.id
+        if not profile.mesh_route.channel_id:
+            profile.mesh_route.channel_id = manifest.default_channel
+        profile.aliases.extend(alias for alias in manifest.aliases if alias not in profile.aliases)
+    elif profile.mesh_route.routable:
+        profile.mesh_route.routable = False
+
+
+def _apply_pat_overlay(registry_dir: Path, by_agent_id: Dict[str, PersonalTerminalProfile]) -> None:
+    """Attach PAT overlay metadata (if present) to the matching profiles, in place."""
+
+    overlay_path = registry_dir / "pat_live_subset.v1.json"
+    if not overlay_path.exists():
+        return
+
+    overlay_payload = json.loads(overlay_path.read_text())
+    for item in overlay_payload.get("overlays", []):
+        owner_agent_id = item.get("owner_agent_id")
+        profile = by_agent_id.get(owner_agent_id)
+        if profile:
+            profile.pat_overlay = PatOverlay.from_dict(item)
+
+
 def load_terminal_directory(registry_dir: Path, manifests: Dict[str, AgentManifest]) -> TerminalDirectory:
     """Load L1 terminal profiles and apply optional PAT overlay metadata."""
 
@@ -211,25 +242,10 @@ def load_terminal_directory(registry_dir: Path, manifests: Dict[str, AgentManife
     by_agent_id = {profile.owner_agent_id: profile for profile in profiles if profile.owner_agent_id}
 
     for profile in profiles:
-        if profile.owner_agent_id and profile.owner_agent_id in manifests:
-            manifest = manifests[profile.owner_agent_id]
-            if not profile.owner_display_name:
-                profile.owner_display_name = manifest.display_name
-            if not profile.mesh_route.owner_agent_id:
-                profile.mesh_route.owner_agent_id = manifest.id
-            if not profile.mesh_route.channel_id:
-                profile.mesh_route.channel_id = manifest.default_channel
-            profile.aliases.extend(alias for alias in manifest.aliases if alias not in profile.aliases)
-        elif profile.mesh_route.routable:
-            profile.mesh_route.routable = False
+        _reconcile_profile_with_manifest(profile, manifests)
 
-    overlay_path = registry_dir / "pat_live_subset.v1.json"
-    if overlay_path.exists():
-        overlay_payload = json.loads(overlay_path.read_text())
-        for item in overlay_payload.get("overlays", []):
-            owner_agent_id = item.get("owner_agent_id")
-            profile = by_agent_id.get(owner_agent_id)
-            if profile:
-                profile.pat_overlay = PatOverlay.from_dict(item)
+    _apply_pat_overlay(registry_dir, by_agent_id)
+
+    return TerminalDirectory(profiles)
 
     return TerminalDirectory(profiles)

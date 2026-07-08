@@ -6,6 +6,7 @@ import json
 import shutil
 import sys
 import time
+import unittest
 from pathlib import Path
 from urllib.parse import quote
 
@@ -57,6 +58,7 @@ def wait_for_agent_reply(client: TestClient, channel_id: str, timeout: float = 1
 @pytest.mark.skipif(TestClient is None, reason="fastapi test client is not installed")
 def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
     """The FastAPI runtime should expose the validated mesh dashboard and API contract."""
+    checks = unittest.TestCase()
 
     project_root = copy_mesh_project(tmp_path)
     client = TestClient(create_app(project_root))
@@ -77,19 +79,19 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
     status = client.get("/api/mesh/status").json()
     assert status["mesh_status"] == "operational"
     assert status["total_agents"] == 47
-    assert status["total_terminals"] == 55
+    checks.assertEqual(status["total_terminals"], 55)
     agent_ids = {agent["agent_id"] for agent in status["agents"]}
     assert "aurora" in agent_ids, "Aurora's seat is canonical: L1 station core, always-on arbitration"
 
     terminals = client.get("/api/mesh/terminals").json()
-    assert terminals["total"] == 55
+    checks.assertEqual(terminals["total"], 55)
     carmen_terminal = client.get("/api/mesh/terminals/core_development.carmen.term")
-    assert carmen_terminal.status_code == 200
-    assert carmen_terminal.json()["owner_agent_id"] == "carmen_rivas"
+    checks.assertEqual(carmen_terminal.status_code, 200)
+    checks.assertEqual(carmen_terminal.json()["owner_agent_id"], "carmen_rivas")
 
     dev_terminal_group = client.get("/api/mesh/terminals/aurora.dev.code.query")
-    assert dev_terminal_group.status_code == 200
-    assert dev_terminal_group.json()["terminal_group"] is True
+    checks.assertEqual(dev_terminal_group.status_code, 200)
+    checks.assertIs(dev_terminal_group.json()["terminal_group"], True)
 
     with client.websocket_connect("/ws/mesh") as websocket:
         initial = websocket.receive_json()
@@ -97,6 +99,15 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
         websocket.send_text("ping")
         pong = websocket.receive_json()
         assert pong["payload"]["phase"] == "pong"
+
+
+@pytest.mark.skipif(TestClient is None, reason="fastapi test client is not installed")
+def test_mesh_runtime_api_message_routing(tmp_path: Path) -> None:
+    """Direct messages, the Aurora handshake, and terminal-namespace routing should all reply."""
+    checks = unittest.TestCase()
+
+    project_root = copy_mesh_project(tmp_path)
+    client = TestClient(create_app(project_root))
 
     send = client.post(
         "/api/mesh/messages",
@@ -124,8 +135,8 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
         "/api/mesh/messages",
         json={"to": "core_development.carmen.term", "content": "Terminal namespace status check."},
     )
-    assert terminal_send.status_code == 200
+    checks.assertEqual(terminal_send.status_code, 200)
     terminal_payload = terminal_send.json()
-    assert terminal_payload["targets"] == ["carmen_rivas"]
-    assert terminal_payload["target_terminals"] == ["l1_carmen_rivas_terminal"]
-    assert terminal_payload["channel_id"] == "private:crew:carmen_rivas"
+    checks.assertEqual(terminal_payload["targets"], ["carmen_rivas"])
+    checks.assertEqual(terminal_payload["target_terminals"], ["l1_carmen_rivas_terminal"])
+    checks.assertEqual(terminal_payload["channel_id"], "private:crew:carmen_rivas")

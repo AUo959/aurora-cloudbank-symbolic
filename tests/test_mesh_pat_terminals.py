@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 import sys
 import asyncio
+import unittest
 from pathlib import Path
 
 import pytest
@@ -28,44 +29,44 @@ def copy_mesh_project(tmp_path: Path) -> Path:
 
 
 def test_pat_live_subset_is_overlay_not_full_terminal_universe(tmp_path: Path) -> None:
+    checks = unittest.TestCase()
     runtime = MeshRuntime(copy_mesh_project(tmp_path))
     terminals = runtime.list_terminals()
 
     pat_terminals = [terminal for terminal in terminals if terminal["pat_overlay"]]
-    assert len(pat_terminals) == 9
-    assert len(terminals) > len(pat_terminals)
+    checks.assertEqual(len(pat_terminals), 9)
+    checks.assertGreater(len(terminals), len(pat_terminals))
 
     dev_group = runtime.get_terminal("aurora.dev.code.query")
-    assert dev_group["terminal_group"] is True
-    assert {member["owner_agent_id"] for member in dev_group["members"]} == {
-        "carmen_rivas",
-        "ira_menon",
-        "tobias_qin",
-    }
+    checks.assertIs(dev_group["terminal_group"], True)
+    checks.assertEqual(
+        {member["owner_agent_id"] for member in dev_group["members"]},
+        {"carmen_rivas", "ira_menon", "tobias_qin"},
+    )
 
     carmen = runtime.get_terminal("core_development.carmen.term")
-    assert carmen["owner_agent_id"] == "carmen_rivas"
-    assert carmen["pat_overlay"]["anchor_node"] == "aurora.dev.code.query"
-    assert carmen["mesh_route"]["channel_id"] == "private:crew:carmen_rivas"
+    checks.assertEqual(carmen["owner_agent_id"], "carmen_rivas")
+    checks.assertEqual(carmen["pat_overlay"]["anchor_node"], "aurora.dev.code.query")
+    checks.assertEqual(carmen["mesh_route"]["channel_id"], "private:crew:carmen_rivas")
 
     routed = asyncio.run(
         runtime.send_message(
             MeshMessageRequest.from_dict({"to": "aurora.dev.code.query", "content": "PAT anchor check."})
         )
     )
-    assert sorted(routed["targets"]) == ["carmen_rivas", "ira_menon", "tobias_qin"]
-    assert sorted(routed["target_terminals"]) == [
-        "l1_carmen_rivas_terminal",
-        "l1_ira_menon_terminal",
-        "l1_tobias_qin_terminal",
-    ]
-    assert routed["channel_id"] == "aurora.dev.code.query"
+    checks.assertEqual(sorted(routed["targets"]), ["carmen_rivas", "ira_menon", "tobias_qin"])
+    checks.assertEqual(
+        sorted(routed["target_terminals"]),
+        ["l1_carmen_rivas_terminal", "l1_ira_menon_terminal", "l1_tobias_qin_terminal"],
+    )
+    checks.assertEqual(routed["channel_id"], "aurora.dev.code.query")
 
 
 def test_personnel_attention_tags_do_not_resolve_as_terminal_routes(tmp_path: Path) -> None:
+    checks = unittest.TestCase()
     runtime = MeshRuntime(copy_mesh_project(tmp_path))
     tag = "{{@Carmen-Rivas:::Adhesive flow rate nominal}}"
 
-    assert is_personnel_attention_tag(tag)
+    checks.assertTrue(is_personnel_attention_tag(tag))
     with pytest.raises(ValueError, match="Personnel Attention Tags"):
         runtime.get_terminal(tag)

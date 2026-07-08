@@ -701,17 +701,25 @@ class MeshRuntime:
         if request.to:
             terminal_profiles = self._resolve_terminal_profiles(request.to)
             if terminal_profiles:
-                anchor_nodes = {
-                    profile.pat_overlay.anchor_node
-                    for profile in terminal_profiles
-                    if profile.pat_overlay and profile.pat_overlay.anchor_node
-                }
-                if len(terminal_profiles) > 1 and len(anchor_nodes) == 1:
-                    return next(iter(anchor_nodes))
-                if terminal_profiles[0].mesh_route.channel_id:
-                    return terminal_profiles[0].mesh_route.channel_id
+                channel = self._channel_from_terminal_profiles(terminal_profiles)
+                if channel:
+                    return channel
         first_target = next(iter(targets))
         return first_target.default_channel
+
+    @staticmethod
+    def _channel_from_terminal_profiles(terminal_profiles: List[PersonalTerminalProfile]) -> Optional[str]:
+        """Return the shared anchor channel for a terminal group, else the first profile's own channel."""
+        anchor_nodes = {
+            profile.pat_overlay.anchor_node
+            for profile in terminal_profiles
+            if profile.pat_overlay and profile.pat_overlay.anchor_node
+        }
+        if len(terminal_profiles) > 1 and len(anchor_nodes) == 1:
+            return next(iter(anchor_nodes))
+        if terminal_profiles[0].mesh_route.channel_id:
+            return terminal_profiles[0].mesh_route.channel_id
+        return None
 
     def _resolve_terminal_profiles(
         self,

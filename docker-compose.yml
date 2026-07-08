@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Aurora CloudBank Symbolic — Docker Compose
 # Ethics Protocol: Picard_Delta_3
 # T1: Compose-file anchor
@@ -9,17 +7,25 @@ version: '3.8'
 services:
   aurora_gui:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile_aurora_gui_cloudhub
+    environment:
+      # Runtime startup refuses empty values; keep build usable without secrets.
+      CSRF_SECRET_KEY: ${CSRF_SECRET_KEY:-}
+      WS_AUTH_SECRET: ${WS_AUTH_SECRET:-}
+      AURORA_OPERATOR_SNAPSHOT_PATH: ${AURORA_OPERATOR_SNAPSHOT_PATH:-/app/operator_snapshot/aurora_operator_snapshot_latest.json}
+    ports:
+      - "127.0.0.1:8080:8080"
     volumes:
-      - ../memory:/app/symbols/memory
-      - ../aurora.seed.json:/app/symbols/aurora.seed.json
+      - aurora_gui_symbols:/app/symbols
+      # Aurora root operator snapshot, mounted read-only for the local console.
+      - ${AURORA_OPERATOR_SNAPSHOT_DIR:-../../../reports/analysis}:/app/operator_snapshot:ro
 
   command_node:
     build:
       context: ./services/command_node
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     restart: unless-stopped
 
   # ── NeMo Inference Service ─────────────────────────────────────────────
@@ -28,11 +34,13 @@ services:
   # Chain Notation: #SERVICES//NEMO//COMPOSE//
   # Anchor Seed: EOS_SEED_ORION
   nemo_service:
+    profiles:
+      - gpu
     build:
       context: .
       dockerfile: services/nemo_service/Dockerfile
     ports:
-      - "8090:8090"
+      - "127.0.0.1:8090:8090"
     restart: unless-stopped
     depends_on:
       - aurora_gui
@@ -64,6 +72,8 @@ services:
       start_period: 60s
 
 volumes:
+  aurora_gui_symbols:
+    driver: local
   nemo_models:
     driver: local
   nemo_snapshots:

@@ -8,7 +8,7 @@ nemo_toolkit[all]>=2.7.3
 
 # ── Web server ────────────────────────────────────────────────────────────
 fastapi>=0.139.0
-uvicorn[standard]>=0.49.0
+uvicorn[standard]>=0.50.2
 
 # ── Settings management ───────────────────────────────────────────────────
 pydantic>=2.13.4

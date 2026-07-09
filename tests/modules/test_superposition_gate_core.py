@@ -70,6 +70,16 @@ def test_empty_verdict_list_raises():
 
 
 @pytest.mark.unit
+def test_empty_generator_raises_empty_verdict_set_error():
+    # A generator has no __len__/__bool__, so `not verdicts` on the raw
+    # generator would never be True even when it yields nothing. collapse()
+    # must snapshot to a tuple before checking emptiness, or this raises a
+    # raw ValueError from max() instead of the documented EmptyVerdictSetError.
+    with pytest.raises(EmptyVerdictSetError):
+        collapse(v for v in [])
+
+
+@pytest.mark.unit
 def test_all_verdicts_preserved_in_result():
     verdicts = [_v("a", VerdictSeverity.ALLOW), _v("b", VerdictSeverity.WARN)]
     result = collapse(verdicts)

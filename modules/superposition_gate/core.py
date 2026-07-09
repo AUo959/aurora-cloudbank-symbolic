@@ -27,7 +27,7 @@ and Hypothesis property-based tests over randomly generated verdict lists.
 DLP: context_tag=superposition_gate_core, symbolic_hash=SUPERPOSITION_GATE_v1
 """
 
-from typing import Sequence
+from typing import Iterable
 
 from .models import CollapsedVerdict, Verdict, VerdictSeverity
 
@@ -36,12 +36,13 @@ class EmptyVerdictSetError(ValueError):
     """Raised when collapse() is called with no verdicts to combine."""
 
 
-def collapse(verdicts: Sequence[Verdict]) -> CollapsedVerdict:
+def collapse(verdicts: Iterable[Verdict]) -> CollapsedVerdict:
     """Combine independent Verdicts into one CollapsedVerdict.
 
     Args:
         verdicts: Independent judgments from any number of evaluators, in any
-            order. Order must not affect the result -- see
+            order or iterable form (list, tuple, generator, ...). Order must
+            not affect the result -- see
             tests/modules/test_superposition_gate_invariant_properties.py::test_collapse_is_order_independent.
 
     Returns:
@@ -57,12 +58,17 @@ def collapse(verdicts: Sequence[Verdict]) -> CollapsedVerdict:
         EmptyVerdictSetError: if verdicts is empty. There is no safe default
             outcome for zero evaluators -- callers must supply at least one.
     """
+    # Snapshot once, before the emptiness check: guards against a caller
+    # mutating a mutable input sequence mid-call, avoids iterating the input
+    # multiple times below, and ensures the emptiness check below is correct
+    # for any iterable -- an empty generator is falsy under `not verdicts`
+    # but has no reliable __bool__/__len__, so checking before snapshotting
+    # would silently skip the check and let max() raise a different,
+    # undocumented error instead of EmptyVerdictSetError.
+    verdicts = tuple(verdicts)
+
     if not verdicts:
         raise EmptyVerdictSetError("collapse() requires at least one Verdict")
-
-    # Snapshot once: guards against a caller mutating a mutable input sequence
-    # mid-call, and avoids iterating the input multiple times below.
-    verdicts = tuple(verdicts)
 
     hard_vetoes = [v for v in verdicts if v.hard_veto]
     if hard_vetoes:

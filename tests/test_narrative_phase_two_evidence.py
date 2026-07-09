@@ -25,6 +25,96 @@ def _request() -> NormalizedTaskRequest:
     )
 
 
+def _phase_two_sources() -> list[dict[str, str]]:
+    return [
+        {
+            "source_id": "canon:mesh-memory",
+            "authority_tier": "canon",
+            "source_type": "canon_file",
+            "uri": "config/mesh/memory/aurora.md",
+            "observed_at_utc": "2026-07-04T00:00:00Z",
+        },
+        {
+            "source_id": "gumas:turn-42",
+            "authority_tier": "operational",
+            "source_type": "gumas_turn_output",
+            "observed_at_utc": "2026-07-04T00:01:00Z",
+        },
+        {
+            "source_id": "llm:extractor-fixture",
+            "authority_tier": "llm_candidate",
+            "source_type": "fixture_extractor_output",
+            "observed_at_utc": "2026-07-04T00:02:00Z",
+        },
+    ]
+
+
+def _phase_two_facts() -> list[dict[str, object]]:
+    return [
+        {
+            "fact_id": "layer:continuity",
+            "claim_type": "layer",
+            "payload": {"name": "continuity"},
+            "source_ids": ("canon:mesh-memory",),
+            "authority_tier": "canon",
+        },
+        {
+            "fact_id": "event:mesh-fault",
+            "claim_type": "event",
+            "payload": {
+                "label": "A mesh fault degraded station services during the night cycle.",
+                "timing": "prior",
+                "participants": ["Alex Thorne"],
+            },
+            "source_ids": ("canon:mesh-memory",),
+            "authority_tier": "canon",
+        },
+        {
+            "fact_id": "event:gumas-next-beat",
+            "claim_type": "event",
+            "payload": {
+                "label": "GUMAS proposes an immediate unilateral hot-patch.",
+                "timing": "next_turn",
+                "participants": ["Alex Thorne"],
+            },
+            "source_ids": ("gumas:turn-42",),
+            "authority_tier": "operational",
+        },
+        {
+            "fact_id": "knowledge:llm-extracted-charter",
+            "claim_type": "knowledge_state",
+            "payload": {
+                "holder": "Alex Thorne",
+                "fact": (
+                    "Major station actions require Aurora arbitration and "
+                    "ethics validation."
+                ),
+            },
+            "source_ids": ("llm:extractor-fixture",),
+            "authority_tier": "llm_candidate",
+            "status": "candidate",
+            "promotion_eligible": True,
+        },
+    ]
+
+
+def _phase_two_evidence_bundle():
+    return build_evidence_bundle(
+        sources=_phase_two_sources(),
+        facts=_phase_two_facts(),
+        generated_at_utc="2026-07-04T00:03:00Z",
+    )
+
+
+def _phase_two_proposal() -> dict[str, str]:
+    return {
+        "actor": "Alex Thorne",
+        "action": "apply the simulation hot-patch unilaterally",
+        "type": "event",
+        "timing": "next_turn",
+    }
+
+
 @pytest.mark.unit
 @pytest.mark.aurora
 def test_evidence_bundle_hash_is_stable_and_content_addressed() -> None:
@@ -117,83 +207,9 @@ def test_evidence_bundle_hash_handles_mixed_mapping_keys_and_sets() -> None:
 @pytest.mark.unit
 @pytest.mark.aurora
 def test_state_builder_preserves_authority_tiers_and_provisional_events() -> None:
-    bundle = build_evidence_bundle(
-        sources=[
-            {
-                "source_id": "canon:mesh-memory",
-                "authority_tier": "canon",
-                "source_type": "canon_file",
-                "uri": "config/mesh/memory/aurora.md",
-                "observed_at_utc": "2026-07-04T00:00:00Z",
-            },
-            {
-                "source_id": "gumas:turn-42",
-                "authority_tier": "operational",
-                "source_type": "gumas_turn_output",
-                "observed_at_utc": "2026-07-04T00:01:00Z",
-            },
-            {
-                "source_id": "llm:extractor-fixture",
-                "authority_tier": "llm_candidate",
-                "source_type": "fixture_extractor_output",
-                "observed_at_utc": "2026-07-04T00:02:00Z",
-            },
-        ],
-        facts=[
-            {
-                "fact_id": "layer:continuity",
-                "claim_type": "layer",
-                "payload": {"name": "continuity"},
-                "source_ids": ("canon:mesh-memory",),
-                "authority_tier": "canon",
-            },
-            {
-                "fact_id": "event:mesh-fault",
-                "claim_type": "event",
-                "payload": {
-                    "label": "A mesh fault degraded station services during the night cycle.",
-                    "timing": "prior",
-                    "participants": ["Alex Thorne"],
-                },
-                "source_ids": ("canon:mesh-memory",),
-                "authority_tier": "canon",
-            },
-            {
-                "fact_id": "event:gumas-next-beat",
-                "claim_type": "event",
-                "payload": {
-                    "label": "GUMAS proposes an immediate unilateral hot-patch.",
-                    "timing": "next_turn",
-                    "participants": ["Alex Thorne"],
-                },
-                "source_ids": ("gumas:turn-42",),
-                "authority_tier": "operational",
-            },
-            {
-                "fact_id": "knowledge:llm-extracted-charter",
-                "claim_type": "knowledge_state",
-                "payload": {
-                    "holder": "Alex Thorne",
-                    "fact": "Major station actions require Aurora arbitration and ethics validation.",
-                },
-                "source_ids": ("llm:extractor-fixture",),
-                "authority_tier": "llm_candidate",
-                "status": "candidate",
-                "promotion_eligible": True,
-            },
-        ],
-        generated_at_utc="2026-07-04T00:03:00Z",
-    )
-
+    bundle = _phase_two_evidence_bundle()
     state, receipt = build_state_from_evidence(
-        bundle,
-        _request(),
-        proposal={
-            "actor": "Alex Thorne",
-            "action": "apply the simulation hot-patch unilaterally",
-            "type": "event",
-            "timing": "next_turn",
-        },
+        bundle, _request(), _phase_two_proposal()
     )
 
     assert state.input_profile["evidence_bundle_id"] == bundle.bundle_id  # nosec B101

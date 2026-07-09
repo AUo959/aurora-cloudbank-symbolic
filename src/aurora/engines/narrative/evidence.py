@@ -138,22 +138,17 @@ def promotion_safety_for_bundle(bundle: NarrativeEvidenceBundle) -> dict[str, An
     blocking_tiers: set[str] = set()
 
     for fact in bundle.facts:
-        status = fact.status.lower()
-        if status in REJECTED_FACT_STATUSES:
+        safety = _promotion_safety_for_fact(fact, sources_by_id)
+        if safety is None:
             continue
-        tiers = _authority_tiers_for_fact(fact, sources_by_id)
-        if status in INFERRED_FACT_STATUSES or tiers.intersection(
-            CANDIDATE_AUTHORITY_TIERS
-        ):
+        if safety["candidate"]:
             candidate_fact_ids.append(fact.fact_id)
-        if fact.promotion_eligible and tiers.issubset(CANON_AUTHORITY_TIERS):
+        if safety["promotable"]:
             promotable_fact_ids.append(fact.fact_id)
             continue
-        if fact.promotion_eligible or tiers.intersection(CANDIDATE_AUTHORITY_TIERS):
+        if safety["blocked"]:
             blocked_fact_ids.append(fact.fact_id)
-            blocking_tiers.update(
-                tier for tier in tiers if tier not in CANON_AUTHORITY_TIERS
-            )
+            blocking_tiers.update(safety["blocking_tiers"])
 
     decision = "deterministic_gate_only"
     if blocked_fact_ids:
@@ -166,6 +161,25 @@ def promotion_safety_for_bundle(bundle: NarrativeEvidenceBundle) -> dict[str, An
         "canon_promotion_allowed": not blocked_fact_ids,
         "decision": decision,
         "promotable_fact_ids": tuple(sorted(promotable_fact_ids)),
+    }
+
+
+def _promotion_safety_for_fact(
+    fact: NarrativeFact,
+    sources_by_id: Mapping[str, NarrativeEvidenceSource],
+) -> dict[str, Any] | None:
+    status = fact.status.lower()
+    if status in REJECTED_FACT_STATUSES:
+        return None
+
+    tiers = _authority_tiers_for_fact(fact, sources_by_id)
+    has_candidate_tier = bool(tiers.intersection(CANDIDATE_AUTHORITY_TIERS))
+    promotable = fact.promotion_eligible and tiers.issubset(CANON_AUTHORITY_TIERS)
+    return {
+        "blocked": not promotable and (fact.promotion_eligible or has_candidate_tier),
+        "blocking_tiers": {tier for tier in tiers if tier not in CANON_AUTHORITY_TIERS},
+        "candidate": status in INFERRED_FACT_STATUSES or has_candidate_tier,
+        "promotable": promotable,
     }
 
 
@@ -234,20 +248,30 @@ def _stable_digest(payload: Mapping[str, Any]) -> str:
 
 def _canonicalize(value: Any) -> Any:
     if isinstance(value, Mapping):
-        return {
-            str(key): _canonicalize(value[key])
-            for key in sorted(value, key=_canonical_mapping_key)
-        }
-    if isinstance(value, tuple):
-        return [_canonicalize(item) for item in value]
-    if isinstance(value, list):
-        return [_canonicalize(item) for item in value]
+        return _canonicalize_mapping(value)
+    if isinstance(value, (tuple, list)):
+        return _canonicalize_sequence(value)
     if isinstance(value, (frozenset, set)):
-        return sorted(
-            (_canonicalize(item) for item in value),
-            key=_canonical_sequence_key,
-        )
+        return _canonicalize_set(value)
     return value
+
+
+def _canonicalize_mapping(value: Mapping[Any, Any]) -> dict[str, Any]:
+    return {
+        str(key): _canonicalize(value[key])
+        for key in sorted(value, key=_canonical_mapping_key)
+    }
+
+
+def _canonicalize_sequence(value: Iterable[Any]) -> list[Any]:
+    return [_canonicalize(item) for item in value]
+
+
+def _canonicalize_set(value: Iterable[Any]) -> list[Any]:
+    return sorted(
+        (_canonicalize(item) for item in value),
+        key=_canonical_sequence_key,
+    )
 
 
 def _canonical_mapping_key(key: Any) -> tuple[str, str, str]:

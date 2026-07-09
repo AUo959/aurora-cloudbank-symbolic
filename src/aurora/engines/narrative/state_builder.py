@@ -122,6 +122,33 @@ def build_state_from_evidence(
     active_authority_tiers = _active_authority_tiers(bundle, accepted_fact_ids)
     freshness_summary = _freshness_summary(bundle)
     promotion_safety = promotion_safety_for_bundle(bundle)
+    _attach_evidence_context(
+        state,
+        bundle,
+        active_authority_tiers=active_authority_tiers,
+        promotion_safety=promotion_safety,
+    )
+
+    receipt = _build_state_receipt(
+        bundle=bundle,
+        state=state,
+        accepted_fact_ids=accepted_fact_ids,
+        rejected_fact_ids=rejected_fact_ids,
+        inferred_fact_ids=inferred_fact_ids,
+        active_authority_tiers=active_authority_tiers,
+        freshness_summary=freshness_summary,
+        promotion_safety=promotion_safety,
+    )
+    return state, receipt
+
+
+def _attach_evidence_context(
+    state: CanonicalState,
+    bundle: NarrativeEvidenceBundle,
+    *,
+    active_authority_tiers: tuple[str, ...],
+    promotion_safety: Mapping[str, Any],
+) -> None:
     state.input_profile.update(
         {
             "evidence_bundle_id": bundle.bundle_id,
@@ -140,6 +167,18 @@ def build_state_from_evidence(
         }
     )
 
+
+def _build_state_receipt(
+    *,
+    bundle: NarrativeEvidenceBundle,
+    state: CanonicalState,
+    accepted_fact_ids: tuple[str, ...],
+    rejected_fact_ids: tuple[str, ...],
+    inferred_fact_ids: tuple[str, ...],
+    active_authority_tiers: tuple[str, ...],
+    freshness_summary: Mapping[str, Any],
+    promotion_safety: Mapping[str, Any],
+) -> StateBuildReceipt:
     receipt_payload = {
         "accepted_fact_ids": accepted_fact_ids,
         "active_authority_tiers": active_authority_tiers,
@@ -149,7 +188,7 @@ def build_state_from_evidence(
         "rejected_fact_ids": rejected_fact_ids,
         "state_id": state.state_id,
     }
-    receipt = StateBuildReceipt(
+    return StateBuildReceipt(
         receipt_id=stable_receipt_id(receipt_payload),
         bundle_id=bundle.bundle_id,
         state_id=state.state_id,
@@ -161,7 +200,6 @@ def build_state_from_evidence(
         promotion_safety=promotion_safety,
         source_policy=dict(bundle.source_policy),
     )
-    return state, receipt
 
 
 def _stable_state_id(payload: Mapping[str, Any], proposal: Mapping[str, Any]) -> str:

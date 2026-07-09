@@ -9,8 +9,6 @@ wider variety of scores, source names, and list lengths than either of those
 two exhaustively enumerate.
 """
 
-import random
-
 import pytest
 
 hypothesis = pytest.importorskip("hypothesis")
@@ -48,11 +46,14 @@ def test_any_hard_veto_forces_hard_veto_final(verdict_list):
 
 
 @pytest.mark.unit
+@given(_verdict_lists(), st.data())
 @settings(max_examples=200)
-@given(_verdict_lists())
-def test_collapse_is_order_independent(verdict_list):
-    shuffled = verdict_list[:]
-    random.shuffle(shuffled)
+def test_collapse_is_order_independent(verdict_list, data):
+    # Hypothesis's own permutation strategy, not the stdlib `random` module --
+    # keeps shuffling reproducible under Hypothesis's example database/seed
+    # instead of reaching for a PRNG that security scanners flag as
+    # unsuitable for anything beyond this kind of non-security test shuffling.
+    shuffled = list(data.draw(st.permutations(verdict_list)))
     assert collapse(verdict_list).final == collapse(shuffled).final
     assert collapse(verdict_list).blocked == collapse(shuffled).blocked
 

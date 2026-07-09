@@ -234,9 +234,25 @@ def _stable_digest(payload: Mapping[str, Any]) -> str:
 
 def _canonicalize(value: Any) -> Any:
     if isinstance(value, Mapping):
-        return {str(key): _canonicalize(value[key]) for key in sorted(value)}
+        return {
+            str(key): _canonicalize(value[key])
+            for key in sorted(value, key=_canonical_mapping_key)
+        }
     if isinstance(value, tuple):
         return [_canonicalize(item) for item in value]
     if isinstance(value, list):
         return [_canonicalize(item) for item in value]
+    if isinstance(value, (frozenset, set)):
+        return sorted(
+            (_canonicalize(item) for item in value),
+            key=_canonical_sequence_key,
+        )
     return value
+
+
+def _canonical_mapping_key(key: Any) -> tuple[str, str, str]:
+    return (str(key), type(key).__module__ + "." + type(key).__qualname__, repr(key))
+
+
+def _canonical_sequence_key(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), default=str)

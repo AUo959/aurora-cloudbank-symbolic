@@ -72,6 +72,50 @@ def test_evidence_bundle_hash_is_stable_and_content_addressed() -> None:
 
 @pytest.mark.unit
 @pytest.mark.aurora
+def test_evidence_bundle_hash_handles_mixed_mapping_keys_and_sets() -> None:
+    source_a = NarrativeEvidenceSource(
+        source_id="canon:mixed-metadata",
+        authority_tier="canon",
+        metadata={2: "two", "1": "one", "tags": {"zeta", "alpha"}},
+    )
+    source_b = NarrativeEvidenceSource(
+        source_id="canon:mixed-metadata",
+        authority_tier="canon",
+        metadata={"tags": frozenset({"alpha", "zeta"}), "1": "one", 2: "two"},
+    )
+    fact_a = NarrativeFact(
+        fact_id="event:mixed-payload",
+        claim_type="event",
+        payload={
+            "detail": {1: "one", "2": "two"},
+            "participants": {"Alex Thorne", "Mira Vale"},
+        },
+        source_ids=("canon:mixed-metadata",),
+        authority_tier="canon",
+    )
+    fact_b = NarrativeFact(
+        fact_id="event:mixed-payload",
+        claim_type="event",
+        payload={
+            "participants": frozenset({"Mira Vale", "Alex Thorne"}),
+            "detail": {"2": "two", 1: "one"},
+        },
+        source_ids=("canon:mixed-metadata",),
+        authority_tier="canon",
+    )
+
+    bundle_a = build_evidence_bundle(
+        [source_a], [fact_a], generated_at_utc="2026-07-04T00:00:00Z"
+    )
+    bundle_b = build_evidence_bundle(
+        [source_b], [fact_b], generated_at_utc="2026-07-04T00:00:00Z"
+    )
+
+    assert bundle_a.bundle_id == bundle_b.bundle_id  # nosec B101
+
+
+@pytest.mark.unit
+@pytest.mark.aurora
 def test_state_builder_preserves_authority_tiers_and_provisional_events() -> None:
     bundle = build_evidence_bundle(
         sources=[

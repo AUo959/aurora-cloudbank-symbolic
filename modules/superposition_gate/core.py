@@ -19,11 +19,10 @@ The hard-veto invariant this function must satisfy is:
     if any v in V has v.hard_veto == True,
     then collapse(V).final == VerdictSeverity.HARD_VETO
 
-That invariant is checked three ways in tests/: exhaustive enumeration over
-small bounded verdict-list lengths (test_invariant_exhaustive.py, no extra
-dependencies), a bounded-N SMT proof via z3 (test_invariant_smt.py, skipped
-if z3 isn't installed), and Hypothesis property-based tests over randomly
-generated verdict lists (test_invariant_properties.py).
+That invariant is checked three ways in tests/modules/test_superposition_gate_*.py:
+exhaustive enumeration over small bounded verdict-list lengths (no extra
+dependencies), a bounded-N SMT proof via z3 (skipped if z3 isn't installed),
+and Hypothesis property-based tests over randomly generated verdict lists.
 
 DLP: context_tag=superposition_gate_core, symbolic_hash=SUPERPOSITION_GATE_v1
 """
@@ -43,11 +42,16 @@ def collapse(verdicts: Sequence[Verdict]) -> CollapsedVerdict:
     Args:
         verdicts: Independent judgments from any number of evaluators, in any
             order. Order must not affect the result -- see
-            tests/test_invariant_properties.py::test_collapse_is_order_independent.
+            tests/modules/test_superposition_gate_invariant_properties.py::test_collapse_is_order_independent.
 
     Returns:
         CollapsedVerdict carrying the final severity and the verdict that
-        bound the decision.
+        bound the decision. Note that `binding_verdict.severity` is the
+        vetoing evaluator's own reported severity, which is not required to
+        equal `HARD_VETO` -- an evaluator may report a low general severity
+        while still setting `hard_veto=True` on one specific judgment. Only
+        `final` (and `blocked`) is the authoritative collapsed decision;
+        don't assume `binding_verdict.severity == final`.
 
     Raises:
         EmptyVerdictSetError: if verdicts is empty. There is no safe default
@@ -55,6 +59,10 @@ def collapse(verdicts: Sequence[Verdict]) -> CollapsedVerdict:
     """
     if not verdicts:
         raise EmptyVerdictSetError("collapse() requires at least one Verdict")
+
+    # Snapshot once: guards against a caller mutating a mutable input sequence
+    # mid-call, and avoids iterating the input multiple times below.
+    verdicts = tuple(verdicts)
 
     hard_vetoes = [v for v in verdicts if v.hard_veto]
     if hard_vetoes:
@@ -65,7 +73,7 @@ def collapse(verdicts: Sequence[Verdict]) -> CollapsedVerdict:
         return CollapsedVerdict(
             final=VerdictSeverity.HARD_VETO,
             binding_verdict=binding,
-            all_verdicts=tuple(verdicts),
+            all_verdicts=verdicts,
         )
 
     # No hard veto: the most severe ordinal verdict wins; ties broken by
@@ -74,5 +82,5 @@ def collapse(verdicts: Sequence[Verdict]) -> CollapsedVerdict:
     return CollapsedVerdict(
         final=binding.severity,
         binding_verdict=binding,
-        all_verdicts=tuple(verdicts),
+        all_verdicts=verdicts,
     )

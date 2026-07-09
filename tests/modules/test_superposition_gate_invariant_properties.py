@@ -11,7 +11,7 @@ two exhaustively enumerate.
 
 import pytest
 
-hypothesis = pytest.importorskip("hypothesis")
+pytest.importorskip("hypothesis")
 from hypothesis import given, settings, strategies as st  # noqa: E402
 
 from modules.superposition_gate import Verdict, VerdictSeverity, collapse  # noqa: E402

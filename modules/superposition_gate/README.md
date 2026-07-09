@@ -39,17 +39,23 @@ combined into a final decision.
   formation), not because the math underneath is quantum.
 - **The hard-veto invariant is verified three ways**, in increasing order of
   effort and decreasing order of how much of the state space they cover:
-  - `tests/test_invariant_exhaustive.py` -- brute-force enumeration over all
-    `(severity, hard_veto)` combinations for small bounded verdict-list
-    lengths. No extra dependencies; always runs.
-  - `tests/test_invariant_smt.py` -- a bounded-N proof via `z3`: asserts the
-    negation of the invariant and confirms the solver reports `unsat`. Covers
-    larger N than brute-force enumeration can reach in reasonable time,
-    because SMT search scales with formula size, not input-space size.
-    Skipped gracefully if `z3-solver` isn't installed.
-  - `tests/test_invariant_properties.py` -- Hypothesis property-based tests
-    over randomly generated verdict lists, including an explicit
-    order-independence check (`collapse()` must not depend on list order).
+  - `tests/modules/test_superposition_gate_invariant_exhaustive.py` --
+    brute-force enumeration over all `(severity, hard_veto)` combinations for
+    small bounded verdict-list lengths. No extra dependencies; always runs.
+  - `tests/modules/test_superposition_gate_invariant_smt.py` -- a bounded-N
+    proof via `z3`: asserts the negation of the invariant and confirms the
+    solver reports `unsat`. Covers larger N than brute-force enumeration can
+    reach in reasonable time, because SMT search scales with formula size,
+    not input-space size. Skipped gracefully if `z3-solver` isn't installed.
+  - `tests/modules/test_superposition_gate_invariant_properties.py` --
+    Hypothesis property-based tests over randomly generated verdict lists,
+    including an explicit order-independence check (`collapse()` must not
+    depend on list order).
+
+  Tests live under `tests/modules/` rather than `modules/superposition_gate/tests/`
+  because the repo's pytest config (`testpaths = ["tests"]` in `pyproject.toml`)
+  only discovers tests there -- this matches the existing convention used by
+  every other module's tests (e.g. `tests/modules/test_insight_ledger_security.py`).
 
   Model checking (TLA+-style) was considered and deliberately not used here:
   it's the right tool once a combiner becomes stateful, asynchronous, or

@@ -38,6 +38,16 @@ class Verdict(BaseModel):
     maximally concerning, 1.0 = fully acceptable), matching the existing
     Picard_Delta_3 evaluator's vector-magnitude convention so that evaluator's
     output can be passed through unchanged if it's ever wired in here.
+
+    `hard_veto` and `severity` are deliberately independent fields, not
+    constrained to agree. An evaluator may report a low general `severity`
+    (e.g. WARN) while still setting `hard_veto=True` to flag one specific,
+    non-negotiable judgment -- `severity` describes the evaluator's overall
+    assessment, `hard_veto` is a separate unconditional signal. This is why
+    `collapse()`'s exhaustive and property-based invariant tests deliberately
+    cover the full (severity, hard_veto) cross-product rather than assuming
+    they always match: see `CollapsedVerdict.binding_verdict` below for what
+    this means for callers reading a collapsed result.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -51,7 +61,16 @@ class Verdict(BaseModel):
 
 
 class CollapsedVerdict(BaseModel):
-    """The single decision produced by combining a set of independent Verdicts."""
+    """The single decision produced by combining a set of independent Verdicts.
+
+    `final` is the authoritative collapsed decision -- always trust `final`
+    (and `blocked`) over `binding_verdict.severity`. When `final ==
+    HARD_VETO`, `binding_verdict` is the vetoing evaluator's own Verdict,
+    whose `severity` field reflects that evaluator's own general assessment
+    and is not required to equal `HARD_VETO` (see `Verdict.hard_veto`'s
+    docstring). Reading `binding_verdict.severity` as if it always equals
+    `final` is a mistake this docstring exists to prevent.
+    """
 
     model_config = ConfigDict(frozen=True)
 

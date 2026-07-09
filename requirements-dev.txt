@@ -13,7 +13,12 @@ coverage>=7.10.7                    # Coverage measurement
 # FORMAL VERIFICATION & PROPERTY-BASED TESTING
 # ===================================================================
 hypothesis>=6.100.0                 # Property-based testing
-z3-solver>=4.13.0                   # SMT solving for invariant proofs (optional; tests skip gracefully if absent)
+# z3-solver>=4.13.0                  # SMT solving for invariant proofs (modules/superposition_gate).
+                                     # Left commented out: it's a native-code build on some platforms and a
+                                     # failure here would abort the rest of this file's install (blocking
+                                     # black/flake8/etc). Install manually for SMT test coverage:
+                                     #     pip install z3-solver
+                                     # The relevant tests use pytest.importorskip("z3") and skip cleanly without it.
 
 # ===================================================================
 # CODE QUALITY & FORMATTING

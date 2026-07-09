@@ -61,21 +61,29 @@ def collapse(verdicts: Iterable[Verdict]) -> CollapsedVerdict:
     # Snapshot once, before the emptiness check: guards against a caller
     # mutating a mutable input sequence mid-call, avoids iterating the input
     # multiple times below, and ensures the emptiness check below is correct
-    # for any iterable -- an empty generator is falsy under `not verdicts`
-    # but has no reliable __bool__/__len__, so checking before snapshotting
-    # would silently skip the check and let max() raise a different,
-    # undocumented error instead of EmptyVerdictSetError.
+    # for any iterable -- a generator has no __len__ and is always truthy
+    # regardless of whether it yields anything, so `not verdicts` on a raw
+    # generator would never be True even when empty. Checking before
+    # snapshotting would silently skip the check and let max() raise a
+    # different, undocumented error instead of EmptyVerdictSetError.
     verdicts = tuple(verdicts)
 
     if not verdicts:
         raise EmptyVerdictSetError("collapse() requires at least one Verdict")
 
+    # Tie-break keys cover every field, not just (score, source): if two
+    # verdicts somehow shared just those two (e.g. a caller bug emitting
+    # duplicate verdicts for one evaluator), stopping the key there would let
+    # min()/max() return whichever duplicate came first in the input,
+    # making binding_verdict order-dependent even though `final` stays
+    # stable. `context_tag` is Optional, so it's normalized to "" for
+    # ordering purposes (None isn't orderable against str).
     hard_vetoes = [v for v in verdicts if v.hard_veto]
     if hard_vetoes:
-        # Tie-break on (score, source): lowest score is the most concerning
-        # veto; source is a final deterministic tie-break so the result never
-        # depends on list order, only on the verdicts' own field values.
-        binding = min(hard_vetoes, key=lambda v: (v.score, v.source))
+        # Lowest score is the most concerning veto; remaining fields are a
+        # final deterministic tie-break so the result never depends on list
+        # order, only on the verdicts' own field values.
+        binding = min(hard_vetoes, key=lambda v: (v.score, v.source, v.reason, v.context_tag or ""))
         return CollapsedVerdict(
             final=VerdictSeverity.HARD_VETO,
             binding_verdict=binding,
@@ -83,8 +91,9 @@ def collapse(verdicts: Iterable[Verdict]) -> CollapsedVerdict:
         )
 
     # No hard veto: the most severe ordinal verdict wins; ties broken by
-    # lowest score (more concerning), then by source for determinism.
-    binding = max(verdicts, key=lambda v: (v.severity, -v.score, v.source))
+    # lowest score (more concerning), then by the remaining fields for full
+    # determinism.
+    binding = max(verdicts, key=lambda v: (v.severity, -v.score, v.source, v.reason, v.context_tag or ""))
     return CollapsedVerdict(
         final=binding.severity,
         binding_verdict=binding,

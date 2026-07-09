@@ -1,13 +1,25 @@
 """Unit tests for modules.superposition_gate.core.collapse()."""
 
+from typing import Optional
+
+import pydantic
 import pytest
 
 from modules.superposition_gate import CollapsedVerdict, Verdict, VerdictSeverity, collapse
 from modules.superposition_gate.core import EmptyVerdictSetError
 
 
-def _v(source: str, severity: VerdictSeverity, score: float = 0.5, hard_veto: bool = False) -> Verdict:
-    return Verdict(source=source, severity=severity, score=score, hard_veto=hard_veto)
+def _v(
+    source: str,
+    severity: VerdictSeverity,
+    score: float = 0.5,
+    hard_veto: bool = False,
+    reason: str = "",
+    context_tag: Optional[str] = None,
+) -> Verdict:
+    return Verdict(
+        source=source, severity=severity, score=score, hard_veto=hard_veto, reason=reason, context_tag=context_tag
+    )
 
 
 @pytest.mark.unit
@@ -90,5 +102,22 @@ def test_all_verdicts_preserved_in_result():
 def test_collapsed_verdict_is_frozen():
     result = collapse([_v("a", VerdictSeverity.ALLOW)])
     assert isinstance(result, CollapsedVerdict)
-    with pytest.raises(Exception):
+    # Pydantic v2 raises its own ValidationError on assignment to a frozen
+    # model, not a plain TypeError -- verified empirically rather than assumed.
+    with pytest.raises(pydantic.ValidationError):
         result.final = VerdictSeverity.BLOCK  # type: ignore[misc]
+
+
+@pytest.mark.unit
+def test_binding_verdict_is_order_independent_even_with_duplicate_score_and_source():
+    # If two verdicts share (score, source) but differ in reason/context_tag,
+    # the tie-break must still be a total, order-independent ordering --
+    # otherwise binding_verdict could silently depend on which duplicate
+    # happened to come first in the input list.
+    a = _v("evaluator_x", VerdictSeverity.HARD_VETO, score=0.3, hard_veto=True, reason="first", context_tag="tag_a")
+    b = _v("evaluator_x", VerdictSeverity.HARD_VETO, score=0.3, hard_veto=True, reason="second", context_tag="tag_b")
+
+    forward = collapse([a, b])
+    reversed_order = collapse([b, a])
+
+    assert forward.binding_verdict == reversed_order.binding_verdict

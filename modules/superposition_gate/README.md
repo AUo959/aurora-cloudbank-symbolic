@@ -61,16 +61,24 @@ combined into a final decision.
   it's the right tool once a combiner becomes stateful, asynchronous, or
   distributed, and this one is a pure, stateless function.
 
-## What this module does *not* do
+## Integration status
 
-- It does not call `src/monitoring/ethics_engine.py`, the Ethics Field's
-  `dimension_evaluators` (including `picard_delta_3`), or
-  `EthicsAwareQuantumGate`. Wiring any of those three existing evaluators to
-  produce a `Verdict` and calling `collapse()` at their actual decision point
-  is the natural next step, but it's a separate, per-caller change so each
-  integration can be reviewed and rolled out independently.
-- It does not compute or emit the disagreement metric (ordinal Krippendorff's
-  alpha over verdict severities, feeding `src/monitoring/drift_detector.py`).
-  That's monitoring/observability work that depends on real verdicts flowing
-  through `collapse()` in production first.
-- It has no FastAPI route. It's a plain Python library until something calls it.
+- **Wired in**: `src/monitoring/ethics_gate.py::check_ethics()` -- the gate
+  already live on `modules/quantum_simulator/api.py`'s scenario endpoint --
+  now builds a `Verdict` from `EthicsEngine.evaluate_action()`'s violation
+  list (via `_violations_to_verdict()`) and makes its raise decision through
+  `collapse()` instead of `check_should_block()` directly. With only one
+  evaluator wired in, this is behavior-preserving (the raise condition is
+  keyed on `collapsed.final == HARD_VETO`, which is driven solely by
+  `hard_veto`, matching the original `any(v.blocked for v in violations)`
+  exactly) -- the point was to make this call site ready to take a second
+  evaluator's `Verdict` without another change at the decision point itself.
+- **Not yet wired in**: the Ethics Field's `dimension_evaluators` (including
+  `picard_delta_3`) and `EthicsAwareQuantumGate`. Each is a separate,
+  independently-reviewable follow-up, same as the first.
+- Still not computed: the disagreement metric (ordinal Krippendorff's alpha
+  over verdict severities, feeding `src/monitoring/drift_detector.py`). That
+  needs at least two live evaluators disagreeing in practice before it's
+  meaningful to build.
+- Still no FastAPI route of its own -- it's called from other modules'
+  decision points, not exposed directly.

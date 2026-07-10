@@ -18,7 +18,103 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.monitoring.ethics_gate import EthicsViolationError, check_ethics
+from src.monitoring.ethics_gate import (
+    EthicsViolationError,
+    _non_blocking_severity,
+    _violations_to_verdict,
+    check_ethics,
+)
+from modules.superposition_gate import VerdictSeverity
+
+
+# ---------------------------------------------------------------------------
+# Unit tests for the collapse()-adapter helpers
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_non_blocking_severity_maps_known_levels():
+    for value, expected in (
+        ("low", (VerdictSeverity.WARN, 0.7)),
+        ("medium", (VerdictSeverity.WARN, 0.5)),
+        ("high", (VerdictSeverity.THROTTLE, 0.3)),
+        ("critical", (VerdictSeverity.THROTTLE, 0.1)),
+    ):
+        violation = MagicMock()
+        violation.severity.value = value
+        assert _non_blocking_severity(violation) == expected
+
+
+@pytest.mark.unit
+def test_non_blocking_severity_falls_back_for_unknown_value():
+    violation = MagicMock()
+    violation.severity.value = "not_a_real_severity"
+    assert _non_blocking_severity(violation) == (VerdictSeverity.WARN, 0.5)
+
+
+@pytest.mark.unit
+def test_non_blocking_severity_falls_back_when_severity_missing():
+    # A test double/mock that never sets `.severity` to a real enum must not
+    # raise -- this is what lets existing MagicMock()-based tests pass.
+    violation = MagicMock(spec=[])
+    assert _non_blocking_severity(violation) == (VerdictSeverity.WARN, 0.5)
+
+
+@pytest.mark.unit
+def test_violations_to_verdict_empty_list_is_allow():
+    verdict = _violations_to_verdict([], "tag_1")
+    assert verdict.severity == VerdictSeverity.ALLOW
+    assert verdict.hard_veto is False
+    assert verdict.score == 1.0
+    assert verdict.context_tag == "tag_1"
+
+
+@pytest.mark.unit
+def test_violations_to_verdict_non_blocking_violation_does_not_hard_veto():
+    violation = MagicMock()
+    violation.blocked = False
+    violation.severity.value = "high"
+    violation.rule_name = "some_rule"
+
+    verdict = _violations_to_verdict([violation], None)
+    assert verdict.hard_veto is False
+    assert verdict.severity == VerdictSeverity.THROTTLE
+
+
+@pytest.mark.unit
+def test_violations_to_verdict_blocked_violation_forces_hard_veto_regardless_of_severity():
+    # Even a nominally "low" severity violation must hard-veto if blocked=True --
+    # only `blocked` drives the raise decision, never the severity mapping.
+    violation = MagicMock()
+    violation.blocked = True
+    violation.severity.value = "low"
+    violation.rule_name = "low_severity_but_blocking_rule"
+
+    verdict = _violations_to_verdict([violation], "tag_2")
+    assert verdict.hard_veto is True
+    assert verdict.severity == VerdictSeverity.HARD_VETO
+    assert "low_severity_but_blocking_rule" in verdict.reason
+
+
+@pytest.mark.unit
+def test_check_ethics_raises_on_low_severity_blocked_violation():
+    # Regression guard for the same invariant as above, at the check_ethics()
+    # level: a "low" severity violation that is nonetheless auto_block=True
+    # must still raise, matching the pre-collapse() check_should_block() behavior.
+    violation = MagicMock()
+    violation.blocked = True
+    violation.severity.value = "low"
+    violation.rule_name = "low_severity_but_blocking_rule"
+    violation.to_dict.return_value = {"rule_id": "X", "blocked": True}
+
+    mock_engine_instance = MagicMock()
+    mock_engine_instance.evaluate_action.return_value = [violation]
+    mock_engine_cls = MagicMock(return_value=mock_engine_instance)
+
+    with patch("src.monitoring.ethics_engine.EthicsEngine", mock_engine_cls), \
+         patch("src.monitoring.ethics_engine.ActionContext", MagicMock()):
+        with pytest.raises(EthicsViolationError):
+            check_ethics("quantum_simulate", {"scenario_type": "dangerous"})
 
 
 # ---------------------------------------------------------------------------

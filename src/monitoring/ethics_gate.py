@@ -4,9 +4,67 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List
 
+from modules.superposition_gate import Verdict, VerdictSeverity, collapse
+
 logger = logging.getLogger(__name__)
 
 LOW_RISK_IMPACT_LEVELS = {"low", "informational", "read_only", "read-only"}
+
+# Maps EthicsEngine's ViolationSeverity to a (VerdictSeverity, score) pair for
+# non-blocking violations. Deliberately caps below BLOCK/HARD_VETO: whether
+# this gate raises is governed solely by `hard_veto` (== any violation with
+# auto_block=True), not by nominal severity -- a HIGH-severity violation that
+# isn't auto_block must not itself trigger a block, matching the original
+# check_should_block() semantics exactly.
+_NON_BLOCKING_SEVERITY_MAP = {
+    "low": (VerdictSeverity.WARN, 0.7),
+    "medium": (VerdictSeverity.WARN, 0.5),
+    "high": (VerdictSeverity.THROTTLE, 0.3),
+    "critical": (VerdictSeverity.THROTTLE, 0.1),
+}
+
+
+def _non_blocking_severity(violation: Any) -> tuple:
+    """Map a violation's severity to (VerdictSeverity, score), defensively.
+
+    Falls back to (WARN, 0.5) for anything that isn't one of EthicsEngine's
+    four known ViolationSeverity values -- including test doubles/mocks that
+    don't set `.severity` to a real enum. This lookup only ever affects
+    informational severity/score for *non-blocking* violations; it can never
+    change whether check_ethics() raises, since that's keyed on `hard_veto`
+    (== violation.blocked) alone.
+    """
+    value = getattr(getattr(violation, "severity", None), "value", None)
+    return _NON_BLOCKING_SEVERITY_MAP.get(value, (VerdictSeverity.WARN, 0.5))
+
+
+def _violations_to_verdict(violations: List[Any], context_tag: str) -> Verdict:
+    """Normalize EthicsEngine's violation list into one Verdict for collapse().
+
+    This is the first of the three existing ethics/safety evaluators wired
+    into modules.superposition_gate.collapse() -- see that module's README
+    for why the other two (the Ethics Field's dimension evaluators,
+    EthicsAwareQuantumGate) are left as separate, later integrations rather
+    than bolted on here.
+    """
+    if not violations:
+        return Verdict(source="ethics_engine", severity=VerdictSeverity.ALLOW, score=1.0, context_tag=context_tag)
+
+    hard_veto = any(v.blocked for v in violations)
+    worst = min(violations, key=lambda v: _non_blocking_severity(v)[1])
+    severity, score = _non_blocking_severity(worst)
+    if hard_veto:
+        severity = VerdictSeverity.HARD_VETO
+
+    worst_name = getattr(worst, "rule_name", None) or "unknown_rule"
+    return Verdict(
+        source="ethics_engine",
+        severity=severity,
+        score=score,
+        hard_veto=hard_veto,
+        reason=f"{len(violations)} violation(s); worst={worst_name}",
+        context_tag=context_tag,
+    )
 
 
 class EthicsViolationError(Exception):
@@ -51,7 +109,11 @@ def check_ethics(
     """Run the EthicsEngine check. Raises EthicsViolationError if not permitted.
 
     Uses EthicsEngine.evaluate_action(ActionContext) — the engine returns a list of
-    EthicsViolation objects; if any have auto_block=True the gate raises.
+    EthicsViolation objects, which are normalized into a single Verdict and passed
+    through modules.superposition_gate.collapse() to make the raise decision. With
+    only one evaluator wired in, this is behavior-preserving today (still raises iff
+    any violation has auto_block=True); the point is to make this call site ready
+    to take a second/third evaluator's Verdict without changing again.
 
     The gate fails closed by default when EthicsEngine is unavailable or errors.
     Low-risk callers may explicitly opt into degraded allow behavior by passing
@@ -86,7 +148,14 @@ def check_ethics(
 
         violations = engine.evaluate_action(context)
 
-        if violations and engine.check_should_block(violations):
+        verdict = _violations_to_verdict(violations, context_tag or None)
+        collapsed = collapse([verdict])
+
+        # Keyed on `final == HARD_VETO` specifically, not the broader `.blocked`
+        # property: raising must depend only on hard_veto (== any violation with
+        # auto_block=True), matching the original check_should_block() semantics
+        # exactly regardless of how non-blocking violations map onto severity.
+        if collapsed.final == VerdictSeverity.HARD_VETO:
             serialized = [v.to_dict() for v in violations if v.blocked]
             raise EthicsViolationError(
                 f"Ethics check failed for {action_type}: "

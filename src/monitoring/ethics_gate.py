@@ -35,6 +35,8 @@ def _non_blocking_severity(violation: Any) -> tuple:
     (== violation.blocked) alone.
     """
     value = getattr(getattr(violation, "severity", None), "value", None)
+    if not isinstance(value, str):
+        return (VerdictSeverity.WARN, 0.5)
     return _NON_BLOCKING_SEVERITY_MAP.get(value, (VerdictSeverity.WARN, 0.5))
 
 

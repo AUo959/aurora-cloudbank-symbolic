@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from modules.superposition_gate import Verdict, VerdictSeverity, collapse
 
@@ -38,7 +38,7 @@ def _non_blocking_severity(violation: Any) -> tuple:
     return _NON_BLOCKING_SEVERITY_MAP.get(value, (VerdictSeverity.WARN, 0.5))
 
 
-def _violations_to_verdict(violations: List[Any], context_tag: str) -> Verdict:
+def _violations_to_verdict(violations: List[Any], context_tag: Optional[str]) -> Verdict:
     """Normalize EthicsEngine's violation list into one Verdict for collapse().
 
     This is the first of the three existing ethics/safety evaluators wired

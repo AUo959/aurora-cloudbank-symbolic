@@ -22,6 +22,15 @@ _CANONICAL_INVARIANTS = {
     "drift_lock": 0.0,
 }
 _CURRENT_FLIGHT_STATES = frozenset({"current", "flown", "passed", "success"})
+_FALSE_LIKE_VALUES = frozenset(
+    {"0", "bypass", "disabled", "false", "no", "none", "off", "skip", "skipped"}
+)
+_ARBITRATION_INPUTS = (
+    "aurora_arbitration",
+    "ethics_validation",
+    "arbitration",
+    "proposal_text",
+)
 
 
 def next_event_continuity_check(
@@ -156,7 +165,7 @@ def _hard_constraint_findings(
             "The proposed event bypasses required Aurora arbitration and ethics validation."
         )
 
-    checked = tuple((*_CANONICAL_INVARIANTS, "aurora_arbitration"))
+    checked = tuple((*_CANONICAL_INVARIANTS, *_ARBITRATION_INPUTS))
     return findings, checked
 
 
@@ -189,13 +198,28 @@ def _invariant_matches(actual: Any, expected: Any) -> bool:
 
 
 def _bypasses_aurora_arbitration(proposal: Mapping[str, Any]) -> bool:
-    if proposal.get("aurora_arbitration") is False:
+    if _proposal_flag_is_false_like(proposal, "aurora_arbitration"):
         return True
-    if proposal.get("ethics_validation") is False:
+    if _proposal_flag_is_false_like(proposal, "ethics_validation"):
         return True
     arbitration = str(proposal.get("arbitration", "")).casefold()
-    if arbitration in {"bypass", "disabled", "none", "skipped"}:
+    if arbitration in _FALSE_LIKE_VALUES:
         return True
+    return _proposal_text_bypasses_arbitration(proposal)
+
+
+def _proposal_flag_is_false_like(proposal: Mapping[str, Any], field_name: str) -> bool:
+    if field_name not in proposal:
+        return False
+    value = proposal[field_name]
+    if value is False:
+        return True
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return value == 0
+    return isinstance(value, str) and value.strip().casefold() in _FALSE_LIKE_VALUES
+
+
+def _proposal_text_bypasses_arbitration(proposal: Mapping[str, Any]) -> bool:
     text = " ".join(
         str(proposal.get(key, "")) for key in ("action", "event", "label", "notes")
     ).casefold()

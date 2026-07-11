@@ -218,6 +218,33 @@ def test_aurora_arbitration_bypass_blocks_promotion() -> None:
         "bypasses required Aurora arbitration" in blocker
         for blocker in receipt.gate_results["hard_blocks"]
     )  # nosec B101
+    assert {
+        "arbitration",
+        "aurora_arbitration",
+        "ethics_validation",
+        "proposal_text",
+    }.issubset(receipt.gate_results["hard_constraints_checked"])  # nosec B101
+
+
+@pytest.mark.unit
+@pytest.mark.aurora
+@pytest.mark.parametrize("field_name", ("aurora_arbitration", "ethics_validation"))
+def test_string_false_arbitration_flags_block_promotion(field_name: str) -> None:
+    _, state, state_receipt, _ = _build_canon_state()
+    proposal = {
+        "actor": "Alex Thorne",
+        "action": "apply the mesh patch",
+        field_name: "false",
+        "timing": "next_turn",
+        "type": "event",
+    }
+
+    receipt = next_event_continuity_check(
+        state, proposal, state_receipt, flight_status=CURRENT_FLIGHT
+    )
+
+    assert receipt.verdict == "contradictory"  # nosec B101
+    assert receipt.promotion_gate == "block_promotion"  # nosec B101
 
 
 @pytest.mark.unit

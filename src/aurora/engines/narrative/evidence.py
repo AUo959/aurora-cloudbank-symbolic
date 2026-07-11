@@ -94,6 +94,14 @@ class ContinuityVerdictReceipt:
     gate_results: Mapping[str, Any] = field(default_factory=dict)
     promotion_safety: Mapping[str, Any] = field(default_factory=dict)
 
+    @property
+    def promotion_gate(self) -> str:
+        return str(self.gate_results.get("promotion_gate", ""))
+
+    @property
+    def gate(self) -> str:
+        return self.promotion_gate
+
     def to_dict(self) -> dict[str, Any]:
         return _canonicalize(asdict(self))
 

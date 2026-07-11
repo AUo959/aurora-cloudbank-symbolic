@@ -1,4 +1,5 @@
 from .engine import NarrativeValidationEngine
+from .continuity import build_canon_reconciler_packet, next_event_continuity_check
 from .evidence import (
     ContinuityVerdictReceipt,
     NarrativeEvidenceBundle,
@@ -36,6 +37,8 @@ __all__ = [
     "TaskKind",
     "Verdict",
     "build_evidence_bundle",
+    "build_canon_reconciler_packet",
     "build_state_from_evidence",
+    "next_event_continuity_check",
     "promotion_safety_for_bundle",
 ]

@@ -11,8 +11,11 @@ import os
 import pytest
 
 os.environ.setdefault("CSRF_SECRET_KEY", "test-csrf-secret-app-assembly")
+os.environ.setdefault("AURORA_SECRET_KEY", "test-aurora-secret-key-app-assembly")
 os.environ.setdefault("WS_AUTH_SECRET", "test-ws-secret-app-assembly")
-os.environ.setdefault("JWT_SECRET_KEY", "test-jwt-secret-key-for-app-assembly-tests-12345678")
+os.environ.setdefault(
+    "JWT_SECRET_KEY", "test-jwt-secret-key-for-app-assembly-tests-12345678"
+)
 
 from tests._slowapi_stub import install_slowapi_stub  # noqa: E402
 
@@ -56,24 +59,69 @@ EXPECTED_ROUTE_PREFIXES = {
     "/collab",
 }
 
+EXPECTED_ROUTE_METHODS = {
+    ("/api/aurora/health/l1", "GET"),
+    ("/api/aurora/simulation/state", "GET"),
+}
+
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
+
+def _join_route_path(prefix: str, path: str) -> str:
+    """Join an include-router prefix and child route path."""
+    if not prefix:
+        return path
+    if path == "/":
+        return prefix
+    return f"{prefix.rstrip('/')}/{path.lstrip('/')}"
+
+
+def _iter_routes(routes, prefix: str = ""):
+    """Yield route objects, including routes nested under included routers."""
+    for route in routes:
+        child_prefix = prefix
+        include_context = getattr(route, "include_context", None)
+        if include_context:
+            child_prefix = _join_route_path(
+                prefix, getattr(include_context, "prefix", "")
+            )
+
+        original_router = getattr(route, "original_router", None)
+        if original_router is not None:
+            yield from _iter_routes(original_router.routes, child_prefix)
+        else:
+            yield route, child_prefix
+
+
 def _collect_route_paths(application) -> set:
     """Return the set of all paths registered on the application."""
     paths = set()
-    for route in application.routes:
+    for route, prefix in _iter_routes(application.routes):
         path = getattr(route, "path", None)
         if path:
-            paths.add(path)
+            paths.add(_join_route_path(prefix, path))
     return paths
+
+
+def _collect_route_methods(application) -> set:
+    """Return ``(path, method)`` pairs registered on the application."""
+    route_methods = set()
+    for route, prefix in _iter_routes(application.routes):
+        path = getattr(route, "path", None)
+        methods = getattr(route, "methods", None)
+        if path and methods:
+            full_path = _join_route_path(prefix, path)
+            route_methods.update((full_path, method) for method in methods)
+    return route_methods
 
 
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 def test_route_inventory():
@@ -99,6 +147,17 @@ def test_route_inventory():
     assert not missing, (
         f"The following expected route prefixes are not registered in the app: {missing}.\n"
         f"Registered paths (sample): {sorted(route_paths)[:40]}"
+    )
+
+
+@pytest.mark.unit
+def test_l1_station_route_inventory_guard():
+    """Assert that the L1 station router is wired into the assembled app."""
+    route_methods = _collect_route_methods(app)
+    missing = sorted(EXPECTED_ROUTE_METHODS - route_methods)
+
+    assert not missing, (
+        f"The following L1 station route methods are not registered in the app: {missing}."
     )
 
 

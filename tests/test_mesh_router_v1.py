@@ -113,7 +113,7 @@ def test_broadcast_routes_to_all_channel_agents(tmp_path: Path) -> None:
         while elapsed < deadline:
             await asyncio.sleep(0.1)
             elapsed += 0.1
-            history = runtime.get_channel_history("#crew_lounge")["events"]
+            history = runtime.get_channel_history("#crew_lounge", limit=target_count * 6)["events"]
             replied = {event["agent_id"] for event in history if event["event_type"] == "agent_reply"}
             if len(replied) >= target_count:
                 break

@@ -46,16 +46,27 @@ from pathlib import Path
 from typing import Any, Dict
 
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import (
+    Depends,
+    FastAPI,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.cors import CORSMiddleware
-
+from src.integrations.chatgpt_agent_mode import AURORA_CUSTOM_GPT, auroraCustomGptBridge
 from src.mesh.models import MeshMessageRequest
 from src.mesh.runtime import MeshRuntime
-from src.integrations.chatgpt_agent_mode import AURORA_CUSTOM_GPT, auroraCustomGptBridge
-from src.middleware.fastapi_security import security, verify_csrf_token, sanitize_session_id
+from src.mesh.terminals import PersonnelAttentionTagError
+from src.middleware.fastapi_security import (
+    sanitize_session_id,
+    security,
+    verify_csrf_token,
+)
+from starlette.middleware.cors import CORSMiddleware
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -214,6 +225,29 @@ def create_app(project_root: Path | None = None) -> FastAPI:
 
     # --- end /api/mesh/agents routes ---
 
+    @mesh_app.get("/api/mesh/terminals")
+    async def mesh_list_terminals() -> Dict[str, Any]:
+        """List the full L1 terminal registry, including optional PAT overlays."""
+        terminals = mesh_runtime.list_terminals()
+        return {"terminals": terminals, "total": len(terminals)}
+
+    @mesh_app.get("/api/mesh/terminals/{terminal_id}")
+    async def mesh_get_terminal(terminal_id: str) -> Dict[str, Any]:
+        """Get a terminal profile by id, namespace, owner alias, or anchor node."""
+        try:
+            terminal = mesh_runtime.get_terminal(terminal_id)
+            return {"success": True, **terminal}
+        except PersonnelAttentionTagError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except (KeyError, ValueError) as exc:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Terminal '{terminal_id}' not found",
+            ) from exc
+        except Exception as e:
+            logger.error("mesh_get_terminal failed for %s: %s", str(terminal_id)[:100], str(e)[:100])
+            raise HTTPException(status_code=500, detail="Internal server error") from e
+
     @mesh_app.post("/api/bridge/gpt/connect/{agent_id}")
     async def mesh_bridge_connect(agent_id: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
         activation_phrase = request_data.get("activationPhrase")
@@ -232,6 +266,7 @@ def create_app(project_root: Path | None = None) -> FastAPI:
         }
 
     return mesh_app
+
 
 try:
     # Import Aurora Custom GPT bridge for explicit integration
@@ -252,24 +287,24 @@ except ImportError:
     class MockBridge:
         """
         Mock L2 Bridge for testing and development environments.
-        
+
         Provides stub implementations of L2 Meta-Agent bridge functionality
         when the full integration is not available. All methods return success
         responses with minimal data for compatibility.
-        
+
         Methods:
             activate_agent(agent_id, phrase): Simulate agent activation
             get_constellation_status(): Return empty constellation status
             relay_message(agent_id, target, message, type): Mock message relay
             get_agent_status(agent_id): Return mock agent status
-        
+
         Attributes:
             agents: Empty dict for agent tracking compatibility
-        
+
         Note: This is a development/testing fallback. Production deployments
         should use the full L2 bridge implementation.
         """
-        
+
         def __init__(self):
             """Initialize mock bridge with empty agent registry."""
             self.agents = {}
@@ -286,7 +321,7 @@ except ImportError:
                     "capsules": []
                 }
             }
-        
+
         async def relay_message(self, agent_id, target, message, message_type):
             return {
                 "success": True,
@@ -294,7 +329,7 @@ except ImportError:
                 "target": target,
                 "relayed": True
             }
-        
+
         def get_agent_status(self, agent_id):
             return {
                 "agent_id": agent_id,
@@ -380,6 +415,7 @@ async def dashboard():
         logger.error("Dashboard error: %s", str(str(e))[:100])
         return HTMLResponse(f"<h1>Dashboard Error: {str(e)}</h1>", status_code=500)
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
@@ -392,6 +428,7 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         "aurora_custom_gpt_available": AURORA_CUSTOM_GPT_AVAILABLE,
     }
+
 
 # Aurora Custom GPT Integration Endpoints
 if AURORA_CUSTOM_GPT_AVAILABLE:
@@ -473,6 +510,7 @@ else:
 
 # L2 Meta-Agent Bridge Endpoints
 
+
 @app.post("/api/bridge/gpt/connect/{agent_id}")
 async def connect_custom_gpt(
     agent_id: str,
@@ -508,6 +546,7 @@ async def connect_custom_gpt(
         logger.error("Custom GPT connection failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @app.post("/api/bridge/gpt/message/{agent_id}")
 async def relay_message(
     agent_id: str,
@@ -538,6 +577,7 @@ async def relay_message(
         logger.error("Message relay failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @app.get("/api/bridge/constellation/status")
 async def get_constellation_status():
     """Get status of the entire agent constellation"""
@@ -555,6 +595,7 @@ async def get_constellation_status():
         logger.error("Status retrieval failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @app.get("/api/bridge/gpt/status/{agent_id}")
 async def get_agent_status(agent_id: str):
     """Get detailed status of a specific agent"""
@@ -570,6 +611,7 @@ async def get_agent_status(agent_id: str):
     except Exception as e:
         logger.error("Agent status retrieval failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @app.post("/api/bridge/gpt/heartbeat/{agent_id}")
 async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
@@ -596,6 +638,7 @@ async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = 
         logger.error("Heartbeat update failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @app.post("/api/bridge/gpt/disconnect/{agent_id}")
 async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
     """Disconnect an agent from the constellation with CSRF validation."""
@@ -614,6 +657,7 @@ async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = 
     except Exception as e:
         logger.error("Disconnect failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @app.get("/api/agents")
 async def list_agents():
@@ -638,6 +682,7 @@ async def list_agents():
     except Exception as e:
         logger.error("Agent listing failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @app.get("/api/orion-core")
 async def get_orion_core_info():

@@ -10,11 +10,9 @@ Co-located deficits on heavily-weighted, structurally-coupled dimensions (e.g.
 layer-integrity and autonomy) register more curvature than the same total deficit
 spread thinly across dimensions.
 
-Vendored from the root control-plane reference implementation
-(tools/geometric_ethics_curvature.py) so this hub repo does not need a cross-repo
-import. Keep the two in sync if the model changes; the root copy remains the
-canonical design reference (see catalog/session_state.json pending item
-ga-ethics-hub-integration in the root workspace for context).
+Adapted from the Aurora root control-plane reference implementation so this hub
+repo does not need a cross-repo import. Keep this vendored runtime copy aligned
+with the upstream control-plane model when the design changes.
 
 The model (Cl(5,0))
 --------------------

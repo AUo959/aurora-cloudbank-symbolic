@@ -6,7 +6,7 @@ Covers two things:
   changes the scalar gate's decision (composite_score/resistance_level/
   formation_allowed) whether enabled or not.
 - The GA math itself: pins the same interaction-detection contract validated
-  in the root control-plane reference (tools/geometric_ethics_curvature.py).
+  by the upstream Aurora control-plane reference.
 """
 
 import unittest

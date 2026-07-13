@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import unittest
 from pathlib import Path
 
 from jsonschema import Draft7Validator
@@ -23,12 +24,14 @@ def validator() -> Draft7Validator:
 
 
 def test_current_queue_json_matches_compatibility_schema():
+    checks = unittest.TestCase()
     data = load_json(QUEUE_PATH)
     errors = sorted(validator().iter_errors(data), key=lambda error: list(error.path))
-    assert errors == []
+    checks.assertEqual(errors, [])
 
 
 def test_schema_accepts_future_state_and_bridge_metadata():
+    checks = unittest.TestCase()
     data = {
         "_meta": {
             "version": "test",
@@ -79,10 +82,11 @@ def test_schema_accepts_future_state_and_bridge_metadata():
     }
 
     errors = sorted(validator().iter_errors(data), key=lambda error: list(error.path))
-    assert errors == []
+    checks.assertEqual(errors, [])
 
 
 def test_schema_rejects_item_without_status_or_state():
+    checks = unittest.TestCase()
     data = {
         "_meta": {
             "version": "test",
@@ -100,4 +104,4 @@ def test_schema_rejects_item_without_status_or_state():
     }
 
     errors = sorted(validator().iter_errors(data), key=lambda error: list(error.path))
-    assert errors
+    checks.assertTrue(errors)

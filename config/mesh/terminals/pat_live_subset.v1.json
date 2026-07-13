@@ -1,0 +1,146 @@
+{
+  "overlays": [
+    {
+      "anchor_node": "aurora.rnd.crossdomain.query",
+      "canonical_department": "Cross-Domain R&D",
+      "canonical_role": "Lead - Symbolic Systems Researcher",
+      "owner_agent_id": "amina_velin",
+      "pat_role": "Lead - Symbolic Systems Researcher",
+      "source_name": "Dr. Amina Velin",
+      "source_pointers": [
+        "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip::data/aurora_gumas_pat_live_subset_ssot.v1.json",
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "status": "active",
+      "thread": "Unwritten Maps",
+      "visibility": "Available"
+    },
+    {
+      "anchor_node": "aurora.dev.code.query",
+      "canonical_department": "Core Development",
+      "canonical_role": "Simulation Bindings Specialist",
+      "owner_agent_id": "carmen_rivas",
+      "pat_role": "Simulation Bindings Specialist",
+      "source_name": "Carmen Rivas",
+      "source_pointers": [
+        "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip::data/aurora_gumas_pat_live_subset_ssot.v1.json",
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "status": "active",
+      "thread": null,
+      "visibility": "Available"
+    },
+    {
+      "anchor_node": "aurora.rnd.self.query",
+      "canonical_department": "Aurora Internal R&D",
+      "canonical_role": "Lead - Reflexivity Specialist",
+      "owner_agent_id": "elira_noor",
+      "pat_role": "Lead - Reflexivity Specialist",
+      "source_name": "Dr. Elira Noor",
+      "source_pointers": [
+        "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip::data/aurora_gumas_pat_live_subset_ssot.v1.json",
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "status": "active",
+      "thread": "Echoes of the Source",
+      "visibility": "Available"
+    },
+    {
+      "anchor_node": "aurora.rnd.crossdomain.query",
+      "canonical_department": "Cross-Domain R&D",
+      "canonical_role": "Immersive Experience Theorist",
+      "owner_agent_id": "haneul_park",
+      "pat_role": "Immersive Experience Theorist",
+      "source_name": "Haneul Park",
+      "source_pointers": [
+        "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip::data/aurora_gumas_pat_live_subset_ssot.v1.json",
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "status": "active",
+      "thread": null,
+      "visibility": "Available"
+    },
+    {
+      "anchor_node": "aurora.dev.code.query",
+      "canonical_department": "Core Development",
+      "canonical_role": "Lead - Compiler Engineer",
+      "owner_agent_id": "ira_menon",
+      "pat_role": "Lead - Compiler Engineer",
+      "source_name": "Ira Menon",
+      "source_pointers": [
+        "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip::data/aurora_gumas_pat_live_subset_ssot.v1.json",
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "status": "active",
+      "thread": "Hard Truths, Soft Interfaces",
+      "visibility": "DND"
+    },
+    {
+      "anchor_node": "aurora.rnd.crossdomain.query",
+      "canonical_department": "Cross-Domain R&D",
+      "canonical_role": "Interface Ecologist",
+      "owner_agent_id": "kai_drev",
+      "pat_role": "Interface Ecologist",
+      "source_name": "Kai Drev",
+      "source_pointers": [
+        "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip::data/aurora_gumas_pat_live_subset_ssot.v1.json",
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "status": "active",
+      "thread": null,
+      "visibility": "Available"
+    },
+    {
+      "anchor_node": "aurora.rnd.self.query",
+      "canonical_department": "Aurora Internal R&D",
+      "canonical_role": "Cognitive Drift Mapper",
+      "owner_agent_id": "maren_koss",
+      "pat_role": "Cognitive Drift Mapper",
+      "source_name": "Maren Koss",
+      "source_pointers": [
+        "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip::data/aurora_gumas_pat_live_subset_ssot.v1.json",
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "status": "active",
+      "thread": null,
+      "visibility": "Available"
+    },
+    {
+      "anchor_node": "aurora.dev.code.query",
+      "canonical_department": "Core Development",
+      "canonical_role": "Code/Narrative Bridge Mapper",
+      "owner_agent_id": "tobias_qin",
+      "pat_role": "Code/Narrative Bridge Mapper",
+      "source_name": "Tobias Qin",
+      "source_pointers": [
+        "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip::data/aurora_gumas_pat_live_subset_ssot.v1.json",
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "status": "active",
+      "thread": null,
+      "visibility": "Available"
+    },
+    {
+      "anchor_node": "aurora.rnd.self.query",
+      "canonical_department": "Aurora Internal R&D",
+      "canonical_role": "Layer 2 Isolation Theorist",
+      "owner_agent_id": "vincent_kale",
+      "pat_role": "Layer 2 Isolation Theorist",
+      "source_name": "Vincent Kale",
+      "source_pointers": [
+        "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip::data/aurora_gumas_pat_live_subset_ssot.v1.json",
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "status": "active",
+      "thread": null,
+      "visibility": "Available"
+    }
+  ],
+  "pat_acronym_disambiguation": {
+    "personal_access_terminal": "Runtime/interface terminal profile compatibility layer.",
+    "personnel_attention_tag": "EVA/HUD message tag syntax such as {{@Carmen-Rivas:::message}}; not a terminal route."
+  },
+  "schema_version": "cloudbank-pat-live-subset-overlay-v1",
+  "source_archive": "archives/structured_archives/AURORA_GUMAS_PAT_LIVE_SUBSET_SSOT__v0.1.0__2026-03-14__STRUCTURED_ARCHIVE.zip",
+  "source_posture": "Personal Access Terminal routing overlay only; Personnel Attention Tags remain a separate EVA/HUD syntax."
+}

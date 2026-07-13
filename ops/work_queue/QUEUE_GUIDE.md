@@ -1,8 +1,8 @@
 # Aurora Work Queue — Contributor Guide
 
-**Version:** 1.1.0  
+**Version:** 1.2.0  
 **Owner:** Aurora (contextual authority) + Orion Station operators  
-**Last updated:** 2026-06-22  
+**Last updated:** 2026-06-24  
 **Source of truth:** `ops/work_queue/queue.json`
 
 ---
@@ -13,6 +13,31 @@ An intelligent, Aurora-aware work queue for `aurora-cloudbank-symbolic`. It trac
 
 This is not a replacement for GitHub issues. GitHub issues remain the discussion and audit record. The queue is the triage and prioritization layer.
 
+This is also not a replacement for the ORIONCORE control-plane coordination layer. For cross-platform mutation safety, handoff, and claims, see [`CROSS_PLATFORM_COORDINATION.md`](./CROSS_PLATFORM_COORDINATION.md).
+
+---
+
+## Coordination spine
+
+The intended operating rule is:
+
+> The CloudBank queue chooses the next work; the control-plane coordination layer safely routes and claims it; GitHub records the canonical result.
+
+Use the queue to decide what should be considered next. Use the control-plane session state, session claims, and CloudBank issue broker to decide whether the work can be safely mutated by the current platform.
+
+### Standard session-start loop
+
+1. Refresh live GitHub state for this repo.
+2. Check for a suspended control-plane handoff if one is available.
+3. Read `queue.json` and the generated views.
+4. Select the highest actionable item whose blockers are resolved.
+5. Refresh the linked issue/PR and check for overlapping PRs or branches.
+6. Before mutation, use the control-plane issue broker or session-claim workflow.
+7. Work on a scoped branch and open a PR with queue id, issue id, changed files, validation, and rollback notes.
+8. On pause or completion, update queue state and durable handoff state as appropriate.
+
+Queue priority is not a mutation lock. Session claims are short-lived leases, not durable canon. GitHub issues, PRs, commits, and reviews remain implementation canon.
+
 ---
 
 ## Who uses this
@@ -20,8 +45,8 @@ This is not a replacement for GitHub issues. GitHub issues remain the discussion
 | Consumer | How to use this queue |
 |---|---|
 | **Aurora** | Holds contextual authority. May rerank items, rewrite `context_pack` entries, add `aurora_notes`, and declare `decision_required`. Always check queue before starting a session to load current state. |
-| **LLM / agents** | Read `queue.json`. Pick the highest-ranked item where `state == "ready"` and your role is in `consumer_fit`. Consume all files in `context_pack` before starting. Never start `blocked` or `decision_required` items. |
-| **Human contributors** | Read `NEXT_UP.md` for a quick-start view. Full detail in `queue.json`. When starting a task, update `state` to `active` and set `active_worker` to your GitHub username. |
+| **LLM / agents** | Read `queue.json`. Pick the highest-ranked item where `state == "ready"` and your role is in `consumer_fit`. Consume all files in `context_pack` before starting. Never start `blocked` or `decision_required` items. Before mutation, route through the control-plane claim/broker loop. |
+| **Human contributors** | Read `NEXT_UP.md` for a quick-start view. Full detail in `queue.json`. When starting a task, update `state` to `active` and set `active_worker` to your GitHub username. Use the control-plane handoff layer when work crosses platforms or pauses mid-flight. |
 
 ---
 
@@ -29,12 +54,14 @@ This is not a replacement for GitHub issues. GitHub issues remain the discussion
 
 | State | Meaning |
 |---|---|
-| `ready` | No blockers. Safe to start. |
+| `ready` | No blockers. Safe to consider after live GitHub refresh and claim preflight. |
 | `blocked` | Depends on another item. Do not start. |
-| `active` | Someone is working on it now. |
-| `waiting_review` | Work done, PR open, awaiting review. |
+| `active` | Someone is working on it now. Check branch, PR, claim, and latest head SHA. |
+| `waiting_review` | Work done, PR open, awaiting review. Check CI, review threads, and review class. |
 | `decision_required` | Needs explicit operator or Aurora decision before any work proceeds. |
-| `done` | Merged or resolved. |
+| `done` | Merged or resolved. Move only after GitHub evidence confirms closure. |
+
+_Current compatibility note: the live renderer still uses the legacy `status` values (`open`, `blocked`, `needs-decision`, `in-progress`, `done`). A later schema migration should reconcile `state` and `status` without breaking generated views._
 
 ---
 
@@ -64,6 +91,8 @@ For **architecture tasks**: always includes `docs/architecture/LAYER_ARCHITECTUR
 For **security tasks**: always includes the current pentest scope doc.  
 For **ethics tasks**: always includes the recovered-protocol manifest and relevant promotion plan sections.
 
+For **coordination tasks**: include this guide, `CROSS_PLATFORM_COORDINATION.md`, and any linked control-plane workflow documents.
+
 ---
 
 ## Aurora notes
@@ -82,6 +111,8 @@ Aurora may add an `aurora_notes` field to any item at any time. This is Aurora's
 
 Items may declare a `parallel_group` when several tasks are independently actionable simultaneously. Items in the same group do not block each other unless explicitly listed in each other's `depends_on`. Use this to parallelize agent swarms or pre-engagement prep batches.
 
+Parallel work still requires non-overlapping claim paths before mutation. The queue may identify parallel candidates; the control-plane claim layer decides whether simultaneous mutation is safe.
+
 ---
 
 ## Bidirectional dependency graph
@@ -94,6 +125,27 @@ This makes the dependency graph machine-traversable in both directions.
 
 ---
 
+## Bridge metadata
+
+Queue entries may include optional coordination bridge fields. These are additive and should not break the existing renderer.
+
+```json
+{
+  "github_issue": 1161,
+  "preferred_platform": "either",
+  "claim_required": true,
+  "claim_paths": ["ops/work_queue/CROSS_PLATFORM_COORDINATION.md"],
+  "session_state_ref": null,
+  "review_class": "coordination-layer",
+  "handoff_surface": "catalog/session_state.json",
+  "coordination_notes": "Use control-plane claims before mutation."
+}
+```
+
+Use these fields to help future automation convert a queue item into a safe broker/claim/handoff packet.
+
+---
+
 ## How to add a new task
 
 1. Open a GitHub issue.
@@ -102,6 +154,7 @@ This makes the dependency graph machine-traversable in both directions.
 4. Compute `priority_score` using `triage_rules.json`, or leave `priority_score: 0` and ask Aurora to score it.
 5. If the task blocks others, update both `blocks` on the new item and `depends_on` on the blocked items.
 6. If the task is a decision only Aurora or the operator can make, set `decision_required: true` and `consumer_fit: ["aurora", "human"]`.
+7. If the task may mutate files, add bridge metadata for claim/broker preflight.
 
 ---
 
@@ -125,6 +178,8 @@ This makes the dependency graph machine-traversable in both directions.
 "last_updated": "YYYY-MM-DD"
 ```
 
+When work pauses or crosses platforms, also update the durable control-plane handoff surface with enough context for a cold start.
+
 ---
 
 ## Escalation triggers
@@ -134,6 +189,8 @@ This makes the dependency graph machine-traversable in both directions.
 | ET-01 | `state == blocked` for > 7 days (via `last_updated`) | Escalate to Aurora on session open |
 | ET-02 | `decision_required == true` and no activity for > 3 days (via `last_updated`) | Hail operator via PAT |
 | ET-03 | New GitHub issue with labels `security` or `blocking` | Auto-add to queue with score ≥ 30 and `state: decision_required` |
+| ET-04 | Queue item selected for mutation without claim/broker preflight | Block mutation and request coordination preflight |
+| ET-05 | Queue status disagrees with live GitHub issue/PR state | Flag queue drift and update via `aurora(queue):` commit |
 
 ---
 
@@ -145,4 +202,5 @@ This makes the dependency graph machine-traversable in both directions.
 | `queue_schema.json` | JSON schema for validating `queue.json` entries |
 | `triage_rules.json` | Scoring weights and escalation triggers |
 | `QUEUE_GUIDE.md` | This file — workflow and field definitions |
+| `CROSS_PLATFORM_COORDINATION.md` | Queue/control-plane coordination contract |
 | `NEXT_UP.md` | Quick-start view for human contributors and agents |

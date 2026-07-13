@@ -1,7 +1,7 @@
 # Runtime Topology and L3 Communications Authority
 
 **Status:** Current repo evidence review
-**Last reviewed:** 2026-05-26
+**Last reviewed:** 2026-07-13
 **Scope:** CloudBank runtime and operator entrypoints in this repository
 
 This document resolves the active runtime topology and the L3 communications
@@ -21,7 +21,7 @@ Runtime entrypoint classes:
 | Class | Runtime surface | Status | Evidence |
 | --- | --- | --- | --- |
 | Primary application | `api/aurora_api.py` | active in repo | Defines `app = FastAPI(...)` and includes module routers. |
-| Main module routers | `/memory`, `/data`, `/ledger`, `/simulate`, `/rd`, `/hr_system`, `/collab`, `/subroutines`, `/api/coordination`, `/api/fleet`, `/relay`, `/synergy`, `/api/synergy`, `/sentinel`, `/monitoring`, `/gumas`, `/api/auth`, `/r2-telemetry`, `/api/l2-agents`, `/api/drift`, `/playground` | active or active-optional in repo | Included by `api/aurora_api.py`; optional modules use guarded imports. |
+| Main module routers | `/memory`, `/data`, `/ledger`, `/simulate`, `/rd`, `/hr_system`, `/collab`, `/subroutines`, `/api/coordination`, `/api/fleet`, `/relay`, `/synergy`, `/api/synergy`, `/sentinel`, `/monitoring`, `/gumas`, `/api/auth`, `/r2-telemetry`, `/api/l2-agents`, `/api/drift`, `/qgia`, `/playground` | active or active-optional in repo | Included by `api/aurora_api.py`; optional modules use guarded imports. |
 | Mesh runtime V1 | `src/servers/l2_integration_server.py` with `src/mesh/runtime.py` | active standalone | Provides implemented mesh routes, bridge compatibility routes, `/ws/mesh`, `/chamber`, and root dashboard routes; covered by `tests/test_mesh_router_v1.py`. |
 | JavaScript mesh router | `src/api/mesh_api.js` | inactive for production mount, test-mounted only | Defines an Express router and is mounted in `tests/node/mesh_api_activation.test.js`; no repo production server mount was found in the current review. |
 | Enhanced API bridge | `src/bridge/enhanced_api_bridge.js` | superseded compatibility bridge | Defines Custom GPT bridge handlers and is covered by node tests, but current canonical mesh endpoints are provided by the Python mesh runtime surface. |
@@ -54,6 +54,7 @@ dependency degrades that module rather than disabling the full app.
 | R2 telemetry | `/r2-telemetry` | `api/r2_telemetry_routes.py` | active |
 | L2 meta-agent bridge | `/api/l2-agents` | `src/api/l2_meta_agent_api.py` | active |
 | Drift metrics | `/api/drift` | `src/observability/drift_metrics_api.py` | active |
+| QGIA forecast engine | `/qgia` | `modules/qgia/api.py` | active-optional |
 | Playground | `/playground` | `src/playground/api.py` | active |
 
 The API governance registry for these surfaces lives at
@@ -68,22 +69,60 @@ The implemented Python mesh runtime V1 surface currently confirmed by
 - `POST /api/mesh/messages`
 - `GET /api/mesh/channels/{id}/history`
 - `GET /api/mesh/events?after=<cursor>`
+- `GET /api/mesh/agents`
+- `GET /api/mesh/agents/{agent_id}`
+- `POST /api/mesh/agents/{agent_id}/activate`
 - `POST /api/bridge/gpt/connect/{agent_id}`
 - `GET /api/bridge/constellation/status`
 - `GET /ws/mesh` by native WebSocket
 - `GET /chamber`
 - `GET /`
 
-`skills/mesh-router/references/runtime-contract.md` lists additional
-`/api/mesh/agents` routes. Those routes are an expected contract surface, but
-they are not verified as implemented in `create_app()` during this review and
-are therefore tracked as path drift rather than current runtime authority.
+The `/api/mesh/agents` routes are canonical runtime authority. They are
+implemented by `create_app()` in `src/servers/l2_integration_server.py`, were
+landed in PR #1011 for issue #764, and are covered by
+`tests/test_mesh_router_v1.py`. This agrees with the resolved entry in
+`RUNTIME_PATH_DRIFT_LEDGER.md`.
 
 `src/api/mesh_api.js` still has value as a legacy Express router and node test
 target, but it is not the production-mounted authority in the current repo
 evidence. `src/bridge/enhanced_api_bridge.js` remains a compatibility bridge
 for Custom GPT style handlers, but the route authority has moved to the mesh
 runtime and L2 integration server.
+
+## Peer L1 Node Topology and QGIA Runtime Boundary
+
+`QGIA_L1_NODE_REGISTRATION.md` defines a two-node L1 peer network. This is a
+network-authority statement, not evidence that every documented exchange step
+has a dedicated HTTP route.
+
+| Node | Designation | Current repo evidence | Boundary |
+| --- | --- | --- | --- |
+| Orion Station | L1-A | Primary CloudBank application plus L2 simulation and relay surfaces | Owns its operations and simulation tasking. |
+| QGIA | L1-B | `modules/qgia/` forecast engine, `/qgia` FastAPI router, and committed agent/trust artifacts | Peer analytical node; it does not gain authority over Orion or autonomous L2 tasking. |
+
+The current `/qgia` surface is mounted by `api/aurora_api.py` through a guarded
+import. It exposes forecast-engine health, forecast creation and retrieval,
+population/network summaries, and example scenarios. It is the current QGIA
+forecast API; it is **not** evidence of a generic inter-node exchange router.
+
+The six-step `INTER_NODE_EXCHANGE_v1.0` flow documented in
+`QGIA_L1_NODE_REGISTRATION.md` does not have a separately verified transport
+surface that enforces the full consent, provenance, ethics, and symmetric-
+sovereignty protocol. Do not relabel `/qgia` as that transport without a
+reviewed adapter and inventory update. Issue #1141 remains the tracker for the
+exchange-router disposition and related inventory work.
+
+`agents/qgia_agent_registry_full.json` is now committed, so the earlier
+"pending commit" statement is stale. Its metadata declares `total_agents: 551`,
+but the committed `agents` array currently materializes 10 records. Treat the
+551-agent population as a declared/generated model, not a fully verified
+materialized registry, until #1141 reconciles that evidence.
+
+QGIA-to-L2 flow remains mediated through L1 as defined by
+`QGIA_SIM_BRIDGE.md`: QGIA produces analytical signals, L1 crew and relay
+agents interpret and translate them, and only then may L2 simulations be
+tasked. No current route authorizes QGIA to self-task GUMAS or mutate L2 state.
 
 ## L3 Authority Map
 

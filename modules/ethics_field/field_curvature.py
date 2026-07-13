@@ -28,6 +28,7 @@ from .dimension_evaluators.layer_integrity import LayerIntegrityEvaluator
 from .dimension_evaluators.picard_delta_3 import PicardDelta3Evaluator
 from .dimension_evaluators.thermax_continuity import ThermaxContinuityEvaluator
 from .dimension_evaluators.transparency import TransparencyEvaluator
+from .geometric_curvature import DIMENSION_WEIGHTS, calculate_ga_curvature
 
 
 class FieldCurvature:
@@ -39,22 +40,26 @@ class FieldCurvature:
     curvature (difficult/impossible formation).
     """
 
-    def __init__(self):
-        """Initialize all dimension evaluators."""
+    def __init__(self, enable_ga_composite: bool = False):
+        """Initialize all dimension evaluators.
+
+        Args:
+            enable_ga_composite: When True, also compute a geometric-algebra
+                alignment score (modules/ethics_field/geometric_curvature.py)
+                and attach it as "ga_composite" in calculate_curvature's
+                result. Additive only — composite_score, resistance_level,
+                and formation_allowed are unaffected; the scalar gate remains
+                authoritative. Defaults to False (no behavior change).
+        """
         self.picard_evaluator = PicardDelta3Evaluator(threshold=0.70)
         self.thermax_evaluator = ThermaxContinuityEvaluator(threshold=0.80)
         self.layer_evaluator = LayerIntegrityEvaluator(threshold=0.95)
         self.welfare_evaluator = CollectiveWelfareEvaluator(threshold=0.60)
         self.transparency_evaluator = TransparencyEvaluator(threshold=0.75)
+        self.enable_ga_composite = enable_ga_composite
 
-        # Dimension weights (must sum to 1.0)
-        self.weights = {
-            "picard_delta_3": 0.25,
-            "thermax_continuity": 0.25,
-            "layer_integrity": 0.30,  # Highest weight - reality boundaries critical
-            "collective_welfare": 0.10,
-            "transparency": 0.10
-        }
+        # Per-instance copy of the canonical shared weights (must sum to 1.0).
+        self.weights = dict(DIMENSION_WEIGHTS)
 
     def calculate_curvature(self, synapse_context: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -99,12 +104,9 @@ class FieldCurvature:
         )
 
         # Determine if formation allowed
-        formation_allowed = (
-            resistance_level != "INFINITE" and
-            len(critical_violations) == 0
-        )
+        formation_allowed = resistance_level != "INFINITE" and len(critical_violations) == 0
 
-        return {
+        result = {
             "dimension_scores": dimension_scores,
             "composite_score": composite_score,
             "resistance_level": resistance_level,
@@ -115,6 +117,12 @@ class FieldCurvature:
                 for dim, score in dimension_scores.items()
             }
         }
+
+        if self.enable_ga_composite:
+            # Additive only: informational, never changes the decision above.
+            result["ga_composite"] = calculate_ga_curvature(dimension_scores).to_dict()
+
+        return result
 
     def _calculate_resistance_level(
         self,

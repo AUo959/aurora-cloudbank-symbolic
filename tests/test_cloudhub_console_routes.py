@@ -4,12 +4,13 @@ import os
 import unittest
 
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 os.environ.setdefault("CSRF_SECRET_KEY", "test-csrf-secret-for-cloudhub-console")
 os.environ.setdefault("WS_AUTH_SECRET", "test-ws-secret-for-cloudhub-console")
 
-from api.aurora_gui_cloudhub_fastapi import app  # noqa: E402
+from api.aurora_gui_cloudhub_fastapi import app, html_file_response  # noqa: E402
 
 pytestmark = pytest.mark.unit
 
@@ -62,3 +63,24 @@ def test_legacy_vsa_route_is_retired() -> None:
     checks.assertEqual(response.status_code, 410)
     checks.assertIn("Quantum VSA Playground Retired", response.text)
     checks.assertIn("/simulation-console", response.text)
+
+
+def test_missing_static_asset_returns_404(tmp_path) -> None:
+    checks = unittest.TestCase()
+
+    with checks.assertRaises(HTTPException) as exc_info:
+        html_file_response(tmp_path / "missing.html")
+
+    checks.assertEqual(exc_info.exception.status_code, 404)
+
+
+def test_security_session_is_not_cacheable() -> None:
+    checks = unittest.TestCase()
+    response = _client().get("/api/security/session")
+
+    checks.assertEqual(response.status_code, 200)
+    checks.assertEqual(response.headers["cache-control"], "no-store")
+    checks.assertEqual(
+        set(response.json()),
+        {"session_id", "csrf_token", "ws_token"},
+    )

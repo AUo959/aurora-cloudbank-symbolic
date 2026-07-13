@@ -82,6 +82,8 @@ app = FastAPI(title="Aurora Simulation Console")
 
 
 def html_file_response(path: Path) -> FileResponse:
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Static asset not found")
     return FileResponse(path, headers={"Cache-Control": "no-store"})
 
 
@@ -333,11 +335,14 @@ async def legacy_upload():
 async def browser_security_session():
     """Issue short-lived same-origin tokens for the static GUI."""
     session_id = uuid.uuid4().hex
-    return {
-        "session_id": session_id,
-        "csrf_token": generate_csrf_token(session_id),
-        "ws_token": generate_ws_token(session_id),
-    }
+    return JSONResponse(
+        {
+            "session_id": session_id,
+            "csrf_token": generate_csrf_token(session_id),
+            "ws_token": generate_ws_token(session_id),
+        },
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @app.get("/api/operator/snapshot", summary="Read Aurora operator-console snapshot")
@@ -365,11 +370,12 @@ async def operator_snapshot():
             "error": exc.msg,
         }
     except OSError as exc:
+        logger.warning("Operator snapshot is unreadable: %s", exc)
         return {
             "available": False,
             "status": "unreadable",
             "snapshot_path": str(snapshot_path),
-            "error": str(exc),
+            "error": "snapshot_unreadable",
         }
 
     if not isinstance(payload, dict):

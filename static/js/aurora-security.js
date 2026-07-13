@@ -121,9 +121,10 @@ class AuroraSecurityUtils {
     ]);
     const allowedAttributes = new Set(['style', 'class']);
 
-    // Create a temporary div to parse HTML
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
+    // DOMParser keeps untrusted markup detached and does not initiate subresource
+    // loads while the allowlist pass removes unsafe elements and attributes.
+    const parsedDocument = new DOMParser().parseFromString(html, 'text/html');
+    const tempDiv = parsedDocument.body;
 
     const sanitizeChildren = parent => {
       for (const child of Array.from(parent.children)) {

@@ -1,6 +1,8 @@
 # R&D Productization Pipeline API Reference
 
-**Version:** 1.0.0 (HR Module v3.0 "Helios")  
+**Version:** 1.1.0
+**HR Runtime:** 3.0.0 "Helios" (confirmed by `modules/hr/__init__.py`)
+**Last Reviewed:** 2026-07-13
 **Base Path:** `/rd`  
 **Ethics Framework:** [Connection as Universal Constant](../../modules/hr/ETHICS_FRAMEWORK_CONNECTION_AS_CONSTANT.md)
 
@@ -21,6 +23,20 @@ The R&D Productization Pipeline API provides endpoints for managing research-to-
 - **Rate Limits:**
   - GET endpoints: 60-120 requests/minute
   - POST endpoints: 30-45 requests/minute
+
+### Token Budget and Compute Accounting
+
+The `/rd` coherence and report endpoints currently execute local VSA and Python
+calculations. They do not call the AI-core token-budget service, so requests
+such as `/rd/coherence/full` and `/rd/report` are not represented in
+`/api/usage` totals and are not preflighted against those limits.
+
+`GET /api/usage/me` reports authenticated, instrumented model-token usage for
+the current user. `GET /api/usage/global` exposes global token totals and
+configured limits to administrators. These routes are observability surfaces,
+not CPU or VSA capacity controls for the R&D pipeline. If a separate workflow
+invokes model inference using R&D output, only calls recorded by the AI-core
+instrumentation should be expected to appear there.
 
 ---
 
@@ -49,12 +65,19 @@ Before using coherence metrics, review the [Ethics Framework](../../modules/hr/E
 
 ### Data Dignity Principles
 
-**Consent Architecture (to be implemented in v3.1):**
+**Consent Architecture (planned; not implemented):**
+
+> **Status:** The tiered consent contract has no active HTTP surface or durable
+> grant/revocation store. Design and implementation are tracked in issue
+> [#1200](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1200).
+> The tiers below are policy requirements for that future implementation, not
+> claims enforced by the current `/rd` router.
+
 - **Tier 1 (Default):** Aggregated, anonymized data
 - **Tier 2 (Consent Required):** Individual profiles visible to self and HR
 - **Tier 3 (Explicit Request):** Data shared with project leads
 
-**Withdrawal Rights:**
+**Required Withdrawal Rights for the planned implementation:**
 - Crew members can opt out of coherence tracking without penalty
 - Systems function gracefully with partial data
 - Withdrawal does not affect job security or advancement
@@ -462,6 +485,10 @@ for pair in mediation["pairs"]:
 
 ## Version History
 
+- **v1.1.0** (2026-07-13): Runtime and governance reconciliation
+  - Confirmed HR runtime version 3.0.0 "Helios" from the owning module
+  - Marked tiered consent management as planned and linked issue #1200
+  - Clarified that local R&D calculations are not metered by `/api/usage`
 - **v1.0.0** (2025-11-12): Initial release with Ethics Framework integration
   - Inquiry-first mandate implemented
   - Contextual interpretation added to all coherence endpoints

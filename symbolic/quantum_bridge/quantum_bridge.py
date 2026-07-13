@@ -106,7 +106,7 @@ class QuantumBridge:
         self._last_sample_at = sample["timestamp"]
         return sample
 
-    def validate_causal_anchor(self, sample: Dict[str, Any]) -> bool:
+    def validate_causal_anchor(self, sample: Dict[str, Any]) -> None:
         """Enforce causal consistency before a sample may become threads.
 
         The config's ``causal_anchor`` block declares ``paradox_prevention:
@@ -116,19 +116,21 @@ class QuantumBridge:
         (monotonic time) and, when present, its ``causal_sequence`` does
         not go backwards relative to the last accepted sample.
 
+        Returns nothing — success is "did not raise". Callers should not
+        branch on a return value here.
+
         Raises:
             CausalAnchorViolation: if the sample would break causal order.
         """
         causal_cfg = self.config["reality_anchors"]["causal_anchor"]
         if causal_cfg.get("validation") != "strict":
-            return True
+            return
 
         if self._last_sample_at is not None and sample["timestamp"] < self._last_sample_at:
             raise CausalAnchorViolation(
                 f"sample timestamp {sample['timestamp']} precedes last accepted "
                 f"sample {self._last_sample_at} — paradox_prevention violation"
             )
-        return True
 
     def encode_to_mesh_threads(self, sample: Dict[str, Any]) -> List[ThreadDescriptor]:
         """Convert a validated reality sample into CONSTELLINK thread descriptors.

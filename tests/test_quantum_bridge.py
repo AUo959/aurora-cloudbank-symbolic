@@ -39,8 +39,8 @@ class TestSampleReality:
     def test_injected_provider_signals_flow_through(self):
         bridge = QuantumBridge(reality_provider=lambda: {"coherence": 0.9, "field_strength": 0.5})
         sample = bridge.sample_reality()
-        assert sample["signals"]["field_strength"] == 0.5
-        assert sample["coherence"] == 0.9
+        assert sample["signals"]["field_strength"] == pytest.approx(0.5)
+        assert sample["coherence"] == pytest.approx(0.9)
 
 
 @pytest.mark.unit
@@ -49,7 +49,7 @@ class TestValidateCausalAnchor:
     def test_first_sample_always_valid(self):
         bridge = QuantumBridge()
         sample = bridge.sample_reality()
-        assert bridge.validate_causal_anchor(sample) is True
+        bridge.validate_causal_anchor(sample)  # must not raise
 
     def test_out_of_order_sample_raises(self):
         bridge = QuantumBridge()
@@ -78,7 +78,7 @@ class TestEncodeToMeshThreads:
         thread_by_tag = {t.tags[-1]: t for t in threads}
         assert set(thread_by_tag) == {"field_strength", "spin_state"}
         assert all(t.source == "ORION_QUANTUM_BRIDGE_001" for t in threads)
-        assert all(t.anchor_alignment == 0.9 for t in threads)
+        assert all(t.anchor_alignment == pytest.approx(0.9) for t in threads)
         assert all(0.0 <= t.entropy_hint <= 1.0 for t in threads)
 
     def test_causally_invalid_sample_blocks_encoding(self):
@@ -108,7 +108,7 @@ class TestCheckDrift:
         assert event is not None
         assert event["event_type"] == "aurora.drift.detected"
         assert event["source_node"] == "ORION-QUANTUM-BRIDGE"
-        assert event["payload"]["coherence"] == 0.5
+        assert event["payload"]["coherence"] == pytest.approx(0.5)
         assert "timestamp" in event
         assert event["provenance"]["l3_compliance"] is True
 
@@ -128,4 +128,4 @@ class TestGetBridgeHealth:
         bridge.sample_reality()
         health = bridge.get_bridge_health()
         assert health.status == "degraded"
-        assert health.last_coherence == 0.5
+        assert health.last_coherence == pytest.approx(0.5)

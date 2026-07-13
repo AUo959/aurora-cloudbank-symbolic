@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "last_reviewed": "2026-05-26",
+  "last_reviewed": "2026-07-13",
   "governance_decision": "primary-fastapi-with-declared-standalone-services",
   "status_values": [
     "active",
@@ -83,6 +83,21 @@
       "notes": "Current prefix is /simulate; older /quantum claims are legacy unless reintroduced."
     },
     {
+      "id": "qgia_forecast",
+      "owner": "qgia-forecast",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/qgia/api.py",
+      "mount_path": "/qgia",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /qgia.",
+        "api/aurora_api.py includes the router through a guarded import.",
+        "tests/test_qgia_api.py validates forecast, population, trust-network, and health routes."
+      ],
+      "notes": "Forecast-engine API backed by process-local engine and result state. This is not the generic L1 inter-node exchange transport described in QGIA_L1_NODE_REGISTRATION.md; that transport remains tracked in issue #1141."
+    },
+    {
       "id": "rd_pipeline",
       "owner": "hr-rd-productization",
       "runtime": "fastapi-router",
@@ -94,7 +109,7 @@
         "Router prefix is /rd.",
         "api/aurora_api.py includes rd_router when RD_PIPELINE_AVAILABLE is true."
       ],
-      "notes": "Distinct from HR staffing and character generation."
+      "notes": "Distinct from HR staffing and character generation. The tiered Consent Architecture described in RD_API_REFERENCE.md is not implemented as an HTTP surface; its design and implementation are tracked in issue #1200."
     },
     {
       "id": "hr_system",
@@ -339,14 +354,29 @@
       "owner": "mesh-runtime",
       "runtime": "fastapi-standalone",
       "entrypoint": "src/servers/l2_integration_server.py",
-      "mount_path": "/api/mesh, /api/bridge, /ws/mesh",
+      "mount_path": "/api/mesh, /api/mesh/agents, /api/mesh/agents/{agent_id}, /api/mesh/agents/{agent_id}/activate, /api/bridge, /ws/mesh",
       "service_class": "standalone-service",
       "status": "active-standalone",
       "status_evidence": [
         "create_app() defines /api/mesh/status, /api/mesh/messages, /api/mesh/channels/{channel_id}/history, /api/mesh/events, bridge compatibility routes, and /ws/mesh.",
-        "tests/test_mesh_router_v1.py validates the API and UI contract."
+        "create_app() defines GET /api/mesh/agents, GET /api/mesh/agents/{agent_id}, and POST /api/mesh/agents/{agent_id}/activate.",
+        "tests/test_mesh_router_v1.py validates the mesh-agent API and UI contract."
       ],
       "notes": "Canonical Mesh Runtime V1 surface."
+    },
+    {
+      "id": "pat_terminal_overlay",
+      "owner": "mesh-runtime",
+      "runtime": "fastapi-standalone-route-group",
+      "entrypoint": "src/servers/l2_integration_server.py",
+      "mount_path": "/api/mesh/terminals, /api/mesh/terminals/{terminal_id}",
+      "service_class": "standalone-service-route-group",
+      "status": "active-standalone",
+      "status_evidence": [
+        "create_app() defines read-only terminal list and terminal lookup routes.",
+        "tests/test_mesh_runtime_api_surface.py validates PAT overlay lookup and Personal Access Terminal versus Personnel Attention Tag disambiguation."
+      ],
+      "notes": "Read-only Personal Access Terminal compatibility overlay. It does not implement availability state, audio hailing, group chat, emergency cutoff, or memory preview; those Space configuration capabilities are not active API claims."
     },
     {
       "id": "api_bridge_server",

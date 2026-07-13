@@ -3,7 +3,7 @@
 **Status:** Planning artifact — documentation only
 **Authority:** Operator + Aurora joint decision required before any mapping is activated
 **Ref:** Issue [#1151](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1151) | PROTOCOL_PROMOTION_PLAN.md Section 7–8
-**Updated:** 2026-06-24
+**Updated:** 2026-07-13
 
 ---
 
@@ -17,7 +17,7 @@ The authoritative gate list governing when wiring may begin is in `recovered_pro
 
 ## Runtime Surfaces
 
-Four surfaces exist in the Orion Station ethics architecture that recovered protocols may eventually connect to:
+Five direct surfaces exist in the Orion Station ethics architecture that recovered protocols may eventually connect to. CASK is an adjacent cultural-ethics system with an existing `EthicsEngine` integration; its overlap is addressed separately below rather than treating it as another recovered-protocol authority.
 
 ### `EthicsEngine`
 
@@ -55,19 +55,32 @@ Four surfaces exist in the Orion Station ethics architecture that recovered prot
 | Layer | L3 framework layer (Axiomera, Caelion, Sentari, Velatrix) |
 | Pre-conditions for wiring | Same as EthicsEngine; L3 framework authority must be confirmed prior to wiring |
 
+### `modules/symbolic_core/model_validation.py` (`model_validation`)
+
+| Property | Value |
+| --- | --- |
+| Current status | **Not wired to any recovered protocol** |
+| Function | Model-agnostic request/response validation; returns structured `ModelValidationVerdict` records with receipt metadata and delegates ethics decisions to the shared `ethics_gate` |
+| Layer | Model adapter boundary at the L1/L2 interface |
+| Pre-conditions for wiring | Same promotion gates as other consumers; any protocol fields must remain receipt metadata until a separately approved adapter defines and tests their semantics |
+
+`model_validation` is a **read-only receipt consumer** for recovered-protocol lanes. It may record a protocol identifier, decision-record reference, custody status, or appeal/containment reference in `ModelValidationVerdict.receipt`; it must not reinterpret that metadata as an independent allow/block decision. Existing `validate_ethics()` and `validate_security()` behavior remains authoritative for model-facing enforcement.
+
 ---
 
 ## Protocol-to-Surface Mapping Table
 
 This table describes **intended eventual mapping only**. All entries are conditional on all promotion gates being met. "Eligible" means the protocol's design is compatible with that surface — it does not mean wiring is authorized.
 
-| Protocol | EthicsEngine | ethics_gate | compliance_monitor | geometric_ethics | Notes |
-| --- | --- | --- | --- | --- | --- |
-| **Sherlock** | Eligible (evidence input) | Not eligible (investigation ≠ enforcement) | Eligible (traceability feed) | Eligible (doctrine verification) | Sherlock produces inputs and reports; it does not enforce. Must never be wired to ethics_gate directly. |
-| **Watson** | Eligible (context input) | Not eligible (briefing ≠ gate decision) | Eligible (context correlation) | Not eligible | Watson moderates and correlates; it does not adjudicate. ethics_gate wiring explicitly excluded. |
-| **Moriarty** | Eligible (anomaly signal) | **Conditional** (quarantine recommendation only, not auto-enforce) | Eligible (anomaly detection feed) | Eligible (anchor validation) | **HARD BLOCK**: containment boundaries must be tested before any ethics_gate wiring is considered. Quarantine must remain a recommendation, not an automatic gate action, until tests pass. |
-| **Tribunal** | Not eligible (adjudication is post-hoc, not pre-action) | Not eligible | Eligible (ruling record feed) | Eligible (dispute record) | Tribunal reviews decisions already made. It must not sit inline on the action dispatch path. |
-| **SHADOWFAX** | **Blocked** | **Blocked** | **Blocked** | **Blocked** | Standalone bundle not located — HARD BLOCK on all surface mapping until bundle is found and hash-verified. |
+Surface authority remains distinct: `EthicsEngine` evaluates rules and produces violations; `ethics_gate` is the only inline enforcement target in this design; `compliance_monitor` observes and records; `geometric_ethics` supplies relational scoring/warnings; and `model_validation` consumes receipt metadata while delegating ethics enforcement to the existing shared gate.
+
+| Protocol | EthicsEngine | ethics_gate | compliance_monitor | geometric_ethics | model_validation | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Sherlock** | Eligible (evidence input) | Not eligible (investigation ≠ enforcement) | Eligible (traceability feed) | Eligible (doctrine verification) | Eligible (evidence-receipt metadata only) | Sherlock produces inputs and reports; it does not enforce. Must never be wired to ethics_gate directly. |
+| **Watson** | Eligible (context input) | Not eligible (briefing ≠ gate decision) | Eligible (context correlation) | Not eligible | Eligible (briefing/context receipt metadata only) | Watson moderates and correlates; it does not adjudicate. ethics_gate wiring explicitly excluded. |
+| **Moriarty** | Eligible (anomaly signal) | **Conditional** (quarantine recommendation only, not auto-enforce) | Eligible (anomaly detection feed) | Eligible (anchor validation) | Eligible (containment/appeal receipt metadata only) | **HARD BLOCK**: containment boundaries must be tested before any ethics_gate wiring is considered. Quarantine must remain a recommendation, not an automatic gate action, until tests pass. |
+| **Tribunal** | Not eligible (adjudication is post-hoc, not pre-action) | Not eligible | Eligible (ruling record feed) | Eligible (dispute record) | Eligible (ruling/appeal receipt reference only) | Tribunal reviews decisions already made. It must not sit inline on the action dispatch path. |
+| **SHADOWFAX** | **Blocked** | **Blocked** | **Blocked** | **Blocked** | **Blocked** | Standalone bundle not located — HARD BLOCK on all surface mapping until bundle is found and hash-verified. |
 
 ---
 
@@ -103,6 +116,23 @@ Every protocol must pass these gates **in order** before any surface mapping is 
 
 ## Special Cases
 
+### CASK — Existing Contributor, Future Consumer Only
+
+CASK Issue [#780](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/780), completed by merged PR [#941](https://github.com/AUo959/aurora-cloudbank-symbolic/pull/941), already established two distinct surfaces:
+
+- a read-only `/api/cask` design/specification API and cultural-sensitivity scorer; and
+- `RecursiveEthicsValidator`, which registers CASK-specific cultural-safety rules into an `EthicsEngine` instance and returns its own validation verdict.
+
+Recovered-protocol mapping must not duplicate or replace that work. CASK remains an independent cultural-ethics contributor, not a custody authority, investigation protocol, containment adjudicator, or appeal body. After the applicable promotion gates pass, a separately approved adapter may let CASK consume normalized recovered-protocol decision receipts as cultural context. It must not:
+
+- register duplicate recovered-protocol rules already owned by an approved `EthicsEngine` mapping;
+- convert Sherlock or Watson reports into enforcement decisions;
+- execute Moriarty containment recommendations or adjudicate their appeals;
+- replace Tribunal ruling/appeal records; or
+- treat protocol identifiers in model-validation receipts as independent allow/block authority.
+
+Any CASK consumer adapter requires its own implementation issue, explicit input schema, and tests proving that existing CASK and recovered-protocol verdict authorities remain separate.
+
 ### Moriarty — Containment Boundary Tests Required
 
 Moriarty's `ethics_gate` eligibility is conditional on containment boundary tests passing. The risk without those tests: a quarantine recommendation wired directly to `ethics_gate` could act as automatic enforcement, bypassing the appeal path that the manifest requires. Until #1152 tests are designed and passing:
@@ -127,6 +157,8 @@ This document does **not**:
 
 - Authorize wiring any protocol to any runtime surface
 - Define implementation code for EthicsEngine, ethics_gate, compliance_monitor, or geometric_ethics
+- Change `model_validation` behavior or add recovered-protocol enforcement to model adapters
+- Modify or duplicate the CASK runtime delivered by #780 / PR #941
 - Replace the wiring gate in `recovered_protocol_manifest.json` — that gate remains authoritative
 - Claim custody hashes are verified
 - Make promotion decisions on behalf of the operator

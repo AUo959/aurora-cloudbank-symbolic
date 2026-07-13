@@ -74,7 +74,7 @@ def _not_found_status(simulation_id: str) -> SimulationStatus:
     dependencies=MUTATION_DEPENDENCIES,
 )
 @limiter.limit("10/minute")  # Quantum scenario run - expensive, strict rate limit per IP
-async def run_simulation(request: ScenarioRequest, http_request: Request) -> SimulationResult:
+async def run_simulation(scenario_request: ScenarioRequest, request: Request) -> SimulationResult:
     """
     Run quantum-classical hybrid simulation scenario.
 
@@ -82,7 +82,8 @@ async def run_simulation(request: ScenarioRequest, http_request: Request) -> Sim
     simulations, use the progress WebSocket endpoint to track status.
 
     Args:
-        request: Scenario configuration and parameters
+        scenario_request: Scenario configuration and parameters
+        request: Incoming HTTP request used by the rate limiter
 
     Returns:
         SimulationResult with measurement, optimization, and/or forecast results
@@ -108,8 +109,11 @@ async def run_simulation(request: ScenarioRequest, http_request: Request) -> Sim
     try:
         check_ethics(
             "quantum_simulate",
-            {"scenario_type": str(request.scenario_type), **dict(request.parameters or {})},
-            context_tag=request.tags[0] if request.tags else "",
+            {
+                "scenario_type": str(scenario_request.scenario_type),
+                **dict(scenario_request.parameters or {}),
+            },
+            context_tag=scenario_request.tags[0] if scenario_request.tags else "",
         )
     except EthicsViolationError as exc:
         raise HTTPException(
@@ -126,7 +130,7 @@ async def run_simulation(request: ScenarioRequest, http_request: Request) -> Sim
         engine = ScenarioEngine(orchestrator, status_store=active_simulations)
 
         # Execute scenario
-        result = await engine.execute_scenario(request)
+        result = await engine.execute_scenario(scenario_request)
 
         # Cache result
         cache.set(result, ttl_hours=24)
@@ -138,7 +142,11 @@ async def run_simulation(request: ScenarioRequest, http_request: Request) -> Sim
             result.model_dump(mode="json") if hasattr(result, "model_dump") else {},
             metadata={
                 "endpoint": "/simulate/scenario",
-                "scenario_type": request.scenario_type.value if hasattr(request.scenario_type, "value") else str(request.scenario_type),
+                "scenario_type": (
+                    scenario_request.scenario_type.value
+                    if hasattr(scenario_request.scenario_type, "value")
+                    else str(scenario_request.scenario_type)
+                ),
                 "simulation_id": result.simulation_id,
             },
             context_tag=f"quantum_simulate_{result.simulation_id}",
@@ -147,7 +155,8 @@ async def run_simulation(request: ScenarioRequest, http_request: Request) -> Sim
         return result
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.exception("Quantum scenario execution failed: %s", e)
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/results/{simulation_id}", response_model=SimulationResult)
@@ -274,7 +283,7 @@ async def delete_simulation_result(simulation_id: str) -> None:
     status_code=202,
     dependencies=MUTATION_DEPENDENCIES,
 )
-async def run_forecast(request: ScenarioRequest) -> SimulationResult:
+async def run_forecast(scenario_request: ScenarioRequest, request: Request) -> SimulationResult:
     """
     Run quantum-enhanced forecasting simulation.
 
@@ -282,7 +291,8 @@ async def run_forecast(request: ScenarioRequest) -> SimulationResult:
     Validates that forecast_config is provided.
 
     Args:
-        request: Scenario configuration with forecast parameters
+        scenario_request: Scenario configuration with forecast parameters
+        request: Incoming HTTP request forwarded to the rate-limited scenario route
 
     Returns:
         SimulationResult with forecast time series
@@ -291,25 +301,25 @@ async def run_forecast(request: ScenarioRequest) -> SimulationResult:
         HTTPException: 400 if forecast_config is missing
     """
     # Validate forecast config
-    if not request.forecast_config:
+    if not scenario_request.forecast_config:
         raise HTTPException(
             status_code=400,
             detail="forecast_config is required for forecasting simulations"
         )
 
     # Validate scenario type
-    if request.scenario_type not in [
+    if scenario_request.scenario_type not in [
         ScenarioType.SUPPLY_CHAIN,
         ScenarioType.ENERGY_GRID,
         ScenarioType.RISK_ANALYSIS
     ]:
         raise HTTPException(
             status_code=400,
-            detail=f"Scenario type {request.scenario_type.value} does not support forecasting"
+            detail=f"Scenario type {scenario_request.scenario_type.value} does not support forecasting"
         )
 
     # Run simulation using main endpoint
-    return await run_simulation(request)
+    return await run_simulation(scenario_request, request)
 
 
 @router.get("/cache/stats")

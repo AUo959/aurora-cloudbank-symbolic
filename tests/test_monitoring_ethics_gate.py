@@ -93,7 +93,28 @@ def test_violations_to_verdict_blocked_violation_forces_hard_veto_regardless_of_
     verdict = _violations_to_verdict([violation], "tag_2")
     assert verdict.hard_veto is True
     assert verdict.severity == VerdictSeverity.HARD_VETO
+    assert verdict.score == 0.0
     assert "low_severity_but_blocking_rule" in verdict.reason
+
+
+@pytest.mark.unit
+def test_violations_to_verdict_hard_veto_audits_blocking_violation():
+    blocking = MagicMock()
+    blocking.blocked = True
+    blocking.severity.value = "low"
+    blocking.rule_name = "blocking_rule"
+
+    non_blocking = MagicMock()
+    non_blocking.blocked = False
+    non_blocking.severity.value = "critical"
+    non_blocking.rule_name = "non_blocking_rule"
+
+    verdict = _violations_to_verdict([blocking, non_blocking], None)
+
+    assert verdict.hard_veto is True
+    assert verdict.severity == VerdictSeverity.HARD_VETO
+    assert verdict.score == 0.0
+    assert "worst=blocking_rule" in verdict.reason
 
 
 @pytest.mark.unit

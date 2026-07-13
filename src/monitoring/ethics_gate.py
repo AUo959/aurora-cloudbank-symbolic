@@ -52,11 +52,14 @@ def _violations_to_verdict(violations: List[Any], context_tag: Optional[str]) ->
     if not violations:
         return Verdict(source="ethics_engine", severity=VerdictSeverity.ALLOW, score=1.0, context_tag=context_tag)
 
-    hard_veto = any(v.blocked for v in violations)
-    worst = min(violations, key=lambda v: _non_blocking_severity(v)[1])
+    blocking_violations = [v for v in violations if v.blocked]
+    hard_veto = bool(blocking_violations)
+    candidates = blocking_violations or violations
+    worst = min(candidates, key=lambda v: _non_blocking_severity(v)[1])
     severity, score = _non_blocking_severity(worst)
     if hard_veto:
         severity = VerdictSeverity.HARD_VETO
+        score = 0.0
 
     worst_name = getattr(worst, "rule_name", None) or "unknown_rule"
     return Verdict(

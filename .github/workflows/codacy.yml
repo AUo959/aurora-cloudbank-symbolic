@@ -1,6 +1,16 @@
 # Codacy Configuration
-
 # This file is used to configure the workflows for Codacy.
+# This workflow is disabled.
 
-# Disable this workflow by setting the following condition
-if: false
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  codacy:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disabled
+        run: echo 'Codacy workflow disabled'

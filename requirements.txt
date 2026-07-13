@@ -40,7 +40,7 @@ passlib[bcrypt]>=1.7.4              # Password handling
 # ===================================================================
 # DATA PROCESSING & SCIENTIFIC COMPUTING
 # ===================================================================
-numpy>=1.24.3                       # Numerical computing
+numpy>=2.5.1                       # Numerical computing
 scipy>=1.11.4                       # Scientific computing
 pandas>=2.1.0                       # Data analysis
 

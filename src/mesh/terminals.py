@@ -253,7 +253,7 @@ def _apply_pat_overlay(registry_dir: Path, by_agent_id: Dict[str, PersonalTermin
     if not overlay_path.exists():
         return
 
-    overlay_payload = json.loads(overlay_path.read_text())
+    overlay_payload = json.loads(overlay_path.read_text(encoding="utf-8"))
     for item in overlay_payload.get("overlays", []):
         owner_agent_id = item.get("owner_agent_id")
         profile = by_agent_id.get(owner_agent_id)
@@ -268,7 +268,7 @@ def load_terminal_directory(registry_dir: Path, manifests: Dict[str, AgentManife
     if not registry_path.exists():
         return TerminalDirectory([])
 
-    payload = json.loads(registry_path.read_text())
+    payload = json.loads(registry_path.read_text(encoding="utf-8"))
     profiles = [PersonalTerminalProfile.from_dict(item) for item in payload.get("profiles", [])]
     by_agent_id = {profile.owner_agent_id: profile for profile in profiles if profile.owner_agent_id}
 

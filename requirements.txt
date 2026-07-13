@@ -14,9 +14,9 @@
 # ===================================================================
 fastapi>=0.128.8,<1.0.0             # FastAPI web framework (updated for starlette 0.50+ compatibility)
 uvicorn[standard]>=0.24.0           # ASGI server
-starlette>=0.49.3,<2.0.0            # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
+starlette>=1.3.1,<2.0.0            # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
 pydantic>=2.5.0,<3.0.0             # Data validation (cap at next major; V2->V3 would be breaking)
-pydantic-settings>=2.0.0            # Settings management via environment variables
+pydantic-settings>=2.14.2            # Settings management via environment variables
 python-multipart>=0.0.20             # File upload handling
 
 # ===================================================================
@@ -31,7 +31,7 @@ aiofiles>=24.1.0                    # Async file operations
 # ===================================================================
 # SECURITY & CRYPTOGRAPHY
 # ===================================================================
-cryptography>=44.0.0,<49.0.0        # Cryptographic library (cap reviewed quarterly; bump for security releases)
+cryptography>=49.0.0,<50.0.0        # Cryptographic library (cap reviewed quarterly; bump for security releases)
 bcrypt>=4.1.2                       # Password hashing
 pyjwt>=2.10.0,<3.0.0                 # JWT tokens (migrated from python-jose)
 passlib[bcrypt]>=1.7.4              # Password handling
@@ -80,7 +80,7 @@ slowapi>=0.1.9                      # Rate limiting for FastAPI
 # AI MODEL INTEGRATIONS
 # ===================================================================
 anthropic>=0.40.0,<1.0.0            # Claude 3.5/4.5 integration
-openai>=1.50.0,<3.0.0               # GPT-4/5 integration
+openai>=2.43.0,<3.0.0               # GPT-4/5 integration
 
 # ===================================================================
 # VALIDATION
@@ -93,6 +93,6 @@ jsonschema>=4.17.0                  # JSON Schema validation (MCP tool inputSche
 requests>=2.34.2                    # HTTP library
 urllib3>=2.7.0                      # HTTP connection pooling
 certifi>=2026.5.20                   # SSL certificates
-charset-normalizer>=3.4.3           # Character encoding detection
+charset-normalizer>=3.4.7           # Character encoding detection
 idna>=3.18                          # Internationalized domain names
 psutil>=7.2.2                       # Process and system monitoring (for R-2 telemetry)

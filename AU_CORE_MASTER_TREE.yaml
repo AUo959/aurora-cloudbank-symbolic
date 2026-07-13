@@ -1,6 +1,8 @@
 framework: Aurora
 ethics_protocol: Picard_Delta_3
 anchor_seed: EOS_SEED_ORION
+last_review: 2026-06-20
+review_notes_index: docs/review-notes/
 
 core_modules:
   - name: NARRATIVE_MEMORY_FUSER
@@ -13,19 +15,102 @@ core_modules:
     potential_state_logic: true
     dynamic_agent_slots: 12
     memory_collapse_model: observer-dependent
+    reference: docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md
 
   - name: ZK_IDENTITY_GATE
     function: Secure all memory calls with zero-knowledge consent challenge
     consent_anchor_required: true
     credential_mode: UC-secure + minimal disclosure
 
+  - name: QGIA_INTEGRATION_MODULE
+    function: >-
+      QGIA (Quantitative Geopolitical Intelligence Architecture) doctrine port into Aurora.
+      Provides axiom node definitions, confidence scoring contracts, WATCHCON escalation logic,
+      GUMAS audit schema, RESETCORE bootstrap, and PAT operator command sheet.
+    version: v1.0
+    integration_date: 2026-06-20
+    stage_1_artifacts:
+      - QGIA_Integration/01_QUANTUM_FORGE_AxiomManifest.md
+      - QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md
+    stage_2_artifacts:
+      - QGIA_Integration/03_RESETCORE_Bootstrap.md
+      - QGIA_Integration/03_RESETCORE_Bootstrap.json
+      - QGIA_Integration/04_GUMAS_AuditSchema.md
+      - QGIA_Integration/05_PAT_CommandSheet.md
+    axiom_node_count: 23
+    ethics_lock: true
+    ethics_protocol: Picard_Delta_3
+    gumas_tier: governed
+    watchcon_levels: [1, 2, 3, 4, 5]
+    drift_threshold: 0.002  # Velatrix hard ceiling; triggers alert above this value
+    confidence_dimensions: [DQ, SR, MR, TS, Composite, QC]
+    related_docs:
+      - docs/LAYER_BOUNDARY_REFERENCE.md
+      - docs/GEOMETRIC_ETHICS_ARCHITECTURE.md
+      - docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md
+      - agents/QGIA_ARCHITECTURE.md  # canonical operational bridge document
+    pending_alignment:
+      - docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md  # GAP-005: scope boundary review needed
+
+  - name: AGENT_POPULATION_MODULE
+    function: 551-agent QGIA epistemic simulation population with trust network for scenario execution
+    generated: 2026-03-12
+    framework_version: QGIA Operational Environment v3.0
+    total_agents: 551
+    total_trust_edges: 7407
+    average_degree: 26.9
+    forecast_accuracy_12mo: 0.847
+    warning_lead_time_days: 127
+    divisions:
+      GMD: 203
+      MAD: 142
+      IID: 138
+      SRD: 68
+    archetypes: 8
+    epistemic_parameters: 7
+    edge_types: [collaborate, challenge, reinforce, inform]
+    files:
+      architecture: agents/QGIA_ARCHITECTURE.md
+      registry: agents/qgia_agent_registry_full.json
+      trust_network: agents/qgia_trust_network.json
+    stub_warning: "Registry and trust network JSON files contain stub payloads only. Full arrays in session compute artifacts. GAP-007."
+
+  - name: ORION_STATION_MODULE
+    function: Named crew, station AI, L2 relay agents, and L3 framework systems for Orion Station L1 simulation
+    registry_version: 1.0.0-reconstructed
+    last_updated: 2026-04-08
+    registry_status: RECONSTRUCTED_FROM_REPO_CANON
+    declared_entities: 49
+    materialized_entities: 48
+    unresolved_gap: 1  # GAP-009: UNRESOLVED_HUMAN_001
+    ai_core: Aurora (AI_AURORA)
+    l2_relay_agents: [HALO, STARLING_AU, LIORA, OPPY, ARCHY, RIVERTHREAD_808]
+    l3_framework_systems: [Axiomera, Glyphon, Sentari, Caelion, Velatrix, Harmion]
+    drift_defense_pair: [HALO, Velatrix]  # HALO=Drift Anchor; Velatrix=Anti-Obfuscation
+    canonical_ssot: ORION_STATION_CANONICAL_STAFF_REGISTRY.json
+    legacy_registry: staff_registry.json  # deprecated as canonical; retained as generic
+    source_registers:
+      - simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json
+      - simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json
+      - simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json
+      - simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json
+      - simulation/CODEX_PHASE5_TECHNICAL_REGISTER.json
+      - simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json
+    relationship_to_qgia: >-
+      Parallel, non-competing namespace. Orion staff = operational crew.
+      QGIA 551-agent population = analytical engine. Cross-namespace bridges:
+      L2 relay agents and L3 framework systems operate across both layers.
+      See docs/review-notes/2026-06-20_orion-registry-review.md.
+
 drift_monitoring:
   model_drift: true
   data_drift: true
   symbolic_leakage_threshold: 0.1
+  velatrix_drift_threshold: 0.002
   report_channels:
     - RaR_trace
     - Ethical_drift_log
+    - GUMAS_audit_log
 
 persona_modes:
   - Clear
@@ -43,22 +128,42 @@ deployment_tags:
   - symbolic-quantum-adaptive
   - narrative-continuity-preserving
   - zero-knowledge-consent-bound
+  - qgia-integrated
+  - orion-station-active
 
 grafts:
   - type: capsule_graft
     grafted_capsule_id: AU_PERSONA_FLOWCORE_v1.0
     file_reference: AU_PERSONA_FLOWCORE_v1.0.yaml
-    binds:
-      - persona_engine
-      - flow_modulator
+    binds: [persona_engine, flow_modulator]
     link_mode: echo-anchor
     ethics_protocol: Picard_Delta_3
 
   - type: capsule_graft
     grafted_capsule_id: AURIC_AGENT_CORE_v1.0
     file_reference: AURIC_AGENT_CORE_v1.0.yaml
-    binds:
-      - symbolic_agent
-      - system_interface
+    binds: [symbolic_agent, system_interface]
     link_mode: anchor-phrase
     ethics_protocol: Picard_Delta_3
+
+open_gaps:
+  - id: GAP-003
+    description: 06_Integration_Console.html not pushed to QGIA_Integration/
+    severity: low
+    action: pending
+  - id: GAP-005
+    description: Scope boundary between QUANTUM_FORGE_V3_COMPLETE_GUIDE.md and 01_QUANTUM_FORGE_AxiomManifest.md undefined
+    severity: medium
+    action: pending-cross-reference-review
+  - id: GAP-006
+    description: docs/LAYER_BOUNDARY_REFERENCE.md not linked from QGIA artifacts
+    severity: low
+    action: pending
+  - id: GAP-007
+    description: Agent registry and trust network JSON files contain stub payloads only
+    severity: high
+    action: pending-payload-recovery
+  - id: GAP-009
+    description: UNRESOLVED_HUMAN_001 — declared 36 Orion human staff, only 35 materialized
+    severity: low-medium
+    action: pending — resolve via simulation/L1_CANON_CHARACTER_ROSTER.md

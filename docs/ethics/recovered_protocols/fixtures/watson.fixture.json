@@ -1,0 +1,43 @@
+{
+  "_fixture_meta": {
+    "fixture_for": "watson",
+    "description": "Canonical sanitized example for the Watson recovered protocol. All custody_record fields present and schema-valid. Hash and date fields are PENDING until real custody verification is performed.",
+    "schema_refs": [
+      "../schemas/custody_record.schema.json",
+      "../schemas/recovered_protocol_manifest.schema.json"
+    ],
+    "intake_status": "sanitized_canonical_example",
+    "validation_command": "ajv validate -s docs/ethics/recovered_protocols/schemas/custody_record.schema.json -d docs/ethics/recovered_protocols/fixtures/watson.fixture.json --spec=draft2020",
+    "sanitization_notes": "No real source packages, file paths, or hashes are present. PENDING is the correct value for all unverified fields."
+  },
+  "protocol_id": "watson",
+  "role": "Context retention, rigidity moderation, evidence correlation, and operator-readable briefing.",
+  "custody_record": {
+    "source_package_name": "PENDING",
+    "source_package_sha256": "PENDING",
+    "internal_file_path": "PENDING",
+    "internal_file_sha256": "PENDING",
+    "observed_version": "unverified-recovered-candidate",
+    "observed_status": "recovered_candidate",
+    "source_classification": "recovered_candidate",
+    "verification_date": "PENDING",
+    "reviewer_or_agent_surface": "PENDING",
+    "unresolved_blockers": [
+      "Exact source package name and hash not yet verified.",
+      "Internal file path and hash not yet verified.",
+      "Protocol-specific schema not yet promoted."
+    ],
+    "promotion_decision": "pending_custody_verification"
+  },
+  "allowed_actions": ["retain_context", "correlate_evidence", "generate_operator_brief", "moderate_rigidity"],
+  "forbidden_actions": ["alter_sherlock_logs", "enforce_containment", "adjudicate_disputes"],
+  "layer_boundaries": {
+    "l1": "May brief operators with reviewed context only.",
+    "l2": "May correlate simulation context as non-canonical evidence.",
+    "l3": "May correlate THREADCORE continuity material without mutating it.",
+    "cross_layer_rules": [
+      "Briefs cannot promote recovered candidates into runtime canon.",
+      "Context moderation cannot alter source logs."
+    ]
+  }
+}

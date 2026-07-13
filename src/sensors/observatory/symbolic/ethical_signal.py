@@ -5,10 +5,10 @@ Detects escalating patterns (tone escalation, boundary testing, deviation
 accumulation) BEFORE explicit Picard_Delta_3 rules break, enabling proactive
 intervention while risk is low.
 
-Repo-reality integration (reconciler 2026-06-11): binds to
-``src.monitoring.ethics_engine.EthicsEngine`` (``evaluate_action(ActionContext)
--> List[EthicsViolation]``, severities LOW/MEDIUM/HIGH/CRITICAL). The
-BLOCK/REVIEW/THROTTLE/SUSPEND/RESET action vocabulary belongs to
+Repo-reality integration (issue #1070): prefers the unified
+``ethics.engine.EthicsEngine.validate()`` interface, with fallback support for
+``src.monitoring.ethics_engine.EthicsEngine.evaluate_action(ActionContext)``.
+The BLOCK/REVIEW/THROTTLE/SUSPEND/RESET action vocabulary belongs to
 ``MonitoringSystem`` — the sentinel only RECOMMENDS; MonitoringSystem and L3
 governance own actions (one-way observation, RQ-4).
 
@@ -57,10 +57,19 @@ class EthicalSignalSentinel(Sensor):
     def __init__(self, ethics_engine: Optional[Any] = None):
         super().__init__("observatory.symbolic.ethical_signal",
                          Layer.L3, "ethical_signal")
-        self.ethics_engine = ethics_engine    # src.monitoring.EthicsEngine
+        self.ethics_engine = ethics_engine or self._default_ethics_engine()
         self.action_history: Dict[str, List[dict]] = defaultdict(list)
         self.risk_scores: Dict[str, float] = defaultdict(float)
         self.critical = True                  # never decimated
+
+    def _default_ethics_engine(self) -> Optional[Any]:
+        try:
+            from ethics.engine import EthicsEngine
+
+            return EthicsEngine()
+        except Exception:  # noqa: BLE001 — observation must stay available
+            logger.exception("Unified EthicsEngine initialization failed")
+            return None
 
     # -- evaluation -------------------------------------------------------------
 
@@ -128,6 +137,8 @@ class EthicalSignalSentinel(Sensor):
         """Standard ethics check via the existing EthicsEngine, if wired."""
         if self.ethics_engine is None:
             return []
+        if hasattr(self.ethics_engine, "validate"):
+            return self._unified_engine_violations(entity_id, action)
         try:
             from src.monitoring.ethics_engine import ActionContext
             results = self.ethics_engine.evaluate_action(ActionContext(
@@ -142,6 +153,35 @@ class EthicalSignalSentinel(Sensor):
             ]
         except Exception:  # noqa: BLE001 — sentinel must never break the path
             logger.exception("EthicsEngine evaluation failed (observed only)")
+            return []
+
+    def _unified_engine_violations(
+        self, entity_id: str, action: Action
+    ) -> List[dict]:
+        """SENTINEL Stream 3 overlay hook for ethics.engine verdicts."""
+        try:
+            signals = dict(action.params)
+            signals.setdefault("action_type", action.action_type)
+            signals.setdefault("allowed", action.allowed)
+            signals.setdefault("intensity", action.intensity)
+            result = self.ethics_engine.validate(
+                context="sentinel_stream_3",
+                signals=signals,
+                anchor=signals.get("anchor", "T1-SENTINEL-001"),
+                agent_id=entity_id,
+            )
+            return [
+                {
+                    "severity": rule.severity,
+                    "blocked": result.blocked or rule.auto_block,
+                    "rule_id": rule.rule_id,
+                    "verdict": result.verdict,
+                    "audit_id": result.audit_id,
+                }
+                for rule in result.triggered_rules
+            ]
+        except Exception:  # noqa: BLE001 — sentinel must never break the path
+            logger.exception("Unified EthicsEngine validation failed (observed only)")
             return []
 
     # -- signal components ----------------------------------------------------------

@@ -1,0 +1,86 @@
+{
+  "version": "1.1.0",
+  "description": "Scoring weights used by Aurora and any automated sync scripts to compute priority_score for queue items. Version 1.1 replaces fragile title-string stale-scope detection with the explicit is_stale_scope flag.",
+  "rules": [
+    {
+      "id": "TR-01",
+      "condition": "labels includes 'blocking'",
+      "score_delta": 40,
+      "reason": "Blocking tasks gate all dependent work — highest urgency."
+    },
+    {
+      "id": "TR-02",
+      "condition": "labels includes 'security' OR labels includes 'pentest'",
+      "score_delta": 30,
+      "reason": "Security posture and pentest readiness directly affect engagement timelines."
+    },
+    {
+      "id": "TR-03",
+      "condition": "area == 'architecture' OR labels includes 'architecture'",
+      "score_delta": 25,
+      "reason": "Unresolved architecture issues create persistent terminology and design drift across agents and contributors."
+    },
+    {
+      "id": "TR-04",
+      "condition": "is_stale_scope == true",
+      "score_delta": 20,
+      "reason": "Live docs mismatch and stale scope create compound risk when picked up by agents without context. Set explicitly by Aurora — not inferred from title strings."
+    },
+    {
+      "id": "TR-05",
+      "condition": "decision_required == true",
+      "score_delta": 10,
+      "reason": "Decision gates must be elevated so they are not missed by agents scanning the queue."
+    },
+    {
+      "id": "TR-06",
+      "condition": "blocks array is non-empty",
+      "score_delta": 8,
+      "reason": "Items that gate downstream work should be resolved ahead of the work they block."
+    },
+    {
+      "id": "TR-07",
+      "condition": "depends_on array is non-empty",
+      "score_delta": -6,
+      "reason": "Blocked items cannot be started — deprioritize in the ranked view."
+    }
+  ],
+  "priority_bands": {
+    "CRITICAL": {
+      "min": 80,
+      "note": "Must resolve before downstream work. Surface immediately to Aurora and operator."
+    },
+    "HIGH": {
+      "min": 60,
+      "max": 79,
+      "note": "Resolve within current sprint or session. Do not leave unassigned."
+    },
+    "MEDIUM": {
+      "min": 30,
+      "max": 59,
+      "note": "Resolve this cycle. Safe for agents with appropriate context packs."
+    },
+    "LOW": {
+      "min": 0,
+      "max": 29,
+      "note": "Queue for next sprint. Review if it ages past 30 days without progress."
+    }
+  },
+  "escalation_triggers": [
+    {
+      "id": "ET-01",
+      "condition": "state == 'blocked' AND (today - last_updated) > 7 days",
+      "action": "Escalate to Aurora. Surface on next session open."
+    },
+    {
+      "id": "ET-02",
+      "condition": "decision_required == true AND (today - last_updated) > 3 days",
+      "action": "Hail operator via PAT. Do not let decision gates go stale silently."
+    },
+    {
+      "id": "ET-03",
+      "condition": "new GitHub issue with labels 'security' OR 'blocking'",
+      "action": "Auto-add to queue.json with priority_score >= 30 and state 'decision_required'."
+    }
+  ]
+}

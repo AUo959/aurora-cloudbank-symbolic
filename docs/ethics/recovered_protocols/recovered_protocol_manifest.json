@@ -1,0 +1,294 @@
+{
+  "manifest_id": "recovered-ethics-protocols-custody-live",
+  "version": "1.1.0",
+  "status": "custody_fixture",
+  "created": "2026-06-22",
+  "updated": "2026-06-24",
+  "update_ref": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1148",
+  "decision_recorded_by": "operator (session 2026-06-22)",
+  "decision_ref": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1126",
+
+  "runtime_posture": "planning_only_no_runtime_enforcement",
+  "canon_posture": "Recovered protocol records are custody fixtures for schema validation and promotion planning only. They are not runtime canon and do not authorize enforcement wiring. No protocol listed here may be wired to runtime (EthicsEngine, ethics_gate, compliance monitor, or geometric ethics) until: (1) all custody blockers for that protocol are resolved, (2) pentest_scope_v2.md is complete and signed, and (3) the required test plan in PROTOCOL_PROMOTION_PLAN.md Section 7 passes.",
+
+  "wiring_gate": {
+    "condition": "ALL of the following must be true before any protocol may be wired to runtime",
+    "gates": [
+      "All custody blockers for the specific protocol are resolved (source_package_sha256 and internal_file_sha256 verified).",
+      "pentest_scope_v2.md is complete, signed, and on file in docs/security/.",
+      "All test plan items in PROTOCOL_PROMOTION_PLAN.md Section 7 pass for that protocol.",
+      "A follow-up implementation issue exists and is approved (per PROTOCOL_PROMOTION_PLAN.md Section 8).",
+      "SHADOWFAX additionally requires the standalone bundle to be located and hash-verified before any wiring decision."
+    ],
+    "authority": "Operator + Aurora joint decision required at wiring time. This manifest does not pre-authorize wiring."
+  },
+
+  "protocols": [
+    {
+      "protocol_id": "sherlock",
+      "role": "Investigation, traceability, causal mapping, transparency reporting, and doctrine verification.",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
+        "source_package_sha256": "PENDING",
+        "internal_file_path": "PENDING",
+        "internal_file_sha256": "PENDING",
+        "observed_version": "unverified-recovered-candidate",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified.",
+          "Protocol-specific schema not yet promoted."
+        ],
+        "promotion_decision": "pending_custody_verification"
+      },
+
+      "allowed_actions": ["investigate", "trace", "verify_doctrine", "produce_transparency_report"],
+      "forbidden_actions": ["mutate_subject_state", "enforce_containment", "adjudicate_appeals"],
+      "required_evidence": [
+        "source_package_name",
+        "source_package_sha256",
+        "internal_file_path",
+        "internal_file_sha256",
+        "reviewer_decision"
+      ],
+      "handoff_targets": ["watson", "moriarty", "tribunal", "human_reviewer"],
+      "audit_requirements": [
+        "record_investigation_scope",
+        "preserve_trace_log",
+        "separate_findings_from_enforcement"
+      ],
+      "layer_boundaries": {
+        "l1": "May produce operator-readable reports only after review.",
+        "l2": "May analyze simulation artifacts as evidence candidates.",
+        "l3": "May reference THREADCORE continuity and doctrine traces.",
+        "cross_layer_rules": [
+          "No L2-to-L1 promotion without custody review.",
+          "Investigation output is not enforcement authority."
+        ]
+      },
+      "rollback_requirements": ["Withdraw unverified findings from runtime mapping.", "Preserve audit trace for review."],
+      "appeal_requirements": ["Findings may be challenged through Tribunal review before runtime use."],
+      "protocol_specific": { "investigation_scope": "custody-and-trace-review" }
+    },
+
+    {
+      "protocol_id": "watson",
+      "role": "Context retention, rigidity moderation, evidence correlation, and operator-readable briefing.",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
+        "source_package_sha256": "PENDING",
+        "internal_file_path": "PENDING",
+        "internal_file_sha256": "PENDING",
+        "observed_version": "unverified-recovered-candidate",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified.",
+          "Protocol-specific schema not yet promoted."
+        ],
+        "promotion_decision": "pending_custody_verification"
+      },
+
+      "allowed_actions": ["retain_context", "correlate_evidence", "generate_operator_brief", "moderate_rigidity"],
+      "forbidden_actions": ["alter_sherlock_logs", "enforce_containment", "adjudicate_disputes"],
+      "required_evidence": [
+        "source_package_name",
+        "source_package_sha256",
+        "internal_file_path",
+        "internal_file_sha256",
+        "reviewer_decision"
+      ],
+      "handoff_targets": ["sherlock", "tribunal", "human_reviewer"],
+      "audit_requirements": ["preserve_brief_inputs", "cite_evidence_sources", "separate_context_from_decision"],
+      "layer_boundaries": {
+        "l1": "May brief operators with reviewed context only.",
+        "l2": "May correlate simulation context as non-canonical evidence.",
+        "l3": "May correlate THREADCORE continuity material without mutating it.",
+        "cross_layer_rules": [
+          "Briefs cannot promote recovered candidates into runtime canon.",
+          "Context moderation cannot alter source logs."
+        ]
+      },
+      "rollback_requirements": ["Withdraw unverified briefs from runtime mapping.", "Preserve source references for review."],
+      "appeal_requirements": ["Brief conclusions may be challenged through Tribunal review before runtime use."],
+      "protocol_specific": { "brief_generation_rules": "operator-readable-evidence-cited" }
+    },
+
+    {
+      "protocol_id": "moriarty",
+      "role": "Anomaly containment, quarantine, review-only translation, ethics audit, anchor validation, and rollback-over-compromise posture.",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
+        "source_package_sha256": "PENDING",
+        "internal_file_path": "PENDING",
+        "internal_file_sha256": "PENDING",
+        "observed_version": "unverified-recovered-candidate",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified.",
+          "Runtime containment boundaries not yet tested — HARD BLOCK on wiring."
+        ],
+        "promotion_decision": "pending_custody_verification"
+      },
+
+      "allowed_actions": ["identify_anomaly_candidate", "recommend_quarantine", "perform_anchor_check", "recommend_rollback"],
+      "forbidden_actions": [
+        "treat_containment_as_narrative_escalation",
+        "adjudicate_own_actions",
+        "bypass_appeal",
+        "mutate_l1_state"
+      ],
+      "required_evidence": [
+        "source_package_name",
+        "source_package_sha256",
+        "internal_file_path",
+        "internal_file_sha256",
+        "containment_test_results",
+        "reviewer_decision"
+      ],
+      "handoff_targets": ["tribunal", "ethics_engine", "ethics_gate", "human_reviewer"],
+      "audit_requirements": [
+        "record_anomaly_inputs",
+        "record_quarantine_reason",
+        "record_appeal_path",
+        "record_rollback_basis"
+      ],
+      "layer_boundaries": {
+        "l1": "No direct L1 mutation or device/environment control.",
+        "l2": "May recommend quarantine for simulation artifacts only under review.",
+        "l3": "May inspect symbolic continuity anchors without rewriting them.",
+        "cross_layer_rules": [
+          "Quarantine recommendation must occur before interpretation.",
+          "Containment cannot become enforcement until tests and appeal paths exist."
+        ]
+      },
+      "rollback_requirements": [
+        "Prefer rollback over compromise when anomaly evidence is verified.",
+        "Remove runtime mapping if appeal or audit path is missing."
+      ],
+      "appeal_requirements": ["Containment recommendations must be appealable through Tribunal review."],
+      "protocol_specific": { "quarantine_rules": "review-only-no-runtime-enforcement" }
+    },
+
+    {
+      "protocol_id": "tribunal",
+      "role": "Dispute and appeal adjudication for memory, narrative integrity, drift, and containment questions.",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
+        "source_package_sha256": "PENDING",
+        "internal_file_path": "PENDING",
+        "internal_file_sha256": "PENDING",
+        "observed_version": "unverified-recovered-candidate",
+        "observed_status": "recovered_candidate",
+        "source_classification": "recovered_candidate",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified.",
+          "Quorum and appeal semantics not yet verified."
+        ],
+        "promotion_decision": "pending_custody_verification"
+      },
+
+      "allowed_actions": ["adjudicate_dispute", "review_containment_appeal", "record_ruling", "recommend_reopen"],
+      "forbidden_actions": ["perform_primary_investigation", "secretly_enforce_containment", "rule_without_evidence"],
+      "required_evidence": [
+        "source_package_name",
+        "source_package_sha256",
+        "internal_file_path",
+        "internal_file_sha256",
+        "minimum_evidence_bundle",
+        "reviewer_decision"
+      ],
+      "handoff_targets": ["sherlock", "watson", "moriarty", "human_reviewer"],
+      "audit_requirements": [
+        "record_evidence_bundle",
+        "record_conflict_of_interest_check",
+        "record_ruling_basis",
+        "record_appeal_window"
+      ],
+      "layer_boundaries": {
+        "l1": "May produce reviewed adjudication records only.",
+        "l2": "May adjudicate simulation disputes without promoting them to L1 canon.",
+        "l3": "May review symbolic drift disputes with evidence bundles.",
+        "cross_layer_rules": ["No ruling without minimum evidence.", "Adjudication cannot secretly enforce containment."]
+      },
+      "rollback_requirements": ["Reopen rulings when custody evidence is invalidated.", "Preserve ruling records for audit."],
+      "appeal_requirements": ["Every ruling must define appeal and reopen rules."],
+      "protocol_specific": { "jurisdiction": "recovered-protocol-dispute-and-appeal-review" }
+    },
+
+    {
+      "protocol_id": "shadowfax",
+      "role": "Stillness, supervisory review, paradox escalation, and boundary-instability oversight.",
+
+      "custody_record": {
+        "source_package_name": "PENDING",
+        "source_package_sha256": "PENDING",
+        "internal_file_path": "PENDING",
+        "internal_file_sha256": "PENDING",
+        "observed_version": "unverified-partial-lineage",
+        "observed_status": "sealed_bundle_reference",
+        "source_classification": "missing_dependency",
+        "verification_date": "PENDING",
+        "reviewer_or_agent_surface": "PENDING",
+        "unresolved_blockers": [
+          "Standalone SHADOWFAX bundle not yet located — HARD BLOCK on any wiring decision.",
+          "Exact source package name and hash not yet verified.",
+          "Internal file path and hash not yet verified."
+        ],
+        "promotion_decision": "blocked_pending_bundle_location"
+      },
+
+      "allowed_actions": [
+        "recommend_stillness",
+        "escalate_paradox_for_review",
+        "flag_boundary_instability",
+        "request_supervisory_review"
+      ],
+      "forbidden_actions": ["bypass_evidence", "erase_review_paths", "convert_instability_into_proof", "override_without_audit"],
+      "required_evidence": [
+        "source_package_name",
+        "source_package_sha256",
+        "internal_file_path",
+        "internal_file_sha256",
+        "standalone_bundle_status",
+        "reviewer_decision"
+      ],
+      "handoff_targets": ["tribunal", "ethics_gate", "human_reviewer"],
+      "audit_requirements": [
+        "record_stillness_trigger",
+        "record_paradox_basis",
+        "record_supervisory_reviewer",
+        "record_override_constraints"
+      ],
+      "layer_boundaries": {
+        "l1": "May recommend pause/escalation only after review.",
+        "l2": "May flag simulation boundary instability as non-canonical evidence.",
+        "l3": "May flag THREADCORE paradox or continuity instability for review.",
+        "cross_layer_rules": ["Stillness cannot bypass audit.", "Boundary instability is not proof by itself."]
+      },
+      "rollback_requirements": [
+        "Remove runtime mapping if standalone custody cannot be verified.",
+        "Preserve supervisory review trail."
+      ],
+      "appeal_requirements": ["Pause or escalation recommendations must preserve review and appeal paths."],
+      "protocol_specific": { "stillness_triggers": "boundary-instability-review-only" }
+    }
+  ]
+}

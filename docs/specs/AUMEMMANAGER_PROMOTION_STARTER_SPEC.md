@@ -1,12 +1,13 @@
 # AuMemManager Promotion Starter Spec
 
-**Status:** Draft for next-phase development  
-**Date:** 2026-03-23  
-**Promotion Candidate:** `extracted_aumemmanager/script.py`  
-**Anchor Seed:** `EOS_SEED_ORION`  
-**Ethics Protocol:** `Picard_Delta_3`  
-**T1 Marker:** `T1:AuMemManager:Promotion:01`  
-**Symbolic Refs:** `ANCHOR_SYNC`, `MEMORY_TIERING`, `QUANTUM_VECTOR_FLIGHT`, `PII_REDACTION`  
+**Status:** Draft for next-phase development
+**Date:** 2026-03-23
+**Last reviewed:** 2026-06-23 (cross-reference audit, #1126)
+**Promotion Candidate:** `extracted_aumemmanager/script.py`
+**Anchor Seed:** `EOS_SEED_ORION`
+**Ethics Protocol:** `Picard_Delta_3`
+**T1 Marker:** `T1:AuMemManager:Promotion:01`
+**Symbolic Refs:** `ANCHOR_SYNC`, `MEMORY_TIERING`, `QUANTUM_VECTOR_FLIGHT`, `PII_REDACTION`
 **DLP Classification:** `internal_system_design`
 
 ## 1. Executive Summary
@@ -222,6 +223,7 @@ AuMemManager is ready for promotion when all of the following are true:
 - [ ] Logging and debug output redact PII-sensitive text.
 - [ ] Metrics expose counts for active/compressed/archived memories and quantum-vector state.
 - [ ] Documentation explains integration boundaries and non-goals.
+- [ ] **GUMAS ethics audit gate passed** — the GUMAS ethics audit layer must explicitly review and clear the AuMemManager promotion before runtime wiring proceeds. This is a named gate, not an implicit assumption. Audit record must reference `Picard_Delta_3` and be on file before Phase C integration tests are merged. _(Gap identified and added 2026-06-23, #1126.)_
 
 ## 11. Suggested Test Matrix
 
@@ -256,3 +258,24 @@ AuMemManager is ready for promotion when all of the following are true:
 ## 13. Immediate Next Step
 
 Start with **Phase A extraction + schema design**, using AuMemManager as the first promotion candidate and keeping the initial milestone intentionally narrow: **health, metrics, create, retrieve, and three quantum endpoints**. That scope is small enough to validate the recovery effort, but large enough to prove Aurora-native integration patterns for future promoted modules.
+
+## 14. Ethics Promotion Track Cross-Reference
+
+> Added 2026-06-23 during #1126 cross-reference audit.
+
+**This spec and the recovered ethics protocols are separate promotion tracks.** They share the ethics layer but are not the same work.
+
+| Dimension | AuMemManager (this spec) | Recovered Ethics Protocols |
+|---|---|---|
+| Promotion candidate | `extracted_aumemmanager/script.py` | Sherlock, Watson, Moriarty, Tribunal, SHADOWFAX |
+| Primary plan doc | This file | `docs/ethics/recovered_protocols/PROTOCOL_PROMOTION_PLAN.md` |
+| Live custody manifest | `src/aurora/memory/manifests/aumemmanager_manifest.json` _(to be created in Phase A)_ | `docs/ethics/recovered_protocols/recovered_protocol_manifest.json` _(exists, created 2026-06-22)_ |
+| Ethics gate | `Picard_Delta_3` + GUMAS audit (see Section 10) | Per `PROTOCOL_PROMOTION_PLAN.md` Section 7 test plan + wiring gate |
+| Runtime wiring status | Not wired — spec only | Not wired — planning only, all five protocols `PENDING` custody verification |
+| Tracking issue | #1126 | #993, #1148–#1153 |
+
+**Key findings from the audit (2026-06-23):**
+
+1. **AUMEMMANAGER promotion has not been executed against the recovered protocols.** The two tracks are independent. No cross-execution evidence exists in either document.
+2. **A live `recovered_protocol_manifest.json` already exists** (created 2026-06-22, `docs/ethics/recovered_protocols/`). It is a genuine custody fixture, not just the example. All five protocol custody records are `PENDING` SHA verification — this is correct and expected; closure is tracked under #1148.
+3. **GUMAS was not previously a named gate in this spec's acceptance criteria.** This was a gap. It has been added to Section 10 above. The ethics protocol field named `Picard_Delta_3` but did not explicitly require a GUMAS audit record before runtime wiring. That requirement is now explicit.

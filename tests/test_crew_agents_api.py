@@ -4,14 +4,17 @@ from fastapi.testclient import TestClient
 from api.aurora_api import app
 from src.agents.crew.noor import get_noor
 from src.agents.crew.lin import get_lin
+from src.middleware.fastapi_security import generate_csrf_token
 
 client = TestClient(app)
 
-# Helper to sign a dummy token (bypassing full auth) if needed. For now endpoints rely on test env secret.
+# The full app mounts GlobalCsrfMiddleware, so unsafe (POST) requests must carry a
+# valid CSRF token or they are rejected with 403 before reaching the route. Mint a
+# token against the test CSRF secret (set in conftest.py) so the endpoints are
+# actually exercised rather than blocked at the middleware.
 
 def _auth_headers():
-    # Minimal stub: tokenless access may fail if security enforced; adjust if necessary.
-    return {}
+    return {"X-CSRF-Token": generate_csrf_token("test-session")}
 
 
 @pytest.mark.unit

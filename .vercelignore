@@ -10,6 +10,15 @@ coverage.xml
 *.pyc
 __pycache__/
 
+# Backend/runtime surfaces are deployed separately.
+# Vercel serves the frontend build and proxies /api via vercel.json rewrites.
+api/
+pyproject.toml
+requirements*.txt
+Pipfile*
+uv.lock
+.python-version
+
 # Documentation
 docs/
 *.md

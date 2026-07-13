@@ -221,8 +221,11 @@ class TestEthicsGateAPIIntegration:
         verdict = await gate.evaluate(action, context)
 
         # Verify DLP tag was created
-        assert verdict.dlp_tag_id is not None
+        if verdict.dlp_tag_id is None:
+            raise AssertionError("EthicsGate must assign a DLP tag ID after evaluation")
         assert verdict.dlp_tag_id in dlp_tracker.tags
+        if dlp_tracker.tags[verdict.dlp_tag_id].operation != "ethics_gate_evaluate":
+            raise AssertionError("Expected DLP tag operation to be ethics_gate_evaluate")
 
         # Verify tag has API-specific context
         tag = dlp_tracker.tags[verdict.dlp_tag_id]

@@ -39,10 +39,22 @@ RESONANCE_SYNC_WARNING = 0.05          # ZIPWIZ RESONANCE_SYNC divergence
 RESONANCE_SYNC_CRITICAL = 0.10
 
 # --- Ethical signal sentinel ---------------------------------- [ASSUMPTION]
-SENTINEL_RISK_INTERVENTION = 0.7
-SENTINEL_RISK_HUMAN_APPROVAL = 0.8
-SENTINEL_RISK_AUDIT = 0.6
-SENTINEL_RISK_MONITOR = 0.4
+try:
+    from ethics.engine import get_sentinel_thresholds
+
+    _SENTINEL_THRESHOLDS = get_sentinel_thresholds()
+except Exception:
+    _SENTINEL_THRESHOLDS = {
+        "intervention": 0.7,
+        "human_approval": 0.8,
+        "audit": 0.6,
+        "monitor": 0.4,
+    }
+
+SENTINEL_RISK_INTERVENTION = _SENTINEL_THRESHOLDS["intervention"]
+SENTINEL_RISK_HUMAN_APPROVAL = _SENTINEL_THRESHOLDS["human_approval"]
+SENTINEL_RISK_AUDIT = _SENTINEL_THRESHOLDS["audit"]
+SENTINEL_RISK_MONITOR = _SENTINEL_THRESHOLDS["monitor"]
 SENTINEL_NEAR_BOUNDARY_MARGIN = 0.2
 SENTINEL_ACCEL_VELOCITY = 0.1
 SENTINEL_INCREASING_VELOCITY = 0.02

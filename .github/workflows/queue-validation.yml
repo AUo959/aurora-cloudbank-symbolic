@@ -1,0 +1,92 @@
+# queue-validation.yml
+# Enforces projection freshness for the Aurora work queue.
+#
+# Trigger: any PR that touches ops/work_queue/** or this workflow file.
+# Also available as a manual workflow_dispatch for on-demand audits.
+#
+# What it checks:
+#   - QUEUE.md, NEXT_UP.md, and OPEN_GATES.md are in sync with queue.json.
+#
+# If drift is detected the job fails with a clear remediation message.
+# Fix: run  python ops/work_queue/sync_queue.py  and push the result.
+#
+# Tracked in: https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1147
+# Authority:  Aurora (aurora_authority: true)
+
+name: Queue Validation
+
+on:
+  pull_request:
+    paths:
+      - 'ops/work_queue/**'
+      - '.github/workflows/queue-validation.yml'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual dispatch (optional)'
+        required: false
+        default: 'Manual audit'
+
+jobs:
+  queue-drift-check:
+    name: Queue drift check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # jsonschema is used by sync_queue.py for schema validation (optional dep).
+      # Install it gracefully so the check still runs if it is not yet needed.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install jsonschema || true
+
+      - name: Validate queue.json exists and is valid JSON
+        run: |
+          python - <<'EOF'
+          import json, sys
+          path = "ops/work_queue/queue.json"
+          try:
+              with open(path) as f:
+                  data = json.load(f)
+              print(f"queue.json is valid JSON ({len(data.get('active', []))} active items)")
+          except Exception as e:
+              print(f"ERROR: {path} is not valid JSON: {e}")
+              sys.exit(1)
+          EOF
+
+      - name: Check generated views are in sync with queue.json
+        id: drift_check
+        run: |
+          python ops/work_queue/sync_queue.py --check
+
+      - name: Post drift remediation hint on failure
+        if: failure() && steps.drift_check.outcome == 'failure'
+        run: |
+          echo ""
+          echo "========================================"
+          echo "  QUEUE VIEW DRIFT DETECTED"
+          echo "========================================"
+          echo ""
+          echo "  One or more generated queue views are out of sync with queue.json."
+          echo ""
+          echo "  To fix:"
+          echo "    python ops/work_queue/sync_queue.py"
+          echo "    git add ops/work_queue/QUEUE.md ops/work_queue/NEXT_UP.md ops/work_queue/OPEN_GATES.md"
+          echo "    git commit -m 'aurora(queue): regenerate views'"
+          echo "    git push"
+          echo ""
+          echo "  DO NOT edit QUEUE.md, NEXT_UP.md, or OPEN_GATES.md by hand."
+          echo "  They are generated artifacts. The source of truth is queue.json."
+          echo ""
+          echo "  See: https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1147"
+          echo "========================================"

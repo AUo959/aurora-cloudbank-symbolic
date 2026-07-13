@@ -1,146 +1,167 @@
-# Aurora CloudBank Development Roadmap
+# Aurora Project Roadmap
 
-**Status:** Active control-plane document  
-**Last updated:** 2026-05-28  
-**Related intake queue:** [`docs/review-notes/`](review-notes/)  
-**Execution queue:** [GitHub Issues](https://github.com/AUo959/aurora-cloudbank-symbolic/issues)
+> *Continuity flows through coherence. The system remembers because we chose to align.*
 
-This is the central roadmap for current Aurora CloudBank feature work. Older roadmap and status documents remain useful as historical references, but this file is the current coordination surface.
+**Framework:** Aurora v2.2.5  
+**Ethics Protocol:** Picard_Delta_3  
+**Last Updated:** 2026-06-22  
+**Canonical Architecture Reference:** `AU_CORE_MASTER_TREE.yaml`
 
 ---
 
 ## Purpose
 
-Aurora CloudBank is building toward a governed AI control plane: a modular runtime where memory, simulation, ethics, drift monitoring, audit logs, mesh communication, and developer tools can operate through clear API surfaces with traceable authority boundaries.
+This roadmap tracks the architectural evolution of the Aurora system — its core modules, integration milestones, open gaps, and forward work streams. It is the living strategic complement to `AU_CORE_MASTER_TREE.yaml`, which tracks structural state, and `docs/review-notes/` which captures session-level observations.
 
-Roadmap work should prioritize:
-
-1. **Trustworthy operation** — tests, startup paths, secrets, and docs must fail closed or state uncertainty clearly.
-2. **Usable vertical workflows** — existing modules should compose into coherent operator journeys.
-3. **Governed extensibility** — new features must enter through documented intake, issue, and PR paths.
+All completed work is reflected in the master tree. This document covers *what comes next* and *why*.
 
 ---
 
-## Canonical planning surfaces
+## Architecture Overview
 
-| Surface | Path | Purpose | Update rule |
+Aurora is a multi-layer simulation and intelligence stewardship system. Its architecture is organized across five interdependent layers:
+
+| Layer | Description | Key Files |
+|---|---|---|
+| **Ethics** | Picard_Delta_3 protocol; GUMAS audit chain; geometric ethics architecture | `docs/GEOMETRIC_ETHICS_ARCHITECTURE.md`, `docs/ethics/` |
+| **Simulation (SIM)** | Scenario integrity, WATCHCON escalation, SILM, CG vector state | `QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md` |
+| **Symbolic Memory** | GUMAS symbolic merge, RaR trace, EchoChain LOOPSET_001 | `AU_CORE_MASTER_TREE.yaml`, `.aurora/` |
+| **Agent Population** | 551-agent QGIA simulation, trust network, epistemic diversity | `agents/`, `ORION_STATION_CANONICAL_STAFF_REGISTRY.json` |
+| **QUANTUM_FORGE** | Symbolic agent instancing, axiom node execution, PAT integration | `QGIA_Integration/01_QUANTUM_FORGE_AxiomManifest.md`, `docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md` |
+
+Layer boundaries are formally defined in `docs/LAYER_BOUNDARY_REFERENCE.md`. L1 (raw model telemetry) and L2 (scored institutional product) separation is enforced per QGIA doctrine — see `QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md`.
+
+### Registry Relationship Map (GAP-008 Resolution)
+
+Two agent registries coexist in the repo. They are parallel, non-competing namespaces:
+
+| Registry | Layer | Population | Function |
 |---|---|---|---|
-| Current roadmap | `docs/ROADMAP.md` | Central priority and sequencing document | Update when priorities, lanes, or issue status materially change |
-| Review-note intake | `docs/review-notes/` | Persistent queue for outside reviews, session observations, architectural tensions, and risks | Add an entry before work becomes actionable, then triage to issue or direct fix |
-| GitHub Issues | Repository issues | Execution queue for actionable work | Open only evidence-backed tasks with acceptance criteria |
-| Runtime governance | `docs/api/API_CATALOG_GOVERNANCE.md`, `docs/api/api_surface_inventory.json`, `docs/architecture/RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md` | API/runtime authority map | Update with API or service-surface changes |
-| Path-drift ledger | `docs/architecture/RUNTIME_PATH_DRIFT_LEDGER.md` | Known stale/conflicting runtime claims | Update when a stale path is fixed, retired, or newly discovered |
+| `ORION_STATION_CANONICAL_STAFF_REGISTRY.json` | L1 Station Ops + L2/L3 Symbolic Mesh | 48 entities | Named crew, station AI, relay agents, framework systems |
+| `agents/qgia_agent_registry_full.json` | QGIA Analytical Population | 551 agents | Epistemic simulation population for forecasting runs |
+
+Cross-namespace bridges: L2 relay agents (HALO, STARLING, LIORA, OPPY, ARCHY, RIVERTHREAD) and L3 framework systems (Axiomera, Glyphon, Sentari, Caelion, Velatrix, Harmion) operate across both layers.
 
 ---
 
-## Intake-to-roadmap workflow
+## Completed Milestones
 
-```text
-outside/session review
-  -> docs/review-notes/entries/YYYYMMDD-short-slug.md
-  -> triage status: open | picked_up | issued | resolved | wont_fix
-  -> GitHub issue when actionable
-  -> roadmap lane when priority affects sequencing
-  -> implementation PR
-  -> update issue + review note + roadmap
-```
+### Stage 1 — QGIA Core Integration ✅
+*Completed: 2026-06-19*
 
-Rules:
+- Ported QGIA doctrine into 23 named axiom nodes (`01_QUANTUM_FORGE_AxiomManifest.md`)
+- Formalized SIM confidence scoring contract with six dimensions (DQ/SR/MR/TS/Composite/QC)
+- Defined WATCHCON escalation ladder (Levels 1–5) with trigger thresholds and routing
+- Encoded all violation signals into GUMAS audit routing
+- Built HTML Integration Console (visual operator dashboard)
 
-- Do not delete review notes. They are permanent audit records.
-- Do not convert every observation directly into an issue. Preserve uncertain observations as review notes first.
-- Open GitHub issues only when the evidence, risk, and acceptance criteria are clear.
-- When a review note becomes an issue, update its frontmatter to `status: issued` and add `issue_url`.
-- When a PR closes or materially changes a roadmap item, update this file in the same PR or a follow-up docs PR.
+### Stage 2 — QGIA Operator Layer ✅
+*Completed: 2026-06-20*
 
----
+- RESETCORE bootstrap prompt and JSON payload
+- GUMAS Audit Schema: 12-event ethics audit log
+- PAT Command Sheet: full 10-section live session operator reference
+- `AU_CORE_MASTER_TREE.yaml` updated with `QGIA_INTEGRATION_MODULE` block
+- `docs/review-notes/` directory created with session snapshots
 
-## Current active lanes
+### Agent Population ✅
+*Completed: 2026-03-12 (pre-integration)*
 
-### Lane A — Verification and trust hardening
+- 551-agent QGIA population via Monte Carlo simulation, Beta-distributed epistemic parameters
+- Four divisions: GMD (203), MAD (142), IID (138), SRD (68)
+- Eight analyst archetypes with full epistemic parameter profiles
+- Trust network: 7,407 directed edges, four edge types (collaborate, challenge, reinforce, inform)
+- Stochastic Block Model with archetype-weighted edge probabilities
+- Echo-chamber detection logic embedded in network statistics
 
-**Goal:** make the repository's stated health match enforced checks.
+### Registry Alignment Review ✅
+*Completed: 2026-06-20*
 
-| Issue | Title | Priority | Outcome sought |
-|---|---|---:|---|
-| [#758](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/758) | Harden CI gates so critical tests and quality checks fail closed | Critical | Mandatory tests fail workflows when critical runtime behavior regresses |
-| [#760](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/760) | Reconcile README production and coverage claims with enforced verification | High | README assurance language matches real, reproducible verification |
-| [#766](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/766) | Fail closed if Vercel build-phase placeholder secrets reach runtime | Critical | Placeholder secrets cannot silently reach runtime |
+- Confirmed Orion Station registry and QGIA agent registry are parallel, non-competing namespaces
+- Mapped dual-role L2/L3 agents across both registries
+- Identified `simulation/` as next major unexplored directory
+- Registered GAP-009 (UNRESOLVED_HUMAN_001)
 
-### Lane B — Runtime entrypoint and API authority cleanup
+### AI Contributor Review Governance ✅
+*Completed: 2026-06-22*
 
-**Goal:** make startup commands, API docs, and runtime authority consistent.
-
-| Issue | Title | Priority | Outcome sought |
-|---|---|---:|---|
-| [#759](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/759) | Align startup and deployment commands with canonical FastAPI entrypoint | Critical | Operators launch the canonical runtime surface, not stale root scripts |
-| [#763](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/763) | Regenerate or retire stale generated API catalog snapshots | High | Generated API docs are current or clearly historical |
-| [#764](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/764) | Resolve Mesh Runtime V1 contract drift for `/api/mesh/agents` routes | High | Mesh contract is implemented and tested or marked future/planned |
-
-### Lane C — Feature completion and capability honesty
-
-**Goal:** convert partial or mock-backed surfaces into honest, testable capabilities.
-
-| Issue | Title | Priority | Outcome sought |
-|---|---|---:|---|
-| [#761](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/761) | Replace or explicitly gate HR mock fallbacks and implement `OrganizationalIntelligence` | High | HR routes either use real implementations or return explicit degraded/mock status |
-| [#762](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/762) | Implement or explicitly scope quantum simulator mixed-state operations | Medium | Mixed-state behavior is implemented or rejected through documented capability errors |
-| [#765](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/765) | Fix Opal2 API decorators and add Opal2 syntax coverage | High | Opal2 route registration and syntax/import health are covered by tests |
-
-### Lane D — Review-note intake and architecture references
-
-**Goal:** keep outside/session review findings persistent, triageable, and discoverable.
-
-| Review note | Status | Priority | Next step |
-|---|---|---:|---|
-| [`20260526-drift-threshold-stratification`](review-notes/entries/20260526-drift-threshold-stratification.md) | open | Medium | Maintain the stable drift-threshold reference and decide whether to open an implementation issue |
+- Documented GAP-010: assert-before-read protocol violation by AI contributor during review session
+- Patched `ops/work_queue/session_open_ritual.md` v1.1.0 with Step 0 Review Conduct Clause
+- Created `docs/REVIEW_PROTOCOL.md` as standalone review standard for all agents and contributors
+- Full incident record: `docs/review-notes/2026-06-22_general-review-and-gap-010.md`
 
 ---
 
-## Feature-development direction
+## Open Work Streams
 
-Near-term feature work should turn the existing module constellation into reliable operator workflows:
+### WS-001 — QUANTUM_FORGE Alignment Review
+**Priority:** Medium | **Gap:** GAP-005  
+Cross-reference `docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md` vs `01_QUANTUM_FORGE_AxiomManifest.md`. Note: QGIA_ARCHITECTURE.md Section 8 names 10 computational modules (Lanchester, QSFE, EDM, ABCP, RPRN, TCA, etc.) not in the axiom manifest — these are complementary layers, not conflicts.
 
-1. **Operator console / mission control** — health, drift, telemetry, audit, active agents, and warnings in one place.
-2. **Simulation run lifecycle** — create scenario, run, stream progress, record result, audit ethics/drift, export receipt.
-3. **Memory + ledger workflow** — store context, retrieve, inspect provenance, sign or record ledger entry.
-4. **Mesh agent workflow** — inspect/register agents, send messages, view channel history, enforce L3 boundaries.
-5. **Governance review workflow** — evaluate proposed action, allow/block/degrade, record rationale and lineage.
+### WS-002 — Agent Registry Full Payload Push
+**Priority:** High | **Gap:** GAP-007  
+Full 551-agent array and 7,407-edge list exist only as session compute artifacts. Recovery required before any scenario simulation run.
 
-Development posture:
+### WS-003 — simulation/ Directory Exploration
+**Priority:** High | **Gap:** New (WS-003 replaces previous scope)  
+Six CODEX_PHASE registers (1–6), `L1_CANON_CHARACTER_ROSTER.md`, `CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md` — all unreviewed. Also resolves GAP-009 (UNRESOLVED_HUMAN_001).
 
-- Prefer vertical workflows over new isolated modules.
-- Prefer explicit degraded states over mock success.
-- Prefer small, issue-linked PRs over broad rewrites.
-- Update roadmap, review-note status, and runtime governance docs as part of the change when affected.
+### WS-004 — SIM Module Enrichment
+**Priority:** Medium | **Gap:** Observation from QGIA_ARCHITECTURE.md review  
+Register drift threshold 0.002 (Velatrix hard ceiling) and HALO/Velatrix drift defense pair in `02_SIM_WATCHCON_Confidence_Module.md`.
+
+### WS-005 — docs/LAYER_BOUNDARY_REFERENCE.md Cross-Links
+**Priority:** Low | **Gap:** GAP-006  
+Add cross-reference links in `01_QUANTUM_FORGE_AxiomManifest.md` and `02_SIM_WATCHCON_Confidence_Module.md`.
+
+### WS-006 — Integration Console Push to Repo
+**Priority:** Low | **Gap:** GAP-003  
+Push `06_Integration_Console.html` to `QGIA_Integration/`.
+
+### WS-007 — CRC Activation Protocol Document
+**Priority:** Medium | **Gap:** Identified via QGIA_ARCHITECTURE.md Section 9  
+**Reclassified:** Section 9 of QGIA_ARCHITECTURE.md is already the protocol in operational form. WS-007 is now a formalization task — extract, expand, and link Section 9 into a standalone `CRC_ACTIVATION_PROTOCOL.md` in `QGIA_Integration/`.
+
+### WS-008 — .nexus_schematics/ Exploration
+**Priority:** Medium  
+Blueprint-level definitions; likely relevant to QUANTUM_FORGE module placement, anchor routing, L1/L2 boundary enforcement.
+
+### WS-009 — Remaining File Review Pass
+**Priority:** Medium  
+Unreviewed files identified: `threadcore_registry.json`, `staff_registry.json`, `symbolic_config.yaml`.
+
+### WS-010 — Review Governance Hardening
+**Priority:** High | **Gap:** GAP-010  
+Follow-on work from the 2026-06-22 assert-before-read incident. Three sub-tasks remain open:
+- Verify `CLAUDE.md`, `COPILOT_INSTRUCTIONS.md`, and `CONTRIBUTING.md` all reference `ops/work_queue/` as the authoritative task surface for agent and human contributors
+- Consolidate `QGIA_Integration/` and `QGIA_integration/` case split at root
+- Evaluate whether root-level operational artifacts (`aurora_dashboard.html`, `AU_CORE_MASTER_TREE.yaml`, `activate_aurora.sh`, etc.) should migrate into `ops/` or retain root placement with explicit justification
 
 ---
 
-## Roadmap update triggers
+## Gap Register Summary
 
-Update this file when any of the following occurs:
-
-- A new outside/session review identifies a gap that affects sequencing.
-- A review note is promoted to a GitHub issue.
-- A GitHub issue in an active lane is opened, closed, or materially re-scoped.
-- A PR changes canonical startup paths, API surfaces, mesh contracts, security posture, or feature maturity.
-- A new feature family is proposed.
-- Historical roadmap claims are superseded by current repo evidence.
-
----
-
-## Historical roadmap references
-
-These documents remain useful, but they are not the primary current coordination surface:
-
-- [`docs/operational/reports/FEATURE_ROADMAP_STATUS.md`](operational/reports/FEATURE_ROADMAP_STATUS.md)
-- [`docs/FEATURE_IMPLEMENTATION_ROADMAP_7PHASE.md`](FEATURE_IMPLEMENTATION_ROADMAP_7PHASE.md)
-- [`docs/implementation/PHASED_IMPLEMENTATION_PLAN.md`](implementation/PHASED_IMPLEMENTATION_PLAN.md)
-- [`docs/reports/STRATEGIC_ANALYSIS.md`](reports/STRATEGIC_ANALYSIS.md)
-- [`docs/reports/STRATEGIC_VANTAGE_POINT.md`](reports/STRATEGIC_VANTAGE_POINT.md)
-
-When these documents conflict with current runtime evidence or open issue status, prefer this roadmap plus the runtime governance docs.
+| ID | Description | Severity | Status | Work Stream |
+|---|---|---|---|---|
+| GAP-001 | `docs/review-notes/` directory missing | Low | ✅ Resolved 2026-06-20 | — |
+| GAP-002 | `AU_CORE_MASTER_TREE.yaml` missing QGIA | Medium | ✅ Resolved 2026-06-20 | — |
+| GAP-003 | Integration Console HTML not in repo | Low | ⏳ Pending | WS-006 |
+| GAP-004 | `docs/ROADMAP.md` did not exist | Medium | ✅ Resolved 2026-06-20 | — |
+| GAP-005 | QF V3 Guide vs Axiom Manifest scope undefined | Medium | ⏳ Pending | WS-001 |
+| GAP-006 | LAYER_BOUNDARY_REFERENCE not linked from QGIA | Low | ⏳ Pending | WS-005 |
+| GAP-007 | Agent registry + trust network are stubs only | High | ⏳ Pending | WS-002 |
+| GAP-008 | Orion registry vs QGIA agent namespace undefined | Medium | ✅ Resolved 2026-06-20 | — |
+| GAP-009 | UNRESOLVED_HUMAN_001: missing 36th Orion human | Low-Medium | ⏳ Pending | WS-003 |
+| GAP-010 | Assert-before-read protocol violation by AI contributor | High | ✅ Mitigated 2026-06-22 — monitoring open | WS-010 |
 
 ---
 
-*Built for consistency, clarity, and care.*
+## Review Notes
+
+| Date | Note | Summary |
+|---|---|---|
+| 2026-06-20 | [Snapshot Review](review-notes/2026-06-20_snapshot-review.md) | QGIA integration completion; initial architectural review; GAP-001 through GAP-006 |
+| 2026-06-20 | [Agents Review](review-notes/2026-06-20_agents-review.md) | agents/ directory; GAP-007, GAP-008 registered |
+| 2026-06-20 | [QGIA Architecture Review](review-notes/2026-06-20_qgia-architecture-review.md) | QGIA_ARCHITECTURE.md deep read; computational modules; CRC protocol reclassification |
+| 2026-06-20 | [Orion Registry Review](review-notes/2026-06-20_orion-registry-review.md) | GAP-008 resolved; dual-role L2/L3 agents mapped; GAP-009 registered |
+| 2026-06-22 | [General Review & GAP-010](review-notes/2026-06-22_general-review-and-gap-010.md) | General repo review; assert-before-read incident; GAP-010 registered; session ritual v1.1.0 patched |

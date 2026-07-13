@@ -596,6 +596,16 @@ class TestJoyEvolutionEngine:
             
     def test_evolve(self, evolution_engine):
         """Test evolution process"""
+        import random
+
+        random.seed(314159)
+        try:
+            import numpy as np
+
+            np.random.seed(314159)
+        except ImportError:
+            pass
+
         evolution_engine.initialize_population()
         
         initial_avg_fitness = sum(g.fitness for g in evolution_engine.population) / len(evolution_engine.population)

@@ -16,6 +16,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from ethics.engine import EthicsEngine as UnifiedEthicsEngine
 from src.monitoring.ethics_engine import (
     EthicsEngine,
     ActionContext,
@@ -40,6 +41,7 @@ def _monitoring_storage_dir() -> Path:
 ethics_engine = EthicsEngine(
     violations_path=_monitoring_storage_dir() / "ethics_violations.jsonl"
 )
+unified_ethics_engine = UnifiedEthicsEngine()
 
 
 # Pydantic Models
@@ -67,6 +69,29 @@ class EvaluateActionResponse(BaseModel):
     violations: List[Dict[str, Any]]
     evaluation_timestamp: str
     context_tag: Optional[str] = None
+
+
+class UnifiedEthicsCheckRequest(BaseModel):
+    """Request for the config-backed unified ethics engine."""
+
+    context: str = Field(default="gumas_ethics_check", description="Ethics validation context")
+    signals: Dict[str, Any] = Field(default_factory=dict, description="Signals to validate")
+    anchor: Optional[str] = Field(default="T1-ETHICS-ENGINE-001", description="Symbolic anchor")
+    agent_id: str = Field(default="system", description="Agent or service requesting validation")
+
+
+class UnifiedEthicsCheckResponse(BaseModel):
+    """Response from the unified ethics engine."""
+
+    verdict: str
+    blocked: bool
+    severity: str
+    audit_id: Optional[str]
+    triggered_rules: List[Dict[str, Any]]
+    engine_id: str
+    engine_version: str
+    compliance_monitor_id: str
+    blockchain_anchoring: bool
 
 
 class ViolationQueryRequest(BaseModel):
@@ -170,6 +195,46 @@ async def evaluate_action(request: EvaluateActionRequest) -> EvaluateActionRespo
         
     except Exception as e:
         logger.error("Action evaluation failed: %s", e)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post("/ethics_check", response_model=UnifiedEthicsCheckResponse)
+async def unified_ethics_check(request: UnifiedEthicsCheckRequest) -> UnifiedEthicsCheckResponse:
+    """
+    Evaluate signals through the unified config-backed ethics engine.
+
+    DLP: gumas_unified_ethics_check
+    """
+    try:
+        result = unified_ethics_engine.validate(
+            context=request.context,
+            signals=request.signals,
+            anchor=request.anchor,
+            agent_id=request.agent_id,
+        )
+        dlp_tracker.create_tag(
+            operation="gumas_unified_ethics_check",
+            data={
+                "agent_id": request.agent_id,
+                "context": request.context,
+                "verdict": result.verdict,
+                "triggered_rule_count": len(result.triggered_rules),
+                "audit_id": result.audit_id,
+            },
+        )
+        return UnifiedEthicsCheckResponse(
+            verdict=result.verdict,
+            blocked=result.blocked,
+            severity=result.severity,
+            audit_id=result.audit_id,
+            triggered_rules=[rule.to_dict() for rule in result.triggered_rules],
+            engine_id=result.engine_id,
+            engine_version=result.engine_version,
+            compliance_monitor_id=result.compliance_monitor_id,
+            blockchain_anchoring=result.blockchain_anchoring,
+        )
+    except Exception as e:
+        logger.error("Unified ethics check failed: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

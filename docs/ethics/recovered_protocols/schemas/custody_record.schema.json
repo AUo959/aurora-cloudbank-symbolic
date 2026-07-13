@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AUo959/aurora-cloudbank-symbolic/docs/ethics/recovered_protocols/schemas/custody_record.schema.json",
+  "title": "CustodyRecord",
+  "description": "Schema for the custody_record object required on every recovered protocol entry in recovered_protocol_manifest.json. Defined in Section 4 of PROTOCOL_PROMOTION_PLAN.md and mandated by Section 8 issue #1148.",
+  "type": "object",
+  "required": [
+    "source_package_name",
+    "source_package_sha256",
+    "internal_file_path",
+    "internal_file_sha256",
+    "observed_version",
+    "observed_status",
+    "source_classification",
+    "verification_date",
+    "reviewer_or_agent_surface",
+    "unresolved_blockers",
+    "promotion_decision"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "source_package_name": {
+      "type": "string",
+      "description": "Name of the source package from which this protocol was recovered. Set to 'PENDING' until located and verified."
+    },
+    "source_package_sha256": {
+      "type": "string",
+      "description": "SHA-256 hash of the source package. Set to 'PENDING' until verified. When resolved, must be a 64-character hex string.",
+      "pattern": "^(PENDING|[a-f0-9]{64})$"
+    },
+    "internal_file_path": {
+      "type": "string",
+      "description": "Path to the protocol file inside the source package. Set to 'PENDING' until located."
+    },
+    "internal_file_sha256": {
+      "type": "string",
+      "description": "SHA-256 hash of the internal protocol file. Set to 'PENDING' until verified. When resolved, must be a 64-character hex string.",
+      "pattern": "^(PENDING|[a-f0-9]{64})$"
+    },
+    "observed_version": {
+      "type": "string",
+      "description": "Version string as observed in the recovered artifact. May be 'unverified-recovered-candidate' or similar until verified."
+    },
+    "observed_status": {
+      "type": "string",
+      "description": "Observed lifecycle status of the protocol at recovery time.",
+      "enum": [
+        "recovered_candidate",
+        "sealed_bundle_reference",
+        "verified",
+        "deprecated",
+        "under_review"
+      ]
+    },
+    "source_classification": {
+      "type": "string",
+      "description": "Classification of the recovery source. 'missing_dependency' is used when the standalone bundle has not been located (e.g. SHADOWFAX).",
+      "enum": [
+        "recovered_candidate",
+        "sealed_bundle_reference",
+        "missing_dependency",
+        "verified_archive",
+        "external_import"
+      ]
+    },
+    "verification_date": {
+      "type": "string",
+      "description": "ISO 8601 date (YYYY-MM-DD) of custody verification. Set to 'PENDING' until verified.",
+      "pattern": "^(PENDING|\\d{4}-\\d{2}-\\d{2})$"
+    },
+    "reviewer_or_agent_surface": {
+      "type": "string",
+      "description": "Name or identifier of the human reviewer or agent surface that performed custody verification. Set to 'PENDING' until verified."
+    },
+    "unresolved_blockers": {
+      "type": "array",
+      "description": "List of known blockers preventing promotion. Empty array when no blockers remain. Each blocker is a human-readable string. Blockers annotated 'HARD BLOCK' require operator resolution before wiring gate can open.",
+      "items": { "type": "string" },
+      "minItems": 0
+    },
+    "promotion_decision": {
+      "type": "string",
+      "description": "Current promotion decision state for this protocol.",
+      "enum": [
+        "pending_custody_verification",
+        "blocked_pending_bundle_location",
+        "approved_for_schema_promotion",
+        "approved_for_runtime_wiring",
+        "rejected",
+        "deferred"
+      ]
+    }
+  },
+  "if": {
+    "properties": {
+      "source_classification": { "const": "missing_dependency" }
+    }
+  },
+  "then": {
+    "properties": {
+      "promotion_decision": {
+        "const": "blocked_pending_bundle_location",
+        "description": "Protocols with source_classification=missing_dependency MUST have promotion_decision=blocked_pending_bundle_location. The standalone bundle must be located and hash-verified before any other promotion decision is valid."
+      }
+    }
+  }
+}

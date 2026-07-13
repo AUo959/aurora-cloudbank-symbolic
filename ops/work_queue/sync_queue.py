@@ -18,10 +18,8 @@ Tracked in:        https://github.com/AUo959/aurora-cloudbank-symbolic/issues/11
 
 from __future__ import annotations
 
+import argparse
 import json
-import sys
-import textwrap
-from datetime import datetime, timezone
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -44,6 +42,7 @@ GENERATED_BANNER = (
 # ---------------------------------------------------------------------------
 # Load
 # ---------------------------------------------------------------------------
+
 
 def load_queue() -> dict:
     with QUEUE_JSON.open(encoding="utf-8") as f:
@@ -93,8 +92,9 @@ def _aurora_note(item: dict) -> str:
     return "\n".join(f"> {line}" if line.strip() else ">" for line in lines)
 
 
-def _ts() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+def _ts(data: dict) -> str:
+    """Use the source review timestamp so regenerated views are byte-stable."""
+    return str(data.get("_meta", {}).get("last_aurora_review", "unknown"))
 
 
 # ---------------------------------------------------------------------------
@@ -105,16 +105,16 @@ def render_queue_md(data: dict) -> str:
     meta = data.get("_meta", {})
     items = data.get("active", [])
     completed = data.get("completed", [])
-    ts = _ts()
+    ts = _ts(data)
 
     lines: list[str] = [
         GENERATED_BANNER,
         "",
         "# Aurora Work Queue",
         "",
-        f"**Schema version:** `{meta.get('version', 'unknown')}`  ",
-        f"**Last Aurora review:** `{meta.get('last_aurora_review', 'unknown')}`  ",
-        f"**Generated:** `{ts}`  ",
+        f"**Schema version:** `{meta.get('version', 'unknown')}`",
+        f"**Last Aurora review:** `{meta.get('last_aurora_review', 'unknown')}`",
+        f"**Generated:** `{ts}`",
         f"**Items:** {len(items)} active · {len(completed)} completed",
         "",
         "> Aurora holds contextual authority over rank order.",
@@ -142,8 +142,8 @@ def render_queue_md(data: dict) -> str:
         lines += [
             f"### {rank}. {emoji} {iid} — {title}",
             "",
-            f"| Field | Value |",
-            f"|---|---|",
+            "| Field | Value |",
+            "|---|---|",
             f"| **Status** | `{status}` |",
             f"| **Owner** | {owner} |",
             f"| **Depends on** | {deps_str} |",
@@ -166,7 +166,7 @@ def render_queue_md(data: dict) -> str:
             "|---|---|",
         ]
         for item in completed:
-            lines.append(f"| {item.get('id','?')} | {item.get('title','?')} |")
+            lines.append(f"| {item.get('id', '?')} | {item.get('title', '?')} |")
         lines.append("")
 
     return "\n".join(lines)
@@ -178,7 +178,7 @@ def render_queue_md(data: dict) -> str:
 
 def render_next_up_md(data: dict) -> str:
     items = data.get("active", [])
-    ts = _ts()
+    ts = _ts(data)
 
     open_items = [x for x in items if x.get("status") == "open"]
     blocked_items = [x for x in items if x.get("status") == "blocked"]
@@ -269,8 +269,7 @@ def render_next_up_md(data: dict) -> str:
 
 def render_open_gates_md(data: dict) -> str:
     items = data.get("active", [])
-    gate_data = data.get("gates", {})
-    ts = _ts()
+    ts = _ts(data)
 
     # Items that are themselves gate-holders: tagged 'gate' or status 'needs-decision'
     gates = [
@@ -307,7 +306,7 @@ def render_open_gates_md(data: dict) -> str:
         ]
         for g in gates:
             lines.append(
-                f"| {g['rank']} | {g['id']} | {g['title']} | `{g.get('status','?')}` |"
+                f"| {g['rank']} | {g['id']} | {g['title']} | `{g.get('status', '?')}` |"
             )
     else:
         lines.append("_No open gates. 🎉_")
@@ -365,6 +364,7 @@ def check_all(rendered: dict[Path, str]) -> bool:
             continue
         existing = path.read_text(encoding="utf-8")
         # Strip the timestamp line before comparing so clock-skew doesn't cause false positives.
+
         def strip_ts(text: str) -> str:
             return "\n".join(
                 line for line in text.splitlines()
@@ -382,14 +382,17 @@ def check_all(rendered: dict[Path, str]) -> bool:
 # Entry point
 # ---------------------------------------------------------------------------
 
-def main() -> None:
-    args = sys.argv[1:]
-    check_mode = "--check" in args
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--render", action="store_true", help="Render generated queue views in place (default).")
+    mode.add_argument("--check", action="store_true", help="Exit non-zero when a generated view is stale.")
+    args = parser.parse_args()
 
     data = load_queue()
     rendered = render_all(data)
 
-    if check_mode:
+    if args.check:
         print("Queue drift check...")
         ok = check_all(rendered)
         if not ok:
@@ -397,14 +400,15 @@ def main() -> None:
             print("ERROR: Generated queue views are out of sync with queue.json.")
             print("FIX:   python ops/work_queue/sync_queue.py")
             print("       Then commit the regenerated QUEUE.md, NEXT_UP.md, OPEN_GATES.md.")
-            sys.exit(1)
-        else:
-            print("All generated views are current.")
-    else:
-        print("Rendering queue views...")
-        write_all(rendered)
-        print("Done.")
+            return 1
+        print("All generated views are current.")
+        return 0
+
+    print("Rendering queue views...")
+    write_all(rendered)
+    print("Done.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

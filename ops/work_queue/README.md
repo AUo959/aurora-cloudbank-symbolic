@@ -15,8 +15,12 @@ Tracked in: [#1147](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1
 | `triage_rules.json` | Scoring weights and escalation triggers | ✅ Yes (Aurora / queue steward) |
 | `gate_registry.json` | Named gate definitions | ✅ Yes (Aurora / queue steward) |
 | `QUEUE_GUIDE.md` | Onboarding — how Aurora, agents, and humans use the queue | ✅ Yes |
+| `CROSS_PLATFORM_COORDINATION.md` | Queue → broker/claim → GitHub → handoff contract | ✅ Yes |
+| `BRIDGE_FIELDS.md` | Optional queue-to-control-plane metadata reference | ✅ Yes |
 | `session_open_ritual.md` | Session-start checklist | ✅ Yes |
 | `sync_queue.py` | Renderer / CI drift-checker | ✅ Yes (ops contributor) |
+| `collect_coordination_metrics.py` | Read-only metrics collector / report checker | ✅ Yes (ops contributor) |
+| `COORDINATION_METRICS.md` | 🚫 **GENERATED — DO NOT EDIT** | ❌ No |
 | `QUEUE.md` | 🚫 **GENERATED — DO NOT EDIT** | ❌ No |
 | `NEXT_UP.md` | 🚫 **GENERATED — DO NOT EDIT** | ❌ No |
 | `OPEN_GATES.md` | 🚫 **GENERATED — DO NOT EDIT** | ❌ No |
@@ -25,7 +29,7 @@ Tracked in: [#1147](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1
 
 ## 🚫 Generated Files — Do Not Edit
 
-`QUEUE.md`, `NEXT_UP.md`, and `OPEN_GATES.md` are **rendered projections** of `queue.json`.
+`QUEUE.md`, `NEXT_UP.md`, `OPEN_GATES.md`, and `COORDINATION_METRICS.md` are **rendered projections** of `queue.json`.
 They are generated automatically and must not be edited by hand.
 
 **If you edit them directly:**
@@ -39,6 +43,13 @@ They are generated automatically and must not be edited by hand.
 python ops/work_queue/sync_queue.py
 git add ops/work_queue/QUEUE.md ops/work_queue/NEXT_UP.md ops/work_queue/OPEN_GATES.md
 git commit -m "aurora(queue): regenerate views"
+```
+
+Regenerate or verify the deterministic metrics report with:
+
+```bash
+python ops/work_queue/collect_coordination_metrics.py --markdown > ops/work_queue/COORDINATION_METRICS.md
+python ops/work_queue/collect_coordination_metrics.py --check
 ```
 
 ---
@@ -76,10 +87,10 @@ git push
 Queue authority events must use the `aurora(queue):` prefix:
 
 ```
-auroraqueue): re-rank #1140 above #1141 — topology contradiction is active blocker for QGIA
-auroraqueue): add Q-new-item — docs/archive audit gap identified
-auroraqueue): close #1148 — custody inventory complete, SHA verified
-auroraqueue): regenerate views
+aurora(queue): re-rank #1140 above #1141 — topology contradiction is active blocker for QGIA
+aurora(queue): add Q-new-item — docs/archive audit gap identified
+aurora(queue): close #1148 — custody inventory complete, SHA verified
+aurora(queue): regenerate views
 ```
 
 This prefix makes queue deltas machine-readable for changelog generation and CI summaries, and is the traceable event surface for Aurora’s contextual authority.

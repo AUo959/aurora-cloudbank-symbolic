@@ -1,6 +1,6 @@
 # Aurora Dev Coordination Spine
 
-**Status:** Draft coordination contract  
+**Status:** Active coordination contract
 **Owner:** Aurora / ORIONCORE operators  
 **Tracked in:** #1161  
 **Applies to:** `AUo959/aurora-cloudbank-symbolic` work coordinated with the ORIONCORE control-plane repo
@@ -186,7 +186,7 @@ This system should aid development measurably. Initial metrics:
 | Generated-view drift | Whether views match `queue.json` | Zero |
 | CI validation success | Queue/coordination PRs passing required checks | Up |
 
-A future metrics script may render `ops/work_queue/COORDINATION_METRICS.md` or `reports/analysis/dev_coordination_metrics_latest.md`.
+`collect_coordination_metrics.py` renders `COORDINATION_METRICS.md` from local queue evidence and verifies the tracked artifact with `--check`. Live GitHub comparison remains explicit input through `--github-state`; the collector does not call GitHub or mutate either repository.
 
 ---
 
@@ -202,13 +202,14 @@ A future metrics script may render `ops/work_queue/COORDINATION_METRICS.md` or `
 
 ---
 
-## First implementation slice
+## Implementation status
 
-The first safe slice is documentation and compatibility only:
+The coordination spine is active at the compatibility layer:
 
-1. Add this coordination contract.
-2. Update `QUEUE_GUIDE.md` to point contributors at this session-start/session-close loop.
-3. Add bridge fields to queue entries in a later PR after PR #1160 lands and queue validation is green.
-4. Add metrics generation after bridge fields stabilize.
+1. This contract and `QUEUE_GUIDE.md` define the queue → broker → claim → PR → handoff loop.
+2. `queue_schema.json` accepts optional bridge metadata without changing legacy renderer semantics.
+3. Representative live queue entries carry claim, platform, review, and handoff metadata.
+4. `collect_coordination_metrics.py` provides read-only JSON/Markdown output and deterministic tracked-report verification.
+5. `sync_queue.py` derives projection timestamps from `queue.json` review metadata, so repeated rendering is byte-stable.
 
-This order avoids mixing stale-state cleanup, schema migration, broker integration, and metrics automation into one oversized change.
+The control-plane claim files, issue broker, and durable session state remain owned by the ORIONCORE root repository. This nested repository documents and consumes those surfaces; it does not duplicate or mutate them.

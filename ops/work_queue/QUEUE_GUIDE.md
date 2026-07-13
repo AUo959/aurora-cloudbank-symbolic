@@ -1,8 +1,8 @@
 # Aurora Work Queue — Contributor Guide
 
-**Version:** 1.2.0  
+**Version:** 1.3.0
 **Owner:** Aurora (contextual authority) + Orion Station operators  
-**Last updated:** 2026-06-24  
+**Last updated:** 2026-07-13
 **Source of truth:** `ops/work_queue/queue.json`
 
 ---
@@ -203,4 +203,7 @@ When work pauses or crosses platforms, also update the durable control-plane han
 | `triage_rules.json` | Scoring weights and escalation triggers |
 | `QUEUE_GUIDE.md` | This file — workflow and field definitions |
 | `CROSS_PLATFORM_COORDINATION.md` | Queue/control-plane coordination contract |
+| `BRIDGE_FIELDS.md` | Optional queue-to-control-plane metadata reference |
+| `collect_coordination_metrics.py` | Read-only metrics collector and tracked-report verifier |
+| `COORDINATION_METRICS.md` | Generated local coordination metrics report |
 | `NEXT_UP.md` | Quick-start view for human contributors and agents |

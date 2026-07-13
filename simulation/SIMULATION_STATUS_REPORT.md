@@ -137,7 +137,7 @@
 - Reduces residual drift by 2% when stable
 - Achievement: "Truth markers in Aurora's codebase"
 
-**L2 Relay Agents:**
+**L1 Relay Agents:**
 
 **HALO (Drift Anchor & Synchronization)** — Aurora Core, Deck B
 - Zero-drift enforcement (Δ 0.000 target)

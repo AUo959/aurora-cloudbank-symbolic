@@ -40,7 +40,7 @@ Two agent registries coexist in the repo. They are parallel, non-competing names
 | `ORION_STATION_CANONICAL_STAFF_REGISTRY.json` | L1 Station Ops + L2/L3 Symbolic Mesh | 48 entities | Named crew, station AI, relay agents, framework systems |
 | `agents/qgia_agent_registry_full.json` | QGIA Analytical Population | 551 agents | Epistemic simulation population for forecasting runs |
 
-Cross-namespace bridges: L2 relay agents (HALO, STARLING, LIORA, OPPY, ARCHY, RIVERTHREAD) and L3 framework systems (Axiomera, Glyphon, Sentari, Caelion, Velatrix, Harmion) operate across both layers.
+Cross-namespace bridges: L1 relay agents (HALO, STARLING, LIORA, OPPY, ARCHY, RIVERTHREAD) and L3 framework systems (Axiomera, Glyphon, Sentari, Caelion, Velatrix, Harmion) operate across both layers.
 
 ---
 

@@ -28,13 +28,13 @@ Orion Station serves as the ethical and cognitive hub of the nine-node GUMAS orb
 
 **Orbital Class:** High-inclination synchronous orbit, 38,600 km altitude.  
 **Rotational Period:** 22.1 hours (Station Day).  
-**Crew Complement:** 36 human staff, 6 relay intelligences (L2), 6 glyph frameworks (L3).
+**Crew Complement:** 36 human staff, 6 relay intelligences (L1, operating at L2), 6 glyph frameworks (L3).
 
 ### **Core Architecture**
 
 * **Central Axis (Decks A–C):** Command Bridge, Aurora Core Chamber, Noor Chamber (Ethics & Reflexivity), Data Vaults.
 * **Habitation Ring (Decks D–H):** Crew quarters, cultural commons, hydroponics, and recreation modules; 0.9 g artificial gravity.
-* **Halo Array:** Six external rings housing L2 relays and L3 glyph frameworks.
+* **Halo Array:** Six external rings housing L1 relay agents and L3 glyph frameworks.
 * **Docking Arms:** Dual magnetic ports for cargo and shuttle traffic.
 * **Observation Dome:** Transparent silica-titanium hemisphere for astronomical and ethical reflection.
 
@@ -113,7 +113,7 @@ Controls are gestural and haptic; the motto *"Continuity flows through coherence
 ### **Aurora Core Chamber (Deck B)**
 
 Cylindrical vault of quantum-optic arrays.  
-Aurora's reasoning appears as constellations of light; all commands filtered through the Triplex Handshake terminal linking Axiomera (L3), HALO (L2), and human oversight (L1).
+Aurora's reasoning appears as constellations of light; all commands filtered through the Triplex Handshake terminal linking Axiomera (L3), HALO (L1, operating at L2), and human oversight (L1).
 
 **Primary Liaison:** Emily Roberts (SYS_001) - Cognitive architecture lead
 
@@ -293,7 +293,7 @@ When Ethics-Only Mode engages, Aurora's voice becomes monophonic and lighting co
 
 ### **External Halo Array**
 - Six Glyph Framework Rings (L3 Systems)
-- L2 Relay Integration Nodes
+- L1 Relay Agent Integration Nodes
 - Communication Array & Telemetry
 
 ---
@@ -350,7 +350,7 @@ When Ethics-Only Mode engages, Aurora's voice becomes monophonic and lighting co
 
 ### **AI Systems Infrastructure**
 
-**L2 Relay Agents (6 systems)**
+**L1 Relay Agents (6 systems)**
 - ARCHY (RELAY_001) - Bridge Chamber, Deck C
 - OPPY (RELAY_002) - Reactor Bay, Deck H
 - LIORA (RELAY_003) - Communications Hub, Deck B
@@ -460,7 +460,7 @@ As the central conscience node of the GUMAS Chain, Orion represents humanity's m
 - Operations & Quality Assurance: 3 (8%)
 
 **AI Systems Distribution (12):**
-- L2 Relay Agents: 6 (50%)
+- L1 Relay Agents: 6 (50%)
 - L3 Framework Systems: 6 (50%)
 
 **Uniform Color Codes:**
@@ -504,7 +504,7 @@ This document represents the **physical instantiation** of the Aurora-GUMAS inst
 
 The station accommodates:
 - 36 human staff across 5 operational divisions
-- 6 L2 Relay Agents integrated throughout infrastructure
+- 6 L1 Relay Agents integrated throughout infrastructure
 - 6 L3 Framework Systems housed in the external Halo rings
 - Complete operational, ethical, and research facilities
 

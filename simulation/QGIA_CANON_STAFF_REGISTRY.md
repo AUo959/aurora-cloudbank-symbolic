@@ -263,7 +263,7 @@ Quick-reference for all named QGIA ↔ Orion Station liaison pairs established i
 | QGIA-SRD-001 | Dr. Henrik Svensson | SRD Chief | Tariq El-Sayegh | RES-001 |
 | QGIA-ETH-001 | Dr. Astrid Lindqvist | Ethics Officer | Dr. Amira Sato | ETH-001 |
 | QGIA-SEC-001 | BG (Ret.) Samuel Okonkwo | Security Officer | Julian Markov | SEC-001 |
-| QGIA-IID-TCU-001 | Elena Volkov | Temporal Coordination | HALO (L2) | L2_HALO |
+| QGIA-IID-TCU-001 | Elena Volkov | Temporal Coordination | HALO (L1) | L2_HALO |
 | QGIA-GMD-CRC-001 | Fatima Ibrahim | Crisis Response Cell | Commander Thorne (via HALO) | CMD-001 |
 
 ---

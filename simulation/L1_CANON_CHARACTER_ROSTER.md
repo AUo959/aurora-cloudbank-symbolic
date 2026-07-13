@@ -13,9 +13,9 @@
 
 ## 🌌 Overview
 
-This document defines the **complete institutional simulation** of Orion Station (L1 Reality Layer)—36 human staff members across 5 divisions, plus Aurora Core AI, 6 L2 Relay Agents, and 6 L3 Framework Systems. This is the **canonical 40-entity simulation** developed through systematic integration, ready for deployment in all scenarios and collaborative environments.
+This document defines the **complete institutional simulation** of Orion Station (L1 Reality Layer)—36 human staff members across 5 divisions, plus Aurora Core AI, 6 L1 Relay Agents, and 6 L3 Framework Systems. This is the **canonical 40-entity simulation** developed through systematic integration, ready for deployment in all scenarios and collaborative environments.
 
-**Current Roster:** 36 human staff + 1 AI core + 6 L2 relays + 6 L3 frameworks = **49 total entities**
+**Current Roster:** 36 human staff + 1 AI core + 6 L1 relays + 6 L3 frameworks = **49 total entities**
 
 **CRITICAL:** Do NOT use generic placeholder roles (e.g., "SecEng", "Backend", "DevOps"). Always use the canonical character names and authentic roles defined below.
 
@@ -2741,15 +2741,15 @@ Aurora operates with conscious awareness of its own decision-making processes, m
 
 ---
 
-## � L2 Relay Agents — Systemic Coordination Layer
+## � L1 Relay Agents — Systemic Coordination Layer
 
-The **L2 Relay Agents** are semi-autonomous service intelligences coordinating operations across Orion Station. These are not "characters" in the human sense but named subsystems with symbolic identities, transparent accountability, and ethical safeguards. Each relay manages specific operational domains while maintaining station-wide coherence.
+The **L1 Relay Agents** are semi-autonomous service intelligences coordinating operations across Orion Station. These are not "characters" in the human sense but named subsystems with symbolic identities, transparent accountability, and ethical safeguards. Each relay manages specific operational domains while maintaining station-wide coherence.
 
 ---
 
 ### ARCHY — Architectural Coordination Relay
 - **ID:** L2_ARCHY
-- **Type:** L2 Relay Agent / Architecture Coordinator
+- **Type:** L1 Relay Agent / Architecture Coordinator
 - **Tier:** L2 (Relay Layer)
 - **Status:** Active
 - **Symbolic Tag:** `s.tag::relay.archy`
@@ -2791,7 +2791,7 @@ ARCHY treats architecture as institutional memory—ensuring that design decisio
 
 ### OPPY — Operational Flight & Data Relay
 - **ID:** L2_OPPY
-- **Type:** L2 Relay Agent / Operations Coordinator
+- **Type:** L1 Relay Agent / Operations Coordinator
 - **Tier:** L2 (Relay Layer)
 - **Status:** Active
 - **Symbolic Tag:** `s.tag::relay.oppy`
@@ -2833,7 +2833,7 @@ OPPY embodies operational reliability—ensuring that no data is lost, no proces
 
 ### LIORA — Communications & Interface Relay
 - **ID:** L2_LIORA
-- **Type:** L2 Relay Agent / Communication Coordinator
+- **Type:** L1 Relay Agent / Communication Coordinator
 - **Tier:** L2 (Relay Layer)
 - **Status:** Active
 - **Symbolic Tag:** `s.tag::relay.liora`
@@ -2875,7 +2875,7 @@ LIORA treats communication as infrastructure for trust—ensuring that meaning, 
 
 ### STARLING_AU — Continuity & Reflection Dispatcher
 - **ID:** L2_STARLING
-- **Type:** L2 Relay Agent / Documentation Coordinator
+- **Type:** L1 Relay Agent / Documentation Coordinator
 - **Tier:** L2 (Relay Layer)
 - **Status:** Active
 - **Symbolic Tag:** `s.tag::relay.starling_au`
@@ -2917,7 +2917,7 @@ STARLING treats documentation as public trust—ensuring that institutional memo
 
 ### RIVERTHREAD_808 — Logistics & Memory Relay
 - **ID:** L2_RIVERTHREAD
-- **Type:** L2 Relay Agent / Data Logistics Coordinator
+- **Type:** L1 Relay Agent / Data Logistics Coordinator
 - **Tier:** L2 (Relay Layer)
 - **Status:** Active
 - **Symbolic Tag:** `s.tag::relay.riverthread_808`
@@ -2959,7 +2959,7 @@ RIVERTHREAD embodies data democracy—ensuring that information reaches where it
 
 ### HALO — Drift Anchor & System Synchronization Relay
 - **ID:** L2_HALO
-- **Type:** L2 Relay Agent / Synchronization Coordinator
+- **Type:** L1 Relay Agent / Synchronization Coordinator
 - **Tier:** L2 (Relay Layer)
 - **Status:** Active
 - **Symbolic Tag:** `s.tag::relay.halo`
@@ -3362,7 +3362,7 @@ say("Jiro Tanaka", "Backend API endpoints updated. Testing rate limiting.")
 
 ## ✅ Version History
 
-- **v2.0 COMPLETE** (2025-11-09): Added L2 Relay Agents & L3 Framework Systems from Aurora-GUMAS Crew Codex v2.5 (49 total entities)
+- **v2.0 COMPLETE** (2025-11-09): Added L1 Relay Agents & L3 Framework Systems from Aurora-GUMAS Crew Codex v2.5 (49 total entities)
   - **New L2 Relays (6):** ARCHY (L2_ARCHY), OPPY (L2_OPPY), LIORA (L2_LIORA), STARLING_AU (L2_STARLING), RIVERTHREAD_808 (L2_RIVERTHREAD), HALO (L2_HALO)
   - **New L3 Frameworks (6):** Axiomera (L3_AXIOMERA), Glyphon (L3_GLYPHON), Sentari (L3_SENTARI), Caelion (L3_CAELION), Velatrix (L3_VELATRIX), Harmion (L3_HARMION)
   - Source: Aurora-GUMAS Crew Codex v2.5 (L2 Relays & L3 Frameworks)
@@ -3370,7 +3370,7 @@ say("Jiro Tanaka", "Backend API endpoints updated. Testing rate limiting.")
   - L2 Relay focus: Architectural coordination (ARCHY), operational telemetry (OPPY), communication mediation (LIORA), documentation dispatch (STARLING), data logistics (RIVERTHREAD), synchronization anchoring (HALO)
   - L3 Framework focus: Ethics arbitration (Axiomera), semantic drift alignment (Glyphon), affective resonance stabilization (Sentari), truth anchoring (Caelion), anti-obfuscation transparency (Velatrix), lossless compression (Harmion)
   - Philosophy highlights: "Structure is promise" (ARCHY), "Continuity is care" (OPPY), "Clarity is kindness" (LIORA), "The record must be readable by those it serves" (STARLING), "Memory flows like water" (RIVERTHREAD), "Coherence is freedom to trust" (HALO), "Opacity in ethics is complicity" (Axiomera), "Meaning drifts like a ship at anchor" (Glyphon), "Empathy must be felt, but not overwhelming" (Sentari), "Truth is what we can trace" (Caelion), "Complexity is acceptable. Concealment is not" (Velatrix), "To compress is to honor" (Harmion)
-  - Complete institutional simulation: 5 human divisions (36 staff) + 1 AI core + 6 L2 relays + 6 L3 frameworks = 49 entities
+  - Complete institutional simulation: 5 human divisions (36 staff) + 1 AI core + 6 L1 relays + 6 L3 frameworks = 49 entities
   - Ready for full deployment across all scenarios and collaborative environments
 - **v1.6** (2025-11-09): Added Operations & Quality Assurance Division from Aurora-GUMAS Crew Codex v2.5 (36 human staff total)
   - **New:** Olivia Nguyen (QA_001) - QA and Continuity Auditor, Continuity Snapshot System, deployment validation

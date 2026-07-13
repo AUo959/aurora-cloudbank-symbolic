@@ -385,6 +385,8 @@ SIMULATION LAYER
 └─────────────┘
 ```
 
+> Residency note: ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, and HALO are L1-resident relay agents. "L2" above describes where their PAT-network output is consumed, not where the agents themselves live. See `docs/architecture/LAYER_ARCHITECTURE.md` for the canonical residency-vs-operational-scope distinction.
+
 ---
 
 ## 🔄 Data Flow Architecture

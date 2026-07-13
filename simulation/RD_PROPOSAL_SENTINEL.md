@@ -47,7 +47,7 @@ Dr. Amira Sato articulated the synthesis: *"Alpha is asking — can the system k
 Deploy real-time biometric and physiological monitoring to generate continuous cognitive load estimates for operational staff during high-decision-density periods. Data streams include but are not limited to: cortisol proxy markers, HRV signatures, response latency patterns, and microbiome-correlated cognitive state indicators (per Dr. Feldman's longitudinal research interests).
 
 ### Objective 2 — AI Self-Audit Signaling
-Extend Aurora Core (AI_AURORA) and relevant L2 relay agents with explicit reasoning-drift detection and uncertainty-flagging outputs visible to operational staff in real time. Agents should surface — not suppress — their own confidence boundaries. This directly operationalizes the AI reflexivity research Dr. Noor identified as a priority field.
+Extend Aurora Core (AI_AURORA) and relevant L1 relay agents with explicit reasoning-drift detection and uncertainty-flagging outputs visible to operational staff in real time. Agents should surface — not suppress — their own confidence boundaries. This directly operationalizes the AI reflexivity research Dr. Noor identified as a priority field.
 
 ### Objective 3 — Ethical Decision-Support Overlay
 Develop a lightweight, non-coercive decision-support layer that activates when sensor data and AI self-audit signals jointly indicate elevated risk conditions (high crew load + high AI uncertainty). The overlay provides structured ethical prompts aligned with the Picard_Delta_3 charter — not directives, but scaffolding.
@@ -78,7 +78,7 @@ Orion Station is uniquely positioned to host this pilot:
 │  Monitoring  │  Signal Layer    │  (Picard_Delta_3) │
 ├──────────────┼──────────────────┼───────────────────┤
 │ Biometrics   │ Aurora Core      │ Axiomera (L3)     │
-│ HRV / Cort.  │ L2 Relay Agents  │ Dr. Sato Review   │
+│ HRV / Cort.  │ L1 Relay Agents  │ Dr. Sato Review   │
 │ Microbiome   │ Uncertainty Pub  │ Non-coercive      │
 │ (Dr. Feldman)│ (Dr. Noor spec)  │ Prompt Scaffold   │
 └──────────────┴──────────────────┴───────────────────┘

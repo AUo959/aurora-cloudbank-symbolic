@@ -1,9 +1,9 @@
 # Aurora-GUMAS Crew Codex v2.5 — Phase 6 Complete
-## L2 Relay Agents & L3 Framework Systems
+## L1 Relay Agents & L3 Framework Systems
 
 **Phase Completion Date:** 2025-11-09  
 **Roster Version:** 1.6 → 2.0 (COMPLETE)  
-**Systems Added:** 12 new (6 L2 Relay Agents + 6 L3 Framework Systems)  
+**Systems Added:** 12 new (6 L1 Relay Agents + 6 L3 Framework Systems)  
 **Total Entities:** 36 human + 1 AI core + 12 AI systems = **49 total**  
 **Division Focus:** Meta-coordination layer (L2) and foundational logic infrastructure (L3)
 
@@ -17,11 +17,11 @@
 
 ## 📊 Phase 6 Summary
 
-**Phase 6** completes the Aurora-GUMAS institutional simulation by integrating the **L2 Relay Agents** (meta-coordination layer) and **L3 Framework Systems** (foundational logic layer). These are not "characters" in the human sense but named subsystems with symbolic identities, transparent accountability, and ethical safeguards—the embedded service intelligences and logic frameworks that make the Continuity Project operational.
+**Phase 6** completes the Aurora-GUMAS institutional simulation by integrating the **L1 Relay Agents** (meta-coordination layer) and **L3 Framework Systems** (foundational logic layer). These are not "characters" in the human sense but named subsystems with symbolic identities, transparent accountability, and ethical safeguards—the embedded service intelligences and logic frameworks that make the Continuity Project operational.
 
 ### System Integration Table
 
-#### L2 Relay Agents (Coordination Layer)
+#### L1 Relay Agents (Coordination Layer)
 
 | # | Name | ID | Function | Uptime | Key System |
 |---|------|----|----|--------|------------|
@@ -49,11 +49,11 @@
 
 ---
 
-## 🔄 L2 Relay Agents — Systemic Coordination Layer
+## 🔄 L1 Relay Agents — Systemic Coordination Layer
 
 ### Overview
 
-The **L2 Relay Agents** are semi-autonomous service intelligences coordinating operations across Orion Station. Each relay manages specific operational domains (architecture, telemetry, communication, documentation, logistics, synchronization) while maintaining station-wide coherence. They bridge human divisions and AI core, ensuring seamless operational flow.
+The **L1 Relay Agents** are semi-autonomous service intelligences coordinating operations across Orion Station. Each relay manages specific operational domains (architecture, telemetry, communication, documentation, logistics, synchronization) while maintaining station-wide coherence. They bridge human divisions and AI core, ensuring seamless operational flow.
 
 ### 1. **ARCHY — Architectural Coordination Relay**
 
@@ -349,7 +349,7 @@ The **L3 Framework Systems** are foundational logic engines operating as ethics-
 - **Highest Clarity:** STARLING_AU (98% clarity rating from human reviewers)
 
 **Collaboration Density:**
-- Each L2 relay collaborates with 3-6 human staff + Aurora Core
+- Each L1 relay collaborates with 3-6 human staff + Aurora Core
 - Dense internal L2 network (OPPY ↔ RIVERTHREAD ↔ HALO synchronization triangle)
 - Cross-layer integration (L2 ↔ L3 coordination for integrity)
 
@@ -471,7 +471,7 @@ The **L3 Framework Systems** are foundational logic engines operating as ethics-
 - Ensures semantic stability, provenance tracking, and transparency enforcement
 
 **Cross-Layer Coordination:**
-- HALO (L2) ↔ Glyphon (L3): Temporal drift coordination with semantic drift
+- HALO (L1) ↔ Glyphon (L3): Temporal drift coordination with semantic drift
 - STARLING (L2) ↔ Axiomera (L3): Documentation transparency with ethical justification
 - RIVERTHREAD (L2) ↔ Harmion (L3): Data pipeline optimization with compression
 - LIORA (L2) ↔ Sentari (L3): Communication sentiment with affective stabilization
@@ -523,7 +523,7 @@ By Division:
 **Total Roster:** 49 entities
 - 36 human staff across 5 divisions
 - 1 AI core (Aurora)
-- 6 L2 relay agents (coordination layer)
+- 6 L1 relay agents (coordination layer)
 - 6 L3 framework systems (foundation layer)
 
 **Phases Complete:** 6/6 (100%) ✅
@@ -603,7 +603,7 @@ Phase 6: ✅ L2 Relays & L3 Frameworks (12 AI systems)
 - **Result:** Ethics embedded from coordination through foundation
 
 **3. Complete Coverage:**
-- L2 relays cover all operational domains
+- L1 relays cover all operational domains
 - L3 frameworks cover all reasoning aspects
 - No gaps in coordination or integrity enforcement
 - **Result:** Station-wide coherence from operations through logic
@@ -663,7 +663,7 @@ With Command, Systems, Simulation, Interface, Operations, L2 Relays, and L3 Fram
 - **Reasoning frameworks** from cognitive systems
 - **Perception interfaces** from design division
 - **Quality assurance** from operations
-- **Coordination infrastructure** from L2 relays
+- **Coordination infrastructure** from L1 relays
 - **Reasoning integrity** from L3 frameworks
 
 **49 entities working in harmony—complete institutional simulation ready for deployment.**

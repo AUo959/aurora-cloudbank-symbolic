@@ -2,6 +2,7 @@ import logging
 import os
 import uuid
 import hashlib
+import json
 import uvicorn
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional, Any
@@ -10,7 +11,13 @@ import aiofiles
 import numpy as np
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPAuthorizationCredentials
-from src.middleware.fastapi_security import security, verify_csrf_token, verify_ws_token
+from src.middleware.fastapi_security import (
+    generate_csrf_token,
+    generate_ws_token,
+    security,
+    verify_csrf_token,
+    verify_ws_token,
+)
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -64,7 +71,21 @@ except ImportError:
     AerSimulator = None
     QISKIT_AVAILABLE = False
 
-app = FastAPI(title="Aurora Quantum VSA Playground")
+MODULE_DIR = Path(__file__).resolve().parent
+REPO_ROOT = MODULE_DIR.parent if MODULE_DIR.name == "api" else MODULE_DIR
+STATIC_DIR = REPO_ROOT / "static"
+SIMULATION_CONSOLE_PATH = STATIC_DIR / "aurora-simulation-console.html"
+SYNERGY_DASHBOARD_PATH = STATIC_DIR / "synergy-dashboard.html"
+LEGACY_VSA_ARCHIVE_PATH = STATIC_DIR / "archive" / "index_old_quantum_playground.html"
+
+app = FastAPI(title="Aurora Simulation Console")
+
+
+def html_file_response(path: Path) -> FileResponse:
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Static asset not found")
+    return FileResponse(path, headers={"Cache-Control": "no-store"})
+
 
 # Add CORS middleware for frontend integration
 # SECURITY FIX: Use specific origins instead of wildcard when credentials are enabled
@@ -140,11 +161,25 @@ def _cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
         return 0.0
     return float(np.dot(vec_a, vec_b) / denominator)
 
+
 # Serve static files if needed in the future
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# The lightweight Docker GUI serves the Synergy Dashboard UI directly. Mount the
+# read-only dashboard router here so that surface is functional without the full
+# aurora_api application.
+try:
+    from src.synergy.dashboard_api import router as synergy_dashboard_router
+
+    app.include_router(synergy_dashboard_router)
+    logger.info("Synergy Dashboard API routes integrated successfully")
+except Exception as exc:
+    logger.warning("Synergy Dashboard API routes not available: %s", exc)
 
 # Store for VSA operations (in-memory for demo)
 vsa_store: Dict[str, QuantumSymbolicVector] = {}
+
+DEFAULT_OPERATOR_SNAPSHOT_PATH = "/app/operator_snapshot/aurora_operator_snapshot_latest.json"
 
 # === Enhanced Data Models ===
 
@@ -180,9 +215,92 @@ class GeometricAlgebraRequest(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    """Serve the quantum VSA demo application"""
+    """Serve the primary Aurora simulation/operator console."""
 
-    return FileResponse("static/quantum-vsa-demo.html")
+    return html_file_response(SIMULATION_CONSOLE_PATH)
+
+
+@app.get("/simulation-console", response_class=HTMLResponse)
+async def simulation_console():
+    """Stable alias for the primary Aurora simulation/operator console."""
+
+    return html_file_response(SIMULATION_CONSOLE_PATH)
+
+
+@app.get("/synergy-dashboard", response_class=HTMLResponse)
+async def synergy_dashboard():
+    """Serve the component synergy dashboard UI."""
+
+    return html_file_response(SYNERGY_DASHBOARD_PATH)
+
+
+@app.get("/legacy/vsa", response_class=HTMLResponse, include_in_schema=False)
+async def legacy_vsa_retired():
+    """Retired route for the archived Quantum VSA playground."""
+
+    archive_state = "available" if LEGACY_VSA_ARCHIVE_PATH.exists() else "missing"
+    return HTMLResponse(
+        status_code=410,
+        content=f"""
+        <!doctype html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; object-src 'none'; frame-src 'none';" />
+            <title>Aurora VSA Playground Retired</title>
+            <style>
+                body {{
+                    margin: 0;
+                    min-height: 100vh;
+                    display: grid;
+                    place-items: center;
+                    background: #071014;
+                    color: #edf7f8;
+                    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                }}
+                main {{
+                    width: min(680px, calc(100vw - 40px));
+                    border: 1px solid rgba(116, 214, 234, 0.28);
+                    border-radius: 8px;
+                    padding: 28px;
+                    background: rgba(14, 25, 32, 0.88);
+                    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+                }}
+                h1 {{
+                    margin: 0 0 12px;
+                    font-size: 28px;
+                    line-height: 1.1;
+                }}
+                p {{
+                    margin: 0 0 16px;
+                    color: #9bb0b8;
+                    line-height: 1.55;
+                }}
+                a {{
+                    color: #4cc9e8;
+                    font-weight: 700;
+                }}
+                .state {{
+                    margin-top: 18px;
+                    font-size: 12px;
+                    color: #65df89;
+                    text-transform: uppercase;
+                    letter-spacing: 0;
+                }}
+            </style>
+        </head>
+        <body>
+            <main>
+                <h1>Quantum VSA Playground Retired</h1>
+                <p>The Docker app now opens the Aurora Simulation Console. The old playground is preserved only as archived project material and is no longer the primary operator surface.</p>
+                <p><a href="/simulation-console">Open Simulation Console</a> or <a href="/synergy-dashboard">open Synergy Dashboard</a>.</p>
+                <div class="state">Archive state: {archive_state}</div>
+            </main>
+        </body>
+        </html>
+        """,
+    )
 
 
 @app.get("/legacy", response_class=HTMLResponse)
@@ -211,6 +329,65 @@ async def legacy_upload():
     </body>
     </html>
     """
+
+
+@app.get("/api/security/session", summary="Issue browser security tokens")
+async def browser_security_session():
+    """Issue short-lived same-origin tokens for the static GUI."""
+    session_id = uuid.uuid4().hex
+    return JSONResponse(
+        {
+            "session_id": session_id,
+            "csrf_token": generate_csrf_token(session_id),
+            "ws_token": generate_ws_token(session_id),
+        },
+        headers={"Cache-Control": "no-store"},
+    )
+
+
+@app.get("/api/operator/snapshot", summary="Read Aurora operator-console snapshot")
+async def operator_snapshot():
+    """Return the read-only root operator snapshot mounted into the GUI container."""
+    snapshot_path = Path(os.getenv("AURORA_OPERATOR_SNAPSHOT_PATH", DEFAULT_OPERATOR_SNAPSHOT_PATH))
+    if not snapshot_path.exists():
+        return {
+            "available": False,
+            "status": "missing",
+            "snapshot_path": str(snapshot_path),
+            "recommended_next_action": (
+                "Run `make operator-snapshot-report` in the Aurora root workspace and mount "
+                "reports/analysis read-only into the GUI container."
+            ),
+        }
+
+    try:
+        payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return {
+            "available": False,
+            "status": "invalid_json",
+            "snapshot_path": str(snapshot_path),
+            "error": exc.msg,
+        }
+    except OSError as exc:
+        logger.warning("Operator snapshot is unreadable: %s", exc)
+        return {
+            "available": False,
+            "status": "unreadable",
+            "snapshot_path": str(snapshot_path),
+            "error": "snapshot_unreadable",
+        }
+
+    if not isinstance(payload, dict):
+        return {
+            "available": False,
+            "status": "invalid_payload",
+            "snapshot_path": str(snapshot_path),
+        }
+    payload.setdefault("available", True)
+    payload.setdefault("snapshot_path", str(snapshot_path))
+    return payload
+
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MiB
 CSRF_INVALID_MSG = "Invalid CSRF token"
@@ -504,7 +681,7 @@ def mcp_bridge_health_check():
         """Compute security status using centralized validation rules."""
         result = {}
         all_valid = True
-        
+
         for layer_name, layer_value in security_layers.items():
             is_valid = validate_security_layer(layer_name, layer_value)
             rules = validation_rules.get(layer_name, {})
@@ -516,7 +693,7 @@ def mcp_bridge_health_check():
             }
             if not is_valid:
                 all_valid = False
-        
+
         result["all_valid"] = all_valid
         return result
 
@@ -528,7 +705,7 @@ def mcp_bridge_health_check():
         for capsule in capsules.values():
             level = capsule.get("security_level", "UNKNOWN")
             by_security_level[level] = by_security_level.get(level, 0) + 1
-        
+
         return {
             "total": total,
             "active": active,
@@ -543,24 +720,24 @@ def mcp_bridge_health_check():
         required_functions = health_config.get("required_core_functions", 7)
         security_required = health_config.get("required_security_active", True)
         mesh_required = health_config.get("mesh_sync_required", True)
-        
+
         checks_passed = 0
         checks_total = 0
-        
+
         if security_required:
             checks_total += 1
             if sec_valid:
                 checks_passed += 1
-        
+
         checks_total += 1
         if fn_count >= required_functions:
             checks_passed += 1
-        
+
         if mesh_required:
             checks_total += 1
             if mesh_active:
                 checks_passed += 1
-        
+
         if checks_passed == checks_total:
             return "healthy", True, True
         elif checks_passed > 0:
@@ -573,7 +750,7 @@ def mcp_bridge_health_check():
         health_config = mcp.get("health_check", {})
         status, ready, live = _derive_status(sec["all_valid"], fn_count, mesh_active, health_config)
         current_time = datetime.now(timezone.utc).isoformat()
-        
+
         return {
             "status": status,
             "module_id": mcp.get("module_id", "UNKNOWN"),
@@ -627,16 +804,16 @@ def mcp_bridge_health_check():
         security_layers = mcp_data.get("security_layers", {})
         validation_rules = mcp_data.get("security_validation_rules", {})
         sec = _compute_security(security_layers, validation_rules)
-        
+
         core_functions = mcp_data.get("core_functions", [])
         functions_count = len(core_functions)
-        
+
         external_hooks = mcp_data.get("external_hooks", {})
         mesh_sync_active = external_hooks.get("symbolic_mesh_sync") == "ACTIVE"
-        
+
         capsules = mcp_data.get("capsules", {})
         capsule_summary = _get_capsule_summary(capsules)
-        
+
         return _build_response(mcp_data, sec, functions_count, mesh_sync_active, capsule_summary)
     except Exception as e:  # pragma: no cover - defensive fallback
         logger.error("MCP health check failed: %s", str(e))
@@ -838,8 +1015,8 @@ def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCreden
             "vector_type": "bipolar",
             "quantum_generated": True,
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @app.post("/api/vsa/bind", summary="Bind two VSA vectors", dependencies=[Depends(security)])  # verify_csrf inside
@@ -881,8 +1058,8 @@ def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = 
             "similarity_a": float(np.dot(bound_vector, vec_a) / min_dim),
             "similarity_b": float(np.dot(bound_vector, vec_b) / min_dim),
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @app.post(
@@ -921,8 +1098,8 @@ def calculate_vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorization
             "dot_product": float(np.dot(vec_a, vec_b)),
             "dimension": min_dim,
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @app.get("/api/vsa/list", summary="List stored VSA vectors")
@@ -977,8 +1154,8 @@ def advanced_geometric_operations(
         else:
             return {"operation": req.operation, "input_vectors": req.vectors, "results": [], "mock_mode": ga._mock}
         return {"operation": req.operation, "input_vectors": req.vectors, "results": computed, "mock_mode": ga._mock}
-    except Exception as e:  # pragma: no cover
-        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as exc:  # pragma: no cover
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @app.post(
@@ -1012,8 +1189,8 @@ def generate_quantum_circuit(req: QuantumCircuitRequest, token: HTTPAuthorizatio
             "total_shots": 1000,
             "circuit_qasm": _serialize_quantum_circuit(qc),
         }
-    except Exception as e:  # pragma: no cover
-        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as exc:  # pragma: no cover
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 # === Enhanced WebSocket for Real-time Collaboration ===
 
@@ -1092,20 +1269,20 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
 def oppy_plan_maneuver(req: OPPYManeuverRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Plan a navigation maneuver for a vessel using OPPY Navigator.
-    
+
     T1: OPPY_PLAN_MANEUVER
     SRB: NAVIGATION_PLANNING
     DLP: context_tag=oppy_plan_maneuver
     """
     verify_csrf_token(token)
-    
+
     if not OPPY_AVAILABLE:
         raise HTTPException(status_code=503, detail="OPPY Navigator not available")
-    
+
     try:
         navigator = OPPYNavigator(vessel_id=req.vessel_id)
         plan = navigator.plan_maneuver(req.maneuver_type, req.target_state)
-        
+
         return {
             "status": "success",
             "plan": {
@@ -1136,21 +1313,21 @@ def oppy_plan_maneuver(req: OPPYManeuverRequest, token: HTTPAuthorizationCredent
 def oppy_execute_maneuver(req: OPPYExecuteRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Execute a planned navigation maneuver with triplex governance evaluation.
-    
+
     T1: OPPY_EXECUTE_MANEUVER
     SRB: NAVIGATION_EXECUTION
     DLP: context_tag=oppy_execute_maneuver
     """
     verify_csrf_token(token)
-    
+
     if not OPPY_AVAILABLE:
         raise HTTPException(status_code=503, detail="OPPY Navigator not available")
-    
+
     try:
         from src.entities.fleet.types import NavigationPlan
-        
+
         navigator = OPPYNavigator(vessel_id=req.vessel_id)
-        
+
         # Reconstruct the plan from request
         plan = NavigationPlan(
             plan_id=req.plan_id,
@@ -1163,9 +1340,9 @@ def oppy_execute_maneuver(req: OPPYExecuteRequest, token: HTTPAuthorizationCrede
             risk_assessment=req.risk_assessment,
             triplex_status={}
         )
-        
+
         result = navigator.execute_maneuver(plan)
-        
+
         return {
             "status": "success",
             "result": result,
@@ -1186,18 +1363,18 @@ def oppy_execute_maneuver(req: OPPYExecuteRequest, token: HTTPAuthorizationCrede
 def oppy_get_telemetry(vessel_id: str):
     """
     Get current telemetry data for a vessel.
-    
+
     T1: OPPY_TELEMETRY
     SRB: TELEMETRY_READ
     DLP: context_tag=oppy_telemetry
     """
     if not OPPY_AVAILABLE:
         raise HTTPException(status_code=503, detail="OPPY Navigator not available")
-    
+
     try:
         navigator = OPPYNavigator(vessel_id=vessel_id)
         telemetry = navigator.get_telemetry()
-        
+
         return {
             "status": "success",
             "telemetry": {
@@ -1228,18 +1405,18 @@ def oppy_get_telemetry(vessel_id: str):
 def oppy_get_state(vessel_id: str):
     """
     Get OPPY Navigator state summary including performance metrics.
-    
+
     T1: OPPY_STATE
     SRB: STATE_READ
     DLP: context_tag=oppy_state
     """
     if not OPPY_AVAILABLE:
         raise HTTPException(status_code=503, detail="OPPY Navigator not available")
-    
+
     try:
         navigator = OPPYNavigator(vessel_id=vessel_id)
         state = navigator.get_state_summary()
-        
+
         return {
             "status": "success",
             "state": state,
@@ -1265,21 +1442,21 @@ def oppy_get_state(vessel_id: str):
 def hr_assess_psychological_safety(req: HRPsychSafetyRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Assess psychological safety level for a team member.
-    
+
     T1: HR_PSYCH_SAFETY_ASSESSMENT
     SRB: HR_SAFETY_EVAL
     DLP: context_tag=hr_psych_safety
     Protocol: Picard_Delta_3
     """
     verify_csrf_token(token)
-    
+
     if not HR_MODULE_AVAILABLE:
         raise HTTPException(status_code=503, detail="HR Module v3.0 not available")
-    
+
     try:
         hr_module = AuroraHRModule()
         assessment = hr_module.assess_psychological_safety(req.member_name)
-        
+
         return {
             "status": "success",
             "assessment": assessment,
@@ -1302,21 +1479,21 @@ def hr_assess_psychological_safety(req: HRPsychSafetyRequest, token: HTTPAuthori
 def hr_detect_conflict(req: HRConflictRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Detect and track organizational conflicts with AI-powered analysis.
-    
+
     T1: HR_CONFLICT_DETECTION
     SRB: HR_CONFLICT_TRACKING
     DLP: context_tag=hr_conflict_detect
     Protocol: Picard_Delta_3
     """
     verify_csrf_token(token)
-    
+
     if not HR_MODULE_AVAILABLE:
         raise HTTPException(status_code=503, detail="HR Module v3.0 not available")
-    
+
     try:
         hr_module = AuroraHRModule()
         conflict = hr_module.detect_conflict(req.indicators)
-        
+
         if conflict:
             return {
                 "status": "success",
@@ -1354,17 +1531,17 @@ def hr_detect_conflict(req: HRConflictRequest, token: HTTPAuthorizationCredentia
 def hr_initiate_onboarding(req: HROnboardingRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Initiate comprehensive onboarding journey for new team member.
-    
+
     T1: HR_ONBOARDING_INIT
     SRB: HR_ONBOARDING_JOURNEY
     DLP: context_tag=hr_onboarding
     Protocol: Picard_Delta_3
     """
     verify_csrf_token(token)
-    
+
     if not HR_MODULE_AVAILABLE:
         raise HTTPException(status_code=503, detail="HR Module v3.0 not available")
-    
+
     try:
         hr_module = AuroraHRModule()
         journey = hr_module.initiate_onboarding(
@@ -1373,7 +1550,7 @@ def hr_initiate_onboarding(req: HROnboardingRequest, token: HTTPAuthorizationCre
             req.department,
             req.manager
         )
-        
+
         return {
             "status": "success",
             "journey": {
@@ -1405,17 +1582,17 @@ def hr_initiate_onboarding(req: HROnboardingRequest, token: HTTPAuthorizationCre
 def hr_cultural_health(req: HRCulturalHealthRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Assess cultural health for a specific organizational layer.
-    
+
     T1: HR_CULTURAL_HEALTH
     SRB: HR_CULTURE_ASSESSMENT
     DLP: context_tag=hr_cultural_health
     Protocol: Picard_Delta_3
     """
     verify_csrf_token(token)
-    
+
     if not HR_MODULE_AVAILABLE:
         raise HTTPException(status_code=503, detail="HR Module v3.0 not available")
-    
+
     try:
         # Map string to TeamLayer enum
         layer_map = {
@@ -1424,10 +1601,10 @@ def hr_cultural_health(req: HRCulturalHealthRequest, token: HTTPAuthorizationCre
             "governance": TeamLayer.GOVERNANCE
         }
         layer = layer_map.get(req.layer.lower(), TeamLayer.REAL_WORLD)
-        
+
         hr_module = AuroraHRModule()
         report = hr_module.assess_cultural_health(layer)
-        
+
         return {
             "status": "success",
             "report": {
@@ -1464,17 +1641,17 @@ def hr_cultural_health(req: HRCulturalHealthRequest, token: HTTPAuthorizationCre
 def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Generate a quantum-symbolic agent with ethics enforcement.
-    
+
     T1: QUANTUM_FORGE_AGENT_CREATE
     SRB: AGENT_GENERATION
     DLP: context_tag=qf_create_agent
     Ethics: GUMAS_Thermax, Picard_Delta_3
     """
     verify_csrf_token(token)
-    
+
     if not QUANTUM_FORGE_AVAILABLE:
         raise HTTPException(status_code=503, detail="Quantum Forge not available")
-    
+
     try:
         # Map string to enum
         ethics_map = {
@@ -1489,12 +1666,12 @@ def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentia
             "metamorphic": FlowstateMode.METAMORPHIC,
             "quiescent": FlowstateMode.QUIESCENT
         }
-        
+
         ethics_level = ethics_map.get(req.ethics_level.lower(), EthicsLevel.BALANCED)
         flowstate_mode = flowstate_map.get(req.flowstate_mode.lower(), FlowstateMode.GENERATIVE)
-        
+
         forge = QuantumForge(ethics_level=ethics_level, flowstate_mode=flowstate_mode)
-        
+
         # Actual API: generate_agent(intent_query, constellation_targets, metadata)
         # Create intent from agent_id and capabilities
         # Secure construction of intent_query (avoid direct f-string interpolation of arbitrary capability text)
@@ -1508,13 +1685,13 @@ def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentia
             "capabilities": req.capabilities,
             "symbolic_depth": req.symbolic_depth
         }
-        
+
         agent = forge.generate_agent(
             intent_query=intent_query,
             constellation_targets=None,
             metadata=metadata
         )
-        
+
         return {
             "status": "success",
             "agent": {
@@ -1548,26 +1725,26 @@ def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentia
 def qf_store_memory(req: QFStoreMemoryRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Store a symbolic memory node.
-    
+
     T1: QUANTUM_FORGE_MEMORY_STORE
     SRB: MEMORY_STORAGE
     DLP: context_tag=qf_store_memory
     """
     verify_csrf_token(token)
-    
+
     if not QUANTUM_FORGE_AVAILABLE:
         raise HTTPException(status_code=503, detail="Quantum Forge not available")
-    
+
     try:
         forge = QuantumForge()
-        
+
         # Actual API: create_memory_node(content, tags)
         # Note: intent_alignment is calculated internally based on content
         node = forge.create_memory_node(
             content=req.content,
             tags=req.tags
         )
-        
+
         return {
             "status": "success",
             "node": {
@@ -1594,23 +1771,23 @@ def qf_store_memory(req: QFStoreMemoryRequest, token: HTTPAuthorizationCredentia
 def qf_reactivate_memories(req: QFReactivateRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Reactivate memory nodes based on intent query.
-    
+
     T1: QUANTUM_FORGE_REACTIVATE
     SRB: MEMORY_REACTIVATION
     DLP: context_tag=qf_reactivate
     """
     verify_csrf_token(token)
-    
+
     if not QUANTUM_FORGE_AVAILABLE:
         raise HTTPException(status_code=503, detail="Quantum Forge not available")
-    
+
     try:
         forge = QuantumForge()
-        
+
         # Actual API: reactivate_by_intent(intent_query, top_k)
         # Returns list of memory nodes, not agents
         nodes = forge.reactivate_by_intent(req.intent_query, top_k=5)
-        
+
         if nodes:
             return {
                 "status": "success",
@@ -1652,23 +1829,23 @@ def qf_reactivate_memories(req: QFReactivateRequest, token: HTTPAuthorizationCre
 def qf_ethics_check(req: QFEthicsCheckRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Perform GUMAS_Thermax ethics drift check on action vectors.
-    
+
     T1: QUANTUM_FORGE_ETHICS_CHECK
     SRB: ETHICS_VALIDATION
     DLP: context_tag=qf_ethics_check
     Ethics: GUMAS_Thermax
     """
     verify_csrf_token(token)
-    
+
     if not QUANTUM_FORGE_AVAILABLE:
         raise HTTPException(status_code=503, detail="Quantum Forge not available")
-    
+
     try:
         from modules.quantum_forge import GUMAS_Thermax
-        
+
         ethics = GUMAS_Thermax(level=EthicsLevel.BALANCED)
         is_acceptable, drift = ethics.check_drift(req.action_vector, req.baseline_vector)
-        
+
         return {
             "status": "success",
             "ethics_check": {

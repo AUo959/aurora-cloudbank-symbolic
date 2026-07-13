@@ -3,12 +3,15 @@ from __future__ import annotations
 from collections.abc import Callable
 from unittest import TestCase
 
+import pytest
+
 from simulation.scenario_seed_initializer import (
     ScenarioSeedInitializationError,
     initialize_from_uptake_packet,
 )
 
 CHECK = TestCase()
+pytestmark = pytest.mark.unit
 
 
 def sample_packet() -> dict:

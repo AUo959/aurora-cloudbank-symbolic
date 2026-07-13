@@ -41,6 +41,8 @@ if __name__ == "__main__":
     import os
     if os.path.exists('index.html'):
         fix_html_file('index.html')
+    if os.path.exists('static/aurora-simulation-console.html'):
+        fix_html_file('static/aurora-simulation-console.html')
     if os.path.exists('static/quantum-vsa-demo.html'):
         fix_html_file('static/quantum-vsa-demo.html')
 EOF

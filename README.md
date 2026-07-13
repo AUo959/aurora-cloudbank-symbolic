@@ -155,6 +155,12 @@ The server exposes ~339 HTTP routes across 30+ routers. All routes return JSON.
 | GUMAS | `/api/gumas/` | Ethics alignment enforcement |
 | Sensors | `/api/sensors/` | System sensor array |
 
+**CloudHub GUI routes:**
+
+- `/` and `/simulation-console` — Aurora Simulation Console
+- `/synergy-dashboard` — Component Synergy Dashboard UI
+- `/legacy/vsa` — Retired Quantum VSA playground notice
+
 See [`docs/reference/API_CATALOG.md`](docs/reference/API_CATALOG.md) for the full route listing.
 
 ---

@@ -308,6 +308,20 @@
       "notes": "Crew collaboration endpoint currently lives in the main API file."
     },
     {
+      "id": "l1_station",
+      "owner": "l1-station",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/api/l1_station_api.py",
+      "mount_path": "/api/aurora",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /api/aurora.",
+        "api/aurora_api.py imports src.api.l1_station_api and includes the router."
+      ],
+      "notes": "L1 station health and simulation-state surface."
+    },
+    {
       "id": "l2_meta_agents",
       "owner": "l2-agents",
       "runtime": "fastapi-router",
@@ -336,6 +350,34 @@
       "notes": "Drift metrics and Prometheus exporter surface."
     },
     {
+      "id": "sensor_array",
+      "owner": "sensor-array",
+      "runtime": "fastapi-router-factory",
+      "entrypoint": "src/sensors/api/routes.py",
+      "mount_path": "/api/sensors",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "build_router() constructs the observation router.",
+        "api/aurora_api.py creates a SensorArrayFacade and includes the router with prefix /api/sensors."
+      ],
+      "notes": "GET-only internal, external, observatory, fusion, and health observation surface."
+    },
+    {
+      "id": "checkpoint_vault",
+      "owner": "checkpoint-vault",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/checkpoint_vault/api.py",
+      "mount_path": "/checkpoint",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /checkpoint.",
+        "api/aurora_api.py imports modules.checkpoint_vault.api and includes the router."
+      ],
+      "notes": "Ethical checkpoint creation, lookup, rollback, and agent-history surface."
+    },
+    {
       "id": "playground",
       "owner": "developer-experience",
       "runtime": "fastapi-router",
@@ -348,6 +390,20 @@
         "api/aurora_api.py imports src.playground and includes playground_router."
       ],
       "notes": "Interactive execution, share, health, metrics, and WebSocket surface."
+    },
+    {
+      "id": "cask",
+      "owner": "cask",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/cask/api.py",
+      "mount_path": "/api/cask",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /api/cask.",
+        "api/aurora_api.py imports modules.cask.api and includes the router."
+      ],
+      "notes": "Read-only CASK technical specification, comparison, risk, and topology surface."
     },
     {
       "id": "mesh_runtime_v1",

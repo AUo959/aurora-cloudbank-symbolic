@@ -1,7 +1,7 @@
 # API Catalog Governance
 
 **Status:** Active governance decision
-**Last reviewed:** 2026-05-26
+**Last reviewed:** 2026-07-13
 **Inventory:** `docs/api/api_surface_inventory.json`
 
 ## Decision
@@ -72,8 +72,25 @@ Each inventory entry must include:
   route authority by the Python mesh runtime unless a deployment surface later
   mounts it explicitly.
 - `docs/api/API_CATALOG.json` and `docs/api/api_schema.json` are generated
-  snapshots. Use them for route detail only after confirming their generated
-  timestamp is current.
+  snapshots. `API_CATALOG.json` records `generated_at` and `source_commit`;
+  `api_schema.json` records the same values as `x-generated-at` and
+  `x-source-commit`. Use them for route detail only after completing the
+  currency check below.
+
+## Snapshot Currency Check
+
+The generated metadata identifies the runtime commit that was assembled, not
+the commit that later stored the generated files. Verify all of the following:
+
+1. The timestamp and source commit agree across both generated JSON files.
+2. The source commit exists and is an ancestor of the checkout being reviewed.
+3. No route-bearing files under `api/`, `modules/`, or `src/` changed after the
+   source commit. If they did, inspect the changes and regenerate when any HTTP
+   or WebSocket surface changed.
+
+The catalog's `total_routes` is the number of OpenAPI paths. The `routes` array
+contains one record per supported HTTP operation, so its length can be larger.
+Neither count proves inventory ownership coverage.
 
 ## Update Workflow
 
@@ -82,9 +99,28 @@ Each inventory entry must include:
    evidence.
 3. Update `docs/architecture/RUNTIME_PATH_DRIFT_LEDGER.md` if older docs,
    commands, or routes now conflict.
-4. Regenerate OpenAPI/catalog snapshots only when route-level detail changed and
-   the generator output path is understood.
-5. Run `python3 -m pytest -q tests/test_api_surface_inventory.py`.
+4. Regenerate OpenAPI/catalog snapshots when route-level detail changed with
+   `python3 scripts/generate_api_catalog.py`. The default output is the tracked
+   `docs/api/` directory, independent of caller working directory.
+5. Run `python3 -m pytest -q tests/test_api_surface_inventory.py` for inventory
+   schema, required-field, and named regression checks. This is a structural
+   test, not a complete comparison with live router registrations. Automated
+   router-coverage validation is tracked in issue #1204.
+
+## 2026-07-13 Review Receipt
+
+- Issues #1142, #1144, and #1145 were resolved before this review.
+- The catalog and schema snapshots were regenerated with matching timestamps
+  and source commit metadata.
+- Mesh-agent routes, the QGIA forecast router, the read-only PAT terminal
+  overlay, and the unimplemented RD consent contract were reconciled in #1144;
+  consent implementation remains explicitly tracked in #1200.
+- A manual comparison of `api/aurora_api.py` router registrations with the
+  inventory found and added four omitted active routers: L1 Station, Sensor
+  Array, Checkpoint Vault, and CASK.
+- The existing inventory test was confirmed to be structural rather than a
+  completeness proof. Issue #1204 tracks a deterministic router-coverage
+  validator; until it lands, every review must include the manual comparison.
 
 ## Review Cadence
 

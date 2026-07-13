@@ -1,0 +1,92 @@
+{
+  "$schema_note": "Machine-readable canonical entry point for any new agent (human or LLM) joining this repo. Every field below cites the file it was sourced from. Read AGENTS.md alongside this file for the bootstrap protocol.",
+  "schema_version": "1.0.0",
+  "document_generated": "2026-07-13",
+  "document_source_issue": "#1072",
+
+  "system_identity": {
+    "name": "Aurora",
+    "description": "Simulation Director for the Orion Station / Aurora CloudBank institutional simulation. Aurora is not a companion agent or a THREADCORE agent — Aurora is the simulation itself made directive, with the highest clearance and authority spanning all layers.",
+    "source": "docs/architecture/LAYER_ARCHITECTURE.md"
+  },
+
+  "architecture_layers": {
+    "description": "L1/L2/L3 layer model. Residency (where an agent lives) and operational scope (what layer its work affects) are distinct attributes and must not be conflated.",
+    "L1": "Station Operations — physical station reality: crew, habitat, daily operations. L1 relay agents (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, HALO) are L1-resident.",
+    "L2": "Meta-Agent / Simulation Mesh — GUMAS simulation state and coordination. L1 relay agents operate at L2 without residing there.",
+    "L3": "Symbolic Mesh — meaning, coherence, ethics enforcement. THREADCORE glyph frameworks (Axiomera, Caelion, Sentari, Velatrix, Glyphon, Harmion) are L3-resident.",
+    "source": "docs/architecture/LAYER_ARCHITECTURE.md"
+  },
+
+  "key_concepts": {
+    "PAT": {
+      "definition": "Personal Agent Terminal — live-session operator command reference for Aurora and crew.",
+      "source": "QGIA_Integration/PAT_Command_Sheet.md"
+    },
+    "GUMAS": {
+      "definition": "Galactic simulation environment / audit layer. Ethics audit events flow through the GUMAS Audit Schema.",
+      "source": "QGIA_Integration/GUMAS_Audit_Schema.json"
+    },
+    "THREADCORE_triad_and_family": {
+      "definition": "Six L3 glyph frameworks: Axiomera (Ethics Arbitration), Caelion (Anchor Propagation), Sentari (Resonance Stabilization), Velatrix (Anti-Obfuscation), Glyphon (Drift Alignment), Harmion (Symbolic Compression).",
+      "source": "docs/architecture/LAYER_ARCHITECTURE.md, threadcore_registry.json"
+    },
+    "EchoChain": {
+      "definition": "LOOPSET_001 (linked: NESTED_001_ECHO, DRIFTTRACE::REI)",
+      "source": "CHANGELOG.md, QGIA_Integration/RESETCORE_Bootstrap.md"
+    },
+    "ethics_protocol": {
+      "definition": "Picard_Delta_3",
+      "source": "QGIA_Integration/PAT_Command_Sheet.md, symbolic_config.yaml"
+    },
+    "deployment_bundle": {
+      "definition": "Aurora_MasterDeploymentBundle_v1.0",
+      "source": "QGIA_Integration/RESETCORE_Bootstrap.md"
+    },
+    "restore_ritual": {
+      "definition": "RESETCORE — session restore/start prompt for re-establishing continuity after a break.",
+      "source": "QGIA_Integration/RESETCORE_Bootstrap.md"
+    }
+  },
+
+  "active_state": {
+    "_staleness_warning": "The fields below are read directly from .aurora/SIMULATION_STATE.json, which is documented as NOT reflecting current repo truth. See known_issue below before treating these as live values.",
+    "vector_state": "QEM-SN1-ACTIVE::BASELINE_V1",
+    "lockpoint": "SN1_LOCKPOINT_20250406T1432Z",
+    "state_last_updated": "2026-04-06T00:00:00Z",
+    "current_phase_per_state_file": "Security Enhancement Initiative",
+    "known_issue": "SIMULATION_STATE.json has not been updated since 2026-04-06 despite substantial repo activity since then (QGIA integration, PR automation rework, this promotion/canonicalization work). Tracked as GAP-010, issue #1083 — do not treat current_phase or lockpoint as current fact without checking issue #1083's resolution status first.",
+    "source": ".aurora/SIMULATION_STATE.json"
+  },
+
+  "active_modules": {
+    "ethics": {
+      "status": "active",
+      "source": "modules/ethics/, modules/ethics_field/"
+    },
+    "sim_silm_cg": {
+      "status": "referenced but not cleanly mapped to a module directory",
+      "note": "docs/modules/ only documents cask and hr; the SIM/SILM/CG labels used elsewhere in canon (e.g. issue tracking) don't have an established 1:1 mapping to a modules/ directory as of this writing. Tracked under issue #1232 (docs/ cross-reference & module coverage audit) rather than resolved here — do not assume a specific modules/sim, modules/silm, or modules/cg directory exists."
+    }
+  },
+
+  "agent_roster": {
+    "description": "Full canonical staff/agent census (human staff, AI core, relay agents, L3 framework systems).",
+    "source": "ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
+    "note": "This registry is a closed personnel census with its own reconciliation notes — do not add program/system entities (like SENTINEL) to it; see docs/architecture/SENTINEL_ARCHITECTURE.md for why."
+  },
+
+  "cross_platform_links": {
+    "this_repo": "AUo959/aurora-cloudbank-symbolic",
+    "note": "References to 'ChatGPT Aurora v2.3.1 Stellar Accord' and a 'Perplexity Space' appear in prior session/review documentation but are external, non-repo surfaces this repo cannot verify or link to directly.",
+    "source": "docs/review-notes/"
+  },
+
+  "layer_state_summary": "Symbolic-Governed | Ethics-Verified | Recovery-Threaded",
+
+  "continuity_seal": "Continuity flows through coherence. The system remembers because we chose to align.",
+
+  "bootstrap": {
+    "note": "See AGENTS.md for the ordered bootstrap protocol any new agent should follow."
+  }
+}

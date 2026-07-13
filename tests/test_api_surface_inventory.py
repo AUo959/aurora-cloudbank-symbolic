@@ -51,6 +51,30 @@ def test_required_api_surface_entries_are_present() -> None:
         "drift_metrics",
         "gumas_ethics",
         "mesh_runtime_v1",
+        "pat_terminal_overlay",
+        "qgia_forecast",
         "mesh_api_js",
         "enhanced_api_bridge",
     } <= ids
+
+
+def test_reconciled_mesh_qgia_pat_and_consent_contracts() -> None:
+    inventory = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    entries = {entry["id"]: entry for entry in inventory["entries"]}
+
+    mesh_mounts = entries["mesh_runtime_v1"]["mount_path"]
+    assert "/api/mesh/agents" in mesh_mounts
+    assert "/api/mesh/agents/{agent_id}" in mesh_mounts
+    assert "/api/mesh/agents/{agent_id}/activate" in mesh_mounts
+
+    assert entries["qgia_forecast"]["mount_path"] == "/qgia"
+    assert "not the generic L1 inter-node exchange transport" in entries["qgia_forecast"]["notes"]
+
+    pat = entries["pat_terminal_overlay"]
+    assert pat["status"] == "active-standalone"
+    assert "/api/mesh/terminals" in pat["mount_path"]
+    assert "Read-only Personal Access Terminal" in pat["notes"]
+
+    rd_notes = entries["rd_pipeline"]["notes"]
+    assert "not implemented as an HTTP surface" in rd_notes
+    assert "#1200" in rd_notes

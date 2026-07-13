@@ -51,7 +51,7 @@ amazon-braket-sdk>=1.65.0           # AWS Braket SDK
 # ADDITIONAL QUANTUM FRAMEWORKS (Optional)
 # ===================================================================
 # Additional quantum computing frameworks
-pennylane>=0.33.0                   # PennyLane quantum ML (optional)
+pennylane>=0.45.1                   # PennyLane quantum ML (optional)
 
 # ===================================================================
 # PERFORMANCE OPTIMIZATION (Optional)

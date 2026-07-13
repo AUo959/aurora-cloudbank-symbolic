@@ -93,6 +93,14 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
     checks.assertEqual(dev_terminal_group.status_code, 200)
     checks.assertIs(dev_terminal_group.json()["terminal_group"], True)
 
+    personnel_tag = quote("{{@Carmen-Rivas:::Adhesive flow rate nominal}}", safe="")
+    invalid_terminal = client.get(f"/api/mesh/terminals/{personnel_tag}")
+    checks.assertEqual(invalid_terminal.status_code, 400)
+    checks.assertIn("Personnel Attention Tags", invalid_terminal.json()["detail"])
+
+    unknown_terminal = client.get("/api/mesh/terminals/not-a-terminal")
+    checks.assertEqual(unknown_terminal.status_code, 404)
+
     with client.websocket_connect("/ws/mesh") as websocket:
         initial = websocket.receive_json()
         assert initial["payload"]["phase"] == "socket_connected"
@@ -111,7 +119,7 @@ def test_mesh_runtime_api_message_routing(tmp_path: Path) -> None:
 
     send = client.post(
         "/api/mesh/messages",
-        json={"to": "alex_thorne", "channel": "private:captain:alex", "content": "Status check."},
+        json={"to": "Alex Thorne", "channel": "private:captain:alex", "content": "Status check."},
     )
     assert send.status_code == 200
     history = wait_for_agent_reply(client, "private:captain:alex")

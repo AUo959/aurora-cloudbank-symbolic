@@ -17,7 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.mesh.runtime import MeshRuntime  # noqa: E402
 from src.mesh.models import MeshMessageRequest  # noqa: E402
-from src.mesh.terminals import is_personnel_attention_tag  # noqa: E402
+from src.mesh.terminals import MeshTerminalRoute, is_personnel_attention_tag  # noqa: E402
 
 
 def copy_mesh_project(tmp_path: Path) -> Path:
@@ -39,10 +39,16 @@ def test_pat_live_subset_is_overlay_not_full_terminal_universe(tmp_path: Path) -
 
     dev_group = runtime.get_terminal("aurora.dev.code.query")
     checks.assertIs(dev_group["terminal_group"], True)
+    checks.assertEqual(dev_group["terminal_id"], "aurora.dev.code.query")
+    checks.assertEqual(dev_group["terminal_namespace"], "aurora.dev.code.query")
     checks.assertEqual(
         {member["owner_agent_id"] for member in dev_group["members"]},
         {"carmen_rivas", "ira_menon", "tobias_qin"},
     )
+
+    alternate_spelling = runtime.get_terminal("  AURORA-dev-code-query  ")
+    checks.assertEqual(alternate_spelling["terminal_id"], dev_group["terminal_id"])
+    checks.assertEqual(alternate_spelling["terminal_namespace"], dev_group["terminal_namespace"])
 
     carmen = runtime.get_terminal("core_development.carmen.term")
     checks.assertEqual(carmen["owner_agent_id"], "carmen_rivas")
@@ -70,3 +76,11 @@ def test_personnel_attention_tags_do_not_resolve_as_terminal_routes(tmp_path: Pa
     checks.assertTrue(is_personnel_attention_tag(tag))
     with pytest.raises(ValueError, match="Personnel Attention Tags"):
         runtime.get_terminal(tag)
+
+
+def test_terminal_route_null_strings_use_valid_defaults() -> None:
+    checks = unittest.TestCase()
+    route = MeshTerminalRoute.from_dict({"channel_id": None, "route_kind": None})
+
+    checks.assertEqual(route.channel_id, "")
+    checks.assertEqual(route.route_kind, "mesh_agent")

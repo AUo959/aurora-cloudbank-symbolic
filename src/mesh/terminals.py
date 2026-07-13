@@ -15,6 +15,10 @@ from .models import AgentManifest
 PERSONNEL_ATTENTION_TAG_RE = re.compile(r"^\{\{@[^{}]+:::.+\}\}$")
 
 
+class PersonnelAttentionTagError(ValueError):
+    """Raised when EVA/HUD tag syntax is used as a terminal route."""
+
+
 def is_personnel_attention_tag(value: str) -> bool:
     """Return true for EVA/HUD Personnel Attention Tag syntax."""
 
@@ -35,8 +39,8 @@ class MeshTerminalRoute:
         payload = payload or {}
         return cls(
             owner_agent_id=payload.get("owner_agent_id"),
-            channel_id=str(payload.get("channel_id", "")),
-            route_kind=str(payload.get("route_kind", "mesh_agent")),
+            channel_id=str(payload.get("channel_id") or ""),
+            route_kind=str(payload.get("route_kind") or "mesh_agent"),
             routable=bool(payload.get("routable", True)),
         )
 
@@ -185,18 +189,40 @@ class TerminalDirectory:
 
     def resolve(self, value: str) -> List[PersonalTerminalProfile]:
         if is_personnel_attention_tag(value):
-            raise ValueError("Personnel Attention Tags are not Personal Access Terminal routes")
+            raise PersonnelAttentionTagError(
+                "Personnel Attention Tags are not Personal Access Terminal routes"
+            )
         key = normalize_lookup(value)
         terminal_ids = self.alias_index.get(key, [])
         return [self.profiles[terminal_id] for terminal_id in terminal_ids]
 
+    @staticmethod
+    def _canonical_group_key(
+        normalized_key: str, matches: Iterable[PersonalTerminalProfile]
+    ) -> str:
+        """Choose one deterministic presentation for a shared normalized alias."""
+
+        candidates = {
+            candidate
+            for profile in matches
+            for candidate in profile.lookup_values()
+            if normalize_lookup(candidate) == normalized_key
+        }
+        if not candidates:
+            return normalized_key
+        return min(candidates, key=lambda candidate: (candidate.casefold(), candidate))
+
     def resolve_presented(self, value: str) -> Dict[str, Any]:
+        normalized_key = normalize_lookup(value)
         matches = self.resolve(value)
         if not matches:
             raise ValueError(f"Unknown terminal '{value}'")
         if len(matches) == 1:
             return matches[0].to_dict()
-        return TerminalGroup(lookup_key=value, members=matches).to_dict()
+        return TerminalGroup(
+            lookup_key=self._canonical_group_key(normalized_key, matches),
+            members=matches,
+        ).to_dict()
 
 
 def _apply_manifest_to_profile(profile: PersonalTerminalProfile, manifest: AgentManifest) -> None:
@@ -250,7 +276,5 @@ def load_terminal_directory(registry_dir: Path, manifests: Dict[str, AgentManife
         _reconcile_profile_with_manifest(profile, manifests)
 
     _apply_pat_overlay(registry_dir, by_agent_id)
-
-    return TerminalDirectory(profiles)
 
     return TerminalDirectory(profiles)

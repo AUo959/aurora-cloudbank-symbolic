@@ -90,9 +90,23 @@ Cross-namespace bridges: L2 relay agents (HALO, STARLING, LIORA, OPPY, ARCHY, RI
 - Created `docs/REVIEW_PROTOCOL.md` as standalone review standard for all agents and contributors
 - Full incident record: `docs/review-notes/2026-06-22_general-review-and-gap-010.md`
 
+### PROJECT SENTINEL Canonical Promotion ✅
+*Completed: 2026-07-13 (issue #1069)*
+
+- Promoted SENTINEL from NON-CANONICAL R&D proposal to canonical architecture — Streams 2 (AI self-audit) and 3 (ethics overlay) were already operational in code
+- Created `docs/architecture/SENTINEL_ARCHITECTURE.md` as the canonical technical reference
+- Registered `SENTINEL-COORDINATOR` in `constellation-contracts/manifests/sentinel-coordinator.manifest.json`, with Axiomera as named L3 audit authority
+- Added Stream 1 (crew cognitive load) stub sensors at `src/sensors/crew_load/` and a stub status endpoint at `/sentinel/crew-load/status` — not wired to a real biometric provider yet
+- Full detail, including two schema mismatches found (staff registry and ThreadCore payload registry don't fit a program entity like SENTINEL): `docs/architecture/SENTINEL_ARCHITECTURE.md`
+
 ---
 
 ## Open Work Streams
+
+### WS-011 — SENTINEL Stream 1 Biometric Provider
+**Priority:** Medium | **Owner:** Medical division (Dr. Vasquez)
+Wire a real HRV/cortisol-proxy data source to `src/sensors/crew_load/`, and define Stream 1's own consent/opt-out hook. See `docs/architecture/SENTINEL_ARCHITECTURE.md` — Remaining Work.
+
 
 ### WS-001 — QUANTUM_FORGE Alignment Review
 **Priority:** Medium | **Gap:** GAP-005  

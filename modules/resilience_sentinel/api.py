@@ -15,6 +15,8 @@ from pydantic import BaseModel, Field
 
 from src.middleware.fastapi_security import require_csrf_token, verify_ws_token
 
+from src.sensors.crew_load import CognitiveLoadMonitor, MicrobiomeProxySensor
+
 from .alert_manager import AlertSeverity
 from .monitoring_engine import MonitoringEngine
 
@@ -145,6 +147,33 @@ async def get_health():
         checks=[HealthCheckResponse(**check) for check in report["checks"]],
         alerts=report["alerts"],
     )
+
+
+@router.get("/crew-load/status")
+async def get_crew_load_status():
+    """
+    PROJECT SENTINEL Stream 1 — crew cognitive-load monitoring status.
+
+    Stub endpoint. No biometric provider is wired yet (see
+    src/sensors/crew_load/). Returns each sensor's registration state, not
+    live readings, so callers can distinguish "not yet implemented" from
+    "no data right now." See docs/architecture/SENTINEL_ARCHITECTURE.md for
+    the layer-boundary constraint this stream operates under (crew load
+    data must never be reported as, or feed, performance data).
+    """
+    sensors = {
+        "cognitive_load": CognitiveLoadMonitor(),
+        "microbiome_proxy": MicrobiomeProxySensor(),
+    }
+    return {
+        "stream": "SENTINEL_STREAM_1",
+        "wired": False,
+        "sensors": {
+            name: {"sensor_id": s.sensor_id, "layer": s.layer.value, "provider_wired": False}
+            for name, s in sensors.items()
+        },
+        "note": "Stub endpoint — no biometric provider wired.",
+    }
 
 
 @router.get("/metrics", response_model=Dict[str, Any])

@@ -3,12 +3,15 @@
 import os
 import unittest
 
+import pytest
 from fastapi.testclient import TestClient
 
 os.environ.setdefault("CSRF_SECRET_KEY", "test-csrf-secret-for-cloudhub-console")
 os.environ.setdefault("WS_AUTH_SECRET", "test-ws-secret-for-cloudhub-console")
 
 from api.aurora_gui_cloudhub_fastapi import app  # noqa: E402
+
+pytestmark = pytest.mark.unit
 
 
 def _client() -> TestClient:

@@ -10,16 +10,17 @@ services:
       context: .
       dockerfile: Dockerfile_aurora_gui_cloudhub
     environment:
-      # Runtime startup refuses empty values; keep build usable without secrets.
-      CSRF_SECRET_KEY: ${CSRF_SECRET_KEY:-}
-      WS_AUTH_SECRET: ${WS_AUTH_SECRET:-}
+      # Fail during Compose interpolation instead of starting with missing secrets.
+      # Generate local values with: openssl rand -hex 32
+      CSRF_SECRET_KEY: "${CSRF_SECRET_KEY:?Set CSRF_SECRET_KEY to a strong random value}"
+      WS_AUTH_SECRET: "${WS_AUTH_SECRET:?Set WS_AUTH_SECRET to a strong random value}"
       AURORA_OPERATOR_SNAPSHOT_PATH: ${AURORA_OPERATOR_SNAPSHOT_PATH:-/app/operator_snapshot/aurora_operator_snapshot_latest.json}
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
       - aurora_gui_symbols:/app/symbols
-      # Aurora root operator snapshot, mounted read-only for the local console.
-      - ${AURORA_OPERATOR_SNAPSHOT_DIR:-../../../reports/analysis}:/app/operator_snapshot:ro
+      # Optional operator snapshots, mounted read-only from a repo-local default.
+      - ${AURORA_OPERATOR_SNAPSHOT_DIR:-./reports}:/app/operator_snapshot:ro
 
   command_node:
     build:

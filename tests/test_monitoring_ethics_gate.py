@@ -118,6 +118,25 @@ def test_violations_to_verdict_hard_veto_audits_blocking_violation():
 
 
 @pytest.mark.unit
+def test_violations_to_verdict_tie_break_is_order_independent():
+    alpha = MagicMock()
+    alpha.blocked = False
+    alpha.severity.value = "medium"
+    alpha.rule_name = "alpha_rule"
+
+    omega = MagicMock()
+    omega.blocked = False
+    omega.severity.value = "medium"
+    omega.rule_name = "omega_rule"
+
+    forward = _violations_to_verdict([omega, alpha], None)
+    reverse = _violations_to_verdict([alpha, omega], None)
+
+    assert forward.reason == reverse.reason
+    assert "worst=alpha_rule" in forward.reason
+
+
+@pytest.mark.unit
 def test_check_ethics_raises_on_low_severity_blocked_violation():
     # Regression guard for the same invariant as above, at the check_ethics()
     # level: a "low" severity violation that is nonetheless auto_block=True

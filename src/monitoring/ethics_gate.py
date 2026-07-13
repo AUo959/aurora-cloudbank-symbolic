@@ -55,7 +55,13 @@ def _violations_to_verdict(violations: List[Any], context_tag: Optional[str]) ->
     blocking_violations = [v for v in violations if v.blocked]
     hard_veto = bool(blocking_violations)
     candidates = blocking_violations or violations
-    worst = min(candidates, key=lambda v: _non_blocking_severity(v)[1])
+    worst = min(
+        candidates,
+        key=lambda v: (
+            _non_blocking_severity(v)[1],
+            str(getattr(v, "rule_name", None) or "unknown_rule"),
+        ),
+    )
     severity, score = _non_blocking_severity(worst)
     if hard_veto:
         severity = VerdictSeverity.HARD_VETO

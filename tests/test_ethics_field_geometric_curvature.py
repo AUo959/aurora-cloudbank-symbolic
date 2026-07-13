@@ -140,6 +140,45 @@ class TestGeometricCurvatureMath:
             pytest.approx(expected.interaction_penalty),
         )
 
+    def test_failing_clifford_backend_falls_back_to_closed_form(self, monkeypatch):
+        checks = unittest.TestCase()
+        scores = self._all(0.8)
+        expected = calculate_ga_curvature(scores, prefer_clifford=False)
+        monkeypatch.setattr(ga_curvature, "_clifford", object())
+
+        def fail_backend(_legs, _lam):
+            raise RuntimeError("optional backend failed")
+
+        monkeypatch.setattr(ga_curvature, "_interaction_via_clifford", fail_backend)
+
+        result = calculate_ga_curvature(scores)
+
+        checks.assertEqual(result.backend, "closed_form")
+        checks.assertEqual(
+            result.interaction_penalty,
+            pytest.approx(expected.interaction_penalty),
+        )
+
+    def test_returned_dimension_scores_match_clamped_computation(self):
+        checks = unittest.TestCase()
+        scores = self._all(0.5)
+        scores["picard_delta_3"] = 1.2
+        scores["transparency"] = -0.3
+
+        result = calculate_ga_curvature(scores, prefer_clifford=False)
+
+        checks.assertEqual(result.dimension_scores["picard_delta_3"], 1.0)
+        checks.assertEqual(result.dimension_scores["transparency"], 0.0)
+        checks.assertEqual(
+            result.composite_scalar,
+            pytest.approx(
+                sum(
+                    DIMENSION_WEIGHTS[dim] * result.dimension_scores[dim]
+                    for dim in DIMENSION_WEIGHTS
+                )
+            ),
+        )
+
     def test_clifford_basis_is_cached_per_process(self, monkeypatch):
         checks = unittest.TestCase()
 

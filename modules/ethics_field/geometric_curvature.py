@@ -164,41 +164,54 @@ def calculate_ga_curvature(
     Additive companion to FieldCurvature.calculate_curvature — does not decide
     formation_allowed/resistance_level; the scalar gate remains authoritative.
     """
-    legs = _legs(dimension_scores)
+    normalized_scores = {
+        dim: max(0.0, min(1.0, float(dimension_scores.get(dim, 0.0))))
+        for dim in DIMENSION_WEIGHTS
+    }
+    legs = _legs(normalized_scores)
     closed_form_interaction = _interaction_closed_form(legs, lam)
 
     if prefer_clifford and _clifford is not None:
-        clifford_interaction = _interaction_via_clifford(legs, lam)
-        if math.isclose(
-            clifford_interaction,
-            closed_form_interaction,
-            rel_tol=1e-9,
-            abs_tol=1e-12,
-        ):
-            interaction = clifford_interaction
-            backend = "clifford"
-        else:
+        try:
+            clifford_interaction = _interaction_via_clifford(legs, lam)
+        except Exception:
             logger.warning(
-                "Clifford interaction %.12g diverged from closed form %.12g; "
-                "using closed-form fallback",
-                clifford_interaction,
-                closed_form_interaction,
+                "Clifford interaction failed; using closed-form fallback",
+                exc_info=True,
             )
             interaction = closed_form_interaction
             backend = "closed_form"
+        else:
+            if math.isclose(
+                clifford_interaction,
+                closed_form_interaction,
+                rel_tol=1e-9,
+                abs_tol=1e-12,
+            ):
+                interaction = clifford_interaction
+                backend = "clifford"
+            else:
+                logger.warning(
+                    "Clifford interaction %.12g diverged from closed form %.12g; "
+                    "using closed-form fallback",
+                    clifford_interaction,
+                    closed_form_interaction,
+                )
+                interaction = closed_form_interaction
+                backend = "closed_form"
     else:
         interaction = closed_form_interaction
         backend = "closed_form"
 
     composite_scalar = sum(
-        DIMENSION_WEIGHTS[d] * max(0.0, min(1.0, float(dimension_scores.get(d, 0.0))))
+        DIMENSION_WEIGHTS[d] * normalized_scores[d]
         for d in DIMENSION_WEIGHTS
     )
 
     alignment = max(0.0, min(1.0, composite_scalar - interaction))
 
     return GACurvatureResult(
-        dimension_scores={d: float(dimension_scores.get(d, 0.0)) for d in DIMENSION_WEIGHTS},
+        dimension_scores=normalized_scores,
         composite_scalar=composite_scalar,
         interaction_penalty=interaction,
         alignment=alignment,

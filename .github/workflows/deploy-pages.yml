@@ -1,8 +1,5 @@
 # This workflow is disabled
 
-# Disable the workflow
-if: false
-
 on:
   push:
     branches:
@@ -10,6 +7,7 @@ on:
 
 jobs:
   deploy:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

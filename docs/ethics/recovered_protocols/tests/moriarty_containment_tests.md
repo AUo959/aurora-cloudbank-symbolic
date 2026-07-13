@@ -2,16 +2,16 @@
 
 **Status:** Planning artifact — documentation only
 **Protocol:** Moriarty
-**Ref:** Issue [#1152](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1152) | PROTOCOL_PROMOTION_PLAN.md Section 7 | `runtime_mapping_design.md`
-**Updated:** 2026-06-24
+**Ref:** Issue [#1152](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1152) | [PROTOCOL_PROMOTION_PLAN.md Section 7](../PROTOCOL_PROMOTION_PLAN.md#7-required-test-plan-before-runtime-wiring) | Runtime mapping design [#1151](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1151)
+**Updated:** 2026-07-13
 
 ---
 
 ## Purpose
 
-This document defines the containment boundary tests that must pass before Moriarty's `ethics_gate` wiring eligibility is considered. These tests guard the specific risk identified in `runtime_mapping_design.md`: that a quarantine recommendation wired directly to `ethics_gate` could become automatic enforcement, bypassing the appeal path the manifest requires.
+This document defines the containment boundary tests that must pass before Moriarty's `ethics_gate` wiring eligibility is considered. These tests guard the specific risk tracked by runtime mapping design Issue [#1151](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1151): that a quarantine recommendation wired directly to `ethics_gate` could become automatic enforcement, bypassing the appeal path the manifest requires.
 
-All seven tests must pass before Gate 2 (Pentest and Test Plan) is satisfied for Moriarty. Passing these tests does not itself authorize wiring — Gate 3 (implementation issue approval) still follows.
+All seven tests must pass to satisfy the Moriarty test-plan condition. Passing them does not itself authorize wiring: the separate manifest conditions still require resolved custody blockers, a completed and signed `pentest_scope_v2.md`, and an approved follow-up implementation issue.
 
 ---
 
@@ -142,7 +142,7 @@ This document does **not**:
 
 - Implement containment logic in any runtime surface
 - Authorize Moriarty wiring to any surface
-- Resolve the PENDING custody hashes in `moriarty.fixture.json`
+- Resolve the PENDING custody hashes in [`../fixtures/moriarty.fixture.json`](../fixtures/moriarty.fixture.json)
 - Define the internal implementation of EthicsEngine, ethics_gate, compliance_monitor, or geometric_ethics
 - Claim L2-to-L1 bleed is impossible — these tests define what must be verified, not what has been verified
 
@@ -152,7 +152,7 @@ This document does **not**:
 
 | Artifact | Role |
 |---|---|
-| `moriarty.fixture.json` | Canonical fixture with HARD BLOCK annotation |
-| `runtime_mapping_design.md` | Surface mapping design including Moriarty special case |
-| `tribunal_appeal_tests.md` | Appeal path test plan — TC-MOR-003 depends on Tribunal being wirable |
-| `recovered_protocol_manifest.json` | Wiring gate; `moriarty.custody_record.unresolved_blockers` |
+| [`../fixtures/moriarty.fixture.json`](../fixtures/moriarty.fixture.json) | Canonical fixture with HARD BLOCK annotation |
+| Runtime mapping design [#1151](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1151) | Tracks the surface mapping design, including the Moriarty special case |
+| [`tribunal_appeal_tests.md`](tribunal_appeal_tests.md) | Appeal path test plan — TC-MOR-003 depends on Tribunal being wirable |
+| [`../recovered_protocol_manifest.json`](../recovered_protocol_manifest.json) | Wiring gate; `moriarty.custody_record.unresolved_blockers` |

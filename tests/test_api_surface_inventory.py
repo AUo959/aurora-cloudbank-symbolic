@@ -1,3 +1,9 @@
+"""Structural checks for the governed API inventory.
+
+These tests validate schema and named regression contracts. They do not prove
+complete coverage of routers mounted by the live applications; see issue #1204.
+"""
+
 import json
 from pathlib import Path
 
@@ -50,6 +56,10 @@ def test_required_api_surface_entries_are_present() -> None:
         "monitoring_dashboard",
         "drift_metrics",
         "gumas_ethics",
+        "l1_station",
+        "sensor_array",
+        "checkpoint_vault",
+        "cask",
         "mesh_runtime_v1",
         "pat_terminal_overlay",
         "qgia_forecast",
@@ -78,3 +88,17 @@ def test_reconciled_mesh_qgia_pat_and_consent_contracts() -> None:
     rd_notes = entries["rd_pipeline"]["notes"]
     assert "not implemented as an HTTP surface" in rd_notes
     assert "#1200" in rd_notes
+
+
+def test_governance_review_router_dispositions() -> None:
+    inventory = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    entries = {entry["id"]: entry for entry in inventory["entries"]}
+
+    assert entries["l1_station"]["mount_path"] == "/api/aurora"
+    assert entries["sensor_array"]["mount_path"] == "/api/sensors"
+    assert entries["checkpoint_vault"]["mount_path"] == "/checkpoint"
+    assert entries["cask"]["mount_path"] == "/api/cask"
+
+    for entry_id in ("l1_station", "sensor_array", "checkpoint_vault", "cask"):
+        assert entries[entry_id]["status"] == "active"
+        assert entries[entry_id]["service_class"] == "main-app-router"

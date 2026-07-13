@@ -47,7 +47,6 @@
         "blocked",
         "needs-decision",
         "in-progress",
-        "waiting-review",
         "done"
       ]
     },
@@ -92,6 +91,12 @@
       "anyOf": [
         { "required": ["status"] },
         { "required": ["state"] }
+      ],
+      "allOf": [
+        {
+          "if": { "required": ["status"] },
+          "then": { "required": ["rank"] }
+        }
       ],
       "properties": {
         "rank": { "type": "integer", "minimum": 1 },

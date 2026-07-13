@@ -105,3 +105,50 @@ def test_schema_rejects_item_without_status_or_state():
 
     errors = sorted(validator().iter_errors(data), key=lambda error: list(error.path))
     checks.assertTrue(errors)
+
+
+def test_schema_rejects_status_item_without_renderer_rank():
+    checks = unittest.TestCase()
+    data = {
+        "_meta": {
+            "version": "test",
+            "description": "test queue",
+            "last_aurora_review": "2026-06-24T00:00:00Z",
+            "schema": "ops/work_queue/queue_schema.json",
+        },
+        "active": [
+            {
+                "id": "#9998",
+                "title": "Status item without rank",
+                "status": "open",
+            }
+        ],
+        "completed": [],
+    }
+
+    errors = sorted(validator().iter_errors(data), key=lambda error: list(error.path))
+    checks.assertTrue(errors)
+
+
+def test_schema_rejects_status_unknown_to_live_renderer():
+    checks = unittest.TestCase()
+    data = {
+        "_meta": {
+            "version": "test",
+            "description": "test queue",
+            "last_aurora_review": "2026-06-24T00:00:00Z",
+            "schema": "ops/work_queue/queue_schema.json",
+        },
+        "active": [
+            {
+                "rank": 1,
+                "id": "#9997",
+                "title": "Unsupported renderer status",
+                "status": "waiting-review",
+            }
+        ],
+        "completed": [],
+    }
+
+    errors = sorted(validator().iter_errors(data), key=lambda error: list(error.path))
+    checks.assertTrue(errors)

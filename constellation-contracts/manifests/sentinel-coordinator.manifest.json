@@ -1,0 +1,52 @@
+{
+  "constellation_version": "1.0.0-alpha",
+  "node": {
+    "designation": "SENTINEL-COORDINATOR",
+    "symbolic_tag": "s.tag::sentinel.coordinator",
+    "repo": "aurora-cloudbank-symbolic",
+    "role": "spoke",
+    "stack": ["python", "fastapi"],
+    "description": "PROJECT SENTINEL coordinator — aggregates Stream 1 (crew cognitive load), Stream 2 (AI self-audit), and Stream 3 (ethics overlay) into one named entity for constellation health/status reporting."
+  },
+  "upstream": [
+    "s.tag::constellation.prime"
+  ],
+  "downstream": [],
+  "governance": {
+    "charter": "Picard_Delta_3",
+    "l3_modules": ["Axiomera", "Velatrix", "Glyphon", "Caelion", "Harmion"],
+    "primary_audit_authority": "Axiomera",
+    "primary_audit_authority_note": "Axiomera (Ethics Arbitration Framework, L3_AXIOMERA) is the named L3 audit authority for SENTINEL events. threadcore_registry.json's schema is a payload/version registry, not an event-routing table, so this assignment is recorded here and in docs/architecture/SENTINEL_ARCHITECTURE.md rather than there.",
+    "ethics_protocol": true
+  },
+  "streams": {
+    "stream_1_crew_cognitive_load": {
+      "status": "stub_unwired",
+      "anchor": null,
+      "source": "src/sensors/crew_load/"
+    },
+    "stream_2_ai_self_audit": {
+      "status": "operational",
+      "anchor": "T1-SENTINEL-001",
+      "source": "src/sensors/observatory/symbolic/ethical_signal.py"
+    },
+    "stream_3_ethics_overlay": {
+      "status": "operational",
+      "anchor": "T1-SENTINEL-001",
+      "source": "ethics/, symbolic_config.yaml"
+    }
+  },
+  "contracts": {
+    "published": ["sentinel-status"],
+    "consumed": ["constellation-event", "constellation-health"]
+  },
+  "health": {
+    "last_sync": null,
+    "status": "initializing"
+  },
+  "meta": {
+    "created": "2026-07-13T00:00:00-04:00",
+    "created_by": "Claude Code",
+    "proposal_ref": "issue #1069 — PROJECT SENTINEL canonical promotion"
+  }
+}

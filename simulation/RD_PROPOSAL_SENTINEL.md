@@ -1,8 +1,8 @@
 # PROJECT SENTINEL
 ## R&D Submission — Orion Station (ORH-07)
 
-**Document Class:** NON-CANONICAL CONTEXT — R&D Proposal  
-**Status:** Submitted for R&D Review  
+**Document Class:** HISTORICAL RECORD — Original R&D Proposal (superseded as the status reference by `docs/architecture/SENTINEL_ARCHITECTURE.md`, promoted to CANONICAL ARCHITECTURE v1.0 on 2026-07-13, issue #1069)
+**Status:** Promoted to canonical — see `docs/architecture/SENTINEL_ARCHITECTURE.md` for current stream status
 **Submitted By:** Senior Staff, Orion Station — Joint Proposal  
 **Submission Date:** 2026-04-09  
 **Session Reference:** Senior Staff All-Hands, Station Day [current]  

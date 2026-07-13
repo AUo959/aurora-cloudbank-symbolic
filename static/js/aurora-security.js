@@ -90,36 +90,7 @@ class AuroraSecurityUtils {
       return;
     }
 
-    // Create a temporary element to parse and clean the HTML
-    const temp = document.createElement('div');
-    temp.textContent = this.sanitizeText(content); // SECURITY FIX: Changed from innerHTML
-
-    // Only allow safe elements
-    const allowedTags = ['p', 'span', 'strong', 'em', 'br'];
-    const walker = document.createTreeWalker(temp, NodeFilter.SHOW_ELEMENT, {
-      acceptNode: node => {
-        return allowedTags.includes(node.tagName.toLowerCase())
-          ? NodeFilter.FILTER_ACCEPT
-          : NodeFilter.FILTER_REJECT;
-      },
-    });
-
-    const safeContent = document.createDocumentFragment();
-    let node;
-    while ((node = walker.nextNode())) {
-      const clone = node.cloneNode(true);
-      // Remove all attributes except safe ones
-      for (let i = clone.attributes.length - 1; i >= 0; i--) {
-        const attr = clone.attributes[i];
-        if (!this.isValidAttribute(attr.name)) {
-          clone.removeAttribute(attr.name);
-        }
-      }
-      safeContent.appendChild(clone);
-    }
-
-    element.textContent = ''; // SECURITY FIX: Changed from innerHTML
-    element.appendChild(safeContent);
+    element.innerHTML = this.sanitizeHTML(content);
   }
 
   /**
@@ -134,7 +105,7 @@ class AuroraSecurityUtils {
 
     // Basic HTML sanitization - escapes potentially dangerous content
     // while preserving basic formatting tags
-    const allowedTags = [
+    const allowedTags = new Set([
       'div',
       'span',
       'p',
@@ -147,53 +118,45 @@ class AuroraSecurityUtils {
       'strong',
       'em',
       'br',
-    ];
-    const allowedAttributes = ['style', 'class'];
+    ]);
+    const allowedAttributes = new Set(['style', 'class']);
 
     // Create a temporary div to parse HTML
     const tempDiv = document.createElement('div');
-    tempDiv.textContent = html; // SECURITY FIX: Changed from innerHTML
+    tempDiv.innerHTML = html;
 
-    // Walk through all elements and sanitize
-    const walker = document.createTreeWalker(
-      tempDiv,
-      NodeFilter.SHOW_ELEMENT,
-      null,
-      false
-    );
-
-    const elementsToRemove = [];
-    let node;
-
-    while ((node = walker.nextNode())) {
-      const tagName = node.tagName.toLowerCase();
-
-      // Remove disallowed tags
-      if (!allowedTags.includes(tagName)) {
-        elementsToRemove.push(node);
-        continue;
-      }
-
-      // Clean attributes
-      const attributes = Array.from(node.attributes);
-      attributes.forEach(attr => {
-        if (!allowedAttributes.includes(attr.name.toLowerCase())) {
-          node.removeAttribute(attr.name);
-        } else if (attr.name === 'style') {
-          // Sanitize style attribute - remove javascript: and other dangerous content
-          const cleanStyle = attr.value
-            .replace(/javascript:/gi, '')
-            .replace(/expression\(/gi, '');
-          node.setAttribute('style', cleanStyle);
+    const sanitizeChildren = parent => {
+      for (const child of Array.from(parent.children)) {
+        const tagName = child.tagName.toLowerCase();
+        if (!allowedTags.has(tagName)) {
+          child.remove();
+          continue;
         }
-      });
-    }
 
-    // Remove dangerous elements
-    elementsToRemove.forEach(el => el.remove());
+        for (const attr of Array.from(child.attributes)) {
+          const attrName = attr.name.toLowerCase();
+          if (!allowedAttributes.has(attrName)) {
+            child.removeAttribute(attr.name);
+            continue;
+          }
+          if (attrName === 'style') {
+            const safeColors = attr.value
+              .split(';')
+              .map(value => value.trim())
+              .filter(value => /^color\s*:\s*(#[0-9a-f]{3,8}|[a-z]+)$/i.test(value));
+            if (safeColors.length) {
+              child.setAttribute('style', safeColors.join('; '));
+            } else {
+              child.removeAttribute('style');
+            }
+          }
+        }
+        sanitizeChildren(child);
+      }
+    };
 
-    // Return the sanitized content safely
-    return tempDiv.textContent || ''; // SECURITY FIX: Use textContent instead of innerHTML
+    sanitizeChildren(tempDiv);
+    return tempDiv.innerHTML;
   }
 
   /**

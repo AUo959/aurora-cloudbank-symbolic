@@ -1487,7 +1487,10 @@
                 // Fallback to local display
                 const collaborationFeed = document.getElementById('collaboration-feed');
                 const timestamp = new Date().toLocaleTimeString();
-                const tempEl = AuroraSecurity.createSafeElement('div', '<p><strong>[${timestamp}] You:</strong> ' + message + '</p>'); collaborationFeed.appendChild(tempEl);
+                const tempEl = AuroraSecurity.createSafeElement('p');
+                tempEl.appendChild(AuroraSecurity.createSafeElement('strong', `[${timestamp}] You:`));
+                tempEl.appendChild(document.createTextNode(` ${message}`));
+                collaborationFeed.appendChild(tempEl);
                 document.getElementById('message-input').value = '';
             }
         }

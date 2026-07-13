@@ -11,11 +11,17 @@ This module provides enterprise-grade memory management with:
 """
 
 import json
+import math
 import os
 import time
 import uuid
 import re
-import numpy as np
+try:
+    import numpy as np
+    _NUMPY_AVAILABLE = True
+except ImportError:  # NOSONAR - numpy is optional; fallback np=None allows graceful degradation when not installed
+    np = None  # type: ignore
+    _NUMPY_AVAILABLE = False
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict, field
@@ -38,12 +44,11 @@ except ImportError:
     AURORA_DLP_AVAILABLE = False
     logger.warning("Aurora DLP not available - running in standalone mode")
 
-try:
-    from src.utils.atomic_io import atomic_write_json
-    ATOMIC_IO_AVAILABLE = True
-except ImportError:
-    ATOMIC_IO_AVAILABLE = False
-    logger.warning("atomic_io not available - persistence will use non-atomic writes")
+# atomic_write_json already imported unconditionally above; re-import avoided to prevent import shadowing
+
+# Ledger hook is imported lazily in __init__ to avoid circular imports
+# (aumemmanager.__init__.py imports hierarchical_memory, so any module-level
+# import of ledger_hooks here would form a cycle via the package namespace)
 
 # Constants
 SUMMARY_MAX_LENGTH = 100  # Maximum length for content summaries in logs
@@ -168,13 +173,13 @@ class MemoryItem:
         cultural_boost = 1.0 + (self.cask_cultural_score * 0.1)
         anchor_boost = 1.0 + (len(self.symbolic_anchors) * 0.05)
         
-        effective_half_life = (self.half_life * (1 + self.importance) * 
-                             (1 + np.log(1 + self.access_count)) * 
+        effective_half_life = (self.half_life * (1 + self.importance) *
+                             (1 + math.log(1 + self.access_count)) *
                              cultural_boost * anchor_boost)
-        
+
         # Exponential decay
-        decay_constant = np.log(2) / effective_half_life
-        self.strength *= np.exp(-decay_constant * elapsed_time)
+        decay_constant = math.log(2) / effective_half_life
+        self.strength *= math.exp(-decay_constant * elapsed_time)
         
         # Threshold for archival
         if self.strength < 0.001:
@@ -335,6 +340,16 @@ class HierarchicalMemoryManager:
 
         if self._persist_path:
             self._load_from_disk()
+
+        # Optional ledger integration — lazy import to avoid circular package load
+        self._ledger_hook = None
+        try:
+            from modules.aumemmanager.ledger_hooks import AuMemLedgerHook as _Hook
+            _candidate = _Hook.create()
+            if _candidate.enabled:
+                self._ledger_hook = _candidate
+        except Exception as _exc:  # NOSONAR - import may fail in restricted environments or during testing
+            logger.debug("AuMemLedgerHook unavailable (%s) — ledger integration disabled", _exc)
     
     # ------------------------------------------------------------------
     # Persistence helpers
@@ -416,14 +431,7 @@ class HierarchicalMemoryManager:
             }
 
             try:
-                if ATOMIC_IO_AVAILABLE:
-                    atomic_write_json(self._persist_path, payload)
-                else:
-                    # Fallback: plain write (not atomic but functional)
-                    dest_dir = os.path.dirname(os.path.abspath(self._persist_path))
-                    os.makedirs(dest_dir, exist_ok=True)
-                    with open(self._persist_path, "w", encoding="utf-8") as fh:
-                        json.dump(payload, fh, indent=2, default=str)
+                atomic_write_json(self._persist_path, payload)
 
                 logger.info(
                     "AuMemManager: saved %d memories to %s",
@@ -569,9 +577,22 @@ class HierarchicalMemoryManager:
                 self._auto_compress()
             
             # Secure logging to prevent log injection
-            logger.info("Added memory %s for %s with importance %s", 
-                       str(memory_id)[:50], str(owner)[:50], str(importance))
-            return memory_id
+            logger.info("Added memory %s for %s with importance %s",
+                        str(memory_id)[:50], str(owner)[:50], str(importance))
+
+        # Ledger hook outside the lock — non-blocking, optional, graceful
+        # Use local variable so type-narrowing tracks the None check correctly.
+        _hook = self._ledger_hook
+        if _hook is not None:
+            _hook.on_memory_added(
+                memory_id=memory_id,
+                owner=owner,
+                importance=importance,
+                memory_type=memory_type.value,
+                tags=tags,
+                context_tag=memory.context_tag,
+            )
+        return memory_id
     
     def retrieve_memories(self,
                          query: str,
@@ -667,7 +688,7 @@ class HierarchicalMemoryManager:
         
         # Recency score (exponential decay from last access)
         time_since_access = current_time - memory.last_access
-        recency_score = np.exp(-time_since_access / 3600.0)  # 1 hour decay constant
+        recency_score = math.exp(-time_since_access / 3600.0)  # 1 hour decay constant
         
         # Importance score (normalized)
         importance_score = min(1.0, memory.importance / 10.0)
@@ -885,7 +906,10 @@ class HierarchicalMemoryManager:
                 'quantum_vectors': len(self.flight_controller.active_vectors),
                 'entangled_pairs': quantum_analysis['total_entanglements'],
                 'aurora_anchor_coverage': len(self.anchor_index),
-                'average_cultural_score': np.mean([m.cask_cultural_score for m in self.active_tier.values()]) if self.active_tier else 0,
+                'average_cultural_score': (
+                    sum(m.cask_cultural_score for m in self.active_tier.values()) / len(self.active_tier)
+                    if self.active_tier else 0
+                ),
                 'quantum_network_density': quantum_analysis['network_density']
             })
             return self.metrics.copy()

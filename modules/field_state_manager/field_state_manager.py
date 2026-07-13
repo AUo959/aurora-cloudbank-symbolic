@@ -64,6 +64,8 @@ class FieldStateManager:
 
         # Synapse tracking (compressed if enabled)
         self.use_compressed_registry = use_compressed_registry
+        # Declared Optional so type-narrowing via local variable works in methods below.
+        self.synapse_registry: Optional[CompressedSynapseRegistry] = None
         if use_compressed_registry:
             self.synapse_registry = CompressedSynapseRegistry(
                 config=compression_config or CompressionConfig()
@@ -139,19 +141,15 @@ class FieldStateManager:
 
         # Prune all synapses involving this node
         if self.use_compressed_registry:
-            # Get all synapses
-            permanent_synapses = list(self.synapse_registry.permanent.values())
-            active_synapses = list(self.synapse_registry.active.values())
-
-            all_synapses = permanent_synapses + active_synapses
-
-            for synapse in all_synapses:
-                if synapse.source_node == node_id or synapse.target_node == node_id:
-                    synapse_id = f"{synapse.source_node}_{synapse.target_node}"
-                    if synapse_id in self.synapse_registry.permanent:
-                        del self.synapse_registry.permanent[synapse_id]
-                    if synapse_id in self.synapse_registry.active:
-                        del self.synapse_registry.active[synapse_id]
+            _registry = self.synapse_registry
+            if _registry is not None:
+                for _syn_dict in (_registry.permanent, _registry.active):
+                    _keys_to_remove = [
+                        k for k, v in _syn_dict.items()
+                        if v.source_node == node_id or v.target_node == node_id
+                    ]
+                    for k in _keys_to_remove:
+                        _syn_dict.pop(k, None)
         else:
             # Simple dict pruning
             pruned = [
@@ -292,7 +290,8 @@ class FieldStateManager:
         target_node = self.nodes[target_node_id]
 
         # Geometric ethical validation (unless explicitly skipped)
-        if not skip_ethics_check and self.geometric_ethics:
+        _ethics = self.geometric_ethics
+        if not skip_ethics_check and _ethics is not None:
             # Build synapse context for ethical validation
             synapse_context = {
                 "source_node": {
@@ -366,7 +365,7 @@ class FieldStateManager:
             }
 
             # Validate through geometric ethics
-            validation = self.geometric_ethics.validate_synapse(synapse_context)
+            validation = _ethics.validate_synapse(synapse_context)
 
             # Check if formation is allowed
             if not validation["allowed"]:
@@ -403,7 +402,9 @@ class FieldStateManager:
                 ethical_score=ethical_score,
                 success_rate=1.0
             )
-            self.synapse_registry.observe_synapse(synapse_id, synapse)
+            _reg = self.synapse_registry
+            if _reg is not None:
+                _reg.observe_synapse(source_node_id, target_node_id, initial_weight, ethical_score)
         else:
             # Simple dict storage
             synapse = Synapse(
@@ -447,24 +448,26 @@ class FieldStateManager:
 
         # Update in registry
         if self.use_compressed_registry:
-            synapse = self.synapse_registry.get_synapse(synapse_id)
-            if synapse:
-                synapse.usage_count += 1
-                synapse.last_used = datetime.now(UTC)
-
-                if success:
-                    synapse.weight = min(1.0, synapse.weight + 0.1)
-                    # Update success rate
-                    total = synapse.usage_count
-                    synapse.success_rate = (synapse.success_rate * (total - 1) + 1.0) / total
-                else:
-                    synapse.weight = max(0.0, synapse.weight - 0.05)
-                    # Update success rate
-                    total = synapse.usage_count
-                    synapse.success_rate = (synapse.success_rate * (total - 1)) / total
-
-                # Re-observe to trigger compression check
-                self.synapse_registry.observe_synapse(synapse_id, synapse)
+            _registry = self.synapse_registry
+            if _registry is not None:
+                _key = (source_node_id, target_node_id)
+                for _syn_dict in (_registry.permanent, _registry.active):
+                    if _key in _syn_dict:
+                        _syn = _syn_dict[_key]
+                        _syn.usage_count += 1
+                        _syn.last_used = datetime.now(UTC)
+                        if success:
+                            _syn.weight = min(1.0, _syn.weight + 0.1)
+                            _total = _syn.usage_count
+                            _syn.success_rate = (_syn.success_rate * (_total - 1) + 1.0) / _total
+                        else:
+                            _syn.weight = max(0.0, _syn.weight - 0.05)
+                            _total = _syn.usage_count
+                            _syn.success_rate = (_syn.success_rate * (_total - 1)) / _total
+                        _registry.observe_synapse(
+                            source_node_id, target_node_id, _syn.weight, _syn.ethical_score, success
+                        )
+                        break
         else:
             if synapse_id in self.synapses:
                 synapse = self.synapses[synapse_id]
@@ -483,8 +486,9 @@ class FieldStateManager:
                 source_node.active_synapses[target_node_id].record_usage(success)
 
         # Record for pattern detection
-        if self.pattern_detector:
-            self.pattern_detector.record_synapse_activation(
+        _detector = self.pattern_detector
+        if _detector is not None:
+            _detector.record_synapse_activation(
                 source_id=source_node_id,
                 target_id=target_node_id,
                 success=success
@@ -504,7 +508,11 @@ class FieldStateManager:
         """
         # Get synapse stats
         if self.use_compressed_registry:
-            synapse_stats = self.synapse_registry.memory_stats()
+            _registry = self.synapse_registry
+            if _registry is not None:
+                synapse_stats = _registry.memory_stats()
+            else:
+                synapse_stats = {"compression_ratio": 1.0, "permanent_count": 0, "active_count": 0}
             total_synapses = synapse_stats["permanent_count"] + synapse_stats["active_count"]
         else:
             total_synapses = len(self.synapses)
@@ -624,7 +632,8 @@ class FieldStateManager:
             - cascade: Sequential signal chains
             - coalition: Frequently collaborating groups
         """
-        if not self.pattern_detector:
+        _detector = self.pattern_detector
+        if _detector is None:
             logger.warning("Pattern detection disabled")
             return {
                 "collaboration": [],
@@ -637,14 +646,14 @@ class FieldStateManager:
         node_connection_counts = {}
         for node_id, node in self.nodes.items():
             node_connection_counts[node_id] = len(node.active_synapses)
-            self.pattern_detector.record_node_load(node_id, len(node.active_synapses))
+            _detector.record_node_load(node_id, len(node.active_synapses))
 
         # Detect all pattern types
         patterns = {
-            "collaboration": self.pattern_detector.detect_collaboration_patterns(),
-            "bottleneck": self.pattern_detector.detect_bottlenecks(node_connection_counts),
-            "cascade": self.pattern_detector.detect_cascades(),
-            "coalition": self.pattern_detector.detect_coalitions()
+            "collaboration": _detector.detect_collaboration_patterns(),
+            "bottleneck": _detector.detect_bottlenecks(node_connection_counts),
+            "cascade": _detector.detect_cascades(),
+            "coalition": _detector.detect_coalitions()
         }
 
         # Update last check time
@@ -668,7 +677,8 @@ class FieldStateManager:
         Returns:
             FieldCoherence with overall score and component metrics
         """
-        if not self.pattern_detector:
+        _detector = self.pattern_detector
+        if _detector is None:
             logger.warning("Pattern detection disabled")
             return None
 
@@ -687,7 +697,7 @@ class FieldStateManager:
         else:
             total_synapses = len(self.synapses)
 
-        coherence = self.pattern_detector.calculate_field_coherence(
+        coherence = _detector.calculate_field_coherence(
             total_nodes=total_nodes,
             total_synapses=total_synapses,
             node_connection_counts=node_connection_counts
@@ -709,16 +719,17 @@ class FieldStateManager:
         Returns:
             List of recommendations sorted by priority
         """
-        if not self.pattern_detector:
+        _detector = self.pattern_detector
+        if _detector is None:
             logger.warning("Pattern detection disabled")
             return []
 
         # Get current coherence
         coherence = self.get_field_coherence()
-        if not coherence:
+        if coherence is None:
             return []
 
-        recommendations = self.pattern_detector.generate_recommendations(coherence)
+        recommendations = _detector.generate_recommendations(coherence)
 
         logger.info(f"Generated {len(recommendations)} field recommendations")
         return recommendations
@@ -739,4 +750,3 @@ class FieldStateManager:
         self.signal_propagator.cleanup_expired_signals()
 
         logger.debug("Field maintenance complete")
-

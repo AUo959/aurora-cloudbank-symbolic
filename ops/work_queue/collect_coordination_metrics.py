@@ -29,17 +29,22 @@ import json
 import subprocess
 import sys
 from collections import Counter
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 HERE = Path(__file__).resolve().parent
 QUEUE_JSON = HERE / "queue.json"
 SYNC_QUEUE = HERE / "sync_queue.py"
+REPORT_MD = HERE / "COORDINATION_METRICS.md"
+GENERATED_BANNER = """<!-- !! GENERATED FILE — DO NOT EDIT BY HAND !!
+     Source of truth: ops/work_queue/queue.json
+     Regenerate:      python ops/work_queue/collect_coordination_metrics.py --markdown
+     Verify:          python ops/work_queue/collect_coordination_metrics.py --check -->"""
 
 
-def utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+def source_timestamp(data: dict[str, Any]) -> str:
+    """Return the queue review timestamp used for deterministic reports."""
+    return str(data.get("_meta", {}).get("last_aurora_review", "unknown"))
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -168,7 +173,7 @@ def collect(github_state_path: Path | None = None) -> dict[str, Any]:
 
     return {
         "schema_version": 1,
-        "generated_at": utc_now(),
+        "generated_at": source_timestamp(data),
         "repo": "AUo959/aurora-cloudbank-symbolic",
         "queue_ref": "ops/work_queue/queue.json",
         "control_plane_ref": "AUo959/Aurora_ORIONCORE_Directory_Main/catalog/session_state.json",
@@ -206,10 +211,12 @@ def collect(github_state_path: Path | None = None) -> dict[str, Any]:
 def render_markdown(payload: dict[str, Any]) -> str:
     metrics = payload["metrics"]
     lines = [
+        GENERATED_BANNER,
+        "",
         "# Aurora Dev Coordination Metrics Report",
         "",
-        f"**Generated:** `{payload['generated_at']}`  ",
-        f"**Repo:** `{payload['repo']}`  ",
+        f"**Generated:** `{payload['generated_at']}`",
+        f"**Repo:** `{payload['repo']}`",
         f"**Queue:** `{payload['queue_ref']}`",
         "",
         "## Metrics",
@@ -237,15 +244,31 @@ def render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def check_report(payload: dict[str, Any]) -> bool:
+    """Return whether the tracked Markdown report matches deterministic output."""
+    if not REPORT_MD.exists():
+        print(f"MISSING: {REPORT_MD.relative_to(HERE.parent.parent)}")
+        return False
+    expected = render_markdown(payload)
+    if REPORT_MD.read_text(encoding="utf-8") != expected:
+        print(f"STALE:   {REPORT_MD.relative_to(HERE.parent.parent)}")
+        return False
+    print(f"OK:      {REPORT_MD.relative_to(HERE.parent.parent)}")
+    return True
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--github-state", type=Path, help="Optional JSON export of issue/PR state for drift comparison.")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--json", action="store_true", help="Emit JSON metrics packet.")
     group.add_argument("--markdown", action="store_true", help="Emit Markdown report.")
+    group.add_argument("--check", action="store_true", help="Verify the tracked Markdown report without writing files.")
     args = parser.parse_args()
 
     payload = collect(args.github_state)
+    if args.check:
+        return 0 if check_report(payload) else 1
     if args.markdown:
         print(render_markdown(payload), end="")
     else:

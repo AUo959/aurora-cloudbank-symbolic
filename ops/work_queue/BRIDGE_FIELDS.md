@@ -1,6 +1,6 @@
 # Aurora Queue Bridge Fields
 
-**Status:** Draft field reference  
+**Status:** Active compatibility reference
 **Tracked in:** #1161  
 **Purpose:** Define non-breaking metadata that lets queue items coordinate with the ORIONCORE control-plane layer.
 
@@ -93,6 +93,8 @@ A safe migration order is:
 4. Update renderer to display a compact bridge section only when useful.
 5. Add read-only metrics collection.
 6. Add CI enforcement only after generated output is deterministic.
+
+Steps 1–3 and 5 are implemented. The legacy renderer intentionally ignores bridge fields, while the deterministic metrics report counts their adoption. Broader rendering or CI enforcement remains a separate compatibility decision.
 
 ---
 

@@ -5,10 +5,10 @@
 
 # Aurora Work Queue
 
-**Schema version:** `1.2.1`  
-**Last Aurora review:** `2026-06-24T03:45:00Z`  
-**Generated:** `2026-06-24T03:45:00Z`  
-**Items:** 23 active · 4 completed
+**Schema version:** `1.3.0`
+**Last Aurora review:** `2026-07-13T05:57:19Z`
+**Generated:** `2026-07-13T05:57:19Z`
+**Items:** 19 active · 8 completed
 
 > Aurora holds contextual authority over rank order.
 > Do not edit rank or `aurora_note` fields without an `aurora(queue):` commit.
@@ -18,39 +18,23 @@
 
 ## Active Queue
 
-### 1. 🟢 #1126 — FastAPI lifespan migration (deprecation fix)
+### 1. 🟢 #1130 — SECURITY — pentest scope is stale against the current API surface
 
 | Field | Value |
 |---|---|
 | **Status** | `open` |
 | **Owner** | _unassigned_ |
 | **Depends on** | — |
-| **Blocks** | #1130, docs/api-reference |
-| **Tags** | `runtime` `blocker` `deprecation` |
-
-**Aurora note:**
-
-> Critical runtime blocker. Resolves deprecation warning that affects all startup/shutdown hooks. Must land before any new feature PRs.
-
----
-
-### 2. 🟢 #1130 — CI green-path stabilization
-
-| Field | Value |
-|---|---|
-| **Status** | `open` |
-| **Owner** | _unassigned_ |
-| **Depends on** | #1126 |
 | **Blocks** | docs/api-reference |
-| **Tags** | `ci` `infrastructure` |
+| **Tags** | `security` `pentest` `api-surface` `blocking` |
 
 **Aurora note:**
 
-> CI cannot be trusted for gate-keeping until lifespan is resolved. Unblock #1126 first.
+> Live GitHub refresh on 2026-07-13 confirmed this pre-engagement security issue remains open. The former #1126 dependency is complete; remaining work includes the v2 scope, current API inventory alignment, QGIA/R&D disposition, and approval signatures.
 
 ---
 
-### 3. 🟢 security/CVE-audit — CVE dependency audit (Sprint 311 follow-on)
+### 2. 🟢 security/CVE-audit — CVE dependency audit (Sprint 311 follow-on)
 
 | Field | Value |
 |---|---|
@@ -66,7 +50,7 @@
 
 ---
 
-### 4. 🟢 #1139 — docs/ethics — create top-level README and navigation index
+### 3. 🟢 #1139 — docs/ethics — create top-level README and navigation index
 
 | Field | Value |
 |---|---|
@@ -82,7 +66,7 @@
 
 ---
 
-### 5. 🟢 #1140 — docs/architecture — fix RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md contradiction re: mesh/agents routes and QGIA
+### 4. 🟢 #1140 — docs/architecture — fix RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md contradiction re: mesh/agents routes and QGIA
 
 | Field | Value |
 |---|---|
@@ -98,55 +82,7 @@
 
 ---
 
-### 6. 🔵 #1151 — Runtime mapping design — map protocol decisions to EthicsEngine, ethics_gate, compliance monitor, geometric ethics
-
-| Field | Value |
-|---|---|
-| **Status** | `in-progress` |
-| **Owner** | _unassigned_ |
-| **Depends on** | — |
-| **Blocks** | #1152, #1153 |
-| **Tags** | `ethics` `protocols` `runtime` `design` |
-
-**Aurora note:**
-
-> Previously blocked by #1148–#1150; those prerequisite issues are now completed. PR #1157 is open and mergeable. Review first in the recovered-protocol chain. Documentation-only artifact — no runtime wiring.
-
----
-
-### 7. 🔵 #1152 — Moriarty containment tests — anomaly quarantine/review-only/rollback without L2-to-L1 bleed
-
-| Field | Value |
-|---|---|
-| **Status** | `in-progress` |
-| **Owner** | _unassigned_ |
-| **Depends on** | #1151 |
-| **Blocks** | — |
-| **Tags** | `ethics` `protocols` `moriarty` `tests` |
-
-**Aurora note:**
-
-> Previously blocked by #1148–#1151. PR #1158 is open and mergeable, but review/merge should follow #1157 because the appeal and mapping assumptions depend on the runtime mapping design. No active L2-to-L1 behavior introduced.
-
----
-
-### 8. 🔵 #1153 — Tribunal appeal tests — dispute/appeal record requirements without runtime enforcement
-
-| Field | Value |
-|---|---|
-| **Status** | `in-progress` |
-| **Owner** | _unassigned_ |
-| **Depends on** | #1151 |
-| **Blocks** | — |
-| **Tags** | `ethics` `protocols` `tribunal` `tests` |
-
-**Aurora note:**
-
-> Previously blocked by #1148–#1151. PR #1159 is open and mergeable, but Codacy reported two minor CodeStyle issues; review/merge should follow #1157 and preferably coordinate with #1158. No runtime enforcement wiring introduced.
-
----
-
-### 9. 🟢 #1137 — docs/ethics — geometric curvature v2 supplemental warning layer has no follow-up implementation issue
+### 5. 🟢 #1137 — docs/ethics — geometric curvature v2 supplemental warning layer has no follow-up implementation issue
 
 | Field | Value |
 |---|---|
@@ -162,7 +98,7 @@
 
 ---
 
-### 10. 🟢 #1138 — docs/ethics/recovered_protocols — all five custody records PENDING; custody inventory work not started
+### 6. 🟢 #1138 — docs/ethics/recovered_protocols — all five custody records PENDING; custody inventory work not started
 
 | Field | Value |
 |---|---|
@@ -178,7 +114,7 @@
 
 ---
 
-### 11. 🟢 #1142 — docs/architecture — RUNTIME_PATH_DRIFT_LEDGER.md: two unresolved items with no tracking issue
+### 7. 🟢 #1142 — docs/architecture — RUNTIME_PATH_DRIFT_LEDGER.md: two unresolved items with no tracking issue
 
 | Field | Value |
 |---|---|
@@ -194,7 +130,7 @@
 
 ---
 
-### 12. 🟢 #1141 — docs/architecture — QGIA_L1_NODE_REGISTRATION.md: agent registry pending 102 days, no exchange router defined
+### 8. 🟢 #1141 — docs/architecture — QGIA_L1_NODE_REGISTRATION.md: agent registry pending 102 days, no exchange router defined
 
 | Field | Value |
 |---|---|
@@ -210,7 +146,7 @@
 
 ---
 
-### 13. 🟢 #1144 — docs/api — api_surface_inventory.json missing four surfaces
+### 9. 🟢 #1144 — docs/api — api_surface_inventory.json missing four surfaces
 
 | Field | Value |
 |---|---|
@@ -226,7 +162,7 @@
 
 ---
 
-### 14. 🟢 #1143 — docs/architecture — scaling_plan.md has no issue coverage and no relationship to current runtime topology
+### 10. 🟢 #1143 — docs/architecture — scaling_plan.md has no issue coverage and no relationship to current runtime topology
 
 | Field | Value |
 |---|---|
@@ -242,7 +178,7 @@
 
 ---
 
-### 15. 🟢 #1145 — docs/api — RD_API_REFERENCE.md version 1.0.0 (2025-11-12, 7 months stale); three gaps
+### 11. 🟢 #1145 — docs/api — RD_API_REFERENCE.md version 1.0.0 (2025-11-12, 7 months stale); three gaps
 
 | Field | Value |
 |---|---|
@@ -258,7 +194,7 @@
 
 ---
 
-### 16. 🟢 #1146 — docs/api — API_CATALOG_GOVERNANCE.md: three governance rules currently violated
+### 12. 🟢 #1146 — docs/api — API_CATALOG_GOVERNANCE.md: three governance rules currently violated
 
 | Field | Value |
 |---|---|
@@ -274,7 +210,7 @@
 
 ---
 
-### 17. 🟢 #1135 — simulation/ — L1_CANON_CHARACTER_ROSTER.md (165 KB) has no validation against QGIA or Orion registries
+### 13. 🟢 #1135 — simulation/ — L1_CANON_CHARACTER_ROSTER.md (165 KB) has no validation against QGIA or Orion registries
 
 | Field | Value |
 |---|---|
@@ -290,7 +226,7 @@
 
 ---
 
-### 18. 🟢 #1136 — simulation/ — ORION_STATION_ENHANCEMENT_PROPOSAL.md (38 KB) has no implementation tracking
+### 14. 🟢 #1136 — simulation/ — ORION_STATION_ENHANCEMENT_PROPOSAL.md (38 KB) has no implementation tracking
 
 | Field | Value |
 |---|---|
@@ -306,7 +242,7 @@
 
 ---
 
-### 19. 🟢 arch/layer-canonization — Layer architecture canonization (L1/L2/L3 enforcement in code)
+### 15. 🟢 arch/layer-canonization — Layer architecture canonization (L1/L2/L3 enforcement in code)
 
 | Field | Value |
 |---|---|
@@ -322,7 +258,7 @@
 
 ---
 
-### 20. 🟡 sim/SENTINEL-phase0 — PROJECT SENTINEL — Phase 0: Ethics review board constitution
+### 16. 🟡 sim/SENTINEL-phase0 — PROJECT SENTINEL — Phase 0: Ethics review board constitution
 
 | Field | Value |
 |---|---|
@@ -338,7 +274,7 @@
 
 ---
 
-### 21. 🟢 ops/QGIA-doctrine-store — QGIA analytical framework — store in ops/analytical_frameworks/QGIA/
+### 17. 🟢 ops/QGIA-doctrine-store — QGIA analytical framework — store in ops/analytical_frameworks/QGIA/
 
 | Field | Value |
 |---|---|
@@ -354,13 +290,13 @@
 
 ---
 
-### 22. 🟢 docs/api-reference — API reference documentation
+### 18. 🟢 docs/api-reference — API reference documentation
 
 | Field | Value |
 |---|---|
 | **Status** | `open` |
 | **Owner** | _unassigned_ |
-| **Depends on** | #1126, #1130 |
+| **Depends on** | #1130 |
 | **Blocks** | — |
 | **Tags** | `docs` `api` |
 
@@ -370,7 +306,7 @@
 
 ---
 
-### 23. 🟡 feat/QGIA — QGIA integration hooks
+### 19. 🟡 feat/QGIA — QGIA integration hooks
 
 | Field | Value |
 |---|---|
@@ -390,7 +326,11 @@
 
 | ID | Title |
 |---|---|
+| #1126 | docs/specs/AUMEMMANAGER_PROMOTION_STARTER_SPEC.md — confirm promotion status and link to recovered_protocols/ |
 | #1147 | feat: Aurora-Aware Work Queue System (ops/work_queue/) |
 | #1148 | Protocol custody inventory — machine-readable manifest of recovered package/file hashes and blockers |
 | #1149 | Protocol JSON schemas — add schema files and validation tests for Sherlock, Watson, Moriarty, Tribunal, SHADOWFAX |
 | #1150 | Protocol fixture intake — add sanitized canonical examples for Sherlock, Watson, Moriarty, Tribunal, SHADOWFAX |
+| #1151 | Runtime mapping design — decide how protocol decisions map to EthicsEngine, ethics_gate, compliance monitor, and geometric ethics |
+| #1152 | Moriarty containment tests — test anomaly quarantine/review-only/rollback rules without enabling active L2-to-L1 behavior |
+| #1153 | Tribunal appeal tests — test dispute/appeal record requirements without runtime enforcement |

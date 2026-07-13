@@ -1,12 +1,178 @@
 {
-  "_snapshot_status": "historical",
-  "_snapshot_note": "Generated 2025-11-13. Run `python scripts/generate_api_catalog.py` from repo root to refresh. Current route count may differ — new routers have been added since this snapshot.",
   "title": "Aurora CloudBank Symbolic API - Sonnet 4 Enhanced",
   "version": "1.0.0",
   "description": "Quantum-enhanced symbolic governance system with ChatGPT Agent Mode integration",
-  "generated": "2025-11-13T03:50:42.013302",
-  "total_routes": 169,
+  "generated": "2026-07-13T07:37:11.211808+00:00",
+  "generated_at": "2026-07-13T07:37:11.211808+00:00",
+  "source_commit": "bbf3b516db00876dfe189d4ace50393d08fbdb83",
+  "total_routes": 284,
   "routes": [
+    {
+      "method": "POST",
+      "path": "/admin/patchweaver/apply",
+      "summary": "Apply Patchweaver Patch",
+      "description": "Apply a state patch with ethics validation and DLP tracking.\n\n**Admin-only endpoint** - Requires authentication, CSRF token, and strict rate limiting.\n\nPatch format:\n- `set`: Dictionary of path/value pairs to set (creates nested structures)\n- `delete`: List of paths to delete (idempotent)\n\nPath format: Use `/` to separate nested keys, e.g., `\"config/setting\"` \u2192 `state[\"config\"][\"setting\"]`\n\nReturns:\n- `applied`: Whether patch was successfully applied\n- `reason`: \"ok\" or error/block reason\n- `before_hash`: State hash before patch\n- `after_hash`: State hash after patch\n- `modified_paths`: List of paths that were modified\n- `timestamp`: ISO timestamp of operation\n\nSecurity:\n- All patches validated by ethics gate\n- Full DLP audit trail with anchors (T1/SRB, EOS_SEED_ORION, Picard_Delta_3)\n- CSRF protection required\n- Strict rate limiting (5 requests/minute)",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/admin/patchweaver/history",
+      "summary": "Get Patchweaver History",
+      "description": "Get history of PatchWeaver operations.\n\n**Admin-only endpoint** - Returns recent patch operations with full DLP metadata.\n\nQuery parameters:\n- `limit`: Maximum number of operations to return (default: 20)\n\nReturns list of patch operations with:\n- Operation metadata\n- DLP tags and anchors\n- Modified paths\n- Hashes before/after\n- Timestamps",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 20,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/admin/patchweaver/verify",
+      "summary": "Verify Patchweaver State",
+      "description": "Verify current state hash against expected value.\n\n**Admin-only endpoint** - Validates state integrity.\n\nRequest body:\n- `expected_hash`: SHA256 hash to verify against\n\nReturns:\n- `valid`: Whether current state matches expected hash\n- `current_hash`: Current state hash\n- `expected_hash`: Hash that was checked",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "expected_hash",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Expected Hash"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
     {
       "method": "POST",
       "path": "/agent/execute",
@@ -190,6 +356,336 @@
       "responses": {
         "200": {
           "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/complete",
+      "summary": "Ai Complete",
+      "description": "Complete a prompt using the UnifiedAIInterface.\n\nAutomatically selects the best available model based on task_type.\nFalls back through the configured fallback chain on provider errors.",
+      "tags": [],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/models",
+      "summary": "List Ai Models",
+      "description": "List available AI models and their capability profiles.",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/aurora/health/l1",
+      "summary": "Get L1 Health",
+      "description": "Return L1 Station layer health derived from the canonical state.",
+      "tags": [
+        "L1 Station"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/aurora/simulation/state",
+      "summary": "Get Simulation State",
+      "description": "Return the current canonical simulation state (read-only).",
+      "tags": [
+        "L1 Station"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "summary": "Logout",
+      "description": "Logout endpoint (client-side token removal).\n\nNote: JWT tokens are stateless, so logout is handled client-side\nby removing the token. For true server-side logout, implement\na token blacklist with Redis or similar.\n\nArgs:\n    current_user: Current user from token\n\nReturns:\n    Success message",
+      "tags": [
+        "authentication"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "401": {
+          "description": "Unauthorized",
+          "content": []
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me",
+      "summary": "Read Users Me",
+      "description": "Get current authenticated user information.\n\nArgs:\n    current_user: Current user from token\n\nReturns:\n    User object with current user data",
+      "tags": [
+        "authentication"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "401": {
+          "description": "Unauthorized",
+          "content": []
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me/permissions",
+      "summary": "Read Users Permissions",
+      "description": "Get current user's permissions.\n\nArgs:\n    current_user: Current user from token\n\nReturns:\n    Dict with user role and permissions",
+      "tags": [
+        "authentication"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "401": {
+          "description": "Unauthorized",
+          "content": []
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "summary": "Refresh Token",
+      "description": "Refresh an access token using a refresh token.\n\nArgs:\n    refresh_token: Valid refresh token\n\nReturns:\n    New Token object with fresh access_token\n\nRaises:\n    HTTPException: If refresh token is invalid",
+      "tags": [
+        "authentication"
+      ],
+      "parameters": [
+        {
+          "name": "refresh_token",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Refresh Token"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "401": {
+          "description": "Unauthorized",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/token",
+      "summary": "Login",
+      "description": "OAuth2 compatible token endpoint.\n\nAuthenticates user and returns JWT access and refresh tokens.\n\nArgs:\n    form_data: OAuth2 form with username and password\n\nReturns:\n    Token object with access_token and refresh_token\n\nRaises:\n    HTTPException: If authentication fails",
+      "tags": [
+        "authentication"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/x-www-form-urlencoded"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "401": {
+          "description": "Unauthorized",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/cask/specs/risk",
+      "summary": "CASK project risk assessment",
+      "description": "Return the risk assessment matrix: category, probability, impact, and mitigation.",
+      "tags": [
+        "CASK"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/cask/specs/technical",
+      "summary": "CASK technical specifications per component",
+      "description": "Return the technical specification for each of the ten CASK components.",
+      "tags": [
+        "CASK"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/cask/specs/vs-sota",
+      "summary": "CASK comparison against state of the art",
+      "description": "Return CASK's innovation advantages vs the current state of the art per domain.",
+      "tags": [
+        "CASK"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/cask/topology",
+      "summary": "CASK component topology metadata",
+      "description": "Return the layered component topology as structured JSON.\n\nComponents are arranged in three layers with vertical y-positions: knowledge\n(y=5), processing (y=2.8), and validation/runtime (y=0.8).  ``status`` is\n``'runtime'`` for components with a concrete implementation in this release,\n``'design'`` otherwise.",
+      "tags": [
+        "CASK"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat/rag",
+      "summary": "Rag Chat Endpoint",
+      "description": "Memory-augmented chat endpoint (RAG over AuMemManager).\n\nRetrieves relevant memories for the given ``context_id``/``message`` pair,\ninjects them as context, calls the unified AI interface, and stores the\nQ&A exchange back to memory for future retrieval.\n\nReturns:\n    - ``response``: LLM response text.\n    - ``memories_used``: Number of memory entries injected.\n    - ``context_id``: Echo of the supplied context_id.",
+      "tags": [],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
           "content": [
             "application/json"
           ]
@@ -745,6 +1241,422 @@
     },
     {
       "method": "GET",
+      "path": "/api/crew/all",
+      "summary": "Get All Agents",
+      "description": "Get all registered crew agents.\n\nReturns:\n    Dictionary of all crew agents with basic information",
+      "tags": [
+        "Crew Agents"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/crew/collaborate",
+      "summary": "Coordinate Collaboration",
+      "description": "Coordinate multi-agent collaboration on a task.\n\nArgs:\n    request: Collaboration request with agent list and task\n\nReturns:\n    Collaboration result from all agents\n\nExample:\n    POST /api/crew/collaborate\n    {\n        \"agents\": [\"thorne\", \"markov\", \"roberts\"],\n        \"task\": {\n            \"task_type\": \"system_security_review\",\n            \"context\": {\"scope\": \"authentication_layer\"},\n            \"priority\": \"high\"\n        }\n    }",
+      "tags": [
+        "Crew Agents"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/crew/division/{division}",
+      "summary": "Get Agents By Division Endpoint",
+      "description": "Get all agents in a specific division.\n\nArgs:\n    division: Division name (e.g., \"Command & Ethics\", \"Systems & Infrastructure\")\n\nReturns:\n    List of agents in specified division",
+      "tags": [
+        "Crew Agents"
+      ],
+      "parameters": [
+        {
+          "name": "division",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Division"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/crew/role/{role}",
+      "summary": "Get Agents By Role Endpoint",
+      "description": "Get all agents with a specific role.\n\nArgs:\n    role: Agent role (command, security, systems, simulation, etc.)\n\nReturns:\n    List of agents with specified role",
+      "tags": [
+        "Crew Agents"
+      ],
+      "parameters": [
+        {
+          "name": "role",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Role"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/crew/{agent_surname}/capabilities",
+      "summary": "Get Agent Capabilities",
+      "description": "Get agent's capabilities and tools.\n\nArgs:\n    agent_surname: Agent surname\n\nReturns:\n    List of capabilities with descriptions and endpoints",
+      "tags": [
+        "Crew Agents"
+      ],
+      "parameters": [
+        {
+          "name": "agent_surname",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Surname"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/crew/{agent_surname}/process",
+      "summary": "Process Agent Task",
+      "description": "Process a task with a specific crew agent.\n\nArgs:\n    agent_surname: Agent surname\n    request: Task request with type, context, and priority\n\nReturns:\n    Task processing result\n\nExamples:\n    POST /api/crew/thorne/process\n    {\n        \"task_type\": \"strategic_planning\",\n        \"context\": {\"objectives\": [\"optimization\"]},\n        \"priority\": \"high\"\n    }\n\n    POST /api/crew/markov/process\n    {\n        \"task_type\": \"security_audit\",\n        \"context\": {\"scope\": \"full_station\"},\n        \"priority\": \"medium\"\n    }",
+      "tags": [
+        "Crew Agents"
+      ],
+      "parameters": [
+        {
+          "name": "agent_surname",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Surname"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/crew/{agent_surname}/status",
+      "summary": "Get Agent Status",
+      "description": "Get comprehensive status for a crew agent.\n\nArgs:\n    agent_surname: Agent surname (e.g., \"thorne\", \"markov\")\n\nReturns:\n    Complete agent status including capabilities, statistics, and state\n\nExamples:\n    GET /api/crew/thorne/status\n    GET /api/crew/markov/status",
+      "tags": [
+        "Crew Agents"
+      ],
+      "parameters": [
+        {
+          "name": "agent_surname",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Surname"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/drift/alerts",
+      "summary": "Get drift alerts",
+      "description": "Get recent drift alerts with optional filtering",
+      "tags": [
+        "drift-metrics"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "query",
+          "required": false,
+          "description": "Filter by agent ID",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by agent ID",
+            "title": "Agent Id"
+          }
+        },
+        {
+          "name": "level",
+          "in": "query",
+          "required": false,
+          "description": "Filter by alert level (info/warning/critical)",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by alert level (info/warning/critical)",
+            "title": "Level"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Maximum number of alerts to return",
+          "schema": {
+            "type": "integer",
+            "maximum": 200,
+            "minimum": 1,
+            "description": "Maximum number of alerts to return",
+            "default": 50,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/drift/baseline",
+      "summary": "Establish new baseline",
+      "description": "Establish a new baseline for an agent/metric combination",
+      "tags": [
+        "drift-metrics"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/drift/baselines",
+      "summary": "Get current baselines",
+      "description": "Get current baseline configurations for all monitored metrics",
+      "tags": [
+        "drift-metrics"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/drift/health",
+      "summary": "Health check",
+      "description": "Check drift monitoring health status",
+      "tags": [
+        "drift-metrics"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/drift/metrics",
+      "summary": "Prometheus metrics export",
+      "description": "Export drift metrics in Prometheus text format",
+      "tags": [
+        "drift-metrics"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "text/plain"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/drift/summary",
+      "summary": "Drift metrics summary",
+      "description": "Get JSON summary of current drift state",
+      "tags": [
+        "drift-metrics"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
       "path": "/api/fleet/craft",
       "summary": "Get All Craft",
       "description": "Get all registered craft profiles.\n\nReturns craft data compatible with JS station_types.js CraftProfile schema.",
@@ -835,10 +1747,776 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/api/l2-agents/activate",
+      "summary": "Activate Agent",
+      "description": "Activate a Custom GPT agent with full ZIPWIZ handshake.\n\nPerforms 4-step handshake sequence:\n1. ZIPWIZ_BEACON - Establish initial connection\n2. ANCHOR_SYNC - Synchronize EOS_SEED_ORION anchor\n3. ETHICS_AUDIT - Validate Picard_Delta_3 ethics protocol\n4. DRIFT_VALIDATION - Verify drift lock at \u03940.000\n\nDLP: l2_agent_activation\nAnchors: EOS_SEED_ORION, Picard_Delta_3\nProtocol: ZIPWIZ handshake with ethics audit",
+      "tags": [
+        "l2-agents"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/l2-agents/activation-phrases",
+      "summary": "Get Activation Phrases",
+      "description": "Get activation phrases for all agents (dev/testing).\n\nReturns a mapping of agent IDs to their activation phrases.\nUseful for development and testing purposes.\n\nRequires authentication to prevent unauthorized access.\n\nDLP: l2_activation_phrases\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
+      "tags": [
+        "l2-agents"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/l2-agents/agent/{agent_id}",
+      "summary": "Get Agent Status",
+      "description": "Get detailed status of a specific agent.\n\nReturns agent configuration, connection status, drift lock,\nuptime, and handshake log.\n\nDLP: l2_agent_status\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
+      "tags": [
+        "l2-agents"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/l2-agents/constellation",
+      "summary": "Get Constellation Status",
+      "description": "Get full constellation status including all agents.\n\nReturns relay tier information, ORION core configuration,\nand activation phrases for all agents.\n\nDLP: l2_constellation_status\nAnchors: EOS_SEED_ORION, Picard_Delta_3\nProtocol: ZIPWIZ handshake with ethics audit",
+      "tags": [
+        "l2-agents"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/l2-agents/disconnect/{agent_id}",
+      "summary": "Disconnect Agent",
+      "description": "Disconnect an agent from the constellation.\n\nGracefully disconnects agent, clears connection state,\nand resets handshake log.\n\nDLP: l2_agent_disconnect\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
+      "tags": [
+        "l2-agents"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/l2-agents/health",
+      "summary": "Get Health",
+      "description": "Health check endpoint for L2 Meta-Agent Bridge.\n\nReturns bridge status, agent counts, and configuration information.\n\nDLP: l2_health_check\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
+      "tags": [
+        "l2-agents"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/l2-agents/relay",
+      "summary": "Relay Message",
+      "description": "Relay message between agents or broadcast to mesh.\n\nMessage types:\n- direct: Point-to-point between two agents\n- broadcast: Mesh broadcast to all connected agents\n- mesh: Multi-hop routing through constellation\n\nDLP: l2_message_relay\nAnchors: EOS_SEED_ORION, Picard_Delta_3\nProtocol: Inter-agent relay with heartbeat update",
+      "tags": [
+        "l2-agents"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/performance-budgets",
+      "summary": "Get Performance Budgets",
+      "description": "Returns the documented per-endpoint performance budgets.\n\nEach entry specifies p95/p99 latency targets in milliseconds and the\nmaximum acceptable error rate as a percentage.  These values are checked\nat runtime by the telemetry middleware and logged as warnings when exceeded.",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/quantum-forge/flow/optimize",
+      "summary": "Quantum Forge Flow Optimize",
+      "description": "Trigger an auto-optimization pass across all registered modules.\n\nReturns the optimization report including any mode transitions applied.",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/quantum-forge/flow/status",
+      "summary": "Quantum Forge Flow Status",
+      "description": "Return the SystemFlowOrchestrator manifest: current phase, module health,\ndrift count, and synchronization state.",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/external/astronomical",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/external/communications",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/external/deep-space",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/external/proximity",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/external/salvage",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/fusion/certification",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/fusion/forecasts",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/fusion/forecasts/{anomaly_type}",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [
+        {
+          "name": "anomaly_type",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "title": "Anomaly Type"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/fusion/oscillation-health",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/fusion/resonance",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/health/performance",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/health/status",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/internal/biometrics",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/internal/environmental",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/internal/operational",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/internal/structural",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/physical/boundary",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/physical/containment",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/physical/earth-relay",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/physical/fidelity",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/physical/reality-anchor",
+      "summary": "Endpoint",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/symbolic/concept-resonance",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/symbolic/drift-presignature",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/symbolic/ethical-signal",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/symbolic/ethical-signal/{entity_id}",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [
+        {
+          "name": "entity_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "title": "Entity Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/sensors/observatory/symbolic/integration-depth",
+      "summary": "<Lambda>",
+      "description": "",
+      "tags": [
+        "sensors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
       "method": "GET",
       "path": "/api/synergy/components",
       "summary": "Get Components",
-      "description": "Get all registered R-2 components with real-time status\n\nDLP: synergy_dashboard_components",
+      "description": "Get registered R-2 component topology entries.\n\nThis route intentionally returns static registry data only. It does not\nsynthesize health, uptime, heartbeat, or resource usage values.\n\nDLP: synergy_dashboard_components",
       "tags": [
         "synergy"
       ],
@@ -847,7 +2525,7 @@
           "name": "status_filter",
           "in": "query",
           "required": false,
-          "description": "Filter by status: active|degraded|offline",
+          "description": "Filter by status: documented",
           "schema": {
             "anyOf": [
               {
@@ -857,7 +2535,7 @@
                 "type": "null"
               }
             ],
-            "description": "Filter by status: active|degraded|offline",
+            "description": "Filter by status: documented",
             "title": "Status Filter"
           }
         }
@@ -1164,6 +2842,44 @@
         },
         "422": {
           "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/usage/global",
+      "summary": "Get global token usage (admin)",
+      "description": "Returns the global rolling hourly token total and all configured caps for admin users.",
+      "tags": [
+        "Token Usage"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/usage/me",
+      "summary": "Get token usage for the current user",
+      "description": "Returns rolling hourly and daily token totals for the authenticated user.",
+      "tags": [
+        "Token Usage"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
           "content": [
             "application/json"
           ]
@@ -1944,7 +3660,7 @@
       "method": "DELETE",
       "path": "/api/v2/nodes/{node_id}",
       "summary": "V2 Unregister Node",
-      "description": "Unregister a bridge node from the constellation.\n\nGracefully removes node from registry and load balancing pool.\n\nSECURITY: CSRF protection via token validation (HIGH-4 remediation)",
+      "description": "Unregister a bridge node from the constellation.\n\nGracefully removes node from registry and load balancing pool.\n\nSECURITY: CSRF protection via token validation (HIGH-4 remediation)\nETHICS: Ethics gate evaluation before node deletion",
       "tags": [],
       "parameters": [
         {
@@ -2097,6 +3813,274 @@
               }
             ],
             "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/checkpoint",
+      "summary": "List Checkpoints",
+      "description": "GET /checkpoint \u2014 list checkpoints with optional filters.",
+      "tags": [
+        "ethical-checkpoint-vault"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "query",
+          "required": false,
+          "description": "Filter by agent_id",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by agent_id",
+            "title": "Agent Id"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "Filter by status",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by status",
+            "title": "Status"
+          }
+        },
+        {
+          "name": "trigger",
+          "in": "query",
+          "required": false,
+          "description": "Filter by trigger",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by trigger",
+            "title": "Trigger"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 200,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/checkpoint/agent/{agent_id}/history",
+      "summary": "Agent History",
+      "description": "GET /checkpoint/agent/{agent_id}/history \u2014 version history for an agent.\n\nDLP: checkpoint_vault_history",
+      "tags": [
+        "ethical-checkpoint-vault"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/checkpoint/create",
+      "summary": "Create Checkpoint",
+      "description": "POST /checkpoint/create \u2014 snapshot an agent's ethical state.\n\nDLP: checkpoint_vault_create",
+      "tags": [
+        "ethical-checkpoint-vault"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/checkpoint/health",
+      "summary": "Vault Health",
+      "description": "GET /checkpoint/health \u2014 vault liveness and capacity statistics.",
+      "tags": [
+        "ethical-checkpoint-vault"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/checkpoint/{checkpoint_id}",
+      "summary": "Get Checkpoint",
+      "description": "GET /checkpoint/{id} \u2014 retrieve a full checkpoint record.\n\nDLP: checkpoint_vault_get",
+      "tags": [
+        "ethical-checkpoint-vault"
+      ],
+      "parameters": [
+        {
+          "name": "checkpoint_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Checkpoint Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/checkpoint/{checkpoint_id}/rollback",
+      "summary": "Rollback Checkpoint",
+      "description": "POST /checkpoint/{id}/rollback \u2014 mark a checkpoint as rolled back.\n\nDLP: checkpoint_vault_rollback",
+      "tags": [
+        "ethical-checkpoint-vault"
+      ],
+      "parameters": [
+        {
+          "name": "checkpoint_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Checkpoint Id"
           }
         }
       ],
@@ -2475,6 +4459,23 @@
     },
     {
       "method": "GET",
+      "path": "/continuity/halo_pas/status",
+      "summary": "Get Halo Pas Status",
+      "description": "Get HALO/PAS drift controller status with drift statistics.\n\nReturns real-time drift measurements across L1/L2/L3 timeline layers.\nDLP: halo_pas_drift_controller_v1\nAnchors: T1, SRB, EOS_SEED_ORION",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
       "path": "/data/health",
       "summary": "Health check for Data Guardian service",
       "description": "Check if Data Guardian service is operational",
@@ -2714,6 +4715,36 @@
       "responses": {
         "200": {
           "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/gumas/ethics_check",
+      "summary": "Unified Ethics Check",
+      "description": "Evaluate signals through the unified config-backed ethics engine.\n\nDLP: gumas_unified_ethics_check",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
           "content": [
             "application/json"
           ]
@@ -3030,7 +5061,7 @@
       "method": "GET",
       "path": "/health",
       "summary": "Health Check",
-      "description": "Health check endpoint",
+      "description": "Full health report \u2014 component status for monitoring dashboards.",
       "tags": [],
       "parameters": [],
       "request_body": null,
@@ -3396,6 +5427,23 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/live",
+      "summary": "Liveness",
+      "description": "Kubernetes liveness probe \u2014 confirms the process is alive.",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
       "method": "POST",
       "path": "/memory/compress",
       "summary": "Compress Memories",
@@ -3704,6 +5752,23 @@
         },
         "422": {
           "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/metrics",
+      "summary": "Prometheus Metrics",
+      "description": "Prometheus metrics endpoint for standard telemetry.\n\nReturns metrics in Prometheus text exposition format for:\n- Operation counts and durations\n- Feature usage statistics\n- Error counts by type\n\nDLP: telemetry_export_metrics",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
           "content": [
             "application/json"
           ]
@@ -4255,6 +6320,732 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/playground/execute",
+      "summary": "Execute Code",
+      "description": "",
+      "tags": [
+        "playground"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/playground/health",
+      "summary": "Healthcheck",
+      "description": "",
+      "tags": [
+        "playground"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/playground/metrics",
+      "summary": "Metrics",
+      "description": "",
+      "tags": [
+        "playground"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/playground/results/{session_id}",
+      "summary": "Get Results",
+      "description": "",
+      "tags": [
+        "playground"
+      ],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        },
+        {
+          "name": "task_id",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Task Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/playground/session",
+      "summary": "Create Session",
+      "description": "",
+      "tags": [
+        "playground"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/playground/share",
+      "summary": "Share Session",
+      "description": "",
+      "tags": [
+        "playground"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/playground/share/{short_code}",
+      "summary": "Fetch Shared",
+      "description": "",
+      "tags": [
+        "playground"
+      ],
+      "parameters": [
+        {
+          "name": "short_code",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Short Code"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/qgia/forecast",
+      "summary": "Run Forecast",
+      "description": "Run a full QSFE five-phase belief-propagation forecast.\n\nAccepts a scenario description and evidence fragments, returns a structured\nthree-tier probabilistic forecast with dissent analysis and provenance data.\n\nDLP: qgia_run_forecast",
+      "tags": [
+        "qgia-forecast"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/qgia/forecast",
+      "summary": "List Forecasts",
+      "description": "List stored forecast results, optionally filtered by scenario_id.",
+      "tags": [
+        "qgia-forecast"
+      ],
+      "parameters": [
+        {
+          "name": "scenario_id",
+          "in": "query",
+          "required": false,
+          "description": "Filter by scenario_id",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by scenario_id",
+            "title": "Scenario Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Max results",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Max results",
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/qgia/forecast/example/{scenario_name}",
+      "summary": "Run Example Forecast",
+      "description": "Run a forecast using one of the built-in example scenarios.\n\nAvailable names: iran_nuclear_escalation, south_china_sea_confrontation,\neuropean_energy_crisis, subsaharan_instability\n\nDLP: qgia_example_forecast",
+      "tags": [
+        "qgia-forecast"
+      ],
+      "parameters": [
+        {
+          "name": "scenario_name",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Scenario Name"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/qgia/forecast/{forecast_id}",
+      "summary": "Get Forecast",
+      "description": "Retrieve a previously computed forecast by its ID.\n\nDLP: qgia_get_forecast",
+      "tags": [
+        "qgia-forecast"
+      ],
+      "parameters": [
+        {
+          "name": "forecast_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Forecast Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/qgia/health",
+      "summary": "Qgia Health",
+      "description": "QGIA module health and population statistics.",
+      "tags": [
+        "qgia-forecast"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/qgia/network",
+      "summary": "Get Network Summary",
+      "description": "Return high-level statistics for the analyst trust network.\n\nDLP: qgia_network_summary",
+      "tags": [
+        "qgia-forecast"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/qgia/population",
+      "summary": "Get Population",
+      "description": "Return summary statistics for the 551-analyst population.\n\nDLP: qgia_population_summary",
+      "tags": [
+        "qgia-forecast"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/qgia/scenarios/examples",
+      "summary": "List Example Scenarios",
+      "description": "List the built-in example forecast scenarios available for quick testing.\n\nDLP: qgia_example_scenarios",
+      "tags": [
+        "qgia-forecast"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/r2-telemetry/anomalies",
+      "summary": "Get Detected Anomalies",
+      "description": "Get recently detected anomalies in R-2 agent operations\n\nArgs:\n    limit: Maximum number of anomalies to return\n\nReturns:\n    List of detected anomalies with details",
+      "tags": [
+        "R-2 Agent Telemetry"
+      ],
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Max anomalies to return",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Max anomalies to return",
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/r2-telemetry/health",
+      "summary": "Get Telemetry Health",
+      "description": "Get R-2 agent telemetry system health status\n\nReturns:\n    Health status with system information",
+      "tags": [
+        "R-2 Agent Telemetry"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/r2-telemetry/metrics",
+      "summary": "Get Prometheus Metrics",
+      "description": "Export R-2 agent metrics in Prometheus format\n\nThis endpoint is designed to be scraped by Prometheus for monitoring.\nReturns metrics in the Prometheus text exposition format.",
+      "tags": [
+        "R-2 Agent Telemetry"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "text/plain"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/r2-telemetry/operations/recent",
+      "summary": "Get Recent Operations",
+      "description": "Get recent R-2 agent operations\n\nArgs:\n    limit: Maximum number of operations to return\n    operation_type: Filter by specific operation type\n    failures_only: Only return failed operations\n\nReturns:\n    List of operation metrics",
+      "tags": [
+        "R-2 Agent Telemetry"
+      ],
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Max operations to return",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1,
+            "description": "Max operations to return",
+            "default": 10,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "operation_type",
+          "in": "query",
+          "required": false,
+          "description": "Filter by operation type",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by operation type",
+            "title": "Operation Type"
+          }
+        },
+        {
+          "name": "failures_only",
+          "in": "query",
+          "required": false,
+          "description": "Only return failed operations",
+          "schema": {
+            "type": "boolean",
+            "description": "Only return failed operations",
+            "default": false,
+            "title": "Failures Only"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/r2-telemetry/operations/types",
+      "summary": "Get Operation Types",
+      "description": "Get list of all tracked operation types with statistics\n\nReturns:\n    Dictionary of operation types with their statistics",
+      "tags": [
+        "R-2 Agent Telemetry"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/r2-telemetry/summary",
+      "summary": "Get Metrics Summary",
+      "description": "Get comprehensive metrics summary for R-2 agent operations\n\nArgs:\n    time_window: Time window in seconds (default: 3600 = 1 hour)\n    context_tag: Optional DLP context tag\n\nReturns:\n    Summary with counts, success rates, and performance metrics",
+      "tags": [
+        "R-2 Agent Telemetry"
+      ],
+      "parameters": [
+        {
+          "name": "time_window",
+          "in": "query",
+          "required": false,
+          "description": "Time window in seconds to summarize metrics",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Time window in seconds to summarize metrics",
+            "default": 3600,
+            "title": "Time Window"
+          }
+        },
+        {
+          "name": "context_tag",
+          "in": "query",
+          "required": false,
+          "description": "DLP context tag for lineage tracking",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "DLP context tag for lineage tracking",
+            "title": "Context Tag"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/r2-telemetry/test-operation",
+      "summary": "Test Telemetry Operation",
+      "description": "Test endpoint to generate sample telemetry data\n\nArgs:\n    operation_type: Type of operation to simulate\n    should_fail: Whether to simulate a failure\n\nReturns:\n    Test operation result",
+      "tags": [
+        "R-2 Agent Telemetry"
+      ],
+      "parameters": [
+        {
+          "name": "operation_type",
+          "in": "query",
+          "required": false,
+          "description": "Type of test operation",
+          "schema": {
+            "type": "string",
+            "description": "Type of test operation",
+            "default": "test",
+            "title": "Operation Type"
+          }
+        },
+        {
+          "name": "should_fail",
+          "in": "query",
+          "required": false,
+          "description": "Whether to simulate failure",
+          "schema": {
+            "type": "boolean",
+            "description": "Whether to simulate failure",
+            "default": false,
+            "title": "Should Fail"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
       "method": "GET",
       "path": "/rd/capacity/{team_member}",
       "summary": "Capacity",
@@ -4624,6 +7415,110 @@
       "description": "",
       "tags": [
         "rd-pipeline"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/ready",
+      "summary": "Readiness",
+      "description": "Kubernetes readiness probe \u2014 confirms the app is ready to serve traffic.\n\nReturns 503 if core dependencies are unavailable.",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/relay/health",
+      "summary": "Health Check",
+      "description": "Health check endpoint for relay manager.\n\nDLP: relay_manager_health_check",
+      "tags": [
+        "relay-manager"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/relay/send",
+      "summary": "Send Cross Layer Message",
+      "description": "Send a message across layers with ethics evaluation.\n\nDLP: relay_send_message\nAnchors: T1, SRB",
+      "tags": [
+        "relay-manager"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/relay/stats",
+      "summary": "Get Statistics",
+      "description": "Get relay manager statistics.\n\nDLP: relay_statistics",
+      "tags": [
+        "relay-manager"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/relay/status",
+      "summary": "Get Status",
+      "description": "Get detailed relay manager status.\n\nDLP: relay_status",
+      "tags": [
+        "relay-manager"
       ],
       "parameters": [],
       "request_body": null,
@@ -5562,6 +8457,104 @@
     },
     {
       "method": "POST",
+      "path": "/subroutines/anomaly/detect",
+      "summary": "Detect Anomaly",
+      "description": "Detect anomalies in metrics.\n\nReturns:\n    Anomaly detection result",
+      "tags": [
+        "subroutines-enhanced"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/subroutines/dependencies/health",
+      "summary": "Check Dependencies",
+      "description": "Check health of all dependencies.\n\nReturns:\n    Dependency health report",
+      "tags": [
+        "subroutines-enhanced"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/subroutines/ethics/check",
+      "summary": "Check Ethics Compliance",
+      "description": "Check ethics compliance for an operation.\n\nReturns:\n    Ethics check result with score and violations",
+      "tags": [
+        "subroutines-enhanced"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/subroutines/ethics/stats",
+      "summary": "Get Ethics Stats",
+      "description": "Get ethics compliance statistics",
+      "tags": [
+        "subroutines-enhanced"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
       "path": "/subroutines/execute",
       "summary": "Execute Subroutine",
       "description": "Execute a subroutine with provided inputs.\n\nArgs:\n    request: Execution request with subroutine ID and inputs\n    \nReturns:\n    Execution result",
@@ -5666,6 +8659,44 @@
     },
     {
       "method": "GET",
+      "path": "/subroutines/integration/validate",
+      "summary": "Validate Integrations",
+      "description": "Validate all module integrations.\n\nReturns:\n    Integration validation results",
+      "tags": [
+        "subroutines-enhanced"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/subroutines/knowledge/sync",
+      "summary": "Sync Knowledge Bases",
+      "description": "Synchronize knowledge bases.\n\nReturns:\n    Sync results",
+      "tags": [
+        "subroutines-enhanced"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
       "path": "/subroutines/list",
       "summary": "List Subroutines",
       "description": "List all registered subroutines with optional filters.\n\nArgs:\n    category: Filter by category\n    status_filter: Filter by status\n    \nReturns:\n    List of subroutines",
@@ -5725,6 +8756,55 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/subroutines/performance/profile",
+      "summary": "Get Performance Profile",
+      "description": "Get system performance profile.\n\nReturns:\n    Performance profile with bottlenecks",
+      "tags": [
+        "subroutines-enhanced"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/subroutines/quantum/optimize",
+      "summary": "Optimize Circuit",
+      "description": "Optimize a quantum circuit.\n\nReturns:\n    Optimized circuit and metrics",
+      "tags": [
+        "subroutines-enhanced"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
       "method": "POST",
       "path": "/subroutines/register",
       "summary": "Register Subroutine",
@@ -5756,11 +8836,71 @@
     },
     {
       "method": "POST",
+      "path": "/subroutines/resources/analyze",
+      "summary": "Analyze Resources",
+      "description": "Analyze resource usage and get optimization recommendations.\n\nReturns:\n    Resource metrics and optimization actions",
+      "tags": [
+        "subroutines-enhanced"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
       "path": "/subroutines/search",
       "summary": "Search Subroutines",
       "description": "Search subroutines by query, category, status, or tags.\n\nReturns:\n    List of matching subroutines",
       "tags": [
         "subroutines"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/subroutines/security/scan",
+      "summary": "Scan For Threats",
+      "description": "Scan for security threats.\n\nReturns:\n    Threat scan results",
+      "tags": [
+        "subroutines-enhanced"
       ],
       "parameters": [],
       "request_body": {
@@ -5896,7 +9036,25 @@
       "tags": [
         "Synergy Dashboard"
       ],
-      "parameters": [],
+      "parameters": [
+        {
+          "name": "X-CSRF-Token",
+          "in": "header",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X-Csrf-Token"
+          }
+        }
+      ],
       "request_body": {
         "required": true,
         "content": [
@@ -5971,6 +9129,23 @@
           "schema": {
             "type": "string",
             "title": "Name"
+          }
+        },
+        {
+          "name": "X-CSRF-Token",
+          "in": "header",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X-Csrf-Token"
           }
         }
       ],
@@ -6119,6 +9294,47 @@
       "responses": {
         "200": {
           "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/telemetry/snapshot",
+      "summary": "Telemetry Snapshot",
+      "description": "Get current telemetry metrics snapshot.\n\nReturns structured metrics including:\n- Performance statistics (operation times, counts)\n- Adoption metrics (feature usage)\n- Error metrics\n\nArgs:\n    context_tag: Optional DLP context tag for lineage tracking\n\nDLP: telemetry_snapshot_export",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "context_tag",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Tag"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
           "content": [
             "application/json"
           ]

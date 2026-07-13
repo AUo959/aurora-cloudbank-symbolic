@@ -107,7 +107,6 @@ Cross-namespace bridges: L2 relay agents (HALO, STARLING, LIORA, OPPY, ARCHY, RI
 **Priority:** Medium | **Owner:** Medical division (Dr. Vasquez)
 Wire a real HRV/cortisol-proxy data source to `src/sensors/crew_load/`, and define Stream 1's own consent/opt-out hook. See `docs/architecture/SENTINEL_ARCHITECTURE.md` — Remaining Work.
 
-
 ### WS-001 — QUANTUM_FORGE Alignment Review
 **Priority:** Medium | **Gap:** GAP-005  
 Cross-reference `docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md` vs `01_QUANTUM_FORGE_AxiomManifest.md`. Note: QGIA_ARCHITECTURE.md Section 8 names 10 computational modules (Lanchester, QSFE, EDM, ABCP, RPRN, TCA, etc.) not in the axiom manifest — these are complementary layers, not conflicts.

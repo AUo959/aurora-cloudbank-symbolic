@@ -12,7 +12,7 @@
 ## Streams
 
 | Stream | Description | Status | Implementation |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 — Crew Cognitive Load Monitoring | HRV/cortisol-proxy biometric signals, aggregated and anonymized by default | **Stub — not wired** | `src/sensors/crew_load/` |
 | 2 — AI Self-Audit | Reasoning-drift detection, entropy measurement, sentinel-risk mapping | **Operational** | `services/nemo_service/symbolic_bridge.py`, `src/sensors/observatory/symbolic/ethical_signal.py`, `src/sensors/constants.py` |
 | 3 — Ethics Overlay | Picard_Delta_3 charter enforcement, GUMAS ethics audit log, consent hooks | **Operational** | `ethics/`, `symbolic_config.yaml` |
@@ -45,7 +45,7 @@ Per the original proposal's routing (CC: Dr. Amira Sato — Ethics & Governance;
 Per the original 2026-04-09 proposal, cross-checked against `ORION_STATION_CANONICAL_STAFF_REGISTRY.json` (canonical titles used below where they differ from the proposal's informal phrasing):
 
 | Name | Canonical role | Registry ID |
-|---|---|---|
+| --- | --- | --- |
 | Alex Thorne | Commander, Orion Station | CMD_001 |
 | Maya Shepard | Executive Officer | CMD_002 |
 | Dr. Elira Noor | Lead Reflexivity Specialist | ETH_002 |

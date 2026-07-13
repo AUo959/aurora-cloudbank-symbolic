@@ -1,8 +1,17 @@
 # Aurora CloudBank Symbolic - System Architecture Diagram
 
-**Version:** 1.0.0  
-**Date:** November 13, 2025  
-**Purpose:** Visual map of all systems and their integration points
+**Version:** 1.0.1
+**Snapshot date:** November 13, 2025
+**Authority note updated:** July 13, 2026
+**Status:** Historical system snapshot; several wiring claims below are stale
+**Purpose:** Visual map of systems and their integration points at the recorded date
+
+> **Current authority:** Use
+> [`RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md`](./RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md)
+> for live router and service ownership, and
+> [`scaling_plan.md`](./scaling_plan.md) for replica, state, capacity, and
+> multi-region readiness. This diagram does not currently model the QGIA L1-B
+> forecast surface or prove deployment-scale readiness.
 
 ---
 

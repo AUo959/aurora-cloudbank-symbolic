@@ -1,7 +1,8 @@
 # Aurora CloudBank Scaling Plan
 
 **Status:** Architecture plan
-**Last reviewed:** 2026-06-02
+**Version:** 1.1.0
+**Last reviewed:** 2026-07-13
 **Scope:** Horizontal and multi-region scaling for the CloudBank API and adjacent runtime services
 
 This plan extends the current single-worker safety posture into a staged path
@@ -26,6 +27,29 @@ ordering, and failover controls.
 | Insight Ledger | `modules/insight_ledger/api.py` keeps a module-level ledger instance; `api/aurora_api.py` initializes `./data/insight_ledger`. | Ledger writes need a single-writer service, durable append log, or transactional backend before concurrent pods write to it. |
 | Auth and logout | `src/security/auth_routes.py` documents logout as client-side; `docs/RBAC_SECURITY_SUMMARY.md` lists database-backed users and Redis token blacklist as future work. | Users, refresh state, revocation, and session tracking need shared storage before HA auth claims. |
 | Mesh and audit records | `src/mesh/runtime.py` uses SQLite and JSONL transcripts; monitoring/audit components write JSONL files. | Event and audit surfaces need shared databases, object storage, or log pipelines before cross-pod and cross-region operation. |
+| QGIA forecast API | `modules/qgia/api.py` mounts at `/qgia`, creates one process-local `QGIAForecastEngine`, and stores forecast results in the module-level `_forecast_store` dictionary. | Health and population reads can be replicated, but forecast creation/retrieval needs shared durable storage, idempotency, and backpressure before multi-pod scale. |
+
+## Network and Simulation Topology Scope
+
+Three different uses of "node" must remain separate in scaling decisions:
+
+| Topology | Evidence | Scaling interpretation |
+| --- | --- | --- |
+| CloudBank service replicas | Kubernetes and application deployment surfaces in this repo | This plan governs their state, traffic, failover, and capacity. |
+| L1 peer network | `QGIA_L1_NODE_REGISTRATION.md` defines Orion Station L1-A and QGIA L1-B | Institutional/network authority; not a declaration that either node is a deployable replica of the other. |
+| L2 GUMAS chain | `LAYER_ARCHITECTURE.md` and `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` describe a nine-node simulation network | Simulation topology; it does not substitute for CloudBank pod, database, or region capacity evidence. |
+
+The `/qgia` router is a current forecast-engine surface, not a verified generic
+inter-node exchange transport. The six-step exchange protocol remains a
+separate design concern under issue #1141. QGIA-to-L2 tasking must remain
+mediated through L1 crew and relay judgment as defined by
+`QGIA_SIM_BRIDGE.md`; scaling must not introduce autonomous QGIA-to-L2 writes.
+
+The QGIA registration document's `500TB` daily throughput is an institutional
+design claim. No load test, deployment manifest, queue, storage pipeline, or
+capacity model in this repo verifies CloudBank can ingest that volume. Do not
+use that number for sizing or readiness claims until an explicit transport and
+measured capacity envelope exist.
 
 ## Target Architecture
 
@@ -64,6 +88,7 @@ state services:
 | P1 | Insight Ledger | Introduce a ledger storage interface with single-writer, transaction, or durable-log guarantees. | Concurrent API pods without corrupting audit history. |
 | P1 | AuMemManager | Replace module-level in-memory production storage with a backend interface and durable/vector store. | Consistent memory reads and writes across pods. |
 | P1 | Mesh/event state | Move mesh events and transcripts from local SQLite/JSONL to an event bus and durable sink. | Cross-pod communication and replay. |
+| P1 | QGIA forecast state | Replace `_forecast_store` with a durable repository and add idempotent forecast submission, queueing, and bounded retention. | Consistent `/qgia/forecast` create/list/get behavior across pods. |
 | P2 | Monitoring and audit logs | Route JSONL-style audit events through centralized logging or append-only object storage. | Region-level compliance records and recovery. |
 | P2 | Uploads, snapshots, and model artifacts | Replace pod-local file assumptions with object storage or managed PVC policy. | Rollouts and pod rescheduling without data loss. |
 | P2 | NeMo/GPU inference | Add a queue, GPU node-pool sizing, and backpressure policy. | Independent GPU worker scale without overloading scarce devices. |
@@ -181,6 +206,10 @@ Exit criteria:
    evidence requirements.
 12. Define NeMo/GPU inference scaling around a queue, node-pool capacity, and
    backpressure rather than generic pod HPA.
+13. Externalize QGIA forecast results and define an idempotent queued execution
+    model before scaling `/qgia` beyond one process.
+14. Define and load-test the approved L1 inter-node transport before assigning
+    any capacity or latency guarantee to cross-node exchange.
 
 ## Operator Rules
 
@@ -193,3 +222,11 @@ Exit criteria:
 - Prefer active-passive regional failover before active-active.
 - Update deployment docs whenever a phase graduates so operator-facing claims
   match current repo evidence.
+
+## Architecture References
+
+- [`RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md`](./RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md) — current router, mesh, and L1 peer-node authority.
+- [`SYSTEM_ARCHITECTURE_DIAGRAM.md`](./SYSTEM_ARCHITECTURE_DIAGRAM.md) — broad historical system map; verify live mounts against the runtime-topology document.
+- [`LAYER_ARCHITECTURE.md`](./LAYER_ARCHITECTURE.md) — authoritative L1/L2/L3 definitions, including the nine-node GUMAS design.
+- [`QGIA_L1_NODE_REGISTRATION.md`](./QGIA_L1_NODE_REGISTRATION.md) — L1-A/L1-B institutional network definition.
+- [`QGIA_SIM_BRIDGE.md`](./QGIA_SIM_BRIDGE.md) — required L1 mediation between QGIA signals and L2 simulation tasking.

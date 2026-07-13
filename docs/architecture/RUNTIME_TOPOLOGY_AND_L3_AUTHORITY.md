@@ -60,6 +60,11 @@ dependency degrades that module rather than disabling the full app.
 The API governance registry for these surfaces lives at
 `docs/api/api_surface_inventory.json`.
 
+Deployment replica, state-externalization, capacity, and regional-failover
+claims are governed separately by [`scaling_plan.md`](./scaling_plan.md). A
+route being active here is not evidence that it is safe for multi-worker,
+multi-pod, or multi-region writes.
+
 ## Mesh and Bridge Authority
 
 The implemented Python mesh runtime V1 surface currently confirmed by

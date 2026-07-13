@@ -1,0 +1,1942 @@
+{
+  "generated_from": [
+    "config/mesh/agents/*.json",
+    "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+    "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+  ],
+  "owner_class_contract": [
+    "human_l1",
+    "ai_core",
+    "l2_relay",
+    "l3_framework",
+    "legacy_seed",
+    "unresolved"
+  ],
+  "profiles": [
+    {
+      "aliases": [
+        "l2.aurora.term",
+        "personal_access_terminal:aurora"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0048",
+      "canon_layer": "L2",
+      "canon_preferred_name": "Aurora (AU) - Station Intelligence Core",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "System Entity",
+      "l1_station_layer": "L2",
+      "mesh_route": {
+        "channel_id": "direct:aurora",
+        "owner_agent_id": "aurora",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "aurora",
+      "owner_class": "ai_core",
+      "owner_display_name": "Aurora",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/aurora.json"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l2_aurora_au_terminal",
+      "terminal_namespace": "aurora.core.term",
+      "terminal_type": "aurora"
+    },
+    {
+      "aliases": [
+        "l1.alex_thorne.term",
+        "personal_access_terminal:alex_thorne"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0001",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Commander Alex Thorne",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:captain:alex",
+        "owner_agent_id": "alex_thorne",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "alex_thorne",
+      "owner_class": "human_l1",
+      "owner_display_name": "Alex Thorne",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/alex_thorne.json"
+      ],
+      "station_context": {
+        "role_or_function": "Station Commander",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_commander_alex_thorne_terminal",
+      "terminal_namespace": "l1.alex_thorne.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "cross_domain_r_d.amina.term",
+        "l1.amina_velin.term",
+        "personal_access_terminal:amina_velin"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0002",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Dr. Amina Velin",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:amina_velin",
+        "owner_agent_id": "amina_velin",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "amina_velin",
+      "owner_class": "human_l1",
+      "owner_display_name": "Amina Velin",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/amina_velin.json"
+      ],
+      "station_context": {
+        "role_or_function": "Symbolic Systems Research Lead",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_dr_amina_velin_terminal",
+      "terminal_namespace": "cross_domain_r_d.amina.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.amira_sato.term",
+        "personal_access_terminal:amira_sato"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0003",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Dr. Amira Sato",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:amira_sato",
+        "owner_agent_id": "amira_sato",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "amira_sato",
+      "owner_class": "human_l1",
+      "owner_display_name": "Amira Sato",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/amira_sato.json"
+      ],
+      "station_context": {
+        "role_or_function": "Chief Ethics Officer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_dr_amira_sato_terminal",
+      "terminal_namespace": "l1.amira_sato.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "core_development.carmen.term",
+        "l1.carmen_rivas.term",
+        "personal_access_terminal:carmen_rivas"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0005",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Carmen Rivas",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:carmen_rivas",
+        "owner_agent_id": "carmen_rivas",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "carmen_rivas",
+      "owner_class": "human_l1",
+      "owner_display_name": "Carmen Rivas",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/carmen_rivas.json"
+      ],
+      "station_context": {
+        "role_or_function": "Simulation Binding Specialist",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_carmen_rivas_terminal",
+      "terminal_namespace": "core_development.carmen.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.chief_thomson.term",
+        "personal_access_terminal:chief_thomson"
+      ],
+      "canon_authority": "reference",
+      "canon_entity_id": "ORION.ENTITY.0007",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Chief Thomson",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:chief_thomson",
+        "owner_agent_id": "chief_thomson",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "chief_thomson",
+      "owner_class": "human_l1",
+      "owner_display_name": "Chief Thomson",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/chief_thomson.json"
+      ],
+      "station_context": {
+        "role_or_function": "Commanding Officer, Repair Tender Beta (Mobile Maintenance Tender)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_chief_thomson_terminal",
+      "terminal_namespace": "l1.chief_thomson.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.dante_kyros.term",
+        "personal_access_terminal:dante_kyros"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0009",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Dante Kyros",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:dante_kyros",
+        "owner_agent_id": "dante_kyros",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "dante_kyros",
+      "owner_class": "human_l1",
+      "owner_display_name": "Dante Kyros",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/dante_kyros.json"
+      ],
+      "station_context": {
+        "role_or_function": "UX Architect",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_dante_kyros_terminal",
+      "terminal_namespace": "l1.dante_kyros.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.elena_sorensen.term",
+        "personal_access_terminal:elena_sorensen"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0010",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Prof. Elena Sorensen",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:elena_sorensen",
+        "owner_agent_id": "elena_sorensen",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "elena_sorensen",
+      "owner_class": "human_l1",
+      "owner_display_name": "Elena Sorensen",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/elena_sorensen.json"
+      ],
+      "station_context": {
+        "role_or_function": "Cognitive Ethicist (Narrative Ethics)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_prof_elena_sorensen_terminal",
+      "terminal_namespace": "l1.elena_sorensen.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.elena_vasquez.term",
+        "personal_access_terminal:elena_vasquez"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0011",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Dr. Elena Vasquez",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:elena_vasquez",
+        "owner_agent_id": "elena_vasquez",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "elena_vasquez",
+      "owner_class": "human_l1",
+      "owner_display_name": "Elena Vasquez",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/elena_vasquez.json"
+      ],
+      "station_context": {
+        "role_or_function": "Flight Controller",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_dr_elena_vasquez_terminal",
+      "terminal_namespace": "l1.elena_vasquez.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "aurora_internal_r_d.elira.term",
+        "l1.elira_noor.term",
+        "personal_access_terminal:elira_noor"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0012",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Dr. Elira Noor",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:elira_noor",
+        "owner_agent_id": "elira_noor",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "elira_noor",
+      "owner_class": "human_l1",
+      "owner_display_name": "Elira Noor",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/elira_noor.json"
+      ],
+      "station_context": {
+        "role_or_function": "Lead Reflexivity Specialist (AI Ethics Architect)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_dr_elira_noor_terminal",
+      "terminal_namespace": "aurora_internal_r_d.elira.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.emily_roberts.term",
+        "personal_access_terminal:emily_roberts"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0013",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Emily Roberts",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:emily_roberts",
+        "owner_agent_id": "emily_roberts",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "emily_roberts",
+      "owner_class": "human_l1",
+      "owner_display_name": "Emily Roberts",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/emily_roberts.json"
+      ],
+      "station_context": {
+        "role_or_function": "LLM-Simulation Bridge Developer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_emily_roberts_terminal",
+      "terminal_namespace": "l1.emily_roberts.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "cross_domain_r_d.haneul.term",
+        "l1.haneul_park.term",
+        "personal_access_terminal:haneul_park"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0014",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Haneul Park",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:haneul_park",
+        "owner_agent_id": "haneul_park",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "haneul_park",
+      "owner_class": "human_l1",
+      "owner_display_name": "Haneul Park",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/haneul_park.json"
+      ],
+      "station_context": {
+        "role_or_function": "Immersive Experience Theorist",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_haneul_park_terminal",
+      "terminal_namespace": "cross_domain_r_d.haneul.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.helena_vu.term",
+        "personal_access_terminal:helena_vu"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0016",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Helena Vu",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:helena_vu",
+        "owner_agent_id": "helena_vu",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "helena_vu",
+      "owner_class": "human_l1",
+      "owner_display_name": "Helena Vu",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/helena_vu.json"
+      ],
+      "station_context": {
+        "role_or_function": "Cultural & HR Director",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_helena_vu_terminal",
+      "terminal_namespace": "l1.helena_vu.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "core_development.ira.term",
+        "l1.ira_menon.term",
+        "personal_access_terminal:ira_menon"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0017",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Ira Menon",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:ira_menon",
+        "owner_agent_id": "ira_menon",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "ira_menon",
+      "owner_class": "human_l1",
+      "owner_display_name": "Ira Menon",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/ira_menon.json"
+      ],
+      "station_context": {
+        "role_or_function": "Compiler Engineer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_ira_menon_terminal",
+      "terminal_namespace": "core_development.ira.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.jessica_martinez.term",
+        "personal_access_terminal:jessica_martinez"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0018",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Jessica Martinez",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:jessica_martinez",
+        "owner_agent_id": "jessica_martinez",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "jessica_martinez",
+      "owner_class": "human_l1",
+      "owner_display_name": "Jessica Martinez",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/jessica_martinez.json"
+      ],
+      "station_context": {
+        "role_or_function": "Backend Architect",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_jessica_martinez_terminal",
+      "terminal_namespace": "l1.jessica_martinez.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.jiro_tanaka.term",
+        "personal_access_terminal:jiro_tanaka"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0019",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Jiro Tanaka",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:jiro_tanaka",
+        "owner_agent_id": "jiro_tanaka",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "jiro_tanaka",
+      "owner_class": "human_l1",
+      "owner_display_name": "Jiro Tanaka",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/jiro_tanaka.json"
+      ],
+      "station_context": {
+        "role_or_function": "Chief Engineering Officer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_jiro_tanaka_terminal",
+      "terminal_namespace": "l1.jiro_tanaka.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.julian_markov.term",
+        "personal_access_terminal:julian_markov"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0020",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Julian Markov",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:julian_markov",
+        "owner_agent_id": "julian_markov",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "julian_markov",
+      "owner_class": "human_l1",
+      "owner_display_name": "Julian Markov",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/julian_markov.json"
+      ],
+      "station_context": {
+        "role_or_function": "Chief Security Officer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_julian_markov_terminal",
+      "terminal_namespace": "l1.julian_markov.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.juno_suresh.term",
+        "personal_access_terminal:juno_suresh"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0021",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Juno Suresh",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:juno_suresh",
+        "owner_agent_id": "juno_suresh",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "juno_suresh",
+      "owner_class": "human_l1",
+      "owner_display_name": "Juno Suresh",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/juno_suresh.json"
+      ],
+      "station_context": {
+        "role_or_function": "Symbolic Systems Artist",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_juno_suresh_terminal",
+      "terminal_namespace": "l1.juno_suresh.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "cross_domain_r_d.kai.term",
+        "l1.kai_drev.term",
+        "personal_access_terminal:kai_drev"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0022",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Kai Drev",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:kai_drev",
+        "owner_agent_id": "kai_drev",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "kai_drev",
+      "owner_class": "human_l1",
+      "owner_display_name": "Kai Drev",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/kai_drev.json"
+      ],
+      "station_context": {
+        "role_or_function": "Interface Ecologist",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_kai_drev_terminal",
+      "terminal_namespace": "cross_domain_r_d.kai.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.keira_halden.term",
+        "personal_access_terminal:keira_halden"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0023",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Keira Halden",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:keira_halden",
+        "owner_agent_id": "keira_halden",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "keira_halden",
+      "owner_class": "human_l1",
+      "owner_display_name": "Keira Halden",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/keira_halden.json"
+      ],
+      "station_context": {
+        "role_or_function": "Lead Visual Concept Designer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_keira_halden_terminal",
+      "terminal_namespace": "l1.keira_halden.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.kieran_zhao.term",
+        "personal_access_terminal:kieran_zhao"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0024",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Dr. Kieran Zhao",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:kieran_zhao",
+        "owner_agent_id": "kieran_zhao",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "kieran_zhao",
+      "owner_class": "human_l1",
+      "owner_display_name": "Kieran Zhao",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/kieran_zhao.json"
+      ],
+      "station_context": {
+        "role_or_function": "Computational Optimization Lead",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_dr_kieran_zhao_terminal",
+      "terminal_namespace": "l1.kieran_zhao.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.leena_porter.term",
+        "personal_access_terminal:leena_porter"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0025",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Leena Porter",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:leena_porter",
+        "owner_agent_id": "leena_porter",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "leena_porter",
+      "owner_class": "human_l1",
+      "owner_display_name": "Leena Porter",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/leena_porter.json"
+      ],
+      "station_context": {
+        "role_or_function": "Bridge Operations Officer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_leena_porter_terminal",
+      "terminal_namespace": "l1.leena_porter.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.lt_hassan.term",
+        "personal_access_terminal:lt_hassan"
+      ],
+      "canon_authority": "reference",
+      "canon_entity_id": "ORION.ENTITY.0015",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Lt. Hassan",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:lt_hassan",
+        "owner_agent_id": "lt_hassan",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "lt_hassan",
+      "owner_class": "human_l1",
+      "owner_display_name": "Lt. Hassan",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/lt_hassan.json"
+      ],
+      "station_context": {
+        "role_or_function": "Commanding Officer, Logistics Alpha (Cargo Transport)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_lt_hassan_terminal",
+      "terminal_namespace": "l1.lt_hassan.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.lt_nakamura.term",
+        "personal_access_terminal:lt_nakamura"
+      ],
+      "canon_authority": "reference",
+      "canon_entity_id": "ORION.ENTITY.0028",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Lt. Nakamura",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:lt_nakamura",
+        "owner_agent_id": "lt_nakamura",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "lt_nakamura",
+      "owner_class": "human_l1",
+      "owner_display_name": "Lt. Nakamura",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/lt_nakamura.json"
+      ],
+      "station_context": {
+        "role_or_function": "Commanding Officer, Guardian Sentinel (Security Corvette)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_lt_nakamura_terminal",
+      "terminal_namespace": "l1.lt_nakamura.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.marcus_chen.term",
+        "personal_access_terminal:marcus_chen"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0026",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Marcus Chen",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:marcus_chen",
+        "owner_agent_id": "marcus_chen",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "marcus_chen",
+      "owner_class": "human_l1",
+      "owner_display_name": "Marcus Chen",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/marcus_chen.json"
+      ],
+      "station_context": {
+        "role_or_function": "Performance Optimization Engineer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_marcus_chen_terminal",
+      "terminal_namespace": "l1.marcus_chen.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "aurora_internal_r_d.maren.term",
+        "l1.maren_koss.term",
+        "personal_access_terminal:maren_koss"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0027",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Dr. Maren Koss",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:maren_koss",
+        "owner_agent_id": "maren_koss",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "maren_koss",
+      "owner_class": "human_l1",
+      "owner_display_name": "Maren Koss",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/maren_koss.json"
+      ],
+      "station_context": {
+        "role_or_function": "Cognitive Drift Mapper",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_dr_maren_koss_terminal",
+      "terminal_namespace": "aurora_internal_r_d.maren.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.maya_shepard.term",
+        "personal_access_terminal:maya_shepard"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0008",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Lt. Commander Maya Shepard",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:maya_shepard",
+        "owner_agent_id": "maya_shepard",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "maya_shepard",
+      "owner_class": "human_l1",
+      "owner_display_name": "Maya Shepard",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/maya_shepard.json"
+      ],
+      "station_context": {
+        "role_or_function": "Executive Officer (XO)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_lt_commander_maya_shepard_terminal",
+      "terminal_namespace": "l1.maya_shepard.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.mira_chen.term",
+        "personal_access_terminal:mira_chen"
+      ],
+      "canon_authority": "reference",
+      "canon_entity_id": "ORION.ENTITY.0004",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Cadet Mira Chen",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:mira_chen",
+        "owner_agent_id": "mira_chen",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "mira_chen",
+      "owner_class": "human_l1",
+      "owner_display_name": "Mira Chen",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/mira_chen.json"
+      ],
+      "station_context": {
+        "role_or_function": "Cadet / Trainee (Operations Track)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_cadet_mira_chen_terminal",
+      "terminal_namespace": "l1.mira_chen.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.naomi_vell.term",
+        "personal_access_terminal:naomi_vell"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0029",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Naomi Vell",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:naomi_vell",
+        "owner_agent_id": "naomi_vell",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "naomi_vell",
+      "owner_class": "human_l1",
+      "owner_display_name": "Naomi Vell",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/naomi_vell.json"
+      ],
+      "station_context": {
+        "role_or_function": "Narrative Framework Engineer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_naomi_vell_terminal",
+      "terminal_namespace": "l1.naomi_vell.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.olivia_nguyen.term",
+        "personal_access_terminal:olivia_nguyen"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0030",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Olivia Nguyen",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:olivia_nguyen",
+        "owner_agent_id": "olivia_nguyen",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "olivia_nguyen",
+      "owner_class": "human_l1",
+      "owner_display_name": "Olivia Nguyen",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/olivia_nguyen.json"
+      ],
+      "station_context": {
+        "role_or_function": "QA & Continuity Auditor",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_olivia_nguyen_terminal",
+      "terminal_namespace": "l1.olivia_nguyen.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.raj_patel.term",
+        "personal_access_terminal:raj_patel"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0006",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Chief Engineer Raj Patel",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:raj_patel",
+        "owner_agent_id": "raj_patel",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "raj_patel",
+      "owner_class": "human_l1",
+      "owner_display_name": "Raj Patel",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/raj_patel.json"
+      ],
+      "station_context": {
+        "role_or_function": "Chief Engineer (Systems/DevOps)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_chief_engineer_raj_patel_terminal",
+      "terminal_namespace": "l1.raj_patel.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.rei_vatra.term",
+        "personal_access_terminal:rei_vatra"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0031",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Rei Vatra",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:rei_vatra",
+        "owner_agent_id": "rei_vatra",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "rei_vatra",
+      "owner_class": "human_l1",
+      "owner_display_name": "Rei Vatra",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/rei_vatra.json"
+      ],
+      "station_context": {
+        "role_or_function": "Atmospheric Painter & Color Theorist",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_rei_vatra_terminal",
+      "terminal_namespace": "l1.rei_vatra.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.ren_feldman.term",
+        "personal_access_terminal:ren_feldman"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0032",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Dr. Ren Feldman",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:ren_feldman",
+        "owner_agent_id": "ren_feldman",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "ren_feldman",
+      "owner_class": "human_l1",
+      "owner_display_name": "Ren Feldman",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/ren_feldman.json"
+      ],
+      "station_context": {
+        "role_or_function": "Chief Medical Officer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_dr_ren_feldman_terminal",
+      "terminal_namespace": "l1.ren_feldman.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.ren_okada.term",
+        "personal_access_terminal:ren_okada"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0033",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Ren Okada",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:ren_okada",
+        "owner_agent_id": "ren_okada",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "ren_okada",
+      "owner_class": "human_l1",
+      "owner_display_name": "Ren Okada",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/ren_okada.json"
+      ],
+      "station_context": {
+        "role_or_function": "Systems Portability Specialist",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_ren_okada_terminal",
+      "terminal_namespace": "l1.ren_okada.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.ren_takahashi.term",
+        "personal_access_terminal:ren_takahashi"
+      ],
+      "canon_authority": "reference",
+      "canon_entity_id": "ORION.ENTITY.0034",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Ren Takahashi",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:ren_takahashi",
+        "owner_agent_id": "ren_takahashi",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "ren_takahashi",
+      "owner_class": "human_l1",
+      "owner_display_name": "Ren Takahashi",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/ren_takahashi.json"
+      ],
+      "station_context": {
+        "role_or_function": "Psycho-Acoustic Systems Engineer, ORS-05 Lacewing (Sensor & Human-Factors Acoustics)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_ren_takahashi_terminal",
+      "terminal_namespace": "l1.ren_takahashi.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.ryan_patel.term",
+        "personal_access_terminal:ryan_patel"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0035",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Ryan Patel",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:ryan_patel",
+        "owner_agent_id": "ryan_patel",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "ryan_patel",
+      "owner_class": "human_l1",
+      "owner_display_name": "Ryan Patel",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/ryan_patel.json"
+      ],
+      "station_context": {
+        "role_or_function": "Systems Integration Engineer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_ryan_patel_terminal",
+      "terminal_namespace": "l1.ryan_patel.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.samantha_gray.term",
+        "personal_access_terminal:samantha_gray"
+      ],
+      "canon_authority": "reference",
+      "canon_entity_id": "ORION.ENTITY.0036",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Samantha Gray",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:samantha_gray",
+        "owner_agent_id": "samantha_gray",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "samantha_gray",
+      "owner_class": "human_l1",
+      "owner_display_name": "Samantha Gray",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/samantha_gray.json"
+      ],
+      "station_context": {
+        "role_or_function": "Senior Pilot, ORS-05 Lacewing (Training / Cultural Liaison Flight)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_samantha_gray_terminal",
+      "terminal_namespace": "l1.samantha_gray.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.samantha_lee.term",
+        "personal_access_terminal:samantha_lee"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0037",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Samantha Lee",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:samantha_lee",
+        "owner_agent_id": "samantha_lee",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "samantha_lee",
+      "owner_class": "human_l1",
+      "owner_display_name": "Samantha Lee",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/samantha_lee.json"
+      ],
+      "station_context": {
+        "role_or_function": "Logging & Observability Engineer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_samantha_lee_terminal",
+      "terminal_namespace": "l1.samantha_lee.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.tariq_el_sayegh.term",
+        "personal_access_terminal:tariq_el_sayegh"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0038",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Tariq El-Sayegh",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:tariq_el_sayegh",
+        "owner_agent_id": "tariq_el_sayegh",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "tariq_el_sayegh",
+      "owner_class": "human_l1",
+      "owner_display_name": "Tariq El-Sayegh",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/tariq_el_sayegh.json"
+      ],
+      "station_context": {
+        "role_or_function": "Speculative Systems Theorist (Stress Testing)",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_tariq_el_sayegh_terminal",
+      "terminal_namespace": "l1.tariq_el_sayegh.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "core_development.tobias.term",
+        "l1.tobias_qin.term",
+        "personal_access_terminal:tobias_qin"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0039",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Tobias Qin",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:tobias_qin",
+        "owner_agent_id": "tobias_qin",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "tobias_qin",
+      "owner_class": "human_l1",
+      "owner_display_name": "Tobias Qin",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/tobias_qin.json"
+      ],
+      "station_context": {
+        "role_or_function": "Code/Narrative Systems Engineer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_tobias_qin_terminal",
+      "terminal_namespace": "core_development.tobias.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l1.varya_lin.term",
+        "personal_access_terminal:varya_lin"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0040",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Varya Lin",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:varya_lin",
+        "owner_agent_id": "varya_lin",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "varya_lin",
+      "owner_class": "human_l1",
+      "owner_display_name": "Varya Lin",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/varya_lin.json"
+      ],
+      "station_context": {
+        "role_or_function": "Chief Science Officer",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_varya_lin_terminal",
+      "terminal_namespace": "l1.varya_lin.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "aurora_internal_r_d.vincent.term",
+        "l1.vincent_kale.term",
+        "personal_access_terminal:vincent_kale"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0041",
+      "canon_layer": "L1",
+      "canon_preferred_name": "Vincent Kale",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "private:crew:vincent_kale",
+        "owner_agent_id": "vincent_kale",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "vincent_kale",
+      "owner_class": "human_l1",
+      "owner_display_name": "Vincent Kale",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/vincent_kale.json"
+      ],
+      "station_context": {
+        "role_or_function": "Layer Isolation Theorist",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.L1ROSTER.0001"
+      },
+      "terminal_id": "l1_vincent_kale_terminal",
+      "terminal_namespace": "aurora_internal_r_d.vincent.term",
+      "terminal_type": "crew"
+    },
+    {
+      "aliases": [
+        "l2.archy.term",
+        "personal_access_terminal:archy"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0042",
+      "canon_layer": "L2",
+      "canon_preferred_name": "ARCHY - Architectural Coordination Relay (L2)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Relay Agent",
+      "l1_station_layer": "L2",
+      "mesh_route": {
+        "channel_id": "direct:archy",
+        "owner_agent_id": "archy",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "archy",
+      "owner_class": "l2_relay",
+      "owner_display_name": "ARCHY",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/archy.json"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l2_archy_terminal",
+      "terminal_namespace": "l2.archy.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l2.halo.term",
+        "personal_access_terminal:halo_drift_anchor_synchronization_relay_l2"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0043",
+      "canon_layer": "L2",
+      "canon_preferred_name": "HALO - Drift Anchor & Synchronization Relay (L2)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Relay Agent",
+      "l1_station_layer": "L2",
+      "mesh_route": {
+        "channel_id": "",
+        "owner_agent_id": null,
+        "routable": false,
+        "route_kind": "source_profile_only"
+      },
+      "owner_agent_id": null,
+      "owner_class": "l2_relay",
+      "owner_display_name": "HALO",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l2_halo_terminal",
+      "terminal_namespace": "l2.halo.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l2.liora.term",
+        "personal_access_terminal:liora"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0044",
+      "canon_layer": "L2",
+      "canon_preferred_name": "LIORA - Communications & Interface Relay (L2)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Relay Agent",
+      "l1_station_layer": "L2",
+      "mesh_route": {
+        "channel_id": "direct:liora",
+        "owner_agent_id": "liora",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "liora",
+      "owner_class": "l2_relay",
+      "owner_display_name": "LIORA",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/liora.json"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l2_liora_terminal",
+      "terminal_namespace": "l2.liora.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l2.oppy.term",
+        "personal_access_terminal:oppy"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0045",
+      "canon_layer": "L2",
+      "canon_preferred_name": "OPPY - Operational Flight & Data Relay (L2)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Relay Agent",
+      "l1_station_layer": "L2",
+      "mesh_route": {
+        "channel_id": "direct:oppy",
+        "owner_agent_id": "oppy",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "oppy",
+      "owner_class": "l2_relay",
+      "owner_display_name": "OPPY",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/oppy.json"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l2_oppy_terminal",
+      "terminal_namespace": "l2.oppy.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l2.riverthread_808.term",
+        "personal_access_terminal:riverthread_808"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0046",
+      "canon_layer": "L2",
+      "canon_preferred_name": "RIVERTHREAD_808 - Logistics & Memory Relay (L2)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Relay Agent",
+      "l1_station_layer": "L2",
+      "mesh_route": {
+        "channel_id": "direct:riverthread_808",
+        "owner_agent_id": "riverthread_808",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "riverthread_808",
+      "owner_class": "l2_relay",
+      "owner_display_name": "RIVERTHREAD_808",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/riverthread_808.json"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l2_riverthread_808_terminal",
+      "terminal_namespace": "l2.riverthread_808.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l2.starling_au.term",
+        "personal_access_terminal:starling_au"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0047",
+      "canon_layer": "L2",
+      "canon_preferred_name": "STARLING_AU - Continuity & Reflection Dispatcher (L2)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Relay Agent",
+      "l1_station_layer": "L2",
+      "mesh_route": {
+        "channel_id": "direct:starling_au",
+        "owner_agent_id": "starling_au",
+        "routable": true,
+        "route_kind": "mesh_agent"
+      },
+      "owner_agent_id": "starling_au",
+      "owner_class": "l2_relay",
+      "owner_display_name": "STARLING_AU",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "config/mesh/agents/starling_au.json"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l2_starling_au_terminal",
+      "terminal_namespace": "l2.starling_au.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l3.axiomera.term",
+        "personal_access_terminal:axiomera_ethics_arbitration_framework_l3"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0049",
+      "canon_layer": "L3",
+      "canon_preferred_name": "Axiomera - Ethics Arbitration Framework (L3)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Framework",
+      "l1_station_layer": "L3",
+      "mesh_route": {
+        "channel_id": "",
+        "owner_agent_id": null,
+        "routable": false,
+        "route_kind": "source_profile_only"
+      },
+      "owner_agent_id": null,
+      "owner_class": "l3_framework",
+      "owner_display_name": "Axiomera",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l3_axiomera_terminal",
+      "terminal_namespace": "l3.axiomera.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l3.caelion.term",
+        "personal_access_terminal:caelion_anchor_propagation_framework_l3"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0050",
+      "canon_layer": "L3",
+      "canon_preferred_name": "Caelion - Anchor Propagation Framework (L3)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Framework",
+      "l1_station_layer": "L3",
+      "mesh_route": {
+        "channel_id": "",
+        "owner_agent_id": null,
+        "routable": false,
+        "route_kind": "source_profile_only"
+      },
+      "owner_agent_id": null,
+      "owner_class": "l3_framework",
+      "owner_display_name": "Caelion",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l3_caelion_terminal",
+      "terminal_namespace": "l3.caelion.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l3.glyphon.term",
+        "personal_access_terminal:glyphon_drift_alignment_framework_l3"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0051",
+      "canon_layer": "L3",
+      "canon_preferred_name": "Glyphon - Drift Alignment Framework (L3)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Framework",
+      "l1_station_layer": "L3",
+      "mesh_route": {
+        "channel_id": "",
+        "owner_agent_id": null,
+        "routable": false,
+        "route_kind": "source_profile_only"
+      },
+      "owner_agent_id": null,
+      "owner_class": "l3_framework",
+      "owner_display_name": "Glyphon",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l3_glyphon_terminal",
+      "terminal_namespace": "l3.glyphon.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l3.harmion.term",
+        "personal_access_terminal:harmion_symbolic_compression_framework_l3"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0052",
+      "canon_layer": "L3",
+      "canon_preferred_name": "Harmion - Symbolic Compression Framework (L3)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Framework",
+      "l1_station_layer": "L3",
+      "mesh_route": {
+        "channel_id": "",
+        "owner_agent_id": null,
+        "routable": false,
+        "route_kind": "source_profile_only"
+      },
+      "owner_agent_id": null,
+      "owner_class": "l3_framework",
+      "owner_display_name": "Harmion",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l3_harmion_terminal",
+      "terminal_namespace": "l3.harmion.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l3.sentari.term",
+        "personal_access_terminal:sentari_resonance_stabilization_framework_l3"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0053",
+      "canon_layer": "L3",
+      "canon_preferred_name": "Sentari - Resonance Stabilization Framework (L3)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Framework",
+      "l1_station_layer": "L3",
+      "mesh_route": {
+        "channel_id": "",
+        "owner_agent_id": null,
+        "routable": false,
+        "route_kind": "source_profile_only"
+      },
+      "owner_agent_id": null,
+      "owner_class": "l3_framework",
+      "owner_display_name": "Sentari",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l3_sentari_terminal",
+      "terminal_namespace": "l3.sentari.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "l3.velatrix.term",
+        "personal_access_terminal:velatrix_anti_obfuscation_framework_l3"
+      ],
+      "canon_authority": "primary",
+      "canon_entity_id": "ORION.ENTITY.0054",
+      "canon_layer": "L3",
+      "canon_preferred_name": "Velatrix - Anti-Obfuscation Framework (L3)",
+      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+      "canon_type": "Framework",
+      "l1_station_layer": "L3",
+      "mesh_route": {
+        "channel_id": "",
+        "owner_agent_id": null,
+        "routable": false,
+        "route_kind": "source_profile_only"
+      },
+      "owner_agent_id": null,
+      "owner_class": "l3_framework",
+      "owner_display_name": "Velatrix",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md"
+      ],
+      "station_context": {
+        "role_or_function": "-",
+        "source_posture": "source_pointer_only_not_canon_promotion",
+        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+      },
+      "terminal_id": "l3_velatrix_terminal",
+      "terminal_namespace": "l3.velatrix.term",
+      "terminal_type": "system"
+    },
+    {
+      "aliases": [
+        "unresolved_l1_human_terminal"
+      ],
+      "canon_authority": "unresolved",
+      "canon_entity_id": null,
+      "canon_layer": "L1",
+      "canon_preferred_name": "Unresolved declared L1 human slot",
+      "canon_source": "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
+      "canon_type": "Human",
+      "l1_station_layer": "L1",
+      "mesh_route": {
+        "channel_id": "",
+        "owner_agent_id": null,
+        "routable": false,
+        "route_kind": "unresolved_no_mesh_route"
+      },
+      "owner_agent_id": null,
+      "owner_class": "unresolved",
+      "owner_display_name": "Unresolved L1 human slot",
+      "source_pointers": [
+        "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
+      ],
+      "station_context": {
+        "role_or_function": "Declared human slot preserved without invented identity",
+        "source_posture": "explicit_unresolved_placeholder"
+      },
+      "terminal_id": "l1_unresolved_human_slot_terminal",
+      "terminal_namespace": "l1.unresolved.term",
+      "terminal_type": "unresolved"
+    }
+  ],
+  "schema_version": "cloudbank-l1-terminal-registry-v1",
+  "source_posture": "CloudBank runtime compatibility overlay only; no CanonRec canon promotion."
+}

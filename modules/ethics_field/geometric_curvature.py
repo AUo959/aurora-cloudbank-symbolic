@@ -48,14 +48,17 @@ independently of this module).
 
 `clifford` is optional (mirrors modules/symbolic_core/geometric_algebra.py's own
 graceful-degradation pattern). When present, the multivector is built for real and
-its grade-2 magnitude is asserted to equal the closed form. When absent, the closed
+its grade-2 magnitude is cross-checked against the closed form. A divergent optional
+backend is logged and the closed form is used; when `clifford` is absent, the closed
 form is used directly.
 """
 
 from __future__ import annotations
 
+import logging
 import math
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Dict, List
 
 try:  # optional, like modules/symbolic_core/geometric_algebra.py
@@ -64,7 +67,10 @@ except Exception:  # pragma: no cover - environment dependent
     _clifford = None
 
 
-# Canonical dimension weights — must match field_curvature.py.
+logger = logging.getLogger(__name__)
+
+
+# Canonical dimension weights shared with field_curvature.py.
 DIMENSION_WEIGHTS: Dict[str, float] = {
     "picard_delta_3": 0.25,
     "thermax_continuity": 0.25,
@@ -120,14 +126,20 @@ def _interaction_closed_form(legs: Dict[str, float], lam: float) -> float:
     return lam * math.sqrt(sum_sq)
 
 
+@lru_cache(maxsize=1)
+def _clifford_basis():
+    """Build and cache the optional Cl(5) layout and ordered basis once."""
+    layout, blades = _clifford.Cl(5)
+    return layout, tuple(blades[f"e{i + 1}"] for i in range(5))
+
+
 def _interaction_via_clifford(legs: Dict[str, float], lam: float) -> float:
     """Build M in Cl(5), project to grade 2, and return its magnitude.
 
     Returns the same value as the closed form — that equality is the proof the
     geometry is real and tractable, not metaphor.
     """
-    layout, blades = _clifford.Cl(5)
-    e = [blades[f"e{i + 1}"] for i in range(5)]
+    layout, e = _clifford_basis()
     dims = _ordered_dims()
     a = [legs[d] for d in dims]
 
@@ -153,12 +165,29 @@ def calculate_ga_curvature(
     formation_allowed/resistance_level; the scalar gate remains authoritative.
     """
     legs = _legs(dimension_scores)
+    closed_form_interaction = _interaction_closed_form(legs, lam)
 
     if prefer_clifford and _clifford is not None:
-        interaction = _interaction_via_clifford(legs, lam)
-        backend = "clifford"
+        clifford_interaction = _interaction_via_clifford(legs, lam)
+        if math.isclose(
+            clifford_interaction,
+            closed_form_interaction,
+            rel_tol=1e-9,
+            abs_tol=1e-12,
+        ):
+            interaction = clifford_interaction
+            backend = "clifford"
+        else:
+            logger.warning(
+                "Clifford interaction %.12g diverged from closed form %.12g; "
+                "using closed-form fallback",
+                clifford_interaction,
+                closed_form_interaction,
+            )
+            interaction = closed_form_interaction
+            backend = "closed_form"
     else:
-        interaction = _interaction_closed_form(legs, lam)
+        interaction = closed_form_interaction
         backend = "closed_form"
 
     composite_scalar = sum(

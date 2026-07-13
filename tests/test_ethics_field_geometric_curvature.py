@@ -13,6 +13,7 @@ import unittest
 
 import pytest
 
+from modules.ethics_field import geometric_curvature as ga_curvature
 from modules.ethics_field.field_curvature import FieldCurvature
 from modules.ethics_field.geometric_curvature import (
     DIMENSION_WEIGHTS,
@@ -56,6 +57,12 @@ class TestFieldCurvatureGAWiring:
             {"composite_scalar", "interaction_penalty", "alignment", "backend"},
         )
         checks.assertIn(ga["backend"], {"clifford", "closed_form"})
+
+    def test_scalar_and_ga_paths_share_canonical_weights(self):
+        checks = unittest.TestCase()
+        curvature = FieldCurvature()
+        checks.assertEqual(curvature.weights, DIMENSION_WEIGHTS)
+        checks.assertIsNot(curvature.weights, DIMENSION_WEIGHTS)
 
     def test_scalar_decision_unaffected_by_flag(self):
         """Enabling the GA composite must not change the scalar gate's decision."""
@@ -113,3 +120,44 @@ class TestGeometricCurvatureMath:
         checks = unittest.TestCase()
         result = calculate_ga_curvature(self._all(0.8), prefer_clifford=False)
         checks.assertEqual(result.backend, "closed_form")
+
+    def test_divergent_clifford_backend_falls_back_to_closed_form(self, monkeypatch):
+        checks = unittest.TestCase()
+        scores = self._all(0.8)
+        expected = calculate_ga_curvature(scores, prefer_clifford=False)
+        monkeypatch.setattr(ga_curvature, "_clifford", object())
+        monkeypatch.setattr(
+            ga_curvature,
+            "_interaction_via_clifford",
+            lambda _legs, _lam: expected.interaction_penalty + 0.25,
+        )
+
+        result = calculate_ga_curvature(scores)
+
+        checks.assertEqual(result.backend, "closed_form")
+        checks.assertEqual(
+            result.interaction_penalty,
+            pytest.approx(expected.interaction_penalty),
+        )
+
+    def test_clifford_basis_is_cached_per_process(self, monkeypatch):
+        checks = unittest.TestCase()
+
+        class FakeClifford:
+            def __init__(self):
+                self.calls = 0
+
+            def Cl(self, dimensions):
+                self.calls += 1
+                return object(), {f"e{i}": object() for i in range(1, dimensions + 1)}
+
+        fake = FakeClifford()
+        monkeypatch.setattr(ga_curvature, "_clifford", fake)
+        ga_curvature._clifford_basis.cache_clear()
+        try:
+            first = ga_curvature._clifford_basis()
+            second = ga_curvature._clifford_basis()
+            checks.assertIs(first, second)
+            checks.assertEqual(fake.calls, 1)
+        finally:
+            ga_curvature._clifford_basis.cache_clear()

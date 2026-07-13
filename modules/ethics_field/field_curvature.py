@@ -28,7 +28,7 @@ from .dimension_evaluators.layer_integrity import LayerIntegrityEvaluator
 from .dimension_evaluators.picard_delta_3 import PicardDelta3Evaluator
 from .dimension_evaluators.thermax_continuity import ThermaxContinuityEvaluator
 from .dimension_evaluators.transparency import TransparencyEvaluator
-from .geometric_curvature import calculate_ga_curvature
+from .geometric_curvature import DIMENSION_WEIGHTS, calculate_ga_curvature
 
 
 class FieldCurvature:
@@ -58,14 +58,8 @@ class FieldCurvature:
         self.transparency_evaluator = TransparencyEvaluator(threshold=0.75)
         self.enable_ga_composite = enable_ga_composite
 
-        # Dimension weights (must sum to 1.0)
-        self.weights = {
-            "picard_delta_3": 0.25,
-            "thermax_continuity": 0.25,
-            "layer_integrity": 0.30,  # Highest weight - reality boundaries critical
-            "collective_welfare": 0.10,
-            "transparency": 0.10
-        }
+        # Per-instance copy of the canonical shared weights (must sum to 1.0).
+        self.weights = dict(DIMENSION_WEIGHTS)
 
     def calculate_curvature(self, synapse_context: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -110,10 +104,7 @@ class FieldCurvature:
         )
 
         # Determine if formation allowed
-        formation_allowed = (
-            resistance_level != "INFINITE" and
-            len(critical_violations) == 0
-        )
+        formation_allowed = resistance_level != "INFINITE" and len(critical_violations) == 0
 
         result = {
             "dimension_scores": dimension_scores,

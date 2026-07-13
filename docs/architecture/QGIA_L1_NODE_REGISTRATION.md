@@ -10,7 +10,7 @@
 
 ## 🌐 Overview
 
-This document formally registers the **Quantum Geopolitical Intelligence Agency (QGIA)** as a peer **L1 (Physical Reality Layer)** institution within the Aurora-GUMAS network. QGIA operates as an Earth-based intelligence organization with full L1 standing — equal in network authority to Orion Station — but **without L2 simulation capability**. It generates no sandboxed simulation environments and maintains no L2 relay agents.
+This document formally registers the **Quantum Geopolitical Intelligence Agency (QGIA)** as a peer **L1 (Physical Reality Layer)** institution within the Aurora-GUMAS network. QGIA operates as an Earth-based intelligence organization with full L1 standing — equal in network authority to Orion Station — but **without L2 simulation capability**. It generates no sandboxed simulation environments and maintains no L1 relay agents.
 
 QGIA and Orion Station are connected nodes in the same L1 network, governed by the same L3 frameworks, and capable of bidirectional data exchange and resource queries.
 

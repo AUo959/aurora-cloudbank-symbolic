@@ -26,7 +26,7 @@ The QGIA 551-agent population is the **analytical engine** that processes intell
 |---|---|---|---|
 | Human staff | 36 | 35 | 1 (UNRESOLVED_HUMAN_001) |
 | AI Core | 1 | 1 | — |
-| L2 Relay Agents | 6 | 6 | — |
+| L1 Relay Agents | 6 | 6 | — |
 | L3 Framework Systems | 6 | 6 | — |
 | **Total** | **49** | **48** | **1** |
 
@@ -49,7 +49,7 @@ Organized across six divisions:
 ### AI Core (1)
 - `AI_AURORA` — Aurora (AU), Station Intelligence Core, Command & Ethics division
 
-### L2 Relay Agents (6)
+### L1 Relay Agents (6)
 
 | ID | Name | Role |
 |---|---|---|
@@ -60,7 +60,7 @@ Organized across six divisions:
 | L2_RIVERTHREAD | RIVERTHREAD_808 | Logistics & Memory Relay |
 | L2_HALO | HALO | Drift Anchor & System Synchronization Relay |
 
-These six names match exactly the "Compatible Thread Identifiers" listed in `agents/QGIA_ARCHITECTURE.md` Section 6 (`HALO · STARLING · LIORA · OPPY · ARCHY · RIVERTHREAD`). **This is the cross-namespace link** — L2 relay agents operate in both the Orion station context (as relay agents) and the QGIA ThreadCore context (as compatible thread identifiers).
+These six names match exactly the "Compatible Thread Identifiers" listed in `agents/QGIA_ARCHITECTURE.md` Section 6 (`HALO · STARLING · LIORA · OPPY · ARCHY · RIVERTHREAD`). **This is the cross-namespace link** — L1 relay agents operate in both the Orion station context (as relay agents) and the QGIA ThreadCore context (as compatible thread identifiers).
 
 ### L3 Framework Systems (6)
 
@@ -82,7 +82,7 @@ These six names match exactly the "Compatible Thread Identifiers" listed in `age
 **Status: RESOLVED.**
 
 The two registries are **parallel, non-competing namespaces** with explicit cross-namespace bridges:
-- L2 relay agents (HALO, STARLING, LIORA, OPPY, ARCHY, RIVERTHREAD) appear in both as compatible thread identifiers
+- L1 relay agents (HALO, STARLING, LIORA, OPPY, ARCHY, RIVERTHREAD) appear in both as compatible thread identifiers
 - L3 framework systems (Axiomera, Glyphon, Sentari, Caelion, Velatrix, Harmion) appear in both with complementary role descriptions
 - The QGIA 551-agent population has no overlap with named Orion human staff — they are distinct simulation populations
 - Aurora (AI_AURORA) is the station intelligence core that bridges both layers

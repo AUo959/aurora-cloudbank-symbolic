@@ -338,8 +338,8 @@ When documenting relay agents:
 
 If you're updating code or documentation:
 
-- [ ] Replace "L2 Relay Agent" with "L1 Relay Agent"
-- [ ] Replace "L2 Meta-Agent" with "L1-L3 Bridge Relay"
+- [x] Replace "L2 Relay Agent" with "L1 Relay Agent" (docs swept repo-wide 2026-07-13; no code symbols used this naming)
+- [ ] Replace "L2 Meta-Agent" with "L1-L3 Bridge Relay" (code-level: `src/bridges/l2_meta_agent_bridge.py`, `src/api/l2_meta_agent_api.py`, and their diagram references still use this name — deliberately not renamed in this pass; needs its own reviewed PR since it touches live API routes)
 - [ ] Update class names: `L2MetaAgentBridge` → `L1RelayBridge`
 - [ ] Update file names: `l2_meta_agent_bridge.py` → `l1_relay_bridge.py`
 - [ ] Add architecture clarity comments to explain L1 location vs. Layer 2 protocol role

@@ -124,7 +124,7 @@ The **Operations & Quality Assurance Division** completes the human staff infras
 - **Lee ↔ El-Sayegh:** Observability for speculative experiments (logging thought-experiments)
 - **El-Sayegh ↔ Velin:** Philosophical stress-testing with symbolic reasoning expertise
 - **Nguyen ↔ Noor:** Ethical compliance auditing (values in code)
-- **Lee ↔ HALO:** AI coordination observability (L2 relay monitoring)
+- **Lee ↔ HALO:** AI coordination observability (L1 relay monitoring)
 
 ---
 
@@ -520,4 +520,4 @@ Next, we add:
 
 **End of Phase 5 Documentation**
 
-*Next Phase: L2 Relay Agents & L3 Framework Systems (AI coordination and foundational reasoning)*
+*Next Phase: L1 Relay Agents & L3 Framework Systems (AI coordination and foundational reasoning)*

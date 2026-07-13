@@ -12,10 +12,9 @@ from urllib.parse import quote
 
 import pytest
 
+from src.mesh.manifests import load_manifests
 from src.mesh.models import MeshMessageRequest
 from src.mesh.runtime import MeshRuntime
-
-pytestmark = pytest.mark.critical
 
 try:
     from fastapi.testclient import TestClient
@@ -49,21 +48,19 @@ def copy_mesh_project(tmp_path: Path) -> Path:
 def agent_ids(project_root: Path) -> list[str]:
     """Return manifest agent ids from the copied mesh fixture."""
 
-    return sorted(
-        json.loads(manifest_path.read_text())["id"]
-        for manifest_path in (project_root / "config" / "mesh" / "agents").glob("*.json")
-    )
+    manifests = load_manifests(project_root / "config" / "mesh" / "agents")
+    return sorted(manifests)
 
 
 def channel_agent_ids(project_root: Path, channel: str) -> list[str]:
     """Return agents subscribed to a mesh channel from the copied fixture."""
 
-    subscribed: list[str] = []
-    for manifest_path in (project_root / "config" / "mesh" / "agents").glob("*.json"):
-        manifest = json.loads(manifest_path.read_text())
-        if channel in manifest.get("channels", []):
-            subscribed.append(manifest["id"])
-    return sorted(subscribed)
+    manifests = load_manifests(project_root / "config" / "mesh" / "agents")
+    return sorted(
+        manifest.id
+        for manifest in manifests.values()
+        if channel in manifest.channels
+    )
 
 
 def test_alias_resolution_and_live_fallback(tmp_path: Path) -> None:
@@ -130,9 +127,10 @@ def test_broadcast_routes_to_all_channel_agents(tmp_path: Path) -> None:
     checks.assertEqual(sorted(result["targets"]), expected_targets)
     reply_agents = sorted({event["agent_id"] for event in history if event["event_type"] == "agent_reply"})
     checks.assertEqual(reply_agents, expected_targets)
-    checks.assertFalse([event for event in history if event["event_type"] == "delivery_error"])
+    checks.assertFalse(any(event["event_type"] == "delivery_error" for event in history))
 
 
+@pytest.mark.critical
 def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
     """The server should expose the canonical APIs, compatibility aliases, and same-origin chamber UI."""
 
@@ -191,6 +189,7 @@ def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
     assert bridge_status["meshStatus"] == "operational"
 
 
+@pytest.mark.critical
 def test_mesh_agents_list(tmp_path: Path) -> None:
     """GET /api/mesh/agents should return all registered agents with expected fields."""
 
@@ -215,6 +214,7 @@ def test_mesh_agents_list(tmp_path: Path) -> None:
         assert "status" in agent
 
 
+@pytest.mark.critical
 def test_mesh_agent_get_by_id(tmp_path: Path) -> None:
     """GET /api/mesh/agents/{agent_id} should return detail for a known agent."""
 
@@ -231,6 +231,7 @@ def test_mesh_agent_get_by_id(tmp_path: Path) -> None:
     assert body["agent_id"] == "alex_thorne"
 
 
+@pytest.mark.critical
 def test_mesh_agent_get_unknown_returns_404(tmp_path: Path) -> None:
     """GET /api/mesh/agents/{agent_id} for an unknown agent should return 404."""
 
@@ -244,6 +245,7 @@ def test_mesh_agent_get_unknown_returns_404(tmp_path: Path) -> None:
     assert response.status_code == 404
 
 
+@pytest.mark.critical
 def test_mesh_agent_activate(tmp_path: Path) -> None:
     """POST /api/mesh/agents/{agent_id}/activate should return success and connected status."""
 
@@ -264,6 +266,7 @@ def test_mesh_agent_activate(tmp_path: Path) -> None:
     assert body["status"] == "connected"
 
 
+@pytest.mark.critical
 def test_mesh_agent_activate_missing_phrase(tmp_path: Path) -> None:
     """POST /api/mesh/agents/{agent_id}/activate without activationPhrase should return 400."""
 
@@ -278,6 +281,7 @@ def test_mesh_agent_activate_missing_phrase(tmp_path: Path) -> None:
     assert "activationPhrase" in response.json()["detail"]
 
 
+@pytest.mark.critical
 def test_mesh_agent_activate_unknown_returns_404(tmp_path: Path) -> None:
     """POST /api/mesh/agents/{agent_id}/activate for unknown agent should return 404."""
 

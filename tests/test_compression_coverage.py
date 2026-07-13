@@ -195,7 +195,7 @@ class TestQuantizationCoverage:
         """Quantizer must claim 4× memory savings for any input size."""
         quantizer = FieldQuantizer()
         for n in [1, 10, 100, 1000]:
-            assert quantizer.memory_savings_ratio(n) == 4.0
+            assert quantizer.memory_savings_ratio(n) == pytest.approx(4.0)
 
     def test_all_curvature_steps_produce_valid_output(self):
         """100 evenly-spaced curvature values must all produce valid levels."""

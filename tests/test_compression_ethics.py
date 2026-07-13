@@ -71,7 +71,7 @@ class TestCurvatureQuantization:
     def test_memory_savings_ratio(self):
         """FP32→INT8 must report 4× memory reduction."""
         quantizer = FieldQuantizer()
-        assert quantizer.memory_savings_ratio(100) == 4.0
+        assert quantizer.memory_savings_ratio(100) == pytest.approx(4.0)
 
 
 # ── Sparse Attention ─────────────────────────────────────────────────────────

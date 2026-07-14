@@ -1,0 +1,32 @@
+name: Simulation State Freshness Check
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  check-state-freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          fetch-depth: 0
+
+      - name: Check .aurora/SIMULATION_STATE.json freshness
+        run: |
+          set -euo pipefail
+          FILE=".aurora/SIMULATION_STATE.json"
+          LAST_COMMIT_TS=$(git log -1 --format=%ct -- "$FILE")
+          NOW_TS=$(date +%s)
+          DAYS_OLD=$(( (NOW_TS - LAST_COMMIT_TS) / 86400 ))
+          LAST_COMMIT_DATE=$(git log -1 --format=%ci -- "$FILE")
+
+          echo "Last commit touching $FILE: $LAST_COMMIT_DATE ($DAYS_OLD days ago)"
+
+          if [ "$DAYS_OLD" -gt 14 ]; then
+            echo "::error::$FILE is $DAYS_OLD days old — exceeds the 14-day freshness policy (GAP-010, issue #1083)."
+            exit 1
+          else
+            echo "::notice::$FILE is $DAYS_OLD days old — within the 14-day freshness policy."
+          fi

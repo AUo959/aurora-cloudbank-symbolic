@@ -86,8 +86,13 @@ def test_reconciled_mesh_qgia_pat_and_consent_contracts() -> None:
     assert "Read-only Personal Access Terminal" in pat["notes"]
 
     rd_notes = entries["rd_pipeline"]["notes"]
-    assert "not implemented as an HTTP surface" in rd_notes
+    assert "implemented at /rd/consent" in rd_notes
     assert "#1200" in rd_notes
+
+    consent = entries["rd_consent"]
+    assert consent["mount_path"] == "/rd/consent"
+    assert consent["entrypoint"] == "modules/hr/consent/api.py"
+    assert "insight_ledger" in consent["notes"]
 
 
 def test_governance_review_router_dispositions() -> None:

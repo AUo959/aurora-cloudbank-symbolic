@@ -91,6 +91,14 @@ NOT_MOUNTED_ON_PRIMARY_APP = {
     "generated_api_catalog_snapshot",
 }
 
+# Routers nested inside another router (parent.include_router(child) in the
+# parent's module) rather than included by aurora_api.py directly. They reach
+# the primary app if — and only if — their parent does, so the coverage check
+# credits them when the parent's include_router() call is present.
+NESTED_UNDER = {
+    "rd_consent": "rd_pipeline",  # modules/hr/rd_api.py includes consent_router
+}
+
 
 def _inventory_ids() -> set:
     import json
@@ -140,6 +148,10 @@ def test_every_main_app_router_inventory_entry_is_actually_included() -> None:
 
     symbols = extract_include_router_symbols(AURORA_API_PATH.read_text(encoding="utf-8"))
     mapped_ids = {ROUTER_SYMBOL_TO_INVENTORY_ID[s] for s in symbols if s in ROUTER_SYMBOL_TO_INVENTORY_ID}
+    # Nested routers are covered by their parent's include_router() call.
+    mapped_ids |= {
+        child for child, parent in NESTED_UNDER.items() if parent in mapped_ids
+    }
 
     stale = sorted(main_app_router_ids - mapped_ids)
     assert not stale, (

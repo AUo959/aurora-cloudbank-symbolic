@@ -124,7 +124,21 @@
         "Router prefix is /rd.",
         "api/aurora_api.py includes rd_router when RD_PIPELINE_AVAILABLE is true."
       ],
-      "notes": "Distinct from HR staffing and character generation. The tiered Consent Architecture described in RD_API_REFERENCE.md is not implemented as an HTTP surface; its design and implementation are tracked in issue #1200."
+      "notes": "Distinct from HR staffing and character generation. The tiered Consent Architecture is implemented at /rd/consent (see rd_consent entry); design decision and acceptance criteria in issue #1200."
+    },
+    {
+      "id": "rd_consent",
+      "owner": "hr-rd-productization",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/hr/consent/api.py",
+      "mount_path": "/rd/consent",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /consent, nested inside the /rd router.",
+        "modules/hr/rd_api.py includes it when CONSENT_AVAILABLE is true; reaches the app via the rd_pipeline mount."
+      ],
+      "notes": "Tiered consent management (issue #1200): grant/revoke/check/aggregate. Grant state in data/hr/consent_grants.json (atomic JSON); audit history in insight_ledger (hr_consent). Requester identity is header-asserted pending a platform authn layer."
     },
     {
       "id": "hr_system",

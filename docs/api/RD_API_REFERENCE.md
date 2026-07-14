@@ -1,6 +1,6 @@
 # R&D Productization Pipeline API Reference
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **HR Runtime:** 3.0.0 "Helios" (confirmed by `modules/hr/__init__.py`)
 **Last Reviewed:** 2026-07-13
 **Base Path:** `/rd`  
@@ -65,22 +65,49 @@ Before using coherence metrics, review the [Ethics Framework](../../modules/hr/E
 
 ### Data Dignity Principles
 
-**Consent Architecture (planned; not implemented):**
+**Consent Architecture (implemented):**
 
-> **Status:** The tiered consent contract has no active HTTP surface or durable
-> grant/revocation store. Design and implementation are tracked in issue
-> [#1200](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1200).
-> The tiers below are policy requirements for that future implementation, not
-> claims enforced by the current `/rd` router.
+> **Status:** Implemented at `/rd/consent` per the Option A design approved on
+> issue [#1200](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1200):
+> grant state of record in `data/hr/consent_grants.json` (atomic writes),
+> tamper-evident audit history in the `insight_ledger` hash chain
+> (`hr_consent`). Owner: `modules/hr/consent/`. Runtime tests:
+> `tests/test_rd_consent_api.py`.
 
-- **Tier 1 (Default):** Aggregated, anonymized data
-- **Tier 2 (Consent Required):** Individual profiles visible to self and HR
-- **Tier 3 (Explicit Request):** Data shared with project leads
+- **Tier 1 (Default):** Aggregated, anonymized data — `GET /rd/consent/aggregate`,
+  no grant required; responses carry no individual identifiers and suppress
+  buckets below the k-anonymity threshold (5)
+- **Tier 2 (Consent Required):** Individual profiles visible to self and HR —
+  requires an active grant with grantee `self` or `hr`
+- **Tier 3 (Explicit Request):** Data shared with a named project lead —
+  requires an active grant with grantee `project_lead:<id>`
 
-**Required Withdrawal Rights for the planned implementation:**
-- Crew members can opt out of coherence tracking without penalty
-- Systems function gracefully with partial data
-- Withdrawal does not affect job security or advancement
+**Withdrawal Rights (enforced):**
+- Grants are revocable at any time by the subject (or HR on the subject's
+  behalf) via `POST /rd/consent/grants/{grant_id}/revoke`; revoked and expired
+  grants are retained as history, never deleted
+- Only the data subject can create a grant — HR and automated layers cannot
+  fabricate consent (enforced at the router, audited in the ledger)
+- Systems function gracefully with partial data; withdrawal does not affect
+  job security or advancement
+
+**Requester identity (interim):** the platform has no user-authentication
+layer yet, so `/rd/consent` endpoints identify callers via
+`X-Aurora-Requester` / `X-Aurora-Requester-Role` headers. This is an
+explicitly documented assertion contract to be replaced when platform authn
+lands; consent enforcement, CSRF on mutations, and ledger auditing apply
+regardless.
+
+**Consent endpoints:**
+
+| Method | Path | Purpose | Access |
+|---|---|---|---|
+| POST | `/rd/consent/grants` | Create grant | Subject only (CSRF) |
+| POST | `/rd/consent/grants/{id}/revoke` | Revoke grant | Subject or HR (CSRF) |
+| GET | `/rd/consent/grants/{id}` | Fetch one grant | Subject or HR |
+| GET | `/rd/consent/subjects/{id}/grants` | List subject grants | Self or HR |
+| GET | `/rd/consent/check` | Access decision for requester | Any authenticated requester; all decisions audited |
+| GET | `/rd/consent/aggregate` | Tier 1 anonymized aggregate | Open |
 
 ---
 
@@ -485,6 +512,12 @@ for pair in mediation["pairs"]:
 
 ## Version History
 
+- **v1.2.0** (2026-07-13): Tiered consent management implemented
+  - `/rd/consent` surface live per the Option A design approved on #1200
+  - Grant state in `data/hr/consent_grants.json`; audit history in
+    `insight_ledger` (`hr_consent`)
+  - Consent Architecture section updated from planned to implemented after
+    runtime tests passed (`tests/test_rd_consent_api.py`)
 - **v1.1.0** (2026-07-13): Runtime and governance reconciliation
   - Confirmed HR runtime version 3.0.0 "Helios" from the owning module
   - Marked tiered consent management as planned and linked issue #1200

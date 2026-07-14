@@ -612,3 +612,14 @@ def rd_health(request: Request) -> Dict[str, Any]:
         "active_projects": len(pipeline.active_projects),
         "context_tag": "rd_health",
     }
+
+
+# Tiered consent management (issue #1200) — mounted under /rd/consent so the
+# HR module owns the whole /rd surface with a single include in aurora_api.py.
+try:
+    from modules.hr.consent.api import router as consent_router
+    router.include_router(consent_router)
+    CONSENT_AVAILABLE = True
+except Exception as e:  # pragma: no cover - fallback path
+    CONSENT_AVAILABLE = False
+    logger.warning("RD consent surface unavailable: %s", e)

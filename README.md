@@ -7,6 +7,8 @@
 
 A quantum-symbolic computing platform for enterprise AI. Combines hierarchical memory management, quantum circuit simulation, multi-model AI orchestration, geometric ethics enforcement, and production observability in a single FastAPI application.
 
+> **New agent or contributor?** Start with [`AURORA_CONTEXT.json`](./AURORA_CONTEXT.json) (machine-readable, source-cited concept map) and [`AGENTS.md`](./AGENTS.md) (bootstrap protocol and rules).
+
 ---
 
 ## Contents

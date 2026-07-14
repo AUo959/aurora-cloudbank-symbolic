@@ -41,6 +41,21 @@
       "notes": "Optional dependency surface with guarded import."
     },
     {
+      "id": "memory_retrieval",
+      "owner": "platform-api",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/memory_retrieval/api.py",
+      "mount_path": "/api/memory-retrieval",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /api/memory-retrieval (modules/memory_retrieval/api.py line 21).",
+        "api/aurora_api.py includes it twice, both gated behind MEMORY_RETRIEVAL_AVAILABLE \u2014 appears to be a redundant duplicate include, not two distinct surfaces; flagged separately, not fixed here.",
+        "Found via tests/test_api_router_coverage.py (issue #1204) \u2014 was included in the primary app with no inventory entry at all."
+      ],
+      "notes": "Memory retrieval surface, conditionally mounted."
+    },
+    {
       "id": "data_guardian",
       "owner": "data-governance",
       "runtime": "fastapi-router",

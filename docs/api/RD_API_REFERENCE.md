@@ -101,7 +101,7 @@ regardless.
 **Consent endpoints:**
 
 | Method | Path | Purpose | Access |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | POST | `/rd/consent/grants` | Create grant | Subject only (CSRF) |
 | POST | `/rd/consent/grants/{id}/revoke` | Revoke grant | Subject or HR (CSRF) |
 | GET | `/rd/consent/grants/{id}` | Fetch one grant | Subject or HR |

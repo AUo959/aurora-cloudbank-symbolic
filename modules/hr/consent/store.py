@@ -22,7 +22,7 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict, fields
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from threading import Lock
@@ -134,7 +134,7 @@ class ConsentStore:
             # subjects who did consent. Refuse to start instead.
             raise ConsentError(f"consent store at {self._path} is unreadable: {exc}")
         for item in raw.get("grants", []):
-            grant = ConsentGrant(**{k: item.get(k) for k in ConsentGrant.__dataclass_fields__})
+            grant = ConsentGrant(**{f.name: item.get(f.name) for f in fields(ConsentGrant)})
             self._grants[grant.grant_id] = grant
 
     def _save(self) -> None:
@@ -171,7 +171,12 @@ class ConsentStore:
         Returns True when the event landed in the hash chain. Callers surface
         this (``audit_recorded``) instead of pretending audit always worked.
         """
-        logger.info("consent event %s: %s", event, context)
+        # Context values include request-supplied strings (subject ids,
+        # purposes); escape newlines so a crafted value cannot forge log lines.
+        safe_context = (
+            json.dumps(context, default=str).replace("\r", "\\r").replace("\n", "\\n")
+        )
+        logger.info("consent event %s: %s", event, safe_context)
         if self._ledger is None:
             return False
         try:
@@ -188,8 +193,8 @@ class ConsentStore:
                 )
             )
             return True
-        except Exception as exc:  # pragma: no cover - ledger runtime failure
-            logger.error("consent audit append failed for %s: %s", event, exc)
+        except Exception:  # pragma: no cover - ledger runtime failure
+            logger.exception("consent audit append failed for %s", event)
             return False
 
     # -- operations ---------------------------------------------------------

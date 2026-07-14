@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, Optional
+from typing import Annotated, Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -129,12 +129,21 @@ class RevokeGrantRequest(BaseModel):
 # -------------------------
 # Endpoints
 # -------------------------
-@router.post("/grants", status_code=201, dependencies=_MUTATION_DEPS)
+@router.post(
+    "/grants",
+    status_code=201,
+    dependencies=_MUTATION_DEPS,
+    responses={
+        401: {"description": "Missing or invalid requester identity headers"},
+        403: {"description": "Requester is not the data subject"},
+        409: {"description": "Invalid tier/grantee combination or duplicate active grant"},
+    },
+)
 @limiter.limit("30/minute")
 def create_grant(
     request: Request,
     body: CreateGrantRequest,
-    requester: Requester = Depends(get_requester),
+    requester: Annotated[Requester, Depends(get_requester)],
 ) -> Dict[str, Any]:
     """Create a consent grant. Only the data subject can consent.
 
@@ -165,13 +174,22 @@ def create_grant(
     }
 
 
-@router.post("/grants/{grant_id}/revoke", dependencies=_MUTATION_DEPS)
+@router.post(
+    "/grants/{grant_id}/revoke",
+    dependencies=_MUTATION_DEPS,
+    responses={
+        401: {"description": "Missing or invalid requester identity headers"},
+        403: {"description": "Requester is neither the data subject nor HR"},
+        404: {"description": "Grant not found"},
+        409: {"description": "Grant is already revoked"},
+    },
+)
 @limiter.limit("30/minute")
 def revoke_grant(
     request: Request,
     grant_id: str,
     body: RevokeGrantRequest,
-    requester: Requester = Depends(get_requester),
+    requester: Annotated[Requester, Depends(get_requester)],
 ) -> Dict[str, Any]:
     """Revoke a grant. Allowed for the subject or HR (revocation only ever
     removes access, so the safe direction is to make it easy)."""
@@ -195,12 +213,18 @@ def revoke_grant(
     }
 
 
-@router.get("/grants/{grant_id}")
+@router.get(
+    "/grants/{grant_id}",
+    responses={
+        401: {"description": "Missing or invalid requester identity headers"},
+        404: {"description": "Grant not found (also returned to unauthorized readers)"},
+    },
+)
 @limiter.limit("120/minute")
 def get_grant(
     request: Request,
     grant_id: str,
-    requester: Requester = Depends(get_requester),
+    requester: Annotated[Requester, Depends(get_requester)],
 ) -> Dict[str, Any]:
     """Fetch one grant — visible to its subject and HR (Tier 2 semantics)."""
     grant = get_store().get(grant_id)
@@ -213,12 +237,18 @@ def get_grant(
     return {"success": True, "grant": grant.to_dict(), "context_tag": "rd_consent_get"}
 
 
-@router.get("/subjects/{subject_id}/grants")
+@router.get(
+    "/subjects/{subject_id}/grants",
+    responses={
+        401: {"description": "Missing or invalid requester identity headers"},
+        403: {"description": "Requester is neither the subject nor HR"},
+    },
+)
 @limiter.limit("120/minute")
 def list_subject_grants(
     request: Request,
     subject_id: str,
-    requester: Requester = Depends(get_requester),
+    requester: Annotated[Requester, Depends(get_requester)],
 ) -> Dict[str, Any]:
     """List a subject's grants — visible to self and HR (Tier 2 semantics)."""
     if requester.requester_id != subject_id and not requester.is_hr:
@@ -235,14 +265,19 @@ def list_subject_grants(
     }
 
 
-@router.get("/check")
+@router.get(
+    "/check",
+    responses={
+        401: {"description": "Missing or invalid requester identity headers"},
+    },
+)
 @limiter.limit("240/minute")
 def check_access(
     request: Request,
     subject_id: str,
     data_class: str,
     purpose: str,
-    requester: Requester = Depends(get_requester),
+    requester: Annotated[Requester, Depends(get_requester)],
 ) -> Dict[str, Any]:
     """Access decision for the requester against a subject's data.
 

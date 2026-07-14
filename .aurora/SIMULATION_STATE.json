@@ -3,7 +3,7 @@
   "title": "Aurora CloudBank Orion Station - Canonical Simulation State",
   "description": "Complete quantum-symbolic station infrastructure with dark matter memory architecture. Simulation IS the system.",
   "version": "2.0.0-QUANTUM-CANONICAL",
-  "last_updated": "2026-04-06T00:00:00Z",
+  "last_updated": "2026-07-13T00:00:00Z",
   "simulation": {
     "name": "Aurora CloudBank Orion Station Operations",
     "status": "ACTIVE",
@@ -39,7 +39,7 @@
     }
   },
   "mission_state": {
-    "current_phase": "Security Enhancement Initiative",
+    "current_phase": "Ongoing Active Development (see continuity_events — no single-phase label has stayed accurate long enough to trust; Layer 2 freshness check exists specifically so this stops silently drifting)",
     "active_mission": null,
     "completed_missions": [
       {
@@ -82,10 +82,39 @@
         "commit": "fd62d3c5",
         "completion_date": "2026-04-06",
         "details": "Merged 7 open PRs, deleted 23 remote + 30 local stale branches, ran #321//. on clean main"
+      },
+      {
+        "id": "INTEG-1",
+        "name": "QGIA/Aurora Integration Bundle (Stage 1 + Stage 2)",
+        "status": "COMPLETE",
+        "efficiency": null,
+        "commit": "09506f1b",
+        "completion_date": "2026-06-20",
+        "details": "551-agent QGIA epistemic simulation, QSFE forecast engine, constellation-contracts manifests (QGIA-CORPUS, QGIA-SPINE), knowledge-indexes/. Retroactively recorded 2026-07-13 as part of GAP-010 remediation (#1083) — this is a backfilled record, not a live-tracked mission."
+      },
+      {
+        "id": "MAINT-1",
+        "name": "PR Automation Traceability Rework",
+        "status": "COMPLETE",
+        "efficiency": null,
+        "commit": "bd182c53",
+        "completion_date": "2026-05-XX",
+        "details": "Made Aurora PR automation traceable and quiet by default (#1078). Retroactively recorded 2026-07-13 as part of GAP-010 remediation (#1083) — this is a backfilled record, not a live-tracked mission."
       }
     ],
     "average_efficiency": 148,
-    "total_missions_completed": 5
+    "total_missions_completed": 5,
+    "mission_taxonomy": {
+      "description": "Mission ID prefixes. HIGH-* is reserved for the original feature-track missions (security/infra hardening). The four prefixes below (added 2026-07-13, GAP-010 remediation, issue #1083 Layer 3) exist so activity outside that track still generates a state record instead of falling through the update mechanism entirely.",
+      "prefixes": {
+        "HIGH": "Original feature-track missions (security/infra hardening). Do not reuse for the categories below.",
+        "MAINT": "Dependency and security maintenance — dependabot, manual patching.",
+        "INTEG": "Integration bundles and cross-system work (e.g. QGIA).",
+        "ARCH": "Architectural review, GAP registrations, doctrine/canon work.",
+        "OPS": "Operational housekeeping — branch cleanup, restore operations."
+      },
+      "note": "INTEG-1 and MAINT-1 below are the first entries under this taxonomy, backfilled retroactively as part of this same GAP-010 fix."
+    }
   },
   "system_status": {
     "csrf_coverage": 100,
@@ -93,7 +122,7 @@
     "logging_coverage": 75,
     "documentation_status": "CURRENT",
     "repository_state": "CLEAN",
-    "last_sync": "2026-04-06T00:00:00Z",
+    "last_sync": "2026-07-13T00:00:00Z",
     "branch_consolidation": {
       "completed": "2026-04-06T00:00:00Z",
       "remote_branches_deleted": 23,
@@ -111,7 +140,7 @@
     {
       "id": "ISSUE-001",
       "severity": "LOW",
-      "description": "Pydantic regex \u2192 pattern migration needed",
+      "description": "Pydantic regex → pattern migration needed",
       "impact": "Non-blocking, test compatibility only",
       "status": "DEFERRED"
     },
@@ -895,8 +924,8 @@
     "description": "Entire simulation advances probabilistically each cycle based on quantum state evolution",
     "cycle_frequency_hz": 0.1,
     "cycle_period_s": 10.0,
-    "current_cycle": 18472,
-    "cycles_since_initialization": 18472,
+    "current_cycle": 865192,
+    "cycles_since_initialization": 865192,
     "state_advancement": {
       "mechanism": "QUANTUM_PROBABILISTIC",
       "deterministic_components": [
@@ -1072,5 +1101,17 @@
     "dormant_systems": 43,
     "quantum_cycles_since_init": 18472,
     "memory_efficiency_percent": 98.7
-  }
+  },
+  "continuity_events": [
+    {
+      "event": "GAP-010: SIMULATION_STATE.json staleness",
+      "gap_start": "2026-04-06T00:00:00Z",
+      "gap_detected": "2026-06-21T20:28:00Z",
+      "gap_remediated": "2026-07-13T00:00:00Z",
+      "gap_duration_days": 98,
+      "description": "State file received zero updates for 98 days despite substantial repo activity (QGIA integration bundle, PR automation rework, GAP-007/008/009 registration, doc audits, PROJECT SENTINEL canonical promotion, and ~1700 commits). Root cause: the state file's only update pathways (manual mission close-out, #321//. sync chain) both require conscious invocation, and no mechanism existed to flag divergence from repo truth.",
+      "remediation": "See issue #1083 for the 3-layer fix: this backfill (Layer 1), .github/workflows/simulation-state-freshness.yml (Layer 2), and the MAINT-*/INTEG-*/ARCH-*/OPS-* mission taxonomy extension (Layer 3).",
+      "caveat": "This backfill is a best-effort summary of a 98-day, ~1700-commit gap, not an exhaustive mission log. Treat current_phase and completed_missions as directionally accurate, not a complete history."
+    }
+  ]
 }

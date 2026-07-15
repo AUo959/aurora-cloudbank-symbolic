@@ -85,20 +85,39 @@ def test_canonical_and_legacy_constellation_routes_serve(client):
         assert "relay_tier" in response.json()
 
 
+def _relay_paths(schema, prefix):
+    return {p: ops for p, ops in schema["paths"].items() if p.startswith(prefix)}
+
+
+def _deprecated_flags(paths):
+    """Map each path to the set of `deprecated` flags across its operations."""
+    return {
+        path: {operation.get("deprecated") for operation in operations.values()}
+        for path, operations in paths.items()
+    }
+
+
+def test_both_prefixes_expose_the_same_operation_set(client):
+    schema = client.get("/openapi.json").json()
+    legacy = _relay_paths(schema, "/api/l2-agents")
+    canonical = _relay_paths(schema, "/api/l1-relay-agents")
+
+    assert legacy, "legacy alias routes missing from OpenAPI"
+    assert canonical, "canonical routes missing from OpenAPI"
+    assert {p.replace("/api/l2-agents", "") for p in legacy} == {
+        p.replace("/api/l1-relay-agents", "") for p in canonical
+    }
+
+
 def test_legacy_routes_marked_deprecated_in_openapi(client):
     schema = client.get("/openapi.json").json()
-    legacy_paths = [p for p in schema["paths"] if p.startswith("/api/l2-agents")]
-    canonical_paths = [p for p in schema["paths"] if p.startswith("/api/l1-relay-agents")]
 
-    assert legacy_paths, "legacy alias routes missing from OpenAPI"
-    assert canonical_paths, "canonical routes missing from OpenAPI"
-    # Same operation set under both prefixes
-    assert {p.replace("/api/l2-agents", "") for p in legacy_paths} == {
-        p.replace("/api/l1-relay-agents", "") for p in canonical_paths
-    }
-    for path in legacy_paths:
-        for operation in schema["paths"][path].values():
-            assert operation.get("deprecated") is True, f"{path} not marked deprecated"
-    for path in canonical_paths:
-        for operation in schema["paths"][path].values():
-            assert operation.get("deprecated") is not True, f"{path} wrongly deprecated"
+    legacy_flags = _deprecated_flags(_relay_paths(schema, "/api/l2-agents"))
+    assert legacy_flags and all(flags == {True} for flags in legacy_flags.values()), (
+        f"every legacy operation must be deprecated: {legacy_flags}"
+    )
+
+    canonical_flags = _deprecated_flags(_relay_paths(schema, "/api/l1-relay-agents"))
+    assert canonical_flags and all(True not in flags for flags in canonical_flags.values()), (
+        f"no canonical operation may be deprecated: {canonical_flags}"
+    )

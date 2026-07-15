@@ -71,6 +71,15 @@ except ImportError:
     AerSimulator = None
     QISKIT_AVAILABLE = False
 
+# NEMO inference client (issue #1061) — every call site degrades gracefully
+# when the service or the client package is unavailable.
+try:
+    from services.nemo_service.client import get_nemo_client, close_nemo_client
+    NEMO_CLIENT_AVAILABLE = True
+except Exception:
+    NEMO_CLIENT_AVAILABLE = False
+    _early_logger.warning("NEMO client not available — NEMO integrations disabled")
+
 MODULE_DIR = Path(__file__).resolve().parent
 REPO_ROOT = MODULE_DIR.parent if MODULE_DIR.name == "api" else MODULE_DIR
 STATIC_DIR = REPO_ROOT / "static"
@@ -514,6 +523,68 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("Aurora Cloud GUI FastAPI service shutting down...")
+    if NEMO_CLIENT_AVAILABLE:
+        close_nemo_client()
+
+
+# === NEMO integration helpers (issue #1061) ===
+# Each helper returns None on ANY failure — service down, client missing,
+# or NEMO answering with its own "model not loaded" mock payload (which
+# carries no usable field). Callers fall back to their pre-NEMO behavior.
+
+def _nemo_nlu_intent(agent_id: str, capabilities: List[str]) -> Optional[str]:
+    """Classify agent capabilities into a semantically grounded intent."""
+    if not NEMO_CLIENT_AVAILABLE:
+        return None
+    response = get_nemo_client().infer(
+        model_type="nlu",
+        text=f"Classify agent intent for {agent_id} with capabilities: "
+             f"{', '.join(capabilities)}",
+        context={"anchor": "T1:QF_AGENT_CREATE", "source": "qf_create_agent"},
+    )
+    if not response:
+        return None
+    intent = (response.get("result") or {}).get("intent")
+    if isinstance(intent, list):
+        intent = intent[0] if intent else None
+    return intent if isinstance(intent, str) and intent.strip() else None
+
+
+def _nemo_transcribe(audio_bytes: str) -> Optional[str]:
+    """Transcribe base64 audio via NEMO ASR."""
+    if not NEMO_CLIENT_AVAILABLE:
+        return None
+    response = get_nemo_client().infer(
+        model_type="asr",
+        audio_bytes=audio_bytes,
+        context={"anchor": "T1:OPPY_PLAN", "source": "oppy_plan_maneuver"},
+    )
+    if not response:
+        return None
+    transcript = (response.get("result") or {}).get("transcript")
+    if isinstance(transcript, list):
+        transcript = transcript[0] if transcript else None
+    return transcript if isinstance(transcript, str) and transcript.strip() else None
+
+
+def _nemo_narrative(context_tag: str, payload: Dict[str, Any]) -> Optional[str]:
+    """Generate a natural-language narrative for a structured HR result."""
+    if not NEMO_CLIENT_AVAILABLE:
+        return None
+    prompt = (
+        "Write a brief, professional narrative summary of this Aurora HR "
+        f"assessment ({context_tag}). Respect data dignity: describe, do not "
+        f"judge. Structured result: {json.dumps(payload, default=str)[:2000]}"
+    )
+    response = get_nemo_client().generate(
+        prompt,
+        context={"anchor": "T1:HR_NARRATIVE", "source": context_tag},
+        max_tokens=256,
+    )
+    if not response:
+        return None
+    text = response.get("generated_text")
+    return text if isinstance(text, str) and text.strip() else None
 
 
 class GeometricProductRequest(BaseModel):
@@ -529,7 +600,12 @@ class QuantumSymbolicVectorRequest(BaseModel):
 # === OPPY Navigator Models ===
 class OPPYManeuverRequest(BaseModel):
     vessel_id: str
-    maneuver_type: str
+    # maneuver_type became optional with the NEMO ASR path (issue #1061):
+    # callers supply either a textual maneuver_type (legacy, unchanged) or
+    # base64 audio_bytes to be transcribed into one. At least one required —
+    # enforced in the endpoint so the error is a clear 422 with detail.
+    maneuver_type: Optional[str] = None
+    audio_bytes: Optional[str] = None
     target_state: Dict[str, float]
 
 
@@ -846,7 +922,9 @@ def mcp_route_command(
     """
     mcp_security.validate_anchor(anchor)
     router = MCPCommandRouter()
-    return router.route(command)
+    # anchor is forwarded so external routes (NEMO_GENERATE, issue #1061)
+    # can preserve chain notation end-to-end.
+    return router.route(command, anchor=anchor)
 
 
 @app.post(  # verify_csrf inside
@@ -1264,9 +1342,16 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
     summary="Plan Navigation Maneuver",
     response_description="Navigation plan with risk assessment",
     tags=["oppy"],
-    dependencies=[Depends(security)]
+    dependencies=[Depends(security)],
+    responses={
+        422: {"description": "Neither maneuver_type nor audio_bytes provided"},
+        503: {"description": "OPPY Navigator unavailable, or audio given but NEMO ASR down with no textual maneuver_type"},
+    },
 )
-def oppy_plan_maneuver(req: OPPYManeuverRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+def oppy_plan_maneuver(
+    req: OPPYManeuverRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+):
     """
     Plan a navigation maneuver for a vessel using OPPY Navigator.
 
@@ -1279,9 +1364,30 @@ def oppy_plan_maneuver(req: OPPYManeuverRequest, token: HTTPAuthorizationCredent
     if not OPPY_AVAILABLE:
         raise HTTPException(status_code=503, detail="OPPY Navigator not available")
 
+    # NEMO ASR path (issue #1061): transcribe spoken instruction into the
+    # maneuver type. Text-only requests take the unchanged legacy path.
+    maneuver_type = req.maneuver_type
+    maneuver_source = "text"
+    if req.audio_bytes:
+        transcript = _nemo_transcribe(req.audio_bytes)
+        if transcript:
+            maneuver_type = transcript
+            maneuver_source = "nemo_asr"
+        elif not maneuver_type:
+            raise HTTPException(
+                status_code=503,
+                detail="Audio transcription unavailable (NEMO ASR down) and no "
+                       "textual maneuver_type was provided",
+            )
+    if not maneuver_type:
+        raise HTTPException(
+            status_code=422,
+            detail="Provide maneuver_type or audio_bytes",
+        )
+
     try:
         navigator = OPPYNavigator(vessel_id=req.vessel_id)
-        plan = navigator.plan_maneuver(req.maneuver_type, req.target_state)
+        plan = navigator.plan_maneuver(maneuver_type, req.target_state)
 
         return {
             "status": "success",
@@ -1295,6 +1401,7 @@ def oppy_plan_maneuver(req: OPPYManeuverRequest, token: HTTPAuthorizationCredent
                 "anchor_impact": plan.anchor_impact,
                 "risk_assessment": plan.risk_assessment,
             },
+            "maneuver_source": maneuver_source,
             "context_tag": "oppy_plan_maneuver",
             "anchor": "T1:OPPY_PLAN"
         }
@@ -1439,7 +1546,11 @@ def oppy_get_state(vessel_id: str):
     tags=["hr"],
     dependencies=[Depends(security)]
 )
-def hr_assess_psychological_safety(req: HRPsychSafetyRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+def hr_assess_psychological_safety(
+    req: HRPsychSafetyRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    include_narrative: bool = False,
+):
     """
     Assess psychological safety level for a team member.
 
@@ -1457,13 +1568,18 @@ def hr_assess_psychological_safety(req: HRPsychSafetyRequest, token: HTTPAuthori
         hr_module = AuroraHRModule()
         assessment = hr_module.assess_psychological_safety(req.member_name)
 
-        return {
+        response = {
             "status": "success",
             "assessment": assessment,
             "context_tag": "hr_psych_safety",
             "anchor": "T1:HR_SAFETY",
             "ethics_protocol": "Picard_Delta_3"
         }
+        if include_narrative:
+            # NEMO narrative (issue #1061): additive and best-effort — a
+            # generation failure never fails the assessment itself.
+            response["narrative"] = _nemo_narrative("hr_psych_safety", assessment)
+        return response
     except Exception as e:
         logger.error("HR assess psychological safety error: %s", str(e)[:200])
         raise HTTPException(status_code=500, detail=f"Failed to assess safety: {str(e)[:100]}")
@@ -1476,7 +1592,11 @@ def hr_assess_psychological_safety(req: HRPsychSafetyRequest, token: HTTPAuthori
     tags=["hr"],
     dependencies=[Depends(security)]
 )
-def hr_detect_conflict(req: HRConflictRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+def hr_detect_conflict(
+    req: HRConflictRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    include_narrative: bool = False,
+):
     """
     Detect and track organizational conflicts with AI-powered analysis.
 
@@ -1495,7 +1615,7 @@ def hr_detect_conflict(req: HRConflictRequest, token: HTTPAuthorizationCredentia
         conflict = hr_module.detect_conflict(req.indicators)
 
         if conflict:
-            return {
+            response = {
                 "status": "success",
                 "conflict_detected": True,
                 "conflict": {
@@ -1510,12 +1630,18 @@ def hr_detect_conflict(req: HRConflictRequest, token: HTTPAuthorizationCredentia
                 "ethics_protocol": "Picard_Delta_3"
             }
         else:
-            return {
+            response = {
                 "status": "success",
                 "conflict_detected": False,
                 "context_tag": "hr_conflict_detect",
                 "anchor": "T1:HR_CONFLICT"
             }
+        if include_narrative:
+            # NEMO narrative (issue #1061): additive, never fails the endpoint.
+            response["narrative"] = _nemo_narrative(
+                "hr_conflict_detect", response.get("conflict", {"conflict_detected": False})
+            )
+        return response
     except Exception as e:
         logger.error("HR detect conflict error: %s", str(e)[:200])
         raise HTTPException(status_code=500, detail=f"Failed to detect conflict: {str(e)[:100]}")
@@ -1579,7 +1705,11 @@ def hr_initiate_onboarding(req: HROnboardingRequest, token: HTTPAuthorizationCre
     tags=["hr"],
     dependencies=[Depends(security)]
 )
-def hr_cultural_health(req: HRCulturalHealthRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+def hr_cultural_health(
+    req: HRCulturalHealthRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    include_narrative: bool = False,
+):
     """
     Assess cultural health for a specific organizational layer.
 
@@ -1605,7 +1735,7 @@ def hr_cultural_health(req: HRCulturalHealthRequest, token: HTTPAuthorizationCre
         hr_module = AuroraHRModule()
         report = hr_module.assess_cultural_health(layer)
 
-        return {
+        response = {
             "status": "success",
             "report": {
                 "report_id": report.report_id,
@@ -1622,6 +1752,10 @@ def hr_cultural_health(req: HRCulturalHealthRequest, token: HTTPAuthorizationCre
             "anchor": "T1:HR_CULTURE",
             "ethics_protocol": "Picard_Delta_3"
         }
+        if include_narrative:
+            # NEMO narrative (issue #1061): additive, never fails the endpoint.
+            response["narrative"] = _nemo_narrative("hr_cultural_health", response["report"])
+        return response
     except Exception as e:
         logger.error("HR cultural health error: %s", str(e)[:200])
         raise HTTPException(status_code=500, detail=f"Failed to assess cultural health: {str(e)[:100]}")
@@ -1673,17 +1807,27 @@ def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentia
         forge = QuantumForge(ethics_level=ethics_level, flowstate_mode=flowstate_mode)
 
         # Actual API: generate_agent(intent_query, constellation_targets, metadata)
-        # Create intent from agent_id and capabilities
-        # Secure construction of intent_query (avoid direct f-string interpolation of arbitrary capability text)
+        # NEMO NLU path (issue #1061): derive a semantically grounded intent
+        # from the capabilities; fall back to the legacy string construction
+        # when NEMO is unavailable or returns no usable classification.
         sanitized_caps = [c.replace("'", "").replace(";", "") for c in req.capabilities]
-        intent_query = "Generate agent {} with capabilities: {}".format(
-            req.agent_id,
-            ", ".join(sanitized_caps)
-        )
+        nlu_intent = _nemo_nlu_intent(req.agent_id, sanitized_caps)
+        if nlu_intent:
+            intent_query = nlu_intent
+            intent_source = "nemo_nlu"
+        else:
+            # Secure construction of intent_query (avoid direct f-string
+            # interpolation of arbitrary capability text)
+            intent_query = "Generate agent {} with capabilities: {}".format(
+                req.agent_id,
+                ", ".join(sanitized_caps)
+            )
+            intent_source = "string_construction"
         metadata = {
             "agent_id": req.agent_id,
             "capabilities": req.capabilities,
-            "symbolic_depth": req.symbolic_depth
+            "symbolic_depth": req.symbolic_depth,
+            "intent_source": intent_source,
         }
 
         agent = forge.generate_agent(
@@ -1708,7 +1852,10 @@ def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentia
             },
             "context_tag": "qf_create_agent",
             "anchor": "T1:QF_AGENT_CREATE",
-            "ethics_protocol": "GUMAS_Thermax"
+            "ethics_protocol": "GUMAS_Thermax",
+            # intent_alignment above reflects the NLU-enhanced intent when
+            # intent_source == "nemo_nlu" (issue #1061 acceptance criterion)
+            "intent_source": intent_source,
         }
     except Exception as e:
         logger.error("Quantum Forge create agent error: %s", str(e)[:200])

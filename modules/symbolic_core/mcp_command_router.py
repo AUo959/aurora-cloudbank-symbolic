@@ -5,8 +5,21 @@ This module is fully driven by the centralized configuration in mcp_bridge_core.
 All routing logic, governance layers, and capsule capabilities are read from the config file.
 """
 
+import logging
 from typing import Dict, Any, List, Optional
 from modules.symbolic_core import get_mcp_bridge_core, get_capsule
+
+# NEMO inference integration (issue #1061) — optional: routing must keep
+# working in environments where the services package or httpx is absent.
+try:
+    from services.nemo_service.client import get_nemo_client
+    NEMO_CLIENT_AVAILABLE = True
+except Exception:  # pragma: no cover - fallback path
+    NEMO_CLIENT_AVAILABLE = False
+
+logger = logging.getLogger("mcp_command_router")
+
+NEMO_COMMAND_PREFIX = "NEMO_GENERATE"
 
 
 class MCPCommandRouter:
@@ -60,6 +73,18 @@ class MCPCommandRouter:
             "security_level": "HIGH",
             "ethics_protocol": "GUMAS_Thermax",
         },
+        # Issue #1061 — NEMO inference capsule. Deliberately NOT added to
+        # `registered_capsules`: that list is a frozen 3-capsule test
+        # contract (see tests/test_module_integration_api.py, which pins
+        # capsule_count == 3). NEMO is reachable via get_capsule_info(),
+        # ethics validation, and the NEMO_GENERATE route below.
+        "NEMO_CAPSULE_004": {
+            "capsule_id": "NEMO_CAPSULE_004",
+            "status": "ACTIVE",
+            "module": "Aurora NeMo Inference v1.0",
+            "security_level": "HIGH",
+            "ethics_protocol": "Picard_Delta_3",
+        },
     }
 
     def get_capsule_info(self, capsule_id: str) -> Dict[str, Any]:  # type: ignore[name-defined]
@@ -75,13 +100,67 @@ class MCPCommandRouter:
         info = self._capsule_registry.get(capsule_id)
         return bool(info and info.get("status") == "ACTIVE")
 
-    def route(self, command: str, target_capsule: Optional[str] = None) -> Dict[str, Any]:
+    def _route_nemo_generate(
+        self, command: str, anchor: Optional[str]
+    ) -> Dict[str, Any]:
+        """Forward a NEMO_GENERATE command to the NEMO inference service.
+
+        Command grammar: ``NEMO_GENERATE <prompt text>`` — everything after
+        the command token is the prompt (the bare token falls back to the
+        full command string so the call still round-trips).
+
+        Returns the ``nemo`` sub-result: real generation output when the
+        service answered, a mock fallback payload when it did not
+        (unavailable pod, timeout, or client not importable).
+        """
+        prompt = command[len(NEMO_COMMAND_PREFIX):].strip() or command
+        cloudhub_context = {
+            "anchor": anchor,
+            "governance_layer": self.governance_layer,
+            "capsule_id": "NEMO_CAPSULE_004",
+        }
+
+        response = None
+        if NEMO_CLIENT_AVAILABLE:
+            response = get_nemo_client().generate(prompt, context=cloudhub_context)
+        else:  # pragma: no cover - environment-dependent
+            logger.warning("NEMO client not importable — using mock fallback")
+
+        if response is None:
+            return {
+                "status": "FALLBACK",
+                "mock": True,
+                "generated_text": f"[NEMO unavailable — mock response] {prompt}",
+                "anchor_context": {"cloudhub": cloudhub_context, "nemo": None},
+            }
+        return {
+            "status": "OK",
+            "mock": False,
+            "generated_text": response.get("generated_text", ""),
+            "tokens_generated": response.get("tokens_generated"),
+            "latency_ms": response.get("latency_ms"),
+            # Merged anchor context: CloudHub's routing context plus the
+            # anchor context NEMO returned — both services' T1 lineage.
+            "anchor_context": {
+                "cloudhub": cloudhub_context,
+                "nemo": response.get("anchor_context", {}),
+            },
+        }
+
+    def route(
+        self,
+        command: str,
+        target_capsule: Optional[str] = None,
+        anchor: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Route a command through the governance layer.
 
         Args:
             command: The command to route
             target_capsule: Optional target capsule ID for direct routing
+            anchor: Optional caller anchor, forwarded to external services
+                (currently used by the NEMO_GENERATE route)
 
         Returns:
             Dict containing routing status, protocol info, and routed command
@@ -114,6 +193,13 @@ class MCPCommandRouter:
         if self.ethics_enforcement.get("validation_on_route", False):
             result["ethics_validated"] = True
             result["ethics_protocol"] = self.ethics_enforcement.get("protocol", "UNKNOWN")
+
+        # NEMO inference routing (issue #1061): forward NEMO_GENERATE
+        # commands to the NEMO service and attach the (real or fallback)
+        # generation result without disturbing the legacy routing contract.
+        if command.strip().upper().startswith(NEMO_COMMAND_PREFIX):
+            result["nemo"] = self._route_nemo_generate(command.strip(), anchor)
+            result["anchor_context"] = result["nemo"]["anchor_context"]
 
         return result
 

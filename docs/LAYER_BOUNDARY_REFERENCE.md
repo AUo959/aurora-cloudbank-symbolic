@@ -48,7 +48,7 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 **L2 Components:**
 
 - `modules/nexus/scale/gumas_orion_integration.py` - GUMAS integration
-- `src/bridges/l2_meta_agent_bridge.py` - L2 bridge (if exists)
+- `src/bridges/l1_relay_bridge.py` - L1 relay bridge (formerly l2_meta_agent_bridge.py, a canon-error name; old path is a deprecation shim)
 - Meta-agent definitions and coordination logic
 - Simulation scenario files
 

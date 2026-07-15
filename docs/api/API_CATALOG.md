@@ -1,9 +1,9 @@
 # Aurora CloudBank Symbolic API - Sonnet 4 Enhanced
 
 **Version:** 1.0.0
-**Generated:** 2026-07-13T07:37:11.211808+00:00
-**Source Commit:** `bbf3b516db00876dfe189d4ace50393d08fbdb83`
-**Total Routes:** 284
+**Generated:** 2026-07-15T23:37:10.193533+00:00
+**Source Commit:** `21bd4b3567231c04ccefae6feafbf3c30cd651c5`
+**Total Routes:** 281
 
 Quantum-enhanced symbolic governance system with ChatGPT Agent Mode integration
 
@@ -23,16 +23,17 @@ Quantum-enhanced symbolic governance system with ChatGPT Agent Mode integration
 - [R-2 Agent Telemetry](#r-2-agent-telemetry)
 - [Synergy Dashboard](#synergy-dashboard)
 - [Token Usage](#token-usage)
-- [authentication](#authentication)
 - [cross-repo-collaboration](#cross-repo-collaboration)
 - [drift-metrics](#drift-metrics)
 - [ethical-checkpoint-vault](#ethical-checkpoint-vault)
 - [fleet-bridge](#fleet-bridge)
+- [l1-relay-agents](#l1-relay-agents)
 - [l2-agents](#l2-agents)
 - [monitoring](#monitoring)
 - [playground](#playground)
 - [qgia-forecast](#qgia-forecast)
 - [quantum-simulator](#quantum-simulator)
+- [rd-consent](#rd-consent)
 - [rd-pipeline](#rd-pipeline)
 - [relay-manager](#relay-manager)
 - [resilience](#resilience)
@@ -1716,129 +1717,6 @@ Returns rolling hourly and daily token totals for the authenticated user.
 
 ---
 
-## authentication
-
-**Routes:** 5
-
-### `POST /api/auth/logout`
-
-**Summary:** Logout
-Logout endpoint (client-side token removal).
-
-Note: JWT tokens are stateless, so logout is handled client-side
-by removing the token. For true server-side logout, implement
-a token blacklist with Redis or similar.
-
-Args:
-    current_user: Current user from token
-
-Returns:
-    Success message
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **401**: Unauthorized
-
----
-
-### `GET /api/auth/me`
-
-**Summary:** Read Users Me
-Get current authenticated user information.
-
-Args:
-    current_user: Current user from token
-
-Returns:
-    User object with current user data
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **401**: Unauthorized
-
----
-
-### `GET /api/auth/me/permissions`
-
-**Summary:** Read Users Permissions
-Get current user's permissions.
-
-Args:
-    current_user: Current user from token
-
-Returns:
-    Dict with user role and permissions
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **401**: Unauthorized
-
----
-
-### `POST /api/auth/refresh`
-
-**Summary:** Refresh Token
-Refresh an access token using a refresh token.
-
-Args:
-    refresh_token: Valid refresh token
-
-Returns:
-    New Token object with fresh access_token
-
-Raises:
-    HTTPException: If refresh token is invalid
-
-**Parameters:**
-
-- `refresh_token` (query) - ✅ Required
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **401**: Unauthorized
-- **422**: Validation Error
-  - Content: application/json
-
----
-
-### `POST /api/auth/token`
-
-**Summary:** Login
-OAuth2 compatible token endpoint.
-
-Authenticates user and returns JWT access and refresh tokens.
-
-Args:
-    form_data: OAuth2 form with username and password
-
-Returns:
-    Token object with access_token and refresh_token
-
-Raises:
-    HTTPException: If authentication fails
-
-**Request Body:**
-- Required: Yes
-- Content Types: application/x-www-form-urlencoded
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **401**: Unauthorized
-- **422**: Validation Error
-  - Content: application/json
-
----
-
 ## cross-repo-collaboration
 
 **Routes:** 9
@@ -2309,6 +2187,169 @@ Get overall fleet status summary.
 
 ---
 
+## l1-relay-agents
+
+**Routes:** 7
+
+### `POST /api/l1-relay-agents/activate`
+
+**Summary:** Activate Agent
+Activate a Custom GPT agent with full ZIPWIZ handshake.
+
+Performs 4-step handshake sequence:
+1. ZIPWIZ_BEACON - Establish initial connection
+2. ANCHOR_SYNC - Synchronize EOS_SEED_ORION anchor
+3. ETHICS_AUDIT - Validate Picard_Delta_3 ethics protocol
+4. DRIFT_VALIDATION - Verify drift lock at Δ0.000
+
+DLP: l2_agent_activation
+Anchors: EOS_SEED_ORION, Picard_Delta_3
+Protocol: ZIPWIZ handshake with ethics audit
+
+**Request Body:**
+- Required: Yes
+- Content Types: application/json
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `GET /api/l1-relay-agents/activation-phrases`
+
+**Summary:** Get Activation Phrases
+Get activation phrases for all agents (dev/testing).
+
+Returns a mapping of agent IDs to their activation phrases.
+Useful for development and testing purposes.
+
+Requires authentication to prevent unauthorized access.
+
+DLP: l2_activation_phrases
+Anchors: EOS_SEED_ORION, Picard_Delta_3
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+
+---
+
+### `GET /api/l1-relay-agents/agent/{agent_id}`
+
+**Summary:** Get Agent Status
+Get detailed status of a specific agent.
+
+Returns agent configuration, connection status, drift lock,
+uptime, and handshake log.
+
+DLP: l2_agent_status
+Anchors: EOS_SEED_ORION, Picard_Delta_3
+
+**Parameters:**
+
+- `agent_id` (path) - ✅ Required
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `GET /api/l1-relay-agents/constellation`
+
+**Summary:** Get Constellation Status
+Get full constellation status including all agents.
+
+Returns relay tier information, ORION core configuration,
+and activation phrases for all agents.
+
+DLP: l2_constellation_status
+Anchors: EOS_SEED_ORION, Picard_Delta_3
+Protocol: ZIPWIZ handshake with ethics audit
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+
+---
+
+### `POST /api/l1-relay-agents/disconnect/{agent_id}`
+
+**Summary:** Disconnect Agent
+Disconnect an agent from the constellation.
+
+Gracefully disconnects agent, clears connection state,
+and resets handshake log.
+
+DLP: l2_agent_disconnect
+Anchors: EOS_SEED_ORION, Picard_Delta_3
+
+**Parameters:**
+
+- `agent_id` (path) - ✅ Required
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `GET /api/l1-relay-agents/health`
+
+**Summary:** Get Health
+Health check endpoint for L2 Meta-Agent Bridge.
+
+Returns bridge status, agent counts, and configuration information.
+
+DLP: l2_health_check
+Anchors: EOS_SEED_ORION, Picard_Delta_3
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+
+---
+
+### `POST /api/l1-relay-agents/relay`
+
+**Summary:** Relay Message
+Relay message between agents or broadcast to mesh.
+
+Message types:
+- direct: Point-to-point between two agents
+- broadcast: Mesh broadcast to all connected agents
+- mesh: Multi-hop routing through constellation
+
+DLP: l2_message_relay
+Anchors: EOS_SEED_ORION, Picard_Delta_3
+Protocol: Inter-agent relay with heartbeat update
+
+**Request Body:**
+- Required: Yes
+- Content Types: application/json
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
 ## l2-agents
 
 **Routes:** 7
@@ -2474,226 +2515,7 @@ Protocol: Inter-agent relay with heartbeat update
 
 ## monitoring
 
-**Routes:** 27
-
-### `POST /monitoring/action/evaluate`
-
-**Summary:** Evaluate Action
-Evaluate action against ethics rules
-
-**Request Body:**
-- Required: Yes
-- Content Types: application/json
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **422**: Validation Error
-  - Content: application/json
-
----
-
-### `GET /monitoring/agent/{agent_id}/status`
-
-**Summary:** Get Agent Status
-Get comprehensive status for an agent
-
-**Parameters:**
-
-- `agent_id` (path) - ✅ Required
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **422**: Validation Error
-  - Content: application/json
-
----
-
-### `GET /monitoring/alerts`
-
-**Summary:** Get Alerts
-Get drift alerts
-
-**Parameters:**
-
-- `agent_id` (query) - Optional
-  - Filter by agent ID
-- `level` (query) - Optional
-  - Filter by alert level
-- `since_hours` (query) - Optional
-  - Hours to look back
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **422**: Validation Error
-  - Content: application/json
-
----
-
-### `GET /monitoring/audit`
-
-**Summary:** Get Audit Log
-Get audit log entries
-
-**Parameters:**
-
-- `agent_id` (query) - Optional
-  - Filter by agent ID
-- `event_type` (query) - Optional
-  - Filter by event type
-- `since_hours` (query) - Optional
-  - Hours to look back
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **422**: Validation Error
-  - Content: application/json
-
----
-
-### `POST /monitoring/baseline`
-
-**Summary:** Establish Baseline
-Establish behavioral baseline for an agent
-
-**Request Body:**
-- Required: Yes
-- Content Types: application/json
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **422**: Validation Error
-  - Content: application/json
-
----
-
-### `POST /monitoring/behavior/check`
-
-**Summary:** Check Behavior
-Check agent behavior for drift
-
-**Parameters:**
-
-- `agent_id` (query) - ✅ Required
-  - Agent identifier
-- `context_tag` (query) - Optional
-  - DLP context tag
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **422**: Validation Error
-  - Content: application/json
-
----
-
-### `POST /monitoring/behavior/record`
-
-**Summary:** Record Behavior
-Record behavioral metrics for an agent
-
-**Request Body:**
-- Required: Yes
-- Content Types: application/json
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **422**: Validation Error
-  - Content: application/json
-
----
-
-### `GET /monitoring/compliance/report`
-
-**Summary:** Get Compliance Report
-Generate compliance report
-
-**Parameters:**
-
-- `since_hours` (query) - Optional
-  - Hours to look back
-- `agent_id` (query) - Optional
-  - Specific agent ID
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **422**: Validation Error
-  - Content: application/json
-
----
-
-### `GET /monitoring/dashboard/stats`
-
-**Summary:** Get Dashboard Stats
-Get overall dashboard statistics
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-
----
-
-### `GET /monitoring/export`
-
-**Summary:** Export State
-Export full monitoring system state
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-
----
-
-### `GET /monitoring/health`
-
-**Summary:** Health Check
-Health check for monitoring system
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-
----
-
-### `GET /monitoring/violations`
-
-**Summary:** Get Violations
-Get ethics violations
-
-**Parameters:**
-
-- `agent_id` (query) - Optional
-  - Filter by agent ID
-- `severity` (query) - Optional
-  - Filter by severity
-- `since_hours` (query) - Optional
-  - Hours to look back
-
-**Responses:**
-
-- **200**: Successful Response
-  - Content: application/json
-- **422**: Validation Error
-  - Content: application/json
-
----
+**Routes:** 16
 
 ### `GET /sentinel/alerts`
 
@@ -2821,6 +2643,25 @@ Delete an alert rule.
 - **200**: Successful Response
   - Content: application/json
 - **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `GET /sentinel/crew-load/status`
+
+**Summary:** Get Crew Load Status
+PROJECT SENTINEL Stream 1 — crew cognitive-load monitoring status.
+
+Stub endpoint. No biometric provider is wired yet (see
+src/sensors/crew_load/). Returns each sensor's registration state, not
+live readings, so callers can distinguish "not yet implemented" from
+"no data right now." See docs/architecture/SENTINEL_ARCHITECTURE.md for
+the layer-boundary constraint this stream operates under (crew load
+data must never be reported as, or feed, performance data).
+
+**Responses:**
+
+- **200**: Successful Response
   - Content: application/json
 
 ---
@@ -3341,7 +3182,8 @@ Specialized endpoint for supply chain and energy grid forecasting scenarios.
 Validates that forecast_config is provided.
 
 Args:
-    request: Scenario configuration with forecast parameters
+    scenario_request: Scenario configuration with forecast parameters
+    request: Incoming HTTP request forwarded to the rate-limited scenario route
 
 Returns:
     SimulationResult with forecast time series
@@ -3486,7 +3328,8 @@ Executes simulation asynchronously and returns result. For long-running
 simulations, use the progress WebSocket endpoint to track status.
 
 Args:
-    request: Scenario configuration and parameters
+    scenario_request: Scenario configuration and parameters
+    request: Incoming HTTP request used by the rate limiter
 
 Returns:
     SimulationResult with measurement, optimization, and/or forecast results
@@ -3582,9 +3425,144 @@ Raises:
 
 ---
 
+## rd-consent
+
+**Routes:** 6
+
+### `GET /rd/consent/aggregate`
+
+**Summary:** Aggregate
+Tier 1 (default) view: anonymized aggregate, no grant required.
+
+Response carries no subject ids, grant ids, or grantee ids, and buckets
+below the k-anonymity threshold are suppressed.
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+
+---
+
+### `GET /rd/consent/check`
+
+**Summary:** Check Access
+Access decision for the requester against a subject's data.
+
+The grantee identity is derived from the requester (self / hr /
+project_lead:<id>) — callers cannot ask on behalf of someone else.
+Every decision, including denials, is appended to the audit ledger.
+
+**Parameters:**
+
+- `subject_id` (query) - ✅ Required
+- `data_class` (query) - ✅ Required
+- `purpose` (query) - ✅ Required
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `POST /rd/consent/grants`
+
+**Summary:** Create Grant
+Create a consent grant. Only the data subject can consent.
+
+HR cannot consent on a subject's behalf and no automated pathway exists:
+consent that wasn't given by its subject isn't consent.
+
+**Request Body:**
+- Required: Yes
+- Content Types: application/json
+
+**Responses:**
+
+- **201**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **403**: Requester is not the data subject
+- **409**: Invalid tier/grantee combination or duplicate active grant
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `GET /rd/consent/grants/{grant_id}`
+
+**Summary:** Get Grant
+Fetch one grant — visible to its subject and HR (Tier 2 semantics).
+
+**Parameters:**
+
+- `grant_id` (path) - ✅ Required
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **404**: Grant not found (also returned to unauthorized readers)
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `POST /rd/consent/grants/{grant_id}/revoke`
+
+**Summary:** Revoke Grant
+Revoke a grant. Allowed for the subject or HR (revocation only ever
+removes access, so the safe direction is to make it easy).
+
+**Parameters:**
+
+- `grant_id` (path) - ✅ Required
+
+**Request Body:**
+- Required: Yes
+- Content Types: application/json
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **403**: Requester is neither the data subject nor HR
+- **404**: Grant not found
+- **409**: Grant is already revoked
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `GET /rd/consent/subjects/{subject_id}/grants`
+
+**Summary:** List Subject Grants
+List a subject's grants — visible to self and HR (Tier 2 semantics).
+
+**Parameters:**
+
+- `subject_id` (path) - ✅ Required
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **403**: Requester is neither the subject nor HR
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
 ## rd-pipeline
 
-**Routes:** 10
+**Routes:** 16
 
 ### `GET /rd/capacity/{team_member}`
 
@@ -3635,6 +3613,137 @@ Complexity kept low via small dedicated helper steps.
 
 ---
 
+### `GET /rd/consent/aggregate`
+
+**Summary:** Aggregate
+Tier 1 (default) view: anonymized aggregate, no grant required.
+
+Response carries no subject ids, grant ids, or grantee ids, and buckets
+below the k-anonymity threshold are suppressed.
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+
+---
+
+### `GET /rd/consent/check`
+
+**Summary:** Check Access
+Access decision for the requester against a subject's data.
+
+The grantee identity is derived from the requester (self / hr /
+project_lead:<id>) — callers cannot ask on behalf of someone else.
+Every decision, including denials, is appended to the audit ledger.
+
+**Parameters:**
+
+- `subject_id` (query) - ✅ Required
+- `data_class` (query) - ✅ Required
+- `purpose` (query) - ✅ Required
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `POST /rd/consent/grants`
+
+**Summary:** Create Grant
+Create a consent grant. Only the data subject can consent.
+
+HR cannot consent on a subject's behalf and no automated pathway exists:
+consent that wasn't given by its subject isn't consent.
+
+**Request Body:**
+- Required: Yes
+- Content Types: application/json
+
+**Responses:**
+
+- **201**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **403**: Requester is not the data subject
+- **409**: Invalid tier/grantee combination or duplicate active grant
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `GET /rd/consent/grants/{grant_id}`
+
+**Summary:** Get Grant
+Fetch one grant — visible to its subject and HR (Tier 2 semantics).
+
+**Parameters:**
+
+- `grant_id` (path) - ✅ Required
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **404**: Grant not found (also returned to unauthorized readers)
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `POST /rd/consent/grants/{grant_id}/revoke`
+
+**Summary:** Revoke Grant
+Revoke a grant. Allowed for the subject or HR (revocation only ever
+removes access, so the safe direction is to make it easy).
+
+**Parameters:**
+
+- `grant_id` (path) - ✅ Required
+
+**Request Body:**
+- Required: Yes
+- Content Types: application/json
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **403**: Requester is neither the data subject nor HR
+- **404**: Grant not found
+- **409**: Grant is already revoked
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `GET /rd/consent/subjects/{subject_id}/grants`
+
+**Summary:** List Subject Grants
+List a subject's grants — visible to self and HR (Tier 2 semantics).
+
+**Parameters:**
+
+- `subject_id` (path) - ✅ Required
+
+**Responses:**
+
+- **200**: Successful Response
+  - Content: application/json
+- **401**: Missing or invalid requester identity headers
+- **403**: Requester is neither the subject nor HR
+- **422**: Validation Error
+  - Content: application/json
+
+---
+
 ### `GET /rd/health`
 
 **Summary:** Rd Health
@@ -3663,10 +3772,6 @@ List all active R&D projects with basic metadata.
 **Summary:** Create Project
 Create new R&D project with DLP tracking.
 
-**Parameters:**
-
-- `session_id` (query) - Optional
-
 **Request Body:**
 - Required: Yes
 - Content Types: application/json
@@ -3688,7 +3793,6 @@ Advance project to next stage with milestone tracking.
 **Parameters:**
 
 - `project_id` (path) - ✅ Required
-- `session_id` (query) - Optional
 
 **Request Body:**
 - Required: Yes
@@ -3711,7 +3815,6 @@ Calculate team coherence score using VSA vectors.
 **Parameters:**
 
 - `project_id` (path) - ✅ Required
-- `session_id` (query) - Optional
 
 **Request Body:**
 - Required: Yes
@@ -3734,7 +3837,6 @@ Calculate production readiness score for project.
 **Parameters:**
 
 - `project_id` (path) - ✅ Required
-- `session_id` (query) - Optional
 
 **Request Body:**
 - Required: Yes
@@ -3829,7 +3931,7 @@ DLP: relay_status
 
 ## resilience
 
-**Routes:** 15
+**Routes:** 16
 
 ### `GET /sentinel/alerts`
 
@@ -3957,6 +4059,25 @@ Delete an alert rule.
 - **200**: Successful Response
   - Content: application/json
 - **422**: Validation Error
+  - Content: application/json
+
+---
+
+### `GET /sentinel/crew-load/status`
+
+**Summary:** Get Crew Load Status
+PROJECT SENTINEL Stream 1 — crew cognitive-load monitoring status.
+
+Stub endpoint. No biometric provider is wired yet (see
+src/sensors/crew_load/). Returns each sensor's registration state, not
+live readings, so callers can distinguish "not yet implemented" from
+"no data right now." See docs/architecture/SENTINEL_ARCHITECTURE.md for
+the layer-boundary constraint this stream operates under (crew load
+data must never be reported as, or feed, performance data).
+
+**Responses:**
+
+- **200**: Successful Response
   - Content: application/json
 
 ---

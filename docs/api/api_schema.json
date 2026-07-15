@@ -954,7 +954,7 @@
           "quantum-simulator"
         ],
         "summary": "Run Simulation",
-        "description": "Run quantum-classical hybrid simulation scenario.\n\nExecutes simulation asynchronously and returns result. For long-running\nsimulations, use the progress WebSocket endpoint to track status.\n\nArgs:\n    request: Scenario configuration and parameters\n\nReturns:\n    SimulationResult with measurement, optimization, and/or forecast results\n\nExample:\n    ```json\n    {\n        \"name\": \"Q1 Supply Chain Optimization\",\n        \"scenario_type\": \"supply_chain\",\n        \"backend\": \"mock\",\n        \"optimization_method\": \"qaoa\",\n        \"parameters\": {\"max_iterations\": 100},\n        \"forecast_config\": {\n            \"time_steps\": 30,\n            \"variables\": [\"inventory\", \"demand\", \"cost\"]\n        },\n        \"seed\": 42,\n        \"tags\": [\"supply-chain\", \"q1-2025\"]\n    }\n    ```",
+        "description": "Run quantum-classical hybrid simulation scenario.\n\nExecutes simulation asynchronously and returns result. For long-running\nsimulations, use the progress WebSocket endpoint to track status.\n\nArgs:\n    scenario_request: Scenario configuration and parameters\n    request: Incoming HTTP request used by the rate limiter\n\nReturns:\n    SimulationResult with measurement, optimization, and/or forecast results\n\nExample:\n    ```json\n    {\n        \"name\": \"Q1 Supply Chain Optimization\",\n        \"scenario_type\": \"supply_chain\",\n        \"backend\": \"mock\",\n        \"optimization_method\": \"qaoa\",\n        \"parameters\": {\"max_iterations\": 100},\n        \"forecast_config\": {\n            \"time_steps\": 30,\n            \"variables\": [\"inventory\", \"demand\", \"cost\"]\n        },\n        \"seed\": 42,\n        \"tags\": [\"supply-chain\", \"q1-2025\"]\n    }\n    ```",
         "operationId": "run_simulation_simulate_scenario_post",
         "requestBody": {
           "content": {
@@ -1214,7 +1214,7 @@
           "quantum-simulator"
         ],
         "summary": "Run Forecast",
-        "description": "Run quantum-enhanced forecasting simulation.\n\nSpecialized endpoint for supply chain and energy grid forecasting scenarios.\nValidates that forecast_config is provided.\n\nArgs:\n    request: Scenario configuration with forecast parameters\n\nReturns:\n    SimulationResult with forecast time series\n\nRaises:\n    HTTPException: 400 if forecast_config is missing",
+        "description": "Run quantum-enhanced forecasting simulation.\n\nSpecialized endpoint for supply chain and energy grid forecasting scenarios.\nValidates that forecast_config is provided.\n\nArgs:\n    scenario_request: Scenario configuration with forecast parameters\n    request: Incoming HTTP request forwarded to the rate-limited scenario route\n\nReturns:\n    SimulationResult with forecast time series\n\nRaises:\n    HTTPException: 400 if forecast_config is missing",
         "operationId": "run_forecast_simulate_forecast_post",
         "requestBody": {
           "content": {
@@ -1426,8 +1426,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
                   "additionalProperties": true,
+                  "type": "object",
                   "title": "Response List Projects Rd Projects Get"
                 }
               }
@@ -1442,38 +1442,15 @@
         "summary": "Create Project",
         "description": "Create new R&D project with DLP tracking.",
         "operationId": "create_project_rd_projects_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "session_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Session Id"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Body_create_project_rd_projects_post"
+                "$ref": "#/components/schemas/CreateProjectRequest"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -1481,8 +1458,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
                   "additionalProperties": true,
+                  "type": "object",
                   "title": "Response Create Project Rd Projects Post"
                 }
               }
@@ -1498,7 +1475,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/rd/projects/{project_id}/advance": {
@@ -1523,22 +1505,6 @@
               "type": "string",
               "title": "Project Id"
             }
-          },
-          {
-            "name": "session_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Session Id"
-            }
           }
         ],
         "requestBody": {
@@ -1546,7 +1512,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Body_advance_stage_rd_projects__project_id__advance_post"
+                "$ref": "#/components/schemas/AdvanceStageRequest"
               }
             }
           }
@@ -1599,22 +1565,6 @@
               "type": "string",
               "title": "Project Id"
             }
-          },
-          {
-            "name": "session_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Session Id"
-            }
           }
         ],
         "requestBody": {
@@ -1622,7 +1572,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Body_update_readiness_rd_projects__project_id__readiness_post"
+                "$ref": "#/components/schemas/ReadinessRequest"
               }
             }
           }
@@ -1675,22 +1625,6 @@
               "type": "string",
               "title": "Project Id"
             }
-          },
-          {
-            "name": "session_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Session Id"
-            }
           }
         ],
         "requestBody": {
@@ -1698,7 +1632,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Body_update_coherence_rd_projects__project_id__coherence_post"
+                "$ref": "#/components/schemas/CoherenceRequest"
               }
             }
           }
@@ -1887,6 +1821,334 @@
                   "additionalProperties": true,
                   "type": "object",
                   "title": "Response Rd Health Rd Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rd/consent/grants": {
+      "post": {
+        "tags": [
+          "rd-pipeline",
+          "rd-consent"
+        ],
+        "summary": "Create Grant",
+        "description": "Create a consent grant. Only the data subject can consent.\n\nHR cannot consent on a subject's behalf and no automated pathway exists:\nconsent that wasn't given by its subject isn't consent.",
+        "operationId": "create_grant_rd_consent_grants_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGrantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Create Grant Rd Consent Grants Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid requester identity headers"
+          },
+          "403": {
+            "description": "Requester is not the data subject"
+          },
+          "409": {
+            "description": "Invalid tier/grantee combination or duplicate active grant"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/rd/consent/grants/{grant_id}/revoke": {
+      "post": {
+        "tags": [
+          "rd-pipeline",
+          "rd-consent"
+        ],
+        "summary": "Revoke Grant",
+        "description": "Revoke a grant. Allowed for the subject or HR (revocation only ever\nremoves access, so the safe direction is to make it easy).",
+        "operationId": "revoke_grant_rd_consent_grants__grant_id__revoke_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "grant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Grant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeGrantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Revoke Grant Rd Consent Grants  Grant Id  Revoke Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid requester identity headers"
+          },
+          "403": {
+            "description": "Requester is neither the data subject nor HR"
+          },
+          "404": {
+            "description": "Grant not found"
+          },
+          "409": {
+            "description": "Grant is already revoked"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rd/consent/grants/{grant_id}": {
+      "get": {
+        "tags": [
+          "rd-pipeline",
+          "rd-consent"
+        ],
+        "summary": "Get Grant",
+        "description": "Fetch one grant \u2014 visible to its subject and HR (Tier 2 semantics).",
+        "operationId": "get_grant_rd_consent_grants__grant_id__get",
+        "parameters": [
+          {
+            "name": "grant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Grant Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Grant Rd Consent Grants  Grant Id  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid requester identity headers"
+          },
+          "404": {
+            "description": "Grant not found (also returned to unauthorized readers)"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rd/consent/subjects/{subject_id}/grants": {
+      "get": {
+        "tags": [
+          "rd-pipeline",
+          "rd-consent"
+        ],
+        "summary": "List Subject Grants",
+        "description": "List a subject's grants \u2014 visible to self and HR (Tier 2 semantics).",
+        "operationId": "list_subject_grants_rd_consent_subjects__subject_id__grants_get",
+        "parameters": [
+          {
+            "name": "subject_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Subject Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response List Subject Grants Rd Consent Subjects  Subject Id  Grants Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid requester identity headers"
+          },
+          "403": {
+            "description": "Requester is neither the subject nor HR"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rd/consent/check": {
+      "get": {
+        "tags": [
+          "rd-pipeline",
+          "rd-consent"
+        ],
+        "summary": "Check Access",
+        "description": "Access decision for the requester against a subject's data.\n\nThe grantee identity is derived from the requester (self / hr /\nproject_lead:<id>) \u2014 callers cannot ask on behalf of someone else.\nEvery decision, including denials, is appended to the audit ledger.",
+        "operationId": "check_access_rd_consent_check_get",
+        "parameters": [
+          {
+            "name": "subject_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Subject Id"
+            }
+          },
+          {
+            "name": "data_class",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Data Class"
+            }
+          },
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Purpose"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Check Access Rd Consent Check Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid requester identity headers"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rd/consent/aggregate": {
+      "get": {
+        "tags": [
+          "rd-pipeline",
+          "rd-consent"
+        ],
+        "summary": "Aggregate",
+        "description": "Tier 1 (default) view: anonymized aggregate, no grant required.\n\nResponse carries no subject ids, grant ids, or grantee ids, and buckets\nbelow the k-anonymity threshold are suppressed.",
+        "operationId": "aggregate_rd_consent_aggregate_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Aggregate Rd Consent Aggregate Get"
                 }
               }
             }
@@ -4854,6 +5116,27 @@
         }
       }
     },
+    "/sentinel/crew-load/status": {
+      "get": {
+        "tags": [
+          "monitoring",
+          "resilience"
+        ],
+        "summary": "Get Crew Load Status",
+        "description": "PROJECT SENTINEL Stream 1 \u2014 crew cognitive-load monitoring status.\n\nStub endpoint. No biometric provider is wired yet (see\nsrc/sensors/crew_load/). Returns each sensor's registration state, not\nlive readings, so callers can distinguish \"not yet implemented\" from\n\"no data right now.\" See docs/architecture/SENTINEL_ARCHITECTURE.md for\nthe layer-boundary constraint this stream operates under (crew load\ndata must never be reported as, or feed, performance data).",
+        "operationId": "get_crew_load_status_sentinel_crew_load_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/sentinel/metrics": {
       "get": {
         "tags": [
@@ -5396,678 +5679,6 @@
         }
       }
     },
-    "/monitoring/health": {
-      "get": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Health Check",
-        "description": "Health check for monitoring system",
-        "operationId": "health_check_monitoring_health_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/monitoring/baseline": {
-      "post": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Establish Baseline",
-        "description": "Establish behavioral baseline for an agent",
-        "operationId": "establish_baseline_monitoring_baseline_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BaselineInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/monitoring/behavior/record": {
-      "post": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Record Behavior",
-        "description": "Record behavioral metrics for an agent",
-        "operationId": "record_behavior_monitoring_behavior_record_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BehaviorMetricsInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/monitoring/behavior/check": {
-      "post": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Check Behavior",
-        "description": "Check agent behavior for drift",
-        "operationId": "check_behavior_monitoring_behavior_check_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "agent_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Agent identifier",
-              "title": "Agent Id"
-            },
-            "description": "Agent identifier"
-          },
-          {
-            "name": "context_tag",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "DLP context tag",
-              "title": "Context Tag"
-            },
-            "description": "DLP context tag"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/monitoring/action/evaluate": {
-      "post": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Evaluate Action",
-        "description": "Evaluate action against ethics rules",
-        "operationId": "evaluate_action_monitoring_action_evaluate_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ActionEvaluationInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/monitoring/agent/{agent_id}/status": {
-      "get": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Get Agent Status",
-        "description": "Get comprehensive status for an agent",
-        "operationId": "get_agent_status_monitoring_agent__agent_id__status_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "agent_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Agent Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/monitoring/alerts": {
-      "get": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Get Alerts",
-        "description": "Get drift alerts",
-        "operationId": "get_alerts_monitoring_alerts_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "agent_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by agent ID",
-              "title": "Agent Id"
-            },
-            "description": "Filter by agent ID"
-          },
-          {
-            "name": "level",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by alert level",
-              "title": "Level"
-            },
-            "description": "Filter by alert level"
-          },
-          {
-            "name": "since_hours",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Hours to look back",
-              "default": 24,
-              "title": "Since Hours"
-            },
-            "description": "Hours to look back"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/monitoring/violations": {
-      "get": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Get Violations",
-        "description": "Get ethics violations",
-        "operationId": "get_violations_monitoring_violations_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "agent_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by agent ID",
-              "title": "Agent Id"
-            },
-            "description": "Filter by agent ID"
-          },
-          {
-            "name": "severity",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by severity",
-              "title": "Severity"
-            },
-            "description": "Filter by severity"
-          },
-          {
-            "name": "since_hours",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Hours to look back",
-              "default": 24,
-              "title": "Since Hours"
-            },
-            "description": "Hours to look back"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/monitoring/audit": {
-      "get": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Get Audit Log",
-        "description": "Get audit log entries",
-        "operationId": "get_audit_log_monitoring_audit_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "agent_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by agent ID",
-              "title": "Agent Id"
-            },
-            "description": "Filter by agent ID"
-          },
-          {
-            "name": "event_type",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by event type",
-              "title": "Event Type"
-            },
-            "description": "Filter by event type"
-          },
-          {
-            "name": "since_hours",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Hours to look back",
-              "default": 24,
-              "title": "Since Hours"
-            },
-            "description": "Hours to look back"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/monitoring/compliance/report": {
-      "get": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Get Compliance Report",
-        "description": "Generate compliance report",
-        "operationId": "get_compliance_report_monitoring_compliance_report_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "since_hours",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Hours to look back",
-              "default": 168,
-              "title": "Since Hours"
-            },
-            "description": "Hours to look back"
-          },
-          {
-            "name": "agent_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Specific agent ID",
-              "title": "Agent Id"
-            },
-            "description": "Specific agent ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/monitoring/export": {
-      "get": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Export State",
-        "description": "Export full monitoring system state",
-        "operationId": "export_state_monitoring_export_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/monitoring/dashboard/stats": {
-      "get": {
-        "tags": [
-          "monitoring"
-        ],
-        "summary": "Get Dashboard Stats",
-        "description": "Get overall dashboard statistics",
-        "operationId": "get_dashboard_stats_monitoring_dashboard_stats_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
     "/gumas/health": {
       "get": {
         "tags": [
@@ -6524,183 +6135,6 @@
             }
           }
         }
-      }
-    },
-    "/api/auth/token": {
-      "post": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Login",
-        "description": "OAuth2 compatible token endpoint.\n\nAuthenticates user and returns JWT access and refresh tokens.\n\nArgs:\n    form_data: OAuth2 form with username and password\n\nReturns:\n    Token object with access_token and refresh_token\n\nRaises:\n    HTTPException: If authentication fails",
-        "operationId": "login_api_auth_token_post",
-        "requestBody": {
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_login_api_auth_token_post"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Token"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/refresh": {
-      "post": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh an access token using a refresh token.\n\nArgs:\n    refresh_token: Valid refresh token\n\nReturns:\n    New Token object with fresh access_token\n\nRaises:\n    HTTPException: If refresh token is invalid",
-        "operationId": "refresh_token_api_auth_refresh_post",
-        "parameters": [
-          {
-            "name": "refresh_token",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Refresh Token"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Token"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/me": {
-      "get": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Read Users Me",
-        "description": "Get current authenticated user information.\n\nArgs:\n    current_user: Current user from token\n\nReturns:\n    User object with current user data",
-        "operationId": "read_users_me_api_auth_me_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
-      }
-    },
-    "/api/auth/me/permissions": {
-      "get": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Read Users Permissions",
-        "description": "Get current user's permissions.\n\nArgs:\n    current_user: Current user from token\n\nReturns:\n    Dict with user role and permissions",
-        "operationId": "read_users_permissions_api_auth_me_permissions_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
-      }
-    },
-    "/api/auth/logout": {
-      "post": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Logout",
-        "description": "Logout endpoint (client-side token removal).\n\nNote: JWT tokens are stateless, so logout is handled client-side\nby removing the token. For true server-side logout, implement\na token blacklist with Redis or similar.\n\nArgs:\n    current_user: Current user from token\n\nReturns:\n    Success message",
-        "operationId": "logout_api_auth_logout_post",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
       }
     },
     "/r2-telemetry/metrics": {
@@ -7422,6 +6856,260 @@
         }
       }
     },
+    "/api/l1-relay-agents/health": {
+      "get": {
+        "tags": [
+          "l1-relay-agents"
+        ],
+        "summary": "Get Health",
+        "description": "Health check endpoint for L2 Meta-Agent Bridge.\n\nReturns bridge status, agent counts, and configuration information.\n\nDLP: l2_health_check\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
+        "operationId": "get_health_api_l1_relay_agents_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__api__l1_relay_api__HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/l1-relay-agents/constellation": {
+      "get": {
+        "tags": [
+          "l1-relay-agents"
+        ],
+        "summary": "Get Constellation Status",
+        "description": "Get full constellation status including all agents.\n\nReturns relay tier information, ORION core configuration,\nand activation phrases for all agents.\n\nDLP: l2_constellation_status\nAnchors: EOS_SEED_ORION, Picard_Delta_3\nProtocol: ZIPWIZ handshake with ethics audit",
+        "operationId": "get_constellation_status_api_l1_relay_agents_constellation_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConstellationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/l1-relay-agents/activate": {
+      "post": {
+        "tags": [
+          "l1-relay-agents"
+        ],
+        "summary": "Activate Agent",
+        "description": "Activate a Custom GPT agent with full ZIPWIZ handshake.\n\nPerforms 4-step handshake sequence:\n1. ZIPWIZ_BEACON - Establish initial connection\n2. ANCHOR_SYNC - Synchronize EOS_SEED_ORION anchor\n3. ETHICS_AUDIT - Validate Picard_Delta_3 ethics protocol\n4. DRIFT_VALIDATION - Verify drift lock at \u03940.000\n\nDLP: l2_agent_activation\nAnchors: EOS_SEED_ORION, Picard_Delta_3\nProtocol: ZIPWIZ handshake with ethics audit",
+        "operationId": "activate_agent_api_l1_relay_agents_activate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/l1-relay-agents/agent/{agent_id}": {
+      "get": {
+        "tags": [
+          "l1-relay-agents"
+        ],
+        "summary": "Get Agent Status",
+        "description": "Get detailed status of a specific agent.\n\nReturns agent configuration, connection status, drift lock,\nuptime, and handshake log.\n\nDLP: l2_agent_status\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
+        "operationId": "get_agent_status_api_l1_relay_agents_agent__agent_id__get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__api__l1_relay_api__AgentStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/l1-relay-agents/relay": {
+      "post": {
+        "tags": [
+          "l1-relay-agents"
+        ],
+        "summary": "Relay Message",
+        "description": "Relay message between agents or broadcast to mesh.\n\nMessage types:\n- direct: Point-to-point between two agents\n- broadcast: Mesh broadcast to all connected agents\n- mesh: Multi-hop routing through constellation\n\nDLP: l2_message_relay\nAnchors: EOS_SEED_ORION, Picard_Delta_3\nProtocol: Inter-agent relay with heartbeat update",
+        "operationId": "relay_message_api_l1_relay_agents_relay_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRelayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageRelayResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/l1-relay-agents/disconnect/{agent_id}": {
+      "post": {
+        "tags": [
+          "l1-relay-agents"
+        ],
+        "summary": "Disconnect Agent",
+        "description": "Disconnect an agent from the constellation.\n\nGracefully disconnects agent, clears connection state,\nand resets handshake log.\n\nDLP: l2_agent_disconnect\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
+        "operationId": "disconnect_agent_api_l1_relay_agents_disconnect__agent_id__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisconnectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/l1-relay-agents/activation-phrases": {
+      "get": {
+        "tags": [
+          "l1-relay-agents"
+        ],
+        "summary": "Get Activation Phrases",
+        "description": "Get activation phrases for all agents (dev/testing).\n\nReturns a mapping of agent IDs to their activation phrases.\nUseful for development and testing purposes.\n\nRequires authentication to prevent unauthorized access.\n\nDLP: l2_activation_phrases\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
+        "operationId": "get_activation_phrases_api_l1_relay_agents_activation_phrases_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/l2-agents/health": {
       "get": {
         "tags": [
@@ -7436,12 +7124,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/src__api__l2_meta_agent_api__HealthResponse"
+                  "$ref": "#/components/schemas/src__api__l1_relay_api__HealthResponse"
                 }
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/l2-agents/constellation": {
@@ -7463,7 +7152,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/l2-agents/activate": {
@@ -7506,6 +7196,7 @@
             }
           }
         },
+        "deprecated": true,
         "security": [
           {
             "HTTPBearer": []
@@ -7521,6 +7212,7 @@
         "summary": "Get Agent Status",
         "description": "Get detailed status of a specific agent.\n\nReturns agent configuration, connection status, drift lock,\nuptime, and handshake log.\n\nDLP: l2_agent_status\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
         "operationId": "get_agent_status_api_l2_agents_agent__agent_id__get",
+        "deprecated": true,
         "parameters": [
           {
             "name": "agent_id",
@@ -7538,7 +7230,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/src__api__l2_meta_agent_api__AgentStatusResponse"
+                  "$ref": "#/components/schemas/src__api__l1_relay_api__AgentStatusResponse"
                 }
               }
             }
@@ -7596,6 +7288,7 @@
             }
           }
         },
+        "deprecated": true,
         "security": [
           {
             "HTTPBearer": []
@@ -7611,6 +7304,7 @@
         "summary": "Disconnect Agent",
         "description": "Disconnect an agent from the constellation.\n\nGracefully disconnects agent, clears connection state,\nand resets handshake log.\n\nDLP: l2_agent_disconnect\nAnchors: EOS_SEED_ORION, Picard_Delta_3",
         "operationId": "disconnect_agent_api_l2_agents_disconnect__agent_id__post",
+        "deprecated": true,
         "security": [
           {
             "HTTPBearer": []
@@ -7669,6 +7363,7 @@
             }
           }
         },
+        "deprecated": true,
         "security": [
           {
             "HTTPBearer": []
@@ -11804,46 +11499,6 @@
         ],
         "title": "AICompleteRequest"
       },
-      "ActionEvaluationInput": {
-        "properties": {
-          "agent_id": {
-            "type": "string",
-            "title": "Agent Id",
-            "description": "Agent identifier"
-          },
-          "action_type": {
-            "type": "string",
-            "title": "Action Type",
-            "description": "Type of action"
-          },
-          "parameters": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Parameters",
-            "description": "Action parameters"
-          },
-          "context_tag": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Context Tag",
-            "description": "DLP context tag"
-          }
-        },
-        "type": "object",
-        "required": [
-          "agent_id",
-          "action_type",
-          "parameters"
-        ],
-        "title": "ActionEvaluationInput",
-        "description": "Input for action evaluation"
-      },
       "ActivationRequest": {
         "properties": {
           "agent_id": {
@@ -12536,85 +12191,6 @@
         "title": "AuditQuery",
         "description": "Schema for querying audit history."
       },
-      "BaselineInput": {
-        "properties": {
-          "agent_id": {
-            "type": "string",
-            "title": "Agent Id",
-            "description": "Agent identifier"
-          },
-          "historical_data": {
-            "additionalProperties": {
-              "items": {
-                "type": "number"
-              },
-              "type": "array"
-            },
-            "type": "object",
-            "title": "Historical Data",
-            "description": "Historical metric values"
-          }
-        },
-        "type": "object",
-        "required": [
-          "agent_id",
-          "historical_data"
-        ],
-        "title": "BaselineInput",
-        "description": "Input for establishing baseline"
-      },
-      "BehaviorMetricsInput": {
-        "properties": {
-          "agent_id": {
-            "type": "string",
-            "title": "Agent Id",
-            "description": "Agent identifier"
-          },
-          "metrics": {
-            "additionalProperties": {
-              "type": "number"
-            },
-            "type": "object",
-            "title": "Metrics",
-            "description": "Metric values"
-          },
-          "context_tag": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Context Tag",
-            "description": "DLP context tag"
-          }
-        },
-        "type": "object",
-        "required": [
-          "agent_id",
-          "metrics"
-        ],
-        "title": "BehaviorMetricsInput",
-        "description": "Input for recording behavior metrics"
-      },
-      "Body_advance_stage_rd_projects__project_id__advance_post": {
-        "properties": {
-          "body": {
-            "$ref": "#/components/schemas/AdvanceStageRequest"
-          },
-          "token": {
-            "$ref": "#/components/schemas/HTTPAuthorizationCredentials"
-          }
-        },
-        "type": "object",
-        "required": [
-          "body",
-          "token"
-        ],
-        "title": "Body_advance_stage_rd_projects__project_id__advance_post"
-      },
       "Body_apply_patchweaver_patch_admin_patchweaver_apply_post": {
         "properties": {
           "req": {
@@ -12664,22 +12240,6 @@
           "after"
         ],
         "title": "Body_compute_capsule_diff_collab_drift_diff_post"
-      },
-      "Body_create_project_rd_projects_post": {
-        "properties": {
-          "body": {
-            "$ref": "#/components/schemas/CreateProjectRequest"
-          },
-          "token": {
-            "$ref": "#/components/schemas/HTTPAuthorizationCredentials"
-          }
-        },
-        "type": "object",
-        "required": [
-          "body",
-          "token"
-        ],
-        "title": "Body_create_project_rd_projects_post"
       },
       "Body_create_vector_geometric_vector_post": {
         "properties": {
@@ -12812,65 +12372,6 @@
         ],
         "title": "Body_import_context_collab_context_import_post"
       },
-      "Body_login_api_auth_token_post": {
-        "properties": {
-          "grant_type": {
-            "anyOf": [
-              {
-                "type": "string",
-                "pattern": "^password$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Grant Type"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "password": {
-            "type": "string",
-            "format": "password",
-            "title": "Password"
-          },
-          "scope": {
-            "type": "string",
-            "title": "Scope",
-            "default": ""
-          },
-          "client_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Client Id"
-          },
-          "client_secret": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "format": "password",
-            "title": "Client Secret"
-          }
-        },
-        "type": "object",
-        "required": [
-          "username",
-          "password"
-        ],
-        "title": "Body_login_api_auth_token_post"
-      },
       "Body_manage_agent_session_agent_session_post": {
         "properties": {
           "req": {
@@ -12986,38 +12487,6 @@
           "token"
         ],
         "title": "Body_thread_bridge_validate_endpoint_api_thread_bridge_validate_post"
-      },
-      "Body_update_coherence_rd_projects__project_id__coherence_post": {
-        "properties": {
-          "body": {
-            "$ref": "#/components/schemas/CoherenceRequest"
-          },
-          "token": {
-            "$ref": "#/components/schemas/HTTPAuthorizationCredentials"
-          }
-        },
-        "type": "object",
-        "required": [
-          "body",
-          "token"
-        ],
-        "title": "Body_update_coherence_rd_projects__project_id__coherence_post"
-      },
-      "Body_update_readiness_rd_projects__project_id__readiness_post": {
-        "properties": {
-          "body": {
-            "$ref": "#/components/schemas/ReadinessRequest"
-          },
-          "token": {
-            "$ref": "#/components/schemas/HTTPAuthorizationCredentials"
-          }
-        },
-        "type": "object",
-        "required": [
-          "body",
-          "token"
-        ],
-        "title": "Body_update_readiness_rd_projects__project_id__readiness_post"
       },
       "Body_v2_create_layer_bridge_api_v2_layers_bridge_post": {
         "properties": {
@@ -14005,6 +13474,62 @@
         ],
         "title": "CreateCheckpointRequest",
         "description": "Request body for POST /checkpoint/create."
+      },
+      "CreateGrantRequest": {
+        "properties": {
+          "subject_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Subject Id"
+          },
+          "tier": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 2.0,
+            "title": "Tier"
+          },
+          "data_class": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Data Class"
+          },
+          "purpose": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Purpose"
+          },
+          "grantee": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Grantee"
+          },
+          "expires_in_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 365.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires In Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject_id",
+          "tier",
+          "data_class",
+          "purpose",
+          "grantee"
+        ],
+        "title": "CreateGrantRequest"
       },
       "CreateProjectRequest": {
         "properties": {
@@ -17180,15 +16705,20 @@
         "title": "ResourceMetricsRequest",
         "description": "Request for resource metrics"
       },
-      "Role": {
-        "type": "string",
-        "enum": [
-          "observer",
-          "relay_operator",
-          "admin"
+      "RevokeGrantRequest": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
         ],
-        "title": "Role",
-        "description": "User roles in the Aurora CloudBank system.\n\nRoles hierarchy (from least to most privileged):\n1. OBSERVER: Read-only access, monitoring\n2. RELAY_OPERATOR: Execute operations, read/write data\n3. ADMIN: Full system administration"
+        "title": "RevokeGrantRequest"
       },
       "RollbackRequest": {
         "properties": {
@@ -18798,41 +18328,6 @@
         "title": "TierAssessment",
         "description": "Single tier assessment within a forecast output."
       },
-      "Token": {
-        "properties": {
-          "access_token": {
-            "type": "string",
-            "title": "Access Token"
-          },
-          "token_type": {
-            "type": "string",
-            "title": "Token Type",
-            "default": "bearer"
-          },
-          "expires_in": {
-            "type": "integer",
-            "title": "Expires In",
-            "default": 1800
-          },
-          "refresh_token": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Refresh Token"
-          }
-        },
-        "type": "object",
-        "required": [
-          "access_token"
-        ],
-        "title": "Token",
-        "description": "Token response model."
-      },
       "TrajectoryRequest": {
         "properties": {
           "vector_id": {
@@ -18992,51 +18487,6 @@
         ],
         "title": "UnifiedEthicsCheckResponse",
         "description": "Response from the unified ethics engine."
-      },
-      "User": {
-        "properties": {
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "full_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Full Name"
-          },
-          "role": {
-            "$ref": "#/components/schemas/Role",
-            "default": "observer"
-          },
-          "disabled": {
-            "type": "boolean",
-            "title": "Disabled",
-            "default": false
-          }
-        },
-        "type": "object",
-        "required": [
-          "username"
-        ],
-        "title": "User",
-        "description": "User model with role-based permissions."
       },
       "UserUsageResponse": {
         "properties": {
@@ -19763,7 +19213,7 @@
         "title": "HealthResponse",
         "description": "Overall health report response."
       },
-      "src__api__l2_meta_agent_api__AgentStatusResponse": {
+      "src__api__l1_relay_api__AgentStatusResponse": {
         "properties": {
           "success": {
             "type": "boolean",
@@ -19929,7 +19379,7 @@
         "title": "AgentStatusResponse",
         "description": "Response model for agent status.\n\nDLP: l2_agent_status_response"
       },
-      "src__api__l2_meta_agent_api__HealthResponse": {
+      "src__api__l1_relay_api__HealthResponse": {
         "properties": {
           "status": {
             "type": "string",
@@ -20037,6 +19487,6 @@
       }
     }
   },
-  "x-generated-at": "2026-07-13T07:37:11.211808+00:00",
-  "x-source-commit": "bbf3b516db00876dfe189d4ace50393d08fbdb83"
+  "x-generated-at": "2026-07-15T23:37:10.193533+00:00",
+  "x-source-commit": "21bd4b3567231c04ccefae6feafbf3c30cd651c5"
 }

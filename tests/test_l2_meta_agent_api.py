@@ -41,8 +41,10 @@ def api_client():
     # Apply dependency overrides
     app.dependency_overrides[security] = override_security
 
-    # Patch verify_csrf_token to bypass CSRF validation
-    with patch("src.api.l2_meta_agent_api.verify_csrf_token"):
+    # Patch verify_csrf_token to bypass CSRF validation. Target follows the
+    # implementation: handlers live in src.api.l1_relay_api since the L1
+    # relay rename (src.api.l2_meta_agent_api is now a re-export shim).
+    with patch("src.api.l1_relay_api.verify_csrf_token"):
         # Create client with overrides
         client = TestClient(app)
         yield client

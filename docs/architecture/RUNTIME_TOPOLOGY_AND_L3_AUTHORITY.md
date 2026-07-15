@@ -52,7 +52,7 @@ dependency degrades that module rather than disabling the full app.
 | GUMAS ethics | `/gumas` | `modules/gumas/api/routes.py` | active |
 | OAuth2/RBAC | `/api/auth` | `src/security/auth_routes.py` | active |
 | R2 telemetry | `/r2-telemetry` | `api/r2_telemetry_routes.py` | active |
-| L2 meta-agent bridge | `/api/l2-agents` | `src/api/l2_meta_agent_api.py` | active |
+| L1 relay bridge | `/api/l1-relay-agents` (canonical), `/api/l2-agents` (deprecated alias) | `src/api/l1_relay_api.py` | active |
 | Drift metrics | `/api/drift` | `src/observability/drift_metrics_api.py` | active |
 | QGIA forecast engine | `/qgia` | `modules/qgia/api.py` | active-optional |
 | Playground | `/playground` | `src/playground/api.py` | active |

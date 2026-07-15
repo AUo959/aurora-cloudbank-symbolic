@@ -339,11 +339,11 @@ When documenting relay agents:
 If you're updating code or documentation:
 
 - [x] Replace "L2 Relay Agent" with "L1 Relay Agent" (docs swept repo-wide 2026-07-13; no code symbols used this naming)
-- [ ] Replace "L2 Meta-Agent" with "L1-L3 Bridge Relay" (code-level: `src/bridges/l2_meta_agent_bridge.py`, `src/api/l2_meta_agent_api.py`, and their diagram references still use this name — deliberately not renamed in this pass; needs its own reviewed PR since it touches live API routes)
-- [ ] Update class names: `L2MetaAgentBridge` → `L1RelayBridge`
-- [ ] Update file names: `l2_meta_agent_bridge.py` → `l1_relay_bridge.py`
-- [ ] Add architecture clarity comments to explain L1 location vs. Layer 2 protocol role
-- [ ] Include `reality_layer="L1"` and `triplex_role="layer_2_verifier"` in agent specs
+- [x] Replace "L2 Meta-Agent" with "L1 Relay" naming at code level (2026-07-15: canonical modules are `src/bridges/l1_relay_bridge.py` + `src/api/l1_relay_api.py`; old paths kept as deprecation shims; routes served at `/api/l1-relay-agents` with `/api/l2-agents` as deprecated alias)
+- [x] Update class names: `L2MetaAgentBridge` → `L1RelayBridge` (old name aliased in the shim)
+- [x] Update file names: `l2_meta_agent_bridge.py` → `l1_relay_bridge.py`
+- [x] Add architecture clarity comments to explain L1 location vs. Layer 2 protocol role (module docstrings of both canonical modules)
+- [x] Include `reality_layer="L1"` and `triplex_role="layer_2_verifier"` in agent specs (L1RelayAgent dataclass defaults)
 - [ ] Update API documentation to clarify relay agent locations
 - [ ] Add "Architecture Note" sections to documentation explaining the distinction
 

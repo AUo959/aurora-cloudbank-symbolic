@@ -1,15 +1,15 @@
-# L2 Meta-Agent Bridge API Manifest
+# L1 Relay Bridge API Manifest (formerly L2 Meta-Agent Bridge)
 # Aurora CloudBank Symbolic v3.5.1
 #
-# Symbolic metadata for L2 Meta-Agent Bridge REST API endpoints
+# Symbolic metadata for L1 Relay Bridge REST API endpoints
 # Supports ZIPWIZ handshake protocol for Custom GPT meta-agents
 
 anchor_seed: EOS_SEED_ORION
 ethics_protocol: Picard_Delta_3
-dlp_tag: l2_meta_agent_api_v1
+dlp_tag: l1_relay_api_v1  # formerly l2_meta_agent_api_v1
 version: "1.0.0"
 team: AUo959-team
-memory_provenance: L2_RELAY_TIER
+memory_provenance: L1_RELAY_TIER
 
 symbolic_refs:
   - ZIPWIZ_BEACON

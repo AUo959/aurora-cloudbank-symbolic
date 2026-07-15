@@ -351,18 +351,32 @@
       "notes": "L1 station health and simulation-state surface."
     },
     {
+      "id": "l1_relay_agents",
+      "owner": "l2-agents",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/api/l1_relay_api.py",
+      "mount_path": "/api/l1-relay-agents",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "canonical_router prefix is /api/l1-relay-agents.",
+        "api/aurora_api.py imports src.api.l1_relay_api and includes canonical + legacy routers."
+      ],
+      "notes": "Canonical L1 relay-agent constellation surface (formerly l2_meta_agents; see that entry for the deprecated alias)."
+    },
+    {
       "id": "l2_meta_agents",
       "owner": "l2-agents",
       "runtime": "fastapi-router",
-      "entrypoint": "src/api/l2_meta_agent_api.py",
+      "entrypoint": "src/api/l1_relay_api.py",
       "mount_path": "/api/l2-agents",
       "service_class": "main-app-router",
       "status": "active",
       "status_evidence": [
-        "Router prefix is /api/l2-agents.",
-        "api/aurora_api.py imports src.api.l2_meta_agent_api and includes the router."
+        "legacy_router prefix is /api/l2-agents, marked deprecated=True in OpenAPI.",
+        "api/aurora_api.py includes it alongside the canonical /api/l1-relay-agents router."
       ],
-      "notes": "L2 constellation and activation phrase surface."
+      "notes": "DEPRECATED alias of l1_relay_agents \u2014 same handlers, legacy prefix kept for existing integrations. 'L2' naming was a canon error (relay agents are L1-resident; docs/architecture/LAYER_ARCHITECTURE.md). Remove after callers migrate."
     },
     {
       "id": "drift_metrics",

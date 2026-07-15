@@ -9,7 +9,7 @@ Extended ZIPWIZ handshake — v0.2.0 5-step sequence with RESONANCE_SYNC.
 
 Divergence > 0.05 logs a warning; > 0.10 holds the relay PENDING.
 Step executors are injectable so existing bridge logic
-(src/bridges/l2_meta_agent_bridge.py) supplies steps 1-4 unchanged.
+(src/bridges/l1_relay_bridge.py) supplies steps 1-4 unchanged.
 """
 
 from __future__ import annotations

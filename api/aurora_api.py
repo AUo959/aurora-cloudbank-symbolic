@@ -899,15 +899,20 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate L1 Station routes: %s", e)
 
-# Include L2 Meta-Agent Bridge API routes
+# Include L1 Relay Bridge API routes (formerly "L2 Meta-Agent Bridge" — the
+# relay agents are L1-resident; see docs/architecture/LAYER_ARCHITECTURE.md).
+# Canonical prefix /api/l1-relay-agents plus the deprecated /api/l2-agents
+# alias for existing integrations.
 try:
-    from src.api.l2_meta_agent_api import router as l2_meta_agent_router
-    app.include_router(l2_meta_agent_router)
-    logger.info("✅ L2 Meta-Agent Bridge API routes integrated successfully")
+    from src.api.l1_relay_api import canonical_router as l1_relay_router
+    from src.api.l1_relay_api import legacy_router as l1_relay_legacy_router
+    app.include_router(l1_relay_router)
+    app.include_router(l1_relay_legacy_router)
+    logger.info("✅ L1 Relay Bridge API routes integrated (canonical + legacy alias)")
 except ImportError as e:
-    logger.warning("⚠️ L2 Meta-Agent Bridge not available: %s", e)
+    logger.warning("⚠️ L1 Relay Bridge not available: %s", e)
 except Exception as e:
-    logger.error("❌ Failed to integrate L2 Meta-Agent Bridge routes: %s", e)
+    logger.error("❌ Failed to integrate L1 Relay Bridge routes: %s", e)
 
 # Include Drift Metrics API routes (Phase 2: Drift Prometheus Exporter)
 try:

@@ -21,29 +21,38 @@ from pathlib import Path
 # Assemble the app with process-local generation fixtures. These values exist
 # only for this process, are never serialized, and avoid reading operator
 # credentials while preserving security/monitoring routes in the OpenAPI tree.
-for env_name in (
-    "CSRF_SECRET_KEY",
-    "WS_AUTH_SECRET",
-    "JWT_SECRET_KEY",
-    "MONITORING_SIGNING_KEY",
+# Skipped when the core secrets are already configured (e.g. under pytest,
+# where conftest.py provides session-wide values): overwriting CSRF_SECRET_KEY
+# at import time desyncs tokens minted via fastapi_security's module constant
+# from the secret GlobalCsrfMiddleware binds at the app's first request,
+# breaking every token-authenticated endpoint test collected after this module.
+if not all(
+    os.environ.get(name)
+    for name in ("CSRF_SECRET_KEY", "WS_AUTH_SECRET", "JWT_SECRET_KEY")
 ):
-    os.environ[env_name] = secrets.token_hex(32)
+    for env_name in (
+        "CSRF_SECRET_KEY",
+        "WS_AUTH_SECRET",
+        "JWT_SECRET_KEY",
+        "MONITORING_SIGNING_KEY",
+    ):
+        os.environ[env_name] = secrets.token_hex(32)
 
-os.environ["AURORA_ENV"] = "test"
-os.environ["AURORA_ALLOW_DEV_AUTH_FIXTURE"] = "true"
-for role in ("ADMIN", "OPERATOR", "OBSERVER"):
-    os.environ[f"AURORA_DEV_{role}_PASSWORD"] = secrets.token_urlsafe(32)
+    os.environ["AURORA_ENV"] = "test"
+    os.environ["AURORA_ALLOW_DEV_AUTH_FIXTURE"] = "true"
+    for role in ("ADMIN", "OPERATOR", "OBSERVER"):
+        os.environ[f"AURORA_DEV_{role}_PASSWORD"] = secrets.token_urlsafe(32)
 
-for credential_name in (
-    "ANTHROPIC_API_KEY",
-    "GEMINI_API_KEY",
-    "GOOGLE_API_KEY",
-    "OPENAI_ADMIN_KEY",
-    "OPENAI_API_KEY",
-):
-    os.environ.pop(credential_name, None)
-os.environ.pop("AURORA_AUTH_USERS_FILE", None)
-os.environ.pop("AURORA_AUTH_USERS_JSON", None)
+    for credential_name in (
+        "ANTHROPIC_API_KEY",
+        "GEMINI_API_KEY",
+        "GOOGLE_API_KEY",
+        "OPENAI_ADMIN_KEY",
+        "OPENAI_API_KEY",
+    ):
+        os.environ.pop(credential_name, None)
+    os.environ.pop("AURORA_AUTH_USERS_FILE", None)
+    os.environ.pop("AURORA_AUTH_USERS_JSON", None)
 
 # Add project root to path
 project_root = Path(__file__).parent.parent

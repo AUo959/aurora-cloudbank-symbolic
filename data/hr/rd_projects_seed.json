@@ -1,0 +1,37 @@
+{
+  "description": "Initial R&D productization pipeline seed projects (Phase 1 - see modules/hr/RD_DIVISION_QUANTUM_EXPANSION.md)",
+  "projects": [
+    {
+      "project_id": "rdp-vsa-encoding",
+      "name": "VSA Personality Encoding Algorithm",
+      "project_type": "algorithm",
+      "lead_researcher": "kai_chen",
+      "team_members": ["priya_sharma", "tobias_qin"],
+      "key_technologies": ["vsa", "quantum-algorithms", "python"]
+    },
+    {
+      "project_id": "rdp-cask-ml",
+      "name": "CASK ML Model Architecture",
+      "project_type": "framework",
+      "lead_researcher": "priya_sharma",
+      "team_members": ["kai_chen"],
+      "key_technologies": ["machine-learning", "cask", "python"]
+    },
+    {
+      "project_id": "rdp-pipeline-api",
+      "name": "Productization Pipeline API",
+      "project_type": "microservice",
+      "lead_researcher": "marcus_webb",
+      "team_members": ["tobias_qin"],
+      "key_technologies": ["fastapi", "python"]
+    },
+    {
+      "project_id": "rdp-nli-tracking",
+      "name": "NLI Pipeline Tracking Integration",
+      "project_type": "module",
+      "lead_researcher": "tobias_qin",
+      "team_members": ["marcus_webb"],
+      "key_technologies": ["nli", "symbolic-linguistics", "python"]
+    }
+  ]
+}

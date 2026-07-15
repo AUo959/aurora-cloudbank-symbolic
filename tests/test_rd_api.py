@@ -1,45 +1,16 @@
-import pytest
 from fastapi.testclient import TestClient
 
 from api.aurora_api import app
+from src.middleware.fastapi_security import generate_csrf_token
 
-# Mock security dependencies for testing
-from src.middleware.fastapi_security import security, verify_csrf_token
-
-
-def override_security():
-    """Mock security dependency - always allow access in tests."""
-    return {"sub": "test_user"}
-
-
-def override_csrf():
-    """Mock CSRF verification - always pass in tests."""
-    return True
-
-
-@pytest.fixture(autouse=True)
-def setup_security_overrides():
-    """Set up security overrides for each test and clean up after."""
-    # Set overrides before each test
-    app.dependency_overrides[security] = override_security
-    app.dependency_overrides[verify_csrf_token] = override_csrf
-    yield
-    # Clean up after each test (though they need to stay for this module)
-
-
-# Create client after overrides are set
-@pytest.fixture
-def rd_client():
-    """Provide a test client with security overrides."""
-    app.dependency_overrides[security] = override_security
-    app.dependency_overrides[verify_csrf_token] = override_csrf
-    return TestClient(app)
-
-
-# For backward compatibility with existing tests
 client = TestClient(app)
-app.dependency_overrides[security] = override_security
-app.dependency_overrides[verify_csrf_token] = override_csrf
+
+
+def _auth_headers() -> dict:
+    # GlobalCsrfMiddleware checks X-CSRF-Token on unsafe methods; the
+    # require_csrf_token route dependency reads the bearer credentials.
+    token = generate_csrf_token("rd-api-test-session")
+    return {"Authorization": f"Bearer {token}", "X-CSRF-Token": token}
 
 
 def test_rd_health():
@@ -68,12 +39,12 @@ def test_create_and_advance_project():
         "team_members": ["alpha", "beta"],
         "key_technologies": ["python"],
     }
-    # Creation - FastAPI embeds body when Request parameter present
-    r_create = client.post("/rd/projects", json={"body": payload})
+    r_create = client.post("/rd/projects", json=payload, headers=_auth_headers())
     assert r_create.status_code == 200, r_create.text
     r_adv = client.post(
         "/rd/projects/rdp-test-api/advance",
-        json={"body": {"new_stage": "proof_of_concept", "milestone": "Initial POC"}},
+        json={"new_stage": "proof_of_concept", "milestone": "Initial POC"},
+        headers=_auth_headers(),
     )
     assert r_adv.status_code == 200, r_adv.text
     data = r_adv.json()
@@ -81,45 +52,63 @@ def test_create_and_advance_project():
 
 
 def test_update_readiness_and_coherence():
-    # Ensure project exists - embedded body format
+    # Ensure project exists
     client.post(
         "/rd/projects",
-        json={"body": {
+        json={
             "project_id": "rdp-readiness",
             "name": "Readiness Project",
             "project_type": "module",
             "lead_researcher": "lead_x",
             "team_members": ["member_a", "member_b"],
             "key_technologies": ["fastapi"],
-        }},
+        },
+        headers=_auth_headers(),
     )
     r_ready = client.post(
         "/rd/projects/rdp-readiness/readiness",
-        json={"body": {
+        json={
             "code_quality": 0.9,
             "documentation": 0.8,
             "test_coverage": 0.85,
             "performance": 0.75,
             "security": 0.88,
-        }},
+        },
+        headers=_auth_headers(),
     )
-    assert r_ready.status_code == 200
+    assert r_ready.status_code == 200, r_ready.text
     readiness_score = r_ready.json()["production_readiness"]
     assert 0.0 <= readiness_score <= 1.0
 
     r_coh = client.post(
         "/rd/projects/rdp-readiness/coherence",
-        json={"body": {
+        json={
             "team_vectors": {
                 "lead_x": [0.2, 0.3, 0.5],
                 "member_a": [0.21, 0.29, 0.52],
                 "member_b": [0.19, 0.31, 0.49],
             }
-        }},
+        },
+        headers=_auth_headers(),
     )
-    assert r_coh.status_code == 200
+    assert r_coh.status_code == 200, r_coh.text
     coherence = r_coh.json()["team_coherence"]
     assert 0.0 <= coherence <= 1.0
+
+
+def test_mutating_endpoint_requires_csrf_token():
+    r = client.post(
+        "/rd/projects",
+        json={
+            "project_id": "rdp-no-token",
+            "name": "No Token Project",
+            "project_type": "tool",
+            "lead_researcher": "lead_y",
+            "team_members": [],
+            "key_technologies": [],
+        },
+    )
+    assert r.status_code == 403
 
 
 def test_pipeline_report():

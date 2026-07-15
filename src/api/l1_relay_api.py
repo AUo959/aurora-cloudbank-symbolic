@@ -48,6 +48,12 @@ from src.middleware.fastapi_security import (
 
 logger = logging.getLogger(__name__)
 
+
+def _safe_log_id(value: str) -> str:
+    """Escape newlines in request-supplied identifiers before logging so a
+    crafted value cannot forge log lines (Sonar S5145)."""
+    return value[:20].replace("\r", "\\r").replace("\n", "\\n")
+
 # Endpoints are defined on an unprefixed base router; the canonical and
 # legacy prefixed routers below both include it, so the same handlers
 # serve both paths.
@@ -323,7 +329,7 @@ async def activate_agent(
                 error=result.get("error", "Activation failed")
             )
     except Exception as e:
-        logger.error("Agent activation failed for %s: %s", req.agent_id[:20], str(e)[:100])
+        logger.error("Agent activation failed for %s: %s", _safe_log_id(req.agent_id), str(e)[:100])
         raise HTTPException(
             status_code=500,
             detail="Internal server error"
@@ -355,7 +361,7 @@ async def get_agent_status(agent_id: str, request: Request):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Failed to get agent status for %s: %s", agent_id[:20], str(e)[:100])
+        logger.error("Failed to get agent status for %s: %s", _safe_log_id(agent_id), str(e)[:100])
         raise HTTPException(
             status_code=500,
             detail="Internal server error"
@@ -456,7 +462,7 @@ async def disconnect_agent(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Agent disconnection failed for %s: %s", agent_id[:20], str(e)[:100])
+        logger.error("Agent disconnection failed for %s: %s", _safe_log_id(agent_id), str(e)[:100])
         raise HTTPException(
             status_code=500,
             detail="Internal server error"

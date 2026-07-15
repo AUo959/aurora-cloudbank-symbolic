@@ -13,7 +13,7 @@
 
 ## 🌌 Overview
 
-This document defines the **complete institutional simulation** of Orion Station (L1 Reality Layer)—36 human staff members across 5 divisions, plus Aurora Core AI, 6 L1 Relay Agents, and 6 L3 Framework Systems. This is the **canonical 40-entity simulation** developed through systematic integration, ready for deployment in all scenarios and collaborative environments.
+This document defines the **complete institutional simulation** of Orion Station (L1 Reality Layer)—36 human staff members across 5 divisions, plus Aurora Core AI, 5 L1 Relay Agents, the HALO continuity system-entity (RELAY_006), and 6 L3 Framework Systems. This is the **canonical 40-entity simulation** developed through systematic integration, ready for deployment in all scenarios and collaborative environments.
 
 **Current Roster:** 36 human staff + 1 AI core + 6 L1 relays + 6 L3 frameworks = **49 total entities**
 
@@ -936,7 +936,7 @@ Develops cross-architecture deployment frameworks so Aurora's systems can operat
 **Collaborative Network:**
 - **Ryan Patel (Integration Engineer):** Cross-platform protocol coordination
 - **Marcus Chen (Performance Engineer):** Platform-specific optimization validation
-- **HALO Relay:** Cloud infrastructure coordination
+- **HALO (continuity system-entity):** Cloud infrastructure coordination
 - **Jiro Tanaka (Chief Engineering Officer):** Infrastructure upgrade planning
 
 **Working Style & Philosophy:**
@@ -968,7 +968,7 @@ Treats portability as an ethical requirement: resilience ensures accountability.
 - **Key Collaborators:**
   - Ryan Patel (integration protocols)
   - Marcus Chen (performance validation)
-  - HALO Relay (cloud infrastructure)
+  - HALO (continuity system-entity) (cloud infrastructure)
 - **Phase 1 Role:** Deployment portability for security systems
 - **Phase 1 Responsibilities:**
   - Ensure authentication/authorization systems deploy across all platforms
@@ -1186,7 +1186,7 @@ Designs the logical partitions that keep simulation layers distinct, preventing 
 **Collaborative Network:**
 - **Ira Menon (Compiler Engineer):** Compile-time layer boundary enforcement
 - **Carmen Rivas (Drift Cartographer):** Layer integrity and drift detection
-- **HALO Relay:** Layer coordination and isolation validation
+- **HALO (continuity system-entity):** Layer coordination and isolation validation
 - **Dr. Elira Noor (Reflexivity Specialist):** Ethical implications of layer isolation
 
 **Working Style & Philosophy:**
@@ -1218,7 +1218,7 @@ Says every system needs both walls and windows—and spends his career designing
 - **Key Collaborators:**
   - Ira Menon (compile-time enforcement)
   - Carmen Rivas (drift detection)
-  - HALO Relay (layer coordination)
+  - HALO (continuity system-entity) (layer coordination)
 - **Phase 1 Role:** Layer isolation for security subsystems
 - **Phase 1 Responsibilities:**
   - Design isolation boundaries for authentication/authorization layers
@@ -1566,7 +1566,7 @@ Maintains temporal and structural bindings within running simulations, preventin
 **Collaborative Network:**
 - **Vincent Kale (Layer Isolation Theorist):** Temporal boundaries and layer isolation coordination
 - **Maren Koss (Cognitive Drift Mapper):** Drift detection and binding recalibration
-- **HALO Relay:** Layer-to-layer binding coordination and monitoring
+- **HALO (continuity system-entity):** Layer-to-layer binding coordination and monitoring
 - **Emily Roberts (LLM-Simulation Bridge Developer):** Real-time binding for language-driven updates
 - **Dr. Kieran Zhao (Computational Optimization Lead):** Optimization of binding algorithms
 
@@ -1598,7 +1598,7 @@ Maintains temporal and structural bindings within running simulations, preventin
 - **Key Collaborators:**
   - Vincent Kale (layer isolation)
   - Maren Koss (drift detection)
-  - HALO Relay (layer coordination)
+  - HALO (continuity system-entity) (layer coordination)
 - **Phase 1 Role:** Temporal binding for security event synchronization
 - **Phase 1 Responsibilities:**
   - Ensure security events maintain temporal consistency across systems
@@ -1666,7 +1666,7 @@ Monitors semantic and symbolic drift across long-running simulations, ensuring A
 - **Dr. Amina Velin (Symbolic Systems Research Lead):** Symbolic drift validation and theoretical framework
 - **Aurora Core:** Cognitive model alignment and drift reporting
 - **Tobias Qin (Code/Narrative Systems Engineer):** Semantic drift monitoring for NLI calibration
-- **HALO Relay:** Cross-layer drift coordination and reporting
+- **HALO (continuity system-entity):** Cross-layer drift coordination and reporting
 
 **Repository Mapping:**
 - **Primary Systems:**
@@ -2527,7 +2527,7 @@ Maintains the station's telemetry and introspection framework. Her systems recor
 - Log aggregation and correlation at scale
 
 **Collaborative Network:**
-- **Primary:** Olivia Nguyen (validation integration), Tariq El-Sayegh (speculative scenarios), HALO Relay (AI coordination)
+- **Primary:** Olivia Nguyen (validation integration), Tariq El-Sayegh (speculative scenarios), HALO (continuity system-entity) (AI coordination)
 - **Secondary:** Marcus Chen (infrastructure monitoring), Carmen Rivas (temporal logging), Dr. Sorensen (ethical audit trails)
 
 **Repository Mapping:**
@@ -2815,7 +2815,7 @@ Handles telemetry synchronization, data backup, and runtime continuity for simul
 - Real-time system health assessment
 
 **Collaboration Network:**
-- **Primary:** Marcus Chen (infrastructure operations), Samantha Lee (observability integration), HALO Relay (synchronization coordination)
+- **Primary:** Marcus Chen (infrastructure operations), Samantha Lee (observability integration), HALO (continuity system-entity) (synchronization coordination)
 - **Secondary:** Olivia Nguyen (continuity validation), RIVERTHREAD_808 (data pipeline coordination), Carmen Rivas (temporal consistency)
 
 **Operational Characteristics:**

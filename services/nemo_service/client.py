@@ -30,7 +30,11 @@ import httpx
 
 logger = logging.getLogger("nemo_client")
 
-DEFAULT_BASE_URL = "http://aurora-nemo-service:8090"
+# Pod-to-pod call inside the cluster network: the NEMO service
+# (k8s/aurora-nemo-service.yaml) serves plain HTTP on 8090 and there is no
+# mesh/mTLS layer in this deployment. Override NEMO_SERVICE_URL with an
+# https:// URL if the service ever moves behind TLS.
+DEFAULT_BASE_URL = "http://aurora-nemo-service:8090"  # NOSONAR(S5332) in-cluster DNS, deliberate
 
 
 def _base_url() -> str:

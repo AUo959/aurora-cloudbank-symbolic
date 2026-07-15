@@ -1342,9 +1342,16 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
     summary="Plan Navigation Maneuver",
     response_description="Navigation plan with risk assessment",
     tags=["oppy"],
-    dependencies=[Depends(security)]
+    dependencies=[Depends(security)],
+    responses={
+        422: {"description": "Neither maneuver_type nor audio_bytes provided"},
+        503: {"description": "OPPY Navigator unavailable, or audio given but NEMO ASR down with no textual maneuver_type"},
+    },
 )
-def oppy_plan_maneuver(req: OPPYManeuverRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+def oppy_plan_maneuver(
+    req: OPPYManeuverRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+):
     """
     Plan a navigation maneuver for a vessel using OPPY Navigator.
 
@@ -1541,8 +1548,8 @@ def oppy_get_state(vessel_id: str):
 )
 def hr_assess_psychological_safety(
     req: HRPsychSafetyRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     include_narrative: bool = False,
-    token: HTTPAuthorizationCredentials = Depends(security),
 ):
     """
     Assess psychological safety level for a team member.
@@ -1587,8 +1594,8 @@ def hr_assess_psychological_safety(
 )
 def hr_detect_conflict(
     req: HRConflictRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     include_narrative: bool = False,
-    token: HTTPAuthorizationCredentials = Depends(security),
 ):
     """
     Detect and track organizational conflicts with AI-powered analysis.
@@ -1700,8 +1707,8 @@ def hr_initiate_onboarding(req: HROnboardingRequest, token: HTTPAuthorizationCre
 )
 def hr_cultural_health(
     req: HRCulturalHealthRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     include_narrative: bool = False,
-    token: HTTPAuthorizationCredentials = Depends(security),
 ):
     """
     Assess cultural health for a specific organizational layer.

@@ -44,15 +44,12 @@ from modules.hr.rd_productization import (
 
 # Aurora security + rate limiting (guard optional import failures gracefully)
 try:
-    from src.middleware.fastapi_security import security, verify_csrf_token, limiter
+    from src.middleware.fastapi_security import require_csrf_token, limiter
     SECURITY_AVAILABLE = True
 except Exception:  # pragma: no cover - fallback path
     SECURITY_AVAILABLE = False
-    class DummySec:  # minimal placeholder
-        pass
-    security = DummySec()  # type: ignore
-    def verify_csrf_token(*args, **kwargs):  # type: ignore
-        return True
+    def require_csrf_token() -> None:  # type: ignore
+        return None
     class DummyLimiter:  # minimal placeholder
         @staticmethod
         def limit(limit_str: str):
@@ -255,7 +252,7 @@ def list_projects(request: Request) -> Dict[str, Any]:
     }
 
 
-@router.post("/projects", dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else [])
+@router.post("/projects", dependencies=[Depends(require_csrf_token)] if SECURITY_AVAILABLE else [])
 @limiter.limit("30/minute")
 def create_project(request: Request, body: CreateProjectRequest) -> Dict[str, Any]:
     """Create new R&D project with DLP tracking."""
@@ -280,7 +277,7 @@ def create_project(request: Request, body: CreateProjectRequest) -> Dict[str, An
 
 @router.post(
     "/projects/{project_id}/advance",
-    dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
+    dependencies=[Depends(require_csrf_token)] if SECURITY_AVAILABLE else []
 )
 @limiter.limit("30/minute")
 def advance_stage(request: Request, project_id: str, body: AdvanceStageRequest) -> Dict[str, Any]:
@@ -299,7 +296,7 @@ def advance_stage(request: Request, project_id: str, body: AdvanceStageRequest) 
 
 @router.post(
     "/projects/{project_id}/readiness",
-    dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
+    dependencies=[Depends(require_csrf_token)] if SECURITY_AVAILABLE else []
 )
 @limiter.limit("45/minute")
 def update_readiness(request: Request, project_id: str, body: ReadinessRequest) -> Dict[str, Any]:
@@ -356,7 +353,7 @@ def update_readiness(request: Request, project_id: str, body: ReadinessRequest) 
 
 @router.post(
     "/projects/{project_id}/coherence",
-    dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
+    dependencies=[Depends(require_csrf_token)] if SECURITY_AVAILABLE else []
 )
 @limiter.limit("45/minute")
 def update_coherence(request: Request, project_id: str, body: CoherenceRequest):

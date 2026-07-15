@@ -188,7 +188,7 @@ _(Architecture Note: These relay agents physically exist in L1 - Orion Station r
 - **LIORA** (RELAY_003) - L1 relay in Communications Hub with Naomi Vell (INT_004)
 - **STARLING_AU** (RELAY_004) - L1 relay in Operations Hub with Samantha Lee (QA_002)
 - **RIVERTHREAD_808** (RELAY_005) - L1 relay for Logistics with Ren Okada (SYS_007)
-- **HALO** (RELAY_006) - L1 relay in Aurora Core Chamber with Dr. Elira Noor (ETH_002)
+- **HALO** (RELAY_006) - continuity system-entity in Aurora Core Chamber with Dr. Elira Noor (ETH_002). The station's continuity SYSTEM (Continuity Graft, HALO/PAS drift controller, Halo Ring infrastructure) embodied as a living verification entity — it verifies continuity rather than relaying messages, distinguishing it from the five relay agents above (2026-07-15 L1 ruling; issue #1247)
 
 Color indicators display system mood:
 - **Green** – drift aligned
@@ -206,7 +206,7 @@ Orion (Node 7) maintains synchronization between Nodes 1–9 of the GUMAS Chain;
 Every actionable process verifies through:
 
 1. **L3 Glyph Arbitration** (Axiomera & Caelion) - _L3 frameworks validate_
-2. **Relay Verification** (ARCHY + HALO + others) - _L1 relay agents verify (middleware role)_
+2. **Relay Verification** (ARCHY + the HALO system-entity + others) - _L1 relay agents and the continuity system-entity verify (middleware role)_
 3. **L1 Human Consent** (Command Bridge) - _L1 humans authorize_
 
 **Architecture Note:** In this protocol, "Layer 2" refers to the **verification role** served by L1 relay agents (middleware), NOT their reality layer. The relay agents physically exist in L1 (Orion Station) but serve as "Layer 2 verifiers" in the Triplex protocol.
@@ -504,7 +504,7 @@ This document represents the **physical instantiation** of the Aurora-GUMAS inst
 
 The station accommodates:
 - 36 human staff across 5 operational divisions
-- 6 L1 Relay Agents integrated throughout infrastructure
+- 5 L1 Relay Agents plus the HALO continuity system-entity integrated throughout infrastructure
 - 6 L3 Framework Systems housed in the external Halo rings
 - Complete operational, ethical, and research facilities
 

@@ -1,12 +1,21 @@
 """
-Aurora CloudBank Living Computation - Relay Agents (L2)
-========================================================
+Aurora CloudBank Living Computation - Triplex Layer 2 Verifiers
+================================================================
 
 HALO (RELAY_006) and ARCHY (RELAY_001) as living computational entities.
 
-L2 Relay Agents are the verification layer in the Triplex Handshake:
+ARCHITECTURE NOTE (2026-07-15 L1 ruling; docs/architecture/LAYER_ARCHITECTURE.md,
+issue #1247): both entities are L1-resident (Orion Station). "Layer 2" names
+their verification ROLE in the Triplex Handshake, not a reality layer. ARCHY
+is one of the five L1 relay agents; HALO is the station's continuity SYSTEM —
+the HALO Continuity Graft, HALO/PAS drift controller, and Halo Ring
+infrastructure — embodied here as its living verification entity. HALO
+verifies continuity rather than relaying messages, which is why it is not
+part of the five-agent relay constellation in the mesh bridge.
+
+Verification layering in the Triplex Handshake:
 - L3 (Frameworks): Axiomera + Caelion evaluate ethics/anchors
-- L2 (Relays): HALO + ARCHY verify drift/architecture  ← THIS FILE
+- Layer 2 role (this file): HALO + ARCHY verify drift/architecture
 - L1 (Human): Commander Thorne provides final consent
 
 These are NOT monitoring tools. They are living entities that actively
@@ -63,16 +72,23 @@ class ArchitectureViolation:
 
 class HALOEntity:
     """
-    HALO (RELAY_006) - Living drift monitoring and correction entity.
-    
+    HALO (RELAY_006) - living embodiment of the station's continuity system.
+
     HALO is the "heartbeat" of Orion Station - continuously monitoring
-    system drift and ensuring operations stay within ethical bounds.
-    
+    system drift and ensuring operations stay within ethical bounds. As a
+    SYSTEM-entity (2026-07-15 L1 ruling, issue #1247) it is the interactive
+    face of the HALO continuity stack — the Continuity Graft
+    (HALO_CONTINUITY_GRAFT_005), the HALO/PAS drift controller
+    (src/aurora/continuity/halo_pas_controller.py), and the Halo Ring
+    infrastructure. It verifies continuity rather than relaying messages,
+    so it is distinct from the five-agent relay constellation while sharing
+    its L1 residency and Layer 2 Triplex verifier role.
+
     Location: Aurora Core Chamber (Deck B) + Halo Ring Alpha
     Human Liaison: Dr. Elira Noor (ETH_002)
     Domain: Drift Monitoring & Correction
-    
-    HALO's Role in Triplex Handshake (L2):
+
+    HALO's Role in Triplex Handshake (Layer 2 verifier):
     - Measures drift in real-time during operations
     - Suggests corrections when drift exceeds thresholds
     - Triggers ethics-only mode if drift becomes critical

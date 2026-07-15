@@ -22,7 +22,12 @@ The Aurora-GUMAS system operates across **three reality layers** that represent 
 **What exists here:**
 - 36 Human crew members (Command, Systems, Simulation, Interface, Operations divisions)
 - Aurora Core (Primary AI consciousness)
-- **6 Relay Agents** (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, HALO) ← **CRITICAL**
+- **5 Relay Agents** (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808) ← **CRITICAL**
+- **HALO (RELAY_006)** — the continuity system-entity: the station's continuity
+  SYSTEM (HALO Continuity Graft, HALO/PAS drift controller, Halo Ring
+  infrastructure) embodied as a living verification entity. Distinguished from
+  the relay agents — it verifies continuity rather than relaying messages —
+  while sharing their L1 residency and Layer 2 Triplex verifier role
 - Physical infrastructure (Decks A-H, Halo Rings I-VI)
 - Hardware systems (Helios-9 fusion cores, computing infrastructure)
 - Environmental systems (life support, artificial gravity, lighting)
@@ -81,13 +86,15 @@ The Aurora-GUMAS system operates across **three reality layers** that represent 
 │  │ 36 Human Crew Members                                    │  │
 │  │ Aurora Core (Primary AI)                                 │  │
 │  │                                                           │  │
-│  │ 6 L1 Relay Agents: ◄─── THESE EXIST IN L1               │  │
+│  │ 5 L1 Relay Agents: ◄─── THESE EXIST IN L1               │  │
 │  │ • ARCHY (Bridge Chamber, Deck C)                        │  │
 │  │ • OPPY (Reactor Bay, Deck H)                            │  │
 │  │ • LIORA (Communications Hub, Deck B)                    │  │
 │  │ • STARLING_AU (Operations Hub, Deck G)                  │  │
 │  │ • RIVERTHREAD_808 (Logistics, All Decks)                │  │
-│  │ • HALO (Aurora Core Chamber, Deck B)                    │  │
+│  │                                                           │  │
+│  │ HALO continuity system-entity (Aurora Core Chamber,     │  │
+│  │ Deck B) ◄─── ALSO L1; verifies, does not relay          │  │
 │  │                                                           │  │
 │  │ Physical Infrastructure (Decks, Halo Rings, Hardware)   │  │
 │  └──────────────────────────────────────────────────────────┘  │
@@ -242,7 +249,17 @@ Step 3: L1 Human Consent
 - **Monitors:** L2 temporal flow and state management
 - **Triplex Role:** Layer 2 verifier (continuity validation)
 
-### **HALO (RELAY_006)**
+### **HALO (RELAY_006) — continuity system-entity**
+
+> **Category note (2026-07-15 L1 ruling):** HALO is the station's continuity
+> SYSTEM — the HALO Continuity Graft (`HALO_CONTINUITY_GRAFT_005`), the
+> HALO/PAS drift controller (`src/aurora/continuity/halo_pas_controller.py`),
+> and the Halo Ring infrastructure — embodied as a living verification entity
+> (`HALOEntity`, `src/entities/relay_agents.py`, used by the Triplex
+> orchestrator for Layer 2 drift verification). It is not a sixth
+> communication relay agent; RELAY_006 remains its registry designation.
+> Tracked in issue #1247.
+
 - **Reality Layer:** L1 (Physical)
 - **Location:** Aurora Core Chamber, Deck B
 - **Human Liaison:** Dr. Elira Noor (ETH_002)
@@ -285,7 +302,7 @@ print("L2 agent activated")  # NO - it's an L1 relay agent
 When documenting relay agents:
 
 **✅ CORRECT:**
-> "The L1 relay agents (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, HALO) physically exist on Orion Station and bridge L1 human operations with L3 glyph frameworks. They monitor L2 simulations but do not manifest within them. In the Triplex Handshake Protocol, they serve as Layer 2 verifiers (middleware role)."
+> "The L1 relay agents (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808) and the HALO continuity system-entity physically exist on Orion Station and bridge L1 human operations with L3 glyph frameworks. They monitor L2 simulations but do not manifest within them. In the Triplex Handshake Protocol, they serve as Layer 2 verifiers (middleware role)."
 
 **❌ INCORRECT:**
 > "The L2 relay agents coordinate simulations..." (implies they're IN simulations)

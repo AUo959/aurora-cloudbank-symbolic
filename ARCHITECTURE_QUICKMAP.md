@@ -7,7 +7,7 @@ Aurora CloudBank Symbolic is the code and canon repository for Aurora, the simul
 ## Layer architecture → code map
 
 | Reality layer | Role | Primary code and authority |
-|---|---|---|
+| --- | --- | --- |
 | **L1 — Physical/Operational** | Orion Station crew, Aurora Core, five relay agents, HALO continuity system-entity, and station operations | `src/aurora/`, `src/aurora_orchestrator/`, `src/entities/`, `src/agents/`, `src/bridges/`, `config/mesh/` |
 | **L2 — Simulation/Research** | GUMAS and other computational experiments, scenarios, and forecast environments operated from L1 | `modules/gumas/`, `modules/quantum_simulator/`, `src/aurora_fusion/`, `simulation/` |
 | **L3 — Framework/Conceptual** | Axiomera, Caelion, Sentari, Velatrix, Glyphon, and Harmion; abstract ethics, provenance, drift, and symbolic rules | `modules/ethics_field/`, `modules/symbolic_core/`, `threadcore_registry.json` |

@@ -46,5 +46,5 @@ This applies even if you believe you already know the answer.
 ## Staged Artifacts & Promotion
 
 | Topic | Governing Document |
-|-------|--------------------|
+| --- | --- |
 | Engineer onboarding memory seeds (staged, non-canonical) | `seeds/onboarding/README.md` |

@@ -5,7 +5,7 @@
 ## Layer-oriented map
 
 | Location | Current role | Layer relationship |
-|---|---|---|
+| --- | --- | --- |
 | `aurora/` | Aurora runtime, including narrative engines and HALO/PAS continuity | L1 |
 | `aurora_orchestrator/` | Triplex Handshake orchestration | L1 coordinating L3 validation and L1 consent |
 | `entities/` | Crew, relay, and system-entity definitions | L1 |
@@ -31,7 +31,7 @@ This is an orientation map, not the complete classification audit required by is
 ## Duplicate-looking families are not yet aliases
 
 | Family | Observed distinction |
-|---|---|
+| --- | --- |
 | `bridge/` / `bridges/` | `bridge/` contains Node API-bridge servers used by Node tests and scripts; `bridges/` contains the Python relay bridge and TypeScript constellation bridges. |
 | `collab/` / `collaboration/` | `collab/` is an imported Python capsule/API package; `collaboration/` contains a JavaScript collaborative-research framework. |
 | `interface/` / `interfaces/` | `interface/` contains dynamic-adapter code and a holographic UI; `interfaces/` contains the collaboration chamber consumed by launch scripts and mesh tests. |

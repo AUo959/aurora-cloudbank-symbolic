@@ -6,6 +6,7 @@ import importlib.util
 import io
 import json
 import sys
+import unittest
 from pathlib import Path
 
 import pytest
@@ -13,10 +14,12 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("aurora_onboard", ROOT / "scripts" / "aurora_onboard.py")
-assert SPEC and SPEC.loader
+if SPEC is None or SPEC.loader is None:
+    raise RuntimeError("Could not load scripts/aurora_onboard.py")
 aurora_onboard = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = aurora_onboard
 SPEC.loader.exec_module(aurora_onboard)
+CHECK = unittest.TestCase()
 
 
 def _write(root: Path, relative: str, content: str) -> None:
@@ -84,13 +87,13 @@ def test_agent_mode_emits_parseable_json(healthy_repo: Path) -> None:
     code = aurora_onboard.main(["--agent"], repo_root=healthy_repo, stream=stream)
 
     report = json.loads(stream.getvalue())
-    assert code == 0
-    assert report["status"] == "pass"
-    assert report["system"]["continuity_version"] == "2.2.5"
-    assert report["system"]["lockpoint"] == "SN1_LOCKPOINT_TEST"
-    assert report["architecture"]["l1_relay_agents"] == list(aurora_onboard.RELAY_AGENTS)
-    assert report["architecture"]["l1_continuity_system_entity"] == "HALO"
-    assert report["ethics"]["binding_verified"] is True
+    CHECK.assertEqual(code, 0)
+    CHECK.assertEqual(report["status"], "pass")
+    CHECK.assertEqual(report["system"]["continuity_version"], "2.2.5")
+    CHECK.assertEqual(report["system"]["lockpoint"], "SN1_LOCKPOINT_TEST")
+    CHECK.assertEqual(report["architecture"]["l1_relay_agents"], list(aurora_onboard.RELAY_AGENTS))
+    CHECK.assertEqual(report["architecture"]["l1_continuity_system_entity"], "HALO")
+    CHECK.assertTrue(report["ethics"]["binding_verified"])
 
 
 def test_skip_interactive_is_ci_safe_on_healthy_repo(healthy_repo: Path) -> None:
@@ -98,8 +101,8 @@ def test_skip_interactive_is_ci_safe_on_healthy_repo(healthy_repo: Path) -> None
 
     code = aurora_onboard.main(["--skip-interactive"], repo_root=healthy_repo, stream=stream)
 
-    assert code == 0
-    assert "Onboarding complete" in stream.getvalue()
+    CHECK.assertEqual(code, 0)
+    CHECK.assertIn("Onboarding complete", stream.getvalue())
 
 
 def test_broken_repo_returns_one_without_traceback(healthy_repo: Path) -> None:
@@ -108,9 +111,9 @@ def test_broken_repo_returns_one_without_traceback(healthy_repo: Path) -> None:
 
     code = aurora_onboard.main(["--skip-interactive"], repo_root=healthy_repo, stream=stream)
 
-    assert code == 1
-    assert "Invalid JSON in AURORA_CONTEXT.json" in stream.getvalue()
-    assert "Traceback" not in stream.getvalue()
+    CHECK.assertEqual(code, 1)
+    CHECK.assertIn("Invalid JSON in AURORA_CONTEXT.json", stream.getvalue())
+    CHECK.assertNotIn("Traceback", stream.getvalue())
 
 
 def test_agent_failure_is_still_valid_json(healthy_repo: Path) -> None:
@@ -120,9 +123,9 @@ def test_agent_failure_is_still_valid_json(healthy_repo: Path) -> None:
     code = aurora_onboard.main(["--agent"], repo_root=healthy_repo, stream=stream)
 
     report = json.loads(stream.getvalue())
-    assert code == 1
-    assert report["status"] == "fail"
-    assert "Cannot read .aurora/SIMULATION_STATE.json" in report["error"]
+    CHECK.assertEqual(code, 1)
+    CHECK.assertEqual(report["status"], "fail")
+    CHECK.assertIn("Cannot read .aurora/SIMULATION_STATE.json", report["error"])
 
 
 def test_full_flow_writes_a_staged_seed(healthy_repo: Path) -> None:
@@ -137,13 +140,13 @@ def test_full_flow_writes_a_staged_seed(healthy_repo: Path) -> None:
     )
 
     generated = list((healthy_repo / "seeds/onboarding").glob("engineer-engineer-one-*.md"))
-    assert code == 0
-    assert len(generated) == 1
+    CHECK.assertEqual(code, 0)
+    CHECK.assertEqual(len(generated), 1)
     content = generated[0].read_text(encoding="utf-8")
-    assert "seed_status: staged" in content
-    assert 'engineer_handle: "Engineer One"' in content
-    assert "does not become canon" not in content
-    assert "It is staged, not canonical" in content
+    CHECK.assertIn("seed_status: staged", content)
+    CHECK.assertIn('engineer_handle: "Engineer One"', content)
+    CHECK.assertNotIn("does not become canon", content)
+    CHECK.assertIn("It is staged, not canonical", content)
 
 
 def test_missing_python_floor_returns_partial_status(healthy_repo: Path) -> None:
@@ -152,8 +155,8 @@ def test_missing_python_floor_returns_partial_status(healthy_repo: Path) -> None
 
     code = aurora_onboard.main(["--skip-interactive"], repo_root=healthy_repo, stream=stream)
 
-    assert code == 2
-    assert "WARNING" in stream.getvalue()
+    CHECK.assertEqual(code, 2)
+    CHECK.assertIn("WARNING", stream.getvalue())
 
 
 def test_onboarding_documents_preserve_layer_semantics() -> None:
@@ -161,14 +164,14 @@ def test_onboarding_documents_preserve_layer_semantics() -> None:
     quickmap = (ROOT / "ARCHITECTURE_QUICKMAP.md").read_text(encoding="utf-8")
     agent_context = json.loads((ROOT / "docs/onboarding/AGENT_ONBOARD.md").read_text(encoding="utf-8"))
 
-    assert len(getting_started.splitlines()) <= 200
-    assert "L2 relay agents" not in getting_started
-    assert "mediation layer" not in getting_started.lower()
-    assert "docs/architecture/LAYER_ARCHITECTURE.md" in quickmap
-    assert "docs/architecture/QGIA_SIM_BRIDGE.md" in quickmap
-    assert "docs/architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md" in quickmap
-    assert len(agent_context["identity"]["l1_relay_agents"]) == 5
-    assert agent_context["identity"]["l1_continuity_system_entity"] == "HALO"
+    CHECK.assertLessEqual(len(getting_started.splitlines()), 200)
+    CHECK.assertNotIn("L2 relay agents", getting_started)
+    CHECK.assertNotIn("mediation layer", getting_started.lower())
+    CHECK.assertIn("docs/architecture/LAYER_ARCHITECTURE.md", quickmap)
+    CHECK.assertIn("docs/architecture/QGIA_SIM_BRIDGE.md", quickmap)
+    CHECK.assertIn("docs/architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md", quickmap)
+    CHECK.assertEqual(len(agent_context["identity"]["l1_relay_agents"]), 5)
+    CHECK.assertEqual(agent_context["identity"]["l1_continuity_system_entity"], "HALO")
 
 
 def test_current_checkout_agent_mode_is_parseable() -> None:
@@ -177,5 +180,5 @@ def test_current_checkout_agent_mode_is_parseable() -> None:
     code = aurora_onboard.main(["--agent"], repo_root=ROOT, stream=stream)
 
     report = json.loads(stream.getvalue())
-    assert code == 0
-    assert report["status"] == "pass"
+    CHECK.assertEqual(code, 0)
+    CHECK.assertEqual(report["status"], "pass")

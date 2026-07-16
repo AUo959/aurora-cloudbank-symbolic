@@ -373,6 +373,30 @@ def _error_report(message: str, agent: bool, stream: TextIO) -> None:
         print(f"❌ Onboarding could not continue: {message}", file=stream)
 
 
+def _run_onboarding(
+    app: AuroraOnboarding,
+    args: argparse.Namespace,
+    started: float,
+    input_fn: Callable[[str], str],
+) -> int:
+    app.validate()
+    if args.agent:
+        json.dump(app.agent_report(time.perf_counter() - started), app.stream, indent=2)
+        app.stream.write("\n")
+        return app.exit_code()
+    app.print_environment()
+    if not args.skip_interactive:
+        choice = input_fn("Press ENTER to tour the layer architecture, or SKIP to proceed: ").strip().upper()
+        if choice != "SKIP":
+            app.print_architecture()
+    app.print_ethics()
+    if not args.skip_interactive:
+        app.prompt_for_seed()
+    elapsed = time.perf_counter() - started
+    app.print_completion(elapsed)
+    return app.exit_code()
+
+
 def main(
     argv: Sequence[str] | None = None,
     *,
@@ -386,22 +410,7 @@ def main(
     started = time.perf_counter()
     app = AuroraOnboarding(root=root, stream=output, input_fn=input_fn)
     try:
-        app.validate()
-        if args.agent:
-            json.dump(app.agent_report(time.perf_counter() - started), output, indent=2)
-            output.write("\n")
-            return app.exit_code()
-        app.print_environment()
-        if not args.skip_interactive:
-            choice = input_fn("Press ENTER to tour the layer architecture, or SKIP to proceed: ").strip().upper()
-            if choice != "SKIP":
-                app.print_architecture()
-        app.print_ethics()
-        if not args.skip_interactive:
-            app.prompt_for_seed()
-        elapsed = time.perf_counter() - started
-        app.print_completion(elapsed)
-        return app.exit_code()
+        return _run_onboarding(app, args, started, input_fn)
     except (OnboardingError, EOFError, KeyboardInterrupt) as exc:
         message = str(exc) or "onboarding interrupted"
         _error_report(message, args.agent, output)

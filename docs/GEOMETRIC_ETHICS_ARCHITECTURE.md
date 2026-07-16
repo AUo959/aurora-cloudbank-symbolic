@@ -324,6 +324,27 @@ Geometric ethics: Internal structure determining possibility
 
 - `tests/test_ethics_field.py` - 9 core tests validating ethical geometry
 
+## Aurora Integration and Related Sources
+
+This document is the current architecture reference for the geometric v1
+evaluation model. [`docs/ethics/README.md`](ethics/README.md) supplements it
+with a map of the wider ethics runtime and explicitly separates implemented
+paths from recovered or proposed protocols; it does not supersede this model.
+
+- [`modules/gumas/api/routes.py`](../modules/gumas/api/routes.py) exposes the
+  GUMAS ethics evaluation surface, while
+  [`src/aurora/ethics/ethics_gate.py`](../src/aurora/ethics/ethics_gate.py)
+  adapts GUMAS verdicts for relay and compliance callers. These are separate
+  runtime paths from the geometric field evaluator.
+- [`QGIA_Integration/01_QUANTUM_FORGE_AxiomManifest.md`](../QGIA_Integration/01_QUANTUM_FORGE_AxiomManifest.md)
+  records the QGIA axiom nodes and their ethics locks. Those doctrine gates
+  complement geometric evaluation, but a cross-reference alone does not wire
+  them into this runtime.
+- [`docs/architecture/QGIA_SIM_BRIDGE.md`](architecture/QGIA_SIM_BRIDGE.md)
+  defines how QGIA signals are mediated through L1 judgment before they can
+  scope an L2 GUMAS run. The geometric layer-integrity dimension applies to
+  that boundary; it does not authorize QGIA or an L2 environment to self-task.
+
 ## Thread Continuity
 
 **Thread: T1→T8→T9→INFINITE**  

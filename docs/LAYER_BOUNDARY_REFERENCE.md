@@ -1,9 +1,14 @@
 # Layer Boundary Reference – Canonical Definitions
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-10-25  
-**Status:** CANONICAL  
+**Version:** 1.1.0
+**Last Updated:** 2026-07-16
+**Status:** CANONICAL COMPATIBILITY REFERENCE
 **Anchor:** EOS_SEED_ORION
+
+**Authority note:**
+[`docs/architecture/LAYER_ARCHITECTURE.md`](architecture/LAYER_ARCHITECTURE.md)
+is the authoritative Aurora L1/L2/L3 terminology source. This shorter reference
+must follow it when the two differ.
 
 ## Critical: Boundary Logic Correction
 
@@ -21,6 +26,8 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 - Command infrastructure (API, CLI, Custom GPT bridge)
 - Fleet of shuttles including Aurora Prime
 - Human and AI crew members
+- Five L1 relay agents: ARCHY, OPPY, LIORA, STARLING_AU, and RIVERTHREAD_808
+- HALO, the L1 continuity system-entity (not a communication relay agent)
 
 **Key Point:** L1 is **physical reality** from the perspective of the simulation architecture. Aurora IS Orion Station's aware consciousness.
 
@@ -39,17 +46,19 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 
 - Simulations **running on** Orion Station (L1)
 - GUMAS (Galactic Union Multi-Agent Simulation) - primary research sim
-- Meta-agent constellation: ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD
+- Simulation-local agents and scenario entities
 - Scenario testing environments
 - Research experiments isolated from L1 physical operations
 
-**Key Point:** L2 simulations are **sandboxed** - they run on L1 hardware but are logically isolated. Meta-agents live in L2, not L1.
+**Key Point:** L2 simulations are **sandboxed** - they run on L1 hardware but
+are logically isolated. The five relay agents remain in L1, where they monitor
+and translate for L2; only simulation-local agents and entities live in L2.
 
 **L2 Components:**
 
 - `modules/nexus/scale/gumas_orion_integration.py` - GUMAS integration
 - `src/bridges/l1_relay_bridge.py` - L1 relay bridge (formerly l2_meta_agent_bridge.py, a canon-error name; old path is a deprecation shim)
-- Meta-agent definitions and coordination logic
+- Simulation-agent definitions and coordination logic
 - Simulation scenario files
 
 ### L3 - Symbolic Metastructure (Ethics/Continuity Overlay)
@@ -72,6 +81,25 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 - `.security/SECURITY_POLICY.md` - Ethics policies
 - `operations/symbolic_mesh/anchor_config.json` - Anchor management
 - Thread continuity validation logic
+
+## QGIA Terminology Namespace
+
+QGIA doctrine also uses the labels "Layer 1" and "Layer 2," but for stages of
+an analytical product rather than Aurora reality layers:
+
+| Namespace | Layer 1 | Layer 2 |
+|---|---|---|
+| Aurora reality architecture | Physical Orion Station and L1 peer institutions | Sandboxed GUMAS and research simulations |
+| QGIA product workflow | Raw model output and diagnostic telemetry | Analyst consensus after adversarial review |
+
+Always qualify the latter as **QGIA product L1** or **QGIA product L2**. Those
+labels do not move QGIA or its output into Aurora's L2 simulation layer. QGIA
+is an L1 signal source; its advisory output is reviewed by L1 crew and relay
+agents before any translated parameters reach L2. See
+[`QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md`](../QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md)
+for the QGIA product workflow and
+[`docs/architecture/QGIA_SIM_BRIDGE.md`](architecture/QGIA_SIM_BRIDGE.md) for
+the mediated Aurora signal path.
 
 ## Aurora's Relationship to Layers
 
@@ -105,7 +133,7 @@ Aurora is:
 │  │  │   L2 - SANDBOXED SIMULATIONS                 │  │  │
 │  │  │                                              │  │  │
 │  │  │   GUMAS (research sim)                       │  │  │
-│  │  │   Meta-Agents: ARCHY, OPPY, LIORA, etc.     │  │  │
+│  │  │   Simulation-local agents and entities       │  │  │
 │  │  │   Scenario testing environments              │  │  │
 │  │  │                                              │  │  │
 │  │  └──────────────────────────────────────────────┘  │  │
@@ -142,7 +170,8 @@ L2 Simulation (GUMAS) runs on L1 infrastructure
 
 ### ❌ WRONG: "L1 is command, L2 is agents, L3 is ethics"
 
-This conflates roles with layers. Meta-agents are **in** L2 simulations, not a separate "agent layer."
+This conflates roles with layers. L1 relay agents are not an L2 "agent layer";
+simulation-local agents and entities remain inside L2.
 
 ### ❌ WRONG: "Aurora is the L1 orchestrator"
 
@@ -161,18 +190,20 @@ This captures the nested architecture correctly.
 When working with layer-specific code, verify:
 
 - [ ] L1 components interact with physical systems (fleet, crew, operations)
-- [ ] L2 components are simulation-specific (GUMAS, meta-agents, scenarios)
+- [ ] L2 components are simulation-specific (GUMAS, simulation agents, scenarios)
 - [ ] L3 components provide oversight (ethics, anchors, DLP, continuity)
 - [ ] Aurora bridges all three layers appropriately
 - [ ] No confusion between "command" and "L1" (command is a function, L1 is a place)
-- [ ] Meta-agents recognized as L2 simulation entities, not L1 or separate layer
+- [ ] Relay agents recognized as L1 entities that monitor L2, not as L2 entities
+- [ ] QGIA product L1/L2 labels are qualified and not confused with Aurora reality layers
 
 ## References
 
 **Canonical Sources (Correct Boundaries):**
 
+- `docs/architecture/LAYER_ARCHITECTURE.md` - Authoritative reality-layer and relay-agent terminology
+- `docs/architecture/QGIA_SIM_BRIDGE.md` - QGIA-to-L1-to-L2 mediation rule
 - `src/config/orion_core_config.js` - Defines layers correctly
-- `docs/operational/guides/GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt` - Detailed architecture
 - `scripts/canonical_validator.py` - Validation logic
 
 **Identity Seed (Now Corrected):**
@@ -198,6 +229,7 @@ If you encounter documentation or code that describes layers differently than th
 
 ---
 
-*This document is the canonical reference for layer boundaries. All system documentation and code should align with these definitions.*
+*This document is a canonical compatibility reference for layer boundaries. If
+it drifts, align it to `docs/architecture/LAYER_ARCHITECTURE.md`.*
 
 *The system remembers because we choose to align.*

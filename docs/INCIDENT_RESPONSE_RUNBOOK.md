@@ -49,6 +49,68 @@
 
 ---
 
+## Aurora Escalation Paths
+
+These Aurora signals supplement the P0-P3 incident matrix; they do not replace
+it. WATCHCON is a QGIA analytical posture, while P0-P3 describes service and
+operational impact. A WATCHCON change is advisory until L1 crew review and must
+never self-task an L2 simulation or trigger an infrastructure action.
+
+### WATCHCON triage
+
+| Level | QGIA Tier I trigger | Incident response |
+|---|---|---|
+| 5 | Probability below 0.30 | Standard monitoring and normal collection cadence |
+| 4 | Probability at least 0.30 | Record the change and increase collection review |
+| 3 | Probability at least 0.50 | Brief L1 leadership and activate secondary collection review |
+| 2 | Probability at least 0.70 | Open the crisis protocol and establish daily updates |
+| 1 | Probability at least 0.85, or a confirmed phase transition | Open an emergency session, notify the incident commander, and evaluate RESETCORE |
+
+The complete scoring contract and violation routes are in the
+[`SIM WATCHCON/Confidence Module`](../QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md).
+QGIA output reaches L2 only through the L1 mediation described in
+[`QGIA_SIM_BRIDGE.md`](architecture/QGIA_SIM_BRIDGE.md).
+
+### RESETCORE
+
+Two related restore surfaces exist and must not be conflated:
+
+1. For a QGIA session at WATCHCON 1 that is more than two hours old, rebuild
+   the session using the reviewed carry-forward state and
+   [`03_RESETCORE_Bootstrap.md`](../QGIA_Integration/03_RESETCORE_Bootstrap.md).
+   L1 incident leadership must approve the new session state before it can
+   influence simulation tasking.
+2. The committed reflective-autonomy handler can preview its governance plan
+   with `python -m modules.reflective_autonomy.loom_restore_script`. Its
+   `--execute` option writes an audit receipt and requires explicit L1 incident
+   commander authorization. It is not the QGIA prompt bootstrap.
+
+Record the prior session identifier, WATCHCON level, carry-forward hash,
+approver, command used, and resulting receipt in the incident log.
+
+### PAT and emergency cutoff
+
+[`05_PAT_CommandSheet.md`](../QGIA_Integration/05_PAT_CommandSheet.md) is a QGIA
+operator reference, not a command transport. The current sheet does not define
+an executable emergency-cutoff command. Separately, the Personal Access
+Terminal mesh overlay is read-only and does not implement emergency cutoff,
+audio hailing, or group chat. Do not report a PAT cutoff as successful.
+
+When a cutoff is required, declare the PAT path unavailable, use the contact
+methods and P0 isolation/rollback procedures in this runbook, and record the
+missing capability as an incident follow-up. Preserve the distinction between
+the QGIA PAT sheet, Personal Access Terminals, and Personnel Attention Tags.
+
+### GUMAS violation routing
+
+For a QGIA axiom or product-boundary violation, capture the axiom node, GUMAS
+event code, WATCHCON level, and affected product. Follow the routing action in
+the SIM contract; hard-blocked output must not be promoted to analyst consensus
+or used to scope L2. Escalate a concurrent service or security impact through
+the P0-P3 matrix above.
+
+---
+
 ## 🔥 PAGE 2: COMMON INCIDENTS & RESPONSES
 
 ### INCIDENT 1: API Server Down

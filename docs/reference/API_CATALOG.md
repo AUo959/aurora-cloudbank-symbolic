@@ -6,6 +6,19 @@
 
 Quantum-enhanced symbolic governance system with ChatGPT Agent Mode integration
 
+> **Authority and scope:** This file is a historical, repository-wide generated
+> route snapshot. It is not the current API ownership or deployment authority.
+> For current claims, use committed routers first, then
+> [`docs/api/api_surface_inventory.json`](../api/api_surface_inventory.json),
+> then current generated snapshots under [`docs/api/`](../api/). Verify this
+> file's generation date before using any route detail.
+>
+> [`v2_API_REFERENCE.md`](v2_API_REFERENCE.md) is a human-written,
+> subsystem-specific reference for Thread Transfer Bridge v2 under `/api/v2`.
+> It neither supersedes this broad snapshot nor makes this snapshot current.
+> This 2025 catalog predates the current L1 relay route naming, so it must not be
+> used as authority for relay-agent location or endpoints.
+
 ---
 
 ## Table of Contents

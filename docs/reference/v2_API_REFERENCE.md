@@ -6,6 +6,15 @@
 **DLP**: context_tag=bridge_v2_api_docs  
 **Anchor**: EOS_SEED_ORION_v2
 
+> **Authority and scope:** This document covers only the Thread Transfer Bridge
+> v2 `/api/v2` subsystem implemented by the primary FastAPI application. It is
+> not a repository-wide API catalog and does not supersede
+> [`API_CATALOG.md`](API_CATALOG.md). Current behavior is authoritative in
+> [`api/aurora_api.py`](../../api/aurora_api.py); current surface ownership and
+> deployment status are recorded in
+> [`docs/api/api_surface_inventory.json`](../api/api_surface_inventory.json).
+> Treat examples here as human guidance and verify them against those sources.
+
 ---
 
 ## Table of Contents

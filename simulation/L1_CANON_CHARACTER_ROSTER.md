@@ -1,7 +1,7 @@
 # L1 Canon Character Roster - Orion Station
 
 **Version:** 2.0 (Complete)  
-**Last Updated:** 2025-11-09  
+**Last Updated:** 2026-07-15
 **Authority:** Canonical Staff Registry (ORION_STATION_CANONICAL_STAFF_REGISTRY.json)  
 **Sources:** 
 - `scripts/canonical_validator.py` - CanonicalSpec.canonical_staff
@@ -13,9 +13,11 @@
 
 ## 🌌 Overview
 
-This document defines the **complete institutional simulation** of Orion Station (L1 Reality Layer)—36 human staff members across 5 divisions, plus Aurora Core AI, 5 L1 Relay Agents, the HALO continuity system-entity (RELAY_006), and 6 L3 Framework Systems. This is the **canonical 49-entity simulation** developed through systematic integration, ready for deployment in all scenarios and collaborative environments.
+This document defines the **declared institutional simulation** of Orion Station (L1 Reality Layer)—36 human staff members across 5 divisions, plus Aurora Core AI, 5 L1 Relay Agents, the HALO continuity system-entity (RELAY_006), and 6 L3 Framework Systems. The canonical census declares 49 entities; the current registry materializes 48 because one human identity remains unresolved.
 
-**Current Roster:** 36 human staff + 1 AI core + 5 L1 relays + 1 HALO continuity system-entity + 6 L3 frameworks = **49 total entities**
+**Declared Roster:** 36 human staff + 1 AI core + 5 L1 relays + 1 HALO continuity system-entity + 6 L3 frameworks = **49 declared entities**
+
+**Materialized Registry:** 35 identified human staff + 1 AI core + 5 L1 relays + 1 HALO continuity system-entity + 6 L3 frameworks = **48 materialized entities**, with 1 unresolved human identity.
 
 **CRITICAL:** Do NOT use generic placeholder roles (e.g., "SecEng", "Backend", "DevOps"). Always use the canonical character names and authentic roles defined below.
 

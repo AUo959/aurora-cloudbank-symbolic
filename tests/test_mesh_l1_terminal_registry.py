@@ -54,16 +54,29 @@ def test_l1_terminal_registry_l2_relay_terminals(tmp_path: Path) -> None:
         {terminal["owner_display_name"] for terminal in l2_relays},
         {
             "ARCHY",
-            "HALO",
             "LIORA",
             "OPPY",
             "RIVERTHREAD_808",
             "STARLING_AU",
         },
     )
-    checks.assertTrue(
-        any(terminal["owner_display_name"] == "HALO" and not terminal["routable"] for terminal in l2_relays)
-    )
+    checks.assertNotIn("HALO", {terminal["owner_display_name"] for terminal in l2_relays})
+
+
+def test_l1_terminal_registry_halo_continuity_system(tmp_path: Path) -> None:
+    checks = unittest.TestCase()
+    runtime = MeshRuntime(copy_mesh_project(tmp_path))
+
+    halo = runtime.get_terminal("halo.continuity.term")
+    legacy_alias = runtime.get_terminal("l2.halo.term")
+
+    checks.assertEqual(halo["owner_class"], "continuity_system")
+    checks.assertEqual(halo["canon_type"], "Continuity System-Entity")
+    checks.assertEqual(halo["canon_layer"], "L1")
+    checks.assertEqual(halo["l1_station_layer"], "L1")
+    checks.assertFalse(halo["routable"])
+    checks.assertIsNone(halo["owner_agent_id"])
+    checks.assertEqual(legacy_alias["terminal_id"], halo["terminal_id"])
 
 
 def test_l1_terminal_registry_l3_frameworks_are_not_routable(tmp_path: Path) -> None:

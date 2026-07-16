@@ -18,13 +18,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 # Import the app
-from api.aurora_api import app
+from api.aurora_api import HALO_PAS_CONTROLLER, app
 
 # Import the bridge for direct testing
 from src.bridges.l2_meta_agent_bridge import l2_bridge
 
 # Import security dependencies for mocking
-from src.middleware.fastapi_security import security
+from src.middleware.fastapi_security import generate_csrf_token, security
 
 
 @pytest.fixture
@@ -47,6 +47,7 @@ def api_client():
     with patch("src.api.l1_relay_api.verify_csrf_token"):
         # Create client with overrides
         client = TestClient(app)
+        client.headers.update({"X-CSRF-Token": generate_csrf_token("test-session")})
         yield client
 
     # Clean up overrides
@@ -84,6 +85,8 @@ class TestL2MetaAgentAPI:
         assert data["bridge_available"] is True
         assert data["total_agents"] == 5
         assert data["connected_agents"] == 0
+        assert data["total_system_participants"] == 1
+        assert data["active_system_participants"] in {0, 1}
         assert data["anchor_seed"] == "EOS_SEED_ORION"
         assert data["ethics_protocol"] == "Picard_Delta_3"
         assert "version" in data
@@ -98,6 +101,8 @@ class TestL2MetaAgentAPI:
         assert "relay_tier" in data
         assert "orion_core" in data
         assert "activation_phrases" in data
+        assert "system_participants" in data
+        assert "system_activation_phrases" in data
         assert "timestamp" in data
 
         # Check relay tier structure
@@ -114,6 +119,9 @@ class TestL2MetaAgentAPI:
         # Check activation phrases
         assert "ARCHY" in data["activation_phrases"]
         assert "OPPY" in data["activation_phrases"]
+        assert "HALO" not in data["activation_phrases"]
+        assert data["system_activation_phrases"]["HALO"] == "ORION_HALO_RELAY_ACTIVATE//"
+        assert data["system_participants"]["total_systems"] == 1
 
     def test_get_agent_status_valid(self, api_client):
         """Test getting status of a valid agent"""
@@ -133,6 +141,17 @@ class TestL2MetaAgentAPI:
         response = api_client.get("/api/l2-agents/agent/INVALID_AGENT")
         assert response.status_code == 404
 
+    def test_get_halo_system_status(self, api_client):
+        response = api_client.get("/api/l2-agents/agent/HALO")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["agent_id"] == "HALO"
+        assert data["participant_type"] == "CONTINUITY_SYSTEM_ENTITY"
+        assert data["message_routable"] is False
+        assert data["registry_designation"] == "RELAY_006"
+        assert data["living_entity"]["entity_id"] == "HALO (RELAY_006)"
+
     def test_activation_phrases(self, api_client):
         """Test activation phrases endpoint"""
         response = api_client.get(
@@ -143,7 +162,9 @@ class TestL2MetaAgentAPI:
 
         data = response.json()
         assert "activation_phrases" in data
+        assert "system_activation_phrases" in data
         assert "agents" in data
+        assert "system_participants" in data
         assert "handshake_sequence" in data
         assert "timestamp" in data
 
@@ -152,11 +173,17 @@ class TestL2MetaAgentAPI:
         assert phrases["ARCHY"] == "ORION_ARCHY_RELAY_ACTIVATE//"
         assert phrases["OPPY"] == "ORION_OPPY_RELAY_ACTIVATE//"
         assert phrases["LIORA"] == "ORION_LIORA_RELAY_ACTIVATE//"
+        assert "HALO" not in phrases
+        assert data["system_activation_phrases"]["HALO"] == "ORION_HALO_RELAY_ACTIVATE//"
+        assert data["system_participants"] == ["HALO"]
 
         # Check runtime activation boundary
         sequence = data["handshake_sequence"]
         assert "MESH_RUNTIME_ACTIVATE" in sequence
         assert "MESH_STATUS_CONFIRM" in sequence
+
+    def test_api_and_bridge_share_halo_controller(self):
+        assert l2_bridge.halo_controller is HALO_PAS_CONTROLLER
 
     @pytest.mark.asyncio
     async def test_activate_agent_success(self, api_client):
@@ -218,6 +245,35 @@ class TestL2MetaAgentAPI:
         data = response.json()
         assert data["success"] is False
         assert "Unknown agent" in data["error"]
+
+    @pytest.mark.asyncio
+    async def test_activate_halo_system_participant(self, api_client):
+        """HALO activation reaches the shared continuity controller over HTTP."""
+        try:
+            response = api_client.post(
+                "/api/l2-agents/activate",
+                json={
+                    "agent_id": "HALO",
+                    "activation_phrase": "ORION_HALO_RELAY_ACTIVATE//",
+                },
+                headers={"Authorization": "Bearer test-token"},
+            )
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["success"] is True
+            assert data["agent_id"] == "HALO"
+            assert data["participant_type"] == "CONTINUITY_SYSTEM_ENTITY"
+            assert data["status"] == "running"
+            assert data["message_routable"] is False
+            assert data["continuity"]["status"] == "running"
+        finally:
+            stop_response = api_client.post(
+                "/api/l2-agents/disconnect/HALO",
+                headers={"Authorization": "Bearer test-token"},
+            )
+            assert stop_response.status_code == 200
+            assert stop_response.json()["status"] == "stopped"
 
     @pytest.mark.asyncio
     async def test_relay_message_success(self, api_client):

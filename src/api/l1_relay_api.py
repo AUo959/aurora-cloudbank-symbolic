@@ -16,12 +16,15 @@ ROUTES — served at BOTH prefixes by api/aurora_api.py:
                            compatibility with existing integrations;
                            marked deprecated in OpenAPI
 
-Supported Agents:
+Supported relay agents:
 - ARCHY (Bridge Coordinator)
 - OPPY (Vector/Data Processor)
 - LIORA (Handshake/Synchronization)
 - STARLING_AU (L2 Sim Coordinator)
 - RIVERTHREAD_808 (Narrative/Stream)
+
+Supported operational system:
+- HALO (station continuity system-entity; activation/status only, not message-routable)
 
 DLP: l2_meta_agent_api_v1
 Anchors: EOS_SEED_ORION, Picard_Delta_3
@@ -29,12 +32,16 @@ Protocol: ZIPWIZ handshake with ethics audit
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
+
+# Bind the bridge to the controller already created by the application module.
+# Its fallback controller remains available when this router is used standalone.
+from src.aurora.continuity import get_active_halo_pas_controller
 
 # Import the canonical L1 Relay Bridge (mesh-backed singleton)
 from src.bridges.l1_relay_bridge import l1_relay_bridge as l2_bridge
@@ -46,13 +53,22 @@ from src.middleware.fastapi_security import (
     verify_csrf_token,
 )
 
+_process_halo_controller = get_active_halo_pas_controller()
+if _process_halo_controller is not None:
+    l2_bridge.halo_controller = _process_halo_controller
+
 logger = logging.getLogger(__name__)
+
+
+def _utc_iso() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 def _safe_log_id(value: str) -> str:
     """Escape newlines in request-supplied identifiers before logging so a
     crafted value cannot forge log lines (Sonar S5145)."""
     return value[:20].replace("\r", "\\r").replace("\n", "\\n")
+
 
 # Endpoints are defined on an unprefixed base router; the canonical and
 # legacy prefixed routers below both include it, so the same handlers
@@ -66,14 +82,17 @@ router = APIRouter()
 
 
 class ActivationRequest(BaseModel):
-    """Request model for agent activation.
+    """Request model for relay-agent or system activation.
 
     DLP: l2_agent_activation_request
     """
     agent_id: str = Field(
         ...,
-        description="The agent identifier (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808)",
-        examples=["ARCHY"]
+        description=(
+            "Relay agent or operational system identifier "
+            "(ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, HALO)"
+        ),
+        examples=["ARCHY", "HALO"]
     )
     activation_phrase: str = Field(
         ...,
@@ -83,7 +102,7 @@ class ActivationRequest(BaseModel):
 
 
 class ActivationResponse(BaseModel):
-    """Response model for agent activation.
+    """Response model for relay-agent or system activation.
 
     DLP: l2_agent_activation_response
     """
@@ -102,6 +121,11 @@ class ActivationResponse(BaseModel):
         None,
         description="Agent description"
     )
+    participant_type: Optional[str] = Field(None, description="Semantic participant type")
+    message_routable: Optional[bool] = Field(None, description="Whether the participant can relay messages")
+    registry_designation: Optional[str] = Field(None, description="Preserved registry designation")
+    continuity: Optional[Dict[str, Any]] = Field(None, description="Continuity controller status")
+    living_entity: Optional[Dict[str, Any]] = Field(None, description="Living system-entity state")
     error: Optional[str] = Field(None, description="Error message if activation failed")
 
 
@@ -148,7 +172,7 @@ class MessageRelayResponse(BaseModel):
 
 
 class AgentStatusResponse(BaseModel):
-    """Response model for agent status.
+    """Response model for relay-agent or system-participant status.
 
     DLP: l2_agent_status_response
     """
@@ -167,6 +191,13 @@ class AgentStatusResponse(BaseModel):
         None,
         description="Handshake sequence log"
     )
+    participant_type: Optional[str] = Field(None, description="Semantic participant type")
+    message_routable: Optional[bool] = Field(None, description="Whether the participant can relay messages")
+    registry_designation: Optional[str] = Field(None, description="Preserved registry designation")
+    reality_layer: Optional[str] = Field(None, description="Physical reality layer")
+    triplex_role: Optional[str] = Field(None, description="Triplex verification role")
+    continuity: Optional[Dict[str, Any]] = Field(None, description="Continuity controller status")
+    living_entity: Optional[Dict[str, Any]] = Field(None, description="Living system-entity state")
     error: Optional[str] = Field(None, description="Error message if query failed")
 
 
@@ -179,13 +210,21 @@ class ConstellationResponse(BaseModel):
         ...,
         description="Relay tier information including capsules"
     )
+    system_participants: Dict[str, Any] = Field(
+        ...,
+        description="Operational systems kept distinct from the relay tier"
+    )
     orion_core: Dict[str, Any] = Field(
         ...,
         description="ORION core configuration"
     )
     activation_phrases: Dict[str, str] = Field(
         ...,
-        description="Activation phrases for each agent"
+        description="Activation phrases for relay agents"
+    )
+    system_activation_phrases: Dict[str, str] = Field(
+        ...,
+        description="Activation phrases for operational systems"
     )
     timestamp: str = Field(..., description="Status timestamp")
 
@@ -199,6 +238,8 @@ class HealthResponse(BaseModel):
     bridge_available: bool = Field(..., description="Whether bridge is available")
     total_agents: int = Field(..., description="Total number of agents")
     connected_agents: int = Field(..., description="Number of connected agents")
+    total_system_participants: int = Field(..., description="Total number of operational systems")
+    active_system_participants: int = Field(..., description="Number of active operational systems")
     anchor_seed: str = Field(..., description="Current anchor seed")
     ethics_protocol: str = Field(..., description="Active ethics protocol")
     version: str = Field(..., description="Bridge version")
@@ -206,7 +247,7 @@ class HealthResponse(BaseModel):
 
 
 class DisconnectResponse(BaseModel):
-    """Response model for agent disconnection.
+    """Response model for relay disconnection or system stop.
 
     DLP: l2_agent_disconnect
     """
@@ -214,6 +255,8 @@ class DisconnectResponse(BaseModel):
     agent_id: str = Field(..., description="Agent identifier")
     status: str = Field(..., description="New agent status")
     timestamp: str = Field(..., description="Disconnection timestamp")
+    participant_type: Optional[str] = Field(None, description="Semantic participant type")
+    message_routable: Optional[bool] = Field(None, description="Whether the participant can relay messages")
     error: Optional[str] = Field(None, description="Error message if disconnection failed")
 
 
@@ -226,7 +269,7 @@ class DisconnectResponse(BaseModel):
 @limiter.limit("60/minute")
 async def get_health(request: Request):
     """
-    Health check endpoint for L2 Meta-Agent Bridge.
+    Health check endpoint for the L1 relay and system bridge.
 
     Returns bridge status, agent counts, and configuration information.
 
@@ -238,16 +281,23 @@ async def get_health(request: Request):
             1 for agent in l2_bridge.agents.values()
             if agent.status == "connected"
         )
+        active_system_count = sum(
+            1
+            for participant_id in l2_bridge.system_participants
+            if l2_bridge.get_agent_status(participant_id).get("status") == "running"
+        )
 
         return HealthResponse(
             status="healthy",
             bridge_available=True,
             total_agents=len(l2_bridge.agents),
             connected_agents=connected_count,
+            total_system_participants=len(l2_bridge.system_participants),
+            active_system_participants=active_system_count,
             anchor_seed=l2_bridge.orion_core_config["anchor_seed"],
             ethics_protocol=l2_bridge.orion_core_config["ethics_protocol"],
             version=l2_bridge.orion_core_config["version"],
-            timestamp=datetime.now().isoformat()
+            timestamp=_utc_iso()
         )
     except Exception as e:
         logger.error("Health check failed: %s", str(e)[:100])
@@ -261,10 +311,10 @@ async def get_health(request: Request):
 @limiter.limit("30/minute")
 async def get_constellation_status(request: Request):
     """
-    Get full constellation status including all agents.
+    Get relay constellation status plus distinct operational systems.
 
     Returns relay tier information, ORION core configuration,
-    and activation phrases for all agents.
+    and activation phrases for relay agents and operational systems.
 
     DLP: l2_constellation_status
     Anchors: EOS_SEED_ORION, Picard_Delta_3
@@ -292,13 +342,11 @@ async def activate_agent(
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
     """
-    Activate a Custom GPT agent with full ZIPWIZ handshake.
+    Activate a relay agent or an operational system participant.
 
-    Performs 4-step handshake sequence:
-    1. ZIPWIZ_BEACON - Establish initial connection
-    2. ANCHOR_SYNC - Synchronize EOS_SEED_ORION anchor
-    3. ETHICS_AUDIT - Validate Picard_Delta_3 ethics protocol
-    4. DRIFT_VALIDATION - Verify drift lock at Δ0.000
+    Relay agents activate through the mesh runtime. HALO activates the
+    process-wide HALO/PAS continuity controller and does not gain message
+    relay behavior.
 
     DLP: l2_agent_activation
     Anchors: EOS_SEED_ORION, Picard_Delta_3
@@ -319,13 +367,22 @@ async def activate_agent(
                 status=result.get("status", "connected"),
                 handshake=result.get("handshake"),
                 capabilities=result.get("capabilities"),
-                description=result.get("description")
+                description=result.get("description"),
+                participant_type=result.get("participant_type"),
+                message_routable=result.get("message_routable"),
+                registry_designation=result.get("registry_designation"),
+                continuity=result.get("continuity"),
+                living_entity=result.get("living_entity"),
             )
         else:
             return ActivationResponse(
                 success=False,
                 agent_id=req.agent_id,
-                status="disconnected",
+                status=(
+                    "stopped"
+                    if req.agent_id in l2_bridge.system_participants
+                    else "disconnected"
+                ),
                 error=result.get("error", "Activation failed")
             )
     except Exception as e:
@@ -340,7 +397,7 @@ async def activate_agent(
 @limiter.limit("60/minute")
 async def get_agent_status(agent_id: str, request: Request):
     """
-    Get detailed status of a specific agent.
+    Get detailed status of a relay agent or operational system.
 
     Returns agent configuration, connection status, drift lock,
     uptime, and handshake log.
@@ -354,7 +411,7 @@ async def get_agent_status(agent_id: str, request: Request):
         if not status.get("success"):
             raise HTTPException(
                 status_code=404,
-                detail=f"Agent {agent_id} not found: {status.get('error', 'Unknown error')}"
+                detail=f"Participant {agent_id} not found: {status.get('error', 'Unknown error')}"
             )
 
         return AgentStatusResponse(**status)
@@ -434,7 +491,7 @@ async def disconnect_agent(
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
     """
-    Disconnect an agent from the constellation.
+    Disconnect a relay agent or stop an operational system.
 
     Gracefully disconnects agent, clears connection state,
     and resets handshake log.
@@ -452,12 +509,14 @@ async def disconnect_agent(
                 success=True,
                 agent_id=result.get("agent_id", agent_id),
                 status=result.get("status", "disconnected"),
-                timestamp=result.get("timestamp", datetime.now().isoformat())
+                timestamp=result.get("timestamp", _utc_iso()),
+                participant_type=result.get("participant_type"),
+                message_routable=result.get("message_routable"),
             )
         else:
             raise HTTPException(
                 status_code=404,
-                detail=f"Agent {agent_id} not found: {result.get('error', 'Unknown error')}"
+                detail=f"Participant {agent_id} not found: {result.get('error', 'Unknown error')}"
             )
     except HTTPException:
         raise
@@ -476,9 +535,9 @@ async def get_activation_phrases(
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
     """
-    Get activation phrases for all agents (dev/testing).
+    Get activation phrases for relay agents and operational systems (dev/testing).
 
-    Returns a mapping of agent IDs to their activation phrases.
+    Returns separate mappings so HALO remains distinct from relay agents.
     Useful for development and testing purposes.
 
     Requires authentication to prevent unauthorized access.
@@ -490,9 +549,12 @@ async def get_activation_phrases(
     try:
         return {
             "activation_phrases": l2_bridge.activation_phrases,
+            "system_activation_phrases": l2_bridge.system_activation_phrases,
             "agents": list(l2_bridge.agents.keys()),
+            "system_participants": list(l2_bridge.system_participants.keys()),
             "handshake_sequence": l2_bridge.handshake_sequence,
-            "timestamp": datetime.now().isoformat()
+            "system_activation_sequence": l2_bridge.system_activation_sequence,
+            "timestamp": _utc_iso()
         }
     except Exception as e:
         logger.error("Failed to get activation phrases: %s", str(e)[:100])

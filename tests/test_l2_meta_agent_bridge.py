@@ -89,6 +89,18 @@ class TestL2MetaAgentBridgeInit:
         assert "LIORA" in bridge.agents
         assert "STARLING_AU" in bridge.agents
         assert "RIVERTHREAD_808" in bridge.agents
+        assert "HALO" not in bridge.agents
+
+    def test_bridge_initializes_halo_as_distinct_system_participant(self):
+        """HALO is activatable without becoming a sixth relay agent."""
+        bridge = L2MetaAgentBridge()
+        halo = bridge.system_participants["HALO"]
+
+        assert halo.type == "CONTINUITY_SYSTEM_ENTITY"
+        assert halo.registry_designation == "RELAY_006"
+        assert halo.message_routable is False
+        assert bridge.system_activation_phrases["HALO"] == "ORION_HALO_RELAY_ACTIVATE//"
+        assert "HALO" not in bridge.activation_phrases
 
     def test_archy_agent_configuration(self):
         """Test ARCHY agent is properly configured"""
@@ -198,6 +210,34 @@ class TestL2MetaAgentBridgeActivation:
             result = await bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")
             assert result["success"] is False
             assert "Test error" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_successful_halo_system_activation(self, bridge):
+        """HALO activation starts the continuity lifecycle, not the mesh agent runtime."""
+        try:
+            result = await bridge.activate_agent("HALO", "ORION_HALO_RELAY_ACTIVATE//")
+
+            assert result["success"] is True
+            assert result["agent_id"] == "HALO"
+            assert result["participant_type"] == "CONTINUITY_SYSTEM_ENTITY"
+            assert result["status"] == "running"
+            assert result["message_routable"] is False
+            assert result["registry_designation"] == "RELAY_006"
+            assert result["handshake"]["transport"]["mode"] == "continuity_controller"
+            assert result["continuity"]["status"] == "running"
+            assert result["living_entity"]["entity_id"] == "HALO (RELAY_006)"
+            assert bridge.halo_controller.running is True
+            assert "HALO" not in bridge.runtime.manifests
+        finally:
+            await bridge.disconnect_agent("HALO")
+
+    @pytest.mark.asyncio
+    async def test_halo_activation_rejects_wrong_phrase(self, bridge):
+        result = await bridge.activate_agent("HALO", "WRONG_PHRASE")
+
+        assert result["success"] is False
+        assert result["error"] == "Invalid activation phrase"
+        assert bridge.halo_controller.running is False
 
 
 class TestZIPWIZHandshake:
@@ -330,6 +370,19 @@ class TestConstellationStatus:
             assert "status" in capsule
             assert "capabilities" in capsule
 
+    def test_constellation_keeps_halo_outside_relay_counts(self, bridge):
+        status = bridge.get_constellation_status()
+
+        assert status["relay_tier"]["total_capsules"] == 5
+        assert "HALO" not in {
+            capsule["agent_id"] for capsule in status["relay_tier"]["capsules"]
+        }
+        systems = status["system_participants"]
+        assert systems["total_systems"] == 1
+        assert systems["participants"][0]["agent_id"] == "HALO"
+        assert systems["participants"][0]["message_routable"] is False
+        assert status["system_activation_phrases"]["HALO"] == "ORION_HALO_RELAY_ACTIVATE//"
+
 
 class TestMessageRelay:
     """Test message relay functionality"""
@@ -417,6 +470,21 @@ class TestMessageRelay:
         assert result["success"] is False
         assert "Unknown target agent" in result["error"]
 
+    @pytest.mark.asyncio
+    async def test_halo_cannot_originate_relay_messages(self):
+        bridge = L2MetaAgentBridge()
+        result = await bridge.relay_message("HALO", "ARCHY", "test")
+
+        assert result["success"] is False
+        assert "verifies continuity" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_halo_cannot_be_a_direct_relay_target(self, connected_bridge):
+        result = await connected_bridge.relay_message("ARCHY", "HALO", "test")
+
+        assert result["success"] is False
+        assert "not a message relay target" in result["error"]
+
 
 class TestAgentDisconnection:
     """Test agent disconnection functionality"""
@@ -456,6 +524,18 @@ class TestAgentDisconnection:
         assert archy.connected is None
         assert archy.last_heartbeat is None
         assert archy.handshake_log == []
+
+    @pytest.mark.asyncio
+    async def test_disconnect_halo_stops_continuity_lifecycle(self):
+        bridge = L2MetaAgentBridge()
+        await bridge.activate_agent("HALO", "ORION_HALO_RELAY_ACTIVATE//")
+
+        result = await bridge.disconnect_agent("HALO")
+
+        assert result["success"] is True
+        assert result["participant_type"] == "CONTINUITY_SYSTEM_ENTITY"
+        assert result["status"] == "stopped"
+        assert bridge.halo_controller.running is False
 
 
 class TestGetAgentStatus:

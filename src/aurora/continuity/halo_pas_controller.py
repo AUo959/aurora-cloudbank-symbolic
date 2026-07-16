@@ -19,6 +19,15 @@ from datetime import datetime, timezone
 from src.core.native_dlp_export import NativeDLPTracker
 
 
+_ACTIVE_HALO_PAS_CONTROLLER: Optional["HALOPASController"] = None
+
+
+def get_active_halo_pas_controller() -> Optional["HALOPASController"]:
+    """Return the controller selected for the current application process."""
+
+    return _ACTIVE_HALO_PAS_CONTROLLER
+
+
 @dataclass
 class DriftSample:
     """Represents a single drift measurement across timeline layers"""
@@ -56,6 +65,7 @@ class HALOPASController:
         l1_source: Optional[Callable[[], float]] = None,
         l2_source: Optional[Callable[[], float]] = None,
         l3_source: Optional[Callable[[], float]] = None,
+        register_as_active: bool = True,
     ):
         """
         Initialize HALO/PAS Controller.
@@ -65,6 +75,7 @@ class HALOPASController:
             l1_source: Callable returning L1 time, defaults to time.time()
             l2_source: Callable returning L2 time, defaults to L1
             l3_source: Callable returning L3 time, defaults to L1
+            register_as_active: Publish this instance for application adapters
         """
         self.interval = interval
         self.l1_source = l1_source or time.time
@@ -83,6 +94,10 @@ class HALOPASController:
         # Logger with drift channel
         self.logger = logging.getLogger("aurora.continuity.halo_pas")
 
+        if register_as_active:
+            global _ACTIVE_HALO_PAS_CONTROLLER
+            _ACTIVE_HALO_PAS_CONTROLLER = self
+
         self.logger.info(
             "HALO/PAS Controller initialized",
             extra={
@@ -92,6 +107,12 @@ class HALOPASController:
                 "symbolic_tags": ["HALO_PAS_DRIFT", "CONTINUITY_MONITOR", "TIMELINE_COHESION"],
             }
         )
+
+    @property
+    def running(self) -> bool:
+        """Return whether continuous HALO/PAS monitoring is active."""
+
+        return self._running
 
     def _sample_drift(self) -> DriftSample:
         """

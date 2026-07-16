@@ -249,6 +249,7 @@ auth_config.json
 
 # Aurora generated audit/log artifacts (local only)
 .aurora/audit_trail.json
+.rebuild_prevention_active
 .rebuild_prevention_status.json
 
 # Aurora Nexus - Runtime operational files (local only)

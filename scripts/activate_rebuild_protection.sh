@@ -104,5 +104,6 @@ echo ""
 
 echo "🎉 Aurora CloudBank Rebuild Protection System Ready!"
 
-# Create activation marker
+# Create a local informational receipt. No build or runtime path reads this
+# marker as an enforcement lock; it is ignored by Git and is safe to delete.
 echo "{\"status\":\"prevention_system_ready\",\"timestamp\":\"$CURRENT_TIME\"}" > "$PREVENTION_STATUS"

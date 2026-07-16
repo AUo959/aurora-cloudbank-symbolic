@@ -5,7 +5,7 @@ This directory contains reference documentation for developers working with Auro
 ## Directory authority map
 
 | Directory | Purpose | Authority note |
-|---|---|---|
+| --- | --- | --- |
 | [`api/`](api/) | API catalogs, governance, schemas, and inventory snapshots | Follow [`api/API_CATALOG_GOVERNANCE.md`](api/API_CATALOG_GOVERNANCE.md) before treating a catalog as current runtime truth. |
 | [`architecture/`](architecture/) | Active architecture, topology, and authority-boundary references | [`architecture/LAYER_ARCHITECTURE.md`](architecture/LAYER_ARCHITECTURE.md) is canonical for the L1/L2/L3 model; other files state their own scope. |
 | [`ethics/`](ethics/) | Ethics navigation, evaluations, and recovered-protocol planning | [`ethics/README.md`](ethics/README.md) preserves the boundary between runtime evidence and planning artifacts. |
@@ -19,7 +19,7 @@ This directory contains reference documentation for developers working with Auro
 ## Root structural controls
 
 | File | Semantics |
-|---|---|
+| --- | --- |
 | [`.pre-commit-config.yaml`](../.pre-commit-config.yaml) | The single canonical pre-commit configuration. `pre-commit` discovers this default filename, and repository scripts target it directly. |
 | `.rebuild_prevention_active` | An ignored, local timestamp receipt written by [`scripts/activate_rebuild_protection.sh`](../scripts/activate_rebuild_protection.sh). No build or runtime path consumes it as an enforcement lock; it is safe to delete and regenerate. |
 

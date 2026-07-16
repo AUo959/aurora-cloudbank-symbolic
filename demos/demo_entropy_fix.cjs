@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
  * Demonstration of the entropy calculation fix for issue #144
- * 
+ *
  * This script shows the difference between the incorrect global entropy calculation
  * and the correct local entropy calculation within individual items.
  */
 
-const { rank } = require('./src/pqn/signal_prioritizer.cjs');
+const { rank } = require('../src/pqn/signal_prioritizer.cjs');
 
 console.log('🔬 Entropy Calculation Fix Demonstration');
 console.log('=' .repeat(50));
@@ -19,7 +19,7 @@ const demonstrationItems = [
     tags: ['artificial', 'intelligence', 'machine', 'learning']  // All different
   },
   {
-    title: 'Article with Repeated Local Tags', 
+    title: 'Article with Repeated Local Tags',
     tags: ['machine', 'machine', 'machine', 'learning']  // Mostly repeated
   },
   {
@@ -33,7 +33,7 @@ demonstrationItems.forEach((item, idx) => {
   console.log(`  ${idx + 1}. "${item.title}"`);
   console.log(`     Tags: [${item.tags.join(', ')}]`);
   console.log(`     Tag counts: ${JSON.stringify(item.tags.reduce((acc, tag) => {
-    acc[tag] = (acc[tag] || 0) + 1; 
+    acc[tag] = (acc[tag] || 0) + 1;
     return acc;
   }, {}))}`);
 });
@@ -42,12 +42,12 @@ console.log();
 // Calculate and display entropy values
 function calculateLocalEntropy(tags) {
   if (!tags || tags.length === 0) return 0;
-  
+
   const tagCounts = {};
   for (const tag of tags) {
     tagCounts[tag] = (tagCounts[tag] || 0) + 1;
   }
-  
+
   const total = tags.length;
   let entropy = 0;
   for (const count of Object.values(tagCounts)) {

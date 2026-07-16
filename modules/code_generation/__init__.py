@@ -1,11 +1,6 @@
-"""Compatibility import for the code-generation feature module.
+"""Aurora code-generation feature module."""
 
-The feature implementation is owned by :mod:`modules.code_generation`. This
-module preserves the established ``src.code_generation_framework`` import
-without marking it for deletion.
-"""
-
-from modules.code_generation import (
+from .framework import (
     ClassSpec,
     CodeQualityStandard,
     ComponentType,

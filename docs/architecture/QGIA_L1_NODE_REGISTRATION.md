@@ -166,7 +166,7 @@ Bidirectional institutional relationships between named Orion Station personnel 
 | **Julian Markov** | Chief Security Officer | QGIA Security Division | Inter-node security posture alignment |
 | **Samantha Lee** | Logging & Observability Engineer | QGIA Data Integrity Team | DLP audit trail coordination and cross-node logging |
 | **Ryan Patel** | Systems Integration Engineer | QGIA Systems Interface Team | Inter-node protocol design and maintenance |
-| **HALO** (L2_HALO) | Synchronization Relay | QGIA Temporal Coordination Unit | Zero-drift synchronization across both nodes |
+| **HALO** (L2_HALO / RELAY_006) | Continuity System-Entity / Drift Verifier | QGIA Temporal Coordination Unit | Zero-drift synchronization across both nodes |
 | **RIVERTHREAD_808** (L2_RIVERTHREAD) | Data Logistics Relay | QGIA Data Pipeline Team | Cross-node data flow and archive replication |
 
 ### Crisis Escalation Path
@@ -224,7 +224,7 @@ QGIA_NODE = {
     "primary_liaison_orion": "CMD_001",  # Commander Alex Thorne
     "ethics_liaison_orion": "ETH_001",   # Dr. Amira Sato
     "security_liaison_orion": "SEC_001",  # Julian Markov
-    "sync_relay": "L2_HALO",
+    "continuity_system_entity": "L2_HALO",
     "data_relay": "L2_RIVERTHREAD",
 }
 ```

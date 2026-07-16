@@ -8,8 +8,8 @@ Read this file first if you are a new agent (Claude Code, Codex, GitHub Copilot,
 
 ## Agent roster summary
 
-- **Human staff, AI core, L1 relay agents (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, HALO), and L3 framework systems (Axiomera, Caelion, Sentari, Velatrix, Glyphon, Harmion)** — full census in `ORION_STATION_CANONICAL_STAFF_REGISTRY.json`.
-- Relay agents are **L1-resident**, operating at L2. THREADCORE frameworks are **L3-resident**. Never describe either group as "L2 agents" — see `docs/architecture/LAYER_ARCHITECTURE.md` for the canonical residency-vs-operational-scope model.
+- **Human staff, AI core, five L1 relay agents (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808), the HALO continuity system-entity (RELAY_006), and L3 framework systems (Axiomera, Caelion, Sentari, Velatrix, Glyphon, Harmion)** — full census in `ORION_STATION_CANONICAL_STAFF_REGISTRY.json`.
+- The five relay agents are **L1-resident**, operating at L2. HALO is the L1 continuity system whose living entity interface performs Triplex Layer 2 drift verification; it is not a sixth communication relay. THREADCORE frameworks are **L3-resident**. Never describe these groups collectively as "L2 agents" — see `docs/architecture/LAYER_ARCHITECTURE.md` for the canonical residency-vs-operational-scope model.
 - PAT (Personal Agent Terminal) is the live-session operator interface. See `QGIA_Integration/PAT_Command_Sheet.md`.
 
 ## What agents must never do

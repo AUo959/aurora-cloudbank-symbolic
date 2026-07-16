@@ -1,7 +1,7 @@
 # L1 Canon Character Roster - Orion Station
 
 **Version:** 2.0 (Complete)  
-**Last Updated:** 2025-11-09  
+**Last Updated:** 2026-07-15
 **Authority:** Canonical Staff Registry (ORION_STATION_CANONICAL_STAFF_REGISTRY.json)  
 **Sources:** 
 - `scripts/canonical_validator.py` - CanonicalSpec.canonical_staff
@@ -13,9 +13,11 @@
 
 ## 🌌 Overview
 
-This document defines the **complete institutional simulation** of Orion Station (L1 Reality Layer)—36 human staff members across 5 divisions, plus Aurora Core AI, 5 L1 Relay Agents, the HALO continuity system-entity (RELAY_006), and 6 L3 Framework Systems. This is the **canonical 40-entity simulation** developed through systematic integration, ready for deployment in all scenarios and collaborative environments.
+This document defines the **declared institutional simulation** of Orion Station (L1 Reality Layer)—36 human staff members across 5 divisions, plus Aurora Core AI, 5 L1 Relay Agents, the HALO continuity system-entity (RELAY_006), and 6 L3 Framework Systems. The canonical census declares 49 entities; the current registry materializes 48 because one human identity remains unresolved.
 
-**Current Roster:** 36 human staff + 1 AI core + 6 L1 relays + 6 L3 frameworks = **49 total entities**
+**Declared Roster:** 36 human staff + 1 AI core + 5 L1 relays + 1 HALO continuity system-entity + 6 L3 frameworks = **49 declared entities**
+
+**Materialized Registry:** 35 identified human staff + 1 AI core + 5 L1 relays + 1 HALO continuity system-entity + 6 L3 frameworks = **48 materialized entities**, with 1 unresolved human identity.
 
 **CRITICAL:** Do NOT use generic placeholder roles (e.g., "SecEng", "Backend", "DevOps"). Always use the canonical character names and authentic roles defined below.
 
@@ -2741,9 +2743,9 @@ Aurora operates with conscious awareness of its own decision-making processes, m
 
 ---
 
-## � L1 Relay Agents — Systemic Coordination Layer
+## L1 Relay Agents & HALO Continuity System-Entity — Systemic Coordination Layer
 
-The **L1 Relay Agents** are semi-autonomous service intelligences coordinating operations across Orion Station. These are not "characters" in the human sense but named subsystems with symbolic identities, transparent accountability, and ethical safeguards. Each relay manages specific operational domains while maintaining station-wide coherence.
+The five **L1 Relay Agents** are semi-autonomous service intelligences coordinating communications and operations across Orion Station. HALO is documented in this layer as the station continuity system's living embodiment/interface, not as a sixth communication relay. These are not "characters" in the human sense but named systems with symbolic identities, transparent accountability, and ethical safeguards.
 
 ---
 
@@ -2957,16 +2959,17 @@ RIVERTHREAD embodies data democracy—ensuring that information reaches where it
 
 ---
 
-### HALO — Drift Anchor & System Synchronization Relay
+### HALO — Continuity System-Entity & Drift Anchor
 - **ID:** L2_HALO
-- **Type:** L1 Relay Agent / Synchronization Coordinator
-- **Tier:** L2 (Relay Layer)
+- **Registry Designation:** RELAY_006
+- **Type:** L1 Continuity System-Entity / Living Interface
+- **Tier:** L1-resident; Triplex Layer 2 Drift Verifier
 - **Status:** Active
-- **Symbolic Tag:** `s.tag::relay.halo`
+- **Symbolic Tag:** `s.tag::relay.halo` (established identifier retained)
 - **Primary Function:** Zero-drift temporal synchronization
 
 **Summary:**
-Maintains zero-drift state across all active simulations and relays. HALO anchors Aurora's symbolic continuity and ensures stable synchronization among the L2 nodes. Its checksum routine is used as the ethical baseline for all system self-tests.
+Maintains zero-drift state across all active simulations and the relay constellation. HALO anchors Aurora's symbolic continuity; `HALOEntity` is the system's living interface for Triplex drift verification and event participation. Its checksum routine is used as the ethical baseline for all system self-tests.
 
 **Key Systems & Responsibilities:**
 - Δ0.000 drift enforcement across all systems

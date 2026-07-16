@@ -76,7 +76,7 @@ core_modules:
     stub_warning: "Registry and trust network JSON files contain stub payloads only. Full arrays in session compute artifacts. GAP-007."
 
   - name: ORION_STATION_MODULE
-    function: Named crew, station AI, L2 relay agents, and L3 framework systems for Orion Station L1 simulation
+    function: Named crew, station AI, five L1 relay agents, the HALO continuity system-entity, and L3 framework systems for Orion Station L1 simulation
     registry_version: 1.0.0-reconstructed
     last_updated: 2026-04-08
     registry_status: RECONSTRUCTED_FROM_REPO_CANON
@@ -84,7 +84,8 @@ core_modules:
     materialized_entities: 48
     unresolved_gap: 1  # GAP-009: UNRESOLVED_HUMAN_001
     ai_core: Aurora (AI_AURORA)
-    l2_relay_agents: [HALO, STARLING_AU, LIORA, OPPY, ARCHY, RIVERTHREAD_808]
+    l2_relay_agents: [STARLING_AU, LIORA, OPPY, ARCHY, RIVERTHREAD_808]
+    halo_system_entity: HALO  # RELAY_006; continuity verifier, not a communication relay
     l3_framework_systems: [Axiomera, Glyphon, Sentari, Caelion, Velatrix, Harmion]
     drift_defense_pair: [HALO, Velatrix]  # HALO=Drift Anchor; Velatrix=Anti-Obfuscation
     canonical_ssot: ORION_STATION_CANONICAL_STAFF_REGISTRY.json
@@ -99,7 +100,7 @@ core_modules:
     relationship_to_qgia: >-
       Parallel, non-competing namespace. Orion staff = operational crew.
       QGIA 551-agent population = analytical engine. Cross-namespace bridges:
-      L2 relay agents and L3 framework systems operate across both layers.
+      The five L1 relay agents, HALO continuity system-entity, and L3 framework systems operate across both layers.
       See docs/review-notes/2026-06-20_orion-registry-review.md.
 
 drift_monitoring:

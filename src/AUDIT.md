@@ -101,5 +101,4 @@ member may replace the other. All other rows are `n/a`.
   import.
 
 No compatibility import or unknown directory is approved for deletion by this
-audit. Removal requires a separate PR and owner approval, as required by issue
-#1255.
+audit. Removal requires a separate PR and owner approval under issue #1255.

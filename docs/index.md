@@ -1,6 +1,27 @@
 # Aurora CloudBank Symbolic — Documentation Index
 
-This directory contains reference documentation for developers working with Aurora CloudBank Symbolic. All documents reflect the current state of the codebase. For historical internal reports and phase summaries, see `docs/archive/`.
+This directory contains reference documentation for developers working with Aurora CloudBank Symbolic. This index is a navigation surface, not a blanket authority grant: use [`CANON_INDEX.md`](../CANON_INDEX.md) for canonical doctrine and committed runtime code plus tests for behavioral truth.
+
+## Directory authority map
+
+| Directory | Purpose | Authority note |
+|---|---|---|
+| [`api/`](api/) | API catalogs, governance, schemas, and inventory snapshots | Follow [`api/API_CATALOG_GOVERNANCE.md`](api/API_CATALOG_GOVERNANCE.md) before treating a catalog as current runtime truth. |
+| [`architecture/`](architecture/) | Active architecture, topology, and authority-boundary references | [`architecture/LAYER_ARCHITECTURE.md`](architecture/LAYER_ARCHITECTURE.md) is canonical for the L1/L2/L3 model; other files state their own scope. |
+| [`ethics/`](ethics/) | Ethics navigation, evaluations, and recovered-protocol planning | [`ethics/README.md`](ethics/README.md) preserves the boundary between runtime evidence and planning artifacts. |
+| [`specs/`](specs/) | Technical and promotion specifications | A specification is not proof of implementation; verify status in code and tests. |
+| [`modules/`](modules/) | Module-facing documentation | Runtime modules and their tests remain authoritative for behavior. |
+| [`reference/`](reference/) | Convenience catalogs and reference guides | Verify generated or snapshot material against its governed source before citing it as current. |
+| [`security/`](security/) | Remediation records, status reports, and penetration-test scope/history | Root [`SECURITY.md`](../SECURITY.md) governs disclosure policy; current controls require code and test evidence. |
+| [`review-notes/`](review-notes/) | Dated review and audit evidence | Non-canonical observations; revalidate findings against live repository state. |
+| [`archive/`](archive/) | Superseded, historical, or custody material | Historical context only; archive placement does not confer current authority. |
+
+## Root structural controls
+
+| File | Semantics |
+|---|---|
+| [`.pre-commit-config.yaml`](../.pre-commit-config.yaml) | The single canonical pre-commit configuration. `pre-commit` discovers this default filename, and repository scripts target it directly. |
+| `.rebuild_prevention_active` | An ignored, local timestamp receipt written by [`scripts/activate_rebuild_protection.sh`](../scripts/activate_rebuild_protection.sh). No build or runtime path consumes it as an enforcement lock; it is safe to delete and regenerate. |
 
 ---
 
@@ -76,7 +97,7 @@ This directory contains reference documentation for developers working with Auro
 
 | Document | Description |
 |---|---|
-| [architecture.md](architecture.md) | High-level system architecture |
+| [architecture/SYMBOLIC_DATA_ARCHITECTURE.md](architecture/SYMBOLIC_DATA_ARCHITECTURE.md) | Scoped VSA symbolic-data and schema overview |
 | [architecture/LAYER_ARCHITECTURE.md](architecture/LAYER_ARCHITECTURE.md) | L1/L2/L3 layer architecture detail |
 | [architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md](architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md) | System architecture diagram and component map |
 | [architecture/RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md](architecture/RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md) | Runtime topology reference |

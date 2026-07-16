@@ -297,7 +297,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 ## 🎓 Learn More
 
-- **Architecture:** `docs/architecture.md`
+- **Architecture:** `docs/architecture/SYMBOLIC_DATA_ARCHITECTURE.md`
 - **AuMemManager:** `modules/aumemmanager/README.md`
 - **Quantum Simulator:** `modules/quantum_simulator/README.md`
 - **Thread Bridge v2:** `docs/THREAD_TRANSFER_BRIDGE_v2_PROTOCOL.md`

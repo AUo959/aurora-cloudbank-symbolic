@@ -41,7 +41,7 @@ lazr.restfulclient==0.14.6
 lazr.uri==1.0.6
 limits==5.8.0
 mccabe==0.7.0
-mcp==1.27.2
+mcp==1.28.1
 oauthlib==3.2.2
 packaging==26.2
 passlib==1.7.4

@@ -14,7 +14,87 @@ PYTHON_VENV := $(VENV_DIR)/bin/python
 .PHONY: branch-status sync branch-plan pr-priority
 .PHONY: health-check maintenance-scan maintenance-manual maintenance-status
 .PHONY: branch-cleanup-dry branch-cleanup-apply branch-cleanup-safe branch-cleanup-execute lint-stage1-opal2 pr-triage
-.PHONY: security clean deps-fix deps-fix-apply
+.PHONY: security clean deps-fix deps-fix-apply onboard
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ONBOARDING — first-time setup with guided orientation
+# Run this once when you first clone the repo.
+# ─────────────────────────────────────────────────────────────────────────────
+onboard: ## [NEW ENGINEER START HERE] Guided setup, orientation, and live server start
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════════╗"
+	@echo "║         AURORA CLOUDBANK — ENGINEER ONBOARDING                  ║"
+	@echo "║         Orion Station · L1 Physical Reality Layer                ║"
+	@echo "╚══════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "📖  Read GETTING_STARTED_ENGINEER.md first if you haven't yet."
+	@echo "    It maps the 3 runtime surfaces, key modules, and gotchas."
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "STEP 1/4 — Environment Setup"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@bash scripts/setup_environment.sh
+	@echo ""
+	@echo "✅  Environment ready."
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "STEP 2/4 — Validate .env Configuration"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@if [ ! -f ".env" ]; then \
+		echo "⚠️  No .env file found. Creating from template..."; \
+		cp .env.example .env; \
+		echo "   → .env created. You must fill in the 4 required secrets:"; \
+		echo "     AURORA_SECRET_KEY, JWT_SECRET_KEY, CSRF_SECRET_KEY, WS_AUTH_SECRET"; \
+		echo "     Generate each with: openssl rand -hex 32"; \
+		echo "   → Edit .env now, then re-run: make onboard"; \
+		echo ""; \
+		exit 1; \
+	else \
+		echo "✅  .env found."; \
+	fi
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "STEP 3/4 — System Health Check"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@$(MAKE) status
+	@echo ""
+	@python3 scripts/quick_health_check.py 2>/dev/null || echo "ℹ️   Health check script not available — continuing."
+	@echo ""
+	@echo "✅  Health check complete."
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "STEP 4/4 — Starting Dev Server (hot-reload)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@echo "🚀  Server starting on http://localhost:8000"
+	@echo ""
+	@echo "   Your first stops once running:"
+	@echo "   → Swagger UI:   http://localhost:8000/docs"
+	@echo "   → Health check: curl http://localhost:8000/api/synergy/health"
+	@echo "   → Dashboard:    http://localhost:8000/"
+	@echo ""
+	@echo "   Quick orientation calls (copy-paste):"
+	@echo ""
+	@echo "   # 1. Verify system health"
+	@echo "   curl http://localhost:8000/api/synergy/health"
+	@echo ""
+	@echo "   # 2. Write a memory entry (returns a SHA-256 audit hash)"
+	@echo "   curl -X POST http://localhost:8000/aumem/store \\"
+	@echo "     -H 'Content-Type: application/json' \\"
+	@echo "     -d '{\"content\":\"hello aurora\",\"context_tag\":\"onboarding\",\"tier\":\"active\"}'"
+	@echo ""
+	@echo "   # 3. Run an ethics evaluation"
+	@echo "   curl -X POST http://localhost:8000/api/gumas/evaluate \\"
+	@echo "     -H 'Content-Type: application/json' \\"
+	@echo "     -d '{\"operation\":\"test\",\"context_tag\":\"onboarding\",\"payload\":{}}'"
+	@echo ""
+	@echo "   Press Ctrl+C to stop the server."
+	@echo ""
+	@$(MAKE) serve-dev
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ENVIRONMENT
+# ─────────────────────────────────────────────────────────────────────────────
 
 ensure-venv: ## Ensure the local virtual environment exists
 	@if [ ! -d "$(VENV_DIR)" ]; then \

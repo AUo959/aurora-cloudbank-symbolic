@@ -7,7 +7,9 @@
 
 A quantum-symbolic computing platform for enterprise AI. Combines hierarchical memory management, quantum circuit simulation, multi-model AI orchestration, geometric ethics enforcement, and production observability in a single FastAPI application.
 
-> **New agent or contributor?** Start with [`AURORA_CONTEXT.json`](./AURORA_CONTEXT.json) (machine-readable, source-cited concept map) and [`AGENTS.md`](./AGENTS.md) (bootstrap protocol and rules).
+> **New engineer?** Start with [`GETTING_STARTED_ENGINEER.md`](./GETTING_STARTED_ENGINEER.md) — environment setup, first API call, and system orientation in 30 minutes. Then run `make onboard`.
+>
+> **New AI agent or Copilot session?** Start with [`AGENTS.md`](./AGENTS.md) (bootstrap protocol and rules) and [`AURORA_CONTEXT.json`](./AURORA_CONTEXT.json) (machine-readable concept map).
 
 ---
 
@@ -32,6 +34,13 @@ A quantum-symbolic computing platform for enterprise AI. Combines hierarchical m
 git clone https://github.com/AUo959/aurora-cloudbank-symbolic.git
 cd aurora-cloudbank-symbolic
 
+# Recommended: guided onboarding (setup + orientation + server start)
+make onboard
+```
+
+Or manually:
+
+```bash
 # Create virtualenv and install dependencies
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
@@ -235,6 +244,7 @@ pytest --cov=modules --cov=src --cov-report=html
 **Makefile targets:**
 
 ```bash
+make onboard        # [START HERE] Guided setup + orientation + server start
 make setup          # Create venv, install deps, validate environment
 make serve          # Start the API server (uvicorn, port 8000)
 make test           # Run full test suite

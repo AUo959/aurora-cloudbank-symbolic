@@ -173,12 +173,14 @@ def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
     history = {"events": []}
     while time.monotonic() < deadline:
         history_response = client.get(history_url)
-        assert history_response.status_code == 200
+        unittest.TestCase().assertEqual(history_response.status_code, 200)
         history = history_response.json()
         if any(event["event_type"] == "agent_reply" for event in history.get("events", [])):
             break
         time.sleep(0.02)
-    assert any(event["event_type"] == "agent_reply" for event in history.get("events", []))
+    unittest.TestCase().assertTrue(
+        any(event["event_type"] == "agent_reply" for event in history.get("events", []))
+    )
 
     events = client.get("/api/mesh/events?after=0&limit=50").json()
     assert events["next_cursor"] >= len(events["events"])

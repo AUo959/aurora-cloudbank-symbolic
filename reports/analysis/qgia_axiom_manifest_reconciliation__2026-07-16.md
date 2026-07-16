@@ -23,7 +23,7 @@ orchestration inputs, or ethics-gate rules.
 ## Validation summary
 
 | Entity | Layer | Type | Status | Issues |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | QGIA Axiom Manifest Reconciliation | L3 | protocol_update | PASS | 0 blocks, 0 warnings |
 | Machine/human node registry contract | L1/L3 | staged manifest | PASS after change | 23 IDs and definitions mirrored |
 | Runtime activation claim | L1/L2 | integration binding | NOT IMPLEMENTED | No loader/adapter found |
@@ -102,7 +102,7 @@ human review is pending. The resulting recommendation remains `STAGING`.
 ## Promotion assessment
 
 | Entity | Current tag | Proposed tag | Reasoning |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | QGIA Axiom Manifest | STAGING | STAGING | Registry is reconciled; provenance remains secondary, runtime adapter is absent, and owner review is pending. |
 
 This recommendation expresses integration readiness. It does not reject,

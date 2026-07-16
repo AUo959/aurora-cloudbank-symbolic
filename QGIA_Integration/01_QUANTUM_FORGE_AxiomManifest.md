@@ -36,7 +36,7 @@ Quantum Forge `EthicsLevel` values. The `ethics_lock` flag is declarative until
 an explicit adapter invokes the runtime ethics gate.
 
 | ID | Name | Category | Doctrine tier | Ethics lock | Status | Advisory hook |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | AN-001 | TRUMP_REACTIVE_AGENT_MODEL | A | OVERRIDE | true | PERMANENT_OVERRIDE | `SIM::ACTOR_MODEL::REACTIVE_NODE` |
 | AN-002 | COWARD_BULLY_CONFIG | A | OVERRIDE | true | PERMANENT_OVERRIDE | `SIM::ACTOR_MODEL::ASYMMETRY_CONFIG` |
 | AN-003 | PREDICTION_MARKET_WEIGHT | A | WEIGHT_CONSTRAINT | false | LOW_WEIGHT_SECONDARY_SIGNAL | `SIM::SOURCE_WEIGHT::PREDICTION_MARKET` |
@@ -64,7 +64,7 @@ an explicit adapter invokes the runtime ethics gate.
 ## Quantum Forge binding crosswalk
 
 | Manifest declaration | Verified repository seam | Reconciled meaning |
-|---|---|---|
+| --- | --- | --- |
 | `GUMAS_Thermax` | `modules.quantum_forge.quantum_forge_v2.GUMAS_Thermax` | The declared runtime class exists. Manifest locks remain declarative until an adapter submits operations through `EthicsAwareQuantumGate`. |
 | `Aurora_Core_Flowstate` | `modules.quantum_forge.quantum_forge_v2.Aurora_Core_Flowstate` | Runtime flow-state class exists. Quantum Forge v3 orchestration is coordinated by `SystemFlowOrchestrator`; the manifest is not registered with it. |
 | `gpt-symbolic-memetic` | No runtime target verified | External/package descriptor only; it is not a verified Quantum Forge class or loader. |

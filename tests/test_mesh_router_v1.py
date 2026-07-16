@@ -168,10 +168,14 @@ def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
     )
     assert send.status_code == 200
 
-    time.sleep(0.08)
-    history = client.get(
-        "/api/mesh/channels/{}/history?limit=20".format(quote("private:captain:alex", safe=""))
-    ).json()
+    history_url = "/api/mesh/channels/{}/history?limit=20".format(quote("private:captain:alex", safe=""))
+    deadline = time.monotonic() + 2.0
+    history = {"events": []}
+    while time.monotonic() < deadline:
+        history = client.get(history_url).json()
+        if any(event["event_type"] == "agent_reply" for event in history["events"]):
+            break
+        time.sleep(0.02)
     assert any(event["event_type"] == "agent_reply" for event in history["events"])
 
     events = client.get("/api/mesh/events?after=0&limit=50").json()

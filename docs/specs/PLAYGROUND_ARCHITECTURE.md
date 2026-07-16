@@ -52,6 +52,33 @@ The Aurora Playground is a browser-based interactive development environment tha
 └─────────────┘
 ```
 
+### 1.3 Layer Classification and Tasking Authority
+
+The execution sandbox is an **L2 experimental environment**. Its authenticated
+API, session controls, and human operator are L1 access and oversight surfaces;
+mounting the router in the primary application does not make executed code an
+L1 operation.
+
+The current implementation is request-driven. `POST /playground/execute` in
+[`src/playground/api.py`](../../src/playground/api.py) enqueues only code from
+an authenticated request, and
+[`src/playground/executor.py`](../../src/playground/executor.py) has no
+autonomous scheduler or self-tasking loop. Therefore:
+
+- playground sessions may execute only an explicit L1 user request;
+- results are L2 experimental artifacts, not station state or canonical output;
+- QGIA or other external signals must not trigger playground execution
+  directly; L1 crew must review and translate any input first; and
+- future AI assistance, recurring jobs, or autonomous scenario selection must
+  add an explicit L1 authorization gate before implementation.
+
+The authoritative reality-layer terminology is
+[`LAYER_ARCHITECTURE.md`](../architecture/LAYER_ARCHITECTURE.md). The mediated
+QGIA tasking rule is in
+[`QGIA_SIM_BRIDGE.md`](../architecture/QGIA_SIM_BRIDGE.md). This document is a
+design specification; committed runtime code and tests remain authoritative
+for current behavior.
+
 ---
 
 ## 2. System Architecture

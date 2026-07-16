@@ -30,7 +30,7 @@ Not without checking `last_updated`. `AURORA_CONTEXT.json` records a known fresh
 
 ## 8. Where are ethics rules and audit evidence?
 
-Start with `modules/ethics_field/`, `modules/gumas/`, `QGIA_Integration/04_GUMAS_AuditSchema.md`, and `QGIA_Integration/QUANTUM_FORGE_Axiom_Manifest.json`.
+Start with `modules/ethics_field/`, `modules/gumas/`, `QGIA_Integration/04_GUMAS_AuditSchema.md`, and `QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json`.
 
 ## 9. Does the first memory seed become canon?
 

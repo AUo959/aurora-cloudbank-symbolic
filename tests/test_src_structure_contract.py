@@ -50,11 +50,7 @@ class TestSrcStructureContract(unittest.TestCase):
                 self.assertIn("| independent |", row)
 
     def test_root_python_modules_are_compatibility_imports(self) -> None:
-        from modules.code_generation import (
-            ClassSpec,
-            FunctionSpec,
-            UltraHighFidelityCodeGenerator,
-        )
+        from modules.code_generation import UltraHighFidelityCodeGenerator
         from modules.quantum_decision_oracle import QuantumDecisionOracle
         from src.code_generation_framework import (
             UltraHighFidelityCodeGenerator as LegacyCodeGenerator,
@@ -65,6 +61,13 @@ class TestSrcStructureContract(unittest.TestCase):
 
         self.assertIs(LegacyCodeGenerator, UltraHighFidelityCodeGenerator)
         self.assertIs(LegacyDecisionOracle, QuantumDecisionOracle)
+
+    def test_generated_code_is_self_contained(self) -> None:
+        from modules.code_generation import (
+            ClassSpec,
+            FunctionSpec,
+            UltraHighFidelityCodeGenerator,
+        )
 
         generator = UltraHighFidelityCodeGenerator(enable_aurora_oversight=False)
         generated = generator.generate_function(
@@ -102,6 +105,7 @@ class TestSrcStructureContract(unittest.TestCase):
             generated_class.code,
         )
 
+    def test_compatibility_shims_remain_thin(self) -> None:
         self.assertLess(
             len((SRC_ROOT / "code_generation_framework.py").read_text().splitlines()),
             60,

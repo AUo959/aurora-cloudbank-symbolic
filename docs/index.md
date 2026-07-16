@@ -21,7 +21,7 @@ This directory contains reference documentation for developers working with Auro
 | File | Semantics |
 | --- | --- |
 | [`.pre-commit-config.yaml`](../.pre-commit-config.yaml) | The single canonical pre-commit configuration. `pre-commit` discovers this default filename, and repository scripts target it directly. |
-| `.rebuild_prevention_active` | An ignored, local timestamp receipt written by [`scripts/activate_rebuild_protection.sh`](../scripts/activate_rebuild_protection.sh). No build or runtime path consumes it as an enforcement lock; it is safe to delete and regenerate. |
+| `.rebuild_prevention_active` | An ignored, local timestamp receipt written in the script's current working directory (normally the repository root) by [`scripts/activate_rebuild_protection.sh`](../scripts/activate_rebuild_protection.sh). No build or runtime path consumes it as an enforcement lock; it is safe to delete and regenerate. |
 
 ---
 

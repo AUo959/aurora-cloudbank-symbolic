@@ -14,7 +14,7 @@ PYTHON_VENV := $(VENV_DIR)/bin/python
 .PHONY: branch-status sync branch-plan pr-priority
 .PHONY: health-check maintenance-scan maintenance-manual maintenance-status
 .PHONY: branch-cleanup-dry branch-cleanup-apply branch-cleanup-safe branch-cleanup-execute lint-stage1-opal2 pr-triage
-.PHONY: security clean deps-fix deps-fix-apply onboard
+.PHONY: security clean deps-fix deps-fix-apply onboard demo
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ONBOARDING — first-time setup with guided orientation
@@ -31,14 +31,14 @@ onboard: ## [NEW ENGINEER START HERE] Guided setup, orientation, and live server
 	@echo "    It maps the 3 runtime surfaces, key modules, and gotchas."
 	@echo ""
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo "STEP 1/4 — Environment Setup"
+	@echo "STEP 1/5 — Environment Setup"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@bash scripts/setup_environment.sh
 	@echo ""
 	@echo "✅  Environment ready."
 	@echo ""
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo "STEP 2/4 — Validate .env Configuration"
+	@echo "STEP 2/5 — Validate .env Configuration"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@if [ ! -f ".env" ]; then \
 		echo "⚠️  No .env file found. Creating from template..."; \
@@ -54,7 +54,7 @@ onboard: ## [NEW ENGINEER START HERE] Guided setup, orientation, and live server
 	fi
 	@echo ""
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo "STEP 3/4 — System Health Check"
+	@echo "STEP 3/5 — System Health Check"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@$(MAKE) status
 	@echo ""
@@ -63,7 +63,7 @@ onboard: ## [NEW ENGINEER START HERE] Guided setup, orientation, and live server
 	@echo "✅  Health check complete."
 	@echo ""
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo "STEP 4/4 — Starting Dev Server (hot-reload)"
+	@echo "STEP 4/5 — Starting Dev Server (hot-reload)"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo ""
 	@echo "🚀  Server starting on http://localhost:8000"
@@ -73,24 +73,35 @@ onboard: ## [NEW ENGINEER START HERE] Guided setup, orientation, and live server
 	@echo "   → Health check: curl http://localhost:8000/api/synergy/health"
 	@echo "   → Dashboard:    http://localhost:8000/"
 	@echo ""
-	@echo "   Quick orientation calls (copy-paste):"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "STEP 5/5 — Live Demo (optional)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo ""
-	@echo "   # 1. Verify system health"
-	@echo "   curl http://localhost:8000/api/synergy/health"
+	@echo "   Once the server is running, open a second terminal and run:"
 	@echo ""
-	@echo "   # 2. Write a memory entry (returns a SHA-256 audit hash)"
-	@echo "   curl -X POST http://localhost:8000/aumem/store \\"
-	@echo "     -H 'Content-Type: application/json' \\"
-	@echo "     -d '{\"content\":\"hello aurora\",\"context_tag\":\"onboarding\",\"tier\":\"active\"}'"
+	@echo "       make demo"
 	@echo ""
-	@echo "   # 3. Run an ethics evaluation"
-	@echo "   curl -X POST http://localhost:8000/api/gumas/evaluate \\"
-	@echo "     -H 'Content-Type: application/json' \\"
-	@echo "     -d '{\"operation\":\"test\",\"context_tag\":\"onboarding\",\"payload\":{}}'"
+	@echo "   This executes a 4-step live demo against the running server:"
+	@echo "     1. System health + module registration count"
+	@echo "     2. Memory write → SHA-256 audit hash → semantic recall"
+	@echo "     3. Ethics field evaluation (5-dimension curvature scores)"
+	@echo "     4. Observability telemetry snapshot"
 	@echo ""
-	@echo "   Press Ctrl+C to stop the server."
+	@echo "   All 4 steps run in ~10 seconds and exit 0 on success (CI-safe)."
+	@echo ""
+	@echo "   Press Ctrl+C to stop the server when done."
 	@echo ""
 	@$(MAKE) serve-dev
+
+demo: ## Run live 4-step onboarding demo against a running server (default: localhost:8000)
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "Aurora CloudBank — Live Onboarding Demo"
+	@echo "Requires a running server at http://localhost:8000"
+	@echo "To use a different URL: python scripts/onboard_demo.py --base-url <url>"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@$(PYTHON_VENV) scripts/onboard_demo.py 2>/dev/null || python3 scripts/onboard_demo.py
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ENVIRONMENT

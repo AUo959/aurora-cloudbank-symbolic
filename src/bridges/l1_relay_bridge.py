@@ -85,6 +85,89 @@ class L1SystemParticipant:
     triplex_role: str = "layer_2_verifier"
 
 
+_RELAY_AGENT_SPECS = {
+    "ARCHY": (
+        "Bridge Coordinator",
+        "L1 relay formal logic/reasoning & arbitration engine, bridge coordinator",
+        ("architectural_planning", "bridge_coordination", "formal_logic", "arbitration"),
+        "/api/relay/archy",
+    ),
+    "OPPY": (
+        "Vector/Data Processor",
+        "L1 relay memory/data processing & system operations analyst, vector processor",
+        ("data_processing", "vector_analysis", "memory_operations", "system_monitoring"),
+        "/api/relay/oppy",
+    ),
+    "LIORA": (
+        "Handshake/Synchronization",
+        "L1 relay sentiment analysis, mediation & research coordination, handshake coordinator",
+        ("research_coordination", "handshake_protocols", "sentiment_analysis", "mediation"),
+        "/api/relay/liora",
+    ),
+    "STARLING_AU": (
+        "L2 Sim Coordinator",
+        "L1 relay communications, external protocol & dispatch agent, simulation coordinator",
+        ("simulation_coordination", "communications", "external_protocols", "dispatch"),
+        "/api/relay/starling",
+    ),
+    "RIVERTHREAD_808": (
+        "Narrative/Stream",
+        "L1 relay continuity, temporal flow & state management agent, stream processor",
+        ("narrative_processing", "stream_management", "continuity_validation", "temporal_flow"),
+        "/api/relay/riverthread",
+    ),
+}
+
+_SYSTEM_PARTICIPANT_SPECS = {
+    "HALO": (
+        "Station Continuity Verification",
+        "CONTINUITY_SYSTEM_ENTITY",
+        (
+            "L1 station continuity system embodied by HALOEntity and backed by "
+            "the HALO/PAS drift controller"
+        ),
+        (
+            "continuous_drift_monitoring",
+            "timeline_cohesion",
+            "continuity_verification",
+            "ethical_boundary_enforcement",
+        ),
+        "/continuity/halo_pas/status",
+        "ORION_HALO_RELAY_ACTIVATE//",
+        "RELAY_006",
+    )
+}
+
+
+def _build_relay_agent(agent_id: str, spec: tuple) -> L1RelayAgent:
+    role, description, capabilities, api_endpoint = spec
+    return L1RelayAgent(
+        agent_id=agent_id,
+        role=role,
+        type="META_AGENT",
+        status="disconnected",
+        description=description,
+        capabilities=list(capabilities),
+        api_endpoint=api_endpoint,
+    )
+
+
+def _build_system_participant(
+    participant_id: str, spec: tuple
+) -> L1SystemParticipant:
+    role, participant_type, description, capabilities, endpoint, phrase, designation = spec
+    return L1SystemParticipant(
+        participant_id=participant_id,
+        role=role,
+        type=participant_type,
+        description=description,
+        capabilities=list(capabilities),
+        api_endpoint=endpoint,
+        activation_phrase=phrase,
+        registry_designation=designation,
+    )
+
+
 class L1RelayBridge:
     """Bridge for relay agents plus distinct L1 operational systems."""
 
@@ -100,81 +183,17 @@ class L1RelayBridge:
             interval=0.25,
             register_as_active=False,
         )
-        self.agents = {
-            "ARCHY": L1RelayAgent(
-                agent_id="ARCHY",
-                role="Bridge Coordinator",
-                type="META_AGENT",
-                status="disconnected",
-                description="L1 relay formal logic/reasoning & arbitration engine, bridge coordinator",
-                capabilities=["architectural_planning", "bridge_coordination", "formal_logic", "arbitration"],
-                api_endpoint="/api/relay/archy",
-            ),
-            "OPPY": L1RelayAgent(
-                agent_id="OPPY",
-                role="Vector/Data Processor",
-                type="META_AGENT",
-                status="disconnected",
-                description="L1 relay memory/data processing & system operations analyst, vector processor",
-                capabilities=["data_processing", "vector_analysis", "memory_operations", "system_monitoring"],
-                api_endpoint="/api/relay/oppy",
-            ),
-            "LIORA": L1RelayAgent(
-                agent_id="LIORA",
-                role="Handshake/Synchronization",
-                type="META_AGENT",
-                status="disconnected",
-                description="L1 relay sentiment analysis, mediation & research coordination, handshake coordinator",
-                capabilities=["research_coordination", "handshake_protocols", "sentiment_analysis", "mediation"],
-                api_endpoint="/api/relay/liora",
-            ),
-            "STARLING_AU": L1RelayAgent(
-                agent_id="STARLING_AU",
-                role="L2 Sim Coordinator",
-                type="META_AGENT",
-                status="disconnected",
-                description="L1 relay communications, external protocol & dispatch agent, simulation coordinator",
-                capabilities=["simulation_coordination", "communications", "external_protocols", "dispatch"],
-                api_endpoint="/api/relay/starling",
-            ),
-            "RIVERTHREAD_808": L1RelayAgent(
-                agent_id="RIVERTHREAD_808",
-                role="Narrative/Stream",
-                type="META_AGENT",
-                status="disconnected",
-                description="L1 relay continuity, temporal flow & state management agent, stream processor",
-                capabilities=["narrative_processing", "stream_management", "continuity_validation", "temporal_flow"],
-                api_endpoint="/api/relay/riverthread",
-            ),
-        }
-
-        self.activation_phrases = {
-            "ARCHY": "ORION_ARCHY_RELAY_ACTIVATE//",
-            "OPPY": "ORION_OPPY_RELAY_ACTIVATE//",
-            "LIORA": "ORION_LIORA_RELAY_ACTIVATE//",
-            "STARLING_AU": "ORION_STARLING_AU_RELAY_ACTIVATE//",
-            "RIVERTHREAD_808": "ORION_RIVERTHREAD_RELAY_ACTIVATE//",
-        }
-
         self.system_participants = {
-            "HALO": L1SystemParticipant(
-                participant_id="HALO",
-                role="Station Continuity Verification",
-                type="CONTINUITY_SYSTEM_ENTITY",
-                description=(
-                    "L1 station continuity system embodied by HALOEntity and backed by "
-                    "the HALO/PAS drift controller"
-                ),
-                capabilities=[
-                    "continuous_drift_monitoring",
-                    "timeline_cohesion",
-                    "continuity_verification",
-                    "ethical_boundary_enforcement",
-                ],
-                api_endpoint="/continuity/halo_pas/status",
-                activation_phrase="ORION_HALO_RELAY_ACTIVATE//",
-                registry_designation="RELAY_006",
-            )
+            participant_id: _build_system_participant(participant_id, spec)
+            for participant_id, spec in _SYSTEM_PARTICIPANT_SPECS.items()
+        }
+        self.agents = {
+            agent_id: _build_relay_agent(agent_id, spec)
+            for agent_id, spec in _RELAY_AGENT_SPECS.items()
+        }
+        self.activation_phrases = {
+            agent_id: f"ORION_{agent_id}_RELAY_ACTIVATE//"
+            for agent_id in self.agents
         }
         self.system_activation_phrases = {
             participant_id: participant.activation_phrase
@@ -265,40 +284,16 @@ class L1RelayBridge:
                 "already_running": was_running,
                 "transport": "continuity_controller",
             }
-            handshake = {
-                "success": activation_result["success"],
-                "timestamp": timestamp,
-                "sequence": self.system_activation_sequence,
-                "log": [
-                    {
-                        "step": "HALO_PAS_START",
-                        "result": activation_result,
-                        "timestamp": timestamp,
-                    },
-                    {
-                        "step": "CONTINUITY_STATUS_CONFIRM",
-                        "result": continuity_status,
-                        "timestamp": timestamp,
-                    },
-                ],
-                "transport": {
-                    "mode": "continuity_controller",
-                    "acknowledgement": "system_lifecycle_active",
-                },
-            }
-            return {
-                "success": activation_result["success"],
-                "agent_id": participant_id,
-                "participant_type": participant.type,
-                "status": continuity_status.get("status", "stopped"),
-                "handshake": handshake,
-                "capabilities": participant.capabilities,
-                "description": participant.description,
-                "message_routable": participant.message_routable,
-                "registry_designation": participant.registry_designation,
-                "continuity": continuity_status,
-                "living_entity": get_halo().get_state_summary(),
-            }
+            handshake = self._build_system_activation_handshake(
+                activation_result,
+                continuity_status,
+                timestamp,
+            )
+            return self._build_system_activation_response(
+                participant,
+                continuity_status,
+                handshake,
+            )
         except Exception as exc:
             logger.error(
                 "System participant activation failed for %s: %s",
@@ -306,6 +301,54 @@ class L1RelayBridge:
                 str(exc)[:100],
             )
             return {"success": False, "error": str(exc)}
+
+    def _build_system_activation_handshake(
+        self,
+        activation_result: Dict[str, Any],
+        continuity_status: Dict[str, Any],
+        timestamp: str,
+    ) -> Dict[str, Any]:
+        return {
+            "success": activation_result["success"],
+            "timestamp": timestamp,
+            "sequence": self.system_activation_sequence,
+            "log": [
+                {
+                    "step": "HALO_PAS_START",
+                    "result": activation_result,
+                    "timestamp": timestamp,
+                },
+                {
+                    "step": "CONTINUITY_STATUS_CONFIRM",
+                    "result": continuity_status,
+                    "timestamp": timestamp,
+                },
+            ],
+            "transport": {
+                "mode": "continuity_controller",
+                "acknowledgement": "system_lifecycle_active",
+            },
+        }
+
+    @staticmethod
+    def _build_system_activation_response(
+        participant: L1SystemParticipant,
+        continuity_status: Dict[str, Any],
+        handshake: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        return {
+            "success": handshake["success"],
+            "agent_id": participant.participant_id,
+            "participant_type": participant.type,
+            "status": continuity_status.get("status", "stopped"),
+            "handshake": handshake,
+            "capabilities": participant.capabilities,
+            "description": participant.description,
+            "message_routable": participant.message_routable,
+            "registry_designation": participant.registry_designation,
+            "continuity": continuity_status,
+            "living_entity": get_halo().get_state_summary(),
+        }
 
     async def _perform_zipwiz_handshake(self, agent: L1RelayAgent) -> Dict[str, Any]:
         """Activate an agent through the canonical mesh runtime boundary.

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "last_reviewed": "2026-07-13",
+  "last_reviewed": "2026-07-16",
   "governance_decision": "primary-fastapi-with-declared-standalone-services",
   "status_values": [
     "active",
@@ -447,6 +447,21 @@
         "api/aurora_api.py imports modules.cask.api and includes the router."
       ],
       "notes": "Read-only CASK technical specification, comparison, risk, and topology surface."
+    },
+    {
+      "id": "opal2_visualization",
+      "owner": "visualization",
+      "runtime": "fastapi-standalone",
+      "entrypoint": "modules/opal2/api/opal2_api.py",
+      "mount_path": ":8001 service-local /, /health, /render, /generate, /plugins, /cache/stats, /cache/clear, /ws",
+      "service_class": "standalone-service",
+      "status": "active-standalone",
+      "status_evidence": [
+        "Defines its own FastAPI app and documents independent launch with uvicorn on port 8001.",
+        "Owns a service-local /ws endpoint and distinct authentication and CSRF handling for mutating HTTP routes.",
+        "tests/test_opal2_api_routes.py covers route declarations and the full built-in PluginSystem contract."
+      ],
+      "notes": "Issue #1056 records the durable standalone-only decision. Do not mount Opal2 into the primary app without a concrete deployment need and a separate prefix, authentication, CSRF, WebSocket lifecycle, and client-compatibility design."
     },
     {
       "id": "mesh_runtime_v1",

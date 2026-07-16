@@ -5,7 +5,7 @@
 
 # Open Gates — Aurora Work Queue
 
-_Generated: `2026-07-13T05:57:19Z` — edit `queue.json`, run `sync_queue.py`_
+_Generated: `2026-07-16T00:36:36Z` — edit `queue.json`, run `sync_queue.py`_
 
 > Gates are items tagged `gate` or carrying `status: needs-decision`.
 > Nothing downstream can advance until the gate closes.
@@ -16,8 +16,8 @@ _Generated: `2026-07-13T05:57:19Z` — edit `queue.json`, run `sync_queue.py`_
 
 | Rank | ID | Title | Status |
 |---|---|---|---|
-| 16 | sim/SENTINEL-phase0 | PROJECT SENTINEL — Phase 0: Ethics review board constitution | `needs-decision` |
-| 19 | feat/QGIA | QGIA integration hooks | `needs-decision` |
+| 3 | sim/SENTINEL-phase0 | PROJECT SENTINEL — Phase 0: Ethics review board constitution | `needs-decision` |
+| 6 | feat/QGIA | QGIA integration hooks | `needs-decision` |
 
 ---
 

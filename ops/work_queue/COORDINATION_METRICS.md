@@ -5,7 +5,7 @@
 
 # Aurora Dev Coordination Metrics Report
 
-**Generated:** `2026-07-13T05:57:19Z`
+**Generated:** `2026-07-16T00:36:36Z`
 **Repo:** `AUo959/aurora-cloudbank-symbolic`
 **Queue:** `ops/work_queue/queue.json`
 
@@ -13,10 +13,10 @@
 
 | Metric | Value |
 |---|---:|
-| active_count | `19` |
-| completed_count | `8` |
-| status_counts | `{"needs-decision": 2, "open": 17}` |
-| bridge_field_counts | `{"claim_paths_set": 2, "claim_required": 2, "github_linkable": 13, "preferred_platform_set": 2, "review_class_set": 2}` |
+| active_count | `6` |
+| completed_count | `21` |
+| status_counts | `{"needs-decision": 2, "open": 4}` |
+| bridge_field_counts | `{}` |
 | queue_drift_count | _not measured_ |
 | generated_view_drift_count | `0` |
 | claim_conflict_count | _not measured_ |

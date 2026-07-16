@@ -385,7 +385,7 @@ SIMULATION LAYER
 └─────────────┘
 ```
 
-> Residency note: ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, and HALO are L1-resident relay agents. "L2" above describes where their PAT-network output is consumed, not where the agents themselves live. See `docs/architecture/LAYER_ARCHITECTURE.md` for the canonical residency-vs-operational-scope distinction.
+> Residency note: ARCHY, OPPY, LIORA, STARLING_AU, and RIVERTHREAD_808 are the five L1-resident relay agents. HALO (RELAY_006) is the L1-resident continuity system-entity whose living interface performs Triplex Layer 2 drift verification; it is not a sixth communication relay. "L2" above describes operational scope, not physical residency. See `docs/architecture/LAYER_ARCHITECTURE.md` for the canonical residency-vs-operational-scope distinction.
 
 ---
 

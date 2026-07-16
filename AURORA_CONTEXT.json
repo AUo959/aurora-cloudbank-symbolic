@@ -12,8 +12,8 @@
 
   "architecture_layers": {
     "description": "L1/L2/L3 layer model. Residency (where an agent lives) and operational scope (what layer its work affects) are distinct attributes and must not be conflated.",
-    "L1": "Station Operations — physical station reality: crew, habitat, daily operations. L1 relay agents (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808, HALO) are L1-resident.",
-    "L2": "Meta-Agent / Simulation Mesh — GUMAS simulation state and coordination. L1 relay agents operate at L2 without residing there.",
+    "L1": "Station Operations — physical station reality: crew, habitat, daily operations. Five L1 relay agents (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808) and the HALO continuity system-entity (RELAY_006) are L1-resident.",
+    "L2": "Meta-Agent / Simulation Mesh — GUMAS simulation state and coordination. The five L1 relay agents operate at L2 without residing there; HALO's living system interface performs the Triplex Layer 2 drift-verification role.",
     "L3": "Symbolic Mesh — meaning, coherence, ethics enforcement. THREADCORE glyph frameworks (Axiomera, Caelion, Sentari, Velatrix, Glyphon, Harmion) are L3-resident.",
     "source": "docs/architecture/LAYER_ARCHITECTURE.md"
   },
@@ -71,9 +71,9 @@
   },
 
   "agent_roster": {
-    "description": "Full canonical staff/agent census (human staff, AI core, relay agents, L3 framework systems).",
+    "description": "Full canonical staff/entity census (human staff, AI core, five relay agents, the HALO continuity system-entity, and L3 framework systems).",
     "source": "ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
-    "note": "This registry is a closed personnel census with its own reconciliation notes — do not add program/system entities (like SENTINEL) to it; see docs/architecture/SENTINEL_ARCHITECTURE.md for why."
+    "note": "This registry is a closed personnel census with its own reconciliation notes. HALO is present as RELAY_006 because HALOEntity is the continuity system's established living interface; that does not make generic program/system entities (like SENTINEL) eligible for the personnel census. See docs/architecture/SENTINEL_ARCHITECTURE.md."
   },
 
   "cross_platform_links": {

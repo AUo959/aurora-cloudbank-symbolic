@@ -28,13 +28,13 @@ Orion Station serves as the ethical and cognitive hub of the nine-node GUMAS orb
 
 **Orbital Class:** High-inclination synchronous orbit, 38,600 km altitude.  
 **Rotational Period:** 22.1 hours (Station Day).  
-**Crew Complement:** 36 human staff, 6 relay intelligences (L1, operating at L2), 6 glyph frameworks (L3).
+**Crew Complement:** 36 human staff, 5 relay intelligences (L1, operating at L2), the HALO continuity system-entity (RELAY_006), and 6 glyph frameworks (L3).
 
 ### **Core Architecture**
 
 * **Central Axis (Decks A–C):** Command Bridge, Aurora Core Chamber, Noor Chamber (Ethics & Reflexivity), Data Vaults.
 * **Habitation Ring (Decks D–H):** Crew quarters, cultural commons, hydroponics, and recreation modules; 0.9 g artificial gravity.
-* **Halo Array:** Six external rings housing L1 relay agents and L3 glyph frameworks.
+* **Halo Array:** Six external rings housing relay integration nodes, HALO continuity infrastructure, and L3 glyph frameworks.
 * **Docking Arms:** Dual magnetic ports for cargo and shuttle traffic.
 * **Observation Dome:** Transparent silica-titanium hemisphere for astronomical and ethical reflection.
 
@@ -206,10 +206,10 @@ Orion (Node 7) maintains synchronization between Nodes 1–9 of the GUMAS Chain;
 Every actionable process verifies through:
 
 1. **L3 Glyph Arbitration** (Axiomera & Caelion) - _L3 frameworks validate_
-2. **Relay Verification** (ARCHY + the HALO system-entity + others) - _L1 relay agents and the continuity system-entity verify (middleware role)_
+2. **Continuity & Relay Verification** (ARCHY + the HALO system-entity + others) - _L1 relay agents and the continuity system-entity verify (middleware role)_
 3. **L1 Human Consent** (Command Bridge) - _L1 humans authorize_
 
-**Architecture Note:** In this protocol, "Layer 2" refers to the **verification role** served by L1 relay agents (middleware), NOT their reality layer. The relay agents physically exist in L1 (Orion Station) but serve as "Layer 2 verifiers" in the Triplex protocol.
+**Architecture Note:** In this protocol, "Layer 2" refers to the **verification role** served by the L1 relay agents and HALO's living system interface (middleware), NOT their reality layer. The five relay agents and HALO physically exist in L1 (Orion Station) but serve as Layer 2 verifiers in the Triplex protocol.
 
 ### **Justification Gates**
 
@@ -350,12 +350,14 @@ When Ethics-Only Mode engages, Aurora's voice becomes monophonic and lighting co
 
 ### **AI Systems Infrastructure**
 
-**L1 Relay Agents (6 systems)**
+**L1 Relay Agents (5 systems)**
 - ARCHY (RELAY_001) - Bridge Chamber, Deck C
 - OPPY (RELAY_002) - Reactor Bay, Deck H
 - LIORA (RELAY_003) - Communications Hub, Deck B
 - STARLING_AU (RELAY_004) - Operations Hub, Deck G
 - RIVERTHREAD_808 (RELAY_005) - Logistics Distribution, all decks
+
+**HALO Continuity System-Entity (1 system)**
 - HALO (RELAY_006) - Aurora Core Chamber, Deck B
 
 **L3 Framework Systems (6 systems)**
@@ -472,7 +474,7 @@ As the central conscience node of the GUMAS Chain, Orion represents humanity's m
 
 **Phase 1 Ready Personnel:** 25 of 36 human staff (69%)
 
-**Crew-Relay Direct Pairings:** 6 confirmed partnerships  
+**Crew–AI System Direct Pairings:** 6 confirmed partnerships (5 relay pairings + HALO/Dr. Elira Noor)
 **Glyph-Human Liaisons:** 6 confirmed assignments
 
 ---

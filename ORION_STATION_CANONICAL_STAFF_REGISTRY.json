@@ -10,6 +10,7 @@
     "notes": [
       "This file reconstructs the missing SSOT object referenced elsewhere in the repo.",
       "It preserves known conflicts instead of inventing missing identities or IDs.",
+      "The historical phase 6 source grouped HALO with six relays; current canon distinguishes five relay agents and HALO as the RELAY_006 continuity system-entity.",
       "Source priority: codex phase technical registers, then canonical validator and legacy operational initialization artifacts."
     ],
     "related_files": {
@@ -52,7 +53,8 @@
     "materialized_in_this_registry": {
       "humans": 35,
       "ai_core": 1,
-      "l2_relays": 6,
+      "l2_relays": 5,
+      "halo_system_entities": 1,
       "l3_frameworks": 6,
       "total_entities": 48
     },
@@ -390,12 +392,17 @@
       "entity_type": "L2_RELAY",
       "identity_confidence": "HIGH",
       "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
-    },
+    }
+  ],
+  "halo_system_entities": [
     {
       "id": "L2_HALO",
       "name": "HALO",
-      "role": "Drift Anchor & System Synchronization Relay",
-      "entity_type": "L2_RELAY",
+      "registry_designation": "RELAY_006",
+      "role": "Continuity Graft Drift Anchor & System Synchronization",
+      "entity_type": "L1_CONTINUITY_SYSTEM_ENTITY",
+      "entity_interface": "HALOEntity",
+      "triplex_role": "LAYER_2_DRIFT_VERIFIER",
       "identity_confidence": "HIGH",
       "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
     }

@@ -8,6 +8,46 @@
     "QGIA_Runtime_OnePager v4.2.1",
     "QGIA_Axiom_Doctrine_Narrative v1.0"
   ],
+  "reconciliation": {
+    "certainty": "STAGING",
+    "runtime_activation": "NOT_IMPLEMENTED",
+    "layer_scope": "L1_ANALYTICAL_ADVISORY",
+    "reconciled_on": "2026-07-16",
+    "reconciled_against": [
+      "docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md",
+      "modules/quantum_forge/quantum_forge_v2.py",
+      "modules/quantum_forge/system_flow_orchestrator.py",
+      "modules/quantum_forge/ethics_quantum_gates.py",
+      "modules/quantum_forge/quantum_memory_enhancer.py",
+      "docs/architecture/QGIA_SIM_BRIDGE.md",
+      "docs/architecture/QGIA_L1_NODE_REGISTRATION.md"
+    ],
+    "binding_crosswalk": {
+      "ethics_binding": {
+        "declared": "GUMAS_Thermax",
+        "verified_runtime_target": "modules.quantum_forge.quantum_forge_v2.GUMAS_Thermax",
+        "enforcement_seam": "modules.quantum_forge.ethics_quantum_gates.EthicsAwareQuantumGate"
+      },
+      "core_binding": {
+        "declared": "Aurora_Core_Flowstate",
+        "verified_runtime_target": "modules.quantum_forge.quantum_forge_v2.Aurora_Core_Flowstate",
+        "v3_orchestration_seam": "modules.quantum_forge.system_flow_orchestrator.SystemFlowOrchestrator"
+      },
+      "engine": {
+        "declared": "gpt-symbolic-memetic",
+        "verified_runtime_target": null,
+        "classification": "EXTERNAL_DESCRIPTOR"
+      }
+    },
+    "constraints": [
+      "Axiom node IDs are QGIA doctrine identifiers, not Quantum Forge SymbolicMemoryNode IDs.",
+      "gumas_tier values are QGIA-local doctrine classifications, not runtime EthicsLevel values.",
+      "ethics_lock is declarative until an explicit loader and EthicsAwareQuantumGate adapter are implemented.",
+      "SIM hooks are advisory relay targets and must be mediated by L1 crew or relay agents before any L2 effect.",
+      "No loader or adapter currently activates this manifest in Quantum Forge."
+    ],
+    "export_semantics": "DOCUMENT_PACKAGE_ONLY"
+  },
   "axiom_nodes": [
     {
       "id": "AN-001",

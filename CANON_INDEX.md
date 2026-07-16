@@ -42,3 +42,9 @@ This applies even if you believe you already know the answer.
 | GUMAS Galactic Simulation Environment | `docs/architecture/LAYER_ARCHITECTURE.md` |
 | Observatory / Main Simulation Chamber | `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` |
 | Simulation codex phases 1–6 | `simulation/CODEX_PHASE[N]_*.md` |
+
+## Staged Artifacts & Promotion
+
+| Topic | Governing Document |
+| --- | --- |
+| Engineer onboarding memory seeds (staged, non-canonical) | `seeds/onboarding/README.md` |

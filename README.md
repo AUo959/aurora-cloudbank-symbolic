@@ -7,7 +7,9 @@
 
 A quantum-symbolic computing platform for enterprise AI. Combines hierarchical memory management, quantum circuit simulation, multi-model AI orchestration, geometric ethics enforcement, and production observability in a single FastAPI application.
 
-> **New engineer?** Start with [`GETTING_STARTED_ENGINEER.md`](./GETTING_STARTED_ENGINEER.md) — environment setup, first API call, and system orientation in 30 minutes. Then run `make onboard`.
+> **New engineer?** Start with [`GETTING_STARTED_ENGINEER.md`](./GETTING_STARTED_ENGINEER.md), then run `python scripts/aurora_onboard.py` for a repository-grounded first interaction.
+>
+> **Reviewing the architecture?** Start with [`ARCHITECTURE_QUICKMAP.md`](./ARCHITECTURE_QUICKMAP.md) for a 10-minute orientation to the layer structure, runtime flow, and code map.
 >
 > **New AI agent or Copilot session?** Start with [`AGENTS.md`](./AGENTS.md) (bootstrap protocol and rules) and [`AURORA_CONTEXT.json`](./AURORA_CONTEXT.json) (machine-readable concept map).
 
@@ -112,7 +114,7 @@ All modules follow a consistent layout: `__init__.py`, `core.py`, `api.py`, `mod
 
 | Module | Location | Description |
 |---|---|---|
-| Ethics Field | `modules/ethics_field/` | Geometric ethics curvature. Five-dimension weighted field (picard_delta_3, thermax_continuity, layer_integrity, collective_welfare, transparency) with hard-zero veto and resistance levels. |
+| Ethics Field | `modules/ethics_field/` | Geometric ethics curvature. Five-dimension weighted field (Picard_Delta_3, thermax_continuity, layer_integrity, collective_welfare, transparency) with hard-zero veto and resistance levels. |
 | GUMAS | `modules/gumas/` | Ethics governance, drift threshold enforcement, alignment interventions. |
 | Data Guardian | `modules/data_guardian/` | PII detection and log sanitization. |
 | Insight Ledger | `modules/insight_ledger/` | Immutable audit trails, DLP compliance. |

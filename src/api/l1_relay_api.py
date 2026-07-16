@@ -32,7 +32,7 @@ Protocol: ZIPWIZ handshake with ethics audit
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Request, Depends
@@ -58,6 +58,10 @@ if _process_halo_controller is not None:
     l2_bridge.halo_controller = _process_halo_controller
 
 logger = logging.getLogger(__name__)
+
+
+def _utc_iso() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 def _safe_log_id(value: str) -> str:
@@ -293,7 +297,7 @@ async def get_health(request: Request):
             anchor_seed=l2_bridge.orion_core_config["anchor_seed"],
             ethics_protocol=l2_bridge.orion_core_config["ethics_protocol"],
             version=l2_bridge.orion_core_config["version"],
-            timestamp=datetime.now().isoformat()
+            timestamp=_utc_iso()
         )
     except Exception as e:
         logger.error("Health check failed: %s", str(e)[:100])
@@ -505,7 +509,7 @@ async def disconnect_agent(
                 success=True,
                 agent_id=result.get("agent_id", agent_id),
                 status=result.get("status", "disconnected"),
-                timestamp=result.get("timestamp", datetime.now().isoformat()),
+                timestamp=result.get("timestamp", _utc_iso()),
                 participant_type=result.get("participant_type"),
                 message_routable=result.get("message_routable"),
             )
@@ -550,7 +554,7 @@ async def get_activation_phrases(
             "system_participants": list(l2_bridge.system_participants.keys()),
             "handshake_sequence": l2_bridge.handshake_sequence,
             "system_activation_sequence": l2_bridge.system_activation_sequence,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": _utc_iso()
         }
     except Exception as e:
         logger.error("Failed to get activation phrases: %s", str(e)[:100])

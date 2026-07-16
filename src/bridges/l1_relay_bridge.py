@@ -26,9 +26,9 @@ import sys
 
 # Configure logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from src.aurora.continuity import HALOPASController
 from src.entities.relay_agents import get_halo
@@ -37,6 +37,10 @@ from src.mesh.runtime import MeshRuntime
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+
+def _utc_iso() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 @dataclass
@@ -76,7 +80,7 @@ class L1SystemParticipant:
     role: str
     type: str
     description: str
-    capabilities: List[str]
+    capabilities: Tuple[str, ...]
     api_endpoint: str
     activation_phrase: str
     registry_designation: str
@@ -147,7 +151,7 @@ def _build_relay_agent(agent_id: str, spec: tuple) -> L1RelayAgent:
         type="META_AGENT",
         status="disconnected",
         description=description,
-        capabilities=list(capabilities),
+        capabilities=tuple(capabilities),
         api_endpoint=api_endpoint,
     )
 
@@ -276,7 +280,7 @@ class L1RelayBridge:
         try:
             await self.halo_controller.start()
             continuity_status = self.halo_controller.export_status()
-            timestamp = datetime.now().isoformat()
+            timestamp = _utc_iso()
             activation_result = {
                 "success": continuity_status.get("status") == "running",
                 "controller": "HALO/PAS",
@@ -378,7 +382,7 @@ class L1RelayBridge:
                 {
                     "step": "MESH_RUNTIME_ACTIVATE",
                     "result": activation_result,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": _utc_iso(),
                 }
             )
             if not activation_result["success"]:
@@ -397,7 +401,7 @@ class L1RelayBridge:
                 {
                     "step": "MESH_STATUS_CONFIRM",
                     "result": status_result,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": _utc_iso(),
                 }
             )
 
@@ -410,7 +414,7 @@ class L1RelayBridge:
 
             return {
                 "success": True,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": _utc_iso(),
                 "sequence": self.handshake_sequence,
                 "log": handshake_log,
                 "duration": duration,
@@ -454,7 +458,7 @@ class L1RelayBridge:
             "agent_id": agent.agent_id,
             "error": f"{step} is not connected to a production transport",
             "transport": "demo_disabled",
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": _utc_iso(),
         }
 
     def get_constellation_status(self) -> Dict[str, Any]:
@@ -502,7 +506,7 @@ class L1RelayBridge:
             "orion_core": self.orion_core_config,
             "activation_phrases": dict(self.activation_phrases),
             "system_activation_phrases": dict(self.system_activation_phrases),
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": _utc_iso(),
         }
 
     async def relay_message(
@@ -577,7 +581,7 @@ class L1RelayBridge:
             "processed": True,
             "relay_status": "accepted",
             "delivery_acknowledgements": acknowledgements,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": _utc_iso(),
         }
 
     async def _dispatch_runtime_message(
@@ -637,7 +641,7 @@ class L1RelayBridge:
             "agent_id": agent_id,
             "status": "disconnected",
             "runtime_agent_id": runtime_agent.get("agent_id"),
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": _utc_iso(),
         }
 
     async def _stop_system_participant(self, participant_id: str) -> Dict[str, Any]:
@@ -649,7 +653,7 @@ class L1RelayBridge:
             "participant_type": participant.type,
             "status": "stopped",
             "message_routable": participant.message_routable,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": _utc_iso(),
         }
 
     def get_agent_status(self, agent_id: str) -> Dict[str, Any]:

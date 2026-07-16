@@ -158,7 +158,7 @@ Systems that operate autonomously without direct user interaction.
 |--------|----------|-------|----------------|
 | **CASK** | `modules/cask/` | Backend service, no API endpoints | Add `/cask/*` routes (medium priority) |
 | **GUMAS** | `modules/gumas/` | Core engine exists, no API | Add `/gumas/*` ethics endpoints (high priority) |
-| **Instance Bridge** | `modules/instance_bridge/` | No tests/imports found | Investigate or deprecate |
+| **Instance Bridge** | `modules/instance_bridge/` | Standalone localhost WebSocket relay; no API, mesh, or thread-transfer importers; 11 focused tests | Retain as an active standalone tool |
 | **Flight Control** | `modules/flight_control/` | 3 JS infrastructure tests | Adequate or needs expansion? |
 
 ---

@@ -12,7 +12,7 @@
 | `agents/` | Agent runtime helpers | L1 / cross-cutting |
 | `bridges/` | Python L1 relay bridge plus TypeScript constellation bridges | L1 and cross-system |
 | `aurora_fusion/` | Simulation-fusion and memory support | L2-facing |
-| `api/` | Reusable API routers, including the L1 relay surface | Cross-cutting |
+| `src/api/` | Reusable API routers, including the L1 relay surface; distinct from the root composition entry point | Cross-cutting |
 | `core/` | DLP, command, service, and other shared foundations | Cross-cutting |
 | `middleware/` | CSRF, authentication, rate limiting, PII, and request controls | Cross-cutting |
 | `monitoring/`, `observability/` | Runtime checks, audit logging, telemetry, and traces | Cross-cutting |

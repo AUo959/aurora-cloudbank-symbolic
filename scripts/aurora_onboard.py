@@ -22,7 +22,7 @@ from typing import Any, Callable, Sequence, TextIO
 RELAY_AGENTS = ("ARCHY", "OPPY", "LIORA", "STARLING_AU", "RIVERTHREAD_808")
 L3_FRAMEWORKS = ("Axiomera", "Caelion", "Sentari", "Velatrix", "Glyphon", "Harmion")
 SYSTEM_ENTITY = "HALO"
-DEFAULT_PYTHON_FLOOR = (3, 10)
+DEFAULT_PYTHON_FLOOR = (3, 11)
 
 
 @dataclass(frozen=True)
@@ -53,6 +53,7 @@ class AuroraOnboarding:
         self.version = "unknown"
         self.lockpoint = "not recorded"
         self.lockpoint_source = "AURORA_CONTEXT.json"
+        self.lockpoint_freshness_warning = ""
         self.ethics: dict[str, Any] = {}
         self.seed: dict[str, Any] | None = None
 
@@ -85,10 +86,11 @@ class AuroraOnboarding:
         setup_text = self._read_text("setup.py")
         match = re.search(r"python_requires\s*=\s*[\"']>=\s*(\d+)\.(\d+)", setup_text)
         if not match:
+            fallback = f">={DEFAULT_PYTHON_FLOOR[0]}.{DEFAULT_PYTHON_FLOOR[1]}"
             self._add_check(
                 "python_requirement_source",
                 "warning",
-                "python_requires was not found; using onboarding fallback >=3.10",
+                f"python_requires was not found; using onboarding fallback {fallback}",
                 "setup.py",
             )
             return DEFAULT_PYTHON_FLOOR
@@ -128,10 +130,16 @@ class AuroraOnboarding:
         if isinstance(active_state, dict) and active_state.get("lockpoint"):
             self.lockpoint = str(active_state["lockpoint"])
         freshness = active_state.get("_staleness_warning") if isinstance(active_state, dict) else None
+        self.lockpoint_freshness_warning = str(freshness or "")
         detail = f"Aurora continuity v{self.version}; lockpoint={self.lockpoint}"
         if freshness:
             detail += "; lockpoint is a documented context snapshot, not a live-state claim"
-        self._add_check("system_identity", "pass", detail, self.lockpoint_source)
+        self._add_check(
+            "system_identity",
+            "pass",
+            detail,
+            "AURORA_CONTEXT.json + src/api/l1_relay_api.manifest.yaml",
+        )
 
     def _check_architecture(self) -> None:
         expected = (*RELAY_AGENTS, SYSTEM_ENTITY, *L3_FRAMEWORKS, "Triplex Handshake")
@@ -209,7 +217,10 @@ class AuroraOnboarding:
             icon = "PASS" if check.status == "pass" else check.status.upper()
             self._print(f"[{icon}] {check.name}: {check.detail}")
         self._print(f"Aurora v{self.version} | Orion Station | {self.lockpoint}")
-        self._print("Note: the lockpoint is read from AURORA_CONTEXT.json and carries its recorded freshness warning.")
+        if self.lockpoint_freshness_warning:
+            self._print(f"Freshness warning from AURORA_CONTEXT.json: {self.lockpoint_freshness_warning}")
+        else:
+            self._print("Note: the lockpoint is read from AURORA_CONTEXT.json; no freshness warning is recorded.")
 
     def print_architecture(self) -> None:
         layers = self.context.get("architecture_layers", {})
@@ -282,6 +293,9 @@ class AuroraOnboarding:
     def prompt_for_seed(self) -> None:
         self._print("\nPhase 4 — Symbolic Memory Seed Write (optional)")
         self._print("-" * 36)
+        if self.exit_code() == 1:
+            self._print("Skipped because environment validation failed. No repository files were written.")
+            return
         answer = self.input_fn("Write your engineer handle to the memory vault? [y/N] ").strip().lower()
         if answer not in {"y", "yes"}:
             self._print("Skipped. No repository files were written.")

@@ -94,6 +94,11 @@ def test_agent_mode_emits_parseable_json(healthy_repo: Path) -> None:
     CHECK.assertEqual(report["architecture"]["l1_relay_agents"], list(aurora_onboard.RELAY_AGENTS))
     CHECK.assertEqual(report["architecture"]["l1_continuity_system_entity"], "HALO")
     CHECK.assertTrue(report["ethics"]["binding_verified"])
+    identity_check = next(check for check in report["checks"] if check["name"] == "system_identity")
+    CHECK.assertEqual(
+        identity_check["source"],
+        "AURORA_CONTEXT.json + src/api/l1_relay_api.manifest.yaml",
+    )
 
 
 def test_skip_interactive_is_ci_safe_on_healthy_repo(healthy_repo: Path) -> None:
@@ -149,6 +154,22 @@ def test_full_flow_writes_a_staged_seed(healthy_repo: Path) -> None:
     CHECK.assertIn("It is staged, not canonical", content)
 
 
+def test_failed_validation_does_not_offer_or_write_completion_seed(healthy_repo: Path) -> None:
+    _write(healthy_repo, "docs/architecture/LAYER_ARCHITECTURE.md", "Triplex Handshake\n")
+    stream = io.StringIO()
+
+    code = aurora_onboard.main(
+        [],
+        repo_root=healthy_repo,
+        stream=stream,
+        input_fn=lambda _prompt: "SKIP",
+    )
+
+    CHECK.assertEqual(code, 1)
+    CHECK.assertEqual(list((healthy_repo / "seeds/onboarding").glob("engineer-*.md")), [])
+    CHECK.assertIn("Skipped because environment validation failed", stream.getvalue())
+
+
 def test_missing_python_floor_returns_partial_status(healthy_repo: Path) -> None:
     (healthy_repo / "setup.py").write_text("# no floor recorded\n", encoding="utf-8")
     stream = io.StringIO()
@@ -157,6 +178,20 @@ def test_missing_python_floor_returns_partial_status(healthy_repo: Path) -> None
 
     CHECK.assertEqual(code, 2)
     CHECK.assertIn("WARNING", stream.getvalue())
+    CHECK.assertIn("fallback >=3.11", stream.getvalue())
+
+
+def test_environment_note_is_truthful_without_freshness_warning(healthy_repo: Path) -> None:
+    context_path = healthy_repo / "AURORA_CONTEXT.json"
+    context = json.loads(context_path.read_text(encoding="utf-8"))
+    context["active_state"].pop("_staleness_warning")
+    context_path.write_text(json.dumps(context), encoding="utf-8")
+    stream = io.StringIO()
+
+    code = aurora_onboard.main(["--skip-interactive"], repo_root=healthy_repo, stream=stream)
+
+    CHECK.assertEqual(code, 0)
+    CHECK.assertIn("no freshness warning is recorded", stream.getvalue())
 
 
 def test_onboarding_documents_preserve_layer_semantics() -> None:

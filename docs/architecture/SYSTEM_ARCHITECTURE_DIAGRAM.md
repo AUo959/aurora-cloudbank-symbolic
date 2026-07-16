@@ -470,7 +470,7 @@ graph TD
 
 ```mermaid
 graph LR
-    MAIN[Main FastAPI App] -.-> |NOT INTEGRATED| OPAL[Opal2 System]
+    MAIN[Main FastAPI App] -.-> |STANDALONE SERVICE| OPAL[Opal2 System]
     
     OPAL --> GLY[Glyph Core]
     OPAL --> QRN[Quantum Renderer]
@@ -484,19 +484,22 @@ graph LR
     style OWN fill:#512da8
 ```
 
-**Status:** ✅ Operational but architecturally separate
+**Status:** ✅ Operational standalone service
 
 **Opal2 Characteristics:**
 - Has own FastAPI application (`modules/opal2/api/opal2_api.py`)
-- Not integrated as sub-router in main app
+- Runs as a separate process (documented default: port 8001)
+- Is not mounted as a sub-router in the main app
 - Provides visualization and rendering capabilities
-- Has WebSocket support for real-time updates
+- Owns a service-local WebSocket lifecycle at `/ws`
+- Preserves distinct authentication and CSRF handling for mutating routes
 
-**Decision Required:**
-- **Option A:** Integrate as sub-router in main app (consistent architecture)
-- **Option B:** Document as separate microservice (explicit deployment)
+**Decision Recorded (2026-07-16, issue #1056):**
+- Keep Opal2 standalone-only; do not add a main-app mount without a demonstrated deployment or client need.
+- A future mount requires a separate scoped design covering route prefixing, authentication, CSRF, WebSocket lifecycle, route collisions, and downstream client migration.
+- Record Opal2 as `active-standalone` in `docs/api/api_surface_inventory.json`.
 
-**Note:** `modules/opal2_backup_main/` appears to be duplicate - recommend archiving.
+This decision preserves the tested service boundary and does not change runtime behavior.
 
 ---
 
@@ -660,10 +663,9 @@ aurora_api.py (Main App)
 6. **Thread Bridge API** - v2 exists but no HTTP routes
 
 ### 🟢 Architectural Decisions Needed
-7. **Opal2 Integration** - Keep separate or integrate?
-8. **Nexus vs AuMemManager** - Clarify relationship or consolidate
-9. **Memory Retrieval** - Needed or overlaps with AuMemManager?
-10. **HR System Integration** - Add hr_system API routes (staffing/character generation)
+7. **Nexus vs AuMemManager** - Clarify relationship or consolidate
+8. **Memory Retrieval** - Needed or overlaps with AuMemManager?
+9. **HR System Integration** - Add hr_system API routes (staffing/character generation)
 
 ---
 
@@ -672,14 +674,12 @@ aurora_api.py (Main App)
 ### Quick Wins (< 1 hour each)
 1. Add Resilience Sentinel router to `aurora_api.py` line ~300
 2. Add Monitoring Dashboard router to `aurora_api.py` line ~300
-3. Archive `modules/opal2_backup_main/` as duplicate
-4. Document Opal2 as separate microservice in README
 
 ### Medium Effort (2-4 hours each)
-5. Create `/ethics/validate` endpoint exposing GUMAS validation
-6. Create `/cask/analyze` endpoint for cultural alignment analysis
-7. Add `/autonomy/status` endpoint for Reflective Autonomy health
-8. Create `API_CATALOG.md` from OpenAPI spec
+3. Create `/ethics/validate` endpoint exposing GUMAS validation
+4. Create `/cask/analyze` endpoint for cultural alignment analysis
+5. Add `/autonomy/status` endpoint for Reflective Autonomy health
+6. Create `API_CATALOG.md` from OpenAPI spec
 
 ### Large Effort (1-2 days each)
 9. Audit and consolidate Nexus vs AuMemManager

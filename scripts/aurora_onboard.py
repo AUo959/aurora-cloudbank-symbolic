@@ -252,11 +252,12 @@ class AuroraOnboarding:
             raise OnboardingError("Engineer handle cannot be empty")
         if len(clean_handle) > 80:
             raise OnboardingError("Engineer handle must be 80 characters or fewer")
-        now = datetime.now(timezone.utc).replace(microsecond=0)
-        relative = Path("seeds/onboarding") / f"engineer-{self._slug(clean_handle)}-{now:%Y%m%dT%H%M%SZ}.md"
+        now = datetime.now(timezone.utc)
+        receipt_time = now.replace(microsecond=0)
+        relative = Path("seeds/onboarding") / f"engineer-{self._slug(clean_handle)}-{now:%Y%m%dT%H%M%S%fZ}.md"
         path = self._path(relative.as_posix())
         path.parent.mkdir(parents=True, exist_ok=True)
-        content = self._seed_content(clean_handle, now)
+        content = self._seed_content(clean_handle, receipt_time)
         try:
             with path.open("x", encoding="utf-8") as stream:
                 stream.write(content)
@@ -267,7 +268,7 @@ class AuroraOnboarding:
         self.seed = {
             "path": relative.as_posix(),
             "status": "staged",
-            "created_at": now.isoformat().replace("+00:00", "Z"),
+            "created_at": receipt_time.isoformat().replace("+00:00", "Z"),
             "canon_policy": "seeds/onboarding/README.md",
             "verified": True,
         }

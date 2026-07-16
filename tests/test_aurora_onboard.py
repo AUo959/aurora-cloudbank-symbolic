@@ -154,6 +154,30 @@ def test_full_flow_writes_a_staged_seed(healthy_repo: Path) -> None:
     CHECK.assertIn("It is staged, not canonical", content)
 
 
+def test_same_second_seed_writes_have_unique_paths(healthy_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    moments = iter(
+        [
+            aurora_onboard.datetime(2026, 7, 16, 7, 0, 0, 1, tzinfo=aurora_onboard.timezone.utc),
+            aurora_onboard.datetime(2026, 7, 16, 7, 0, 0, 2, tzinfo=aurora_onboard.timezone.utc),
+        ]
+    )
+
+    class Clock:
+        @staticmethod
+        def now(_timezone: object) -> object:
+            return next(moments)
+
+    monkeypatch.setattr(aurora_onboard, "datetime", Clock)
+    app = aurora_onboard.AuroraOnboarding(healthy_repo, io.StringIO(), lambda _prompt: "")
+
+    first = app.write_seed("Engineer One")
+    second = app.write_seed("Engineer One")
+
+    CHECK.assertNotEqual(first["path"], second["path"])
+    CHECK.assertTrue((healthy_repo / first["path"]).is_file())
+    CHECK.assertTrue((healthy_repo / second["path"]).is_file())
+
+
 def test_failed_validation_does_not_offer_or_write_completion_seed(healthy_repo: Path) -> None:
     _write(healthy_repo, "docs/architecture/LAYER_ARCHITECTURE.md", "Triplex Handshake\n")
     stream = io.StringIO()

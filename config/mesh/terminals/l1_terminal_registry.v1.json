@@ -2,11 +2,13 @@
   "generated_from": [
     "config/mesh/agents/*.json",
     "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+    "docs/architecture/LAYER_ARCHITECTURE.md",
     "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md"
   ],
   "owner_class_contract": [
     "human_l1",
     "ai_core",
+    "continuity_system",
     "l2_relay",
     "l3_framework",
     "legacy_seed",
@@ -1530,15 +1532,16 @@
     {
       "aliases": [
         "l2.halo.term",
+        "halo.continuity.term",
         "personal_access_terminal:halo_drift_anchor_synchronization_relay_l2"
       ],
       "canon_authority": "primary",
       "canon_entity_id": "ORION.ENTITY.0043",
-      "canon_layer": "L2",
-      "canon_preferred_name": "HALO - Drift Anchor & Synchronization Relay (L2)",
-      "canon_source": "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
-      "canon_type": "Relay Agent",
-      "l1_station_layer": "L2",
+      "canon_layer": "L1",
+      "canon_preferred_name": "HALO - Station Continuity System-Entity",
+      "canon_source": "docs/architecture/LAYER_ARCHITECTURE.md",
+      "canon_type": "Continuity System-Entity",
+      "l1_station_layer": "L1",
       "mesh_route": {
         "channel_id": "",
         "owner_agent_id": null,
@@ -1546,19 +1549,21 @@
         "route_kind": "source_profile_only"
       },
       "owner_agent_id": null,
-      "owner_class": "l2_relay",
+      "owner_class": "continuity_system",
       "owner_display_name": "HALO",
       "source_pointers": [
         "reports/analysis/pat_terminal_salvage_scan__2026-06-14.md",
-        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md"
+        "CanonRec:canon/L1/station/operational_library_v2_2/ORION__ENTITY_REGISTRY__v1.0.md",
+        "docs/architecture/LAYER_ARCHITECTURE.md",
+        "src/aurora/continuity/halo_pas_controller.py"
       ],
       "station_context": {
-        "role_or_function": "-",
-        "source_posture": "source_pointer_only_not_canon_promotion",
-        "source_refs": "ORION.ENT.CONSTELLATION.0001"
+        "role_or_function": "Station continuity verification and drift monitoring",
+        "source_posture": "confirmed_by_l1_ruling_2026_07_15",
+        "source_refs": "issue #1247; RELAY_006 designation preserved"
       },
       "terminal_id": "l2_halo_terminal",
-      "terminal_namespace": "l2.halo.term",
+      "terminal_namespace": "halo.continuity.term",
       "terminal_type": "system"
     },
     {

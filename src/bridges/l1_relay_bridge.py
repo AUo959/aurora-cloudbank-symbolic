@@ -30,6 +30,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from src.aurora.continuity import HALOPASController
+from src.entities.relay_agents import get_halo
 from src.mesh.models import MeshMessageRequest
 from src.mesh.runtime import MeshRuntime
 
@@ -38,8 +40,6 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-
-
 class L1RelayAgent:
     """L1 relay agent configuration and state.
 
@@ -68,12 +68,38 @@ class L1RelayAgent:
             self.handshake_log = []
 
 
-class L1RelayBridge:
-    """Bridge connector for the L1 relay agent constellation (mesh-backed)."""
+@dataclass(frozen=True)
+class L1SystemParticipant:
+    """Non-relay L1 system with an explicit operational lifecycle."""
 
-    def __init__(self, project_root: Optional[Path] = None, runtime: Optional[MeshRuntime] = None):
+    participant_id: str
+    role: str
+    type: str
+    description: str
+    capabilities: List[str]
+    api_endpoint: str
+    activation_phrase: str
+    registry_designation: str
+    message_routable: bool = False
+    reality_layer: str = "L1"
+    triplex_role: str = "layer_2_verifier"
+
+
+class L1RelayBridge:
+    """Bridge for relay agents plus distinct L1 operational systems."""
+
+    def __init__(
+        self,
+        project_root: Optional[Path] = None,
+        runtime: Optional[MeshRuntime] = None,
+        halo_controller: Optional[HALOPASController] = None,
+    ):
         self.project_root = project_root or Path(__file__).resolve().parents[2]
         self.runtime = runtime or MeshRuntime(self.project_root)
+        self.halo_controller = halo_controller or HALOPASController(
+            interval=0.25,
+            register_as_active=False,
+        )
         self.agents = {
             "ARCHY": L1RelayAgent(
                 agent_id="ARCHY",
@@ -130,7 +156,33 @@ class L1RelayBridge:
             "RIVERTHREAD_808": "ORION_RIVERTHREAD_RELAY_ACTIVATE//",
         }
 
+        self.system_participants = {
+            "HALO": L1SystemParticipant(
+                participant_id="HALO",
+                role="Station Continuity Verification",
+                type="CONTINUITY_SYSTEM_ENTITY",
+                description=(
+                    "L1 station continuity system embodied by HALOEntity and backed by "
+                    "the HALO/PAS drift controller"
+                ),
+                capabilities=[
+                    "continuous_drift_monitoring",
+                    "timeline_cohesion",
+                    "continuity_verification",
+                    "ethical_boundary_enforcement",
+                ],
+                api_endpoint="/continuity/halo_pas/status",
+                activation_phrase="ORION_HALO_RELAY_ACTIVATE//",
+                registry_designation="RELAY_006",
+            )
+        }
+        self.system_activation_phrases = {
+            participant_id: participant.activation_phrase
+            for participant_id, participant in self.system_participants.items()
+        }
+
         self.handshake_sequence = ["MESH_RUNTIME_ACTIVATE", "MESH_STATUS_CONFIRM"]
+        self.system_activation_sequence = ["HALO_PAS_START", "CONTINUITY_STATUS_CONFIRM"]
 
         self.orion_core_config = {
             "anchor_seed": "EOS_SEED_ORION",
@@ -145,11 +197,14 @@ class L1RelayBridge:
         logger.info("L1 Relay Bridge initialized with %s agents", str(len(self.agents))[:100])
 
     async def activate_agent(self, agent_id: str, activation_phrase: str) -> Dict[str, Any]:
-        """Activate a Custom GPT agent with full ZIPWIZ handshake"""
+        """Activate a relay agent or a distinct operational system participant."""
+
+        if agent_id in self.system_participants:
+            return await self._activate_system_participant(agent_id, activation_phrase)
 
         if agent_id not in self.agents:
             logger.error("Unknown agent: %s", str(agent_id)[:100])
-            return {"success": False, "error": f"Unknown agent: {agent_id}"}
+            return {"success": False, "error": f"Unknown agent or system participant: {agent_id}"}
 
         if activation_phrase != self.activation_phrases.get(agent_id):
             logger.error("Invalid activation phrase for %s", str(agent_id)[:100])
@@ -187,6 +242,70 @@ class L1RelayBridge:
         except Exception as e:
             logger.error("Agent activation failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
             return {"success": False, "error": str(e)}
+
+    async def _activate_system_participant(
+        self, participant_id: str, activation_phrase: str
+    ) -> Dict[str, Any]:
+        """Start a system lifecycle without granting mesh-agent behavior."""
+
+        participant = self.system_participants[participant_id]
+        if activation_phrase != participant.activation_phrase:
+            logger.error("Invalid activation phrase for %s", str(participant_id)[:100])
+            return {"success": False, "error": "Invalid activation phrase"}
+
+        was_running = self.halo_controller.running
+        try:
+            await self.halo_controller.start()
+            continuity_status = self.halo_controller.export_status()
+            timestamp = datetime.now().isoformat()
+            activation_result = {
+                "success": continuity_status.get("status") == "running",
+                "controller": "HALO/PAS",
+                "status": continuity_status.get("status"),
+                "already_running": was_running,
+                "transport": "continuity_controller",
+            }
+            handshake = {
+                "success": activation_result["success"],
+                "timestamp": timestamp,
+                "sequence": self.system_activation_sequence,
+                "log": [
+                    {
+                        "step": "HALO_PAS_START",
+                        "result": activation_result,
+                        "timestamp": timestamp,
+                    },
+                    {
+                        "step": "CONTINUITY_STATUS_CONFIRM",
+                        "result": continuity_status,
+                        "timestamp": timestamp,
+                    },
+                ],
+                "transport": {
+                    "mode": "continuity_controller",
+                    "acknowledgement": "system_lifecycle_active",
+                },
+            }
+            return {
+                "success": activation_result["success"],
+                "agent_id": participant_id,
+                "participant_type": participant.type,
+                "status": continuity_status.get("status", "stopped"),
+                "handshake": handshake,
+                "capabilities": participant.capabilities,
+                "description": participant.description,
+                "message_routable": participant.message_routable,
+                "registry_designation": participant.registry_designation,
+                "continuity": continuity_status,
+                "living_entity": get_halo().get_state_summary(),
+            }
+        except Exception as exc:
+            logger.error(
+                "System participant activation failed for %s: %s",
+                str(participant_id)[:100],
+                str(exc)[:100],
+            )
+            return {"success": False, "error": str(exc)}
 
     async def _perform_zipwiz_handshake(self, agent: L1RelayAgent) -> Dict[str, Any]:
         """Activate an agent through the canonical mesh runtime boundary.
@@ -296,7 +415,7 @@ class L1RelayBridge:
         }
 
     def get_constellation_status(self) -> Dict[str, Any]:
-        """Get status of entire agent constellation"""
+        """Get relay constellation and adjacent system-participant status."""
 
         active_agents = []
         for agent_id, agent in self.agents.items():
@@ -317,6 +436,11 @@ class L1RelayBridge:
             active_agents.append(agent_status)
 
         connected_count = sum(1 for agent in self.agents.values() if agent.status == "connected")
+        system_statuses = [
+            self._get_system_participant_status(participant_id)
+            for participant_id in self.system_participants
+        ]
+        active_systems = sum(1 for status in system_statuses if status["status"] == "running")
 
         return {
             "relay_tier": {
@@ -326,10 +450,15 @@ class L1RelayBridge:
                 "connected_capsules": connected_count,
                 "capsules": active_agents,
             },
-            "orion_core": self.orion_core_config,
-            "activation_phrases": {
-                agent_id: f"ORION_{agent_id}_RELAY_ACTIVATE//" for agent_id in self.agents.keys()
+            "system_participants": {
+                "constellation": "L1_OPERATIONAL_SYSTEMS",
+                "total_systems": len(self.system_participants),
+                "active_systems": active_systems,
+                "participants": system_statuses,
             },
+            "orion_core": self.orion_core_config,
+            "activation_phrases": dict(self.activation_phrases),
+            "system_activation_phrases": dict(self.system_activation_phrases),
             "timestamp": datetime.now().isoformat(),
         }
 
@@ -338,6 +467,11 @@ class L1RelayBridge:
     ) -> Dict[str, Any]:
         """Relay message through the canonical mesh runtime."""
 
+        if from_agent in self.system_participants:
+            return {
+                "success": False,
+                "error": f"System participant {from_agent} verifies continuity and cannot originate relay messages",
+            }
         if from_agent not in self.agents:
             return {"success": False, "error": f"Unknown source agent: {from_agent}"}
 
@@ -354,6 +488,11 @@ class L1RelayBridge:
         elif to_agent in ["Aurora", "AU"]:
             target_agents = ["Aurora"]
         else:
+            if to_agent in self.system_participants:
+                return {
+                    "success": False,
+                    "error": f"System participant {to_agent} is not a message relay target",
+                }
             if to_agent not in self.agents:
                 return {"success": False, "error": f"Unknown target agent: {to_agent}"}
             target_agents = [to_agent]
@@ -434,9 +573,11 @@ class L1RelayBridge:
         }
 
     async def disconnect_agent(self, agent_id: str) -> Dict[str, Any]:
-        """Disconnect an agent from the constellation"""
+        """Disconnect a relay agent or stop a system participant lifecycle."""
+        if agent_id in self.system_participants:
+            return await self._stop_system_participant(agent_id)
         if agent_id not in self.agents:
-            return {"success": False, "error": f"Unknown agent: {agent_id}"}
+            return {"success": False, "error": f"Unknown agent or system participant: {agent_id}"}
 
         agent = self.agents[agent_id]
         runtime_agent = self.runtime.disconnect_agent(agent_id)
@@ -456,10 +597,24 @@ class L1RelayBridge:
             "timestamp": datetime.now().isoformat(),
         }
 
+    async def _stop_system_participant(self, participant_id: str) -> Dict[str, Any]:
+        participant = self.system_participants[participant_id]
+        await self.halo_controller.stop()
+        return {
+            "success": True,
+            "agent_id": participant_id,
+            "participant_type": participant.type,
+            "status": "stopped",
+            "message_routable": participant.message_routable,
+            "timestamp": datetime.now().isoformat(),
+        }
+
     def get_agent_status(self, agent_id: str) -> Dict[str, Any]:
-        """Get detailed status of a specific agent"""
+        """Get detailed status of a relay agent or system participant."""
+        if agent_id in self.system_participants:
+            return self._get_system_participant_status(agent_id)
         if agent_id not in self.agents:
-            return {"success": False, "error": f"Unknown agent: {agent_id}"}
+            return {"success": False, "error": f"Unknown agent or system participant: {agent_id}"}
 
         agent = self.agents[agent_id]
 
@@ -485,6 +640,26 @@ class L1RelayBridge:
             status["handshake_log"] = agent.handshake_log
 
         return status
+
+    def _get_system_participant_status(self, participant_id: str) -> Dict[str, Any]:
+        participant = self.system_participants[participant_id]
+        continuity_status = self.halo_controller.export_status()
+        return {
+            "success": True,
+            "agent_id": participant_id,
+            "participant_type": participant.type,
+            "role": participant.role,
+            "status": continuity_status.get("status", "stopped"),
+            "description": participant.description,
+            "capabilities": participant.capabilities,
+            "api_endpoint": participant.api_endpoint,
+            "message_routable": participant.message_routable,
+            "registry_designation": participant.registry_designation,
+            "reality_layer": participant.reality_layer,
+            "triplex_role": participant.triplex_role,
+            "continuity": continuity_status,
+            "living_entity": get_halo().get_state_summary(),
+        }
 
 
 # Global bridge instance
@@ -517,6 +692,7 @@ async def main():
             f"{relay_status.get('connected_capsules', 0)}/"
             f"{relay_status.get('total_capsules', 0)}"
         )
+
 
 def cli():
     """Command-line helper for integration layers."""

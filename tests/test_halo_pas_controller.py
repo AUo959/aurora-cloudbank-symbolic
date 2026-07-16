@@ -56,6 +56,7 @@ def test_controller_initialization():
     assert controller._task is None
     assert len(controller._samples) == 0
     assert controller._sample_counter == 0
+    assert controller.running is False
 
 
 @pytest.mark.unit
@@ -260,6 +261,7 @@ async def test_controller_start_stop():
     # Start controller
     await controller.start()
     assert controller._running is True
+    assert controller.running is True
     assert controller._task is not None
 
     # Let it run for a short time
@@ -268,6 +270,7 @@ async def test_controller_start_stop():
     # Stop controller
     await controller.stop()
     assert controller._running is False
+    assert controller.running is False
     assert controller._task is None
 
     # Should have collected some samples

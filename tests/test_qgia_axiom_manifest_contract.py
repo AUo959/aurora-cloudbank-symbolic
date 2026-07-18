@@ -137,11 +137,12 @@ class TestQGIAAxiomManifestContract(unittest.TestCase):
         self.assertEqual(human_rows, machine_rows)
 
     def test_external_agent_dependency_remains_preserved_as_corollary(self) -> None:
-        first_node = self.nodes[0]
+        nodes_by_id = {node["id"]: node for node in self.nodes}
 
-        self.assertEqual(first_node["id"], "AN-001")
-        self.assertIn("corollaries", first_node)
-        self.assertIn("1.2 External-Agent Dependency", first_node["corollaries"])
+        self.assertIn("AN-001", nodes_by_id)
+        node = nodes_by_id["AN-001"]
+        self.assertIn("corollaries", node)
+        self.assertIn("1.2 External-Agent Dependency", node["corollaries"])
         self.assertIn("not a removed axiom node", self.human_manifest)
 
     def test_legacy_bundle_aliases_resolve_to_canonical_registry(self) -> None:

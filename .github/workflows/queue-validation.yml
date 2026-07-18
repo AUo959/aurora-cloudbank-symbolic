@@ -79,7 +79,7 @@ jobs:
       # conftest fixtures, so it runs standalone.
       - name: Validate queue.json against queue_schema.json
         run: |
-          pytest --noconftest tests/test_work_queue_schema.py tests/test_queue_issue_ingestion.py -q --no-header
+          pytest --noconftest tests/test_work_queue_schema.py tests/test_queue_issue_ingestion.py tests/test_gate_escalation.py -q --no-header
 
       - name: Check generated views are in sync with queue.json
         id: drift_check

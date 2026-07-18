@@ -1,0 +1,102 @@
+# queue-issue-ingestion.yml
+# Auto-ingest GitHub issues labeled `blocking` or `security` into the Aurora
+# work queue (ops/work_queue/queue.json) — the "Sync script" roadmap item of
+# issue #1131. Design decisions recorded on that issue (2026-07-17).
+#
+# Authority contract: this workflow only ever OPENS A PR — it never pushes to
+# main. Every ingestion is therefore gated by queue-validation.yml (blocking
+# schema validation + view-freshness) and by human/Aurora review. Ingested
+# entries land at the tail of the queue with aurora_authority: false, awaiting
+# Aurora rerank; existing rank order is never modified.
+#
+# Tracked in: https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1131
+
+name: Queue Issue Ingestion
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Mondays 06:00 UTC — weekly is enough; manual for urgency
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual dispatch (optional)'
+        required: false
+        default: 'Manual ingestion run'
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: write
+
+jobs:
+  ingest:
+    name: Ingest labeled issues into work queue
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install jsonschema
+
+      # Auth stays in gh; the Python script only ever sees a JSON file.
+      - name: Fetch candidate issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue list --state open --label blocking \
+            --json number,title,labels,state > /tmp/blocking.json
+          gh issue list --state open --label security \
+            --json number,title,labels,state > /tmp/security.json
+          python - <<'PY'
+          import json
+          seen, merged = set(), []
+          for path in ("/tmp/blocking.json", "/tmp/security.json"):
+              for issue in json.load(open(path)):
+                  if issue["number"] not in seen:
+                      seen.add(issue["number"])
+                      merged.append(issue)
+          json.dump(merged, open("/tmp/candidate_issues.json", "w"), indent=2)
+          print(f"{len(merged)} candidate issue(s)")
+          PY
+
+      - name: Run ingestion
+        id: ingest
+        run: |
+          set +e
+          python ops/work_queue/ingest_issues.py --issues-file /tmp/candidate_issues.json
+          code=$?
+          set -e
+          if [ "$code" = "10" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif [ "$code" = "0" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            exit "$code"
+          fi
+
+      - name: Open ingestion PR
+        if: steps.ingest.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="queue/auto-ingest-$(date -u +%Y%m%d-%H%M)"
+          git config user.name "aurora-queue-ingestion[bot]"
+          git config user.email "aurora-queue-ingestion@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add ops/work_queue/
+          git commit -m "aurora(queue): auto-ingest labeled issues (#1131)"
+          git push -u origin "$branch"
+          gh pr create \
+            --title "aurora(queue): auto-ingest labeled issues" \
+            --body "$(printf 'Automated ingestion of open issues labeled blocking/security into ops/work_queue/queue.json (see #1131 for the design).\n\nEntries are appended at the tail with aurora_authority: false — Aurora rerank happens on review of this PR. Schema validation and view freshness are enforced by queue-validation.yml on this PR.')" \
+            --base main --head "$branch"

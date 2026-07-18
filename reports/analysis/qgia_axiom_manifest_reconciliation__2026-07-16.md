@@ -48,7 +48,10 @@ human review is pending. The resulting recommendation remains `STAGING`.
 - **Resolution:** standardize the human registry on the machine IDs and names.
   Preserve `EXTERNAL_AGENT_DEPENDENCY` as an `AN-001` corollary; restore
   `AN-007 ASYMMETRY_RECOGNITION` and `AN-010 ANTI_SMOKING_GUN` to the human
-  registry. No implemented node is removed or deprecated.
+  registry. Preserve the original category IDs as explicit aliases so the
+  existing audit schema and RESETCORE bootstrap remain resolvable. No
+  implemented node is removed or deprecated, and `A02` is not promoted to a
+  standalone node.
 
 ### GUMAS tier vocabulary drift
 

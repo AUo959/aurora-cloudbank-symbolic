@@ -29,6 +29,38 @@ document package can be exported; it does not mean that Quantum Forge loads or
 activates the axiom definitions. No loader or adapter for that purpose is
 present in this repository.
 
+## Legacy bundle aliases
+
+The existing audit schema and RESETCORE bootstrap still use the original
+category identifiers. The following aliases keep those bundle references
+resolvable without creating additional axiom nodes. `A02` remains a corollary
+of `AN-001`; every other alias targets a canonical node directly.
+
+| Legacy ID | Canonical target | Relationship | Canonical label |
+| --- | --- | --- | --- |
+| A01 | AN-001 | Node | TRUMP_REACTIVE_AGENT_MODEL |
+| A02 | AN-001 | Corollary | EXTERNAL_AGENT_DEPENDENCY |
+| A03 | AN-002 | Node | COWARD_BULLY_CONFIG |
+| B01 | AN-015 | Node | DOMINATION_AXIOM |
+| B02 | AN-016 | Node | AGENCY_AXIOM |
+| B03 | AN-017 | Node | THRESHOLD_AXIOM |
+| B04 | AN-018 | Node | PERCEPTION_AXIOM |
+| B05 | AN-019 | Node | ALLIANCE_AXIOM |
+| B06 | AN-020 | Node | RATIONAL_POWER |
+| C01 | AN-006 | Node | NEUTRALITY_FLUFF |
+| C02 | AN-008 | Node | 4D_CHESS_EXCLUSION |
+| C03 | AN-009 | Node | MOSAIC_EVIDENCE |
+| C04 | AN-011 | Node | REVEALED_BELIEF_DISSONANCE |
+| C05 | AN-003 | Node | PREDICTION_MARKET_WEIGHT |
+| D01 | AN-004 | Node | RATIONALE_TREADMILL |
+| D02 | AN-012 | Node | SELF_INFLICTED_BLIND_SPOT |
+| D03 | AN-005 | Node | WEAPONIZED_DIPLOMACY |
+| D04 | AN-013 | Node | PHOTO_OP_DURABILITY |
+| D05 | AN-014 | Node | PERSONAL_ENRICHMENT_VEHICLE |
+| E01 | AN-022 | Node | MACHIAVELLI_HATRED_THRESHOLD |
+| E02 | AN-023 | Node | DRAFT_THREAT_ACTIVATION |
+| S01 | AN-021 | Node | FORECAST_CONSENSUS_SEPARATION |
+
 ## Node registry
 
 The `gumas_tier` values below are QGIA doctrine classifications. They are not

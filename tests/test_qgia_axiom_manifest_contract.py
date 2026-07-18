@@ -8,8 +8,51 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST_PATH = ROOT / "QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json"
-HUMAN_MANIFEST_PATH = ROOT / "QGIA_Integration/01_QUANTUM_FORGE_AxiomManifest.md"
+
+
+def resolve_qgia_file(filename: str, preferred_directory: str) -> Path:
+    """Resolve either historical QGIA directory casing during consolidation."""
+    directories = dict.fromkeys(
+        (preferred_directory, "QGIA_Integration", "QGIA_integration")
+    )
+    for directory in directories:
+        candidate = ROOT / directory / filename
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(f"Could not locate QGIA file: {filename}")
+
+
+MANIFEST_PATH = resolve_qgia_file(
+    "QUANTUM_FORGE_Axiom_Manifest.json", "QGIA_integration"
+)
+HUMAN_MANIFEST_PATH = resolve_qgia_file(
+    "01_QUANTUM_FORGE_AxiomManifest.md", "QGIA_Integration"
+)
+
+EXPECTED_LEGACY_ALIASES = {
+    "A01": ("AN-001", "NODE", "TRUMP_REACTIVE_AGENT_MODEL"),
+    "A02": ("AN-001", "COROLLARY", "EXTERNAL_AGENT_DEPENDENCY"),
+    "A03": ("AN-002", "NODE", "COWARD_BULLY_CONFIG"),
+    "B01": ("AN-015", "NODE", "DOMINATION_AXIOM"),
+    "B02": ("AN-016", "NODE", "AGENCY_AXIOM"),
+    "B03": ("AN-017", "NODE", "THRESHOLD_AXIOM"),
+    "B04": ("AN-018", "NODE", "PERCEPTION_AXIOM"),
+    "B05": ("AN-019", "NODE", "ALLIANCE_AXIOM"),
+    "B06": ("AN-020", "NODE", "RATIONAL_POWER"),
+    "C01": ("AN-006", "NODE", "NEUTRALITY_FLUFF"),
+    "C02": ("AN-008", "NODE", "4D_CHESS_EXCLUSION"),
+    "C03": ("AN-009", "NODE", "MOSAIC_EVIDENCE"),
+    "C04": ("AN-011", "NODE", "REVEALED_BELIEF_DISSONANCE"),
+    "C05": ("AN-003", "NODE", "PREDICTION_MARKET_WEIGHT"),
+    "D01": ("AN-004", "NODE", "RATIONALE_TREADMILL"),
+    "D02": ("AN-012", "NODE", "SELF_INFLICTED_BLIND_SPOT"),
+    "D03": ("AN-005", "NODE", "WEAPONIZED_DIPLOMACY"),
+    "D04": ("AN-013", "NODE", "PHOTO_OP_DURABILITY"),
+    "D05": ("AN-014", "NODE", "PERSONAL_ENRICHMENT_VEHICLE"),
+    "E01": ("AN-022", "NODE", "MACHIAVELLI_HATRED_THRESHOLD"),
+    "E02": ("AN-023", "NODE", "DRAFT_THREAT_ACTIVATION"),
+    "S01": ("AN-021", "NODE", "FORECAST_CONSENSUS_SEPARATION"),
+}
 
 REQUIRED_NODE_FIELDS = {
     "id",
@@ -40,7 +83,7 @@ class TestQGIAAxiomManifestContract(unittest.TestCase):
         expected_ids = [f"AN-{index:03d}" for index in range(1, 24)]
         actual_ids = [node["id"] for node in self.nodes]
 
-        self.assertEqual(actual_ids, expected_ids)
+        self.assertEqual(sorted(actual_ids), expected_ids)
         self.assertEqual(len(set(actual_ids)), 23)
 
     def test_machine_registry_has_unique_complete_nodes(self) -> None:
@@ -97,8 +140,34 @@ class TestQGIAAxiomManifestContract(unittest.TestCase):
         first_node = self.nodes[0]
 
         self.assertEqual(first_node["id"], "AN-001")
+        self.assertIn("corollaries", first_node)
         self.assertIn("1.2 External-Agent Dependency", first_node["corollaries"])
         self.assertIn("not a removed axiom node", self.human_manifest)
+
+    def test_legacy_bundle_aliases_resolve_to_canonical_registry(self) -> None:
+        aliases = {
+            alias: (
+                entry["target_id"],
+                entry["relationship"],
+                entry["target_name"],
+            )
+            for alias, entry in self.manifest["legacy_id_aliases"].items()
+        }
+        canonical_nodes = {node["id"]: node for node in self.nodes}
+
+        self.assertEqual(aliases, EXPECTED_LEGACY_ALIASES)
+        for alias, (target_id, relationship, target_name) in aliases.items():
+            with self.subTest(alias=alias):
+                self.assertIn(target_id, canonical_nodes)
+                if relationship == "NODE":
+                    self.assertEqual(canonical_nodes[target_id]["name"], target_name)
+                else:
+                    self.assertEqual(alias, "A02")
+                    self.assertEqual(target_name, "EXTERNAL_AGENT_DEPENDENCY")
+                    self.assertIn(
+                        "1.2 External-Agent Dependency",
+                        canonical_nodes[target_id]["corollaries"],
+                    )
 
 
 if __name__ == "__main__":

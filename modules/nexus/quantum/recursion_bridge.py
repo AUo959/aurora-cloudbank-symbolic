@@ -119,6 +119,16 @@ def _serialize_recursion_state(state: Any) -> dict[str, Any]:
     if "T10-HYBRID-2025" not in thread_chain:
         thread_chain.append("T10-HYBRID-2025")
 
+    # UnifiedRecursionState carries a datetime timestamp; the manifest is
+    # json.dumps'd without a custom encoder, so normalize to ISO-8601 here.
+    # (Found by tests/test_hybrid_cycle.py — string-timestamp stubs masked
+    # this until the bridge ran against a real Phase 9 state.)
+    timestamp = getattr(state, "timestamp", None)
+    if hasattr(timestamp, "isoformat"):
+        timestamp = timestamp.isoformat()
+    elif timestamp is None:
+        timestamp = _timestamp()
+
     return {
         "anchor": getattr(state, "anchor", "UNKNOWN"),
         "parent_anchor": getattr(state, "parent_anchor", "UNKNOWN"),
@@ -130,7 +140,7 @@ def _serialize_recursion_state(state: Any) -> dict[str, Any]:
         "divergent_truths": len(getattr(state, "divergent_truths", []) or []),
         "memory_usage_mb": float(getattr(state, "memory_usage_mb", 0.0)),
         "cpu_usage_percent": float(getattr(state, "cpu_usage_percent", 0.0)),
-        "timestamp": getattr(state, "timestamp", _timestamp()),
+        "timestamp": str(timestamp),
         "thread_chain": thread_chain,
         "requires_arbitration": _requires_arbitration(state),
         "dlp_level": getattr(state, "dlp_tag", BRIDGE_DLP_LEVEL),

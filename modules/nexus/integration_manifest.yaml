@@ -1,4 +1,4 @@
-manifest_version: "7.2.0"
+manifest_version: "7.3.0"
 integration_time: "2025-09-27T16:00:00Z"
 team: "Aurora Core"
 arbiter: "AUo959"
@@ -73,18 +73,21 @@ phase_status:
 
   phase10_hybrid_orchestration:
     anchor: "T10-HYBRID-2025"
-    status: "IN_PROGRESS"
-    # Truth reconciliation (2026-07-17, #1067): the components below are the
-    # PLAN, not the tree. modules/nexus/schematics/ contains only
-    # copilot_integration.py; implementation is tracked in issue #1264.
-    components_implemented:
-      - "copilot_integration"
-    components_planned:
-      - "hybrid_orchestrator"          # not implemented — #1264
-      - "quantum_classical_bridge"     # not implemented — #1264
-      - "hybrid_cycle_tests"           # not implemented — #1264
-      - "recursion_hybrid_bridge"      # not implemented — #1264; possible seed: modules/nexus/quantum/recursion_bridge.py
-    capabilities_planned:
+    completion_anchor: "T10-HYBRID-COMPLETE-2025"
+    status: "COMPLETE"
+    # Completion audit (2026-07-17, #1264): the components existed under
+    # modules/nexus/quantum/ (not schematics/, where the earlier #1067 audit
+    # looked). Verified by tests/test_hybrid_cycle.py, including the required
+    # 10-cycle glyphcard burn-in and a real Phase 9 UnifiedRecursionState
+    # hand-off (which surfaced and fixed a datetime-serialization defect in
+    # the bridge manifest path).
+    components:
+      - "hybrid_orchestrator"          # modules/nexus/quantum/hybrid_orchestrator.py
+      - "quantum_classical_bridge"     # realized inside hybrid_orchestrator (QuantumStateSimulator + classical pre/post + cycle exports)
+      - "recursion_hybrid_bridge"      # modules/nexus/quantum/recursion_bridge.py
+      - "hybrid_cycle_tests"           # tests/test_hybrid_cycle.py
+      - "copilot_integration"          # modules/nexus/schematics/copilot_integration.py
+    capabilities:
       - "Quantum-classical cycle exports"
       - "Checkpoint restoration"
       - "Glyphcard synthesis"
@@ -130,10 +133,10 @@ thread_continuity:
   divergent_truths: 0
 
 next_steps:
-  immediate:
-    - "Chain Phase 8 status, Phase 9 recursion, and Phase 10 hybrid cycles"
-    - "Run glyphcard burn-in across 10 hybrid cycles"
-    - "Validate recursion payload hand-off into hybrid orchestrator"
+  immediate: []
+  # Phase 10 items completed 2026-07-17 (#1264): hybrid cycles chained,
+  # 10-cycle glyphcard burn-in run (tests/test_hybrid_cycle.py), recursion
+  # payload hand-off validated against a real UnifiedRecursionState.
     
   phase8_planning:
     - "Transcendent consciousness protocols"
@@ -153,6 +156,7 @@ thread_chain:
   - "T8-STATUS-GUMAS-V2-2025"
   - "T9-INFINITE-UNIFIED-2025"
   - "T10-HYBRID-2025"
+  - "T10-HYBRID-COMPLETE-2025"
   - "T11-MULTIDIM-2025"
 
 # seal below covers the v7.1.0 record; v7.2.0 changes are the truth

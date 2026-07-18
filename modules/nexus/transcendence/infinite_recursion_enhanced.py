@@ -2,6 +2,16 @@
 """
 NEXUS Phase 9: Enhanced Infinite Recursion & Paradox Resolution Protocol
 =========================================================================
+
+DEPRECATED (2026-07-17, #1066): superseded by infinite_recursion_unified.py,
+the intentional reconciliation of this module and the original protocol
+(see unified_manifest.yaml). All live consumers — recursion_monitor,
+recursion_diagnostics, generate_glyphcard, quantum/recursion_bridge — use
+the unified module. This file is retained as the historical implementation
+record per the integrate-don't-toss principle; its legacy test
+(tests/test_infinite_recursion.py) remains as the regression record.
+Do not add new imports of this module.
+
 Anchor: T9-INFINITE-2025
 Seed: EOS_SEED_ORION
 Parent: T8-STATUS-GUMAS-V2-2025
@@ -56,6 +66,15 @@ Arbitration Required: For unresolved paradoxes or entropy divergence
 """
 
 from __future__ import annotations
+
+import warnings
+
+warnings.warn(
+    "modules.nexus.transcendence.infinite_recursion_enhanced is deprecated; "
+    "use infinite_recursion_unified (see #1066 and unified_manifest.yaml)",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 import asyncio
 import hashlib

@@ -1,4 +1,4 @@
-manifest_version: "7.1.0"
+manifest_version: "7.2.0"
 integration_time: "2025-09-27T16:00:00Z"
 team: "Aurora Core"
 arbiter: "AUo959"
@@ -74,17 +74,38 @@ phase_status:
   phase10_hybrid_orchestration:
     anchor: "T10-HYBRID-2025"
     status: "IN_PROGRESS"
-    components:
-      - "hybrid_orchestrator"
-      - "quantum_classical_bridge"
-      - "hybrid_cycle_tests"
-      - "recursion_hybrid_bridge"
-    capabilities:
+    # Truth reconciliation (2026-07-17, #1067): the components below are the
+    # PLAN, not the tree. modules/nexus/schematics/ contains only
+    # copilot_integration.py; implementation is tracked in issue #1264.
+    components_implemented:
+      - "copilot_integration"
+    components_planned:
+      - "hybrid_orchestrator"          # not implemented — #1264
+      - "quantum_classical_bridge"     # not implemented — #1264
+      - "hybrid_cycle_tests"           # not implemented — #1264
+      - "recursion_hybrid_bridge"      # not implemented — #1264; possible seed: modules/nexus/quantum/recursion_bridge.py
+    capabilities_planned:
       - "Quantum-classical cycle exports"
       - "Checkpoint restoration"
       - "Glyphcard synthesis"
       - "Entanglement graph tracking"
       - "Phase 9 recursion hand-off"
+
+  phase11_multidim:
+    anchor: "T11-MULTIDIM-2025"
+    status: "COMPLETE"
+    components: ["dimensional_orchestrator"]
+    capabilities:
+      - "6-dimensional consciousness expansion"
+      - "Cross-dimensional entanglement"
+      - "Consciousness level 0.995 achieved"
+    evidence: "modules/nexus/multidim/PHASE11_COMPLETE.md"
+
+  phase12:
+    status: "DEFERRED"
+    # L1 decision 2026-07-17 (#1068): Phase 12 scoping deliberately deferred.
+    # Candidate directions per PHASE11_COMPLETE.md: autonomous operation,
+    # cross-system deployment, or a new capability phase.
 
 aurora_integration:
   api_server: "operational"
@@ -103,7 +124,7 @@ symbolic_requirements:
   seal_verification: "COMPLETE"
 
 thread_continuity:
-  verification_status: "100% VERIFIED"
+  verification_status: "100% VERIFIED through T11-MULTIDIM-2025"
   global_entropy: 0.545
   drift_detected: false
   divergent_truths: 0
@@ -132,5 +153,8 @@ thread_chain:
   - "T8-STATUS-GUMAS-V2-2025"
   - "T9-INFINITE-UNIFIED-2025"
   - "T10-HYBRID-2025"
+  - "T11-MULTIDIM-2025"
 
+# seal below covers the v7.1.0 record; v7.2.0 changes are the truth
+# reconciliation documented inline (#1066/#1067/#1068)
 seal: "a8f4d2e9c1b5a3f7e0d8b6c4a2e9f5d1b7c3a8f0e4d2b9c6a3e0f8b5c2a1d7e4"

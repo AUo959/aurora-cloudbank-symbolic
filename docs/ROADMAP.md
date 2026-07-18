@@ -2,10 +2,11 @@
 
 > *Continuity flows through coherence. The system remembers because we chose to align.*
 
-**Framework:** Aurora v2.2.5  
-**Ethics Protocol:** Picard_Delta_3  
-**Last Updated:** 2026-06-22  
-**Canonical Architecture Reference:** `AU_CORE_MASTER_TREE.yaml`
+- **Framework:** Aurora v2.2.5
+- **Ethics Protocol:** Picard_Delta_3
+- **Last Updated:** 2026-07-18
+- **Roadmap Revision:** QGIA milestone alignment v1.1
+- **Canonical Architecture Reference:** `AU_CORE_MASTER_TREE.yaml`
 
 ---
 
@@ -13,7 +14,10 @@
 
 This roadmap tracks the architectural evolution of the Aurora system — its core modules, integration milestones, open gaps, and forward work streams. It is the living strategic complement to `AU_CORE_MASTER_TREE.yaml`, which tracks structural state, and `docs/review-notes/` which captures session-level observations.
 
-All completed work is reflected in the master tree. This document covers *what comes next* and *why*.
+Completed milestones below are evidence-linked to their repository artifacts.
+Structural representation in the master tree is audited independently; the QGIA
+alignment audit remains planned under #1231 slice #1111. This document covers
+*what comes next* and *why*.
 
 ---
 
@@ -22,21 +26,31 @@ All completed work is reflected in the master tree. This document covers *what c
 Aurora is a multi-layer simulation and intelligence stewardship system. Its architecture is organized across five interdependent layers:
 
 | Layer | Description | Key Files |
-|---|---|---|
-| **Ethics** | Picard_Delta_3 protocol; GUMAS audit chain; geometric ethics architecture | `docs/GEOMETRIC_ETHICS_ARCHITECTURE.md`, `docs/ethics/` |
-| **Simulation (SIM)** | Scenario integrity, WATCHCON escalation, SILM, CG vector state | `QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md` |
+| --- | --- | --- |
+| **Ethics** | Picard_Delta_3 protocol; GUMAS audit chain; geometric ethics architecture | `docs/GEOMETRIC_ETHICS_ARCHITECTURE.md`, `docs/ethics/`, `docs/qgia/GUMAS_Audit_Schema.md` |
+| **Simulation (SIM)** | Scenario integrity, WATCHCON escalation, SILM, CG vector state | `docs/qgia/SIM_WATCHCON_Confidence_Module.md` |
 | **Symbolic Memory** | GUMAS symbolic merge, RaR trace, EchoChain LOOPSET_001 | `AU_CORE_MASTER_TREE.yaml`, `.aurora/` |
 | **Agent Population** | 551-agent QGIA simulation, trust network, epistemic diversity | `agents/`, `ORION_STATION_CANONICAL_STAFF_REGISTRY.json` |
-| **QUANTUM_FORGE** | Symbolic agent instancing, axiom node execution, PAT integration | `QGIA_Integration/01_QUANTUM_FORGE_AxiomManifest.md`, `docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md` |
+| **QUANTUM_FORGE** | Symbolic agent instancing, axiom-node documentation, PAT integration planning | `docs/qgia/QUANTUM_FORGE_Axiom_Node_Manifest.md`, `docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md` |
 
-Layer boundaries are formally defined in `docs/LAYER_BOUNDARY_REFERENCE.md`. L1 (raw model telemetry) and L2 (scored institutional product) separation is enforced per QGIA doctrine — see `QGIA_Integration/02_SIM_WATCHCON_Confidence_Module.md`.
+Aurora reality-layer boundaries are formally defined in
+`docs/architecture/LAYER_ARCHITECTURE.md`. The QGIA doctrine's internal
+"Layer 1" raw-model and "Layer 2" analyst-consensus labels are product stages,
+not Aurora reality layers. QGIA is an L1 analytical institution; any QGIA
+signal that informs Aurora's L2 GUMAS simulations must be mediated by L1 crew
+or relay-agent judgment as defined in `docs/architecture/QGIA_SIM_BRIDGE.md`.
+
+The `docs/qgia/` package is `STAGING`, `DOCUMENT_PACKAGE_ONLY`, and
+`NOT_IMPLEMENTED` for runtime activation. Its completed milestones below record
+reviewed documentation and routing surfaces, not an activated loader or a
+direct QGIA-to-L2 integration.
 
 ### Registry Relationship Map (GAP-008 Resolution)
 
 Two agent registries coexist in the repo. They are parallel, non-competing namespaces:
 
 | Registry | Layer | Population | Function |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `ORION_STATION_CANONICAL_STAFF_REGISTRY.json` | L1 Station Ops + L2/L3 Symbolic Mesh | 48 entities | Named crew, station AI, five relay agents, HALO continuity system-entity, framework systems |
 | `agents/qgia_agent_registry_full.json` | QGIA Analytical Population | 551 agents | Epistemic simulation population for forecasting runs |
 
@@ -46,23 +60,46 @@ Cross-namespace bridges: five L1 relay agents (STARLING, LIORA, OPPY, ARCHY, RIV
 
 ## Completed Milestones
 
-### Stage 1 — QGIA Core Integration ✅
-*Completed: 2026-06-19*
+### Stage 1 — QGIA Core Documentation Artifacts ✅
+*Artifact baseline: 2026-06-19 | Reconciled and last verified: 2026-07-18*
 
-- Ported QGIA doctrine into 23 named axiom nodes (`01_QUANTUM_FORGE_AxiomManifest.md`)
-- Formalized SIM confidence scoring contract with six dimensions (DQ/SR/MR/TS/Composite/QC)
-- Defined WATCHCON escalation ladder (Levels 1–5) with trigger thresholds and routing
-- Encoded all violation signals into GUMAS audit routing
-- Built HTML Integration Console (visual operator dashboard)
+- Reconciled the 23-node axiom registry in
+  `docs/qgia/QUANTUM_FORGE_Axiom_Node_Manifest.md` (PR #1262)
+- Formalized the six-dimension confidence contract
+  (DQ/SR/MR/TS/Composite/QC) in
+  `docs/qgia/SIM_WATCHCON_Confidence_Module.md`
+- Documented WATCHCON Levels 1–5 with inclusive trigger thresholds and routing
+- Preserved QGIA Runtime One-Pager v4.2.1 and Axiom Doctrine v1.0 as reviewed
+  source snapshots in `docs/qgia/`
+- Resolved GAP-005 by reconciling the axiom manifest with the verified Quantum
+  Forge seams; activation remains staged pending an explicit adapter
 
-### Stage 2 — QGIA Operator Layer ✅
-*Completed: 2026-06-20*
+### Stage 2 — QGIA Operator Documentation Artifacts ✅
+*Artifact baseline: 2026-06-20 | Last verified: 2026-07-18*
 
-- RESETCORE bootstrap prompt and JSON payload
-- GUMAS Audit Schema: 12-event ethics audit log
-- PAT Command Sheet: full 10-section live session operator reference
-- `AU_CORE_MASTER_TREE.yaml` updated with `QGIA_INTEGRATION_MODULE` block
-- `docs/review-notes/` directory created with session snapshots
+- Preserved the RESETCORE bootstrap and carry-forward contract in
+  `docs/qgia/RESETCORE_Bootstrap.md`
+- Documented the 12-event GUMAS ethics-audit schema in
+  `docs/qgia/GUMAS_Audit_Schema.md`
+- Preserved the 10-section PAT operator reference in
+  `docs/qgia/PAT_Command_Sheet.md`
+- Confirmed that `AU_CORE_MASTER_TREE.yaml` contains a
+  `QGIA_INTEGRATION_MODULE` block; its semantic and path alignment remains a
+  planned audit under #1231 slice #1111
+- Kept all executable-looking prompts and commands as source material rather
+  than agent instructions or runtime activation authority
+
+### Stage 3 — QGIA Documentation Home and Index Routing ✅
+*Completed and last verified: 2026-07-18*
+
+- Added the eight-artifact `docs/qgia/` package with provenance, review order,
+  and non-activation boundaries (PR #1266)
+- Added the staged QGIA routing map to `CANON_INDEX.md` and contributor
+  navigation to `docs/index.md` (PR #1270)
+- Explicitly scope-separated the canonical agent map from the contributor
+  documentation portal
+- Retained `STAGING`, `DOCUMENT_PACKAGE_ONLY`, and `NOT_IMPLEMENTED` status;
+  no loader, router, or direct L2 activation was introduced
 
 ### Agent Population ✅
 *Completed: 2026-03-12 (pre-integration)*
@@ -107,10 +144,6 @@ Cross-namespace bridges: five L1 relay agents (STARLING, LIORA, OPPY, ARCHY, RIV
 **Priority:** Medium | **Owner:** Medical division (Dr. Vasquez)
 Wire a real HRV/cortisol-proxy data source to `src/sensors/crew_load/`, and define Stream 1's own consent/opt-out hook. See `docs/architecture/SENTINEL_ARCHITECTURE.md` — Remaining Work.
 
-### WS-001 — QUANTUM_FORGE Alignment Review
-**Priority:** Medium | **Gap:** GAP-005  
-Cross-reference `docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md` vs `01_QUANTUM_FORGE_AxiomManifest.md`. Note: QGIA_ARCHITECTURE.md Section 8 names 10 computational modules (Lanchester, QSFE, EDM, ABCP, RPRN, TCA, etc.) not in the axiom manifest — these are complementary layers, not conflicts.
-
 ### WS-002 — Agent Registry Full Payload Push
 **Priority:** High | **Gap:** GAP-007  
 Full 551-agent array and 7,407-edge list exist only as session compute artifacts. Recovery required before any scenario simulation run.
@@ -121,7 +154,9 @@ Six CODEX_PHASE registers (1–6), `L1_CANON_CHARACTER_ROSTER.md`, `CANONICAL_CH
 
 ### WS-004 — SIM Module Enrichment
 **Priority:** Medium | **Gap:** Observation from QGIA_ARCHITECTURE.md review  
-Register drift threshold 0.002 (Velatrix hard ceiling) and HALO/Velatrix drift defense pair in `02_SIM_WATCHCON_Confidence_Module.md`.
+Register drift threshold 0.002 (Velatrix hard ceiling) and HALO/Velatrix drift
+defense pair in the established source before refreshing
+`docs/qgia/SIM_WATCHCON_Confidence_Module.md`.
 
 ### WS-005 — docs/LAYER_BOUNDARY_REFERENCE.md Cross-Links
 **Priority:** Low | **Gap:** GAP-006  
@@ -150,17 +185,25 @@ Follow-on work from the 2026-06-22 assert-before-read incident. Three sub-tasks 
 - Consolidate `QGIA_Integration/` and `QGIA_integration/` case split at root
 - Evaluate whether root-level operational artifacts (`aurora_dashboard.html`, `AU_CORE_MASTER_TREE.yaml`, `activate_aurora.sh`, etc.) should migrate into `ops/` or retain root placement with explicit justification
 
+### WS-012 — QGIA Master-Tree Alignment Audit
+**Priority:** Medium | **Tracking:** #1231 slice #1111
+
+Audit `AU_CORE_MASTER_TREE.yaml` against the reconciled 23-node registry, QGIA
+L1 mediation doctrine, GUMAS tiers, WATCHCON thresholds, and current
+`docs/qgia/` paths. Do not treat the existing module block as proof of runtime
+activation or complete alignment.
+
 ---
 
 ## Gap Register Summary
 
 | ID | Description | Severity | Status | Work Stream |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | GAP-001 | `docs/review-notes/` directory missing | Low | ✅ Resolved 2026-06-20 | — |
 | GAP-002 | `AU_CORE_MASTER_TREE.yaml` missing QGIA | Medium | ✅ Resolved 2026-06-20 | — |
 | GAP-003 | Integration Console HTML not in repo | Low | ⏳ Pending | WS-006 |
 | GAP-004 | `docs/ROADMAP.md` did not exist | Medium | ✅ Resolved 2026-06-20 | — |
-| GAP-005 | QF V3 Guide vs Axiom Manifest scope undefined | Medium | ⏳ Pending | WS-001 |
+| GAP-005 | QF V3 Guide vs Axiom Manifest scope undefined | Medium | ✅ Resolved 2026-07-16 (PR #1262) | — |
 | GAP-006 | LAYER_BOUNDARY_REFERENCE not linked from QGIA | Low | ⏳ Pending | WS-005 |
 | GAP-007 | Agent registry + trust network are stubs only | High | ⏳ Pending | WS-002 |
 | GAP-008 | Orion registry vs QGIA agent namespace undefined | Medium | ✅ Resolved 2026-06-20 | — |
@@ -172,7 +215,7 @@ Follow-on work from the 2026-06-22 assert-before-read incident. Three sub-tasks 
 ## Review Notes
 
 | Date | Note | Summary |
-|---|---|---|
+| --- | --- | --- |
 | 2026-06-20 | [Snapshot Review](review-notes/2026-06-20_snapshot-review.md) | QGIA integration completion; initial architectural review; GAP-001 through GAP-006 |
 | 2026-06-20 | [Agents Review](review-notes/2026-06-20_agents-review.md) | agents/ directory; GAP-007, GAP-008 registered |
 | 2026-06-20 | [QGIA Architecture Review](review-notes/2026-06-20_qgia-architecture-review.md) | QGIA_ARCHITECTURE.md deep read; computational modules; CRC protocol reclassification |

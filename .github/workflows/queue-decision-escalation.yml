@@ -1,0 +1,109 @@
+# queue-decision-escalation.yml
+# Decision-gate escalation for the Aurora work queue — the final roadmap item
+# of issue #1131 ("PAT hails"), implemented per the L1 decision of 2026-07-17
+# as escalation over transports that exist today: GitHub issue-comment pings.
+# Mesh dispatch is operator-run only (the CI mesh store is ephemeral); a real
+# PAT hailing transport remains future work on the mesh terminal surface.
+#
+# Dedup: escalate_gates.py --apply bumps last_surfaced on escalated gates, so
+# a gate cannot re-ping until the threshold elapses again. The bump routes
+# through a PR (never a direct push), same discipline as queue ingestion.
+#
+# Tracked in: https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1131
+
+name: Queue Decision Escalation
+
+on:
+  schedule:
+    - cron: '30 6 * * 1'  # Mondays 06:30 UTC, after the 06:00 ingestion run
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual dispatch (optional)'
+        required: false
+        default: 'Manual escalation run'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  escalate:
+    name: Escalate aged decision gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run escalation check (and bump last_surfaced)
+        id: escalate
+        run: |
+          set +e
+          python ops/work_queue/escalate_gates.py --apply --json /tmp/escalations.json
+          code=$?
+          set -e
+          if [ "$code" = "10" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif [ "$code" = "0" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            exit "$code"
+          fi
+
+      - name: Ping linked issues
+        if: steps.escalate.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json, subprocess
+          report = json.load(open("/tmp/escalations.json"))
+          for gate in report["escalations"]:
+              issue = gate.get("github_issue")
+              if not issue:
+                  continue
+              age = gate.get("days_since_surfaced")
+              body = (
+                  f"⏰ **Decision-gate escalation** ({gate['gate_id']}, tier {gate['escalation_tier']}): "
+                  f"this gate has awaited an operator decision for "
+                  f"{age if age is not None else 'an unknown number of'} days "
+                  f"(threshold {report['threshold_days']}).\n\n"
+                  f"Blocks: {', '.join(gate.get('blocks_queue_items') or []) or 'none recorded'}. "
+                  f"Owner: {gate.get('decision_owner', 'operator')}.\n\n"
+                  f"_Automated weekly escalation per #1131; last_surfaced has been bumped, "
+                  f"so this will not re-ping before the threshold elapses again._"
+              )
+              subprocess.run(["gh", "issue", "comment", str(issue), "--body", body], check=True)
+              print(f"pinged issue #{issue} for {gate['gate_id']}")
+          for item in report["ungated_decisions"]:
+              print(f"registry drift (reported in PR body): {item['id']} — {item['title']}")
+          PY
+
+      - name: Open registry-update PR
+        if: steps.escalate.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="queue/escalation-surfaced-$(date -u +%Y%m%d-%H%M)"
+          git config user.name "aurora-queue-escalation[bot]"
+          git config user.email "aurora-queue-escalation@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add ops/work_queue/gate_registry.json
+          if git diff --cached --quiet; then
+            echo "No registry changes to propose (drift-only run)."
+            exit 0
+          fi
+          git commit -m "aurora(queue): bump last_surfaced on escalated gates (#1131)"
+          git push -u origin "$branch"
+          gh pr create \
+            --title "aurora(queue): record gate escalation surfacing" \
+            --body "$(printf 'Automated last_surfaced bump for gates escalated this run (see #1131 for the design). Linked issues were pinged directly; this PR only records the surfacing so gates do not re-ping inside the threshold window.\n\nEscalation report:\n\n```json\n%s\n```' "$(cat /tmp/escalations.json)")" \
+            --base main --head "$branch"

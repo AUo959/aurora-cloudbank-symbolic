@@ -95,11 +95,9 @@ class GlyphRenderTool(Opal2Tool):
         self.renderer = renderer or QuantumRenderer()
 
     @staticmethod
-    def _validated_dimensions(value: object) -> dict[str, int] | None:
-        """Validate renderer dimensions beyond the Phase 1 top-level schema subset."""
+    def _dimension_mapping(value: object) -> Mapping[str, object]:
+        """Validate the dimension object's required and allowed fields."""
 
-        if value is None:
-            return None
         if not isinstance(value, Mapping):
             raise ToolInputError("dimensions must be an object")
 
@@ -113,19 +111,32 @@ class GlyphRenderTool(Opal2Tool):
         if unexpected_fields:
             unexpected = sorted(unexpected_fields)[0]
             raise ToolInputError(f"dimensions contains unexpected field: {unexpected}")
+        return value
 
-        dimensions: dict[str, int] = {}
-        for field_name in ("width", "height"):
-            field_value = value[field_name]
-            if not isinstance(field_value, int) or isinstance(field_value, bool):
-                raise ToolInputError(f"dimensions.{field_name} must be an integer")
-            if not MIN_RENDER_DIMENSION <= field_value <= MAX_RENDER_DIMENSION:
-                raise ToolInputError(
-                    f"dimensions.{field_name} must be between "
-                    f"{MIN_RENDER_DIMENSION} and {MAX_RENDER_DIMENSION}"
-                )
-            dimensions[field_name] = field_value
-        return dimensions
+    @staticmethod
+    def _validated_dimension(field_name: str, value: object) -> int:
+        """Validate one dimension against the established OPAL2 graphics bounds."""
+
+        if type(value) is not int:
+            raise ToolInputError(f"dimensions.{field_name} must be an integer")
+        if not MIN_RENDER_DIMENSION <= value <= MAX_RENDER_DIMENSION:
+            raise ToolInputError(
+                f"dimensions.{field_name} must be between "
+                f"{MIN_RENDER_DIMENSION} and {MAX_RENDER_DIMENSION}"
+            )
+        return value
+
+    @classmethod
+    def _validated_dimensions(cls, value: object) -> dict[str, int] | None:
+        """Validate renderer dimensions beyond the Phase 1 top-level schema subset."""
+
+        if value is None:
+            return None
+        dimensions = cls._dimension_mapping(value)
+        return {
+            field_name: cls._validated_dimension(field_name, dimensions[field_name])
+            for field_name in ("width", "height")
+        }
 
     async def run(
         self, payload: JsonObject, context: ToolExecutionContext

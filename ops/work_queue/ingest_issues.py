@@ -30,7 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import subprocess
+import subprocess  # nosec B404 — used only for the sibling sync_queue.py render
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -87,19 +87,32 @@ def score_issue(labels: Set[str], rules: List[Dict[str, Any]]) -> tuple[int, Lis
     Only TR-01/TR-02/TR-03 are computable from a raw GitHub issue; the
     queue-context rules (stale scope, decision_required, blocks/depends_on)
     apply after Aurora triage, not at ingestion."""
+    predicates = {
+        "TR-01": lambda ls: "blocking" in ls,
+        "TR-02": lambda ls: bool(ls & {"security", "pentest"}),
+        "TR-03": lambda ls: "architecture" in ls,
+    }
     score = 0
     applied: List[str] = []
     for rule in rules:
-        rule_id = rule.get("id", "")
-        condition_hit = (
-            (rule_id == "TR-01" and "blocking" in labels)
-            or (rule_id == "TR-02" and ("security" in labels or "pentest" in labels))
-            or (rule_id == "TR-03" and "architecture" in labels)
-        )
-        if condition_hit:
+        predicate = predicates.get(rule.get("id", ""))
+        if predicate and predicate(labels):
             score += int(rule.get("score_delta", 0))
-            applied.append(rule_id)
+            applied.append(rule["id"])
     return score, applied
+
+
+def _eligible(issue: Dict[str, Any], known: Set[int]) -> Optional[tuple[int, Set[str]]]:
+    """(number, labels) when the issue qualifies for ingestion, else None."""
+    if issue.get("state", "OPEN").upper() != "OPEN":
+        return None
+    number = issue.get("number")
+    if not isinstance(number, int) or number in known:
+        return None
+    labels = _labels(issue)
+    if not (labels & INGEST_LABELS):
+        return None
+    return number, labels
 
 
 def build_entries(
@@ -118,14 +131,10 @@ def build_entries(
 
     candidates = []
     for issue in issues:
-        if issue.get("state", "OPEN").upper() != "OPEN":
+        eligible = _eligible(issue, known)
+        if eligible is None:
             continue
-        number = issue.get("number")
-        if not isinstance(number, int) or number in known:
-            continue
-        labels = _labels(issue)
-        if not (labels & INGEST_LABELS):
-            continue
+        number, labels = eligible
         score, applied = score_issue(labels, rules)
         candidates.append((score, number, issue, labels, applied))
 
@@ -179,7 +188,13 @@ def main() -> int:
                         help="Report what would be ingested without writing")
     args = parser.parse_args()
 
-    issues = _load(args.issues_file)
+    # Validate the user-supplied path before any filesystem access
+    # (Sonar S8707): must be an existing regular .json file.
+    issues_file = args.issues_file.resolve()
+    if issues_file.suffix != ".json" or not issues_file.is_file():
+        parser.error(f"--issues-file must be an existing .json file: {issues_file}")
+
+    issues = _load(issues_file)
     queue = _load(QUEUE_JSON)
     rules = _load(TRIAGE_RULES).get("rules", [])
 
@@ -203,7 +218,9 @@ def main() -> int:
 
     # Regenerate the views so the change is self-consistent under
     # queue-validation.yml's drift check.
-    subprocess.run([sys.executable, str(SYNC_QUEUE)], check=True)
+    # Fixed argv: current interpreter + repo-constant script path — no
+    # user-controlled input reaches the subprocess.
+    subprocess.run([sys.executable, str(SYNC_QUEUE)], check=True)  # nosec B603
     print(f"Ingested {len(entries)} issue(s); views regenerated.")
     return 10
 

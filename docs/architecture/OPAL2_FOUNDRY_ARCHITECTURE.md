@@ -1,12 +1,12 @@
 # OPAL2 Tool Foundry Architecture
 
-**Status:** Phase 1 implementation baseline
+**Status:** Phase 2 implementation baseline
 
 **Runtime topology:** standalone service
 
 **Reference implementation:** `modules/opal2/`
 
-**Primary reference tool:** `opal2.glyph.render`
+**Reference tools:** `opal2.glyph.render`, `opal2.regex.workshop`
 
 ## Definition
 
@@ -15,10 +15,11 @@ registering, validating, executing, and eventually packaging modular tools.
 Aurora is the first platform integration profile, not a dependency of the
 portable foundry contract.
 
-The symbolic glyph and rendering stack is the first reference tool produced by
-the foundry. It is not the complete definition of OPAL2.
+The symbolic glyph stack and deterministic regex workshop are the first two
+reference tools produced by the foundry. Together they prove that OPAL2's
+contract is not specific to rendering.
 
-## Phase 1 boundary
+## Current implementation boundary
 
 Phase 1 establishes a small executable spine:
 
@@ -31,8 +32,17 @@ Phase 1 establishes a small executable spine:
 - compatibility routing from the existing `/render` endpoint through the
   foundry registry.
 
-Phase 1 does **not** claim that packaging, remote installation, multi-tenant
-isolation, or general third-party loading is complete.
+Phase 2 proves generality and begins the portability boundary:
+
+- `opal2.regex.workshop` generates bounded curated patterns and checks sample
+  expectations without executing arbitrary user-provided regex;
+- `.opaltool` specification 0.1 exports deterministic archives containing the
+  tool manifest, schemas, implementation artifact, fixtures, and digests;
+- package verification is inspect-only and never extracts, imports, or executes
+  package code.
+
+This baseline does **not** claim that signatures, package activation, remote
+installation, multi-tenant isolation, or third-party loading are complete.
 
 ## Runtime topology
 
@@ -51,7 +61,7 @@ OPAL2 standalone API
         +-- execution + provenance
         |
         v
-reference tools (glyph renderer today; regex and others later)
+reference tools (glyph renderer + regex workshop)
         |
         +-- neutral consumer
         `-- Aurora adapter / policy profile
@@ -93,14 +103,15 @@ not scan arbitrary directories or import user-supplied code. The older OPAL2
 plugin loader remains a visualization compatibility surface and is not the
 portable foundry installation mechanism.
 
-Remote or third-party packages must not be enabled until OPAL2 has:
+`.opaltool` 0.1 now provides the versioned package manifest and digest checks.
+Remote or third-party packages must not be enabled until OPAL2 additionally
+has:
 
-1. a versioned package manifest;
-2. digest and signature verification;
-3. dependency and SBOM validation;
-4. an isolated subprocess, container, or WASM execution boundary;
-5. capability and resource-limit enforcement;
-6. clean-room conformance tests.
+1. asymmetric publisher-signature verification;
+2. dependency and SBOM validation;
+3. an isolated subprocess, container, or WASM execution boundary;
+4. capability and resource-limit enforcement;
+5. clean-room conformance tests and revocation provenance.
 
 ## Standalone API
 
@@ -135,23 +146,28 @@ Focused validation:
 
 ```bash
 python -m compileall -q -x 'modules/opal2/staging' modules/opal2
-python -m pytest tests/test_opal2_foundry.py tests/test_opal2_api_routes.py -q
+python -m pytest \
+  tests/test_opal2_foundry.py \
+  tests/test_opal2_api_routes.py \
+  tests/test_opal2_regex_workshop.py \
+  tests/test_opal2_tool_package.py -q
 ```
 
 ## Planned convergence
 
 ### Phase 2: prove generality
 
-- Add an SDK/scaffold for authoring tools.
-- Restore a narrowly specified regex-generation tool as the first non-renderer
-  reference implementation.
-- Add full input/output conformance fixtures.
-- Introduce an Aurora adapter rather than direct runtime imports.
+- **Implemented:** narrowly specified regex generation and sample conformance as
+  the first non-renderer tool.
+- **Implemented:** deterministic inspect-only `.opaltool` 0.1 export with a
+  packaged regex fixture.
+- **Deferred:** authoring scaffold and full schema-conformance harness.
+- **Deferred:** Aurora adapter rather than direct runtime imports.
 
 ### Phase 3: prove portability
 
-- Define a signed `.opaltool` archive containing the manifest, schemas,
-  implementation artifact, fixtures, digest, and SBOM.
+- Promote `.opaltool` to a signed format with dependency lock, SBOM, publisher
+  identity, and revocation provenance.
 - Export and import the same tool in a clean neutral environment and a clean
   Aurora environment.
 - Require matching fixture output and provenance digests.
@@ -166,13 +182,18 @@ python -m pytest tests/test_opal2_foundry.py tests/test_opal2_api_routes.py -q
 
 ## Public proof flow
 
-The target public demonstration is:
+The target public demonstration is now split into implemented and deferred
+proofs:
 
-1. scaffold a regex tool;
-2. run its conformance fixtures;
-3. export one signed package;
-4. execute the same package in neutral OPAL2 and through the Aurora adapter;
-5. visualize its run and provenance through `opal2.glyph.render`.
+1. **Implemented:** run the regex tool through the neutral registry and HTTP
+   API;
+2. **Implemented:** export and integrity-verify a deterministic inspect-only
+   package carrying its fixture;
+3. **Deferred:** scaffold the same tool from an authoring SDK;
+4. **Deferred:** sign and execute the package in isolated neutral OPAL2 and
+   through the Aurora adapter;
+5. **Deferred:** visualize its run and provenance through
+   `opal2.glyph.render`.
 
 That flow proves that OPAL2 is a tool foundry rather than a renderer with a new
 name.

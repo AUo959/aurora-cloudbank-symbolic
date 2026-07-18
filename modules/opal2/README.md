@@ -8,14 +8,17 @@
 ## Current implementation status
 
 Phase 1 provides a portable tool manifest, explicit trusted-tool registry,
-execution provenance, and the `opal2.glyph.render` reference tool. The
-standalone API exposes tool discovery and execution under `/tools` while
-preserving the existing `/generate`, `/render`, cache, plugin, and WebSocket
-routes.
+execution provenance, and the `opal2.glyph.render` reference tool. Phase 2 adds
+the deterministic `opal2.regex.workshop` tool and the first `.opaltool`
+transport format. The standalone API exposes tool discovery and execution
+under `/tools` while preserving the existing `/generate`, `/render`, cache,
+plugin, and WebSocket routes.
 
-Packaging, remote installation, isolated workers, the Aurora adapter, and the
-regex reference tool remain planned work. The legacy dynamic plugin loader is
-not a trusted package-installation boundary.
+`.opaltool` version 0.1 supports deterministic export and integrity inspection
+only. Package activation, publisher signatures, isolated workers, and the
+Aurora adapter remain planned work. The legacy dynamic plugin loader is not a
+trusted package-installation boundary. See
+[OPAL2 Tool Package Specification](../../docs/architecture/OPAL2_TOOL_PACKAGE_SPEC.md).
 
 ## Glyph visualization reference tool
 

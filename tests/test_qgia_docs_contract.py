@@ -67,6 +67,7 @@ class TestQGIADocsContract(unittest.TestCase):
     """Keep the package complete, traceable, and explicitly non-activating."""
 
     def test_package_contains_exactly_the_eight_requested_artifacts(self) -> None:
+        self.assertTrue(QGIA_DOCS.is_dir(), f"missing QGIA docs directory: {QGIA_DOCS}")
         artifacts = {path.name for path in QGIA_DOCS.iterdir() if path.is_file()}
 
         self.assertEqual(artifacts, EXPECTED_ARTIFACTS)

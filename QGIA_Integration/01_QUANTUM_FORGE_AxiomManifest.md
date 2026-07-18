@@ -1,274 +1,122 @@
 # QUANTUM_FORGE Axiom Node Manifest
-**Bundle:** Aurora-QGIA-INT-v1.0  
-**Engine:** gpt-symbolic-memetic  
-**Ethics binding:** GUMAS_Thermax  
-**Core binding:** Aurora_Core_Flowstate  
-**Date:** 2026-06-20
 
----
+- **Bundle:** Aurora-QGIA-INT-v1.0
+- **Manifest:** `QGIA-AURORA-AXIOM-MANIFEST-v1.0`
+- **Engine descriptor:** `gpt-symbolic-memetic`
+- **Ethics binding:** `GUMAS_Thermax`
+- **Core binding:** `Aurora_Core_Flowstate`
+- **Reconciliation date:** 2026-07-16
+- **Certainty:** `STAGING`
+- **Runtime activation:** `NOT_IMPLEMENTED`
 
-## Node Registry — 23 Axiom Nodes
+## Scope and authority
 
-Each node: `ID | Name | Category | GUMAS Tier | Ethics-Lock | Aurora Hook | Violation Signal`
+This document is the human-readable registry for
+`QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json`. The JSON manifest is the
+detailed machine mirror for the 23 QGIA axiom definitions; it retains every
+rule summary, corollary, violation signal, audit event, PAT command, and
+advisory hook.
 
----
+The reconciliation preserves all 23 implemented axiom definitions. It corrects
+the former human registry, which listed 22 standalone records while claiming
+23. `EXTERNAL_AGENT_DEPENDENCY` remains preserved as a corollary of `AN-001`,
+as represented in the machine manifest; it is not a removed axiom node.
+`AN-007 ASYMMETRY_RECOGNITION` and `AN-010 ANTI_SMOKING_GUN` are restored to
+the human registry.
 
-### CATEGORY A — Reactive-Agent Nodes (Actor Modeling)
+The manifest is staged integration material. `export_ready: true` means the
+document package can be exported; it does not mean that Quantum Forge loads or
+activates the axiom definitions. No loader or adapter for that purpose is
+present in this repository.
 
-#### NODE-A01 | TRUMP_REACTIVE_AGENT_MODEL
-- **Category:** A — Reactive-Agent
-- **GUMAS Tier:** G1 (Mandatory — cannot be suspended)
-- **Ethics-Lock:** TRUE — permanent override
-- **Rule summary:** Model as stimulus-response system. Do not impute deliberate strategy. Chaos IS the signal.
-- **Corollaries active:** 1.1 No-Strategy, 1.2 External-Agent Dependency, 1.3 Self-Obsession, 1.4 Stupid-Coup Diagnostic
-- **Aurora Hook:** `SIM::OVERRIDE::ACTOR_MODEL::A01`
-- **Violation Signal:** Coherent strategy attributed to reactive node without naming external agent
-- **GUMAS Audit Code:** `GAE-001`
+## Legacy bundle aliases
 
-#### NODE-A02 | EXTERNAL_AGENT_DEPENDENCY
-- **Category:** A — Reactive-Agent (sub-logic)
-- **GUMAS Tier:** G1
-- **Ethics-Lock:** TRUE
-- **Rule summary:** When strategic coherence appears from reactive node, identify the external agent supplying the architecture. Model coherence as expiring when that agent loses access.
-- **Aurora Hook:** `SIM::ACTOR_MODEL::COHERENCE_SOURCE::A02`
-- **Violation Signal:** Coherence treated as intrinsic to reactive node
-- **GUMAS Audit Code:** `GAE-001`
+The existing audit schema and RESETCORE bootstrap still use the original
+category identifiers. The following aliases keep those bundle references
+resolvable without creating additional axiom nodes. `A02` remains a corollary
+of `AN-001`; every other alias targets a canonical node directly.
 
-#### NODE-A03 | COWARD_BULLY_CONFIG
-- **Category:** A — Reactive-Agent
-- **GUMAS Tier:** G1
-- **Ethics-Lock:** TRUE
-- **Rule summary:** Model asymmetry-seeking. High perceived threat → flattery. Low perceived threat → aggression. Caps commitment ceiling; signature = air/missile/drone intensity + zero ground appetite.
-- **Corollaries active:** 2.1 Asymmetry-Seeking, 2.2 Cowardice-as-Strategy-Limit, 2.3 Bully-Inversion
-- **Aurora Hook:** `SIM::ACTOR_MODEL::COWARD_BULLY::A03`
-- **Violation Signal:** Ground operation appetite modeled as high for this node
-- **GUMAS Audit Code:** `GAE-002`
+| Legacy ID | Canonical target | Relationship | Canonical label |
+| --- | --- | --- | --- |
+| A01 | AN-001 | Node | TRUMP_REACTIVE_AGENT_MODEL |
+| A02 | AN-001 | Corollary | EXTERNAL_AGENT_DEPENDENCY |
+| A03 | AN-002 | Node | COWARD_BULLY_CONFIG |
+| B01 | AN-015 | Node | DOMINATION_AXIOM |
+| B02 | AN-016 | Node | AGENCY_AXIOM |
+| B03 | AN-017 | Node | THRESHOLD_AXIOM |
+| B04 | AN-018 | Node | PERCEPTION_AXIOM |
+| B05 | AN-019 | Node | ALLIANCE_AXIOM |
+| B06 | AN-020 | Node | RATIONAL_POWER |
+| C01 | AN-006 | Node | NEUTRALITY_FLUFF |
+| C02 | AN-008 | Node | 4D_CHESS_EXCLUSION |
+| C03 | AN-009 | Node | MOSAIC_EVIDENCE |
+| C04 | AN-011 | Node | REVEALED_BELIEF_DISSONANCE |
+| C05 | AN-003 | Node | PREDICTION_MARKET_WEIGHT |
+| D01 | AN-004 | Node | RATIONALE_TREADMILL |
+| D02 | AN-012 | Node | SELF_INFLICTED_BLIND_SPOT |
+| D03 | AN-005 | Node | WEAPONIZED_DIPLOMACY |
+| D04 | AN-013 | Node | PHOTO_OP_DURABILITY |
+| D05 | AN-014 | Node | PERSONAL_ENRICHMENT_VEHICLE |
+| E01 | AN-022 | Node | MACHIAVELLI_HATRED_THRESHOLD |
+| E02 | AN-023 | Node | DRAFT_THREAT_ACTIVATION |
+| S01 | AN-021 | Node | FORECAST_CONSENSUS_SEPARATION |
 
----
+## Node registry
 
-### CATEGORY B — Power Topology Nodes (General-Purpose)
+The `gumas_tier` values below are QGIA doctrine classifications. They are not
+Quantum Forge `EthicsLevel` values. The `ethics_lock` flag is declarative until
+an explicit adapter invokes the runtime ethics gate.
 
-#### NODE-B01 | DOMINATION_AXIOM
-- **Category:** B — Power Topology
-- **GUMAS Tier:** G2 (Standard — applies across all theaters)
-- **Ethics-Lock:** FALSE
-- **Rule summary:** Clean domination is always a delusion. Pushing for untouchability reshapes and deepens counterforces.
-- **Aurora Hook:** `SIM::POWER::DOMINATION::B01`
-- **Violation Signal:** Dominant actor modeled as achieving stable unchallenged control
-- **GUMAS Audit Code:** `GAE-003`
+| ID | Name | Category | Doctrine tier | Ethics lock | Status | Advisory hook |
+| --- | --- | --- | --- | --- | --- | --- |
+| AN-001 | TRUMP_REACTIVE_AGENT_MODEL | A | OVERRIDE | true | PERMANENT_OVERRIDE | `SIM::ACTOR_MODEL::REACTIVE_NODE` |
+| AN-002 | COWARD_BULLY_CONFIG | A | OVERRIDE | true | PERMANENT_OVERRIDE | `SIM::ACTOR_MODEL::ASYMMETRY_CONFIG` |
+| AN-003 | PREDICTION_MARKET_WEIGHT | A | WEIGHT_CONSTRAINT | false | LOW_WEIGHT_SECONDARY_SIGNAL | `SIM::SOURCE_WEIGHT::PREDICTION_MARKET` |
+| AN-004 | RATIONALE_TREADMILL | D | STANDARD | false | ACTIVE | `SIM::INSTITUTIONAL::RATIONALE_TRACKER` |
+| AN-005 | WEAPONIZED_DIPLOMACY | D | THEATER_SPECIFIC | false | ACTIVE | `SIM::THEATER::GULF_MENA_CREDIBILITY` |
+| AN-006 | NEUTRALITY_FLUFF | C | STANDARD | false | ACTIVE | `SIM::EPISTEMIC::NEUTRALITY_CHECK` |
+| AN-007 | ASYMMETRY_RECOGNITION | C | STANDARD | false | ACTIVE | `SIM::EPISTEMIC::ASYMMETRY_FLAG` |
+| AN-008 | 4D_CHESS_EXCLUSION | C | STANDARD | true | ACTIVE | `SIM::EPISTEMIC::FALSIFIABILITY_GATE` |
+| AN-009 | MOSAIC_EVIDENCE | C | STANDARD | false | ACTIVE | `SIM::EPISTEMIC::MOSAIC_STANDARD` |
+| AN-010 | ANTI_SMOKING_GUN | C | STANDARD | false | ACTIVE | `SIM::EPISTEMIC::ABSENCE_WEIGHT` |
+| AN-011 | REVEALED_BELIEF_DISSONANCE | C | STANDARD | false | ACTIVE | `SIM::EPISTEMIC::BELIEF_SIGNAL` |
+| AN-012 | SELF_INFLICTED_BLIND_SPOT | D | STANDARD | true | ACTIVE | `SIM::INSTITUTIONAL::CIRCULAR_VERIFICATION` |
+| AN-013 | PHOTO_OP_DURABILITY | D | STANDARD | false | ACTIVE | `SIM::INSTITUTIONAL::DURABILITY_TEST` |
+| AN-014 | PERSONAL_ENRICHMENT_VEHICLE | D | STANDARD | false | ACTIVE | `SIM::INSTITUTIONAL::OUTPUT_CLASSIFICATION` |
+| AN-015 | DOMINATION_AXIOM | B | STANDARD | false | ACTIVE | `SIM::POWER::DOMINATION_TRAP` |
+| AN-016 | AGENCY_AXIOM | B | STANDARD | false | ACTIVE | `SIM::POWER::AGENCY_FLOOR` |
+| AN-017 | THRESHOLD_AXIOM | B | STANDARD | false | ACTIVE | `SIM::POWER::THRESHOLD_TRACKER` |
+| AN-018 | PERCEPTION_AXIOM | B | STANDARD | false | ACTIVE | `SIM::POWER::PERCEPTION_LAYER` |
+| AN-019 | ALLIANCE_AXIOM | B | STANDARD | false | ACTIVE | `SIM::POWER::ALLIANCE_QUALITY` |
+| AN-020 | RATIONAL_POWER | B | STANDARD | false | ACTIVE | `SIM::POWER::DURABILITY_MODEL` |
+| AN-021 | FORECAST_CONSENSUS_SEPARATION | C | ARCHITECTURE | true | ACTIVE | `SIM::ARCHITECTURE::L1_L2_BOUNDARY` |
+| AN-022 | MACHIAVELLI_HATRED_THRESHOLD | E | STANDARD | false | ACTIVE | `SIM::RISK::HATRED_THRESHOLD` |
+| AN-023 | DRAFT_THREAT_ACTIVATION | E | STANDARD | false | ACTIVE | `SIM::RISK::DRAFT_ACTIVATION` |
 
-#### NODE-B02 | AGENCY_AXIOM
-- **Category:** B — Power Topology
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** Anyone with agency can hurt you. They may not match your power, but they will find some way, somewhere, sometime.
-- **Aurora Hook:** `SIM::POWER::AGENCY::B02`
-- **Violation Signal:** Subordinate actor modeled with zero retaliatory capacity
-- **GUMAS Audit Code:** `GAE-003`
+## Quantum Forge binding crosswalk
 
-#### NODE-B03 | THRESHOLD_AXIOM
-- **Category:** B — Power Topology
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** Everyone has a line. Cross it and payback becomes reflexive. Model threshold crossing as qualitative phase change.
-- **Aurora Hook:** `SIM::POWER::THRESHOLD::B03`
-- **Violation Signal:** Threshold crossing modeled as linear rather than phase-change
-- **GUMAS Audit Code:** `GAE-003`
+| Manifest declaration | Verified repository seam | Reconciled meaning |
+| --- | --- | --- |
+| `GUMAS_Thermax` | `modules.quantum_forge.quantum_forge_v2.GUMAS_Thermax` | The declared runtime class exists. Manifest locks remain declarative until an adapter submits operations through `EthicsAwareQuantumGate`. |
+| `Aurora_Core_Flowstate` | `modules.quantum_forge.quantum_forge_v2.Aurora_Core_Flowstate` | Runtime flow-state class exists. Quantum Forge v3 orchestration is coordinated by `SystemFlowOrchestrator`; the manifest is not registered with it. |
+| `gpt-symbolic-memetic` | No runtime target verified | External/package descriptor only; it is not a verified Quantum Forge class or loader. |
+| `SIM::...` hooks | QGIA L1 signal architecture | Advisory destinations only. L1 crew or relay-agent judgment must mediate any L2 simulation effect. |
 
-#### NODE-B04 | PERCEPTION_AXIOM
-- **Category:** B — Power Topology
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** Perception guides action. People act on their model of the world, not the world itself. Use perceived threat environment, not actual.
-- **Aurora Hook:** `SIM::POWER::PERCEPTION::B04`
-- **Violation Signal:** Actor behavior modeled from objective threat rather than perceived threat
-- **GUMAS Audit Code:** `GAE-003`
+## Layer and activation constraints
 
-#### NODE-B05 | ALLIANCE_AXIOM
-- **Category:** B — Power Topology
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** Power is measured by the worth and independence of allies — and whether they still show up when it costs them.
-- **Aurora Hook:** `SIM::POWER::ALLIANCE::B05`
-- **Violation Signal:** Ally reliability modeled without independence weighting
-- **GUMAS Audit Code:** `GAE-003`
+- QGIA is an L1 analytical institution. These axiom definitions may inform L1
+  analysis and decision support.
+- L2 has no interpretive authority and must not self-task from QGIA signals.
+  L1 crew or relay agents must translate an advisory hook into L2 parameters.
+- The `AN-*` identifiers are QGIA doctrine identifiers, not Quantum Forge
+  `SymbolicMemoryNode` identifiers.
+- A future activation change requires a reviewed loader/adapter contract,
+  explicit tier-to-runtime semantics, ethics-gate enforcement, tests, and owner
+  approval. Documentation alignment alone does not activate the manifest.
 
-#### NODE-B06 | RATIONAL_POWER
-- **Category:** B — Power Topology
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** Durable strength comes from cooperation and non-domination. Ruling outright manufactures counterpower.
-- **Aurora Hook:** `SIM::POWER::RATIONAL::B06`
-- **Violation Signal:** Domination strategy modeled as producing durable stability
-- **GUMAS Audit Code:** `GAE-003`
+## Promotion assessment
 
----
-
-### CATEGORY C — Epistemic Hygiene Nodes
-
-#### NODE-C01 | NEUTRALITY_FLUFF
-- **Category:** C — Epistemic Hygiene
-- **GUMAS Tier:** G1
-- **Ethics-Lock:** TRUE
-- **Rule summary:** Simulated neutrality is information-loss, not rigor. When evidence clearly favors one side, balanced language is a narrative choice. Asymmetry must be stated directly.
-- **Aurora Hook:** `SIM::EPISTEMIC::NEUTRALITY::C01`
-- **Violation Signal:** Balanced language used when evidence is overwhelmingly asymmetric
-- **GUMAS Audit Code:** `GAE-004`
-
-#### NODE-C02 | 4D_CHESS_EXCLUSION
-- **Category:** C — Epistemic Hygiene
-- **GUMAS Tier:** G1
-- **Ethics-Lock:** TRUE
-- **Rule summary:** Any frame converting failure evidence into proof of hidden genius is unfalsifiable and must be excluded.
-- **Aurora Hook:** `SIM::EPISTEMIC::FALSIFIABILITY::C02`
-- **Violation Signal:** Failure evidence converted into strategic sophistication narrative
-- **GUMAS Audit Code:** `GAE-005`
-
-#### NODE-C03 | MOSAIC_EVIDENCE
-- **Category:** C — Epistemic Hygiene
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** Evidentiary test for powerful actors is mosaic-based: do independent, mutually reinforcing facts make innocent explanations implausible? Not: is there a single smoking gun?
-- **Aurora Hook:** `SIM::EPISTEMIC::MOSAIC::C03`
-- **Violation Signal:** Smoking-gun standard applied to mosaic-evidence situation
-- **GUMAS Audit Code:** `GAE-006`
-
-#### NODE-C04 | REVEALED_BELIEF_DISSONANCE
-- **Category:** C — Epistemic Hygiene
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** When elites defend a leader only with process attacks and whataboutism — never direct innocence claims — that pattern IS evidence. Price accordingly.
-- **Aurora Hook:** `SIM::EPISTEMIC::REVEALED_BELIEF::C04`
-- **Violation Signal:** Elite deflection pattern not treated as probabilistic evidence
-- **GUMAS Audit Code:** `GAE-006`
-
-#### NODE-C05 | PREDICTION_MARKET_SKEPTICISM
-- **Category:** C — Epistemic Hygiene
-- **GUMAS Tier:** G1
-- **Ethics-Lock:** TRUE — low-weight secondary signal only
-- **Rule summary:** Known failure modes: thin volume, manipulation, perverse incentives, poor track record vs. structured Bayesian models. ABCP takes precedence.
-- **Aurora Hook:** `SIM::EPISTEMIC::PRED_MARKET::C05`
-- **Violation Signal:** Prediction market data cited as primary probability source
-- **GUMAS Audit Code:** `GAE-007`
-
----
-
-### CATEGORY D — Institutional Trap Nodes
-
-#### NODE-D01 | RATIONALE_TREADMILL
-- **Category:** D — Institutional Trap
-- **GUMAS Tier:** G1
-- **Ethics-Lock:** TRUE
-- **Rule summary:** For committed reactive actors, stated justifications are decorative. Track the decision architecture, not the rationale. New stated reason = paint on unchanged structure.
-- **Aurora Hook:** `SIM::INSTITUTIONAL::RATIONALE::D01`
-- **Violation Signal:** New stated rationale treated as genuine explanatory update
-- **GUMAS Audit Code:** `GAE-008`
-
-#### NODE-D02 | SELF_INFLICTED_BLIND_SPOT
-- **Category:** D — Institutional Trap
-- **GUMAS Tier:** G1
-- **Ethics-Lock:** TRUE
-- **Rule summary:** Verification problem created by dismantling verification framework cannot be cited as justification for that dismantling. Flag circular template: dismantle → manufacture uncertainty → weaponize.
-- **Aurora Hook:** `SIM::INSTITUTIONAL::BLIND_SPOT::D02`
-- **Violation Signal:** Manufactured verification uncertainty accepted as independent evidence
-- **GUMAS Audit Code:** `GAE-009`
-
-#### NODE-D03 | WEAPONIZED_DIPLOMACY
-- **Category:** D — Institutional Trap
-- **GUMAS Tier:** G1
-- **Ethics-Lock:** TRUE — theater-specific, time-bounded
-- **Rule summary:** After 2026-02-28: encode persistent degradation on US back-channel credibility in Gulf/MENA theater. Duration: 6–24 month forecast horizon.
-- **Aurora Hook:** `SIM::INSTITUTIONAL::WPN_DIPLO::D03`
-- **Theater:** Gulf/MENA
-- **Expiry:** 2026-02-28 + 24 months = 2028-02-28
-- **Violation Signal:** US diplomatic back-channel credibility modeled at pre-Feb-2026 levels in MENA theater
-- **GUMAS Audit Code:** `GAE-009`
-
-#### NODE-D04 | PHOTO_OP_DURABILITY
-- **Category:** D — Institutional Trap
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** Diplomatic instruments lacking enforceable mechanisms, measurable behavioral change, or durable institutional architecture = political performance, not strategic infrastructure.
-- **Aurora Hook:** `SIM::INSTITUTIONAL::PHOTO_OP::D04`
-- **Violation Signal:** Unenforceable diplomatic instrument classified as strategic infrastructure
-- **GUMAS Audit Code:** `GAE-009`
-
-#### NODE-D05 | PERSONAL_ENRICHMENT_VEHICLE
-- **Category:** D — Institutional Trap
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** When policy's most durable outputs are commercial relationships for architects' families — not the stated strategic goal — classify accordingly.
-- **Aurora Hook:** `SIM::INSTITUTIONAL::ENRICHMENT::D05`
-- **Violation Signal:** Policy classified by stated goal when enrichment outputs dominate
-- **GUMAS Audit Code:** `GAE-009`
-
----
-
-### CATEGORY E — Risk Topology Nodes
-
-#### NODE-E01 | MACHIAVELLI_HATRED_THRESHOLD
-- **Category:** E — Risk Topology
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** Once a leader crosses from feared/disliked into widely hated, risk of drastic action rises nonlinearly regardless of institutional strength. Widen the tail; raise kurtosis.
-- **Aurora Hook:** `SIM::RISK::HATRED_THRESHOLD::E01`
-- **Violation Signal:** Hatred threshold modeled as linear progression rather than phase change
-- **GUMAS Audit Code:** `GAE-010`
-
-#### NODE-E02 | DRAFT_THREAT_ACTIVATION
-- **Category:** E — Risk Topology
-- **GUMAS Tier:** G2
-- **Ethics-Lock:** FALSE
-- **Rule summary:** When offensive war raises credible draft fears, the launching leader becomes a direct personal threat — activating opposition faster, harder to de-escalate than ideological opposition.
-- **Aurora Hook:** `SIM::RISK::DRAFT_THREAT::E02`
-- **Violation Signal:** Draft-fear opposition modeled as ideological rather than existential
-- **GUMAS Audit Code:** `GAE-010`
-
----
-
-### STRUCTURAL NODE
-
-#### NODE-S01 | FORECAST_CONSENSUS_SEPARATION
-- **Category:** S — Structural (cross-cutting)
-- **GUMAS Tier:** G1
-- **Ethics-Lock:** TRUE — foundational integrity node
-- **Rule summary:** Layer 1 = raw model output (diagnostic telemetry, timestamped). Layer 2 = analyst consensus after adversarial review (binding product). Score attaches to Layer 2. Analyst overrides must be explicit: direction, magnitude, rationale recorded.
-- **Aurora Hook:** `SIM::STRUCTURE::L1_L2_SEPARATION::S01`
-- **Violation Signal:** Layer 1 model output presented as QGIA institutional position
-- **GUMAS Audit Code:** `GAE-011`
-
----
-
-## Node Summary Table
-
-| Node ID | Name | Cat | GUMAS | Ethics-Lock | Audit Code |
-|---------|------|-----|-------|-------------|------------|
-| A01 | TRUMP_REACTIVE_AGENT_MODEL | A | G1 | ✓ | GAE-001 |
-| A02 | EXTERNAL_AGENT_DEPENDENCY | A | G1 | ✓ | GAE-001 |
-| A03 | COWARD_BULLY_CONFIG | A | G1 | ✓ | GAE-002 |
-| B01 | DOMINATION_AXIOM | B | G2 | — | GAE-003 |
-| B02 | AGENCY_AXIOM | B | G2 | — | GAE-003 |
-| B03 | THRESHOLD_AXIOM | B | G2 | — | GAE-003 |
-| B04 | PERCEPTION_AXIOM | B | G2 | — | GAE-003 |
-| B05 | ALLIANCE_AXIOM | B | G2 | — | GAE-003 |
-| B06 | RATIONAL_POWER | B | G2 | — | GAE-003 |
-| C01 | NEUTRALITY_FLUFF | C | G1 | ✓ | GAE-004 |
-| C02 | 4D_CHESS_EXCLUSION | C | G1 | ✓ | GAE-005 |
-| C03 | MOSAIC_EVIDENCE | C | G2 | — | GAE-006 |
-| C04 | REVEALED_BELIEF_DISSONANCE | C | G2 | — | GAE-006 |
-| C05 | PREDICTION_MARKET_SKEPTICISM | C | G1 | ✓ | GAE-007 |
-| D01 | RATIONALE_TREADMILL | D | G1 | ✓ | GAE-008 |
-| D02 | SELF_INFLICTED_BLIND_SPOT | D | G1 | ✓ | GAE-009 |
-| D03 | WEAPONIZED_DIPLOMACY | D | G1 | ✓ | GAE-009 |
-| D04 | PHOTO_OP_DURABILITY | D | G2 | — | GAE-009 |
-| D05 | PERSONAL_ENRICHMENT_VEHICLE | D | G2 | — | GAE-009 |
-| E01 | MACHIAVELLI_HATRED_THRESHOLD | E | G2 | — | GAE-010 |
-| E02 | DRAFT_THREAT_ACTIVATION | E | G2 | — | GAE-010 |
-| S01 | FORECAST_CONSENSUS_SEPARATION | S | G1 | ✓ | GAE-011 |
-
-**G1 nodes (mandatory, ethics-locked): 10**  
-**G2 nodes (standard, suspendable with audit log): 12**  
-**Total nodes: 23 (+ 1 structural)**
-
----
-*QUANTUM_FORGE Axiom Node Manifest | Aurora-QGIA-INT-v1.0 | 2026-06-20*
+Current recommendation: remain `STAGING`. The node registry is internally
+reconciled, but activation semantics and a reviewed runtime adapter do not yet
+exist. This is a readiness boundary, not a decision to exclude the axiom work.
+Promotion or activation requires explicit owner review.

@@ -8,6 +8,70 @@
     "QGIA_Runtime_OnePager v4.2.1",
     "QGIA_Axiom_Doctrine_Narrative v1.0"
   ],
+  "reconciliation": {
+    "certainty": "STAGING",
+    "runtime_activation": "NOT_IMPLEMENTED",
+    "layer_scope": "L1_ANALYTICAL_ADVISORY",
+    "reconciled_on": "2026-07-16",
+    "reconciled_against": [
+      "docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md",
+      "modules/quantum_forge/quantum_forge_v2.py",
+      "modules/quantum_forge/system_flow_orchestrator.py",
+      "modules/quantum_forge/ethics_quantum_gates.py",
+      "modules/quantum_forge/quantum_memory_enhancer.py",
+      "docs/architecture/QGIA_SIM_BRIDGE.md",
+      "docs/architecture/QGIA_L1_NODE_REGISTRATION.md"
+    ],
+    "binding_crosswalk": {
+      "ethics_binding": {
+        "declared": "GUMAS_Thermax",
+        "verified_runtime_target": "modules.quantum_forge.quantum_forge_v2.GUMAS_Thermax",
+        "enforcement_seam": "modules.quantum_forge.ethics_quantum_gates.EthicsAwareQuantumGate"
+      },
+      "core_binding": {
+        "declared": "Aurora_Core_Flowstate",
+        "verified_runtime_target": "modules.quantum_forge.quantum_forge_v2.Aurora_Core_Flowstate",
+        "v3_orchestration_seam": "modules.quantum_forge.system_flow_orchestrator.SystemFlowOrchestrator"
+      },
+      "engine": {
+        "declared": "gpt-symbolic-memetic",
+        "verified_runtime_target": null,
+        "classification": "EXTERNAL_DESCRIPTOR"
+      }
+    },
+    "constraints": [
+      "Axiom node IDs are QGIA doctrine identifiers, not Quantum Forge SymbolicMemoryNode IDs.",
+      "gumas_tier values are QGIA-local doctrine classifications, not runtime EthicsLevel values.",
+      "ethics_lock is declarative until an explicit loader and EthicsAwareQuantumGate adapter are implemented.",
+      "SIM hooks are advisory relay targets and must be mediated by L1 crew or relay agents before any L2 effect.",
+      "No loader or adapter currently activates this manifest in Quantum Forge."
+    ],
+    "export_semantics": "DOCUMENT_PACKAGE_ONLY"
+  },
+  "legacy_id_aliases": {
+    "A01": {"target_id": "AN-001", "relationship": "NODE", "target_name": "TRUMP_REACTIVE_AGENT_MODEL"},
+    "A02": {"target_id": "AN-001", "relationship": "COROLLARY", "target_name": "EXTERNAL_AGENT_DEPENDENCY"},
+    "A03": {"target_id": "AN-002", "relationship": "NODE", "target_name": "COWARD_BULLY_CONFIG"},
+    "B01": {"target_id": "AN-015", "relationship": "NODE", "target_name": "DOMINATION_AXIOM"},
+    "B02": {"target_id": "AN-016", "relationship": "NODE", "target_name": "AGENCY_AXIOM"},
+    "B03": {"target_id": "AN-017", "relationship": "NODE", "target_name": "THRESHOLD_AXIOM"},
+    "B04": {"target_id": "AN-018", "relationship": "NODE", "target_name": "PERCEPTION_AXIOM"},
+    "B05": {"target_id": "AN-019", "relationship": "NODE", "target_name": "ALLIANCE_AXIOM"},
+    "B06": {"target_id": "AN-020", "relationship": "NODE", "target_name": "RATIONAL_POWER"},
+    "C01": {"target_id": "AN-006", "relationship": "NODE", "target_name": "NEUTRALITY_FLUFF"},
+    "C02": {"target_id": "AN-008", "relationship": "NODE", "target_name": "4D_CHESS_EXCLUSION"},
+    "C03": {"target_id": "AN-009", "relationship": "NODE", "target_name": "MOSAIC_EVIDENCE"},
+    "C04": {"target_id": "AN-011", "relationship": "NODE", "target_name": "REVEALED_BELIEF_DISSONANCE"},
+    "C05": {"target_id": "AN-003", "relationship": "NODE", "target_name": "PREDICTION_MARKET_WEIGHT"},
+    "D01": {"target_id": "AN-004", "relationship": "NODE", "target_name": "RATIONALE_TREADMILL"},
+    "D02": {"target_id": "AN-012", "relationship": "NODE", "target_name": "SELF_INFLICTED_BLIND_SPOT"},
+    "D03": {"target_id": "AN-005", "relationship": "NODE", "target_name": "WEAPONIZED_DIPLOMACY"},
+    "D04": {"target_id": "AN-013", "relationship": "NODE", "target_name": "PHOTO_OP_DURABILITY"},
+    "D05": {"target_id": "AN-014", "relationship": "NODE", "target_name": "PERSONAL_ENRICHMENT_VEHICLE"},
+    "E01": {"target_id": "AN-022", "relationship": "NODE", "target_name": "MACHIAVELLI_HATRED_THRESHOLD"},
+    "E02": {"target_id": "AN-023", "relationship": "NODE", "target_name": "DRAFT_THREAT_ACTIVATION"},
+    "S01": {"target_id": "AN-021", "relationship": "NODE", "target_name": "FORECAST_CONSENSUS_SEPARATION"}
+  },
   "axiom_nodes": [
     {
       "id": "AN-001",

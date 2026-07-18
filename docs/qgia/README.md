@@ -29,7 +29,7 @@ layers.
 
 | Artifact | Stage | Provenance | Purpose |
 | --- | --- | --- | --- |
-| [`QGIA_Runtime_OnePager.md`](QGIA_Runtime_OnePager.md) | Source | Normalized snapshot | Portable analytical-process reference |
+| [`QGIA_Runtime_OnePager.md`](QGIA_Runtime_OnePager.md) | Source | Reviewed snapshot | Portable analytical-process reference |
 | [`QGIA_Axiom_Doctrine_Narrative.md`](QGIA_Axiom_Doctrine_Narrative.md) | Source | Normalized snapshot | Doctrine and runtime-application rationale |
 | [`QUANTUM_FORGE_Axiom_Node_Manifest.md`](QUANTUM_FORGE_Axiom_Node_Manifest.md) | Stage 1 | Normalized mirror | Reconciled 23-node human registry |
 | [`SIM_WATCHCON_Confidence_Module.md`](SIM_WATCHCON_Confidence_Module.md) | Stage 1 | Normalized mirror | Confidence and WATCHCON contract |
@@ -40,15 +40,18 @@ layers.
 
 ## Provenance
 
-The two source documents were imported as content-preserving snapshots from the
-Aurora root workspace's loose QGIA artifacts. Only Markdown table-separator
-spacing was normalized to the repository style. Importing them here does not
+The two source documents were imported as traceable snapshots from the Aurora
+root workspace's loose QGIA artifacts. Markdown table-separator spacing was
+normalized to the repository style. The runtime snapshot also applies one
+reviewed consistency correction: its WATCHCON checklist uses inclusive `≥`
+boundaries, matching its own `watchcon_level()` implementation and the staged
+SIM, PAT, and RESETCORE contracts. Importing or correcting them here does not
 promote their claims to canon. Original and package hashes are recorded below;
 the package hashes are pinned by `tests/test_qgia_docs_contract.py`:
 
 | Imported source | Original SHA-256 | Package SHA-256 |
 | --- | --- | --- |
-| `QGIA_Runtime_OnePager.md` | `4712bae35a51e0a8b20da2dfca1796dabf346adc1880e142436d782560922c64` | `eb5b336a2c6bd2bd567524cbc89453bfa771f3067c1feb4dc528425fa593d5a2` |
+| `QGIA_Runtime_OnePager.md` | `4712bae35a51e0a8b20da2dfca1796dabf346adc1880e142436d782560922c64` | `75372d4bea68103279afe81a00088fa989c84358fab9da27ba249e66521f6b84` |
 | `QGIA_Axiom_Doctrine_Narrative.md` | `f84fc62731fbcfb3064662a25ba7f6253ba4e7bcaefa948cc0a7478d9bf2891a` | `f8ddcbfaa8c1e7e0520b9098db3e10eeb674108096c92afad319169ab57debfa` |
 
 The five staged bundle documents are content-preserving normalized mirrors of

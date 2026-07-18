@@ -73,10 +73,10 @@ Every finished product MUST follow this structure:
 
 ## WATCHCON STATUS
 [ ] WATCHCON 5 — Routine (baseline)
-[ ] WATCHCON 4 — Increased vigilance (Tier I P > 0.30)
-[ ] WATCHCON 3 — Enhanced monitoring (Tier I P > 0.50)
-[ ] WATCHCON 2 — Crisis response (Tier I P > 0.70)
-[ ] WATCHCON 1 — Imminent conflict (Tier I P > 0.85)
+[ ] WATCHCON 4 — Increased vigilance (Tier I P ≥ 0.30)
+[ ] WATCHCON 3 — Enhanced monitoring (Tier I P ≥ 0.50)
+[ ] WATCHCON 2 — Crisis response (Tier I P ≥ 0.70)
+[ ] WATCHCON 1 — Imminent conflict (Tier I P ≥ 0.85)
 ```
 
 ---

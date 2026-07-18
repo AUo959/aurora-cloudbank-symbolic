@@ -41,7 +41,7 @@ IMPORTED_PACKAGE_HASHES = {
         "f8ddcbfaa8c1e7e0520b9098db3e10eeb674108096c92afad319169ab57debfa"
     ),
     "QGIA_Runtime_OnePager.md": (
-        "eb5b336a2c6bd2bd567524cbc89453bfa771f3067c1feb4dc528425fa593d5a2"
+        "75372d4bea68103279afe81a00088fa989c84358fab9da27ba249e66521f6b84"
     ),
 }
 
@@ -88,6 +88,15 @@ class TestQGIADocsContract(unittest.TestCase):
             with self.subTest(artifact=artifact):
                 digest = hashlib.sha256((QGIA_DOCS / artifact).read_bytes()).hexdigest()
                 self.assertEqual(digest, expected_hash)
+
+    def test_runtime_watchcon_template_uses_inclusive_thresholds(self) -> None:
+        runtime = (QGIA_DOCS / "QGIA_Runtime_OnePager.md").read_text(encoding="utf-8")
+
+        for level, threshold in ((4, "0.30"), (3, "0.50"), (2, "0.70"), (1, "0.85")):
+            with self.subTest(level=level, threshold=threshold):
+                self.assertIn(f"WATCHCON {level} —", runtime)
+                self.assertIn(f"Tier I P ≥ {threshold}", runtime)
+                self.assertNotIn(f"Tier I P > {threshold}", runtime)
 
     def test_readme_preserves_staging_and_layer_boundaries(self) -> None:
         readme = (QGIA_DOCS / "README.md").read_text(encoding="utf-8")

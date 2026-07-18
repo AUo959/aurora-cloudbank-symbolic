@@ -33,6 +33,11 @@ from modules.nexus.quantum.recursion_bridge import (
 )
 from modules.nexus.transcendence.infinite_recursion_unified import UnifiedRecursionState
 
+# Component markers per tests/README_TESTING.md; every test also carries
+# @pytest.mark.critical so the suite runs in the blocking selective CI lane
+# (aurora-ci-minimal greps for the literal decorator string).
+pytestmark = [pytest.mark.integration, pytest.mark.quantum]
+
 
 def _orchestrator(tmp_path, **overrides) -> HybridQuantumOrchestrator:
     params = {
@@ -40,7 +45,7 @@ def _orchestrator(tmp_path, **overrides) -> HybridQuantumOrchestrator:
         "num_qubits": 3,
         "classical_dimension": 6,
         "noise": 0.02,
-        "rng": random.Random(20260717),
+        "rng": random.Random(20260717),  # nosec B311 — deterministic test seed, not cryptographic
     }
     params.update(overrides)
     return HybridQuantumOrchestrator(**params)
@@ -62,6 +67,7 @@ def _recursion_state(**overrides) -> UnifiedRecursionState:
 # Cycle mechanics and artifacts
 # ---------------------------------------------------------------------------
 
+@pytest.mark.critical
 def test_single_cycle_produces_export_and_entanglement_artifacts(tmp_path):
     orchestrator = _orchestrator(tmp_path)
     report = asyncio.run(orchestrator.run_cycle([0.4, 0.1, 0.9, 0.2, 0.5, 0.3]))
@@ -83,6 +89,7 @@ def test_single_cycle_produces_export_and_entanglement_artifacts(tmp_path):
         assert set(edge) == {"source", "target", "weight"}
 
 
+@pytest.mark.critical
 def test_payload_normalization_pads_truncates_and_unit_norms(tmp_path):
     orchestrator = _orchestrator(tmp_path)
 
@@ -101,6 +108,7 @@ def test_payload_normalization_pads_truncates_and_unit_norms(tmp_path):
 # Checkpoint restoration
 # ---------------------------------------------------------------------------
 
+@pytest.mark.critical
 def test_checkpoint_roundtrip_restores_normalized_state(tmp_path):
     orchestrator = _orchestrator(tmp_path)
     report = asyncio.run(orchestrator.run_cycle([0.2, 0.8, 0.1, 0.4, 0.6, 0.9]))
@@ -118,6 +126,7 @@ def test_checkpoint_roundtrip_restores_normalized_state(tmp_path):
         assert math.isclose(amp.imag, entry["imag"] / export_norm, abs_tol=1e-9)
 
 
+@pytest.mark.critical
 def test_checkpoint_dimension_mismatch_is_rejected(tmp_path):
     producer = _orchestrator(tmp_path, num_qubits=3)
     report = asyncio.run(producer.run_cycle([0.5, 0.5, 0.5, 0.5, 0.5, 0.5]))
@@ -131,6 +140,7 @@ def test_checkpoint_dimension_mismatch_is_rejected(tmp_path):
 # Phase 9 → Phase 10 hand-off (recursion_hybrid_bridge)
 # ---------------------------------------------------------------------------
 
+@pytest.mark.critical
 def test_bridge_payload_and_bias_derive_from_recursion_state():
     state = _recursion_state()
     payload = build_classical_payload(state, 6)
@@ -144,6 +154,7 @@ def test_bridge_payload_and_bias_derive_from_recursion_state():
     assert compute_entanglement_bias(stronger) >= bias
 
 
+@pytest.mark.critical
 def test_bridge_cycle_from_real_unified_recursion_state(tmp_path):
     orchestrator = _orchestrator(tmp_path)
     state = _recursion_state()
@@ -172,6 +183,7 @@ def test_bridge_cycle_from_real_unified_recursion_state(tmp_path):
 # Manifest requirement: glyphcard burn-in across 10 hybrid cycles
 # ---------------------------------------------------------------------------
 
+@pytest.mark.critical
 def test_ten_cycle_glyphcard_burn_in(tmp_path):
     orchestrator = _orchestrator(tmp_path)
     state = _recursion_state()
@@ -212,6 +224,7 @@ def test_ten_cycle_glyphcard_burn_in(tmp_path):
     assert all(0.0 <= score <= 1.0 for score in scores)
 
 
+@pytest.mark.critical
 def test_monitoring_loop_yields_reports_with_limit(tmp_path):
     orchestrator = _orchestrator(tmp_path)
 

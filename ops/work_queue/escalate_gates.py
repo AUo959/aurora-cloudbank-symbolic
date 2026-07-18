@@ -104,24 +104,29 @@ def find_escalations(
     return escalations
 
 
+def _open_gate_refs(registry: Dict[str, Any]) -> tuple[set, set]:
+    """(queue_item ids, github issue numbers) referenced by open gates."""
+    open_gates = [g for g in registry.get("gates", []) if g.get("state") == "open"]
+    return (
+        {gate.get("queue_item") for gate in open_gates},
+        {gate.get("github_issue") for gate in open_gates},
+    )
+
+
+def _needs_decision(item: Dict[str, Any]) -> Optional[str]:
+    status = item.get("status") or item.get("state")
+    return status if status in ("needs-decision", "decision_required") else None
+
+
 def find_ungated_decisions(
     queue: Dict[str, Any], registry: Dict[str, Any]
 ) -> List[Dict[str, Any]]:
     """needs-decision queue items with no matching open gate (registry drift)."""
-    gated_items = {
-        gate.get("queue_item")
-        for gate in registry.get("gates", [])
-        if gate.get("state") == "open"
-    }
-    gated_issues = {
-        gate.get("github_issue")
-        for gate in registry.get("gates", [])
-        if gate.get("state") == "open"
-    }
+    gated_items, gated_issues = _open_gate_refs(registry)
     drift = []
     for item in queue.get("active", []):
-        status = item.get("status") or item.get("state")
-        if status not in ("needs-decision", "decision_required"):
+        status = _needs_decision(item)
+        if status is None:
             continue
         if item.get("id") in gated_items or item.get("github_issue") in gated_issues:
             continue
@@ -192,6 +197,18 @@ def main() -> int:
     escalations = find_escalations(registry, args.threshold_days)
     drift = find_ungated_decisions(queue, registry)
 
+    _print_findings(escalations, drift)
+    _write_report(args, escalations, drift)
+
+    if not escalations and not drift:
+        print("No gates past threshold; no registry drift.")
+        return 0
+
+    _finalize(args, registry, escalations)
+    return 10
+
+
+def _print_findings(escalations: List[Dict[str, Any]], drift: List[Dict[str, Any]]) -> None:
     for item in escalations:
         age = item["days_since_surfaced"]
         print(f"ESCALATE {item['gate_id']} (tier {item['escalation_tier']}, "
@@ -199,28 +216,28 @@ def main() -> int:
     for item in drift:
         print(f"DRIFT ungated needs-decision item: {item['id']} — {item['title']}")
 
+
+def _write_report(args, escalations: List[Dict[str, Any]], drift: List[Dict[str, Any]]) -> None:
+    if not args.json:
+        return
     report = {
         "generated": _today().isoformat(),
         "threshold_days": args.threshold_days,
         "escalations": escalations,
         "ungated_decisions": drift,
     }
-    if args.json:
-        args.json.write_text(json.dumps(report, indent=2) + "\n")
+    args.json.write_text(json.dumps(report, indent=2) + "\n")
 
-    if not escalations and not drift:
-        print("No gates past threshold; no registry drift.")
-        return 0
 
-    if args.mesh and escalations:
+def _finalize(args, registry: Dict[str, Any], escalations: List[Dict[str, Any]]) -> None:
+    if not escalations:
+        return
+    if args.mesh:
         dispatch_mesh(escalations)
-
-    if args.apply and escalations:
+    if args.apply:
         apply_surfacing(registry, escalations)
         GATE_REGISTRY.write_text(json.dumps(registry, indent=2) + "\n")
         print(f"last_surfaced bumped for {len(escalations)} gate(s).")
-
-    return 10
 
 
 if __name__ == "__main__":

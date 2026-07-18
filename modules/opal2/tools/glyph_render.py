@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from ..quantum_renderer import QuantumRenderer
 from ..tool_contract import (
     JsonObject,
@@ -14,6 +16,8 @@ from ..tool_contract import (
 
 
 GLYPH_RENDER_TOOL_ID = "opal2.glyph.render"
+MIN_RENDER_DIMENSION = 100
+MAX_RENDER_DIMENSION = 4096
 
 
 class GlyphRenderTool(Opal2Tool):
@@ -42,7 +46,23 @@ class GlyphRenderTool(Opal2Tool):
                         "geometric_algebra",
                     ],
                 },
-                "dimensions": {"type": "object"},
+                "dimensions": {
+                    "type": "object",
+                    "required": ["width", "height"],
+                    "additionalProperties": False,
+                    "properties": {
+                        "width": {
+                            "type": "integer",
+                            "minimum": MIN_RENDER_DIMENSION,
+                            "maximum": MAX_RENDER_DIMENSION,
+                        },
+                        "height": {
+                            "type": "integer",
+                            "minimum": MIN_RENDER_DIMENSION,
+                            "maximum": MAX_RENDER_DIMENSION,
+                        },
+                    },
+                },
                 "quantum_params": {"type": "object"},
             },
         },
@@ -74,17 +94,51 @@ class GlyphRenderTool(Opal2Tool):
     def __init__(self, renderer: QuantumRenderer | None = None) -> None:
         self.renderer = renderer or QuantumRenderer()
 
+    @staticmethod
+    def _validated_dimensions(value: object) -> dict[str, int] | None:
+        """Validate renderer dimensions beyond the Phase 1 top-level schema subset."""
+
+        if value is None:
+            return None
+        if not isinstance(value, Mapping):
+            raise ToolInputError("dimensions must be an object")
+
+        expected_fields = {"width", "height"}
+        missing_fields = expected_fields - value.keys()
+        if missing_fields:
+            missing = sorted(missing_fields)[0]
+            raise ToolInputError(f"dimensions missing required field: {missing}")
+
+        unexpected_fields = value.keys() - expected_fields
+        if unexpected_fields:
+            unexpected = sorted(unexpected_fields)[0]
+            raise ToolInputError(f"dimensions contains unexpected field: {unexpected}")
+
+        dimensions: dict[str, int] = {}
+        for field_name in ("width", "height"):
+            field_value = value[field_name]
+            if not isinstance(field_value, int) or isinstance(field_value, bool):
+                raise ToolInputError(f"dimensions.{field_name} must be an integer")
+            if not MIN_RENDER_DIMENSION <= field_value <= MAX_RENDER_DIMENSION:
+                raise ToolInputError(
+                    f"dimensions.{field_name} must be between "
+                    f"{MIN_RENDER_DIMENSION} and {MAX_RENDER_DIMENSION}"
+                )
+            dimensions[field_name] = field_value
+        return dimensions
+
     async def run(
         self, payload: JsonObject, context: ToolExecutionContext
     ) -> JsonObject:
         renderer_name = payload.get("renderer", "webgl")
         if renderer_name not in self.renderer.list_renderers():
             raise ToolInputError(f"renderer is not available: {renderer_name}")
+        dimensions = self._validated_dimensions(payload.get("dimensions"))
 
         result = await self.renderer.render_async(
             glyph_data=payload["glyph_data"],
             renderer=renderer_name,
-            dimensions=payload.get("dimensions"),
+            dimensions=dimensions,
             quantum_params=payload.get("quantum_params"),
             metadata={
                 **dict(context.metadata),

@@ -57,7 +57,7 @@ reference tools (glyph renderer today; regex and others later)
         `-- Aurora adapter / policy profile
 ```
 
-Aurora-specific anchors, DLP classifications, Picard_Delta_3s, and continuity
+Aurora-specific anchors, DLP classifications, Picard_Delta_3, and continuity
 fields must enter through a policy profile or adapter. They must not be added
 as required fields in `ToolManifest` or `ToolExecutionContext`.
 

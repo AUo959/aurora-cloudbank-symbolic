@@ -328,6 +328,11 @@ async def _render_glyph_impl(request: RenderRequest) -> Dict[str, Any]:
         )
     except ToolInputError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except (ToolNotFoundError, ToolOutputError) as exc:
+        logger.exception("Registered OPAL2 glyph tool failed", exc_info=exc)
+        raise HTTPException(
+            status_code=500, detail="glyph render tool execution failed"
+        ) from exc
 
     await glyph_cache.set_async(cache_key, tool_result.output)
     await notify_clients(

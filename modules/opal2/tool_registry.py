@@ -13,6 +13,7 @@ from .tool_contract import (
     ToolExecutionContext,
     ToolInputError,
     ToolManifest,
+    ToolOutputError,
     ToolRunResult,
 )
 
@@ -85,6 +86,12 @@ class ToolRegistry:
         output = await tool.run(dict(payload), execution_context)
         duration_ms = (perf_counter() - start) * 1000
         tool.validate_output(output)
+        try:
+            json.dumps(output, allow_nan=False)
+        except (TypeError, ValueError) as exc:
+            raise ToolOutputError(
+                "tool output must be JSON-serializable without non-finite numbers"
+            ) from exc
 
         manifest = tool.manifest.to_dict()
         manifest_digest = hashlib.sha256(

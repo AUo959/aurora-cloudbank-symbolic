@@ -154,6 +154,41 @@ async def test_opal2_compatibility_render_uses_foundry_registry():
     assert result["tool_run"]["tool_id"] == "opal2.glyph.render"  # nosec B101 - pytest assertion
 
 
+@pytest.mark.unit
+@pytest.mark.opal2
+@pytest.mark.asyncio
+@pytest.mark.parametrize("error_name", ["ToolNotFoundError", "ToolOutputError"])
+async def test_opal2_compatibility_render_handles_registry_failures(
+    monkeypatch, error_name
+):
+    """The compatibility route must convert registry failures into controlled 500s."""
+
+    module = importlib.import_module("modules.opal2.api.opal2_api")
+    error_type = getattr(module, error_name)
+
+    class FailingRegistry:
+        async def run(self, *_args, **_kwargs):
+            raise error_type("forced registry failure")
+
+    async def cache_miss(_cache_key):
+        return None
+
+    monkeypatch.setattr(module, "tool_registry", FailingRegistry())
+    monkeypatch.setattr(module.glyph_cache, "get_async", cache_miss)
+    request = module.RenderRequest(
+        glyph_data={"vertices": [], "indices": [], "dimensions": 2},
+        cache_key=f"opal2-{error_name}-route-test",
+    )
+
+    with pytest.raises(module.HTTPException) as exc_info:
+        await module._render_glyph_impl(request)
+
+    assert exc_info.value.status_code == 500  # nosec B101 - pytest assertion
+    assert (  # nosec B101 - pytest assertion
+        exc_info.value.detail == "glyph render tool execution failed"
+    )
+
+
 @pytest.mark.integration
 @pytest.mark.opal2
 def test_opal2_foundry_http_discovery_and_execution():
@@ -165,11 +200,13 @@ def test_opal2_foundry_http_discovery_and_execution():
     client = TestClient(module.app)
     discovery = client.get("/tools")
     assert discovery.status_code == 200  # nosec B101 - pytest assertion
-    assert discovery.json()["tools"][0]["tool_id"] == "opal2.glyph.render"  # nosec B101 - pytest assertion
+    tool_ids = {tool["tool_id"] for tool in discovery.json()["tools"]}
+    assert "opal2.glyph.render" in tool_ids  # nosec B101 - pytest assertion
 
+    auth_headers = {"Authorization": f"Bearer {generate_csrf_token('opal2-test')}"}
     response = client.post(
         "/tools/opal2.glyph.render/run",
-        headers={"Authorization": f"Bearer {generate_csrf_token('opal2-test')}"},
+        headers=auth_headers,
         json={
             "payload": {
                 "glyph_data": {
@@ -185,3 +222,20 @@ def test_opal2_foundry_http_discovery_and_execution():
     assert response.status_code == 200  # nosec B101 - pytest assertion
     assert response.json()["tool_id"] == "opal2.glyph.render"  # nosec B101 - pytest assertion
     assert response.json()["output"]["format"] == "svg"  # nosec B101 - pytest assertion
+
+    invalid_dimensions = client.post(
+        "/tools/opal2.glyph.render/run",
+        headers=auth_headers,
+        json={
+            "payload": {
+                "glyph_data": {"vertices": [], "indices": [], "dimensions": 2},
+                "renderer": "svg",
+                "dimensions": {"width": 320},
+            }
+        },
+    )
+    assert invalid_dimensions.status_code == 422  # nosec B101 - pytest assertion
+    assert (
+        "dimensions missing required field: height"
+        in invalid_dimensions.json()["detail"]
+    )  # nosec B101 - pytest assertion

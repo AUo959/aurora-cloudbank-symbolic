@@ -9,6 +9,7 @@ This directory contains reference documentation for developers working with Auro
 | [`api/`](api/) | API catalogs, governance, schemas, and inventory snapshots | Follow [`api/API_CATALOG_GOVERNANCE.md`](api/API_CATALOG_GOVERNANCE.md) before treating a catalog as current runtime truth. |
 | [`architecture/`](architecture/) | Active architecture, topology, and authority-boundary references | [`architecture/LAYER_ARCHITECTURE.md`](architecture/LAYER_ARCHITECTURE.md) is canonical for the L1/L2/L3 model; other files state their own scope. |
 | [`ethics/`](ethics/) | Ethics navigation, evaluations, and recovered-protocol planning | [`ethics/README.md`](ethics/README.md) preserves the boundary between runtime evidence and planning artifacts. |
+| [`qgia/`](qgia/) | Staged QGIA integration document package | Read [`qgia/README.md`](qgia/README.md) first. Indexing does not activate, register, or canon-promote the package. |
 | [`specs/`](specs/) | Technical and promotion specifications | A specification is not proof of implementation; verify status in code and tests. |
 | [`modules/`](modules/) | Module-facing documentation | Runtime modules and their tests remain authoritative for behavior. |
 | [`reference/`](reference/) | Convenience catalogs and reference guides | Verify generated or snapshot material against its governed source before citing it as current. |
@@ -28,7 +29,7 @@ This directory contains reference documentation for developers working with Auro
 ## Setup and Development
 
 | Document | Description |
-|---|---|
+| --- | --- |
 | [python_env_setup.md](python_env_setup.md) | Python environment setup and virtual env configuration |
 | [LOCAL_TESTING_GUIDE.md](LOCAL_TESTING_GUIDE.md) | Running tests locally, markers, coverage |
 | [CODE_QUALITY_SYSTEM.md](CODE_QUALITY_SYSTEM.md) | Linting, formatting, and automated quality gates |
@@ -39,7 +40,7 @@ This directory contains reference documentation for developers working with Auro
 ## API Reference
 
 | Document | Description |
-|---|---|
+| --- | --- |
 | [reference/API_CATALOG.md](reference/API_CATALOG.md) | Complete route listing for all 30+ routers |
 | [reference/v2_API_REFERENCE.md](reference/v2_API_REFERENCE.md) | Detailed API reference guide |
 | [api/API_CATALOG.json](api/API_CATALOG.json) | Machine-readable API catalog (JSON) |
@@ -48,7 +49,7 @@ This directory contains reference documentation for developers working with Auro
 ## Core Modules
 
 | Document | Description |
-|---|---|
+| --- | --- |
 | [QUANTUM_FORGE_V3_COMPLETE_GUIDE.md](QUANTUM_FORGE_V3_COMPLETE_GUIDE.md) | Quantum Forge v3.0 — agent generation, entanglement networks, joy evolution |
 | [QUANTUM_FORGE_V3_QUICK_REFERENCE.md](QUANTUM_FORGE_V3_QUICK_REFERENCE.md) | Quantum Forge v3.0 quick reference card |
 | [QUANTUM_CLOUD_BACKENDS.md](QUANTUM_CLOUD_BACKENDS.md) | AWS Braket, Azure Quantum, IBM Quantum, Google Cirq integration |
@@ -60,10 +61,29 @@ This directory contains reference documentation for developers working with Auro
 | [CONNECTOR_FRAMEWORK_GUIDE.md](CONNECTOR_FRAMEWORK_GUIDE.md) | Connector framework internals |
 | [CONNECTOR_QUICK_REFERENCE.md](CONNECTOR_QUICK_REFERENCE.md) | Connector quick reference card |
 
+## QGIA Integration (Staged)
+
+This portal provides contributor navigation only. The
+[`CANON_INDEX.md` QGIA section](../CANON_INDEX.md#qgia-integration-staged-documentation-package)
+is the AI-agent routing map, and [`qgia/README.md`](qgia/README.md) governs the
+package's provenance and authority boundaries. The documents remain `STAGING`
+and `DOCUMENT_PACKAGE_ONLY`; links here do not implement runtime activation.
+
+| Document | Description |
+| --- | --- |
+| [qgia/README.md](qgia/README.md) | Package scope, provenance, review order, and non-activation boundary |
+| [qgia/QGIA_Runtime_OnePager.md](qgia/QGIA_Runtime_OnePager.md) | Reviewed analytical-process snapshot |
+| [qgia/QGIA_Axiom_Doctrine_Narrative.md](qgia/QGIA_Axiom_Doctrine_Narrative.md) | Axiom doctrine and runtime-application rationale |
+| [qgia/QUANTUM_FORGE_Axiom_Node_Manifest.md](qgia/QUANTUM_FORGE_Axiom_Node_Manifest.md) | Reconciled 23-node human-readable axiom registry |
+| [qgia/SIM_WATCHCON_Confidence_Module.md](qgia/SIM_WATCHCON_Confidence_Module.md) | Confidence and WATCHCON contract |
+| [qgia/GUMAS_Audit_Schema.md](qgia/GUMAS_Audit_Schema.md) | GUMAS ethics-audit event specification |
+| [qgia/RESETCORE_Bootstrap.md](qgia/RESETCORE_Bootstrap.md) | Explicit session-restore reference |
+| [qgia/PAT_Command_Sheet.md](qgia/PAT_Command_Sheet.md) | PAT operator command reference |
+
 ## Ethics and Safety
 
 | Document | Description |
-|---|---|
+| --- | --- |
 | [GEOMETRIC_ETHICS_ARCHITECTURE.md](GEOMETRIC_ETHICS_ARCHITECTURE.md) | Five-dimension geometric ethics field — picard_delta_3, thermax_continuity, layer_integrity, collective_welfare, transparency |
 | [LAYER_BOUNDARY_REFERENCE.md](LAYER_BOUNDARY_REFERENCE.md) | L1/L2/L3 layer boundary enforcement reference |
 | [ethics/geometric_curvature_v2_evaluation.md](ethics/geometric_curvature_v2_evaluation.md) | Geometric ethics curvature v2 — interaction-aware model evaluation (issue #994) |
@@ -76,7 +96,7 @@ This directory contains reference documentation for developers working with Auro
 ## Security and Auth
 
 | Document | Description |
-|---|---|
+| --- | --- |
 | [SECURITY_GUIDELINES.md](SECURITY_GUIDELINES.md) | Security implementation guidelines |
 | [SECURITY_PATTERNS.md](SECURITY_PATTERNS.md) | Security patterns and anti-patterns |
 | [OAUTH2_SETUP_GUIDE.md](OAUTH2_SETUP_GUIDE.md) | OAuth2 and JWT authentication setup |
@@ -89,14 +109,14 @@ This directory contains reference documentation for developers working with Auro
 ## Deployment
 
 | Document | Description |
-|---|---|
+| --- | --- |
 | [DEVELOPER_DEPLOYMENT_GUIDE.md](DEVELOPER_DEPLOYMENT_GUIDE.md) | Deployment options and environment configuration |
 | [VERCEL_DEPLOYMENT_GUIDE.md](VERCEL_DEPLOYMENT_GUIDE.md) | Vercel deployment guide for web frontend |
 
 ## Architecture
 
 | Document | Description |
-|---|---|
+| --- | --- |
 | [architecture/SYMBOLIC_DATA_ARCHITECTURE.md](architecture/SYMBOLIC_DATA_ARCHITECTURE.md) | Scoped VSA symbolic-data and schema overview |
 | [architecture/LAYER_ARCHITECTURE.md](architecture/LAYER_ARCHITECTURE.md) | L1/L2/L3 layer architecture detail |
 | [architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md](architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md) | System architecture diagram and component map |
@@ -105,16 +125,16 @@ This directory contains reference documentation for developers working with Auro
 ## Specs
 
 | Document | Description |
-|---|---|
+| --- | --- |
 | [specs/CLI_TECHNICAL_SPEC.md](specs/CLI_TECHNICAL_SPEC.md) | CLI technical specification |
 | [specs/PYTHON_SDK_TECHNICAL_SPEC.md](specs/PYTHON_SDK_TECHNICAL_SPEC.md) | Python SDK technical specification |
 | [specs/AUMEMMANAGER_PROMOTION_STARTER_SPEC.md](specs/AUMEMMANAGER_PROMOTION_STARTER_SPEC.md) | AuMemManager promotion specification |
 
 ## Operations
 
-| Document | Description |
-|---|---|
-| [INCIDENT_RESPONSE_RUNBOOK.md](INCIDENT_RESPONSE_RUNBOOK.md) | Incident response procedures |
+| Document                                                          | Description                  |
+| ----------------------------------------------------------------- | ---------------------------- |
+| [INCIDENT_RESPONSE_RUNBOOK.md](INCIDENT_RESPONSE_RUNBOOK.md)      | Incident response procedures |
 
 ---
 

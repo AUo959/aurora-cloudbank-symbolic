@@ -2,7 +2,7 @@
   "registry_authority": "Aurora",
   "protocol_version": "1.0.0",
   "description": "Canonical registry of all human-gated decisions in the Aurora work queue. A gate is created when a queue item reaches decision_required state and consumer_fit excludes autonomous agents. Gates persist across sessions and platforms until explicitly resolved. Aurora surfaces all open gates at session open.",
-  "last_updated": "2026-06-22",
+  "last_updated": "2026-07-20",
   "gates": [
     {
       "gate_id": "GATE-001",
@@ -12,9 +12,11 @@
       "state": "open",
       "decision_owner": "operator",
       "opened": "2026-06-22",
-      "last_surfaced": "2026-06-22",
+      "last_surfaced": "2026-07-20",
       "escalation_tier": 1,
-      "blocks_queue_items": ["Q-0008"],
+      "blocks_queue_items": [
+        "Q-0008"
+      ],
       "blocks_gates": [],
       "resolution_criteria": [
         "Q-0003a complete: recovered_protocol_wiring_verification.md exists and is filled",

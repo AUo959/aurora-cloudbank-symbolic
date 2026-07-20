@@ -16,6 +16,7 @@ from pathlib import Path
 from ops.work_queue.escalate_gates import (
     apply_surfacing,
     find_escalations,
+    find_integrity_holds,
     find_ungated_decisions,
 )
 
@@ -73,6 +74,33 @@ def test_resolved_gates_never_escalate():
     assert find_escalations(resolved, threshold_days=3, today=TODAY) == []
 
 
+def test_integrity_hold_suspends_escalation_and_link_authority():
+    held = _registry(
+        integrity_status="reconciliation_required",
+        integrity_note="Linked issue is closed.",
+    )
+    assert find_escalations(held, threshold_days=3, today=TODAY) == []
+    assert find_integrity_holds(held) == [{
+        "gate_id": "GATE-777",
+        "title": "Test gate",
+        "integrity_status": "reconciliation_required",
+        "integrity_note": "Linked issue is closed.",
+        "github_issue": 777,
+        "queue_item": "Q-0777",
+    }]
+
+    queue = {
+        "active": [
+            {
+                "id": "Q-0777",
+                "title": "Still needs a valid gate",
+                "status": "needs-decision",
+            }
+        ]
+    }
+    assert [item["id"] for item in find_ungated_decisions(queue, held)] == ["Q-0777"]
+
+
 def test_undated_open_gate_always_surfaces():
     """Silence must not hide an undated gate."""
     undated = _registry(opened=None, last_surfaced=None)
@@ -115,9 +143,12 @@ def test_live_registry_and_queue_parse_and_report_cleanly():
 
     escalations = find_escalations(registry, threshold_days=3, today=TODAY)
     drift = find_ungated_decisions(queue, registry)
+    holds = find_integrity_holds(registry)
     # No exceptions and structurally sound output is the contract here;
     # actual counts are live data and will change over time.
     for gate in escalations:
         assert gate["gate_id"]
     for item in drift:
         assert item["id"]
+    assert drift == []
+    assert [gate["gate_id"] for gate in holds] == ["GATE-001"]

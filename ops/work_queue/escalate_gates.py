@@ -18,6 +18,9 @@ Usage:
 Semantics:
 - A gate escalates when state == "open" and days since
   max(opened, last_surfaced) exceed the threshold (default 3, per #1131).
+- Gates with integrity_status == "reconciliation_required" remain open
+  authority records but are excluded from automated escalation until their
+  stale issue/queue references are reconciled.
 - Bumping last_surfaced (--apply) IS the dedup: a gate will not re-escalate
   until the threshold elapses again. escalation_tier is Aurora's field and
   is never modified here.
@@ -67,6 +70,34 @@ def _today() -> date:
     return datetime.now(timezone.utc).date()
 
 
+def _is_active_open_gate(gate: Dict[str, Any]) -> bool:
+    """Whether a gate may participate in automated escalation and linking."""
+    return (
+        gate.get("state") == "open"
+        and gate.get("integrity_status", "active") == "active"
+    )
+
+
+def find_integrity_holds(registry: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Open gates intentionally suspended from automation pending reconciliation."""
+    holds = []
+    for gate in registry.get("gates", []):
+        if gate.get("state") != "open":
+            continue
+        status = gate.get("integrity_status", "active")
+        if status == "active":
+            continue
+        holds.append({
+            "gate_id": gate.get("gate_id"),
+            "title": gate.get("title"),
+            "integrity_status": status,
+            "integrity_note": gate.get("integrity_note"),
+            "github_issue": gate.get("github_issue"),
+            "queue_item": gate.get("queue_item"),
+        })
+    return holds
+
+
 def find_escalations(
     registry: Dict[str, Any],
     threshold_days: int = DEFAULT_THRESHOLD_DAYS,
@@ -76,7 +107,7 @@ def find_escalations(
     today = today or _today()
     escalations: List[Dict[str, Any]] = []
     for gate in registry.get("gates", []):
-        if gate.get("state") != "open":
+        if not _is_active_open_gate(gate):
             continue
         baseline_candidates = [
             _parse_date(gate.get("opened")),
@@ -106,7 +137,7 @@ def find_escalations(
 
 def _open_gate_refs(registry: Dict[str, Any]) -> tuple[set, set]:
     """(queue_item ids, github issue numbers) referenced by open gates."""
-    open_gates = [g for g in registry.get("gates", []) if g.get("state") == "open"]
+    open_gates = [g for g in registry.get("gates", []) if _is_active_open_gate(g)]
     return (
         {gate.get("queue_item") for gate in open_gates},
         {gate.get("github_issue") for gate in open_gates},
@@ -196,9 +227,10 @@ def main() -> int:
 
     escalations = find_escalations(registry, args.threshold_days)
     drift = find_ungated_decisions(queue, registry)
+    integrity_holds = find_integrity_holds(registry)
 
-    _print_findings(escalations, drift)
-    _write_report(args, escalations, drift)
+    _print_findings(escalations, drift, integrity_holds)
+    _write_report(args, escalations, drift, integrity_holds)
 
     if not escalations and not drift:
         print("No gates past threshold; no registry drift.")
@@ -208,16 +240,30 @@ def main() -> int:
     return 10
 
 
-def _print_findings(escalations: List[Dict[str, Any]], drift: List[Dict[str, Any]]) -> None:
+def _print_findings(
+    escalations: List[Dict[str, Any]],
+    drift: List[Dict[str, Any]],
+    integrity_holds: List[Dict[str, Any]],
+) -> None:
     for item in escalations:
         age = item["days_since_surfaced"]
         print(f"ESCALATE {item['gate_id']} (tier {item['escalation_tier']}, "
               f"{age if age is not None else 'undated'}d, issue #{item['github_issue']}): {item['title']}")
     for item in drift:
         print(f"DRIFT ungated needs-decision item: {item['id']} — {item['title']}")
+    for gate in integrity_holds:
+        print(
+            f"HOLD {gate['gate_id']} ({gate['integrity_status']}): "
+            f"{gate['integrity_note'] or gate['title']}"
+        )
 
 
-def _write_report(args, escalations: List[Dict[str, Any]], drift: List[Dict[str, Any]]) -> None:
+def _write_report(
+    args,
+    escalations: List[Dict[str, Any]],
+    drift: List[Dict[str, Any]],
+    integrity_holds: List[Dict[str, Any]],
+) -> None:
     if not args.json:
         return
     report = {
@@ -225,6 +271,7 @@ def _write_report(args, escalations: List[Dict[str, Any]], drift: List[Dict[str,
         "threshold_days": args.threshold_days,
         "escalations": escalations,
         "ungated_decisions": drift,
+        "integrity_holds": integrity_holds,
     }
     args.json.write_text(json.dumps(report, indent=2) + "\n")
 

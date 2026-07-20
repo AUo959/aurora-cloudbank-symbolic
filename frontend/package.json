@@ -94,7 +94,7 @@
     "lint-staged": "^17.0.8",
     "postcss": "^8.5.13",
     "prettier": "^3.8.4",
-    "prettier-plugin-tailwindcss": "^0.8.0",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "react-syntax-highlighter": "^16.1.0",
     "tailwindcss": "^4.3.1",
     "tailwindcss-animate": "^1.0.7",

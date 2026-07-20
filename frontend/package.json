@@ -60,7 +60,7 @@
     "react-markdown": "^9.0.1",
     "react-router-dom": "^6.30.4",
     "react-window": "^1.8.10",
-    "recharts": "^2.10.3",
+    "recharts": "^3.9.2",
     "socket.io-client": "^4.7.0",
     "sonner": "^1.2.3",
     "tailwind-merge": "^2.2.0",

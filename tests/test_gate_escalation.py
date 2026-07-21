@@ -135,6 +135,22 @@ def test_ungated_needs_decision_items_are_reported_as_drift():
     assert [d["id"] for d in drift] == ["sim/decision-x"]
 
 
+def test_null_gate_refs_do_not_mask_unlinked_decisions():
+    registry = _registry(queue_item="sim/known", github_issue=None)
+    queue = {
+        "active": [
+            {
+                "id": "sim/unlinked",
+                "title": "No issue yet",
+                "status": "needs-decision",
+            }
+        ]
+    }
+
+    drift = find_ungated_decisions(queue, registry)
+    assert [item["id"] for item in drift] == ["sim/unlinked"]
+
+
 def test_live_registry_and_queue_parse_and_report_cleanly():
     """The real files must be consumable by the escalation core."""
     work_queue = Path(__file__).resolve().parent.parent / "ops" / "work_queue"

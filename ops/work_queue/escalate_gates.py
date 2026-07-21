@@ -138,10 +138,15 @@ def find_escalations(
 def _open_gate_refs(registry: Dict[str, Any]) -> tuple[set, set]:
     """(queue_item ids, github issue numbers) referenced by open gates."""
     open_gates = [g for g in registry.get("gates", []) if _is_active_open_gate(g)]
-    return (
-        {gate.get("queue_item") for gate in open_gates},
-        {gate.get("github_issue") for gate in open_gates},
-    )
+    gated_items = {
+        gate["queue_item"] for gate in open_gates
+        if gate.get("queue_item") is not None
+    }
+    gated_issues = {
+        gate["github_issue"] for gate in open_gates
+        if gate.get("github_issue") is not None
+    }
+    return gated_items, gated_issues
 
 
 def _needs_decision(item: Dict[str, Any]) -> Optional[str]:
@@ -159,7 +164,11 @@ def find_ungated_decisions(
         status = _needs_decision(item)
         if status is None:
             continue
-        if item.get("id") in gated_items or item.get("github_issue") in gated_issues:
+        github_issue = item.get("github_issue")
+        if (
+            item.get("id") in gated_items
+            or github_issue is not None and github_issue in gated_issues
+        ):
             continue
         drift.append({
             "id": item.get("id"),
@@ -233,7 +242,13 @@ def main() -> int:
     _write_report(args, escalations, drift, integrity_holds)
 
     if not escalations and not drift:
-        print("No gates past threshold; no registry drift.")
+        if integrity_holds:
+            print(
+                "No gates past threshold; no registry drift; "
+                f"{len(integrity_holds)} integrity hold(s) reported."
+            )
+        else:
+            print("No gates past threshold; no registry drift.")
         return 0
 
     _finalize(args, registry, escalations)

@@ -23,6 +23,7 @@ python-multipart>=0.0.20             # File upload handling
 # HTTP & NETWORKING
 # ===================================================================
 httpx>=0.28.0,<1.0.0                # Async HTTP client (requires httpcore 1.x)
+httpx2>=2.0.0,<3.0.0                # Starlette TestClient transport (replaces deprecated httpx fallback)
 httpcore>=1.0.0                     # HTTP core (requires h11 0.16.0+)
 h11>=0.16.0                         # HTTP/1.1 implementation (security updates)
 websockets>=11.0.3                  # WebSocket support

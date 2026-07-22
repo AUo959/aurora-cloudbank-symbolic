@@ -41,6 +41,7 @@ import os
 import sys
 
 # Import our L2 bridge
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Any, Dict
@@ -379,11 +380,34 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Log server lifecycle transitions and disconnect mesh agents cleanly."""
+    logger.info("🌟 Aurora L2 Integration Server starting up")
+    logger.info("Version: %s", str(server_state["version"])[:100])
+    logger.info("Dashboard URL: http://localhost:8000")
+    logger.info("API Documentation: http://localhost:8000/api/docs")
+    logger.info("Health Check: http://localhost:8000/health")
+
+    try:
+        yield
+    finally:
+        logger.info("Aurora L2 Integration Server shutting down")
+        if hasattr(l2_bridge, "agents"):
+            for agent_id in list(l2_bridge.agents):
+                try:
+                    await l2_bridge.disconnect_agent(agent_id)
+                except Exception:
+                    logger.exception("Agent disconnect failed during shutdown")
+
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Aurora L2 Integration Server",
     description="L2 Meta-Agent Integration with real-time dashboard",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -795,28 +819,6 @@ async def get_orion_core_info():
     except Exception as exc:
         logger.exception("ORION Core info retrieval failed")
         raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Server startup event"""
-    logger.info("🌟 Aurora L2 Integration Server starting up")
-    logger.info("Version: %s", str(server_state['version'])[:100])
-    logger.info("Dashboard URL: http://localhost:8000")
-    logger.info("API Documentation: http://localhost:8000/api/docs")
-    logger.info("Health Check: http://localhost:8000/health")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Server shutdown event"""
-    logger.info("Aurora L2 Integration Server shutting down")
-    if hasattr(l2_bridge, "agents"):
-        for agent_id in l2_bridge.agents:
-            try:
-                await l2_bridge.disconnect_agent(agent_id)
-            except Exception as e:
-                logger.error("Error disconnecting %s: %s", str(agent_id)[:100], str(str(e))[:100])
 
 
 def _build_argument_parser() -> argparse.ArgumentParser:

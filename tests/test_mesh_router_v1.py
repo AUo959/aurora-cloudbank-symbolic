@@ -44,6 +44,27 @@ def test_server_cli_defaults_to_loopback_and_allows_explicit_override(monkeypatc
     CHECKS.assertEqual(_build_argument_parser().parse_args([]).host, "192.0.2.10")
 
 
+@pytest.mark.asyncio
+async def test_server_lifespan_disconnects_mesh_agents(monkeypatch) -> None:
+    """The server lifespan should disconnect every registered agent on shutdown."""
+    from src.servers import l2_integration_server
+
+    disconnected_agents = []
+
+    class _Bridge:
+        agents = {"L2_ARCHY": object(), "L2_OPPY": object()}
+
+        async def disconnect_agent(self, agent_id):
+            disconnected_agents.append(agent_id)
+
+    monkeypatch.setattr(l2_integration_server, "l2_bridge", _Bridge())
+
+    async with l2_integration_server.lifespan(l2_integration_server.app):
+        pass
+
+    CHECKS.assertEqual(disconnected_agents, ["L2_ARCHY", "L2_OPPY"])
+
+
 def copy_mesh_project(tmp_path: Path) -> Path:
     """Copy the mesh config and UI assets into a disposable project root."""
 

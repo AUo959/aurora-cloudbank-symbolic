@@ -1,8 +1,8 @@
 {
   "registry_authority": "Aurora",
-  "protocol_version": "1.0.0",
-  "description": "Canonical registry of all human-gated decisions in the Aurora work queue. A gate is created when a queue item reaches decision_required state and consumer_fit excludes autonomous agents. Gates persist across sessions and platforms until explicitly resolved. Aurora surfaces all open gates at session open.",
-  "last_updated": "2026-06-22",
+  "protocol_version": "1.1.0",
+  "description": "Canonical registry of all human-gated decisions in the Aurora work queue. A gate is created when a queue item reaches needs-decision or decision_required state and consumer_fit excludes autonomous agents. Gates persist across sessions and platforms until explicitly resolved. An integrity hold suspends automated escalation without resolving the underlying decision.",
+  "last_updated": "2026-07-20",
   "gates": [
     {
       "gate_id": "GATE-001",
@@ -10,6 +10,9 @@
       "github_issue": 841,
       "title": "Pentest vendor selection + pre-condition sign-off",
       "state": "open",
+      "integrity_status": "reconciliation_required",
+      "integrity_checked": "2026-07-20",
+      "integrity_note": "Linked issue #841 is closed as completed, while Q-0003 and Q-0008 are absent from the current queue. Automated escalation is suspended until the operator reconciles the gate with current security-review authority; this does not declare the pentest decision resolved.",
       "decision_owner": "operator",
       "opened": "2026-06-22",
       "last_surfaced": "2026-06-22",
@@ -28,6 +31,64 @@
         "Update NEXT_UP.md to reflect Q-0003 closure"
       ],
       "aurora_notes": "This gate is the critical path to the pentest engagement. The wiring verification sub-task (Q-0003a) is agent-eligible and should not be waiting on the operator. Vendor selection (Q-0003b) is the true human decision. Tier escalation is computed from (today - opened) at each session open.",
+      "closed": null,
+      "resolved_by": null
+    },
+    {
+      "gate_id": "GATE-002",
+      "queue_item": "sim/SENTINEL-phase0",
+      "github_issue": null,
+      "title": "PROJECT SENTINEL Phase 0 governance constitution",
+      "state": "open",
+      "integrity_status": "active",
+      "decision_owner": "Commander Thorne + Sorensen + Sato",
+      "opened": "2026-07-20",
+      "last_surfaced": null,
+      "escalation_tier": 1,
+      "blocks_queue_items": [],
+      "blocks_gates": [],
+      "resolution_criteria": [
+        "Commander Thorne, Sorensen, and Sato governance decision is recorded",
+        "Phase 0 ethics review board constitution is recorded",
+        "The Phase 0 layer-boundary document is drafted or explicitly deferred"
+      ],
+      "resolution_steps": [
+        "Record the governance decision and named decision-makers",
+        "Update queue.json: move sim/SENTINEL-phase0 out of needs-decision",
+        "Update gate_registry.json: set state = resolved, closed = today, resolved_by = operator handle",
+        "Regenerate queue views with sync_queue.py"
+      ],
+      "aurora_notes": "No engineering blocking condition. The decision is governance-only; agents must not constitute the review board or promote the proposal autonomously.",
+      "closed": null,
+      "resolved_by": null
+    },
+    {
+      "gate_id": "GATE-003",
+      "queue_item": "feat/QGIA",
+      "github_issue": null,
+      "title": "QGIA integration routing and crew sign-off",
+      "state": "open",
+      "integrity_status": "active",
+      "decision_owner": "operator / designated crew reviewers",
+      "opened": "2026-07-20",
+      "last_surfaced": null,
+      "escalation_tier": 1,
+      "blocks_queue_items": [],
+      "blocks_gates": [],
+      "resolution_criteria": [
+        "arch/layer-canonization is complete",
+        "ops/QGIA-doctrine-store is complete",
+        "The PAT routing decision is recorded",
+        "Crew sign-off is recorded before any QGIA axiom becomes operationally binding"
+      ],
+      "resolution_steps": [
+        "Record the PAT routing decision and crew reviewers",
+        "Confirm all declared queue dependencies are complete",
+        "Update queue.json: move feat/QGIA out of needs-decision",
+        "Update gate_registry.json: set state = resolved, closed = today, resolved_by = operator handle",
+        "Regenerate queue views with sync_queue.py"
+      ],
+      "aurora_notes": "QGIA remains mediated through L1. This gate does not authorize direct QGIA-to-L2 tasking or promote analytical doctrine into operational canon.",
       "closed": null,
       "resolved_by": null
     }

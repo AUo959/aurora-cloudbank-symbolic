@@ -18,7 +18,7 @@ from src.mesh.runtime import MeshRuntime
 
 try:
     from fastapi.testclient import TestClient
-    from src.servers.l2_integration_server import PROJECT_ROOT, create_app
+    from src.servers.l2_integration_server import PROJECT_ROOT, _build_argument_parser, create_app
 
     FASTAPI_AVAILABLE = True
 except ModuleNotFoundError:
@@ -26,6 +26,22 @@ except ModuleNotFoundError:
     create_app = None
     PROJECT_ROOT = Path(__file__).resolve().parents[1]
     FASTAPI_AVAILABLE = False
+
+
+CHECKS = unittest.TestCase()
+
+
+def test_server_cli_defaults_to_loopback_and_allows_explicit_override(monkeypatch) -> None:
+    """The server should bind locally unless the operator explicitly selects another host."""
+
+    if not FASTAPI_AVAILABLE:
+        pytest.skip("fastapi is not installed in this environment")
+
+    monkeypatch.delenv("AURORA_L2_HOST", raising=False)
+    CHECKS.assertEqual(_build_argument_parser().parse_args([]).host, "127.0.0.1")
+
+    monkeypatch.setenv("AURORA_L2_HOST", "192.0.2.10")
+    CHECKS.assertEqual(_build_argument_parser().parse_args([]).host, "192.0.2.10")
 
 
 def copy_mesh_project(tmp_path: Path) -> Path:
@@ -78,23 +94,28 @@ def test_alias_resolution_and_live_fallback(tmp_path: Path) -> None:
         return result, history
 
     result, history = asyncio.run(scenario())
-    assert result["status"] == "accepted"
+    CHECKS.assertEqual(result["status"], "accepted")
     event_types = [event["event_type"] for event in history]
-    assert event_types[:6] == [
-        "message_accepted",
-        "trace_update",
-        "agent_ack",
-        "agent_typing",
-        "trace_update",
-        "agent_reply",
-    ]
+    CHECKS.assertEqual(
+        event_types[:6],
+        [
+            "message_accepted",
+            "trace_update",
+            "agent_ack",
+            "agent_typing",
+            "trace_update",
+            "agent_reply",
+        ],
+    )
 
     reply = next(event for event in history if event["event_type"] == "agent_reply")
-    assert reply["agent_id"] == "alex_thorne"
-    assert reply["payload"]["mode"] == "deterministic_fallback"
+    CHECKS.assertEqual(reply["agent_id"], "Alex Thorne")
+    CHECKS.assertEqual(reply["payload"]["mode"], "deterministic_fallback")
 
     trace = [event for event in history if event["event_type"] == "trace_update"]
-    assert any("Live adapter unavailable" in event["payload"].get("detail", "") for event in trace)
+    CHECKS.assertTrue(
+        any("Live adapter unavailable" in event["payload"].get("detail", "") for event in trace)
+    )
 
 
 def test_broadcast_routes_to_all_channel_agents(tmp_path: Path) -> None:
@@ -142,31 +163,31 @@ def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
     expected_total_agents = len(agent_ids(project_root))
 
     chamber_html = client.get("/chamber")
-    assert chamber_html.status_code == 200
-    assert "socket.io" not in chamber_html.text.lower()
-    assert "localhost:8080" not in chamber_html.text.lower()
-    assert "new WebSocket" in chamber_html.text
+    CHECKS.assertEqual(chamber_html.status_code, 200)
+    CHECKS.assertNotIn("socket.io", chamber_html.text.lower())
+    CHECKS.assertNotIn("localhost:8080", chamber_html.text.lower())
+    CHECKS.assertIn("new WebSocket", chamber_html.text)
 
     dashboard_html = client.get("/")
-    assert dashboard_html.status_code == 200
-    assert "/api/mesh/status" in dashboard_html.text
+    CHECKS.assertEqual(dashboard_html.status_code, 200)
+    CHECKS.assertIn("/api/mesh/status", dashboard_html.text)
 
     with client.websocket_connect("/ws/mesh") as websocket:
         initial = websocket.receive_json()
-        assert initial["payload"]["phase"] == "socket_connected"
+        CHECKS.assertEqual(initial["payload"]["phase"], "socket_connected")
         websocket.send_text("ping")
         pong = websocket.receive_json()
-        assert pong["payload"]["phase"] == "pong"
+        CHECKS.assertEqual(pong["payload"]["phase"], "pong")
 
     status = client.get("/api/mesh/status").json()
-    assert status["mesh_status"] == "operational"
+    CHECKS.assertEqual(status["mesh_status"], "operational")
     unittest.TestCase().assertEqual(status["total_agents"], expected_total_agents)
 
     send = client.post(
         "/api/mesh/messages",
         json={"to": "alex_thorne", "channel": "private:captain:alex", "content": "Status check."},
     )
-    assert send.status_code == 200
+    CHECKS.assertEqual(send.status_code, 200)
 
     history_url = "/api/mesh/channels/{}/history?limit=20".format(quote("private:captain:alex", safe=""))
     deadline = time.monotonic() + 2.0
@@ -183,18 +204,18 @@ def test_api_surface_and_ui_contract(tmp_path: Path) -> None:
     )
 
     events = client.get("/api/mesh/events?after=0&limit=50").json()
-    assert events["next_cursor"] >= len(events["events"])
+    CHECKS.assertGreaterEqual(events["next_cursor"], len(events["events"]))
 
     connect = client.post(
         "/api/bridge/gpt/connect/alex_thorne",
         json={"activationPhrase": "ORION_ALEX_THORNE_RELAY_ACTIVATE//"},
     )
-    assert connect.status_code == 200
-    assert connect.json()["status"] == "connected"
+    CHECKS.assertEqual(connect.status_code, 200)
+    CHECKS.assertEqual(connect.json()["status"], "connected")
 
     bridge_status = client.get("/api/bridge/constellation/status").json()
     unittest.TestCase().assertEqual(bridge_status["totalAgents"], expected_total_agents)
-    assert bridge_status["meshStatus"] == "operational"
+    CHECKS.assertEqual(bridge_status["meshStatus"], "operational")
 
 
 @pytest.mark.critical
@@ -210,7 +231,7 @@ def test_mesh_agents_list(tmp_path: Path) -> None:
 
     checks = unittest.TestCase()
     response = client.get("/api/mesh/agents")
-    assert response.status_code == 200
+    checks.assertEqual(response.status_code, 200)
     body = response.json()
     checks.assertEqual(body["total"], len(expected_agent_ids))
     checks.assertEqual(len(body["agents"]), len(expected_agent_ids))
@@ -218,8 +239,8 @@ def test_mesh_agents_list(tmp_path: Path) -> None:
     checks.assertEqual(response_agent_ids, expected_agent_ids)
     # Every agent record must have the required contract fields
     for agent in body["agents"]:
-        assert "agent_id" in agent
-        assert "status" in agent
+        checks.assertIn("agent_id", agent)
+        checks.assertIn("status", agent)
 
 
 @pytest.mark.critical
@@ -233,10 +254,10 @@ def test_mesh_agent_get_by_id(tmp_path: Path) -> None:
     client = TestClient(create_app(project_root))
 
     response = client.get("/api/mesh/agents/alex_thorne")
-    assert response.status_code == 200
+    CHECKS.assertEqual(response.status_code, 200)
     body = response.json()
-    assert body["success"] is True
-    assert body["agent_id"] == "alex_thorne"
+    CHECKS.assertIs(body["success"], True)
+    CHECKS.assertEqual(body["agent_id"], "alex_thorne")
 
 
 @pytest.mark.critical
@@ -250,7 +271,7 @@ def test_mesh_agent_get_unknown_returns_404(tmp_path: Path) -> None:
     client = TestClient(create_app(project_root))
 
     response = client.get("/api/mesh/agents/nonexistent_agent_xyz")
-    assert response.status_code == 404
+    CHECKS.assertEqual(response.status_code, 404)
 
 
 @pytest.mark.critical
@@ -267,11 +288,11 @@ def test_mesh_agent_activate(tmp_path: Path) -> None:
         "/api/mesh/agents/alex_thorne/activate",
         json={"activationPhrase": "ORION_ALEX_THORNE_RELAY_ACTIVATE//"},
     )
-    assert response.status_code == 200
+    CHECKS.assertEqual(response.status_code, 200)
     body = response.json()
-    assert body["success"] is True
-    assert body["agent_id"] == "alex_thorne"
-    assert body["status"] == "connected"
+    CHECKS.assertIs(body["success"], True)
+    CHECKS.assertEqual(body["agent_id"], "alex_thorne")
+    CHECKS.assertEqual(body["status"], "connected")
 
 
 @pytest.mark.critical
@@ -285,8 +306,8 @@ def test_mesh_agent_activate_missing_phrase(tmp_path: Path) -> None:
     client = TestClient(create_app(project_root))
 
     response = client.post("/api/mesh/agents/alex_thorne/activate", json={})
-    assert response.status_code == 400
-    assert "activationPhrase" in response.json()["detail"]
+    CHECKS.assertEqual(response.status_code, 400)
+    CHECKS.assertIn("activationPhrase", response.json()["detail"])
 
 
 @pytest.mark.critical
@@ -303,4 +324,4 @@ def test_mesh_agent_activate_unknown_returns_404(tmp_path: Path) -> None:
         "/api/mesh/agents/nonexistent_agent_xyz/activate",
         json={"activationPhrase": "ORION_RELAY_ACTIVATE//"},
     )
-    assert response.status_code == 404
+    CHECKS.assertEqual(response.status_code, 404)

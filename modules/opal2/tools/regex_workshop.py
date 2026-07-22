@@ -60,9 +60,29 @@ class RegexWorkshopTool(Opal2Tool):
             "additionalProperties": False,
             "properties": {
                 "template": {"type": "string", "enum": _TEMPLATES},
-                "value": {"type": "string"},
-                "flags": {"type": "array"},
-                "samples": {"type": "array"},
+                "value": {"type": "string", "maxLength": MAX_LITERAL_LENGTH},
+                "flags": {
+                    "type": "array",
+                    "items": {"type": "string", "enum": sorted(_FLAG_VALUES)},
+                    "maxItems": len(_FLAG_VALUES),
+                    "uniqueItems": True,
+                },
+                "samples": {
+                    "type": "array",
+                    "maxItems": MAX_SAMPLES,
+                    "items": {
+                        "type": "object",
+                        "required": ["text"],
+                        "additionalProperties": False,
+                        "properties": {
+                            "text": {
+                                "type": "string",
+                                "maxLength": MAX_SAMPLE_LENGTH,
+                            },
+                            "expected_match": {"type": ["boolean", "null"]},
+                        },
+                    },
+                },
             },
         },
         output_schema={
@@ -80,11 +100,53 @@ class RegexWorkshopTool(Opal2Tool):
             "properties": {
                 "pattern": {"type": "string"},
                 "template": {"type": "string"},
-                "flags": {"type": "array"},
-                "samples": {"type": "array"},
-                "expectations_evaluated": {"type": "integer"},
+                "flags": {
+                    "type": "array",
+                    "items": {"type": "string", "enum": sorted(_FLAG_VALUES)},
+                    "maxItems": len(_FLAG_VALUES),
+                    "uniqueItems": True,
+                },
+                "samples": {
+                    "type": "array",
+                    "maxItems": MAX_SAMPLES,
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "text",
+                            "matched",
+                            "match",
+                            "span",
+                            "groups",
+                            "expected_match",
+                            "expectation_met",
+                        ],
+                        "additionalProperties": False,
+                        "properties": {
+                            "text": {"type": "string"},
+                            "matched": {"type": "boolean"},
+                            "match": {"type": ["string", "null"]},
+                            "span": {
+                                "type": ["array", "null"],
+                                "items": {"type": "integer"},
+                                "minItems": 2,
+                                "maxItems": 2,
+                            },
+                            "groups": {
+                                "type": "array",
+                                "items": {"type": ["string", "null"]},
+                            },
+                            "expected_match": {"type": ["boolean", "null"]},
+                            "expectation_met": {"type": ["boolean", "null"]},
+                        },
+                    },
+                },
+                "expectations_evaluated": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": MAX_SAMPLES,
+                },
                 "all_expectations_met": {"type": "boolean"},
-                "warnings": {"type": "array"},
+                "warnings": {"type": "array", "items": {"type": "string"}},
             },
         },
         runtime="python",

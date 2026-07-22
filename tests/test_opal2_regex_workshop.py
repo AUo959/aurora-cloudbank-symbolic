@@ -1,6 +1,7 @@
 """Conformance tests for the neutral OPAL2 regex workshop tool."""
 
 import pytest
+from jsonschema import Draft7Validator, ValidationError
 
 from modules.opal2.tool_contract import ToolExecutionContext, ToolInputError
 from modules.opal2.tool_registry import ToolRegistry
@@ -15,25 +16,50 @@ from modules.opal2.tools.regex_workshop import (
 @pytest.mark.opal2
 @pytest.mark.asyncio
 async def test_regex_workshop_builds_escaped_literal_pattern():
-    registry = ToolRegistry((RegexWorkshopTool(),))
+    tool = RegexWorkshopTool()
+    registry = ToolRegistry((tool,))
+    payload = {
+        "template": "exact",
+        "value": "station[808]",
+        "flags": ["ignore_case"],
+        "samples": [
+            {"text": "STATION[808]", "expected_match": True},
+            {"text": "station808", "expected_match": False},
+        ],
+    }
 
     result = await registry.run(
         REGEX_WORKSHOP_TOOL_ID,
-        {
-            "template": "exact",
-            "value": "station[808]",
-            "flags": ["ignore_case"],
-            "samples": [
-                {"text": "STATION[808]", "expected_match": True},
-                {"text": "station808", "expected_match": False},
-            ],
-        },
+        payload,
     )
+
+    Draft7Validator(tool.manifest.input_schema).validate(payload)
+    Draft7Validator(tool.manifest.output_schema).validate(result.output)
 
     assert result.output["pattern"] == r"\Astation\[808\]\Z"  # nosec B101 - pytest assertion
     assert result.output["all_expectations_met"] is True  # nosec B101 - pytest assertion
     assert result.output["expectations_evaluated"] == 2  # nosec B101 - pytest assertion
     assert result.provenance["runtime"] == "python"  # nosec B101 - pytest assertion
+
+
+@pytest.mark.unit
+@pytest.mark.opal2
+def test_regex_workshop_manifest_rejects_malformed_collection_items():
+    manifest = RegexWorkshopTool.manifest
+    Draft7Validator.check_schema(manifest.input_schema)
+    Draft7Validator.check_schema(manifest.output_schema)
+    validator = Draft7Validator(manifest.input_schema)
+
+    with pytest.raises(ValidationError):
+        validator.validate({"template": "integer", "flags": [1]})
+    with pytest.raises(ValidationError):
+        validator.validate({"template": "integer", "flags": ["dotall", "dotall"]})
+    with pytest.raises(ValidationError):
+        validator.validate({"template": "integer", "samples": [{"text": 42}]})
+    with pytest.raises(ValidationError):
+        validator.validate(
+            {"template": "integer", "samples": [{"text": "42", "extra": True}]}
+        )
 
 
 @pytest.mark.unit

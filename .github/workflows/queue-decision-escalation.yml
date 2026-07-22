@@ -70,6 +70,20 @@ jobs:
               issue = gate.get("github_issue")
               if not issue:
                   continue
+              state_check = subprocess.run(
+                  ["gh", "issue", "view", str(issue), "--json", "state", "--jq", ".state"],
+                  check=False,
+                  capture_output=True,
+                  text=True,
+              )
+              issue_state = state_check.stdout.strip().upper()
+              if state_check.returncode != 0 or issue_state != "OPEN":
+                  detail = issue_state or state_check.stderr.strip() or "UNKNOWN"
+                  print(
+                      f"::warning::skipping {gate['gate_id']}: linked issue "
+                      f"#{issue} is not confirmed open ({detail})"
+                  )
+                  continue
               age = gate.get("days_since_surfaced")
               body = (
                   f"⏰ **Decision-gate escalation** ({gate['gate_id']}, tier {gate['escalation_tier']}): "
@@ -85,6 +99,11 @@ jobs:
               print(f"pinged issue #{issue} for {gate['gate_id']}")
           for item in report["ungated_decisions"]:
               print(f"registry drift (reported in PR body): {item['id']} — {item['title']}")
+          for gate in report.get("integrity_holds", []):
+              print(
+                  f"integrity hold (reported in PR body): {gate['gate_id']} — "
+                  f"{gate.get('integrity_note') or gate['title']}"
+              )
           PY
 
       - name: Open registry-update PR

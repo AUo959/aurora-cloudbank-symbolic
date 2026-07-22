@@ -37,7 +37,7 @@ def test_mesh_runtime_initializes_from_agent_manifests(tmp_path: Path) -> None:
     checks.assertEqual(status["mesh_status"], "operational")
     checks.assertEqual(status["total_agents"], len(manifest_paths))
     checks.assertGreater(status["total_terminals"], status["total_agents"])
-    checks.assertEqual(runtime.get_agent("captain alex line")["agent_id"], "Alex Thorne")
+    checks.assertEqual(runtime.get_agent("captain alex line")["agent_id"], "alex_thorne")
     checks.assertEqual(runtime.get_terminal("core_development.carmen.term")["owner_agent_id"], "carmen_rivas")
     checks.assertTrue((tmp_path / "config" / "mesh" / "memory" / "alex_thorne.md").exists())
 

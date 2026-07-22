@@ -109,7 +109,7 @@ def test_alias_resolution_and_live_fallback(tmp_path: Path) -> None:
     )
 
     reply = next(event for event in history if event["event_type"] == "agent_reply")
-    CHECKS.assertEqual(reply["agent_id"], "Alex Thorne")
+    CHECKS.assertEqual(reply["agent_id"], "alex_thorne")
     CHECKS.assertEqual(reply["payload"]["mode"], "deterministic_fallback")
 
     trace = [event for event in history if event["event_type"] == "trace_update"]

@@ -71,6 +71,8 @@ from starlette.middleware.cors import CORSMiddleware
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+INTERNAL_SERVER_ERROR = "Internal server error"
+INTERNAL_ERROR_RESPONSE = {500: {"description": INTERNAL_SERVER_ERROR}}
 
 
 class _BridgeAgentState:
@@ -191,7 +193,13 @@ def _register_mesh_agent_routes(mesh_app: FastAPI, mesh_runtime: MeshRuntime) ->
         agents = mesh_runtime.list_agents()
         return {"agents": agents, "total": len(agents)}
 
-    @mesh_app.get("/api/mesh/agents/{agent_id}")
+    @mesh_app.get(
+        "/api/mesh/agents/{agent_id}",
+        responses={
+            404: {"description": "Agent not found"},
+            **INTERNAL_ERROR_RESPONSE,
+        },
+    )
     async def mesh_get_agent(agent_id: str) -> Dict[str, Any]:
         """Get detail for a specific mesh agent by ID."""
         try:
@@ -201,10 +209,17 @@ def _register_mesh_agent_routes(mesh_app: FastAPI, mesh_runtime: MeshRuntime) ->
             # MeshRuntime._resolve_manifest raises ValueError for unknown ids
             raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found") from exc
         except Exception as exc:
-            logger.error("mesh_get_agent failed for %s: %s", str(agent_id)[:100], str(exc)[:100])
-            raise HTTPException(status_code=500, detail="Internal server error") from exc
+            logger.exception("Mesh agent lookup failed")
+            raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
-    @mesh_app.post("/api/mesh/agents/{agent_id}/activate")
+    @mesh_app.post(
+        "/api/mesh/agents/{agent_id}/activate",
+        responses={
+            400: {"description": "Activation phrase missing"},
+            404: {"description": "Agent not found"},
+            **INTERNAL_ERROR_RESPONSE,
+        },
+    )
     async def mesh_activate_agent(agent_id: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """Activate a mesh agent by ID. Requires activationPhrase in request body."""
         activation_phrase = request_data.get("activationPhrase")
@@ -217,8 +232,8 @@ def _register_mesh_agent_routes(mesh_app: FastAPI, mesh_runtime: MeshRuntime) ->
             # MeshRuntime._resolve_manifest raises ValueError for unknown ids
             raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found") from exc
         except Exception as exc:
-            logger.error("mesh_activate_agent failed for %s: %s", str(agent_id)[:100], str(exc)[:100])
-            raise HTTPException(status_code=500, detail="Internal server error") from exc
+            logger.exception("Mesh agent activation failed")
+            raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
 def _register_mesh_terminal_routes(mesh_app: FastAPI, mesh_runtime: MeshRuntime) -> None:
@@ -228,7 +243,14 @@ def _register_mesh_terminal_routes(mesh_app: FastAPI, mesh_runtime: MeshRuntime)
         terminals = mesh_runtime.list_terminals()
         return {"terminals": terminals, "total": len(terminals)}
 
-    @mesh_app.get("/api/mesh/terminals/{terminal_id}")
+    @mesh_app.get(
+        "/api/mesh/terminals/{terminal_id}",
+        responses={
+            400: {"description": "Invalid terminal identifier"},
+            404: {"description": "Terminal not found"},
+            **INTERNAL_ERROR_RESPONSE,
+        },
+    )
     async def mesh_get_terminal(terminal_id: str) -> Dict[str, Any]:
         """Get a terminal profile by id, namespace, owner alias, or anchor node."""
         try:
@@ -242,8 +264,8 @@ def _register_mesh_terminal_routes(mesh_app: FastAPI, mesh_runtime: MeshRuntime)
                 detail=f"Terminal '{terminal_id}' not found",
             ) from exc
         except Exception as exc:
-            logger.error("mesh_get_terminal failed for %s: %s", str(terminal_id)[:100], str(exc)[:100])
-            raise HTTPException(status_code=500, detail="Internal server error") from exc
+            logger.exception("Mesh terminal lookup failed")
+            raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
 def _register_mesh_bridge_routes(mesh_app: FastAPI, mesh_runtime: MeshRuntime) -> None:
@@ -443,7 +465,13 @@ async def health_check():
 
 # Aurora Custom GPT Integration Endpoints
 if AURORA_CUSTOM_GPT_AVAILABLE:
-    @app.post("/api/aurora/command")
+    @app.post(
+        "/api/aurora/command",
+        responses={
+            400: {"description": "Command rejected"},
+            500: {"description": "Aurora command processing failed"},
+        },
+    )
     async def aurora_custom_gpt_command(
         request_data: dict,
         token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
@@ -467,10 +495,13 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
             else:
                 raise HTTPException(status_code=400, detail=result["error"])
         except Exception as exc:
-            logger.error("Aurora command failed: %s", str(exc)[:100])
+            logger.exception("Aurora command failed")
             raise HTTPException(status_code=500, detail="Aurora command processing failed") from exc
 
-    @app.get("/api/aurora/status")
+    @app.get(
+        "/api/aurora/status",
+        responses={500: {"description": "Aurora status retrieval failed"}},
+    )
     async def aurora_custom_gpt_status():
         """Get Aurora Custom GPT integration status"""
         server_state["requests_count"] += 1
@@ -485,10 +516,13 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
                 "timestamp": datetime.now().isoformat(),
             }
         except Exception as exc:
-            logger.error("Aurora status request failed: %s", str(str(exc))[:100])
+            logger.exception("Aurora status request failed")
             raise HTTPException(status_code=500, detail="Aurora status retrieval failed") from exc
 
-    @app.post("/api/aurora/initialize")
+    @app.post(
+        "/api/aurora/initialize",
+        responses={500: {"description": "Aurora initialization failed"}},
+    )
     async def initialize_aurora_integration(
         token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     ):
@@ -508,7 +542,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
             else:
                 raise HTTPException(status_code=500, detail=f"Integration failed: {result['error']}")
         except Exception as exc:
-            logger.error("Aurora initialization failed: %s", str(str(exc))[:100])
+            logger.exception("Aurora initialization failed")
             raise HTTPException(status_code=500, detail="Aurora initialization failed") from exc
 
 else:
@@ -527,7 +561,13 @@ else:
 # L2 Meta-Agent Bridge Endpoints
 
 
-@app.post("/api/bridge/gpt/connect/{agent_id}")
+@app.post(
+    "/api/bridge/gpt/connect/{agent_id}",
+    responses={
+        400: {"description": "Connection request rejected"},
+        **INTERNAL_ERROR_RESPONSE,
+    },
+)
 async def connect_custom_gpt(
     agent_id: str,
     request_data: Dict[str, Any],
@@ -559,11 +599,17 @@ async def connect_custom_gpt(
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error("Custom GPT connection failed for %s: %s", str(agent_id)[:100], str(str(exc))[:100])
-        raise HTTPException(status_code=500, detail="Internal server error") from exc
+        logger.exception("Custom GPT connection failed")
+        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
-@app.post("/api/bridge/gpt/message/{agent_id}")
+@app.post(
+    "/api/bridge/gpt/message/{agent_id}",
+    responses={
+        400: {"description": "Message relay rejected"},
+        **INTERNAL_ERROR_RESPONSE,
+    },
+)
 async def relay_message(
     agent_id: str,
     request_data: Dict[str, Any],
@@ -590,11 +636,14 @@ async def relay_message(
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error("Message relay failed for %s: %s", str(agent_id)[:100], str(str(exc))[:100])
-        raise HTTPException(status_code=500, detail="Internal server error") from exc
+        logger.exception("Message relay failed")
+        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
-@app.get("/api/bridge/constellation/status")
+@app.get(
+    "/api/bridge/constellation/status",
+    responses=INTERNAL_ERROR_RESPONSE,
+)
 async def get_constellation_status():
     """Get status of the entire agent constellation"""
     try:
@@ -608,11 +657,17 @@ async def get_constellation_status():
         }
         return JSONResponse(status_code=200, content=status)
     except Exception as exc:
-        logger.error("Status retrieval failed: %s", str(str(exc))[:100])
-        raise HTTPException(status_code=500, detail="Internal server error") from exc
+        logger.exception("Constellation status retrieval failed")
+        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
-@app.get("/api/bridge/gpt/status/{agent_id}")
+@app.get(
+    "/api/bridge/gpt/status/{agent_id}",
+    responses={
+        404: {"description": "Agent not found"},
+        **INTERNAL_ERROR_RESPONSE,
+    },
+)
 async def get_agent_status(agent_id: str):
     """Get detailed status of a specific agent"""
     try:
@@ -625,11 +680,17 @@ async def get_agent_status(agent_id: str):
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error("Agent status retrieval failed for %s: %s", str(agent_id)[:100], str(str(exc))[:100])
-        raise HTTPException(status_code=500, detail="Internal server error") from exc
+        logger.exception("Agent status retrieval failed")
+        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
-@app.post("/api/bridge/gpt/heartbeat/{agent_id}")
+@app.post(
+    "/api/bridge/gpt/heartbeat/{agent_id}",
+    responses={
+        404: {"description": "Agent not found"},
+        **INTERNAL_ERROR_RESPONSE,
+    },
+)
 async def update_heartbeat(
     agent_id: str,
     token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
@@ -654,11 +715,17 @@ async def update_heartbeat(
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error("Heartbeat update failed for %s: %s", str(agent_id)[:100], str(str(exc))[:100])
-        raise HTTPException(status_code=500, detail="Internal server error") from exc
+        logger.exception("Heartbeat update failed")
+        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
-@app.post("/api/bridge/gpt/disconnect/{agent_id}")
+@app.post(
+    "/api/bridge/gpt/disconnect/{agent_id}",
+    responses={
+        400: {"description": "Disconnect request rejected"},
+        **INTERNAL_ERROR_RESPONSE,
+    },
+)
 async def disconnect_agent(
     agent_id: str,
     token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
@@ -677,11 +744,11 @@ async def disconnect_agent(
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error("Disconnect failed for %s: %s", str(agent_id)[:100], str(str(exc))[:100])
-        raise HTTPException(status_code=500, detail="Internal server error") from exc
+        logger.exception("Disconnect failed")
+        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
-@app.get("/api/agents")
+@app.get("/api/agents", responses=INTERNAL_ERROR_RESPONSE)
 async def list_agents():
     """List all available agents"""
     try:
@@ -702,11 +769,11 @@ async def list_agents():
         else:
             return {"agents": [], "total": 0}
     except Exception as exc:
-        logger.error("Agent listing failed: %s", str(str(exc))[:100])
-        raise HTTPException(status_code=500, detail="Internal server error") from exc
+        logger.exception("Agent listing failed")
+        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
-@app.get("/api/orion-core")
+@app.get("/api/orion-core", responses=INTERNAL_ERROR_RESPONSE)
 async def get_orion_core_info():
     """Get ORION Core configuration information"""
     try:
@@ -726,8 +793,8 @@ async def get_orion_core_info():
                 }
             }
     except Exception as exc:
-        logger.error("ORION Core info retrieval failed: %s", str(str(exc))[:100])
-        raise HTTPException(status_code=500, detail="Internal server error") from exc
+        logger.exception("ORION Core info retrieval failed")
+        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR) from exc
 
 
 @app.on_event("startup")

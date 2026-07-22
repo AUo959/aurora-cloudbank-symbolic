@@ -17,7 +17,7 @@ To run Opal2 alongside the main Aurora API, start it as a separate process
 import json
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated, Any, Dict, List, Optional
 
@@ -41,15 +41,19 @@ from modules.opal2.tool_contract import (
     json_ready,
 )
 from modules.opal2.tool_registry import ToolNotFoundError, ToolRegistry
-from modules.opal2.tools import GLYPH_RENDER_TOOL_ID, GlyphRenderTool
+from modules.opal2.tools import (
+    GLYPH_RENDER_TOOL_ID,
+    GlyphRenderTool,
+    RegexWorkshopTool,
+)
 
 security = HTTPBearer()
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="OPAL2 Tool Foundry",
-    description="Portable tool registry and runtime with symbolic visualization reference tools",
-    version="2.1.0",
+    description="Portable tool registry and runtime with regex and symbolic visualization reference tools",
+    version="2.2.0",
 )
 
 glyph_core = GlyphCore()
@@ -57,9 +61,17 @@ glyph_cache = GlyphCache()
 quantum_renderer = QuantumRenderer()
 plugin_system = PluginSystem()
 symbolic_core = SymbolicCore()
-tool_registry = ToolRegistry((GlyphRenderTool(quantum_renderer),))
+tool_registry = ToolRegistry((GlyphRenderTool(quantum_renderer), RegexWorkshopTool()))
 
 active_connections: List[WebSocket] = []
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _utc_now_iso() -> str:
+    return _utc_now().isoformat()
 
 
 class RenderRequest(BaseModel):
@@ -98,7 +110,7 @@ class WebSocketMessage(BaseModel):
 
     type: str = Field(..., description="Message type")
     data: Dict[str, Any] = Field(..., description="Message data")
-    timestamp: datetime = Field(default_factory=datetime.now)
+    timestamp: datetime = Field(default_factory=_utc_now)
 
 
 class ToolRunRequest(BaseModel):
@@ -115,9 +127,9 @@ async def root() -> Dict[str, Any]:
 
     return {
         "system": "OPAL2 Tool Foundry",
-        "version": "2.1.0",
+        "version": "2.2.0",
         "status": "operational",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": _utc_now_iso(),
         "components": {
             "glyph_core": "active",
             "quantum_renderer": "active",
@@ -146,7 +158,7 @@ async def health_check() -> Dict[str, Any]:
         return {
             "healthy": False,
             "components": {},
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": _utc_now_iso(),
             "error": "internal error",
         }
 
@@ -154,7 +166,7 @@ async def health_check() -> Dict[str, Any]:
     return {
         "healthy": all_healthy,
         "components": health_status,
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": _utc_now_iso(),
     }
 
 
@@ -270,9 +282,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             message = json.loads(await websocket.receive_text())
             if message.get("type") == "ping":
                 await websocket.send_text(
-                    json.dumps(
-                        {"type": "pong", "timestamp": datetime.now().isoformat()}
-                    )
+                    json.dumps({"type": "pong", "timestamp": _utc_now_iso()})
                 )
             elif message.get("type") == "subscribe":
                 await websocket.send_text(
@@ -280,7 +290,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                         {
                             "type": "subscribed",
                             "channel": message.get("channel"),
-                            "timestamp": datetime.now().isoformat(),
+                            "timestamp": _utc_now_iso(),
                         }
                     )
                 )

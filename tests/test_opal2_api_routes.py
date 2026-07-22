@@ -198,10 +198,14 @@ def test_opal2_foundry_http_discovery_and_execution():
     from src.middleware.fastapi_security import generate_csrf_token
 
     client = TestClient(module.app)
+    root_response = client.get("/")
+    assert root_response.status_code == 200  # nosec B101 - pytest assertion
+    assert root_response.json()["timestamp"].endswith("+00:00")  # nosec B101 - pytest assertion
     discovery = client.get("/tools")
     assert discovery.status_code == 200  # nosec B101 - pytest assertion
     tool_ids = {tool["tool_id"] for tool in discovery.json()["tools"]}
     assert "opal2.glyph.render" in tool_ids  # nosec B101 - pytest assertion
+    assert "opal2.regex.workshop" in tool_ids  # nosec B101 - pytest assertion
 
     auth_headers = {"Authorization": f"Bearer {generate_csrf_token('opal2-test')}"}
     response = client.post(
@@ -222,6 +226,24 @@ def test_opal2_foundry_http_discovery_and_execution():
     assert response.status_code == 200  # nosec B101 - pytest assertion
     assert response.json()["tool_id"] == "opal2.glyph.render"  # nosec B101 - pytest assertion
     assert response.json()["output"]["format"] == "svg"  # nosec B101 - pytest assertion
+
+    regex_response = client.post(
+        "/tools/opal2.regex.workshop/run",
+        headers=auth_headers,
+        json={
+            "payload": {
+                "template": "word",
+                "value": "anchor",
+                "samples": [
+                    {"text": "stable anchor", "expected_match": True},
+                    {"text": "anchored", "expected_match": False},
+                ],
+            }
+        },
+    )
+    assert regex_response.status_code == 200  # nosec B101 - pytest assertion
+    assert regex_response.json()["tool_id"] == "opal2.regex.workshop"  # nosec B101 - pytest assertion
+    assert regex_response.json()["output"]["all_expectations_met"] is True  # nosec B101 - pytest assertion
 
     invalid_dimensions = client.post(
         "/tools/opal2.glyph.render/run",

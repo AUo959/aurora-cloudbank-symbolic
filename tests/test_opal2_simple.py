@@ -17,7 +17,7 @@ def test_api_imports():
 
     app = FastAPI(title="OPAL2 smoke test")
 
-    assert app.title == "OPAL2 smoke test"
+    assert app.title == "OPAL2 smoke test"  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -40,4 +40,6 @@ def test_opal2_structure():
     missing_paths = sorted(
         str(path.relative_to(REPO_ROOT)) for path in expected_paths if not path.is_file()
     )
-    assert not missing_paths, f"missing OPAL2 runtime files: {missing_paths}"
+    assert not missing_paths, (  # nosec B101 - pytest assertion
+        f"missing OPAL2 runtime files: {missing_paths}"
+    )

@@ -34,8 +34,10 @@ class TestOpal2BasicConcepts:
             "verify_opaltool_package",
         }
 
-        assert set(opal2.__all__) == expected_symbols
-        assert all(hasattr(opal2, symbol) for symbol in expected_symbols)
+        assert set(opal2.__all__) == expected_symbols  # nosec B101 - pytest assertion
+        assert all(  # nosec B101 - pytest assertion
+            hasattr(opal2, symbol) for symbol in expected_symbols
+        )
 
     def test_opal2_glyph_concept(self):
         """Test basic glyph concept"""

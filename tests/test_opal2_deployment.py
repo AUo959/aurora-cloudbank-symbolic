@@ -18,12 +18,17 @@ def test_opal2_compose_service_is_explicit_and_standalone():
     compose = yaml.safe_load((REPO_ROOT / "docker-compose.yml").read_text())
     service = compose["services"]["opal2"]
 
-    assert service["profiles"] == ["opal2"]
-    assert service["build"]["dockerfile"] == "Dockerfile.opal2"
-    assert service["ports"] == ["127.0.0.1:8001:8001"]
-    assert set(service["environment"]) == {"CSRF_SECRET_KEY", "WS_AUTH_SECRET"}
-    assert "localhost:8001/health" in " ".join(service["healthcheck"]["test"])
-    assert "depends_on" not in service
+    assert service["profiles"] == ["opal2"]  # nosec B101 - pytest assertion
+    assert service["build"]["dockerfile"] == "Dockerfile.opal2"  # nosec B101 - pytest assertion
+    assert service["ports"] == ["127.0.0.1:8001:8001"]  # nosec B101 - pytest assertion
+    assert set(service["environment"]) == {  # nosec B101 - pytest assertion
+        "CSRF_SECRET_KEY",
+        "WS_AUTH_SECRET",
+    }
+    assert "localhost:8001/health" in " ".join(  # nosec B101 - pytest assertion
+        service["healthcheck"]["test"]
+    )
+    assert "depends_on" not in service  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -33,15 +38,15 @@ def test_opal2_image_runs_non_root_on_the_canonical_port():
 
     dockerfile = (REPO_ROOT / "Dockerfile.opal2").read_text()
 
-    assert "USER opal2user" in dockerfile
-    assert "EXPOSE 8001" in dockerfile
-    assert "requirements-opal2.lock" in dockerfile
-    assert "--only-binary=:all:" in dockerfile
-    assert "--require-hashes" in dockerfile
-    assert "@sha256:" in dockerfile
-    assert '"modules.opal2.api.opal2_api:app"' in dockerfile
-    assert '"--port", "8001"' in dockerfile
-    assert "localhost:8001/health" in dockerfile
+    assert "USER opal2user" in dockerfile  # nosec B101 - pytest assertion
+    assert "EXPOSE 8001" in dockerfile  # nosec B101 - pytest assertion
+    assert "requirements-opal2.lock" in dockerfile  # nosec B101 - pytest assertion
+    assert "--only-binary=:all:" in dockerfile  # nosec B101 - pytest assertion
+    assert "--require-hashes" in dockerfile  # nosec B101 - pytest assertion
+    assert "@sha256:" in dockerfile  # nosec B101 - pytest assertion
+    assert '"modules.opal2.api.opal2_api:app"' in dockerfile  # nosec B101 - pytest assertion
+    assert '"--port", "8001"' in dockerfile  # nosec B101 - pytest assertion
+    assert "localhost:8001/health" in dockerfile  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -58,7 +63,7 @@ def test_opal2_runtime_dependencies_are_separate_from_the_monolith():
         if line and not line.startswith("#")
     }
 
-    assert dependency_names == {
+    assert dependency_names == {  # nosec B101 - pytest assertion
         "fastapi",
         "numpy",
         "pydantic",
@@ -69,7 +74,7 @@ def test_opal2_runtime_dependencies_are_separate_from_the_monolith():
     }
 
     lockfile = (REPO_ROOT / "requirements-opal2.lock").read_text()
-    assert "--hash=sha256:" in lockfile
-    assert "fastapi==" in lockfile
-    assert "numpy==" in lockfile
-    assert "slowapi==" in lockfile
+    assert "--hash=sha256:" in lockfile  # nosec B101 - pytest assertion
+    assert "fastapi==" in lockfile  # nosec B101 - pytest assertion
+    assert "numpy==" in lockfile  # nosec B101 - pytest assertion
+    assert "slowapi==" in lockfile  # nosec B101 - pytest assertion

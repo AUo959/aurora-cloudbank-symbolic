@@ -15,7 +15,7 @@ async def test_staging_input_is_read_without_blocking_the_event_loop(monkeypatch
 
     monkeypatch.setattr(builtins, "input", lambda _prompt: "  component-1  ")
 
-    assert await _read_input("Component ID: ") == "component-1"
+    assert await _read_input("Component ID: ") == "component-1"  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -25,6 +25,12 @@ def test_staging_candidate_selection_is_fail_closed():
 
     candidates = [{"id": "candidate-1", "name": "Candidate", "score": 95.0}]
 
-    assert StagingDashboard._selected_candidate(candidates, "1") == candidates[0]
-    assert StagingDashboard._selected_candidate(candidates, "0") is None
-    assert StagingDashboard._selected_candidate(candidates, "not-a-number") is None
+    assert (  # nosec B101 - pytest assertion
+        StagingDashboard._selected_candidate(candidates, "1") == candidates[0]
+    )
+    assert StagingDashboard._selected_candidate(  # nosec B101 - pytest assertion
+        candidates, "0"
+    ) is None
+    assert StagingDashboard._selected_candidate(  # nosec B101 - pytest assertion
+        candidates, "not-a-number"
+    ) is None

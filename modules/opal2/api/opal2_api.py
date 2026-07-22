@@ -151,7 +151,7 @@ async def health_check() -> Dict[str, Any]:
             "quantum_renderer": await test_quantum_renderer(),
             "plugin_system": await test_plugin_system(),
             "cache_system": await test_cache_system(),
-            "tool_registry": await test_tool_registry(),
+            "tool_registry": test_tool_registry(),
         }
     except Exception as exc:  # pragma: no cover - defensive logging path
         logger.exception("Health check failed", exc_info=exc)
@@ -172,7 +172,10 @@ async def health_check() -> Dict[str, Any]:
 
 @app.post(
     "/render",
-    responses={400: {"description": "Unsupported renderer or invalid render payload"}},
+    responses={
+        400: {"description": "Unsupported renderer or invalid render payload"},
+        500: {"description": "Registered glyph-render tool failed"},
+    },
 )
 async def render_glyph(
     request: RenderRequest,
@@ -426,7 +429,7 @@ async def test_cache_system() -> Dict[str, Any]:
         return {"healthy": False, "error": str(exc)}
 
 
-async def test_tool_registry() -> Dict[str, Any]:
+def test_tool_registry() -> Dict[str, Any]:
     try:
         tools = tool_registry.list_manifests()
         return {"healthy": bool(tools), "tool_count": len(tools)}
@@ -538,4 +541,4 @@ async def demo_interface() -> str:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8001)

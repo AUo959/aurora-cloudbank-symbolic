@@ -13,7 +13,7 @@ PYTHON_VENV := $(VENV_DIR)/bin/python
 .PHONY: lint lint-tools lint-all test run check
 .PHONY: branch-status sync branch-plan pr-priority
 .PHONY: health-check maintenance-scan maintenance-manual maintenance-status
-.PHONY: branch-cleanup-dry branch-cleanup-apply branch-cleanup-safe branch-cleanup-execute lint-stage1-opal2 pr-triage
+.PHONY: branch-cleanup-dry branch-cleanup-apply branch-cleanup-safe branch-cleanup-execute lint-stage1-opal2 opal2-lock pr-triage
 .PHONY: security clean deps-fix deps-fix-apply onboard demo
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -120,6 +120,19 @@ install:
 install-vercel:
 	@echo "📦 Installing lightweight dependencies (Vercel-compatible)..."
 	pip install -r requirements.txt
+
+opal2-lock: ## Regenerate the hashed standalone OPAL2 Python 3.11 dependency lock
+	@command -v uv >/dev/null 2>&1 || { \
+		echo "❌ uv is required to regenerate requirements-opal2.lock. Install it with: python3 -m pip install uv"; \
+		exit 1; \
+	}
+	uv pip compile requirements-opal2.txt \
+		--output-file requirements-opal2.lock \
+		--generate-hashes \
+		--python-version 3.11 \
+		--universal \
+		--only-binary :all: \
+		--custom-compile-command 'make opal2-lock'
 
 # New dependency management targets
 

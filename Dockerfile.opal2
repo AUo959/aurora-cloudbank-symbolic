@@ -1,0 +1,29 @@
+# Standalone OPAL2 Tool Foundry service
+FROM python:3.11-slim@sha256:db3ff2e1800a8581e2c48a27c3995339d47bdf046da21c7627accd3d51053a93
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+RUN useradd --create-home --uid 10002 opal2user
+
+WORKDIR /app
+
+COPY requirements-opal2.lock ./
+RUN pip install --no-cache-dir --only-binary=:all: --require-hashes \
+    -r requirements-opal2.lock
+
+COPY modules/ ./modules/
+COPY src/ ./src/
+COPY static/ ./static/
+
+RUN mkdir -p /app/cache /app/plugins \
+    && chown -R opal2user:opal2user /app
+
+USER opal2user
+
+EXPOSE 8001
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=4)"]
+
+CMD ["uvicorn", "modules.opal2.api.opal2_api:app", "--host", "0.0.0.0", "--port", "8001"]

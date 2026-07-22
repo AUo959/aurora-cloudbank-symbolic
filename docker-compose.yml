@@ -29,6 +29,27 @@ services:
       - "127.0.0.1:3001:3001"
     restart: unless-stopped
 
+  # Standalone OPAL2 Tool Foundry. It is intentionally not mounted into the
+  # Aurora GUI/API process; enable it explicitly with --profile opal2.
+  opal2:
+    profiles:
+      - opal2
+    build:
+      context: .
+      dockerfile: Dockerfile.opal2
+    environment:
+      CSRF_SECRET_KEY: "${CSRF_SECRET_KEY:?Set CSRF_SECRET_KEY to a strong random value}"
+      WS_AUTH_SECRET: "${WS_AUTH_SECRET:?Set WS_AUTH_SECRET to a strong random value}"
+    ports:
+      - "127.0.0.1:8001:8001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   # ── NeMo Inference Service ─────────────────────────────────────────────
   # Ethics Protocol: Picard_Delta_3
   # SRB: NEMO_SERVICE_v1

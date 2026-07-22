@@ -16,9 +16,28 @@ import pytest
 class TestOpal2BasicConcepts:
     """Test basic Opal2 concepts without complex dependencies"""
 
-    def test_opal2_placeholder(self):
-        """Placeholder test for Opal2 system"""
-        assert True, "Opal2 test framework is working"
+    def test_opal2_public_foundry_surface(self):
+        """The package root must expose the supported Foundry contract."""
+
+        import modules.opal2 as opal2
+
+        expected_symbols = {
+            "GlyphCache",
+            "GlyphGenerator",
+            "Opal2Tool",
+            "ToolExecutionContext",
+            "ToolManifest",
+            "ToolRegistry",
+            "ToolRunResult",
+            "VerifiedToolPackage",
+            "export_builtin_tool",
+            "verify_opaltool_package",
+        }
+
+        assert set(opal2.__all__) == expected_symbols  # nosec B101 - pytest assertion
+        assert all(  # nosec B101 - pytest assertion
+            hasattr(opal2, symbol) for symbol in expected_symbols
+        )
 
     def test_opal2_glyph_concept(self):
         """Test basic glyph concept"""
@@ -85,7 +104,7 @@ class TestOpal2BasicConcepts:
 
         test_data = {"id": "test_123", "type": "glyph"}
         result = await mock_render_async(test_data)
-        
+
         assert result["status"] == "completed"
         assert result["render_time"] > 0
         assert "test_123" in result["output"]

@@ -1,6 +1,6 @@
 # OPAL2 Tool Foundry Architecture
 
-**Status:** Phase 2 implementation baseline
+**Status:** Phase 2.1 landing baseline
 
 **Runtime topology:** standalone service
 
@@ -43,6 +43,15 @@ Phase 2 proves generality and begins the portability boundary:
 
 This baseline does **not** claim that signatures, package activation, remote
 installation, multi-tenant isolation, or third-party loading are complete.
+
+Phase 2.1 makes that baseline operable as a deliberately standalone service:
+
+- a dedicated non-root container image and opt-in Compose profile;
+- an explicit microservice dependency manifest and hash lock independent of
+  the monolith;
+- loopback-only host publication on port 8001;
+- fail-closed module syntax and focused Foundry test gates in CI;
+- a usable package-root API for the supported contracts and packaging tools.
 
 ## Runtime topology
 
@@ -142,15 +151,38 @@ export WS_AUTH_SECRET='<strong deployment secret>'
 uvicorn modules.opal2.api.opal2_api:app --host 127.0.0.1 --port 8001
 ```
 
+The supported container path is an opt-in Compose profile and publishes only
+to the local host by default:
+
+```bash
+export CSRF_SECRET_KEY="$(openssl rand -hex 32)"
+export WS_AUTH_SECRET="$(openssl rand -hex 32)"
+docker compose --profile opal2 up --build opal2
+curl --fail http://127.0.0.1:8001/health
+curl --fail http://127.0.0.1:8001/tools
+```
+
+This deployment does not activate `.opaltool` packages and does not join the
+main Aurora API process.
+
+Regenerate the Python 3.11 multi-platform hash lock after an intentional
+dependency change:
+
+```bash
+make opal2-lock
+```
+
 Focused validation:
 
 ```bash
-python -m compileall -q -x 'modules/opal2/staging' modules/opal2
+python -m compileall -q modules/opal2
 python -m pytest \
   tests/test_opal2_foundry.py \
   tests/test_opal2_api_routes.py \
   tests/test_opal2_regex_workshop.py \
-  tests/test_opal2_tool_package.py -q
+  tests/test_opal2_tool_package.py \
+  tests/test_opal2_staging_dashboard.py \
+  tests/test_opal2_deployment.py -q
 ```
 
 ## Planned convergence

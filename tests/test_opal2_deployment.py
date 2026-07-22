@@ -1,5 +1,6 @@
 """Static deployment-contract tests for the standalone OPAL2 service."""
 
+import re
 from pathlib import Path
 
 import pytest
@@ -34,10 +35,10 @@ def test_opal2_image_runs_non_root_on_the_canonical_port():
 
     assert "USER opal2user" in dockerfile
     assert "EXPOSE 8001" in dockerfile
-    assert "requirements-opal2.txt" in dockerfile
-    assert "requirements.txt" not in dockerfile.replace(
-        "requirements-opal2.txt", ""
-    )
+    assert "requirements-opal2.lock" in dockerfile
+    assert "--only-binary=:all:" in dockerfile
+    assert "--require-hashes" in dockerfile
+    assert "@sha256:" in dockerfile
     assert '"modules.opal2.api.opal2_api:app"' in dockerfile
     assert '"--port", "8001"' in dockerfile
     assert "localhost:8001/health" in dockerfile
@@ -52,7 +53,7 @@ def test_opal2_runtime_dependencies_are_separate_from_the_monolith():
         REPO_ROOT / "requirements-opal2.txt"
     ).read_text().splitlines()
     dependency_names = {
-        line.split("<", 1)[0].split(">", 1)[0].split("[", 1)[0]
+        re.split(r"[\[<>=!~]", line, maxsplit=1)[0]
         for line in requirements
         if line and not line.startswith("#")
     }
@@ -66,3 +67,9 @@ def test_opal2_runtime_dependencies_are_separate_from_the_monolith():
         "starlette",
         "uvicorn",
     }
+
+    lockfile = (REPO_ROOT / "requirements-opal2.lock").read_text()
+    assert "--hash=sha256:" in lockfile
+    assert "fastapi==" in lockfile
+    assert "numpy==" in lockfile
+    assert "slowapi==" in lockfile

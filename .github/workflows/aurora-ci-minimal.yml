@@ -114,6 +114,7 @@ jobs:
             tests/test_opal2_integration.py \
             tests/test_opal2_regex_workshop.py \
             tests/test_opal2_simple.py \
+            tests/test_opal2_staging_dashboard.py \
             tests/test_opal2_system.py \
             tests/test_opal2_tool_package.py
 

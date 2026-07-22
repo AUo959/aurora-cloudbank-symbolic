@@ -448,8 +448,10 @@ config_manager.register_change_callback("opal2_graphics", on_config_change)
 ### Docker Compose
 
 OPAL2 has a dedicated non-root image and an opt-in profile. It remains a
-separate process, installs the bounded `requirements-opal2.txt` runtime set,
-and publishes only to loopback by default.
+separate process, installs the bounded `requirements-opal2.txt` runtime set
+through the generated `requirements-opal2.lock` hash lock, and publishes only
+to loopback by default. Regenerate the lock with `make opal2-lock` after an
+intentional dependency change.
 
 ```bash
 export CSRF_SECRET_KEY="$(openssl rand -hex 32)"

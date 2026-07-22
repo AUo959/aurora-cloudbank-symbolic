@@ -47,7 +47,8 @@ installation, multi-tenant isolation, or third-party loading are complete.
 Phase 2.1 makes that baseline operable as a deliberately standalone service:
 
 - a dedicated non-root container image and opt-in Compose profile;
-- an explicit microservice dependency manifest independent of the monolith;
+- an explicit microservice dependency manifest and hash lock independent of
+  the monolith;
 - loopback-only host publication on port 8001;
 - fail-closed module syntax and focused Foundry test gates in CI;
 - a usable package-root API for the supported contracts and packaging tools.
@@ -164,6 +165,13 @@ curl --fail http://127.0.0.1:8001/tools
 This deployment does not activate `.opaltool` packages and does not join the
 main Aurora API process.
 
+Regenerate the Python 3.11 multi-platform hash lock after an intentional
+dependency change:
+
+```bash
+make opal2-lock
+```
+
 Focused validation:
 
 ```bash
@@ -173,6 +181,7 @@ python -m pytest \
   tests/test_opal2_api_routes.py \
   tests/test_opal2_regex_workshop.py \
   tests/test_opal2_tool_package.py \
+  tests/test_opal2_staging_dashboard.py \
   tests/test_opal2_deployment.py -q
 ```
 

@@ -1,29 +1,42 @@
 #!/usr/bin/env python3
-"""
-Opal2 Staging Dashboard
-Interactive dashboard for managing staged components
-"""
+"""Interactive dashboard for managing OPAL2 staged components."""
 
 import asyncio
 import logging
 from datetime import datetime
+from typing import Any, Mapping, Sequence
 
 from .component_staging_system import ComponentStagingSystem
 
 
 logger = logging.getLogger(__name__)
 
+COMPONENT_NOT_FOUND = "Component %r not found"
+HEALTH_ICONS = {
+    "healthy": "✅",
+    "warning": "⚠️",
+    "critical": "❌",
+    "failing": "💀",
+    "unknown": "❓",
+}
+
+
+async def _read_input(prompt: str) -> str:
+    """Read terminal input without blocking the dashboard event loop."""
+
+    return (await asyncio.to_thread(input, prompt)).strip()
+
 
 class StagingDashboard:
-    """Interactive dashboard for component staging"""
+    """Interactive dashboard for component staging."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.staging_system = ComponentStagingSystem()
 
-    async def display_dashboard(self):
-        """Display the main staging dashboard"""
-        dashboard = self.staging_system.get_component_dashboard()
+    def display_dashboard(self) -> None:
+        """Display the main staging dashboard."""
 
+        dashboard = self.staging_system.get_component_dashboard()
         print("\n" + "=" * 60)
         print("🏗️  OPAL2 COMPONENT STAGING DASHBOARD")
         print("=" * 60)
@@ -32,92 +45,114 @@ class StagingDashboard:
         print(f"   Chassis Ready: {dashboard['chassis_ready_count']}")
         print()
 
-        # Stage distribution
+        self._print_stage_distribution(dashboard["stage_distribution"])
+        self._print_health_distribution(dashboard["health_distribution"])
+        self._print_top_candidates(dashboard["top_candidates"])
+        self._print_components_by_stage(dashboard["components_by_stage"])
+        print("=" * 60)
+
+    @staticmethod
+    def _print_stage_distribution(distribution: Mapping[str, int]) -> None:
         print("📈 Stage Distribution:")
-        for stage, count in dashboard['stage_distribution'].items():
+        for stage, count in distribution.items():
             if count > 0:
                 bar = "█" * min(count * 3, 20)
                 print(f"   {stage.replace('_', ' ').title():<20} {count:>2} {bar}")
-
         print()
 
-        # Health distribution
+    @staticmethod
+    def _print_health_distribution(distribution: Mapping[str, int]) -> None:
         print("🏥 Health Distribution:")
-        for health, count in dashboard['health_distribution'].items():
+        for health, count in distribution.items():
             if count > 0:
-                status_icon = {"healthy": "✅", "warning": "⚠️", "critical": "❌", "failing": "💀", "unknown": "❓"}
-                print(f"   {status_icon.get(health, '?')} {health.title():<12} {count}")
-
+                icon = HEALTH_ICONS.get(health, "?")
+                print(f"   {icon} {health.title():<12} {count}")
         print()
 
-        # Top candidates
-        if dashboard['top_candidates']:
+    @staticmethod
+    def _print_top_candidates(candidates: Sequence[Mapping[str, Any]]) -> None:
+        if candidates:
             print("🌟 Top Chassis Candidates:")
-            for i, candidate in enumerate(dashboard['top_candidates'][:5], 1):
-                print(f"   {i}. {candidate['name']} ({candidate['score']:.1f}%)")
-
+            for index, candidate in enumerate(candidates[:5], 1):
+                print(f"   {index}. {candidate['name']} ({candidate['score']:.1f}%)")
         print()
 
-        # Recent activity
+    @staticmethod
+    def _print_components_by_stage(
+        components_by_stage: Mapping[str, Sequence[Mapping[str, Any]]],
+    ) -> None:
         print("🕒 Components by Stage:")
-        for stage_name, components in dashboard['components_by_stage'].items():
-            if components:
-                print(f"   📂 {stage_name.replace('_', ' ').title()}:")
-                for comp in components[:3]:  # Show top 3
-                    health_icon = {"healthy": "✅", "warning": "⚠️", "critical": "❌", "failing": "💀", "unknown": "❓"}
-                    print(f"      {health_icon.get(comp['health'], '?')} {comp['name']}")
-                if len(components) > 3:
-                    print(f"      ... and {len(components) - 3} more")
-                print()
+        for stage_name, components in components_by_stage.items():
+            if not components:
+                continue
+            print(f"   📂 {stage_name.replace('_', ' ').title()}:")
+            for component in components[:3]:
+                icon = HEALTH_ICONS.get(component["health"], "?")
+                print(f"      {icon} {component['name']}")
+            if len(components) > 3:
+                print(f"      ... and {len(components) - 3} more")
+            print()
 
-        print("=" * 60)
+    async def create_interactive_concept(self) -> None:
+        """Collect component details and create a staged concept."""
 
-    async def create_interactive_concept(self):
-        """Interactive concept creation"""
         print("\n🌱 CREATE NEW COMPONENT CONCEPT")
         print("-" * 35)
 
-        component_id = input("Component ID: ").strip()
+        component_id = await _read_input("Component ID: ")
         if not component_id:
             logger.error("Component ID required")
             return
 
-        name = input("Component Name: ").strip()
+        name = await _read_input("Component Name: ")
         if not name:
             logger.error("Component name required")
             return
 
-        description = input("Description: ").strip()
-        author = input("Author (press Enter for 'Aurora R&D Team'): ").strip()
-        if not author:
-            author = "Aurora R&D Team"
-
-        concept_notes = input("Concept Notes (optional): ").strip()
+        description = await _read_input("Description: ")
+        author = await _read_input("Author (press Enter for 'Aurora R&D Team'): ")
+        author = author or "Aurora R&D Team"
+        concept_notes = await _read_input("Concept Notes (optional): ")
 
         try:
             component = await self.staging_system.create_concept(
                 component_id, name, description, author, concept_notes
             )
-            logger.info(
-                "Component concept %r created successfully!", component.name
-            )
-            print(f"   ID: {component.component_id}")
-            print(f"   Stage: {component.stage.value}")
-            print(f"   Version: {component.version}")
         except Exception:
             logger.exception("Failed to create concept")
-
-    async def view_component_details(self, component_id: str = None):
-        """View detailed component information"""
-        if not component_id:
-            component_id = input("Enter component ID: ").strip()
-
-        if component_id not in self.staging_system.staged_components:
-            logger.error("Component %r not found", component_id)
             return
 
-        component = self.staging_system.staged_components[component_id]
+        logger.info("Component concept %r created successfully!", component.name)
+        print(f"   ID: {component.component_id}")
+        print(f"   Stage: {component.stage.value}")
+        print(f"   Version: {component.version}")
 
+    async def view_component_details(self, component_id: str | None = None) -> None:
+        """View detailed component information."""
+
+        resolved_id = component_id or await _read_input("Enter component ID: ")
+        component = self._component_or_log(resolved_id)
+        if component is None:
+            return
+
+        self._print_component_summary(component)
+        self._print_named_values("Capabilities", component.capabilities)
+        self._print_named_values("Dependencies", component.dependencies)
+        self._print_progression_checklist(component.progression_checklist)
+        self._print_named_values(
+            "Blocking Issues", component.blocking_issues, warning=True
+        )
+        self._print_test_results(component.test_results)
+        self._print_validation_metrics(component.validation_metrics)
+
+    def _component_or_log(self, component_id: str) -> Any | None:
+        component = self.staging_system.staged_components.get(component_id)
+        if component is None:
+            logger.error(COMPONENT_NOT_FOUND, component_id)
+        return component
+
+    @staticmethod
+    def _print_component_summary(component: Any) -> None:
         print(f"\n📋 COMPONENT DETAILS: {component.name}")
         print("-" * 50)
         print(f"ID: {component.component_id}")
@@ -128,124 +163,119 @@ class StagingDashboard:
         print(f"Created: {component.created_at}")
         print(f"Modified: {component.last_modified}")
         print()
-
         if component.description:
             print(f"Description: {component.description}")
             print()
 
-        if component.capabilities:
-            print("Capabilities:")
-            for cap in component.capabilities:
-                print(f"  • {cap}")
-            print()
+    @staticmethod
+    def _print_named_values(
+        title: str, values: Sequence[str], *, warning: bool = False
+    ) -> None:
+        if not values:
+            return
+        if warning:
+            logger.warning("%s:", title)
+        else:
+            print(f"{title}:")
+        for value in values:
+            print(f"  • {value}")
+        print()
 
-        if component.dependencies:
-            print("Dependencies:")
-            for dep in component.dependencies:
-                print(f"  • {dep}")
-            print()
+    @staticmethod
+    def _print_progression_checklist(checklist: Mapping[str, bool]) -> None:
+        if not checklist:
+            return
+        print("Progression Checklist:")
+        for item, completed in checklist.items():
+            status = "✅" if completed else "❌"
+            print(f"  {status} {item.replace('_', ' ').title()}")
+        print()
 
-        if component.progression_checklist:
-            print("Progression Checklist:")
-            for item, completed in component.progression_checklist.items():
-                status = "✅" if completed else "❌"
-                print(f"  {status} {item.replace('_', ' ').title()}")
-            print()
+    @staticmethod
+    def _print_test_results(results: Mapping[str, Any]) -> None:
+        if not results:
+            return
+        print("🧪 Latest Test Results:")
+        print(
+            f"  Tests: {results.get('tests_passed', 0)}/"
+            f"{results.get('tests_run', 0)} passed"
+        )
+        print(f"  Coverage: {results.get('coverage', 0):.1f}%")
+        StagingDashboard._print_named_values("  Issues", results.get("issues_found", []))
 
-        if component.blocking_issues:
-            logger.warning("Blocking Issues:")
-            for issue in component.blocking_issues:
-                print(f"  • {issue}")
-            print()
+    @staticmethod
+    def _print_validation_metrics(validation: Mapping[str, Any]) -> None:
+        if not validation:
+            return
+        print("🔍 Validation Results:")
+        print(f"  Overall Score: {validation.get('overall_score', 0):.1f}%")
+        print(f"  Chassis Ready: {validation.get('chassis_ready', False)}")
+        StagingDashboard._print_named_values(
+            "  Recommendations", validation.get("recommendations", [])
+        )
 
-        if component.test_results:
-            print("🧪 Latest Test Results:")
-            results = component.test_results
-            print(f"  Tests: {results.get('tests_passed', 0)}/{results.get('tests_run', 0)} passed")
-            print(f"  Coverage: {results.get('coverage', 0):.1f}%")
-            if results.get('issues_found'):
-                print("  Issues:")
-                for issue in results['issues_found']:
-                    print(f"    • {issue}")
-            print()
+    async def run_interactive_session(self) -> None:
+        """Run the interactive staging session."""
 
-        if component.validation_metrics:
-            print("🔍 Validation Results:")
-            validation = component.validation_metrics
-            print(f"  Overall Score: {validation.get('overall_score', 0):.1f}%")
-            print(f"  Chassis Ready: {validation.get('chassis_ready', False)}")
-            if validation.get('recommendations'):
-                print("  Recommendations:")
-                for rec in validation['recommendations']:
-                    print(f"    • {rec}")
-
-    async def run_interactive_session(self):
-        """Run interactive staging session"""
+        commands = {
+            "1": self.create_interactive_concept,
+            "2": self.view_component_details,
+            "3": self.interactive_test_component,
+            "4": self.interactive_validate_component,
+            "5": self.interactive_generate_chassis,
+        }
         while True:
-            await self.display_dashboard()
-
-            print("\n🎛️  STAGING COMMANDS:")
-            print("1. Create new concept")
-            print("2. View component details")
-            print("3. Test component")
-            print("4. Validate component")
-            print("5. Generate chassis component")
-            print("6. Refresh dashboard")
-            print("0. Exit")
-
-            choice = input("\nEnter command: ").strip()
+            self.display_dashboard()
+            self._print_commands()
+            choice = await _read_input("\nEnter command: ")
 
             if choice == "0":
-                break
-            elif choice == "1":
-                await self.create_interactive_concept()
-            elif choice == "2":
-                await self.view_component_details()
-            elif choice == "3":
-                await self.interactive_test_component()
-            elif choice == "4":
-                await self.interactive_validate_component()
-            elif choice == "5":
-                await self.interactive_generate_chassis()
-            elif choice == "6":
+                return
+            if choice == "6":
                 continue
-            else:
+
+            command = commands.get(choice)
+            if command is None:
                 logger.error("Invalid command")
+            else:
+                await command()
+            await _read_input("\nPress Enter to continue...")
 
-            input("\nPress Enter to continue...")
+    @staticmethod
+    def _print_commands() -> None:
+        print("\n🎛️  STAGING COMMANDS:")
+        print("1. Create new concept")
+        print("2. View component details")
+        print("3. Test component")
+        print("4. Validate component")
+        print("5. Generate chassis component")
+        print("6. Refresh dashboard")
+        print("0. Exit")
 
-    async def interactive_test_component(self):
-        """Interactive component testing"""
-        component_id = input("Component ID to test: ").strip()
+    async def interactive_test_component(self) -> None:
+        """Run the staged-component test suite."""
 
-        if component_id not in self.staging_system.staged_components:
-            logger.error("Component %r not found", component_id)
+        component_id = await _read_input("Component ID to test: ")
+        if self._component_or_log(component_id) is None:
             return
 
-        test_suite = {
-            "name": "interactive_test_suite",
-            "test_count": 5
-        }
-
+        test_suite = {"name": "interactive_test_suite", "test_count": 5}
         print(f"🧪 Running tests for {component_id}...")
-        results = await self.staging_system.run_component_tests(component_id, test_suite)
+        results = await self.staging_system.run_component_tests(
+            component_id, test_suite
+        )
 
         logger.info("Test results:")
         print(f"   Passed: {results['tests_passed']}")
         print(f"   Failed: {results['tests_failed']}")
         print(f"   Coverage: {results['coverage']:.1f}%")
+        self._print_named_values("   Issues found", results["issues_found"])
 
-        if results['issues_found']:
-            print("   Issues found:")
-            for issue in results['issues_found']:
-                print(f"     • {issue}")
+    async def interactive_validate_component(self) -> None:
+        """Validate a staged component."""
 
-    async def interactive_validate_component(self):
-        """Interactive component validation"""
-        component_id = input("Component ID to validate: ").strip()
-
-        if component_id not in self.staging_system.staged_components:
-            logger.error("Component %r not found", component_id)
+        component_id = await _read_input("Component ID to validate: ")
+        if self._component_or_log(component_id) is None:
             return
 
         print(f"🔍 Validating {component_id}...")
@@ -254,49 +284,61 @@ class StagingDashboard:
         logger.info("Validation results:")
         print(f"   Overall Score: {validation['overall_score']:.1f}%")
         print(f"   Chassis Ready: {validation['chassis_ready']}")
+        self._print_named_values(
+            "   Recommendations", validation["recommendations"]
+        )
 
-        if validation['recommendations']:
-            print("   Recommendations:")
-            for rec in validation['recommendations']:
-                print(f"     • {rec}")
+    async def interactive_generate_chassis(self) -> None:
+        """Generate a chassis component from a staged candidate."""
 
-    async def interactive_generate_chassis(self):
-        """Interactive chassis component generation"""
-        # Show chassis candidates
-        dashboard = self.staging_system.get_component_dashboard()
-
-        if not dashboard['top_candidates']:
+        candidates = self.staging_system.get_component_dashboard()["top_candidates"]
+        if not candidates:
             logger.error("No chassis candidates available")
             return
 
+        self._print_available_candidates(candidates)
+        choice = await _read_input("Select candidate (number): ")
+        candidate = self._selected_candidate(candidates, choice)
+        if candidate is None:
+            return
+
+        print(f"🏗️ Generating chassis component for {candidate['name']}...")
+        chassis_spec = await self.staging_system.generate_chassis_component(
+            candidate["id"]
+        )
+        if chassis_spec is None:
+            logger.error("Failed to generate chassis component")
+            return
+        self._print_chassis_spec(chassis_spec)
+
+    @staticmethod
+    def _print_available_candidates(candidates: Sequence[Mapping[str, Any]]) -> None:
         print("🏗️ Available chassis candidates:")
-        for i, candidate in enumerate(dashboard['top_candidates'], 1):
-            print(f"   {i}. {candidate['name']} ({candidate['score']:.1f}%)")
+        for index, candidate in enumerate(candidates, 1):
+            print(f"   {index}. {candidate['name']} ({candidate['score']:.1f}%)")
 
-        choice = input("Select candidate (number): ").strip()
-
+    @staticmethod
+    def _selected_candidate(
+        candidates: Sequence[Mapping[str, Any]], choice: str
+    ) -> Mapping[str, Any] | None:
         try:
             index = int(choice) - 1
-            if 0 <= index < len(dashboard['top_candidates']):
-                candidate = dashboard['top_candidates'][index]
-                component_id = candidate['id']
-
-                print(f"🏗️ Generating chassis component for {candidate['name']}...")
-                chassis_spec = await self.staging_system.generate_chassis_component(component_id)
-
-                if chassis_spec:
-                    logger.info("Chassis component generated!")
-                    print(f"   Chassis ID: {chassis_spec['component_id']}")
-                    print(f"   Type: {chassis_spec['component_type']}")
-                    print(f"   Power: {chassis_spec['power_requirement']}")
-                    print(f"   Data: {chassis_spec['data_requirement']}")
-                    print(f"   Quantum: {chassis_spec['quantum_required']}")
-                else:
-                    logger.error("Failed to generate chassis component")
-            else:
-                logger.error("Invalid selection")
         except ValueError:
             logger.error("Invalid input")
+            return None
+        if not 0 <= index < len(candidates):
+            logger.error("Invalid selection")
+            return None
+        return candidates[index]
+
+    @staticmethod
+    def _print_chassis_spec(chassis_spec: Mapping[str, Any]) -> None:
+        logger.info("Chassis component generated!")
+        print(f"   Chassis ID: {chassis_spec['component_id']}")
+        print(f"   Type: {chassis_spec['component_type']}")
+        print(f"   Power: {chassis_spec['power_requirement']}")
+        print(f"   Data: {chassis_spec['data_requirement']}")
+        print(f"   Quantum: {chassis_spec['quantum_required']}")
 
 
 if __name__ == "__main__":

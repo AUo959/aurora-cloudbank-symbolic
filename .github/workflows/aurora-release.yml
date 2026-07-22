@@ -1,10 +1,8 @@
 name: Aurora Release Pipeline
 
 permissions:
-  contents: write         # Write releases and tags
-  actions: read          # Read workflow status
-  checks: write          # Write check results
-  security-events: write # Write security events
+  contents: write  # Write releases and tags
+  actions: read    # Read workflow status
 
 'on':
   push:
@@ -16,9 +14,6 @@ permissions:
         description: Release version
         required: true
         default: v1.0.0
-permissions:
-  contents: write
-  actions: read
 jobs:
   create-release:
     name: "\U0001F4E6 Create Release"

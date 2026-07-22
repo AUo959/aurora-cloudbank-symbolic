@@ -158,7 +158,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0.24.0
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           format: spdx-json
           output-file: sbom.spdx.json
       

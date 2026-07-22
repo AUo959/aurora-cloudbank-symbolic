@@ -18,28 +18,38 @@ import json
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Annotated, Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from src.middleware.fastapi_security import verify_csrf_token
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from src.middleware.fastapi_security import verify_csrf_token
 
-from ...symbolic.symbolic_core import SymbolicCore
-from ..glyph_cache import GlyphCache
-from ..glyph_core import GlyphCore
-from ..plugin_system import PluginSystem
-from ..quantum_renderer import QuantumRenderer
+from modules.symbolic_core.symbolic_core import SymbolicCore
+
+from modules.opal2.glyph_cache import GlyphCache
+from modules.opal2.glyph_core import GlyphCore
+from modules.opal2.plugin_system import PluginSystem
+from modules.opal2.quantum_renderer import QuantumRenderer
+from modules.opal2.tool_contract import (
+    ToolExecutionContext,
+    ToolInputError,
+    ToolOutputError,
+    json_ready,
+)
+from modules.opal2.tool_registry import ToolNotFoundError, ToolRegistry
+from modules.opal2.tools import GLYPH_RENDER_TOOL_ID, GlyphRenderTool
 
 security = HTTPBearer()
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Opal2 Modular Visualization System",
-    description="Quantum-enhanced modular visualization with real-time rendering",
-    version="2.0.0",
+    title="OPAL2 Tool Foundry",
+    description="Portable tool registry and runtime with symbolic visualization reference tools",
+    version="2.1.0",
 )
 
 glyph_core = GlyphCore()
@@ -47,6 +57,7 @@ glyph_cache = GlyphCache()
 quantum_renderer = QuantumRenderer()
 plugin_system = PluginSystem()
 symbolic_core = SymbolicCore()
+tool_registry = ToolRegistry((GlyphRenderTool(quantum_renderer),))
 
 active_connections: List[WebSocket] = []
 
@@ -55,18 +66,31 @@ class RenderRequest(BaseModel):
     """Request model for quantum rendering."""
 
     glyph_data: Dict[str, Any] = Field(..., description="Glyph configuration data")
-    renderer_type: str = Field(default="webgl", description="Renderer type (webgl, canvas, svg)")
-    dimensions: Dict[str, int] = Field(default={"width": 800, "height": 600}, description="Render dimensions")
-    quantum_params: Optional[Dict[str, float]] = Field(default=None, description="Quantum enhancement parameters")
-    cache_key: Optional[str] = Field(default=None, description="Cache key for optimization")
+    renderer_type: str = Field(
+        default="webgl", description="Renderer type (webgl, canvas, svg)"
+    )
+    dimensions: Dict[str, int] = Field(
+        default_factory=lambda: {"width": 800, "height": 600},
+        description="Render dimensions",
+    )
+    quantum_params: Optional[Dict[str, float]] = Field(
+        default=None, description="Quantum enhancement parameters"
+    )
+    cache_key: Optional[str] = Field(
+        default=None, description="Cache key for optimization"
+    )
 
 
 class GlyphGenerationRequest(BaseModel):
     """Request model for glyph generation."""
 
     symbolic_expression: str = Field(..., description="Symbolic expression to render")
-    style_params: Dict[str, Any] = Field(default={}, description="Style parameters")
-    quantum_enhancement: bool = Field(default=True, description="Enable quantum enhancement")
+    style_params: Dict[str, Any] = Field(
+        default_factory=dict, description="Style parameters"
+    )
+    quantum_enhancement: bool = Field(
+        default=True, description="Enable quantum enhancement"
+    )
 
 
 class WebSocketMessage(BaseModel):
@@ -77,13 +101,21 @@ class WebSocketMessage(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
+class ToolRunRequest(BaseModel):
+    """Portable request envelope for a registered OPAL2 tool."""
+
+    payload: Dict[str, Any] = Field(default_factory=dict)
+    policy_profile: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
 @app.get("/")
 async def root() -> Dict[str, Any]:
     """Return system status."""
 
     return {
-        "system": "Opal2 Modular Visualization System",
-        "version": "2.0.0",
+        "system": "OPAL2 Tool Foundry",
+        "version": "2.1.0",
         "status": "operational",
         "timestamp": datetime.now().isoformat(),
         "components": {
@@ -91,7 +123,9 @@ async def root() -> Dict[str, Any]:
             "quantum_renderer": "active",
             "plugin_system": "active",
             "cache_system": "active",
+            "tool_registry": "active",
         },
+        "tools": [manifest["tool_id"] for manifest in tool_registry.list_manifests()],
     }
 
 
@@ -105,6 +139,7 @@ async def health_check() -> Dict[str, Any]:
             "quantum_renderer": await test_quantum_renderer(),
             "plugin_system": await test_plugin_system(),
             "cache_system": await test_cache_system(),
+            "tool_registry": await test_tool_registry(),
         }
     except Exception as exc:  # pragma: no cover - defensive logging path
         logger.exception("Health check failed", exc_info=exc)
@@ -123,7 +158,10 @@ async def health_check() -> Dict[str, Any]:
     }
 
 
-@app.post("/render")
+@app.post(
+    "/render",
+    responses={400: {"description": "Unsupported renderer or invalid render payload"}},
+)
 async def render_glyph(
     request: RenderRequest,
     token: HTTPAuthorizationCredentials = Depends(security),
@@ -149,6 +187,59 @@ async def list_plugins() -> Dict[str, Any]:
 
     plugins = plugin_system.list_plugins()
     return {"plugins": plugins, "count": len(plugins)}
+
+
+@app.get("/tools")
+async def list_tools() -> Dict[str, Any]:
+    """List trusted tools registered with the OPAL2 foundry."""
+
+    tools = tool_registry.list_manifests()
+    return {"tools": tools, "count": len(tools)}
+
+
+@app.get("/tools/{tool_id}", responses={404: {"description": "Tool not found"}})
+async def get_tool(tool_id: str) -> Dict[str, Any]:
+    """Return the portable manifest for one registered tool."""
+
+    try:
+        return {"tool": tool_registry.get_manifest(tool_id).to_dict()}
+    except ToolNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post(
+    "/tools/{tool_id}/run",
+    responses={
+        404: {"description": "Tool not found"},
+        422: {"description": "Tool input contract violation"},
+        500: {"description": "Tool output contract violation"},
+    },
+)
+async def run_tool(
+    tool_id: str,
+    request: ToolRunRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+) -> Dict[str, Any]:
+    """Execute one explicitly registered tool with CSRF validation."""
+
+    verify_csrf_token(token)
+    context = ToolExecutionContext(
+        policy_profile=request.policy_profile, metadata=request.metadata
+    )
+    try:
+        result = await tool_registry.run(tool_id, request.payload, context)
+    except ToolNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ToolInputError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except ToolOutputError as exc:
+        logger.exception(
+            "Registered OPAL2 tool violated its output contract", exc_info=exc
+        )
+        raise HTTPException(
+            status_code=500, detail="tool output contract violation"
+        ) from exc
+    return result.to_dict()
 
 
 @app.get("/cache/stats")
@@ -179,7 +270,9 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             message = json.loads(await websocket.receive_text())
             if message.get("type") == "ping":
                 await websocket.send_text(
-                    json.dumps({"type": "pong", "timestamp": datetime.now().isoformat()})
+                    json.dumps(
+                        {"type": "pong", "timestamp": datetime.now().isoformat()}
+                    )
                 )
             elif message.get("type") == "subscribe":
                 await websocket.send_text(
@@ -215,20 +308,33 @@ async def _render_glyph_impl(request: RenderRequest) -> Dict[str, Any]:
 
     cached_result = await glyph_cache.get_async(cache_key)
     if cached_result:
-        return {"success": True, "cached": True, "result": cached_result, "cache_key": cache_key}
+        return {
+            "success": True,
+            "cached": True,
+            "result": cached_result,
+            "cache_key": cache_key,
+        }
 
-    renderer_plugin = plugin_system.get_plugin(f"{request.renderer_type}_renderer")
-    if not renderer_plugin:
-        raise HTTPException(status_code=400, detail=f"Renderer type '{request.renderer_type}' not available")
+    try:
+        tool_result = await tool_registry.run(
+            GLYPH_RENDER_TOOL_ID,
+            {
+                "glyph_data": request.glyph_data,
+                "renderer": request.renderer_type,
+                "dimensions": request.dimensions,
+                "quantum_params": request.quantum_params or {},
+            },
+            ToolExecutionContext(metadata={"compatibility_route": "/render"}),
+        )
+    except ToolInputError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except (ToolNotFoundError, ToolOutputError) as exc:
+        logger.exception("Registered OPAL2 glyph tool failed", exc_info=exc)
+        raise HTTPException(
+            status_code=500, detail="glyph render tool execution failed"
+        ) from exc
 
-    render_result = await quantum_renderer.render_async(
-        glyph_data=request.glyph_data,
-        renderer=renderer_plugin,
-        dimensions=request.dimensions,
-        quantum_params=request.quantum_params or {},
-    )
-
-    await glyph_cache.set_async(cache_key, render_result)
+    await glyph_cache.set_async(cache_key, tool_result.output)
     await notify_clients(
         {
             "type": "render_complete",
@@ -240,16 +346,32 @@ async def _render_glyph_impl(request: RenderRequest) -> Dict[str, Any]:
         }
     )
 
-    return {"success": True, "cached": False, "result": render_result, "cache_key": cache_key}
+    return {
+        "success": True,
+        "cached": False,
+        "result": tool_result.output,
+        "cache_key": cache_key,
+        "tool_run": {
+            "run_id": tool_result.run_id,
+            "tool_id": tool_result.tool_id,
+            "tool_version": tool_result.tool_version,
+            "duration_ms": tool_result.duration_ms,
+            "provenance": dict(tool_result.provenance),
+        },
+    }
 
 
 async def _generate_glyph_impl(request: GlyphGenerationRequest) -> Dict[str, Any]:
     parsed_expression = symbolic_core.parse_expression(request.symbolic_expression)
     glyph_data = await glyph_core.generate_async(
-        expression=parsed_expression,
+        expression={
+            "symbol": request.symbolic_expression,
+            "analysis": parsed_expression,
+        },
         style_params=request.style_params,
         quantum_enhancement=request.quantum_enhancement,
     )
+    glyph_data = json_ready(glyph_data)
 
     cache_key = f"glyph_{uuid.uuid4().hex[:8]}"
     await glyph_cache.set_async(cache_key, glyph_data)
@@ -265,7 +387,7 @@ async def _generate_glyph_impl(request: GlyphGenerationRequest) -> Dict[str, Any
 async def test_glyph_core() -> Dict[str, Any]:
     try:
         result = await glyph_core.test_generation()
-        return {"healthy": True, "test_result": result}
+        return {"healthy": bool(result.get("success")), "test_result": result}
     except Exception as exc:  # pragma: no cover - defensive path
         return {"healthy": False, "error": str(exc)}
 
@@ -273,7 +395,7 @@ async def test_glyph_core() -> Dict[str, Any]:
 async def test_quantum_renderer() -> Dict[str, Any]:
     try:
         result = await quantum_renderer.test_render()
-        return {"healthy": True, "test_result": result}
+        return {"healthy": bool(result.get("success")), "test_result": result}
     except Exception as exc:  # pragma: no cover - defensive path
         return {"healthy": False, "error": str(exc)}
 
@@ -294,11 +416,20 @@ async def test_cache_system() -> Dict[str, Any]:
         return {"healthy": False, "error": str(exc)}
 
 
+async def test_tool_registry() -> Dict[str, Any]:
+    try:
+        tools = tool_registry.list_manifests()
+        return {"healthy": bool(tools), "tool_count": len(tools)}
+    except Exception as exc:  # pragma: no cover - defensive path
+        return {"healthy": False, "error": str(exc)}
+
+
 def _verify_token(token: HTTPAuthorizationCredentials | None) -> None:
     verify_csrf_token(token)
 
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+app.mount("/static", StaticFiles(directory=str(_REPO_ROOT / "static")), name="static")
 
 
 @app.get("/demo", response_class=HTMLResponse)

@@ -1,8 +1,28 @@
-# 🔮 Opal2 Modular Visualization System - Expansion Pack
+# OPAL2 Tool Foundry
 
-## Overview
+> **Current direction:** OPAL2 is the standalone **Tool Foundry** for building,
+> registering, validating, and running portable tools. The visualization stack
+> in this directory is its first reference tool, not the full product identity.
+> See [OPAL2 Tool Foundry Architecture](../../docs/architecture/OPAL2_FOUNDRY_ARCHITECTURE.md).
 
-The Opal2 Modular System is a next-generation quantum-enhanced visualization framework designed for the Aurora CloudBank Symbolic repository. This expansion significantly enhances the existing Opal2 system with advanced quantum rendering capabilities, a flexible plugin architecture, and comprehensive configuration management.
+## Current implementation status
+
+Phase 1 provides a portable tool manifest, explicit trusted-tool registry,
+execution provenance, and the `opal2.glyph.render` reference tool. The
+standalone API exposes tool discovery and execution under `/tools` while
+preserving the existing `/generate`, `/render`, cache, plugin, and WebSocket
+routes.
+
+Packaging, remote installation, isolated workers, the Aurora adapter, and the
+regex reference tool remain planned work. The legacy dynamic plugin loader is
+not a trusted package-installation boundary.
+
+## Glyph visualization reference tool
+
+The surviving OPAL2 visualization stack is a quantum-enhanced rendering
+framework developed in Aurora CloudBank. It supplies the first foundry tool and
+retains its rendering, plugin, cache, configuration, and WebSocket surfaces for
+compatibility.
 
 ## 🚀 Key Features
 
@@ -108,7 +128,7 @@ from modules.opal2.api.opal2_api import app
 import uvicorn
 
 # Run the API server
-uvicorn.run(app, host="0.0.0.0", port=8000)
+uvicorn.run(app, host="127.0.0.1", port=8001)
 ```
 
 ## 📚 **API Documentation**

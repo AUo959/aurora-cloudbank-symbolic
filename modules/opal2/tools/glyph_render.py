@@ -104,12 +104,12 @@ class GlyphRenderTool(Opal2Tool):
         expected_fields = {"width", "height"}
         missing_fields = expected_fields - value.keys()
         if missing_fields:
-            missing = sorted(missing_fields)[0]
+            missing = min(missing_fields)
             raise ToolInputError(f"dimensions missing required field: {missing}")
 
         unexpected_fields = value.keys() - expected_fields
         if unexpected_fields:
-            unexpected = sorted(unexpected_fields)[0]
+            unexpected = min(unexpected_fields)
             raise ToolInputError(f"dimensions contains unexpected field: {unexpected}")
         return value
 

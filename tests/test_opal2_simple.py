@@ -1,84 +1,43 @@
-#!/usr/bin/env python3
-"""
+"""Small fail-closed smoke tests for the OPAL2 module surface."""
 
-        from fastapi import FastAPI
-from pathlib import Path
-import sys
-
-Simple Opal2 API Test
-Test the FastAPI application
-"""
-
-
-import sys
-
-# Add project root to path
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-
-
+import pytest
 from fastapi import FastAPI
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.mark.unit
+@pytest.mark.opal2
+@pytest.mark.smoke
 def test_api_imports():
-    """Test that all API imports work"""
-    print("🔮 Testing Opal2 API Imports")
-    print("=" * 40)
+    """FastAPI must be importable and able to construct an application."""
 
-    try:
-        # Test basic imports
+    app = FastAPI(title="OPAL2 smoke test")
 
-        print("✅ FastAPI import successful")
-
-        print("✅ Pydantic import successful")
-
-        # Test if we can create a simple FastAPI app
-        app = FastAPI(title="Test App")
-        print("✅ FastAPI app creation successful")
-
-        print("\n🎉 All basic imports successful!")
-        return True
-
-    except Exception as e:
-        print(f"❌ Import failed: {e}")
-        return False
+    assert app.title == "OPAL2 smoke test"
 
 
+@pytest.mark.unit
+@pytest.mark.opal2
+@pytest.mark.smoke
 def test_opal2_structure():
-    """Test Opal2 module structure"""
-    print("\n📁 Testing Opal2 Module Structure")
-    print("=" * 40)
+    """Required OPAL2 runtime files must exist in the repository."""
 
-    opal2_path = Path("modules/opal2")
+    opal2_path = REPO_ROOT / "modules" / "opal2"
+    expected_paths = {
+        opal2_path / "__init__.py",
+        opal2_path / "api" / "opal2_api.py",
+        opal2_path / "glyph_cache.py",
+        opal2_path / "glyph_core.py",
+        opal2_path / "tool_contract.py",
+        opal2_path / "tool_package.py",
+        opal2_path / "tool_registry.py",
+    }
 
-    expected_files = [
-        "glyph_core.py",
-        "glyph_cache.py",
-        "quantum_renderer.py",
-        "plugin_system.py",
-        "config_manager.py",
-    ]
-
-    for file in expected_files:
-        file_path = opal2_path / file
-        if file_path.exists():
-            print(f"✅ {file} exists")
-        else:
-            print(f"❌ {file} missing")
-
-    api_path = opal2_path / "api" / "opal2_api.py"
-    if api_path.exists():
-        print("✅ opal2_api.py exists")
-    else:
-        print("❌ opal2_api.py missing")
-
-    print("\n📊 Module structure check complete")
-
-
-if __name__ == "__main__":
-    success = test_api_imports()
-    test_opal2_structure()
-
-    if success:
-        print("\n🚀 Ready to proceed with Opal2 expansion!")
-    else:
-        print("\n⚠️  Some imports failed - check dependencies")
+    missing_paths = sorted(
+        str(path.relative_to(REPO_ROOT)) for path in expected_paths if not path.is_file()
+    )
+    assert not missing_paths, f"missing OPAL2 runtime files: {missing_paths}"

@@ -248,6 +248,11 @@ plugin_system.register_plugin("my_custom_renderer", MyCustomRenderer())
 
 ### Plugin Configuration
 
+> **Compatibility surface only:** these settings belong to the legacy
+> visualization plugin loader. They do not provide package signatures,
+> sandboxing, or activation trust for `.opaltool` artifacts. Keep dynamic
+> loading disabled for untrusted code.
+
 ```yaml
 # config/plugin_system.yaml
 plugins:
@@ -259,7 +264,7 @@ plugins:
   whitelist: []
 
 security:
-  allow_dynamic_loading: true
+  allow_dynamic_loading: false
   require_signatures: false
   sandbox_mode: false
 ```
@@ -294,11 +299,15 @@ effects:
 
 ### API Configuration
 
+The current standalone runtime is launched on port 8001. The CORS and rate
+limiting fields below are forward-looking configuration schema examples; they
+are not enforcement controls in the Phase 2.1 API.
+
 ```yaml
 # config/api.yaml
 server:
-  host: "0.0.0.0"
-  port: 8000
+  host: "127.0.0.1"
+  port: 8001
   debug: false
 
 cors:
@@ -421,37 +430,34 @@ config_manager.register_change_callback("opal2_graphics", on_config_change)
 - **Garbage Collection**: Automatic cleanup of unused resources
 - **Resource Pooling**: Reuse of rendering resources
 
-## 🔒 **Security Features**
+## 🔒 **Current Security Boundary**
 
-### Plugin Security
-
-- **Signature Validation**: Optional plugin signature verification
-- **Sandbox Mode**: Isolated plugin execution
-- **Whitelist/Blacklist**: Plugin access control
-
-### API Security
-
-- **Rate Limiting**: Request rate limiting
-- **CORS Protection**: Cross-origin request security
-- **Input Validation**: Comprehensive input sanitization
+- Mutating HTTP routes require the standalone CSRF bearer-token contract.
+- The service refuses missing `CSRF_SECRET_KEY` and `WS_AUTH_SECRET` values.
+- Foundry tools are registered explicitly in-process; no arbitrary package is
+  discovered or imported.
+- `.opaltool` 0.1 verification checks deterministic structure, SHA-256
+  integrity, size limits, and path/symlink safety without extracting or
+  executing package code.
+- Publisher signatures, dependency/SBOM validation, rate limiting, CORS
+  policy, isolated workers, and third-party activation remain deferred. The
+  legacy plugin loader is not a security boundary.
 
 ## 🚀 **Production Deployment**
 
-### Docker Configuration
+### Docker Compose
 
-```dockerfile
-FROM python:3.11-slim
+OPAL2 has a dedicated non-root image and an opt-in profile. It remains a
+separate process, installs the bounded `requirements-opal2.txt` runtime set,
+and publishes only to loopback by default.
 
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+```bash
+export CSRF_SECRET_KEY="$(openssl rand -hex 32)"
+export WS_AUTH_SECRET="$(openssl rand -hex 32)"
+docker compose --profile opal2 up --build opal2
 
-COPY modules/opal2 ./modules/opal2
-COPY config ./config
-
-EXPOSE 8000
-
-CMD ["uvicorn", "modules.opal2.api.opal2_api:app", "--host", "0.0.0.0", "--port", "8000"]
+curl --fail http://127.0.0.1:8001/health
+curl --fail http://127.0.0.1:8001/tools
 ```
 
 ### Environment Variables
@@ -461,30 +467,44 @@ export OPAL2_CONFIG_DIR="/app/config"
 export OPAL2_PLUGIN_DIR="/app/plugins"
 export OPAL2_CACHE_DIR="/app/cache"
 export OPAL2_LOG_LEVEL="INFO"
+export CSRF_SECRET_KEY="<strong deployment secret>"
+export WS_AUTH_SECRET="<strong deployment secret>"
 ```
 
-## 📋 **Roadmap**
+The four `OPAL2_*` path/log variables document the intended configuration
+surface; the Phase 2.1 service does not yet consume all of them.
 
-### Phase 1: Core Implementation ✅
+## 📋 **Foundry Roadmap**
 
-- [x] Quantum renderer with basic effects
-- [x] Plugin system foundation
-- [x] Configuration management
-- [x] FastAPI integration
+### Phase 1: executable Foundry spine ✅
 
-### Phase 2: Advanced Features 🔄
+- [x] Portable manifest and tool contract
+- [x] Explicit trusted registry and execution provenance
+- [x] Glyph renderer reference adapter and standalone HTTP routes
 
-- [ ] Advanced quantum effects (interference, diffraction)
-- [ ] 3D visualization support
-- [ ] Real-time collaboration features
-- [ ] Performance profiling dashboard
+### Phase 2 / 2.1: generality, packaging, and landing ✅
 
-### Phase 3: AI Integration 🔮
+- [x] Deterministic regex workshop as a non-renderer reference tool
+- [x] Deterministic inspect-only `.opaltool` 0.1 export and verification
+- [x] Dedicated standalone container, Compose profile, and fail-closed CI gate
+- [ ] Authoring scaffold and full schema-conformance harness
+- [ ] Aurora policy adapter rather than direct runtime imports
 
-- [ ] AI-powered glyph generation
-- [ ] Intelligent rendering optimization
-- [ ] Predictive caching
-- [ ] Automated plugin recommendations
+### Phase 3: portability and trust
+
+- [ ] Publisher identity, asymmetric signatures, dependency lock, and SBOM
+- [ ] Isolated execution with capability and resource controls
+- [ ] Neutral and Aurora clean-room conformance with matching provenance
+
+### Phase 4: workshop at scale
+
+- [ ] Scaffold/build/test/run/export/publish workflows
+- [ ] External artifact registry and queue-backed workers
+- [ ] Independent neutral core package after conformance is green
+
+Visualization enhancements such as 3D rendering, collaboration, and AI glyph
+generation remain possible reference-tool work, not the OPAL2 product
+definition.
 
 ## 🤝 **Contributing**
 

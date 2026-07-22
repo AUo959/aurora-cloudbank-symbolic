@@ -30,28 +30,28 @@ jobs:
     name: "CI Check"
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
-      
+
       - name: Legacy references detector (non-blocking)
         continue-on-error: true
         run: |
           bash scripts/verify_removed_paths_unused.sh
-      
+
       - name: Set up Python
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38  # v5.4.0
         with:
           python-version: '3.12'
           cache: 'pip'
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install flake8 pytest pytest-cov pytest-asyncio
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      
+
       - name: Check requirements-lock.txt drift (informational)
         continue-on-error: true
         run: |
@@ -75,15 +75,14 @@ jobs:
         run: |
           # Only check if Python files would actually break, scoped to first-class areas
           paths=""
-          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager modules/nexus; do
+          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager modules/nexus modules/opal2; do
             [ -d "$d" ] && paths="$paths $d"
           done
           if [ -z "$paths" ]; then
             echo "No target directories found for syntax check" && exit 0
           fi
-          # modules/opal2 excluded: 3 pre-existing syntax errors pending separate fix
           flake8 $paths --count --select=E9,F63,F7,F82 --show-source --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,modules/opal2/*,.security/*
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,.security/*
 
       # STYLE CHECKS - informational only, allowed to fail
       - name: Code style check
@@ -91,16 +90,33 @@ jobs:
         run: |
           # Check style but don't fail the build; use same scoped areas as syntax check
           paths=""
-          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager modules/nexus; do
+          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager modules/nexus modules/opal2; do
             [ -d "$d" ] && paths="$paths $d"
           done
           if [ -z "$paths" ]; then
             echo "No target directories found for style check" && exit 0
           fi
-          # modules/opal2 excluded: 3 pre-existing syntax errors pending separate fix
           flake8 $paths --count --max-complexity=10 --max-line-length=127 --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,modules/opal2/*,.security/*
-      
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,.security/*
+
+      # OPAL2 LANDING GATE - must pass, fail closed
+      - name: Run OPAL2 standalone foundry tests
+        env:
+          CSRF_SECRET_KEY: opal2-ci-csrf-secret-not-for-production
+          WS_AUTH_SECRET: opal2-ci-ws-secret-not-for-production
+        run: |
+          pytest -q \
+            tests/test_opal2_api_routes.py \
+            tests/test_opal2_deployment.py \
+            tests/test_opal2_foundry.py \
+            tests/test_opal2_glyph_cache.py \
+            tests/test_opal2_glyph_core.py \
+            tests/test_opal2_integration.py \
+            tests/test_opal2_regex_workshop.py \
+            tests/test_opal2_simple.py \
+            tests/test_opal2_system.py \
+            tests/test_opal2_tool_package.py
+
       # CRITICAL TESTS - must pass, fail closed
       # Only fails on actual test FAILURES, not on collection errors from
       # unrelated test files that have missing optional dependencies.

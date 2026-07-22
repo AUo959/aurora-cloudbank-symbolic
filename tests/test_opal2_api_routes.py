@@ -9,6 +9,7 @@ import ast
 import importlib
 import os
 import re
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -170,11 +171,8 @@ async def test_opal2_compatibility_render_handles_registry_failures(
         async def run(self, *_args, **_kwargs):
             raise error_type("forced registry failure")
 
-    async def cache_miss(_cache_key):
-        return None
-
     monkeypatch.setattr(module, "tool_registry", FailingRegistry())
-    monkeypatch.setattr(module.glyph_cache, "get_async", cache_miss)
+    monkeypatch.setattr(module.glyph_cache, "get_async", AsyncMock(return_value=None))
     request = module.RenderRequest(
         glyph_data={"vertices": [], "indices": [], "dimensions": 2},
         cache_key=f"opal2-{error_name}-route-test",

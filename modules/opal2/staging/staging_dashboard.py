@@ -173,10 +173,10 @@ class StagingDashboard:
     ) -> None:
         if not values:
             return
+        heading = f"{title}:"
+        print(heading)
         if warning:
-            logger.warning("%s:", title)
-        else:
-            print(f"{title}:")
+            logger.warning("%s", heading)
         for value in values:
             print(f"  • {value}")
         print()

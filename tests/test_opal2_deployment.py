@@ -78,3 +78,14 @@ def test_opal2_runtime_dependencies_are_separate_from_the_monolith():
     assert "fastapi==" in lockfile  # nosec B101 - pytest assertion
     assert "numpy==" in lockfile  # nosec B101 - pytest assertion
     assert "slowapi==" in lockfile  # nosec B101 - pytest assertion
+
+
+@pytest.mark.unit
+@pytest.mark.opal2
+def test_opal2_lock_target_explains_its_uv_prerequisite():
+    """Lock regeneration must fail with an actionable missing-tool message."""
+
+    makefile = (REPO_ROOT / "Makefile").read_text()
+
+    assert "command -v uv" in makefile  # nosec B101 - pytest assertion
+    assert "python3 -m pip install uv" in makefile  # nosec B101 - pytest assertion

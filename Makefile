@@ -122,6 +122,10 @@ install-vercel:
 	pip install -r requirements.txt
 
 opal2-lock: ## Regenerate the hashed standalone OPAL2 Python 3.11 dependency lock
+	@command -v uv >/dev/null 2>&1 || { \
+		echo "❌ uv is required to regenerate requirements-opal2.lock. Install it with: python3 -m pip install uv"; \
+		exit 1; \
+	}
 	uv pip compile requirements-opal2.txt \
 		--output-file requirements-opal2.lock \
 		--generate-hashes \

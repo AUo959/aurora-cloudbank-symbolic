@@ -34,3 +34,17 @@ def test_staging_candidate_selection_is_fail_closed():
     assert StagingDashboard._selected_candidate(  # nosec B101 - pytest assertion
         candidates, "not-a-number"
     ) is None
+
+
+@pytest.mark.unit
+@pytest.mark.opal2
+def test_warning_section_keeps_its_heading_visible(capsys):
+    """Interactive warning values must retain a visible stdout heading."""
+
+    StagingDashboard._print_named_values(
+        "Blocking Issues", ["Missing approval"], warning=True
+    )
+
+    output = capsys.readouterr().out
+    assert "Blocking Issues:" in output  # nosec B101 - pytest assertion
+    assert "  • Missing approval" in output  # nosec B101 - pytest assertion

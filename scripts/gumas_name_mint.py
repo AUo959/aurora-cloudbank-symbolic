@@ -61,19 +61,23 @@ def main() -> int:
         candidate_count=max(1, args.count),
     )
     service = NameService(load_registry(args.registry))
+    source_registry_digest = service.registry.digest
     candidates = service.resolve_candidates(request)
+    for candidate in candidates:
+        candidate.registry_digest = source_registry_digest
 
     if args.select is None:
         payload = {
             "protocol": candidates[0].protocol,
             "entity_id": args.entity_id,
-            "registry_digest": candidates[0].registry_digest,
+            "registry_digest": source_registry_digest,
             "candidates": [candidate.to_dict() for candidate in candidates],
         }
     else:
         if args.select < 0 or args.select >= len(candidates):
             raise SystemExit(f"--select must be between 0 and {len(candidates) - 1}")
         selected = NameService.select(candidates, args.select, args.entity_id)
+        selected.registry_digest = source_registry_digest
         payload = {"naming_receipt": selected.naming_receipt()}
 
     text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"

@@ -9,6 +9,7 @@ Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 import asyncio
 import logging
 import os
+import secrets
 import time
 from contextlib import asynccontextmanager
 
@@ -1267,6 +1268,47 @@ def health_check_api(request: Request):
 
 
 # ================================
+# CSRF Token Issuance
+# ================================
+
+@app.get("/api/csrf-token")
+@limiter.limit("60/minute")
+def issue_csrf_token(request: Request):
+    """
+    Issue a CSRF token for use with state-changing requests.
+
+    GlobalCsrfMiddleware rejects any unsafe-method request to a non-allowlisted
+    path that does not carry a valid X-CSRF-Token header. This endpoint is the
+    issuance half of that contract — it is itself on the middleware allowlist
+    (see src/middleware/csrf_middleware.py::_CSRF_ALLOWLIST).
+
+    The token is a stateless HMAC over ``session_id.timestamp`` keyed by
+    CSRF_SECRET_KEY, valid for CSRF_TOKEN_EXPIRY_SECONDS. Callers that already
+    hold a session identifier may pass it as ``session_id`` so the token is
+    bound to that session; otherwise a random one is generated.
+
+    Note on threat model: because the token is not bound to a cookie or
+    authenticated session by default, it defends against blind cross-origin
+    submission but is only as strong as the CORS policy in front of it. Keep
+    ALLOWED_CORS_ORIGINS restrictive in any deployment that relies on it.
+
+    DLP: csrf_token_issuance
+    """
+    from src.middleware.fastapi_security import (
+        CSRF_TOKEN_EXPIRY_SECONDS,
+        generate_csrf_token,
+    )
+
+    session_id = request.query_params.get("session_id") or secrets.token_urlsafe(16)
+    return {
+        "csrf_token": generate_csrf_token(session_id),
+        "session_id": session_id,
+        "header": "X-CSRF-Token",
+        "expires_in_seconds": CSRF_TOKEN_EXPIRY_SECONDS,
+    }
+
+
+# ================================
 # Telemetry and Observability Endpoints
 # ================================
 
@@ -1736,7 +1778,8 @@ class HandshakeRequest(BaseModel):
 @app.post("/api/thread-bridge/handshake", dependencies=[Depends(security), Depends(verify_csrf_token)])
 @limiter.limit("10/minute")
 async def thread_bridge_handshake_endpoint(
-    request: HandshakeRequest,
+    payload: HandshakeRequest,
+    request: Request,
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
     """
@@ -1754,7 +1797,7 @@ async def thread_bridge_handshake_endpoint(
 
     try:
         bridge = get_bridge_instance()
-        result = bridge.handshake(request.thread_id)
+        result = bridge.handshake(payload.thread_id)
 
         if not result.get("success"):
             return JSONResponse(
@@ -1788,7 +1831,8 @@ class ValidateRequest(BaseModel):
 @app.post("/api/thread-bridge/validate", dependencies=[Depends(security), Depends(verify_csrf_token)])
 @limiter.limit("30/minute")
 async def thread_bridge_validate_endpoint(
-    request: ValidateRequest,
+    payload: ValidateRequest,
+    request: Request,
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
     """
@@ -1805,7 +1849,7 @@ async def thread_bridge_validate_endpoint(
 
     try:
         bridge = get_bridge_instance()
-        validation = bridge.validate_continuity(request.source, request.target)
+        validation = bridge.validate_continuity(payload.source, payload.target)
 
         return {
             "success": True,
@@ -1862,7 +1906,8 @@ class TransferRequest(BaseModel):
 @app.post("/api/thread-bridge/transfer", dependencies=[Depends(security), Depends(verify_csrf_token)])
 @limiter.limit("10/minute")
 async def thread_bridge_transfer_endpoint(
-    request: TransferRequest,
+    payload: TransferRequest,
+    request: Request,
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
     """
@@ -1881,9 +1926,9 @@ async def thread_bridge_transfer_endpoint(
     try:
         bridge = get_bridge_instance()
         result = bridge.transfer_context(
-            source=request.source,
-            target=request.target,
-            context_data=request.context_data
+            source=payload.source,
+            target=payload.target,
+            context_data=payload.context_data
         )
 
         if not result.get("success"):
@@ -2266,7 +2311,8 @@ async def v2_trigger_election(request: Request, token: HTTPAuthorizationCredenti
 @app.post("/api/v2/repos/register", dependencies=[Depends(security), Depends(verify_csrf_token)])
 @limiter.limit("20/minute")
 async def v2_register_repository(
-    request: RepositoryRegisterRequest,
+    payload: RepositoryRegisterRequest,
+    request: Request,
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
     """
@@ -2284,9 +2330,9 @@ async def v2_register_repository(
     try:
         synchronizer = get_repository_synchronizer()
         repo_info = await synchronizer.register_repository(
-            repo_id=request.repo_id,
-            repo_path=request.repo_path,
-            branch=request.branch
+            repo_id=payload.repo_id,
+            repo_path=payload.repo_path,
+            branch=payload.branch
         )
 
         return {

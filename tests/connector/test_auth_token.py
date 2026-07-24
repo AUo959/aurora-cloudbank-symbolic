@@ -40,7 +40,7 @@ def seal_secret(monkeypatch):
 @pytest.mark.security
 def test_generated_seal_has_four_colon_separated_fields(seal_secret):
     seal = generate_pilot_seal("operator-1", scope="read")
-    assert len(seal.split(":")) == 4
+    assert len(seal.split(":")) == 4  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -59,15 +59,15 @@ def test_generate_requires_configured_secret(monkeypatch):
 @pytest.mark.unit
 @pytest.mark.security
 def test_freshly_generated_seal_validates(seal_secret):
-    assert is_valid_pilot_seal(generate_pilot_seal("operator-1")) is True
+    assert is_valid_pilot_seal(generate_pilot_seal("operator-1")) is True  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
 @pytest.mark.security
 def test_seal_expiring_in_the_future_is_accepted(seal_secret):
     seal = generate_pilot_seal("operator-1", exp_seconds=60)
-    assert int(seal.split(":")[2]) > time.time()
-    assert is_valid_pilot_seal(seal) is True
+    assert int(seal.split(":")[2]) > time.time()  # nosec B101 - pytest assertion
+    assert is_valid_pilot_seal(seal) is True  # nosec B101 - pytest assertion
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +80,7 @@ def test_seal_expiring_in_the_future_is_accepted(seal_secret):
 def test_seal_is_rejected_without_configured_secret(seal_secret, monkeypatch):
     seal = generate_pilot_seal("operator-1")
     monkeypatch.delenv("AURORA_PILOT_SEAL_SECRET", raising=False)
-    assert is_valid_pilot_seal(seal) is False
+    assert is_valid_pilot_seal(seal) is False  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -88,7 +88,7 @@ def test_seal_is_rejected_without_configured_secret(seal_secret, monkeypatch):
 def test_seal_signed_with_a_different_secret_is_rejected(seal_secret, monkeypatch):
     seal = generate_pilot_seal("operator-1")
     monkeypatch.setenv("AURORA_PILOT_SEAL_SECRET", "a-different-secret")
-    assert is_valid_pilot_seal(seal) is False
+    assert is_valid_pilot_seal(seal) is False  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -98,7 +98,7 @@ def test_tampered_scope_is_rejected(seal_secret):
     operator_id, _scope, exp, mac = generate_pilot_seal(
         "operator-1", scope="read"
     ).split(":")
-    assert is_valid_pilot_seal(f"{operator_id}:write:{exp}:{mac}") is False
+    assert is_valid_pilot_seal(f"{operator_id}:write:{exp}:{mac}") is False  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -107,20 +107,20 @@ def test_extended_expiry_is_rejected(seal_secret):
     """Pushing out the expiry must break the HMAC."""
     operator_id, scope, exp, mac = generate_pilot_seal("operator-1").split(":")
     forged_exp = int(exp) + 86_400
-    assert is_valid_pilot_seal(f"{operator_id}:{scope}:{forged_exp}:{mac}") is False
+    assert is_valid_pilot_seal(f"{operator_id}:{scope}:{forged_exp}:{mac}") is False  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
 @pytest.mark.security
 def test_expired_seal_is_rejected(seal_secret):
     seal = generate_pilot_seal("operator-1", exp_seconds=-1)
-    assert is_valid_pilot_seal(seal) is False
+    assert is_valid_pilot_seal(seal) is False  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
 @pytest.mark.security
 def test_non_integer_expiry_is_rejected(seal_secret):
-    assert is_valid_pilot_seal("operator-1:read:not-a-number:deadbeef") is False
+    assert is_valid_pilot_seal("operator-1:read:not-a-number:deadbeef") is False  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -136,14 +136,14 @@ def test_non_integer_expiry_is_rejected(seal_secret):
     ],
 )
 def test_malformed_seals_are_rejected(seal_secret, seal):
-    assert is_valid_pilot_seal(seal) is False
+    assert is_valid_pilot_seal(seal) is False  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
 @pytest.mark.security
 def test_v0_1_substring_seal_is_rejected(seal_secret):
     """The pre-#822 substring seal must no longer validate."""
-    assert is_valid_pilot_seal("AURORA-PILOT-SEAL-VERIFIED") is False
+    assert is_valid_pilot_seal("AURORA-PILOT-SEAL-VERIFIED") is False  # nosec B101 - pytest assertion
 
 
 # ---------------------------------------------------------------------------
@@ -160,7 +160,7 @@ def test_validate_environment_exits_on_missing_token(monkeypatch):
     with pytest.raises(SystemExit) as exc_info:
         validate_environment()
 
-    assert exc_info.value.code == 1
+    assert exc_info.value.code == 1  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -172,7 +172,7 @@ def test_validate_environment_exits_on_missing_base_url(monkeypatch):
     with pytest.raises(SystemExit) as exc_info:
         validate_environment()
 
-    assert exc_info.value.code == 1
+    assert exc_info.value.code == 1  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit

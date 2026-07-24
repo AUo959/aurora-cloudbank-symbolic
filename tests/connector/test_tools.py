@@ -404,7 +404,7 @@ async def test_get_capsules_total_verified_matches_payload():
     tool = GetCapsulesTool()
     result = await tool.run({})
     data = json.loads(result)
-    assert data["total_verified"] == len(data["capsules"])
+    assert data["total_verified"] == len(data["capsules"])  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit
@@ -414,7 +414,7 @@ async def test_get_capsules_default_returns_all_capsules():
     tool = GetCapsulesTool()
     result = await tool.run({})
     data = json.loads(result)
-    assert len(data["capsules"]) == data["total_verified"]
+    assert len(data["capsules"]) == data["total_verified"]  # nosec B101 - pytest assertion
 
 
 @pytest.mark.unit

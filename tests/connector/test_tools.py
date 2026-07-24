@@ -23,7 +23,7 @@ from connector.tools.get_state import GetStateTool
 from connector.tools.get_agents import GetAgentsTool
 from connector.tools.get_drift import GetDriftTool, DRIFT_THRESHOLDS
 from connector.tools.get_ethics import GetEthicsLogTool
-from connector.tools.get_capsules import GetCapsulesTool, TOTAL_VERIFIED_CAPSULES
+from connector.tools.get_capsules import GetCapsulesTool
 
 
 # ---------------------------------------------------------------------------
@@ -394,22 +394,27 @@ async def test_get_capsules_default_returns_valid_json():
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_get_capsules_total_verified_matches_constant():
-    """total_verified in response must equal TOTAL_VERIFIED_CAPSULES constant."""
+async def test_get_capsules_total_verified_matches_payload():
+    """total_verified must agree with the number of capsules returned.
+
+    Was asserted against a hardcoded TOTAL_VERIFIED_CAPSULES constant from the
+    v0.1 stub; the tool now counts what it actually loaded (#828), so the
+    meaningful invariant is internal consistency of the response.
+    """
     tool = GetCapsulesTool()
     result = await tool.run({})
     data = json.loads(result)
-    assert data["total_verified"] == TOTAL_VERIFIED_CAPSULES
+    assert data["total_verified"] == len(data["capsules"])
 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_get_capsules_default_returns_all_capsules():
-    """run({}) with no filter must return all verified capsules."""
+    """run({}) with no filter must return every capsule it counted."""
     tool = GetCapsulesTool()
     result = await tool.run({})
     data = json.loads(result)
-    assert len(data["capsules"]) == TOTAL_VERIFIED_CAPSULES
+    assert len(data["capsules"]) == data["total_verified"]
 
 
 @pytest.mark.unit

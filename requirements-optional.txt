@@ -83,3 +83,11 @@ kombu>=5.3.0                        # Messaging library
 opentelemetry-api>=1.42.1           # OpenTelemetry API
 opentelemetry-sdk>=1.42.1           # OpenTelemetry SDK
 sentry-sdk>=2.65.0                  # Error tracking
+
+# ===================================================================
+# MCP CONNECTOR (Optional)
+# ===================================================================
+# Required by connector/server.py to expose Aurora state over the Model
+# Context Protocol. Without it the connector and tests/connector are
+# unavailable; the core API is unaffected. See connector/README.md.
+mcp>=1.28.1                         # Model Context Protocol SDK

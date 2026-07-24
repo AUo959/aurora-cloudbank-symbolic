@@ -1,9 +1,9 @@
 # Aurora CloudBank Symbolic
 
+[![CI](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/aurora-ci-minimal.yml/badge.svg?branch=main)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/aurora-ci-minimal.yml)
+[![CodeQL](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml/badge.svg?branch=main)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml)
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.128+-green)](https://fastapi.tiangolo.com/)
-[![Pydantic](https://img.shields.io/badge/Pydantic-v2-orange)](https://docs.pydantic.dev/)
 
 A quantum-symbolic computing platform for enterprise AI. Combines hierarchical memory management, quantum circuit simulation, multi-model AI orchestration, geometric ethics enforcement, and production observability in a single FastAPI application.
 
@@ -80,7 +80,7 @@ aurora-cloudbank-symbolic/
 │   ├── synergy/           # Component registry and dependency graph
 │   ├── integrations/      # ChatGPT and Gemini agent integrations
 │   └── core/              # DLP tracking, request envelope, time utilities
-├── tests/                 # 253 test files (pytest)
+├── tests/                 # 293 test files (pytest)
 ├── docs/                  # Reference documentation
 ├── scripts/               # Development and maintenance automation
 └── cli/                   # Command-line tools
@@ -147,7 +147,7 @@ All modules follow a consistent layout: `__init__.py`, `core.py`, `api.py`, `mod
 
 ## API
 
-The server exposes ~339 HTTP routes across 30+ routers. All routes return JSON.
+The server exposes 301 operations across 293 paths and 30 routers. All routes return JSON.
 
 **Access the interactive docs:**
 
@@ -159,14 +159,30 @@ The server exposes ~339 HTTP routes across 30+ routers. All routes return JSON.
 
 | Group | Prefix | Description |
 |---|---|---|
-| AuMemManager | `/aumem/` | Memory CRUD, semantic retrieval, quantum vector creation, metrics |
-| Quantum Simulator | `/api/quantum/` | Scenario execution, backend selection, result retrieval |
-| Synergy | `/api/synergy/` | Component registry, dependency graph, health |
-| Monitoring | `/api/monitoring/` | Drift alerts, ethics compliance, audit logs |
-| R2 Telemetry | `/api/telemetry/` | Trace export, Prometheus metrics |
-| Auth | `/api/auth/` | JWT token issuance and refresh |
-| GUMAS | `/api/gumas/` | Ethics alignment enforcement |
+| AuMemManager | `/memory/` | Memory CRUD, semantic retrieval, quantum vector creation, metrics |
+| Quantum Simulator | `/simulate/` | Scenario execution, backend selection, result retrieval, forecasting |
+| Synergy | `/synergy/` | Component registry, dependency graph, health |
+| Monitoring | `/monitoring/` | Drift alerts, baselines, behavioural checks |
+| Insight Ledger | `/ledger/` | Audit entries, chain verification, export |
+| R2 Telemetry | `/r2-telemetry/` | Trace export, Prometheus metrics |
+| GUMAS | `/gumas/` | Ethics alignment enforcement |
 | Sensors | `/api/sensors/` | System sensor array |
+| Subroutines | `/subroutines/` | Registration and sandboxed execution |
+
+**State-changing requests need a CSRF token.** Fetch one from
+`GET /api/csrf-token` and send it back as the `X-CSRF-Token` header:
+
+```bash
+TOKEN=$(curl -s localhost:8000/api/csrf-token | jq -r .csrf_token)
+curl -X POST localhost:8000/memory/create \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: $TOKEN" -H "Authorization: Bearer $TOKEN" \
+  -d '{"content":"hello","memory_type":"agent","owner":"you"}'
+```
+
+The `/api/auth/` router registers only when authentication users are
+configured (`AURORA_AUTH_USERS_JSON` or `AURORA_AUTH_USERS_FILE`); a default
+local run starts without it and logs the reason.
 
 **CloudHub GUI routes:**
 
@@ -175,6 +191,22 @@ The server exposes ~339 HTTP routes across 30+ routers. All routes return JSON.
 - `/legacy/vsa` — Retired Quantum VSA playground notice
 
 See [`docs/reference/API_CATALOG.md`](docs/reference/API_CATALOG.md) for the full route listing.
+
+### MCP connector
+
+Aurora's live state is also exposed over the [Model Context Protocol](https://modelcontextprotocol.io),
+so any MCP-capable host (Claude Desktop, Claude Code, and others) can read it
+directly. Five read-only tools: `aurora_get_state`, `aurora_get_agents`,
+`aurora_get_drift`, `aurora_get_ethics_log`, `aurora_get_capsules`.
+
+```bash
+pip install -r requirements-optional.txt   # provides the mcp SDK
+python -m connector.server                 # stdio transport
+```
+
+Elevated operations are gated behind an HMAC-signed, expiring Pilot seal.
+Setup, transport options, and a ready `claude_desktop_config.json` block are in
+[`connector/README.md`](connector/README.md).
 
 ---
 

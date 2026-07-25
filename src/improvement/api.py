@@ -15,7 +15,7 @@ from src.improvement import (
     ImprovementCategory,
     ImprovementSeverity
 )
-from src.utils.temp_roots import resolve_within_temp_root
+from src.utils.temp_roots import is_within_temp_root
 
 
 # Define SAFE_ROOT as the workspace root directory for path security validation
@@ -112,17 +112,14 @@ async def analyze_file(request: AnalyzeFileRequest):
     engine = get_improvement_engine()
     requested_path = Path(request.file_path)
     
-    # Allow absolute paths under a temp root for testing purposes. Bind the
-    # resolved path the check returns, so the value that was validated is the
-    # value that gets opened; assigning `requested_path` validated one object
-    # and used another.
-    _temp_path = (
-        resolve_within_temp_root(requested_path)
-        if requested_path.is_absolute()
-        else None
-    )
-    if _temp_path is not None:
-        full_path = _temp_path
+    # Allow absolute paths under a temp root for testing purposes. Resolve once
+    # and use that same resolved value, so the path that was checked is the path
+    # that gets opened. The comparison is inline rather than behind a helper so
+    # the guard sits in the same function as the filesystem access it protects —
+    # see src/utils/temp_roots.py.
+    _resolved = requested_path.resolve() if requested_path.is_absolute() else None
+    if _resolved is not None and is_within_temp_root(_resolved):
+        full_path = _resolved
     else:
         # Explicit security: Disallow absolute paths and up-level references
         if requested_path.is_absolute():
@@ -156,17 +153,14 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
     engine = get_improvement_engine()
     requested_path = Path(request.directory)
     
-    # Allow absolute paths under a temp root for testing purposes. Bind the
-    # resolved path the check returns, so the value that was validated is the
-    # value that gets opened; assigning `requested_path` validated one object
-    # and used another.
-    _temp_path = (
-        resolve_within_temp_root(requested_path)
-        if requested_path.is_absolute()
-        else None
-    )
-    if _temp_path is not None:
-        full_path = _temp_path
+    # Allow absolute paths under a temp root for testing purposes. Resolve once
+    # and use that same resolved value, so the path that was checked is the path
+    # that gets opened. The comparison is inline rather than behind a helper so
+    # the guard sits in the same function as the filesystem access it protects —
+    # see src/utils/temp_roots.py.
+    _resolved = requested_path.resolve() if requested_path.is_absolute() else None
+    if _resolved is not None and is_within_temp_root(_resolved):
+        full_path = _resolved
     else:
         # Explicit security: Disallow absolute paths and up-level references
         if requested_path.is_absolute():

@@ -83,6 +83,16 @@ def dev_auth_fixture_env(monkeypatch):
     monkeypatch.setenv("AURORA_DEV_OPERATOR_PASSWORD", "test-operator-secret")
     monkeypatch.setenv("AURORA_DEV_OBSERVER_PASSWORD", "test-observer-secret")
 
+    # The user store is built lazily and cached on first use. Drop the cache on
+    # both sides of the test so it is rebuilt against this environment, and does
+    # not leak these fixture users into a later test that configures auth
+    # differently — or into one that expects auth to be unconfigured.
+    from src.security.auth_routes import reset_users_db_cache
+
+    reset_users_db_cache()
+    yield
+    reset_users_db_cache()
+
 
 # ---------------------------------------------------------------------------
 # General-purpose fixtures

@@ -165,7 +165,42 @@ def _truthy(value: Optional[str]) -> bool:
     return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
-USERS_DB = build_auth_users_db()
+_USERS_DB_CACHE: Optional[Dict[str, Any]] = None
+
+
+def get_users_db() -> Dict[str, Any]:
+    """Return the auth user database, building it on first use.
+
+    Deliberately lazy. This was previously ``USERS_DB = build_auth_users_db()``
+    evaluated at import, which made the module unimportable whenever auth was
+    unconfigured — and auth is unconfigured in a default local run. Three
+    consequences, all of which looked like separate problems:
+
+      * ``tests/test_auth_routes.py`` failed at *collection*, so its own
+        ``dev_auth_fixture_env`` fixture never got the chance to run.
+      * ``api/aurora_api.py`` logged "Failed to integrate Authentication API
+        routes" at startup and skipped the router, so ``/api/auth/`` was
+        absent from a default server.
+      * Any module importing this one inherited the same hard failure.
+
+    Building on first use keeps the fail-closed behaviour exactly where it
+    belongs — a request that actually needs a user store still raises — while
+    letting the module import, the routes register, and tests configure the
+    environment before anything reads it.
+    """
+    global _USERS_DB_CACHE
+    if _USERS_DB_CACHE is None:
+        _USERS_DB_CACHE = build_auth_users_db()
+    return _USERS_DB_CACHE
+
+
+def reset_users_db_cache() -> None:
+    """Drop the cached user store so the next call rebuilds from the environment.
+
+    Needed by tests that change auth configuration between cases.
+    """
+    global _USERS_DB_CACHE
+    _USERS_DB_CACHE = None
 
 
 # Rate limit configuration:
@@ -222,7 +257,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
     # Dynamic override enforcement (must occur before auth evaluation)
     _enforce_dynamic_token_limit(request)
 
-    user = OAuth2Handler.authenticate_user(form_data.username, form_data.password, USERS_DB)
+    user = OAuth2Handler.authenticate_user(form_data.username, form_data.password, get_users_db())
 
     if not user:
         raise HTTPException(

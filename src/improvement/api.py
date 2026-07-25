@@ -10,6 +10,7 @@ from typing import List, Optional, Dict, Any
 from pathlib import Path
 from enum import Enum
 import os
+import tempfile
 from src.improvement import (
     get_improvement_engine,
     ImprovementCategory,
@@ -19,6 +20,28 @@ from src.improvement import (
 
 # Define SAFE_ROOT as the workspace root directory for path security validation
 SAFE_ROOT = Path(__file__).parent.parent.parent.resolve()
+
+# Absolute paths are refused except under a temp root, which the test-suite
+# needs in order to analyse fixture files. This was hardcoded to "/tmp/", a
+# Linux-only assumption: on macOS tempfile.gettempdir() is /var/folders/...,
+# so every absolute-path test failed with 400. Both the real temp dir and its
+# /private-prefixed macOS realpath are accepted, since Path.resolve() may
+# return either.
+_TEMP_ROOTS = tuple({
+    str(Path(tempfile.gettempdir()).resolve()),
+    str(Path(tempfile.gettempdir())),
+    str(Path("/tmp").resolve()),  # macOS: /tmp is a symlink to /private/tmp
+    "/tmp",
+})
+
+
+def _is_under_temp_root(path: Path) -> bool:
+    """True when *path* sits inside a platform temp directory."""
+    resolved = str(path.resolve())
+    return any(
+        resolved == root or resolved.startswith(root.rstrip("/") + os.sep)
+        for root in _TEMP_ROOTS
+    )
 
 
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])
@@ -107,7 +130,7 @@ async def analyze_file(request: AnalyzeFileRequest):
     requested_path = Path(request.file_path)
     
     # Allow absolute paths in /tmp for testing purposes
-    if requested_path.is_absolute() and str(requested_path).startswith("/tmp/"):
+    if requested_path.is_absolute() and _is_under_temp_root(requested_path):
         full_path = requested_path
     else:
         # Explicit security: Disallow absolute paths and up-level references
@@ -143,7 +166,7 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
     requested_path = Path(request.directory)
     
     # Allow absolute paths in /tmp for testing purposes
-    if requested_path.is_absolute() and str(requested_path).startswith("/tmp/"):
+    if requested_path.is_absolute() and _is_under_temp_root(requested_path):
         full_path = requested_path
     else:
         # Explicit security: Disallow absolute paths and up-level references

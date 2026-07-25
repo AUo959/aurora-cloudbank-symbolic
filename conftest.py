@@ -123,3 +123,43 @@ def cmd():
         return proc.returncode, proc.stdout, proc.stderr
 
     return _run
+
+
+@pytest.fixture
+def csrf_token():
+    """Return a valid CSRF token for the configured CSRF_SECRET_KEY.
+
+    GlobalCsrfMiddleware rejects every unsafe-method request to a
+    non-allowlisted path, so a plain ``TestClient(app).post(...)`` now returns
+    403 rather than exercising the handler. Tests that predate global CSRF
+    enforcement were asserting ``200`` and getting ``403`` — a test-harness
+    gap, not a regression in the routes.
+    """
+    from src.middleware.fastapi_security import generate_csrf_token
+
+    return generate_csrf_token("pytest-session")
+
+
+@pytest.fixture
+def csrf_client(csrf_token):
+    """A TestClient for the main app that carries a valid CSRF token.
+
+    Both headers are set because the two CSRF checks read different ones:
+    ``GlobalCsrfMiddleware`` reads ``X-CSRF-Token`` and the per-route
+    ``require_csrf_token`` dependency reads ``Authorization: Bearer``. See
+    docs/WALKTHROUGH.md.
+
+    This exercises the real middleware rather than bypassing it — the token is
+    genuinely signed and genuinely verified.
+    """
+    from fastapi.testclient import TestClient
+
+    from api.aurora_api import app
+
+    return TestClient(
+        app,
+        headers={
+            "X-CSRF-Token": csrf_token,
+            "Authorization": f"Bearer {csrf_token}",
+        },
+    )

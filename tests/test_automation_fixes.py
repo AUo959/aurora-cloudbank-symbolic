@@ -4,6 +4,7 @@ Integration test for automation fixes
 Validates that all critical fixes are working correctly
 """
 
+import shlex
 import subprocess
 import sys
 import os
@@ -11,6 +12,13 @@ from pathlib import Path
 
 # Always run commands from the repository root, independent of current CWD
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+# These commands run through shell=True, so the interpreter must be named
+# explicitly. "python" is not on PATH on macOS or on distributions that
+# ship only python3, which made every test in this module fail with
+# exit 127. sys.executable is whatever is running the suite.
+PYTHON = shlex.quote(sys.executable)
 
 
 def run_command(cmd, timeout=30):
@@ -35,7 +43,7 @@ def test_aurora_agent_ci_mode():
     print("🧪 Testing Aurora Agent in CI mode...")
 
     returncode, stdout, stderr = run_command(
-        "python .github/agents/aurora_agent_final.py",
+        f"{PYTHON} .github/agents/aurora_agent_final.py",
         timeout=10
     )
 
@@ -56,7 +64,7 @@ def test_aurora_agent_token_handling():
         del env['GITHUB_TOKEN']
 
     result = subprocess.run(
-        "python .github/agents/aurora_agent_final.py",
+        f"{PYTHON} .github/agents/aurora_agent_final.py",
         shell=True,
         capture_output=True,
         text=True,
@@ -89,7 +97,7 @@ def test_audit_tool():
     print("🧪 Testing automation audit tool...")
 
     returncode, stdout, stderr = run_command(
-        "python scripts/automation_audit.py",
+        f"{PYTHON} scripts/automation_audit.py",
         timeout=60
     )
 
@@ -109,7 +117,7 @@ def test_log_files_created():
     log_file = REPO_ROOT / "logs" / "aurora_agent.log"
 
     # Run agent to create log
-    run_command("python .github/agents/aurora_agent_final.py", timeout=10)
+    run_command(f"{PYTHON} .github/agents/aurora_agent_final.py", timeout=10)
 
     assert log_file.exists(), "Log file not created"
 

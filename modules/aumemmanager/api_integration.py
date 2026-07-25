@@ -6,10 +6,13 @@ FastAPI endpoints for hierarchical memory management with quantum-symbolic capab
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
+import logging
 import time
 
 from modules.aumemmanager import HierarchicalMemoryManager, MemoryType
 from src.middleware.fastapi_security import limiter, require_csrf_token
+
+logger = logging.getLogger(__name__)
 
 # Global memory manager instance (in production, this would be properly managed)
 memory_manager = HierarchicalMemoryManager(max_active_memories=1000)
@@ -93,24 +96,24 @@ class SystemMetricsResponse(BaseModel):
 
 @router.post("/create", response_model=Dict[str, str], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
 @limiter.limit("60/minute")  # Memory write - rate limited per IP
-async def create_memory(request: MemoryCreateRequest, http_request: Request):
+async def create_memory(payload: MemoryCreateRequest, request: Request):
     """Create a new memory item with quantum-symbolic capabilities"""
     try:
         # Convert string memory type to enum
         try:
-            memory_type = MemoryType(request.memory_type.lower())
+            memory_type = MemoryType(payload.memory_type.lower())
         except ValueError:
-            raise HTTPException(status_code=400, detail=f"Invalid memory type: {request.memory_type}")
+            raise HTTPException(status_code=400, detail=f"Invalid memory type: {payload.memory_type}")
 
         memory_id = memory_manager.add_memory(
-            content=request.content,
+            content=payload.content,
             memory_type=memory_type,
-            owner=request.owner,
-            importance=request.importance,
-            tags=request.tags,
-            quantum_properties=request.quantum_properties,
-            aurora_anchors=request.aurora_anchors,
-            cultural_score=request.cultural_score,
+            owner=payload.owner,
+            importance=payload.importance,
+            tags=payload.tags,
+            quantum_properties=payload.quantum_properties,
+            aurora_anchors=payload.aurora_anchors,
+            cultural_score=payload.cultural_score,
         )
 
         return {
@@ -119,7 +122,10 @@ async def create_memory(request: MemoryCreateRequest, http_request: Request):
             "message": f"Memory created successfully with ID: {memory_id}",
         }
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -176,21 +182,24 @@ async def retrieve_memories(request: MemoryRetrievalRequest):
 
         return response_memories
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/quantum/create_vector", response_model=Dict[str, Any], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
 @limiter.limit("60/minute")  # Memory write - rate limited per IP
-async def create_quantum_vector(request: QuantumVectorRequest, http_request: Request):
+async def create_quantum_vector(payload: QuantumVectorRequest, request: Request):
     """Create a quantum-symbolic vector for memory management"""
     try:
         qv = memory_manager.flight_controller.create_quantum_vector(
-            vector_id=request.vector_id,
-            magnitude=request.magnitude,
-            phase=request.phase,
-            aurora_anchors=request.aurora_anchors,
-            dlp_classification=request.dlp_classification,
+            vector_id=payload.vector_id,
+            magnitude=payload.magnitude,
+            phase=payload.phase,
+            aurora_anchors=payload.aurora_anchors,
+            dlp_classification=payload.dlp_classification,
         )
 
         return {
@@ -202,7 +211,10 @@ async def create_quantum_vector(request: QuantumVectorRequest, http_request: Req
             "status": "created",
         }
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -223,30 +235,36 @@ async def entangle_vectors(vector1_id: str, vector2_id: str, request: Request):
         else:
             raise HTTPException(status_code=404, detail="One or both vectors not found")
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/quantum/trajectory", response_model=Dict[str, Any], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
 @limiter.limit("60/minute")  # Memory write - rate limited per IP
-async def compute_trajectory(request: TrajectoryRequest, http_request: Request):
+async def compute_trajectory(payload: TrajectoryRequest, request: Request):
     """Compute quantum vector trajectory using flight control"""
     try:
-        target_state = {"magnitude": request.target_magnitude, "phase": request.target_phase}
+        target_state = {"magnitude": payload.target_magnitude, "phase": payload.target_phase}
 
         trajectory = memory_manager.flight_controller.compute_trajectory(
-            vector_id=request.vector_id, target_state=target_state, trajectory_type=request.trajectory_type
+            vector_id=payload.vector_id, target_state=target_state, trajectory_type=payload.trajectory_type
         )
 
         return {
-            "vector_id": request.vector_id,
-            "trajectory_type": request.trajectory_type,
+            "vector_id": payload.vector_id,
+            "trajectory_type": payload.trajectory_type,
             "waypoints": len(trajectory),
             "trajectory": trajectory,
             "status": "computed",
         }
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -268,7 +286,10 @@ async def get_system_metrics():
             quantum_network_density=metrics.get("quantum_network_density", 0.0),
         )
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -285,7 +306,10 @@ async def batch_process_lifecycle():
             "message": "Batch lifecycle processing completed successfully",
         }
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -307,7 +331,10 @@ async def compress_memories(
             "results": results,
         }
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -318,7 +345,10 @@ async def export_system_state():
         state = memory_manager.export_state()
         return {"status": "exported", "export_timestamp": state["export_timestamp"], "system_state": state}
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -329,7 +359,10 @@ async def get_quantum_network_analysis():
         analysis = memory_manager.flight_controller.get_entanglement_network_analysis()
         return {"status": "analyzed", "timestamp": time.time(), "network_analysis": analysis}
 
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unhandled error in aumemmanager route")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

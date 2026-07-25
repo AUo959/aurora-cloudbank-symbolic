@@ -422,6 +422,24 @@ def main(
     args = build_parser().parse_args(argv)
     output = stream or sys.stdout
     root = repo_root or Path(__file__).resolve().parents[1]
+
+    # No terminal attached (piped, redirected, CI, container) means the
+    # interactive prompts can never be answered. Degrade to the same path as
+    # --skip-interactive rather than failing on EOF, so `make onboard` in a
+    # non-tty context still produces a useful report. Only applies when reading
+    # from real stdin — an injected input_fn supplies its own answers.
+    if (
+        not args.skip_interactive
+        and not args.agent
+        and input_fn is input
+        and not sys.stdin.isatty()
+    ):
+        args.skip_interactive = True
+        print(
+            "ℹ️  No interactive terminal detected — running in non-interactive mode "
+            "(equivalent to --skip-interactive).",
+            file=output,
+        )
     started = time.perf_counter()
     app = AuroraOnboarding(root=root, stream=output, input_fn=input_fn)
     try:

@@ -209,14 +209,12 @@ Aurora CloudBank 2.1.0 delivers substantial new capabilities with **5 major modu
 
 Aurora CloudBank 2.0.0 represents a **major milestone**: the platform has evolved from experimental research to a **production-grade enterprise system**. This release includes comprehensive platform enhancements, zero HIGH vulnerabilities, and complete documentation overhaul.
 
-### 🏆 Sprint Achievements (Days 1-3, Nov 10-15)
+### Scope of this release (Nov 10-15)
 
-- **24,145 lines deployed** across 6 merged PRs
-- **100% goal achievement** (12 issues closed, 6 PRs merged) - completed **2 days early**
-- **Zero HIGH vulnerabilities** (6 HIGH vulnerabilities fixed during sprint)
-- **Zero open PRs/issues** at sprint completion
-- **109 test files** with comprehensive coverage
-- **48,347 lines** of production Python code
+- 6 HIGH-severity vulnerabilities identified and fixed
+- 12 issues closed across 6 merged PRs
+- PR and issue backlog cleared at release
+- 109 test files covering the platform surface
 
 ### Added
 
@@ -346,8 +344,12 @@ Aurora CloudBank 2.0.0 represents a **major milestone**: the platform has evolve
 
 ### Contributors
 
-Special commendation to the **Days 1-3 Sprint Team** for achieving 100% goal completion 2 days early:
-- **GitHub Copilot Agents** - 24,145 lines of code
+> Contributors below include engineering contributors alongside in-universe
+> operational roles, per the Orion Station operations protocol documented in
+> [`.aurora/README.md`](.aurora/README.md). This is a deliberate convention,
+> not a transcription error.
+
+- **GitHub Copilot Agents** - Implementation across the sprint PRs
 - **Claude Sonnet 4.5** - Documentation and planning
 - **OPS Rodriguez** - Sprint coordination and tactical execution
 - **CI/CD Teams** - Pipeline optimization and automated testing

@@ -147,7 +147,7 @@ than trust.
 
 The suite below states the design intent the architecture derives from. It is
 **foundational, not current runtime canon**: it lives under `archive/` by the
-#1139 ruling, and archive placement does not confer present authority. Read it
+ruling in #1139, and archive placement does not confer present authority. Read it
 to understand *why* the system is shaped this way; read `architecture/` and the
 committed code plus tests for what it currently *does*.
 

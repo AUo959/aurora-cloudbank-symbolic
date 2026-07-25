@@ -19,6 +19,7 @@ from src.utils.atomic_io import atomic_write_json, append_jsonl
 from .crypto_signatures import SignatureManager
 from .schemas import AuditQuery, InsightRecord, InsightType, LedgerEntry, LedgerStats
 from src.utils.persist_redact import redact_for_persistence
+from src.utils.temp_roots import is_under_temp_root
 
 # Try to import secure storage for encrypted key persistence
 try:
@@ -44,14 +45,22 @@ def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = Fal
         ValueError: If path is unsafe (absolute, contains .., outside bounds)
     """
     requested = Path(user_path)
-    
-    # Allow absolute paths in /tmp for testing purposes
-    if requested.is_absolute() and str(requested).startswith("/tmp/"):
+
+    # Absolute paths under a temp root are allowed through so the test suite can
+    # point the ledger at fixture directories. This was spelled
+    # startswith("/tmp/"), which never matches macOS's /var/folders/... temp dir
+    # (or a custom TMPDIR), so those paths were rejected as traversal attempts.
+    #
+    # Note this branch returns before the safe_root containment check below —
+    # it is a genuine bypass, not just a relaxation. It is only as safe as the
+    # temp directory itself, which is typically world-writable. Do not pass
+    # untrusted input to this function in a deployment where that matters.
+    if requested.is_absolute() and is_under_temp_root(requested):
         # Test path - allow it directly but ensure it exists or can be created
         if not allow_create and not requested.exists():
             raise ValueError(f"Path does not exist: {user_path}")
         return requested
-    
+
     # Reject other absolute paths from user input
     if requested.is_absolute():
         raise ValueError(f"Absolute paths not allowed: {user_path}")

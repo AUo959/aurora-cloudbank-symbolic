@@ -151,7 +151,11 @@ def _build_relay_agent(agent_id: str, spec: tuple) -> L1RelayAgent:
         type="META_AGENT",
         status="disconnected",
         description=description,
-        capabilities=tuple(capabilities),
+        # L1RelayAgent.capabilities is declared List[str]; this and the tuple()
+        # in _build_system_participant were swapped, so every consumer of
+        # get_constellation_status() received a tuple where the dataclass
+        # promised a list.
+        capabilities=list(capabilities),
         api_endpoint=api_endpoint,
     )
 
@@ -165,7 +169,11 @@ def _build_system_participant(
         role=role,
         type=participant_type,
         description=description,
-        capabilities=list(capabilities),
+        # L1SystemParticipant is frozen and declares Tuple[str, ...]. Storing a
+        # list here left every participant unhashable at runtime — the whole
+        # point of freezing the dataclass — and it raised TypeError only if
+        # something actually tried to hash one, so nothing surfaced it.
+        capabilities=tuple(capabilities),
         api_endpoint=endpoint,
         activation_phrase=phrase,
         registry_designation=designation,

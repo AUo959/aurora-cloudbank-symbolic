@@ -280,7 +280,7 @@ def load_simulation_state() -> Dict[str, Any]:
         logger.error("ERROR: Simulation state file not found!")
         sys.exit(1)
 
-    with open(state_file, 'r') as f:
+    with open(state_file, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 
@@ -289,8 +289,15 @@ def save_simulation_state(state: Dict[str, Any]) -> bool:
     state_file = Path(__file__).parent / "SIMULATION_STATE.json"
 
     try:
-        with open(state_file, 'w') as f:
-            json.dump(state, f, indent=2)
+        # ensure_ascii=False keeps em-dashes and other non-ASCII characters
+        # literal. With the default (True) every save rewrote them as \uXXXX
+        # escapes, so simply loading and saving the canonical state produced a
+        # diff of pure encoding churn on a file nothing had actually edited.
+        # The explicit encoding matches the read side and keeps the round trip
+        # from depending on the platform's default.
+        with open(state_file, 'w', encoding='utf-8') as f:
+            json.dump(state, f, indent=2, ensure_ascii=False)
+            f.write("\n")
         return True
     except Exception as e:
         logger.error(f"ERROR: Failed to save simulation state: {e}")

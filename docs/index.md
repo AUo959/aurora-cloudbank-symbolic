@@ -136,6 +136,13 @@ and `DOCUMENT_PACKAGE_ONLY`; links here do not implement runtime activation.
 | ----------------------------------------------------------------- | ---------------------------- |
 | [INCIDENT_RESPONSE_RUNBOOK.md](INCIDENT_RESPONSE_RUNBOOK.md)      | Incident response procedures |
 
+## Seeing it work
+
+[WALKTHROUGH.md](WALKTHROUGH.md) follows a single `POST /memory/create`
+through the middleware stack, both CSRF checks, the memory tier and the
+observability surface, with the real request/response at each step. Start
+here if you want to understand the runtime rather than the architecture.
+
 ## Verifying claims
 
 [VERIFIED_CLAIMS.md](VERIFIED_CLAIMS.md) pairs each claim the project makes

@@ -28,6 +28,8 @@ and both are load-bearing.
 >
 > **Want to know why it is built this way?** Read [`docs/archive/philosophy/`](./docs/archive/philosophy/PHILOSOPHY.md) — seven documents deriving the architecture from one principle about auditable reasoning. Foundational design intent, not current runtime canon.
 >
+> **Want to see it work?** [`docs/WALKTHROUGH.md`](./docs/WALKTHROUGH.md) traces one request end to end — ten middlewares, both CSRF checks, the memory tier, and what observability recorded. Every response in it was produced by running the commands.
+>
 > **Sceptical?** [`docs/VERIFIED_CLAIMS.md`](./docs/VERIFIED_CLAIMS.md) pairs every claim in this README with the command that proves or falsifies it, and the result that command produced.
 >
 > **Looking for a specific document?** [`docs/index.md`](./docs/index.md) maps every documentation directory and states what authority each one carries.

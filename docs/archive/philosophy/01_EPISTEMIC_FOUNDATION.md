@@ -133,5 +133,5 @@ This is not a UI feature. It is a core design constraint.
 
 ---
 
-*Aurora CloudBank Symbolic — docs/philosophy/01_EPISTEMIC_FOUNDATION.md*  
+*Aurora CloudBank Symbolic — docs/archive/philosophy/01_EPISTEMIC_FOUNDATION.md*  
 *Version 1.0 — March 11, 2026*

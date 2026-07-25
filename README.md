@@ -5,11 +5,32 @@
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A quantum-symbolic computing platform for enterprise AI. Combines hierarchical memory management, quantum circuit simulation, multi-model AI orchestration, geometric ethics enforcement, and production observability in a single FastAPI application.
+A FastAPI platform for keeping machine-generated knowledge coherent over long
+horizons: hierarchical memory, provenance-tracked state, geometric ethics
+enforcement, drift detection, and production observability.
+
+It is also the code and canon repository for Aurora, the simulation director of
+the Orion Station institutional simulation. That is not decoration on the
+engineering — it is what the engineering is for. Keeping a large,
+LLM-generated corpus internally consistent across sessions, model changes, and
+contributors is the problem this system exists to solve, and the simulation is
+the corpus it solves it against: large enough that conflicts are non-trivial,
+long-lived enough that drift is real rather than hypothetical, and without
+external ground truth, which forces genuine internal-consistency machinery
+rather than a lookup against someone else's answer key.
+
+So the module list contains both `src/middleware/` and `modules/crew_agents/`,
+and both are load-bearing.
 
 > **New engineer?** Start with [`GETTING_STARTED_ENGINEER.md`](./GETTING_STARTED_ENGINEER.md), then run `python scripts/aurora_onboard.py` for a repository-grounded first interaction.
 >
 > **Reviewing the architecture?** Start with [`ARCHITECTURE_QUICKMAP.md`](./ARCHITECTURE_QUICKMAP.md) for a 10-minute orientation to the layer structure, runtime flow, and code map.
+>
+> **Want to know why it is built this way?** Read [`docs/archive/philosophy/`](./docs/archive/philosophy/PHILOSOPHY.md) — seven documents deriving the architecture from one principle about auditable reasoning. Foundational design intent, not current runtime canon.
+>
+> **Sceptical?** [`docs/VERIFIED_CLAIMS.md`](./docs/VERIFIED_CLAIMS.md) pairs every claim in this README with the command that proves or falsifies it, and the result that command produced.
+>
+> **Looking for a specific document?** [`docs/index.md`](./docs/index.md) maps every documentation directory and states what authority each one carries.
 >
 > **New AI agent or Copilot session?** Start with [`AGENTS.md`](./AGENTS.md) (bootstrap protocol and rules) and [`AURORA_CONTEXT.json`](./AURORA_CONTEXT.json) (machine-readable concept map).
 
@@ -147,7 +168,7 @@ All modules follow a consistent layout: `__init__.py`, `core.py`, `api.py`, `mod
 
 ## API
 
-The server exposes 301 operations across 293 paths and 30 routers. All routes return JSON.
+The server exposes 290 operations across 282 paths and 30 tags with core requirements and the four required secrets set; 302 across 294 with a full `.env` and optional extras installed. Route registration skips modules whose optional dependencies are absent, so the count varies with your configuration. All routes return JSON.
 
 **Access the interactive docs:**
 

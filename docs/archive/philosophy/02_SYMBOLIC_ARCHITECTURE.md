@@ -142,5 +142,5 @@ has been built according to these principles from inception.
 
 ---
 
-*Aurora CloudBank Symbolic — docs/philosophy/02_SYMBOLIC_ARCHITECTURE.md*  
+*Aurora CloudBank Symbolic — docs/archive/philosophy/02_SYMBOLIC_ARCHITECTURE.md*  
 *Version 1.0 — March 11, 2026*

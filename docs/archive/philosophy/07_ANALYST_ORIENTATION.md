@@ -295,7 +295,7 @@ who uses Aurora from an analyst who is used by it.
 
 ---
 
-*Aurora CloudBank Symbolic — docs/philosophy/07_ANALYST_ORIENTATION.md*  
+*Aurora CloudBank Symbolic — docs/archive/philosophy/07_ANALYST_ORIENTATION.md*  
 *Version 1.0 — March 11, 2026*  
 *Audience: QGIA application layer users, domain analysts, intelligence consumers*  
 *Does not require: substrate architecture knowledge, cryptographic familiarity, Aurora system access*

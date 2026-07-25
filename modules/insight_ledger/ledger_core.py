@@ -19,7 +19,6 @@ from src.utils.atomic_io import atomic_write_json, append_jsonl
 from .crypto_signatures import SignatureManager
 from .schemas import AuditQuery, InsightRecord, InsightType, LedgerEntry, LedgerStats
 from src.utils.persist_redact import redact_for_persistence
-from src.utils.temp_roots import resolve_within_temp_root
 
 # Try to import secure storage for encrypted key persistence
 try:
@@ -42,50 +41,51 @@ def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = Fal
         Validated absolute Path within safe_root
         
     Raises:
-        ValueError: If path is unsafe (absolute, contains .., outside bounds)
+        ValueError: If path is unsafe (contains .., or resolves outside bounds)
+
+    Absolute paths are permitted **only when they resolve inside safe_root**.
+    They are not a special case: both absolute and relative inputs converge on
+    the single containment check below.
+
+    This replaces a carve-out that admitted any absolute path under a system
+    temp directory and returned *before* the containment check. That existed so
+    the test-suite could hand the ledger absolute fixture paths, but it was a
+    genuine bypass — caller input could select any file under /tmp — and CodeQL
+    reported it as py/path-injection. Being under a temp root is a location
+    test, not an authorization decision, so no arrangement of it could be made
+    sound. Callers that need to accept absolute paths now point *safe_root* at
+    the directory those paths live in, which is containment rather than an
+    exemption from it.
     """
     requested = Path(user_path)
-
-    # Absolute paths under a temp root are allowed through so the test suite can
-    # point the ledger at fixture directories. This was spelled
-    # startswith("/tmp/"), which never matches macOS's /var/folders/... temp dir
-    # (or a custom TMPDIR), so those paths were rejected as traversal attempts.
-    #
-    # Note this branch returns before the safe_root containment check below —
-    # it is a genuine bypass, not just a relaxation. It is only as safe as the
-    # temp directory itself, which is typically world-writable. Do not pass
-    # untrusted input to this function in a deployment where that matters.
-    if requested.is_absolute():
-        resolved_temp = resolve_within_temp_root(requested)
-        if resolved_temp is not None:
-            # Return the *resolved* path, so the value that was validated is the
-            # value the caller uses. Returning `requested` validated one object
-            # and handed back another, leaving a window where the path could be
-            # swapped for a symlink between this check and the open.
-            if not allow_create and not resolved_temp.exists():
-                raise ValueError(f"Path does not exist: {user_path}")
-            return resolved_temp
-
-    # Reject other absolute paths from user input
-    if requested.is_absolute():
-        raise ValueError(f"Absolute paths not allowed: {user_path}")
-    
-    # Reject parent directory references
-    if ".." in requested.parts:
-        raise ValueError(f"Parent directory references not allowed: {user_path}")
-    
-    # Resolve to absolute path within safe_root
     safe_root = safe_root.resolve()
-    full_path = (safe_root / requested).resolve()
-    
-    # Verify resolved path is within safe_root
+
+    if requested.is_absolute():
+        # Resolve first, then let the shared check below decide. A symlink is
+        # therefore judged by where it actually leads, not by where it sits.
+        full_path = requested.resolve()
+    else:
+        # Reject parent directory references
+        if ".." in requested.parts:
+            raise ValueError(f"Parent directory references not allowed: {user_path}")
+
+        # Resolve to absolute path within safe_root
+        full_path = (safe_root / requested).resolve()
+
+    # Verify resolved path is within safe_root.
+    #
+    # The commonpath() call is what needs guarding — it raises ValueError when
+    # the paths share no root (different drives on Windows). The containment
+    # rejection below must stay *outside* that try: it raises ValueError too, so
+    # when it lived inside, every ordinary out-of-bounds path was caught by its
+    # own handler and re-reported as the far vaguer "Path validation failed".
     try:
         common = os.path.commonpath([safe_root, full_path])
-        if common != str(safe_root):
-            raise ValueError(f"Path outside allowed directory: {user_path}")
     except ValueError as e:
-        # commonpath raises ValueError if paths are on different drives (Windows)
         raise ValueError(f"Path validation failed: {user_path}") from e
+
+    if common != str(safe_root):
+        raise ValueError(f"Path outside allowed directory: {user_path}")
     
     # Check existence if required
     if not allow_create and not full_path.exists():
@@ -630,10 +630,16 @@ class InsightLedger:
         Raises:
             ValueError: If output_path is invalid or outside safe directory
         """
-        # Define safe export root
-        # In production, this should come from config
-        export_root = Path.cwd() / "data" / "exports"
-        
+        # Define safe export root. AURORA_LEDGER_EXPORT_PATH makes this
+        # configurable, which the previous comment here asked for ("in
+        # production, this should come from config") and which is also how
+        # callers legitimately accept absolute export paths now that
+        # validate_safe_path has no temp-directory exemption: point the root at
+        # the directory the export belongs in, rather than exempting it.
+        _export_env = os.environ.get("AURORA_LEDGER_EXPORT_PATH", "")
+        export_root = Path(_export_env) if _export_env else Path.cwd() / "data" / "exports"
+        export_root.mkdir(parents=True, exist_ok=True)
+
         # Validate output path is safe
         validated_path = validate_safe_path(output_path, export_root, allow_create=True)
         

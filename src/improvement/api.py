@@ -15,16 +15,26 @@ from src.improvement import (
     ImprovementCategory,
     ImprovementSeverity
 )
-from src.utils.temp_roots import resolve_within_temp_root
+
 
 
 # Define SAFE_ROOT as the workspace root directory for path security validation
 SAFE_ROOT = Path(__file__).parent.parent.parent.resolve()
 
-# Absolute paths are refused except under a temp root, which the test-suite
-# needs in order to analyse fixture files. See src/utils/temp_roots.py for why
-# the obvious startswith("/tmp/") spelling is wrong on macOS and under TMPDIR,
-# and why the call sites bind the resolved path it returns.
+
+def _safe_root() -> Path:
+    """The directory analysis is confined to.
+
+    Overridable via AURORA_IMPROVEMENT_ROOT so the test-suite can point it at a
+    fixture directory. That override replaces a carve-out which admitted any
+    absolute path under a system temp directory and skipped the containment
+    check entirely — a bypass CodeQL reported as py/path-injection. Being under
+    a temp root is a location test, not an authorization decision, so it could
+    not be made sound; pointing the root at the directory instead keeps every
+    path subject to the same containment check.
+    """
+    override = os.environ.get("AURORA_IMPROVEMENT_ROOT", "")
+    return Path(override).resolve() if override else SAFE_ROOT
 
 
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])
@@ -112,29 +122,21 @@ async def analyze_file(request: AnalyzeFileRequest):
     engine = get_improvement_engine()
     requested_path = Path(request.file_path)
     
-    # Allow absolute paths under a temp root for testing purposes. Bind the
-    # resolved path the check returns, so the value that was validated is the
-    # value that gets opened; assigning `requested_path` validated one object
-    # and used another.
-    _temp_path = (
-        resolve_within_temp_root(requested_path)
-        if requested_path.is_absolute()
-        else None
-    )
-    if _temp_path is not None:
-        full_path = _temp_path
+    # Absolute and relative inputs converge on one containment check. An
+    # absolute path is not exempt from it — it is simply resolved first, so a
+    # symlink is judged by where it leads rather than where it sits.
+    safe_root = _safe_root()
+    if requested_path.is_absolute():
+        full_path = requested_path.resolve()
     else:
-        # Explicit security: Disallow absolute paths and up-level references
-        if requested_path.is_absolute():
-            raise HTTPException(status_code=400, detail="Absolute paths are not allowed.")
         if ".." in requested_path.parts:
             raise HTTPException(status_code=400, detail="Parent directory references ('..') are not allowed.")
-        # Compute the full, normalized path under the SAFE_ROOT
-        full_path = (SAFE_ROOT / requested_path).resolve()
+        # Compute the full, normalized path under the safe root
+        full_path = (safe_root / requested_path).resolve()
 
-        # Ensure the resolved path is inside SAFE_ROOT
-        if os.path.commonpath([str(SAFE_ROOT), str(full_path)]) != str(SAFE_ROOT):
-            raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
+    # Ensure the resolved path is inside the safe root
+    if os.path.commonpath([str(safe_root), str(full_path)]) != str(safe_root):
+        raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
 
     if not full_path.exists():
         raise HTTPException(status_code=404, detail=f"File not found: {request.file_path}")
@@ -156,29 +158,21 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
     engine = get_improvement_engine()
     requested_path = Path(request.directory)
     
-    # Allow absolute paths under a temp root for testing purposes. Bind the
-    # resolved path the check returns, so the value that was validated is the
-    # value that gets opened; assigning `requested_path` validated one object
-    # and used another.
-    _temp_path = (
-        resolve_within_temp_root(requested_path)
-        if requested_path.is_absolute()
-        else None
-    )
-    if _temp_path is not None:
-        full_path = _temp_path
+    # Absolute and relative inputs converge on one containment check. An
+    # absolute path is not exempt from it — it is simply resolved first, so a
+    # symlink is judged by where it leads rather than where it sits.
+    safe_root = _safe_root()
+    if requested_path.is_absolute():
+        full_path = requested_path.resolve()
     else:
-        # Explicit security: Disallow absolute paths and up-level references
-        if requested_path.is_absolute():
-            raise HTTPException(status_code=400, detail="Absolute paths are not allowed.")
         if ".." in requested_path.parts:
             raise HTTPException(status_code=400, detail="Parent directory references ('..') are not allowed.")
-        # Compute the full, normalized path under the SAFE_ROOT
-        full_path = (SAFE_ROOT / requested_path).resolve()
+        # Compute the full, normalized path under the safe root
+        full_path = (safe_root / requested_path).resolve()
 
-        # Ensure the resolved path is inside SAFE_ROOT
-        if os.path.commonpath([str(SAFE_ROOT), str(full_path)]) != str(SAFE_ROOT):
-            raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
+    # Ensure the resolved path is inside the safe root
+    if os.path.commonpath([str(safe_root), str(full_path)]) != str(safe_root):
+        raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
 
     if not full_path.exists():
         raise HTTPException(status_code=404, detail=f"Directory not found: {request.directory}")

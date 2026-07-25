@@ -24,18 +24,37 @@ from modules.insight_ledger.schemas import InsightRecord, InsightType
 class TestPathValidationHelper:
     """Test validate_safe_path helper function."""
 
-    def test_rejects_absolute_paths(self, tmp_path):
-        """Validate rejects absolute paths from user input (except /tmp for testing)."""
+    def test_rejects_absolute_paths_outside_root(self, tmp_path):
+        """Absolute paths are judged by containment, with no temp-directory exemption.
+
+        There used to be a carve-out admitting any absolute path under a system
+        temp directory, which returned before the containment check. Being under
+        a temp root is a location test, not an authorization decision, so an
+        absolute path is no longer special-cased: it is resolved and then held
+        to the same root as everything else.
+        """
         safe_root = tmp_path / "safe"
         safe_root.mkdir()
-        
-        # Absolute paths outside /tmp should be rejected
-        with pytest.raises(ValueError, match="Absolute paths not allowed"):
+
+        # Outside the root — rejected, as before.
+        with pytest.raises(ValueError, match="Path outside allowed directory"):
             validate_safe_path("/etc/passwd", safe_root)
-        
-        # /tmp paths are allowed for testing, but must exist or allow_create=True
-        with pytest.raises(ValueError, match="Path does not exist"):
+
+        # Under a temp directory but OUTSIDE safe_root. The carve-out used to
+        # admit this purely because of where it sat; it is now rejected on the
+        # same containment grounds as /etc/passwd.
+        with pytest.raises(ValueError, match="Path outside allowed directory"):
             validate_safe_path(str(tmp_path / "other"), safe_root)
+
+    def test_accepts_absolute_paths_inside_root(self, tmp_path):
+        """An absolute path that resolves inside safe_root is admitted."""
+        safe_root = tmp_path / "safe"
+        safe_root.mkdir()
+        target = safe_root / "ledger.json"
+        target.write_text("{}")
+
+        result = validate_safe_path(str(target), safe_root)
+        assert result == target.resolve()
 
     def test_rejects_parent_directory_references(self, tmp_path):
         """Validate rejects .. in path."""
@@ -98,77 +117,59 @@ class TestPathValidationHelper:
         result = validate_safe_path("nonexistent.txt", safe_root, allow_create=True)
         assert result.parent == safe_root
 
-    def test_symlink_out_of_temp_root_is_not_followed(self):
-        """A symlink under a temp root pointing outside it must not be admitted.
+    def test_symlink_inside_root_pointing_out_is_not_followed(self, tmp_path):
+        """A symlink sitting inside the root but leading outside it is rejected.
 
-        The temp-root branch exists so tests can pass absolute fixture paths.
-        Its earliest form compared the *unresolved* path against a literal
-        "/tmp/" prefix, so a symlink at /tmp/innocent.json pointing at
-        /etc/hosts satisfied the check and the caller read the target through
-        it. Containment is now decided on the resolved path, and the resolved
-        path is what gets returned, so the value that was validated is the value
-        the caller uses.
+        The earliest form of this check compared the *unresolved* path against a
+        literal "/tmp/" prefix and then returned that same unresolved value, so
+        a symlink at /tmp/innocent.json pointing at /etc/hosts passed and the
+        caller read the target through it. Containment is now decided on the
+        resolved path, so a symlink is judged by where it leads.
         """
-        # The target has to be somewhere no temp root covers, which rules out
-        # both pytest's tmp_path (it lives under the system temp dir) and the
-        # repository itself (a checkout can sit under /tmp — this one does in
-        # CI scratch space). /etc is never a temp root on either platform we
-        # run on.
         outside = Path("/etc/hosts")
-        if not outside.exists() or not Path("/tmp").is_dir():
-            pytest.skip("needs /tmp and a non-temp absolute path")
+        if not outside.exists():
+            pytest.skip("needs a readable absolute path outside the root")
 
-        # Anchor under /tmp specifically rather than taking mkdtemp()'s default.
-        # On macOS the default is /var/folders/..., which the original literal
-        # startswith("/tmp/") check rejected as a plain absolute path — so this
-        # test would pass without ever entering the temp-root branch it exists
-        # to exercise. Under /tmp both the old and new checks take that branch,
-        # so the assertion is about symlink handling and nothing else.
-        temp_dir = Path(tempfile.mkdtemp(dir="/tmp"))
-        try:
-            link = temp_dir / "innocent.json"
-            link.symlink_to(outside)
-            safe_root = temp_dir / "safe"
-            safe_root.mkdir()
+        safe_root = tmp_path / "safe"
+        safe_root.mkdir()
+        link = safe_root / "innocent.json"
+        link.symlink_to(outside)
 
-            with pytest.raises(ValueError):
-                validate_safe_path(str(link), safe_root)
-        finally:
-            shutil.rmtree(temp_dir, ignore_errors=True)
+        with pytest.raises(ValueError, match="Path outside allowed directory"):
+            validate_safe_path(str(link), safe_root)
 
-    def test_temp_root_path_is_returned_resolved(self):
-        """The temp-root branch returns the resolved path, not the input path.
+    def test_admitted_path_is_returned_resolved(self, tmp_path):
+        """What comes back is the resolved path, not the route that was passed in.
 
-        Routed through a symlinked *directory* so the input and its resolved
-        form differ on every platform. A redundant "." or ".." segment would not
-        work here — pathlib collapses those on construction, so the assertion
-        would hold even if the input were echoed back verbatim.
+        Routed through a symlinked *directory* so input and resolved form differ
+        on every platform. A redundant "." or ".." segment would not do —
+        pathlib collapses those on construction, so the assertion would hold
+        even if the input were echoed back verbatim.
+
+        This matters because the caller opens whatever is returned. Validating
+        one value and handing back another leaves a window for the path to be
+        swapped between the check and the open.
         """
-        temp_dir = Path(tempfile.mkdtemp())
-        try:
-            real_dir = temp_dir / "real_dir"
-            real_dir.mkdir()
-            target = real_dir / "data.json"
-            target.write_text("{}")
+        safe_root = tmp_path / "safe"
+        safe_root.mkdir()
 
-            link_dir = temp_dir / "link_dir"
-            link_dir.symlink_to(real_dir, target_is_directory=True)
+        real_dir = safe_root / "real_dir"
+        real_dir.mkdir()
+        target = real_dir / "data.json"
+        target.write_text("{}")
 
-            safe_root = temp_dir / "safe"
-            safe_root.mkdir()
+        link_dir = safe_root / "link_dir"
+        link_dir.symlink_to(real_dir, target_is_directory=True)
 
-            via_link = link_dir / "data.json"
-            assert via_link != target, "symlink route must differ from the real path"
+        via_link = link_dir / "data.json"
+        assert via_link != target, "symlink route must differ from the real path"
 
-            result = validate_safe_path(str(via_link), safe_root)
+        # Both routes stay inside safe_root, so this is admitted — but the
+        # resolved location is what must come back.
+        result = validate_safe_path(str(via_link), safe_root)
 
-            # Both stay inside the temp root, so this is admitted — but what
-            # comes back must be the resolved location, not the symlinked route
-            # that was passed in.
-            assert result == target.resolve()
-            assert result != via_link
-        finally:
-            shutil.rmtree(temp_dir, ignore_errors=True)
+        assert result == target.resolve()
+        assert result != via_link
 
 
 @pytest.mark.unit
@@ -179,7 +180,7 @@ class TestInsightLedgerConstructorSecurity:
     def test_rejects_absolute_storage_paths(self):
         """Constructor should reject absolute storage paths (except /tmp for testing)."""
         # Absolute paths outside /tmp should be rejected
-        with pytest.raises(ValueError, match="Absolute paths not allowed"):
+        with pytest.raises(ValueError, match="Path outside allowed directory"):
             InsightLedger("/etc/passwd")
         
         # /tmp paths are allowed for testing but must be provided by test fixtures
@@ -225,7 +226,7 @@ class TestExportLedgerSecurity:
         ledger.record_insight(record)
         
         # Should reject absolute path
-        with pytest.raises(ValueError, match="Absolute paths not allowed"):
+        with pytest.raises(ValueError, match="Path outside allowed directory"):
             ledger.export_ledger("/etc/passwd")
         
         # Clean up

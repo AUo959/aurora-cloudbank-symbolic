@@ -41,14 +41,23 @@ def _auth_header():
 
 
 @pytest.fixture
-def temp_ledger_dir():
-    """Create temporary directory for ledger storage.
+def temp_ledger_dir(monkeypatch):
+    """Create a temporary directory for ledger storage, and make it the safe root.
 
-    The path validator only permits absolute test paths under /tmp.
+    Previously this had to force ``dir="/tmp"`` because validate_safe_path
+    carried a carve-out admitting any absolute path under a temp directory —
+    which was a containment bypass, and reported as such by CodeQL. That
+    carve-out is gone.
+
+    The replacement is containment rather than exemption: point the ledger's
+    safe roots at this directory, so the absolute paths the tests pass are
+    legitimately *inside* the root being enforced. Nothing here is exempt from
+    the check; the check simply has the right root. As a result the platform's
+    real temp location works, so the /tmp pin and its NOSONAR are unnecessary.
     """
-    with tempfile.TemporaryDirectory(
-        dir="/tmp",  # NOSONAR
-    ) as tmpdir:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        monkeypatch.setenv("AURORA_LEDGER_PATH", tmpdir)
+        monkeypatch.setenv("AURORA_LEDGER_EXPORT_PATH", tmpdir)
         yield tmpdir
 
 

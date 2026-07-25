@@ -174,5 +174,5 @@ Aurora's constraints are structural. That is what makes them real.
 
 ---
 
-*Aurora CloudBank Symbolic — docs/philosophy/06_SCOPE_AND_LIMITS.md*  
+*Aurora CloudBank Symbolic — docs/archive/philosophy/06_SCOPE_AND_LIMITS.md*  
 *Version 1.0 — March 11, 2026*

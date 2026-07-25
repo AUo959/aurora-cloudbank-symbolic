@@ -123,5 +123,5 @@ cryptographic architecture.
 
 ---
 
-*Aurora CloudBank Symbolic — docs/philosophy/03_CONSENT_AND_IDENTITY.md*  
+*Aurora CloudBank Symbolic — docs/archive/philosophy/03_CONSENT_AND_IDENTITY.md*  
 *Version 1.0 — March 11, 2026*

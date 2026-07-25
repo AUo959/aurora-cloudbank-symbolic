@@ -19,7 +19,7 @@ from src.utils.atomic_io import atomic_write_json, append_jsonl
 from .crypto_signatures import SignatureManager
 from .schemas import AuditQuery, InsightRecord, InsightType, LedgerEntry, LedgerStats
 from src.utils.persist_redact import redact_for_persistence
-from src.utils.temp_roots import is_within_temp_root
+from src.utils.temp_roots import resolve_within_temp_root
 
 # Try to import secure storage for encrypted key persistence
 try:
@@ -56,14 +56,12 @@ def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = Fal
     # temp directory itself, which is typically world-writable. Do not pass
     # untrusted input to this function in a deployment where that matters.
     if requested.is_absolute():
-        # Resolve once, then guard and use that same resolved value. Returning
-        # `requested` would validate one object and hand back another, leaving a
-        # window for the path to be swapped for a symlink between check and open.
-        # The comparison is spelled out here rather than behind a helper so the
-        # guard and the filesystem calls it protects stay in one function — see
-        # src/utils/temp_roots.py for why that matters.
-        resolved_temp = Path(user_path).resolve()
-        if is_within_temp_root(resolved_temp):
+        resolved_temp = resolve_within_temp_root(requested)
+        if resolved_temp is not None:
+            # Return the *resolved* path, so the value that was validated is the
+            # value the caller uses. Returning `requested` validated one object
+            # and handed back another, leaving a window where the path could be
+            # swapped for a symlink between this check and the open.
             if not allow_create and not resolved_temp.exists():
                 raise ValueError(f"Path does not exist: {user_path}")
             return resolved_temp

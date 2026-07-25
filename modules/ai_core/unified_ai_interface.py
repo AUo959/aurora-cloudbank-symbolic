@@ -10,6 +10,7 @@ Multi-model AI abstraction layer supporting:
 """
 
 import asyncio
+import copy
 import logging
 import os
 from dataclasses import dataclass, field
@@ -238,6 +239,20 @@ class UnifiedAIInterface:
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initialize unified AI interface"""
         self.config = config or {}
+
+        # Per-instance capability table.
+        #
+        # CAPABILITIES is declared at class level, so every instance shared one
+        # dict and enable_model()/disable_model() mutated it process-wide: one
+        # caller ungating a model ungated it for every other caller, including
+        # the IDs deliberately shipped as available=False unverified
+        # placeholders. A gate that any instance can silently open for all the
+        # others is not a gate.
+        #
+        # deepcopy because the values are mutable ModelCapabilities dataclasses;
+        # a shallow copy would still share them.
+        self.CAPABILITIES = copy.deepcopy(type(self).CAPABILITIES)
+
         self.anthropic_client = None
         self.openai_client = None
         self.performance_metrics: Dict[AIModel, List[float]] = {}

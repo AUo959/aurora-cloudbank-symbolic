@@ -12,8 +12,8 @@ jobs:
     if: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Codacy Analysis
-        uses: codacy/codacy-analysis-cli-action@33d455949345bddfdb845fba76b57b70cc83754b  # v4.4.0
+        uses: codacy/codacy-analysis-cli-action@562ee3e92b8e92df8b67e0a5ff8aa8e261919c08  # v4.4.7
         with:
           codacy-repo-token: ${{ secrets.CODACY_REPO_TOKEN }}

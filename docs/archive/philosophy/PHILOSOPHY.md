@@ -27,12 +27,14 @@ machine cognition looks like.
 | [04_ETHICS_PROTOCOL.md](04_ETHICS_PROTOCOL.md) | Picard_Delta_3, drift monitoring, the ethics enforcement layer | Platform |
 | [05_GANDALF_STANDARD.md](05_GANDALF_STANDARD.md) | The operational philosophy of constrained amplification | Universal |
 | [06_SCOPE_AND_LIMITS.md](06_SCOPE_AND_LIMITS.md) | What Aurora refuses to be — the no-master-node guarantee | Universal |
+| [07_ANALYST_ORIENTATION.md](07_ANALYST_ORIENTATION.md) | How to read Aurora outputs correctly — for domain experts, no architecture knowledge assumed | Application |
 
 ---
 
 ## The Derivation Chain
 
-All six documents are derivations from a single root principle:
+Documents 01–06 are derivations from a single root principle; 07 applies the
+result at the analyst-facing surface:
 
 > **A reasoning system is only trustworthy to the extent that its reasoning
 > chain can be opened, examined, challenged, and corrected — and to the extent
@@ -50,5 +52,5 @@ what Aurora is for: a system whose philosophy is traceable to first principles.
 
 ---
 
-*Aurora CloudBank Symbolic — docs/philosophy/*  
+*Aurora CloudBank Symbolic — docs/archive/philosophy/*  
 *Initiated: March 11, 2026*

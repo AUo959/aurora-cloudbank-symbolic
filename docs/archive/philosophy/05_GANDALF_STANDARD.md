@@ -153,5 +153,5 @@ that is actually trustworthy.
 
 ---
 
-*Aurora CloudBank Symbolic — docs/philosophy/05_GANDALF_STANDARD.md*  
+*Aurora CloudBank Symbolic — docs/archive/philosophy/05_GANDALF_STANDARD.md*  
 *Version 1.0 — March 11, 2026*

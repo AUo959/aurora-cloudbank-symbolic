@@ -160,5 +160,5 @@ Trustworthiness requires the capacity to refuse.
 
 ---
 
-*Aurora CloudBank Symbolic — docs/philosophy/04_ETHICS_PROTOCOL.md*  
+*Aurora CloudBank Symbolic — docs/archive/philosophy/04_ETHICS_PROTOCOL.md*  
 *Version 1.0 — March 11, 2026*

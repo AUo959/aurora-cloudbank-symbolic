@@ -136,6 +136,13 @@ and `DOCUMENT_PACKAGE_ONLY`; links here do not implement runtime activation.
 | ----------------------------------------------------------------- | ---------------------------- |
 | [INCIDENT_RESPONSE_RUNBOOK.md](INCIDENT_RESPONSE_RUNBOOK.md)      | Incident response procedures |
 
+## Verifying claims
+
+[VERIFIED_CLAIMS.md](VERIFIED_CLAIMS.md) pairs each claim the project makes
+about itself with a runnable command and the result it produced, including
+the limits of what is implemented. Start here if you want to check rather
+than trust.
+
 ## Design philosophy
 
 The suite below states the design intent the architecture derives from. It is

@@ -19,7 +19,7 @@ from src.utils.atomic_io import atomic_write_json, append_jsonl
 from .crypto_signatures import SignatureManager
 from .schemas import AuditQuery, InsightRecord, InsightType, LedgerEntry, LedgerStats
 from src.utils.persist_redact import redact_for_persistence
-from src.utils.temp_roots import is_under_temp_root
+from src.utils.temp_roots import resolve_within_temp_root
 
 # Try to import secure storage for encrypted key persistence
 try:
@@ -55,11 +55,16 @@ def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = Fal
     # it is a genuine bypass, not just a relaxation. It is only as safe as the
     # temp directory itself, which is typically world-writable. Do not pass
     # untrusted input to this function in a deployment where that matters.
-    if requested.is_absolute() and is_under_temp_root(requested):
-        # Test path - allow it directly but ensure it exists or can be created
-        if not allow_create and not requested.exists():
-            raise ValueError(f"Path does not exist: {user_path}")
-        return requested
+    if requested.is_absolute():
+        resolved_temp = resolve_within_temp_root(requested)
+        if resolved_temp is not None:
+            # Return the *resolved* path, so the value that was validated is the
+            # value the caller uses. Returning `requested` validated one object
+            # and handed back another, leaving a window where the path could be
+            # swapped for a symlink between this check and the open.
+            if not allow_create and not resolved_temp.exists():
+                raise ValueError(f"Path does not exist: {user_path}")
+            return resolved_temp
 
     # Reject other absolute paths from user input
     if requested.is_absolute():

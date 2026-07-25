@@ -31,7 +31,7 @@ import os
 import tempfile
 from pathlib import Path
 
-__all__ = ["TEMP_ROOTS", "is_under_temp_root"]
+__all__ = ["TEMP_ROOTS", "resolve_within_temp_root", "is_under_temp_root"]
 
 
 TEMP_ROOTS: tuple[str, ...] = tuple({
@@ -42,14 +42,41 @@ TEMP_ROOTS: tuple[str, ...] = tuple({
 })
 
 
-def is_under_temp_root(path: Path | str) -> bool:
-    """Return True when *path* sits inside a platform temp directory.
+def resolve_within_temp_root(path: Path | str) -> Path | None:
+    """Resolve *path*; return it only if it genuinely lands inside a temp root.
 
-    The path is resolved before comparison, so a symlink pointing into a temp
-    directory counts as being inside one.
+    Returns ``None`` when the resolved path is outside every temp root.
+
+    **Use the returned path, not the one you passed in.** Callers previously
+    validated one value and then used a different one: containment was checked
+    against the resolved path (inside the predicate) while the *unresolved* path
+    was what got opened.
+
+    In the oldest form of this check — a literal ``startswith("/tmp/")`` on the
+    unresolved string — that was directly exploitable: a symlink at
+    ``/tmp/innocent.json`` pointing to ``/etc/hosts`` passed the prefix test and
+    the caller read the target through it. Resolving inside the predicate closed
+    that particular hole, but left a narrower one, because the validated value
+    and the used value were still different objects: anything that replaces the
+    path with a symlink between the check and the open is followed.
+
+    Returning the resolved path collapses the two into one value, which also
+    lets taint analysis see this function as a sanitizer rather than as an
+    unchecked path expression.
     """
-    resolved = str(Path(path).resolve())
-    return any(
-        resolved == root or resolved.startswith(root.rstrip("/") + os.sep)
-        for root in TEMP_ROOTS
-    )
+    resolved = Path(path).resolve()
+    resolved_str = str(resolved)
+    for root in TEMP_ROOTS:
+        if resolved_str == root or resolved_str.startswith(root.rstrip("/") + os.sep):
+            return resolved
+    return None
+
+
+def is_under_temp_root(path: Path | str) -> bool:
+    """Return True when *path* resolves to somewhere inside a temp directory.
+
+    Prefer :func:`resolve_within_temp_root` at any call site that then opens or
+    writes the path — this predicate discards the resolved path, which is what
+    makes the check-then-use mismatch described above easy to reintroduce.
+    """
+    return resolve_within_temp_root(path) is not None

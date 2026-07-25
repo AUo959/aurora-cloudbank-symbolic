@@ -316,3 +316,13 @@ shutdown_manifest.json
 # which rmtree()s the directory before each run — committed contents are
 # meaningless to it.
 .github/workflows_backup/
+
+# git-lfs writes its own hooks into whatever core.hookspath points at, which
+# here is .husky/. They appear the moment anyone with git-lfs installed runs a
+# git command, so without this a fresh clone reports four untracked files that
+# nobody authored. Only the generated LFS hooks are listed — .husky/pre-commit
+# is a real project hook and stays tracked.
+.husky/post-checkout
+.husky/post-commit
+.husky/post-merge
+.husky/pre-push

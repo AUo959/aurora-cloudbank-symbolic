@@ -9,6 +9,10 @@ Tests path validation in:
 Anchor: T1-SEC-LEDGER-001
 """
 
+import shutil
+import tempfile
+from pathlib import Path
+
 import pytest
 
 from modules.insight_ledger.ledger_core import InsightLedger, validate_safe_path
@@ -93,6 +97,78 @@ class TestPathValidationHelper:
         # Should succeed with allow_create
         result = validate_safe_path("nonexistent.txt", safe_root, allow_create=True)
         assert result.parent == safe_root
+
+    def test_symlink_out_of_temp_root_is_not_followed(self):
+        """A symlink under a temp root pointing outside it must not be admitted.
+
+        The temp-root branch exists so tests can pass absolute fixture paths.
+        Its earliest form compared the *unresolved* path against a literal
+        "/tmp/" prefix, so a symlink at /tmp/innocent.json pointing at
+        /etc/hosts satisfied the check and the caller read the target through
+        it. Containment is now decided on the resolved path, and the resolved
+        path is what gets returned, so the value that was validated is the value
+        the caller uses.
+        """
+        # The target has to be somewhere no temp root covers, which rules out
+        # both pytest's tmp_path (it lives under the system temp dir) and the
+        # repository itself (a checkout can sit under /tmp — this one does in
+        # CI scratch space). /etc is never a temp root on either platform we
+        # run on.
+        outside = Path("/etc/hosts")
+        if not outside.exists() or not Path("/tmp").is_dir():
+            pytest.skip("needs /tmp and a non-temp absolute path")
+
+        # Anchor under /tmp specifically rather than taking mkdtemp()'s default.
+        # On macOS the default is /var/folders/..., which the original literal
+        # startswith("/tmp/") check rejected as a plain absolute path — so this
+        # test would pass without ever entering the temp-root branch it exists
+        # to exercise. Under /tmp both the old and new checks take that branch,
+        # so the assertion is about symlink handling and nothing else.
+        temp_dir = Path(tempfile.mkdtemp(dir="/tmp"))
+        try:
+            link = temp_dir / "innocent.json"
+            link.symlink_to(outside)
+            safe_root = temp_dir / "safe"
+            safe_root.mkdir()
+
+            with pytest.raises(ValueError):
+                validate_safe_path(str(link), safe_root)
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_temp_root_path_is_returned_resolved(self):
+        """The temp-root branch returns the resolved path, not the input path.
+
+        Routed through a symlinked *directory* so the input and its resolved
+        form differ on every platform. A redundant "." or ".." segment would not
+        work here — pathlib collapses those on construction, so the assertion
+        would hold even if the input were echoed back verbatim.
+        """
+        temp_dir = Path(tempfile.mkdtemp())
+        try:
+            real_dir = temp_dir / "real_dir"
+            real_dir.mkdir()
+            target = real_dir / "data.json"
+            target.write_text("{}")
+
+            link_dir = temp_dir / "link_dir"
+            link_dir.symlink_to(real_dir, target_is_directory=True)
+
+            safe_root = temp_dir / "safe"
+            safe_root.mkdir()
+
+            via_link = link_dir / "data.json"
+            assert via_link != target, "symlink route must differ from the real path"
+
+            result = validate_safe_path(str(via_link), safe_root)
+
+            # Both stay inside the temp root, so this is admitted — but what
+            # comes back must be the resolved location, not the symlinked route
+            # that was passed in.
+            assert result == target.resolve()
+            assert result != via_link
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 @pytest.mark.unit

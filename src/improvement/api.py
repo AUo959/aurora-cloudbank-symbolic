@@ -15,7 +15,7 @@ from src.improvement import (
     ImprovementCategory,
     ImprovementSeverity
 )
-from src.utils.temp_roots import is_under_temp_root
+from src.utils.temp_roots import resolve_within_temp_root
 
 
 # Define SAFE_ROOT as the workspace root directory for path security validation
@@ -23,8 +23,8 @@ SAFE_ROOT = Path(__file__).parent.parent.parent.resolve()
 
 # Absolute paths are refused except under a temp root, which the test-suite
 # needs in order to analyse fixture files. See src/utils/temp_roots.py for why
-# the obvious startswith("/tmp/") spelling is wrong on macOS and under TMPDIR.
-_is_under_temp_root = is_under_temp_root
+# the obvious startswith("/tmp/") spelling is wrong on macOS and under TMPDIR,
+# and why the call sites bind the resolved path it returns.
 
 
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])
@@ -112,9 +112,17 @@ async def analyze_file(request: AnalyzeFileRequest):
     engine = get_improvement_engine()
     requested_path = Path(request.file_path)
     
-    # Allow absolute paths in /tmp for testing purposes
-    if requested_path.is_absolute() and _is_under_temp_root(requested_path):
-        full_path = requested_path
+    # Allow absolute paths under a temp root for testing purposes. Bind the
+    # resolved path the check returns, so the value that was validated is the
+    # value that gets opened; assigning `requested_path` validated one object
+    # and used another.
+    _temp_path = (
+        resolve_within_temp_root(requested_path)
+        if requested_path.is_absolute()
+        else None
+    )
+    if _temp_path is not None:
+        full_path = _temp_path
     else:
         # Explicit security: Disallow absolute paths and up-level references
         if requested_path.is_absolute():
@@ -148,9 +156,17 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
     engine = get_improvement_engine()
     requested_path = Path(request.directory)
     
-    # Allow absolute paths in /tmp for testing purposes
-    if requested_path.is_absolute() and _is_under_temp_root(requested_path):
-        full_path = requested_path
+    # Allow absolute paths under a temp root for testing purposes. Bind the
+    # resolved path the check returns, so the value that was validated is the
+    # value that gets opened; assigning `requested_path` validated one object
+    # and used another.
+    _temp_path = (
+        resolve_within_temp_root(requested_path)
+        if requested_path.is_absolute()
+        else None
+    )
+    if _temp_path is not None:
+        full_path = _temp_path
     else:
         # Explicit security: Disallow absolute paths and up-level references
         if requested_path.is_absolute():

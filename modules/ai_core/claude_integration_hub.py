@@ -1,7 +1,7 @@
 """
 Enhanced Claude Integration Hub for Aurora CloudBank Symbolic
 
-Supports Claude 3.5 Sonnet and 4.5 Opus with intelligent fallback
+Supports Claude Opus 5 and Claude Sonnet 5 with intelligent fallback
 Maintains backward compatibility with existing Sonnet 4 integration
 """
 
@@ -26,27 +26,28 @@ logger = logging.getLogger(__name__)
 class ClaudeConfig:
     """Configuration for Claude model integration"""
 
-    # Model selection
-    preferred_model: str = "claude-4-5-opus-20250115"  # Default to 4.5 Opus
-    fallback_model: str = "claude-3-5-sonnet-20241022"  # Fallback to 3.5 Sonnet
+    # Model selection (IDs verified against the Anthropic catalog on 2026-07-25;
+    # these take no date suffix)
+    preferred_model: str = "claude-opus-5"  # Default to Opus 5
+    fallback_model: str = "claude-sonnet-5"  # Fallback to Sonnet 5
     enable_gpt_fallback: bool = True
     gpt_fallback_model: str = "gpt-4o"
 
     # Performance settings
-    max_tokens: int = 16384  # 4.5 Opus supports up to 16k
+    max_tokens: int = 16384  # conservative default; Opus 5 supports up to 128k
     temperature: float = 0.7
     top_p: float = 0.9
-    context_window: int = 500_000  # 4.5 Opus: 500K, 3.5 Sonnet: 200K
+    context_window: int = 1_000_000  # Opus 5 and Sonnet 5: 1M
 
     # Safety and ethics
     safety_level: str = "high"
     ethics_protocol: str = "Picard_Delta_3"
 
     # Feature flags
-    enable_code_execution: bool = True  # 4.5 Opus feature
+    enable_code_execution: bool = True  # supported by Opus 5 and Sonnet 5
     enable_vision: bool = True
     enable_function_calling: bool = True
-    preserve_legacy_behavior: bool = True  # Maintain 3.5 compatibility
+    preserve_legacy_behavior: bool = True  # Maintain legacy Sonnet 4 hub compatibility
 
     # DLP and tracking
     dlp_tracking: bool = True
@@ -55,13 +56,13 @@ class ClaudeConfig:
 
 class ClaudeIntegrationHub:
     """
-    Enhanced Claude integration supporting 3.5 Sonnet and 4.5 Opus
+    Enhanced Claude integration supporting Claude Opus 5 and Claude Sonnet 5
 
     Key features:
     - Automatic model selection based on availability
-    - Intelligent fallback chain: 4.5 Opus → 3.5 Sonnet → GPT-4o
+    - Intelligent fallback chain: Opus 5 → Sonnet 5 → GPT-4o
     - Context window optimization
-    - Code execution support (4.5 Opus)
+    - Code execution support
     - Backward compatible with existing sonnet4_integration_hub
     """
 
@@ -81,8 +82,8 @@ class ClaudeIntegrationHub:
         claude_cfg = self.config.get("claude", {})
 
         return ClaudeConfig(
-            preferred_model=claude_cfg.get("preferred_model", "claude-4-5-opus-20250115"),
-            fallback_model=claude_cfg.get("fallback_model", "claude-3-5-sonnet-20241022"),
+            preferred_model=claude_cfg.get("preferred_model", "claude-opus-5"),
+            fallback_model=claude_cfg.get("fallback_model", "claude-sonnet-5"),
             enable_gpt_fallback=claude_cfg.get("enable_gpt_fallback", True),
             gpt_fallback_model=claude_cfg.get("gpt_fallback_model", "gpt-4o"),
             max_tokens=claude_cfg.get("max_tokens", 16384),
@@ -103,26 +104,26 @@ class ClaudeIntegrationHub:
         try:
             available = self._unified_ai.get_available_models()
 
-            # Check for Claude 4.5 Opus
-            if AIModel and AIModel.CLAUDE_45_OPUS in available:
-                logger.info("✅ Claude 4.5 Opus available")
-                self.claude_45_available = True
+            # Check for Claude Opus 5
+            if AIModel and AIModel.CLAUDE_OPUS_5 in available:
+                logger.info("✅ Claude Opus 5 available")
+                self.claude_opus_available = True
             else:
-                logger.info("⏳ Claude 4.5 Opus not yet available, will use 3.5 Sonnet")
-                self.claude_45_available = False
+                logger.info("⏳ Claude Opus 5 not available, will use Sonnet 5")
+                self.claude_opus_available = False
 
-            # Check for Claude 3.5 Sonnet
-            if AIModel and AIModel.CLAUDE_35_SONNET in available:
-                logger.info("✅ Claude 3.5 Sonnet available")
-                self.claude_35_available = True
+            # Check for Claude Sonnet 5
+            if AIModel and AIModel.CLAUDE_SONNET_5 in available:
+                logger.info("✅ Claude Sonnet 5 available")
+                self.claude_sonnet_available = True
             else:
-                logger.warning("⚠️  Claude 3.5 Sonnet not available")
-                self.claude_35_available = False
+                logger.warning("⚠️  Claude Sonnet 5 not available")
+                self.claude_sonnet_available = False
 
         except Exception as e:
             logger.error(f"Error checking model availability: {e}")
-            self.claude_45_available = False
-            self.claude_35_available = True  # Assume 3.5 works
+            self.claude_opus_available = False
+            self.claude_sonnet_available = True  # Assume Sonnet 5 works
 
     async def execute_request(
         self,
@@ -185,26 +186,26 @@ class ClaudeIntegrationHub:
 
         chain = []
 
-        # For reasoning tasks, prefer 4.5 Opus
+        # For reasoning tasks, prefer Opus 5
         if task_type in ["reasoning", "mathematical"]:
-            if self.claude_45_available:
-                chain.append(AIModel.CLAUDE_45_OPUS)
-            if self.claude_35_available:
-                chain.append(AIModel.CLAUDE_35_SONNET)
+            if self.claude_opus_available:
+                chain.append(AIModel.CLAUDE_OPUS_5)
+            if self.claude_sonnet_available:
+                chain.append(AIModel.CLAUDE_SONNET_5)
 
-        # For code generation, prefer 4.5 Opus (better code execution)
+        # For code generation, prefer Opus 5 (stronger code generation)
         elif task_type == "code_generation":
-            if self.claude_45_available:
-                chain.append(AIModel.CLAUDE_45_OPUS)
-            if self.claude_35_available:
-                chain.append(AIModel.CLAUDE_35_SONNET)
+            if self.claude_opus_available:
+                chain.append(AIModel.CLAUDE_OPUS_5)
+            if self.claude_sonnet_available:
+                chain.append(AIModel.CLAUDE_SONNET_5)
 
         # For general tasks, use availability order
         else:
-            if self.claude_35_available:
-                chain.append(AIModel.CLAUDE_35_SONNET)
-            if self.claude_45_available:
-                chain.append(AIModel.CLAUDE_45_OPUS)
+            if self.claude_sonnet_available:
+                chain.append(AIModel.CLAUDE_SONNET_5)
+            if self.claude_opus_available:
+                chain.append(AIModel.CLAUDE_OPUS_5)
 
         # Add GPT fallback if enabled
         if self.claude_config.enable_gpt_fallback:
@@ -247,7 +248,11 @@ class ClaudeIntegrationHub:
 
     async def enable_claude_45(self) -> Dict[str, bool]:
         """
-        Enable Claude 4.5 Opus (when available)
+        Enable the top-tier Claude model (Opus 5).
+
+        The ``_45`` in the name is legacy: it predates the catalog
+        reconciliation and is kept because the ``/enable-claude-45`` API route
+        and the ``get_global_status()`` response keys are public surface.
 
         Returns:
             Status dictionary
@@ -256,16 +261,16 @@ class ClaudeIntegrationHub:
             return {"error": "Unified AI not available", "enabled": False}
 
         try:
-            self._unified_ai.enable_model(AIModel.CLAUDE_45_OPUS)
-            self.claude_45_available = True
+            self._unified_ai.enable_model(AIModel.CLAUDE_OPUS_5)
+            self.claude_opus_available = True
 
-            logger.info("🚀 Claude 4.5 Opus enabled!")
+            logger.info("🚀 Claude Opus 5 enabled!")
 
             return {
                 "enabled": True,
-                "model": "claude-4-5-opus-20250115",
-                "context_window": 500_000,
-                "max_tokens": 16384,
+                "model": AIModel.CLAUDE_OPUS_5.value,
+                "context_window": 1_000_000,
+                "max_tokens": 128_000,
                 "features": {
                     "code_execution": True,
                     "vision": True,
@@ -275,7 +280,7 @@ class ClaudeIntegrationHub:
             }
 
         except Exception as e:
-            logger.error(f"Failed to enable Claude 4.5: {e}")
+            logger.error(f"Failed to enable Claude Opus 5: {e}")
             return {"error": str(e), "enabled": False}
 
     def get_global_status(self) -> Dict[str, Any]:
@@ -286,8 +291,10 @@ class ClaudeIntegrationHub:
             Status dictionary with model availability and configuration
         """
         return {
-            "claude_35_sonnet_available": self.claude_35_available,
-            "claude_45_opus_available": self.claude_45_available,
+            # Key names are legacy public surface; the values now track
+            # Claude Sonnet 5 and Claude Opus 5 respectively.
+            "claude_35_sonnet_available": self.claude_sonnet_available,
+            "claude_45_opus_available": self.claude_opus_available,
             "preferred_model": self.claude_config.preferred_model,
             "fallback_model": self.claude_config.fallback_model,
             "gpt_fallback_enabled": self.claude_config.enable_gpt_fallback,

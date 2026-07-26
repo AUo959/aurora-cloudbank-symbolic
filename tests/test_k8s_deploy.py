@@ -317,9 +317,9 @@ class TestWorkflowFile:
         assert "deploy" in content.lower(), "Workflow should have a deploy job"
 
     def test_workflow_uses_ghcr(self, workflow_file):
-        """Verify workflow uses GitHub Container Registry."""
-        content = workflow_file.read_text()
-        assert "ghcr.io" in content, "Workflow should use GitHub Container Registry"
+        """Verify workflow uses GitHub Container Registry exactly."""
+        workflow = yaml.safe_load(workflow_file.read_text())
+        assert workflow["env"]["REGISTRY"] == "ghcr.io"
 
 
 if __name__ == "__main__":

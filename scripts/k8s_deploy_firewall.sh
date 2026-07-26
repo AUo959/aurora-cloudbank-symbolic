@@ -42,82 +42,89 @@ log_error() {
 # Check prerequisites
 check_prerequisites() {
     log_info "Checking prerequisites..."
-    
-    # Check kubectl
+
+    # kubectl is required for both live deployment and client-side validation.
     if ! command -v kubectl &> /dev/null; then
         log_error "kubectl is not installed. Please install kubectl first."
         exit 1
     fi
-    
-    # Check cluster connection
-    if ! kubectl cluster-info &> /dev/null; then
-        log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
+
+    local namespace_manifest="$K8S_DIR/aurora-namespace-rbac.yaml"
+    if [[ ! -f "$namespace_manifest" ]]; then
+        log_error "Required manifest file not found: $namespace_manifest"
         exit 1
     fi
-    
-    # Check if namespace exists
-    if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
-        log_warn "Namespace $NAMESPACE does not exist. Creating it..."
-        if [[ "$DRY_RUN" != "true" ]]; then
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log_info "[DRY-RUN] Skipping live cluster and namespace checks"
+    else
+        if ! kubectl cluster-info &> /dev/null; then
+            log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
+            exit 1
+        fi
+
+        if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
+            log_warn "Namespace $NAMESPACE does not exist. Creating it..."
             kubectl create namespace "$NAMESPACE"
         fi
     fi
-    
+
     log_success "Prerequisites check passed"
 }
 
 # Deploy network policies from namespace-rbac
 deploy_network_policies() {
     log_info "Deploying Network Policies..."
-    
+
     # Network policies are included in aurora-namespace-rbac.yaml
-    local kubectl_cmd="kubectl apply -f $K8S_DIR/aurora-namespace-rbac.yaml"
-    
+    local manifest="$K8S_DIR/aurora-namespace-rbac.yaml"
+
     if [[ "$DRY_RUN" == "true" ]]; then
-        log_info "[DRY-RUN] Would execute: $kubectl_cmd"
-        
+        log_info "[DRY-RUN] Validating namespace, RBAC, and network policy manifest"
+        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | head -80
+
         # Show NetworkPolicy resources
         log_info "NetworkPolicy resources that would be deployed:"
-        grep -A 50 "kind: NetworkPolicy" "$K8S_DIR/aurora-namespace-rbac.yaml" | head -60
+        grep -A 50 "kind: NetworkPolicy" "$manifest" | head -60
     else
-        $kubectl_cmd
+        kubectl apply -f "$manifest"
     fi
-    
+
     log_success "Network Policies deployed"
 }
 
 # Deploy resource quotas and limit ranges
 deploy_resource_controls() {
     log_info "Deploying Resource Quotas and Limit Ranges..."
-    
+
     # Resource quotas and limit ranges are included in aurora-namespace-rbac.yaml
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Resource controls are part of namespace-rbac deployment"
-        
+
         # Show ResourceQuota
         log_info "ResourceQuota configuration:"
         grep -A 30 "kind: ResourceQuota" "$K8S_DIR/aurora-namespace-rbac.yaml" | head -35
-        
+
         # Show LimitRange
         log_info "LimitRange configuration:"
         grep -A 40 "kind: LimitRange" "$K8S_DIR/aurora-namespace-rbac.yaml" | head -45
     else
         log_info "Resource controls deployed with namespace RBAC"
     fi
-    
+
     log_success "Resource controls configured"
 }
 
 # Deploy ingress rules (if available)
 deploy_ingress() {
     log_info "Deploying Ingress rules..."
-    
+
     local ingress_file="$K8S_DIR/aurora-ingress.yaml"
-    
+
     if [[ -f "$ingress_file" ]]; then
         if [[ "$DRY_RUN" == "true" ]]; then
-            log_info "[DRY-RUN] Would deploy Ingress from: $ingress_file"
-            kubectl apply -f "$ingress_file" --dry-run=client -o yaml | head -50
+            log_info "[DRY-RUN] Validating Ingress manifest: $ingress_file"
+            kubectl apply -f "$ingress_file" --dry-run=client --validate=false -o yaml | head -50
         else
             # Check if ingress-nginx is available
             if kubectl get ingressclass nginx &> /dev/null; then
@@ -136,20 +143,20 @@ deploy_ingress() {
 # Verify network policy enforcement
 verify_network_policies() {
     log_info "Verifying Network Policies..."
-    
+
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Would verify network policies in namespace: $NAMESPACE"
         return 0
     fi
-    
+
     # List network policies
     local policies
     policies=$(kubectl get networkpolicies -n "$NAMESPACE" -o name 2>/dev/null)
-    
+
     if [[ -n "$policies" ]]; then
         log_success "Network policies found:"
         echo "$policies"
-        
+
         # Show details of each policy
         for policy in $policies; do
             echo ""
@@ -164,16 +171,16 @@ verify_network_policies() {
 # Verify resource quotas
 verify_resource_quotas() {
     log_info "Verifying Resource Quotas..."
-    
+
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Would verify resource quotas in namespace: $NAMESPACE"
         return 0
     fi
-    
+
     # List resource quotas
     local quotas
     quotas=$(kubectl get resourcequotas -n "$NAMESPACE" -o name 2>/dev/null)
-    
+
     if [[ -n "$quotas" ]]; then
         log_success "Resource quotas found:"
         kubectl get resourcequotas -n "$NAMESPACE" -o wide
@@ -185,16 +192,16 @@ verify_resource_quotas() {
 # Verify limit ranges
 verify_limit_ranges() {
     log_info "Verifying Limit Ranges..."
-    
+
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Would verify limit ranges in namespace: $NAMESPACE"
         return 0
     fi
-    
+
     # List limit ranges
     local limits
     limits=$(kubectl get limitranges -n "$NAMESPACE" -o name 2>/dev/null)
-    
+
     if [[ -n "$limits" ]]; then
         log_success "Limit ranges found:"
         kubectl describe limitranges -n "$NAMESPACE" | head -50
@@ -206,16 +213,16 @@ verify_limit_ranges() {
 # Check pod security standards compliance
 check_pod_security() {
     log_info "Checking Pod Security Standards compliance..."
-    
+
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Would check pod security in namespace: $NAMESPACE"
         return 0
     fi
-    
+
     # Check namespace labels for Pod Security Standards
     local pss_labels
     pss_labels=$(kubectl get namespace "$NAMESPACE" -o jsonpath='{.metadata.labels}' 2>/dev/null)
-    
+
     if echo "$pss_labels" | grep -q "pod-security"; then
         log_success "Pod Security Standards labels found"
     else
@@ -233,7 +240,7 @@ print_summary() {
     echo "Namespace: $NAMESPACE"
     echo "Dry Run: $DRY_RUN"
     echo ""
-    
+
     if [[ "$DRY_RUN" != "true" ]]; then
         echo "Network Policies:"
         kubectl get networkpolicies -n "$NAMESPACE" 2>/dev/null || echo "  None configured"
@@ -247,7 +254,7 @@ print_summary() {
         echo "Ingress:"
         kubectl get ingress -n "$NAMESPACE" 2>/dev/null || echo "  None configured"
     fi
-    
+
     echo "========================================"
 }
 
@@ -256,7 +263,7 @@ main() {
     log_info "Aurora CloudBank - Firewall Deployment Script"
     log_info "Chain: #K8S//DEPLOY//FIREWALL//"
     echo ""
-    
+
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -283,21 +290,21 @@ main() {
                 ;;
         esac
     done
-    
+
     # Execute deployment steps
     check_prerequisites
     deploy_network_policies
     deploy_resource_controls
     deploy_ingress
-    
+
     # Verification steps
     verify_network_policies
     verify_resource_quotas
     verify_limit_ranges
     check_pod_security
-    
+
     print_summary
-    
+
     log_success "Firewall deployment completed!"
 }
 

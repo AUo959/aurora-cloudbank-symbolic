@@ -30,9 +30,16 @@ jobs:
     - name: Type check
       run: |
         set +e
-        npx tsc --project tsconfig.constellation.json --noEmit --skipLibCheck 2>&1 | tee typescript-check.log
-        TYPECHECK_EXIT=${PIPESTATUS[0]}
+        {
+          echo "TypeScript version: $(npx tsc --version)"
+          echo "--- Effective configuration ---"
+          npx tsc --project tsconfig.constellation.json --showConfig
+          echo "--- Type check ---"
+          npx tsc --project tsconfig.constellation.json --noEmit --skipLibCheck --pretty false
+        } > typescript-check.log 2>&1
+        TYPECHECK_EXIT=$?
         set -e
+        cat typescript-check.log
         exit "$TYPECHECK_EXIT"
 
     - name: Upload TypeScript diagnostics
@@ -41,6 +48,8 @@ jobs:
       with:
         name: typescript-check
         path: typescript-check.log
+        retention-days: 30
+        if-no-files-found: error
 
     - name: Lint JavaScript/TypeScript
       run: npm run lint:check

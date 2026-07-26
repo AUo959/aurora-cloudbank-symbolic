@@ -127,13 +127,19 @@ class ImprovementSeverityEnum(str, Enum):
 class AnalyzeFileRequest(BaseModel):
     """Request to analyze a single file."""
 
-    file_path: str = Field(..., description="Root-relative file lookup key")
+    file_path: str = Field(
+        ...,
+        description="File lookup key, root-relative or an absolute path contained within the configured analysis root",
+    )
 
 
 class AnalyzeDirectoryRequest(BaseModel):
     """Request to analyze a directory."""
 
-    directory: str = Field(..., description="Root-relative directory lookup key")
+    directory: str = Field(
+        ...,
+        description="Directory lookup key, root-relative or an absolute path contained within the configured analysis root",
+    )
     file_patterns: List[str] = Field(default=["*.py"], description="File patterns to match")
     min_confidence: float = Field(
         default=0.5,

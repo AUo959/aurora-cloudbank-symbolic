@@ -28,7 +28,7 @@ jobs:
       run: npm ci
 
     - name: Type check
-      run: npx tsc --noEmit --skipLibCheck
+      run: npx tsc --project tsconfig.constellation.json --noEmit --skipLibCheck
 
     - name: Lint JavaScript/TypeScript
       run: npm run lint:check

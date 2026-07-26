@@ -5,19 +5,25 @@ on:
   push:
     branches:
       - agent/fix-memory-retrieval-router-1345
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
 
 jobs:
   apply-fix:
-    if: github.event.head_commit.message == 'chore: stage issue 1345 patch workflow'
+    if: >-
+      (github.event_name == 'push' && github.event.head_commit.message == 'chore: stage issue 1345 patch workflow') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'agent/fix-memory-retrieval-router-1345')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          ref: agent/fix-memory-retrieval-router-1345
           fetch-depth: 0
 
       - name: Set up Python

@@ -661,9 +661,9 @@ def test_api_export_ledger(api_client, temp_ledger_dir):
     data = response.json()
     assert data["success"]
     assert data["entries_exported"] >= 1
-    export_name = data["export_path"]
-    assert export_name == Path(export_name).name
-    assert (Path(temp_ledger_dir) / export_name).exists()
+    export_filename = data["export_path"]
+    assert export_filename == Path(export_filename).name
+    assert (Path(temp_ledger_dir) / export_filename).exists()
 
 
 @pytest.mark.api

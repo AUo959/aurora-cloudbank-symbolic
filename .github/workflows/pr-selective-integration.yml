@@ -54,7 +54,7 @@ jobs:
         pip install pytest flake8
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Run PR Evaluation
+    - name: Run PR Evaluation (advisory)
       if: steps.detect.outputs.should_run == 'true'
       id: evaluate
       env:
@@ -77,7 +77,7 @@ jobs:
         exit 0
       continue-on-error: true
 
-    - name: Run Selective Integration Analysis
+    - name: Run Selective Integration Analysis (advisory)
       if: steps.detect.outputs.should_run == 'true'
       id: integration
       env:

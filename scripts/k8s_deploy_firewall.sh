@@ -81,11 +81,11 @@ deploy_network_policies() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating namespace, RBAC, and network policy manifest"
-        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | head -80
+        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | sed -n '1,80p'
 
-        # Show NetworkPolicy resources
+        # Show NetworkPolicy resources while consuming the complete input.
         log_info "NetworkPolicy resources that would be deployed:"
-        grep -A 50 "kind: NetworkPolicy" "$manifest" | head -60
+        grep -A 50 "kind: NetworkPolicy" "$manifest" | sed -n '1,60p'
     else
         kubectl apply -f "$manifest"
     fi
@@ -103,11 +103,11 @@ deploy_resource_controls() {
 
         # Show ResourceQuota
         log_info "ResourceQuota configuration:"
-        grep -A 30 "kind: ResourceQuota" "$K8S_DIR/aurora-namespace-rbac.yaml" | head -35
+        grep -A 30 "kind: ResourceQuota" "$K8S_DIR/aurora-namespace-rbac.yaml" | sed -n '1,35p'
 
         # Show LimitRange
         log_info "LimitRange configuration:"
-        grep -A 40 "kind: LimitRange" "$K8S_DIR/aurora-namespace-rbac.yaml" | head -45
+        grep -A 40 "kind: LimitRange" "$K8S_DIR/aurora-namespace-rbac.yaml" | sed -n '1,45p'
     else
         log_info "Resource controls deployed with namespace RBAC"
     fi
@@ -124,7 +124,7 @@ deploy_ingress() {
     if [[ -f "$ingress_file" ]]; then
         if [[ "$DRY_RUN" == "true" ]]; then
             log_info "[DRY-RUN] Validating Ingress manifest: $ingress_file"
-            kubectl apply -f "$ingress_file" --dry-run=client --validate=false -o yaml | head -50
+            kubectl apply -f "$ingress_file" --dry-run=client --validate=false -o yaml | sed -n '1,50p'
         else
             # Check if ingress-nginx is available
             if kubectl get ingressclass nginx &> /dev/null; then
@@ -161,7 +161,7 @@ verify_network_policies() {
         for policy in $policies; do
             echo ""
             echo "=== $(echo "$policy" | cut -d'/' -f2) ==="
-            kubectl describe "$policy" -n "$NAMESPACE" | grep -A 20 "Spec:" | head -25
+            kubectl describe "$policy" -n "$NAMESPACE" | grep -A 20 "Spec:" | sed -n '1,25p'
         done
     else
         log_warn "No network policies found in namespace $NAMESPACE"
@@ -204,7 +204,7 @@ verify_limit_ranges() {
 
     if [[ -n "$limits" ]]; then
         log_success "Limit ranges found:"
-        kubectl describe limitranges -n "$NAMESPACE" | head -50
+        kubectl describe limitranges -n "$NAMESPACE" | sed -n '1,50p'
     else
         log_warn "No limit ranges found in namespace $NAMESPACE"
     fi

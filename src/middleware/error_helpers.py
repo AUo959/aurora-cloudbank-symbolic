@@ -14,25 +14,29 @@ def http_error(
     safe_detail: str,
     exc: Optional[BaseException] = None,
 ) -> HTTPException:
-    """Return an HTTPException with a safe detail string and log the real exception.
+    """Return an HTTPException while keeping response and logs bounded.
 
-    For client errors (4xx) the exception is logged at WARNING level without a
-    stack trace — these represent expected, routine error conditions (invalid
-    input, state conflicts) and emitting a full traceback for every one is
-    high-volume noise in production logs that can also leak internal details.
+    Expected client errors log only the status, approved detail, and exception
+    type. Raw exception messages commonly contain user input or internal state
+    and are intentionally excluded.
 
-    For server errors (5xx) the full traceback is preserved via
-    ``logger.exception()`` because those require investigation.
+    Server errors retain an explicit traceback tuple derived from ``exc`` so
+    diagnostics work both inside and outside an active ``except`` block.
     """
     if exc is not None:
         if status_code >= 500:
-            logger.exception(
-                "Internal error (status=%d, detail=%r): %s",
-                status_code, safe_detail, exc,
+            logger.error(
+                "Internal error (status=%d, detail=%r, exception_type=%s)",
+                status_code,
+                safe_detail,
+                type(exc).__name__,
+                exc_info=(type(exc), exc, exc.__traceback__),
             )
         else:
             logger.warning(
-                "Client error (status=%d, detail=%r): %s",
-                status_code, safe_detail, exc,
+                "Client error (status=%d, detail=%r, exception_type=%s)",
+                status_code,
+                safe_detail,
+                type(exc).__name__,
             )
     return HTTPException(status_code=status_code, detail=safe_detail)

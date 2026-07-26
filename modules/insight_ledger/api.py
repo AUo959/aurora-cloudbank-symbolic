@@ -5,6 +5,7 @@ FastAPI endpoints for the immutable insight ledger.
 Anchor: T1-TIL-API-001
 """
 
+import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
@@ -17,6 +18,7 @@ from src.middleware.fastapi_security import require_csrf_token
 from .ledger_core import InsightLedger
 from .schemas import AuditQuery, InsightRecord, LedgerEntry, LedgerStats, VerificationReport
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ledger", tags=["Insight Ledger"])
 SENSITIVE_LEDGER_DEPENDENCIES = (Depends(require_csrf_token),)
 _ledger_instance: Optional[InsightLedger] = None
@@ -276,7 +278,12 @@ async def health_check() -> Dict[str, Any]:
             "integrity_verified": stats.integrity_verified,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-    except Exception:
+    except Exception as exc:
+        logger.error(
+            "Ledger health check failed (exception_type=%s)",
+            type(exc).__name__,
+            exc_info=(type(exc), exc, exc.__traceback__),
+        )
         return {
             "status": "unhealthy",
             "error": "Ledger health check failed",

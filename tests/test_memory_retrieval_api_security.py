@@ -75,7 +75,7 @@ class FakeMemoryCore:
 
 def _headers(username: str, *, csrf: bool = False) -> dict[str, str]:
     access_token = OAuth2Handler.create_access_token(
-        {"sub": username, "role": "operator"}
+        {"sub": username, "role": "relay_operator"}
     )
     headers = {"Authorization": f"Bearer {access_token}"}
     if csrf:
@@ -123,7 +123,8 @@ def test_all_memory_routes_require_authentication(
     path: str,
     payload: dict | None,
 ) -> None:
-    response = getattr(client, method)(path, json=payload)
+    kwargs = {"json": payload} if payload is not None else {}
+    response = getattr(client, method)(path, **kwargs)
     assert response.status_code in (401, 403)
 
 

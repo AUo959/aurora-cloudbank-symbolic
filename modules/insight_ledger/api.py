@@ -7,6 +7,7 @@ Anchor: T1-TIL-API-001
 
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -35,16 +36,7 @@ def get_ledger() -> InsightLedger:
 
 
 def initialize_ledger(storage_path: str, secret_key: Optional[str] = None) -> InsightLedger:
-    """
-    Initialize the global ledger instance.
-
-    Args:
-        storage_path: Directory for ledger storage
-        secret_key: Optional HMAC secret key (hex)
-
-    Returns:
-        Initialized ledger instance
-    """
+    """Initialize the global ledger instance from operator configuration."""
     global _ledger_instance
     _ledger_instance = InsightLedger(storage_path=storage_path, secret_key=secret_key)
     return _ledger_instance
@@ -83,8 +75,8 @@ class QueryHistoryResponse(BaseModel):
 class ExportLedgerResponse(BaseModel):
     """Response from ledger export."""
 
-    success: bool = Field(..., description="Whether export succeeded")
-    export_path: str = Field(..., description="Path to export file")
+    success: bool = Field(..., description="Whether exporting succeeded")
+    export_path: str = Field(..., description="Server-generated export filename")
     entries_exported: int = Field(..., description="Number of entries exported")
 
 
@@ -97,31 +89,21 @@ class ExportLedgerResponse(BaseModel):
     dependencies=SENSITIVE_LEDGER_DEPENDENCIES,
 )
 async def record_insight(request: RecordInsightRequest) -> RecordInsightResponse:
-    """
-    Record a new insight in the ledger.
-
-    The insight will be:
-    - Assigned a unique entry ID
-    - Timestamped with UTC time
-    - Signed with HMAC-SHA256
-    - Chained to previous entry via hash
-    - Appended to immutable storage
-
-    Returns the complete ledger entry with all cryptographic metadata.
-    """
+    """Record a signed, hash-chained insight in the ledger."""
     try:
         ledger = get_ledger()
         entry = ledger.record_insight(request.insight)
-
         return RecordInsightResponse(
-            success=True, entry=entry, entry_id=entry.entry_id, message="Insight recorded successfully"
+            success=True,
+            entry=entry,
+            entry_id=entry.entry_id,
+            message="Insight recorded successfully",
         )
-
-    except Exception as e:
+    except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
-        )
+        ) from exc
 
 
 @router.get(
@@ -131,18 +113,9 @@ async def record_insight(request: RecordInsightRequest) -> RecordInsightResponse
     description="Cryptographically verify the integrity of the entire ledger or a subset",
 )
 async def verify_integrity(
-    limit: Optional[int] = Query(None, ge=1, le=100000, description="Max entries to verify (None=all)")
+    limit: Optional[int] = Query(None, ge=1, le=100000, description="Max entries to verify (None=all)"),
 ) -> VerifyIntegrityResponse:
-    """
-    Verify the cryptographic integrity of the ledger.
-
-    Checks:
-    - HMAC signature validity for each entry
-    - SHA-256 hash chain continuity
-    - No gaps or breaks in the chain
-
-    Returns detailed report including any verification failures.
-    """
+    """Verify signatures and hash-chain continuity."""
     try:
         ledger = get_ledger()
         report_dict = ledger.verify_integrity(limit=limit)
@@ -160,12 +133,11 @@ async def verify_integrity(
             )
 
         return VerifyIntegrityResponse(report=report, summary=summary)
-
-    except Exception as e:
+    except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
-        )
+        ) from exc
 
 
 @router.post(
@@ -176,33 +148,21 @@ async def verify_integrity(
     dependencies=SENSITIVE_LEDGER_DEPENDENCIES,
 )
 async def query_history(query: Optional[AuditQuery] = None) -> QueryHistoryResponse:
-    """
-    Query ledger history with flexible filters.
-
-    Supports filtering by:
-    - Time range (start_time, end_time)
-    - Insight types (decision, analysis, alert, etc.)
-    - Sources (component/system names)
-    - Tags (classification labels)
-    - Severity (info, warning, error, critical)
-    - Full-text search in content
-
-    Pagination via limit/offset parameters.
-    """
+    """Query ledger history with bounded filters and pagination."""
     try:
         ledger = get_ledger()
-
-        if query is None:
-            query = AuditQuery()
-
-        entries = ledger.query_history(query)
-
-        return QueryHistoryResponse(entries=entries, total_returned=len(entries), query=query)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
+        effective_query = query if query is not None else AuditQuery()
+        entries = ledger.query_history(effective_query)
+        return QueryHistoryResponse(
+            entries=entries,
+            total_returned=len(entries),
+            query=effective_query,
         )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        ) from exc
 
 
 @router.get(
@@ -212,80 +172,54 @@ async def query_history(query: Optional[AuditQuery] = None) -> QueryHistoryRespo
     description="Retrieve ledger health metrics, entry counts, and integrity status",
 )
 async def get_stats() -> LedgerStats:
-    """
-    Get ledger statistics and health metrics.
-
-    Includes:
-    - Total entry count
-    - First/last entry timestamps
-    - Entries by type and source
-    - Integrity verification status
-    - Storage size in bytes
-    """
+    """Return ledger health, counts, and storage statistics."""
     try:
-        ledger = get_ledger()
-        return ledger.get_stats()
-
-    except Exception as e:
+        return get_ledger().get_stats()
+    except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
-        )
+        ) from exc
+
+
+def _server_export_name() -> str:
+    """Create an unguessable server-controlled export filename."""
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    return f"ledger-export-{timestamp}-{uuid4().hex}.json"
 
 
 @router.post(
     "/export",
     response_model=ExportLedgerResponse,
     summary="Export Ledger",
-    description="Export complete ledger to JSON file for backup or analysis",
+    description="Export the complete ledger to a server-generated JSON file",
     dependencies=SENSITIVE_LEDGER_DEPENDENCIES,
 )
 async def export_ledger(
-    output_path: str = Query(..., description="Output file path"),
     include_genesis: bool = Query(True, description="Include genesis entry in export"),
 ) -> ExportLedgerResponse:
+    """Export the ledger under a server-generated filename.
+
+    The HTTP caller does not select or supply a filesystem path. This keeps
+    remote request data out of path construction while preserving the operator-
+    configured export root enforced by ``InsightLedger.export_ledger``.
     """
-    Export the complete ledger to a JSON file.
-
-    The export includes:
-    - All ledger entries with full metadata
-    - Cryptographic signatures and hashes
-    - Ledger statistics and metadata
-
-    Useful for:
-    - Backup and archival
-    - External analysis
-    - Compliance reporting
-    - Data migration
-
-    Note:
-    - output_path must be relative to the safe export directory
-    - Absolute paths and parent directory references (..) are rejected
-    - Path traversal attempts will result in 400 Bad Request
-    """
+    export_name = _server_export_name()
     try:
-        ledger = get_ledger()
-
-        # Path validation is now handled by ledger.export_ledger()
-        # which uses validate_safe_path() to prevent path traversal
-        entries_exported = ledger.export_ledger(output_path, include_genesis=include_genesis)
-
+        entries_exported = get_ledger().export_ledger(
+            export_name,
+            include_genesis=include_genesis,
+        )
         return ExportLedgerResponse(
-            success=True, export_path=output_path, entries_exported=entries_exported
+            success=True,
+            export_path=export_name,
+            entries_exported=entries_exported,
         )
-
-    except ValueError as e:
-        # Path validation errors from export_ledger
+    except Exception as exc:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Internal server error"
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
-        )
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        ) from exc
 
 
 @router.get(
@@ -296,33 +230,24 @@ async def export_ledger(
     dependencies=SENSITIVE_LEDGER_DEPENDENCIES,
 )
 async def get_entry_by_id(entry_id: str) -> LedgerEntry:
-    """
-    Retrieve a specific ledger entry by ID.
-
-    Returns the complete entry with all cryptographic metadata.
-    """
+    """Retrieve a specific ledger entry by ID."""
     try:
-        ledger = get_ledger()
-
-        # Query for the specific entry
-        query = AuditQuery(limit=10000)  # Search entire ledger
-        entries = ledger.query_history(query)
-
+        entries = get_ledger().query_history(AuditQuery(limit=10000))
         for entry in entries:
             if entry.entry_id == entry_id:
                 return entry
 
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Entry not found: {entry_id}"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Entry not found: {entry_id}",
         )
-
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
-        )
+        ) from exc
 
 
 @router.get(
@@ -331,21 +256,12 @@ async def get_entry_by_id(entry_id: str) -> LedgerEntry:
     description="Quick health check for ledger service",
 )
 async def health_check() -> Dict[str, Any]:
-    """
-    Health check endpoint for monitoring.
-
-    Returns:
-    - Service status
-    - Basic ledger stats
-    - Initialization status
-    """
+    """Return a bounded health summary for the ledger service."""
     try:
         if _ledger_instance is None:
             return {"status": "not_initialized", "message": "Ledger not initialized"}
 
-        ledger = get_ledger()
-        stats = ledger.get_stats()
-
+        stats = get_ledger().get_stats()
         return {
             "status": "healthy",
             "ledger_initialized": True,
@@ -353,14 +269,12 @@ async def health_check() -> Dict[str, Any]:
             "integrity_verified": stats.integrity_verified,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
-
-    except Exception as e:
+    except Exception:
         return {
             "status": "unhealthy",
-            "error": str(e),
+            "error": "Ledger health check failed",
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 
-# Export router for main app
 __all__ = ["router", "initialize_ledger", "get_ledger"]

@@ -1,0 +1,265 @@
+name: Temporary Kubernetes Dry-Run Review Fix
+
+on:
+  push:
+    branches:
+      - agent/fail-closed-ci-gates
+    paths:
+      - .github/workflows/temporary-k8s-dry-run-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: agent/fail-closed-ci-gates
+          fetch-depth: 0
+
+      - name: Apply bounded dry-run corrections
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_exact(path: str, old: str, new: str) -> None:
+              file_path = Path(path)
+              content = file_path.read_text()
+              if old not in content:
+                  raise SystemExit(f"Expected source block not found in {path}")
+              file_path.write_text(content.replace(old, new, 1))
+
+          replace_exact(
+              "scripts/k8s_deploy_relays.sh",
+              '''    # Check cluster connection
+              if ! kubectl cluster-info &> /dev/null; then
+                  log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
+                  exit 1
+              fi
+          ''',
+              '''    # Client-side dry runs validate local manifests without cluster credentials.
+              if [[ "$DRY_RUN" == "true" ]]; then
+                  log_info "Dry-run mode: skipping live Kubernetes cluster connectivity check"
+              elif ! kubectl cluster-info &> /dev/null; then
+                  log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
+                  exit 1
+              fi
+          ''',
+          )
+          replace_exact(
+              "scripts/k8s_deploy_relays.sh",
+              'kubectl apply -f "$K8S_DIR/aurora-namespace-rbac.yaml" --dry-run=client -o yaml | head -50',
+              'kubectl apply -f "$K8S_DIR/aurora-namespace-rbac.yaml" --dry-run=client --validate=false -o yaml | head -50',
+          )
+          replace_exact(
+              "scripts/k8s_deploy_relays.sh",
+              'kubectl apply -f "$temp_manifest" --dry-run=client -o yaml | head -100',
+              'kubectl apply -f "$temp_manifest" --dry-run=client --validate=false -o yaml | head -100',
+          )
+
+          replace_exact(
+              "scripts/k8s_deploy_firewall.sh",
+              '''    # Check cluster connection
+              if ! kubectl cluster-info &> /dev/null; then
+                  log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
+                  exit 1
+              fi
+              
+              # Check if namespace exists
+              if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
+                  log_warn "Namespace $NAMESPACE does not exist. Creating it..."
+                  if [[ "$DRY_RUN" != "true" ]]; then
+                      kubectl create namespace "$NAMESPACE"
+                  fi
+              fi
+          ''',
+              '''    # Validate the local manifest before any live-cluster checks.
+              local namespace_manifest="$K8S_DIR/aurora-namespace-rbac.yaml"
+              if [[ ! -f "$namespace_manifest" ]]; then
+                  log_error "Required manifest file not found: $namespace_manifest"
+                  exit 1
+              fi
+
+              if [[ "$DRY_RUN" == "true" ]]; then
+                  log_info "Dry-run mode: skipping live cluster and namespace checks"
+                  log_success "Prerequisites check passed"
+                  return 0
+              fi
+
+              # Check cluster connection
+              if ! kubectl cluster-info &> /dev/null; then
+                  log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
+                  exit 1
+              fi
+              
+              # Check if namespace exists
+              if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
+                  log_warn "Namespace $NAMESPACE does not exist. Creating it..."
+                  kubectl create namespace "$NAMESPACE"
+              fi
+          ''',
+          )
+          replace_exact(
+              "scripts/k8s_deploy_firewall.sh",
+              'kubectl apply -f "$ingress_file" --dry-run=client -o yaml | head -50',
+              'kubectl apply -f "$ingress_file" --dry-run=client --validate=false -o yaml | head -50',
+          )
+
+          replace_exact(
+              "scripts/k8s_deploy_mcp.sh",
+              '''    # Check cluster connection
+              if ! kubectl cluster-info &> /dev/null; then
+                  log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
+                  exit 1
+              fi
+              
+              # Check if namespace exists
+              if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
+                  log_error "Namespace $NAMESPACE does not exist. Run k8s_deploy_relays.sh first."
+                  exit 1
+              fi
+              
+              # Check if deployment exists
+              if ! kubectl get deployment aurora-gui-cloudhub -n "$NAMESPACE" &> /dev/null; then
+                  log_warn "Deployment aurora-gui-cloudhub not found. Run k8s_deploy_relays.sh first."
+              fi
+          ''',
+              '''    # Validate required local input before any live-cluster checks.
+              local service_manifest="$K8S_DIR/aurora-gui-cloudhub-service.yaml"
+              if [[ ! -f "$service_manifest" ]]; then
+                  log_error "Required manifest file not found: $service_manifest"
+                  exit 1
+              fi
+
+              if [[ "$DRY_RUN" == "true" ]]; then
+                  log_info "Dry-run mode: skipping live cluster, namespace, and deployment checks"
+                  log_success "Prerequisites check passed"
+                  return 0
+              fi
+
+              # Check cluster connection
+              if ! kubectl cluster-info &> /dev/null; then
+                  log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
+                  exit 1
+              fi
+              
+              # Check if namespace exists
+              if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
+                  log_error "Namespace $NAMESPACE does not exist. Run k8s_deploy_relays.sh first."
+                  exit 1
+              fi
+              
+              # Check if deployment exists
+              if ! kubectl get deployment aurora-gui-cloudhub -n "$NAMESPACE" &> /dev/null; then
+                  log_warn "Deployment aurora-gui-cloudhub not found. Run k8s_deploy_relays.sh first."
+              fi
+          ''',
+          )
+          replace_exact(
+              "scripts/k8s_deploy_mcp.sh",
+              'kubectl apply -f "$service_file" --dry-run=client -o yaml | head -80',
+              'kubectl apply -f "$service_file" --dry-run=client --validate=false -o yaml | head -80',
+          )
+          replace_exact(
+              "scripts/k8s_deploy_mcp.sh",
+              'kubectl apply -f "$hpa_file" --dry-run=client -o yaml | head -80',
+              'kubectl apply -f "$hpa_file" --dry-run=client --validate=false -o yaml | head -80',
+          )
+
+          Path("tests/test_k8s_dry_run_contract.py").write_text(r'''"""Regression coverage for cluster-independent Kubernetes deployment dry runs."""
+
+import os
+import subprocess
+from pathlib import Path
+
+import pytest
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SCRIPTS = (
+    "k8s_deploy_relays.sh",
+    "k8s_deploy_firewall.sh",
+    "k8s_deploy_mcp.sh",
+)
+
+
+@pytest.mark.parametrize("script_name", SCRIPTS)
+def test_dry_run_never_requires_live_cluster(tmp_path: Path, script_name: str) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_kubectl = fake_bin / "kubectl"
+    fake_kubectl.write_text(
+        """#!/bin/bash
+set -euo pipefail
+case "${1:-}" in
+  apply)
+    args=" $* "
+    if [[ "$args" != *" --dry-run=client "* ]] || [[ "$args" != *" --validate=false "* ]]; then
+      echo "dry-run apply must be client-side with validation disabled: $*" >&2
+      exit 90
+    fi
+    printf 'apiVersion: v1\\nkind: List\\nitems: []\\n'
+    ;;
+  cluster-info|get|create|rollout|logs|exec|describe)
+    echo "unexpected live cluster access: $*" >&2
+    exit 91
+    ;;
+  *)
+    echo "unexpected kubectl command: $*" >&2
+    exit 92
+    ;;
+esac
+"""
+    )
+    fake_kubectl.chmod(0o755)
+
+    env = os.environ.copy()
+    env["PATH"] = f"{fake_bin}{os.pathsep}{env['PATH']}"
+    env.pop("KUBECONFIG", None)
+
+    script = PROJECT_ROOT / "scripts" / script_name
+    result = subprocess.run(
+        ["bash", str(script), "--dry-run"],
+        cwd=PROJECT_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+
+    assert result.returncode == 0, (
+        f"{script_name} dry-run failed without cluster credentials.\\n"
+        f"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}"
+    )
+    assert "unexpected live cluster access" not in result.stderr
+''')
+          PY
+
+      - name: Validate script syntax and focused tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/k8s_deploy_relays.sh
+          bash -n scripts/k8s_deploy_firewall.sh
+          bash -n scripts/k8s_deploy_mcp.sh
+          python3 -m pip install --disable-pip-version-check pytest pyyaml
+          python3 -m pytest tests/test_k8s_deploy.py tests/test_k8s_dry_run_contract.py -q
+          git diff --check
+
+      - name: Commit validated fix and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/temporary-k8s-dry-run-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/k8s_deploy_relays.sh scripts/k8s_deploy_firewall.sh scripts/k8s_deploy_mcp.sh tests/test_k8s_dry_run_contract.py .github/workflows/temporary-k8s-dry-run-fix.yml
+          git commit -m "fix: make Kubernetes dry runs cluster-independent (#1333)"
+          git push origin HEAD:agent/fail-closed-ci-gates

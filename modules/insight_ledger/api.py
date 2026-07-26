@@ -5,6 +5,7 @@ FastAPI endpoints for the immutable insight ledger.
 Anchor: T1-TIL-API-001
 """
 
+import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -241,7 +242,6 @@ async def get_stats() -> LedgerStats:
     dependencies=SENSITIVE_LEDGER_DEPENDENCIES,
 )
 async def export_ledger(
-    output_path: str = Query(..., description="Output file path"),
     include_genesis: bool = Query(True, description="Include genesis entry in export"),
 ) -> ExportLedgerResponse:
     """
@@ -259,30 +259,34 @@ async def export_ledger(
     - Data migration
 
     Note:
-    - output_path must be relative to the safe export directory
-    - Absolute paths and parent directory references (..) are rejected
-    - Path traversal attempts will result in 400 Bad Request
+    - The export filename is generated server-side (UUID-keyed .json under the
+      configured export root).  No caller-supplied path is accepted at this
+      endpoint; the previous ``output_path`` query parameter has been removed to
+      close the py/path-injection taint chain identified by CodeQL.
     """
     try:
         ledger = get_ledger()
 
-        # Path validation is now handled by ledger.export_ledger()
-        # which uses validate_safe_path() to prevent path traversal
-        entries_exported = ledger.export_ledger(output_path, include_genesis=include_genesis)
+        # Generate the export filename entirely on the server.  Using a UUID
+        # means no remote request value ever flows into a path operation.
+        export_filename = f"ledger_export_{uuid.uuid4().hex}.json"
+
+        entries_exported = ledger.export_ledger(export_filename, include_genesis=include_genesis)
 
         return ExportLedgerResponse(
-            success=True, export_path=output_path, entries_exported=entries_exported
+            success=True, export_path=export_filename, entries_exported=entries_exported
         )
 
-    except ValueError as e:
-        # Path validation errors from export_ledger
+    except ValueError:
+        # Unexpected path validation error — the filename is generated server-side,
+        # so a ValueError here indicates a server misconfiguration, not bad input.
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
         )

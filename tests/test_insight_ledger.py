@@ -650,12 +650,16 @@ def test_api_get_stats(api_client):
 
 @pytest.mark.api
 def test_api_export_ledger(api_client, temp_ledger_dir):
-    """Test POST /ledger/export endpoint."""
-    export_path = Path(temp_ledger_dir) / "api_export.json"
+    """Test POST /ledger/export endpoint.
 
+    The endpoint no longer accepts a caller-supplied ``output_path``.  The
+    export filename is generated server-side (UUID-keyed .json) and returned
+    in the response, so the test verifies that the reported file actually
+    exists under the configured export root.
+    """
     response = api_client.post(
         "/ledger/export",
-        params={"output_path": str(export_path), "include_genesis": True},
+        params={"include_genesis": True},
         headers=_auth_header(),
     )
 
@@ -663,7 +667,9 @@ def test_api_export_ledger(api_client, temp_ledger_dir):
     data = response.json()
     assert data["success"]
     assert data["entries_exported"] >= 1
-    assert export_path.exists()
+    # The server-generated filename must exist under the export root.
+    generated_path = Path(temp_ledger_dir) / data["export_path"]
+    assert generated_path.exists(), f"Server-generated export not found: {generated_path}"
 
 
 @pytest.mark.api
@@ -710,7 +716,6 @@ def test_api_get_entry_not_found(api_client):
 @pytest.mark.api
 def test_api_sensitive_routes_reject_missing_token(api_client, temp_ledger_dir):
     """Sensitive ledger routes reject unauthenticated access."""
-    export_path = Path(temp_ledger_dir) / "unauthorized_export.json"
     insight_data = {
         "insight": {
             "insight_type": "alert",
@@ -722,7 +727,7 @@ def test_api_sensitive_routes_reject_missing_token(api_client, temp_ledger_dir):
     unauthorized_responses = [
         api_client.post("/ledger/insight", json=insight_data),
         api_client.post("/ledger/history", json={"limit": 1}),
-        api_client.post("/ledger/export", params={"output_path": str(export_path)}),
+        api_client.post("/ledger/export"),
         api_client.get("/ledger/entry/missing-entry"),
     ]
 

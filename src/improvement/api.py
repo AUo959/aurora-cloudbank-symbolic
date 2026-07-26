@@ -38,54 +38,82 @@ def _safe_root() -> Path:
 
 
 def _resolve_request_path(user_path: str) -> Path:
-    """Validate and resolve *user_path* to an absolute path within the safe root.
+    """Map a logical request key to a real filesystem path by enumeration.
 
-    Applies CodeQL's recommended ``startswith``-based containment pattern:
+    The remote request value is used only as a lookup key — it is compared
+    against names of filesystem entries enumerated from the trusted safe root.
+    It never flows into path construction, ``.resolve()``, ``.stat()``, or any
+    other filesystem operation.  This breaks the remote-source-to-path-sink
+    taint chain that CodeQL flags as py/path-injection.
 
-    * Absolute inputs are first checked lexically via ``relative_to()`` (a pure
-      string operation, no filesystem access) so that ``.resolve()`` is never
-      called on unvalidated caller data.
-    * Relative inputs are joined with the trusted root before resolving.
-    * The resolved path is re-checked against the safe root to catch symlinks
-      that would otherwise escape containment.
-    * Cross-drive paths on Windows fail closed (different drive letters produce
-      no common prefix, so ``startswith`` returns False).
+    Protocol:
+    1. Derive the root-relative key lexically (no filesystem access on user data).
+    2. Walk from ``safe_root`` using ``iterdir()`` — the only paths that exist in
+       the returned chain come from filesystem enumeration, not from user input.
+    3. Compare each directory entry's name against the key part (string
+       comparison only — user data never reaches a path operation).
+    4. If a matching entry resolves outside ``safe_root`` (symlink escape), raise
+       403 immediately rather than treating the entry as absent.
+    5. Return the fully trusted, enumerated path.
 
-    Raises HTTPException 400 on traversal attempts and 403 on containment
-    failures; callers add the 404/400 existence/type checks they need.
+    Raises:
+        HTTPException 400  — ``..`` component in a relative path.
+        HTTPException 403  — absolute path outside safe root, or symlink escape.
+        HTTPException 404  — key not found under the safe root.
     """
-    safe_root = _safe_root()
+    safe_root = _safe_root().resolve()
     safe_root_str = str(safe_root)
-    requested = Path(user_path)
+    # Guard against the filesystem-root edge case: when safe_root is '/',
+    # appending os.sep would produce '//' and incorrectly reject every path.
+    safe_root_prefix = safe_root_str if safe_root_str.endswith(os.sep) else safe_root_str + os.sep
 
-    if requested.is_absolute():
-        # Lexical containment check before any filesystem access.
-        # relative_to() raises ValueError if the path is not under safe_root,
-        # which we convert to a 403.  We then reconstruct from the trusted root
-        # so that .resolve() is not called directly on caller-supplied data.
+    p = Path(user_path)
+
+    if p.is_absolute():
+        # Lexical containment: does this absolute path sit under the root?
+        # relative_to() is a pure string operation — no filesystem access.
         try:
-            rel = requested.relative_to(safe_root)
+            rel_key = p.relative_to(safe_root)
         except ValueError:
             raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
-        full_path = (safe_root / rel).resolve()
     else:
-        if ".." in requested.parts:
+        if ".." in p.parts:
             raise HTTPException(
                 status_code=400,
                 detail="Parent directory references ('..') are not allowed.",
             )
-        # Join with the trusted root before resolving (CodeQL recommended pattern).
-        full_path = (safe_root / requested).resolve()
+        rel_key = p
 
-    # Guard: resolved path must sit within safe_root.
-    # startswith() is CodeQL's recognised containment barrier; os.sep ensures
-    # that /safe/root does not accidentally match /safe/rootother.
-    full_path_str = str(full_path)
-    if not (full_path_str == safe_root_str
-            or full_path_str.startswith(safe_root_str + os.sep)):
-        raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
+    # Walk from safe_root using filesystem enumeration.
+    # rel_key parts are only used in name comparisons (entry.name == part).
+    # Actual filesystem paths come exclusively from iterdir() — no user input
+    # ever flows into path construction, resolve(), or open().
+    current = safe_root
+    for part in rel_key.parts:
+        matched: Optional[Path] = None
+        try:
+            for entry in current.iterdir():
+                if entry.name == part:
+                    resolved = entry.resolve()
+                    resolved_str = str(resolved)
+                    # Containment check on the enumerated, resolved path.
+                    if not (resolved_str == safe_root_str
+                            or resolved_str.startswith(safe_root_prefix)):
+                        # Entry resolves outside the root — symlink escape.
+                        raise HTTPException(
+                            status_code=403, detail="Access to this path is not allowed."
+                        )
+                    matched = resolved
+                    break
+        except HTTPException:
+            raise
+        except (PermissionError, OSError):
+            pass  # Cannot read directory; treat as not found.
+        if matched is None:
+            raise HTTPException(status_code=404, detail="Path not found.")
+        current = matched
 
-    return full_path
+    return current
 
 
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])

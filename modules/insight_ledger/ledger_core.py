@@ -80,9 +80,12 @@ def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = Fal
     # outside the root are also rejected.  On Windows, paths on different
     # drives share no prefix, so the check naturally fails closed without
     # needing a separate cross-drive guard.
+    # Guard against the filesystem-root edge case: when safe_root_str is '/',
+    # appending os.sep produces '//' which would incorrectly reject every path.
+    safe_root_prefix = safe_root_str if safe_root_str.endswith(os.sep) else safe_root_str + os.sep
     full_path_str = str(full_path)
     if not (full_path_str == safe_root_str
-            or full_path_str.startswith(safe_root_str + os.sep)):
+            or full_path_str.startswith(safe_root_prefix)):
         raise ValueError(f"Path outside allowed directory: {user_path}")
 
     # Check existence if required

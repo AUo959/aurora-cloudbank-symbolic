@@ -68,15 +68,22 @@ def test_http_error_logs_expected_client_errors_without_traceback(monkeypatch) -
 
 @pytest.mark.unit
 def test_http_error_keeps_traceback_logging_for_server_errors(monkeypatch) -> None:
-    """Unexpected 5xx failures must retain exception-level diagnostics."""
+    """Unexpected 5xx failures must retain exception-level diagnostics.
+
+    The implementation uses ``logger.error(..., exc_info=...)`` rather than
+    ``logger.exception()``.  The latter reads from ``sys.exc_info()`` and
+    emits a useless ``NoneType: None`` entry when called outside an ``except``
+    block — common when constructing an HTTPException in response to an error
+    caught elsewhere.  The explicit tuple always carries the right traceback.
+    """
     warning_calls = []
-    exception_calls = []
-    monkeypatch.setattr(error_helpers.logger, "warning", lambda *args: warning_calls.append(args))
-    monkeypatch.setattr(error_helpers.logger, "exception", lambda *args: exception_calls.append(args))
+    error_calls = []
+    monkeypatch.setattr(error_helpers.logger, "warning", lambda *a, **kw: warning_calls.append(a))
+    monkeypatch.setattr(error_helpers.logger, "error", lambda *a, **kw: error_calls.append(a))
 
     result = error_helpers.http_error(500, "Internal server error.", RuntimeError("boom"))
 
     assert result.status_code == 500
     assert result.detail == "Internal server error."
     assert warning_calls == []
-    assert len(exception_calls) == 1
+    assert len(error_calls) == 1

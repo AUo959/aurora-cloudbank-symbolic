@@ -1,7 +1,7 @@
 """Runtime registration guards for the Memory Retrieval API (issue #1345)."""
 
-from collections import Counter
 import os
+from collections import Counter
 from pathlib import Path
 
 import pytest

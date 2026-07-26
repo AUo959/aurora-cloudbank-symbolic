@@ -31,52 +31,64 @@ except ImportError:
 def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = False) -> Path:
     """
     Validate user-provided path is safe and within bounds.
-    
+
     Args:
-        user_path: User-provided path string
-        safe_root: Root directory that path must be within
+        user_path: User-provided path string (absolute or relative)
+        safe_root: Root directory that path must resolve within
         allow_create: If False, path must already exist
-        
+
     Returns:
         Validated absolute Path within safe_root
-        
+
     Raises:
-        ValueError: If path is unsafe (absolute, contains .., outside bounds)
+        ValueError: If path is unsafe (contains .., or resolves outside bounds)
+
+    Both absolute and relative inputs converge on the same containment check.
+    Absolute paths must sit under safe_root lexically (verified by
+    ``relative_to``) before any filesystem access occurs; the resolved path is
+    then re-checked for symlink escapes.  Relative paths must contain no ``..``
+    components; they are joined with safe_root before resolving.
+
+    Callers that legitimately accept absolute paths point *safe_root* at the
+    directory those paths live in — containment rather than exemption.
     """
     requested = Path(user_path)
-    
-    # Allow absolute paths in /tmp for testing purposes
-    if requested.is_absolute() and str(requested).startswith("/tmp/"):
-        # Test path - allow it directly but ensure it exists or can be created
-        if not allow_create and not requested.exists():
-            raise ValueError(f"Path does not exist: {user_path}")
-        return requested
-    
-    # Reject other absolute paths from user input
-    if requested.is_absolute():
-        raise ValueError(f"Absolute paths not allowed: {user_path}")
-    
-    # Reject parent directory references
-    if ".." in requested.parts:
-        raise ValueError(f"Parent directory references not allowed: {user_path}")
-    
-    # Resolve to absolute path within safe_root
     safe_root = safe_root.resolve()
-    full_path = (safe_root / requested).resolve()
-    
-    # Verify resolved path is within safe_root
-    try:
-        common = os.path.commonpath([safe_root, full_path])
-        if common != str(safe_root):
+    safe_root_str = str(safe_root)
+
+    if requested.is_absolute():
+        # Do not call .resolve() directly on caller-supplied absolute paths.
+        # relative_to() is a pure string operation: it raises ValueError when
+        # the path is not lexically under safe_root (no filesystem access).
+        # We then reconstruct from the trusted safe_root prefix so that
+        # .resolve() is never called on unvalidated user data.
+        try:
+            rel = requested.relative_to(safe_root)
+        except ValueError:
             raise ValueError(f"Path outside allowed directory: {user_path}")
-    except ValueError as e:
-        # commonpath raises ValueError if paths are on different drives (Windows)
-        raise ValueError(f"Path validation failed: {user_path}") from e
-    
+        full_path = (safe_root / rel).resolve()
+    else:
+        # Reject parent directory references in relative paths.
+        if ".." in requested.parts:
+            raise ValueError(f"Parent directory references not allowed: {user_path}")
+        # Join with the trusted root before resolving (CodeQL recommended pattern).
+        full_path = (safe_root / requested).resolve()
+
+    # Guard: resolved path must be within safe_root.
+    # str.startswith() is CodeQL's recognised containment barrier for path
+    # injection — it is applied to the resolved path so symlinks that lead
+    # outside the root are also rejected.  On Windows, paths on different
+    # drives share no prefix, so the check naturally fails closed without
+    # needing a separate cross-drive guard.
+    full_path_str = str(full_path)
+    if not (full_path_str == safe_root_str
+            or full_path_str.startswith(safe_root_str + os.sep)):
+        raise ValueError(f"Path outside allowed directory: {user_path}")
+
     # Check existence if required
     if not allow_create and not full_path.exists():
         raise ValueError(f"Path does not exist: {user_path}")
-    
+
     return full_path
 
 
@@ -616,10 +628,16 @@ class InsightLedger:
         Raises:
             ValueError: If output_path is invalid or outside safe directory
         """
-        # Define safe export root
-        # In production, this should come from config
-        export_root = Path.cwd() / "data" / "exports"
-        
+        # Define safe export root. AURORA_LEDGER_EXPORT_PATH makes this
+        # configurable, which the previous comment here asked for ("in
+        # production, this should come from config") and which is also how
+        # callers legitimately accept absolute export paths now that
+        # validate_safe_path has no temp-directory exemption: point the root at
+        # the directory the export belongs in, rather than exempting it.
+        _export_env = os.environ.get("AURORA_LEDGER_EXPORT_PATH", "")
+        export_root = Path(_export_env) if _export_env else Path.cwd() / "data" / "exports"
+        export_root.mkdir(parents=True, exist_ok=True)
+
         # Validate output path is safe
         validated_path = validate_safe_path(output_path, export_root, allow_create=True)
         

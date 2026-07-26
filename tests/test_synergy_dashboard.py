@@ -7,6 +7,16 @@ DLP: synergy_dashboard_tests
 import pytest
 from fastapi.testclient import TestClient
 
+# The signals _runtime_health() is allowed to attribute a score to. Kept in
+# sync with the health_source docstring on ComponentStatus; anything outside
+# this set means a score appeared with no named source behind it.
+_RUNTIME_HEALTH_SOURCES = {
+    "runtime_import",
+    "runtime_routes",
+    "runtime_telemetry",
+    "static",
+}
+
 
 @pytest.fixture
 def test_client():
@@ -30,7 +40,7 @@ class TestSynergyDashboardAPI:
         assert "version" in data
     
     def test_get_components(self, test_client):
-        """Test retrieving static component topology entries."""
+        """Static topology, enriched with runtime-derived health."""
         response = test_client.get("/api/synergy/components")
         assert response.status_code == 200
 
@@ -49,36 +59,54 @@ class TestSynergyDashboardAPI:
         assert "telemetry_available" in component
         assert "telemetry_source" in component
 
-        # The route is static topology, not live health telemetry.
-        assert component["status"] == "documented"
-        assert component["telemetry_available"] is False
-        assert component["telemetry_source"] == "static_registry"
-        assert "health_score" not in component
-        assert "last_heartbeat" not in component
-        assert "uptime_seconds" not in component
-        assert "resource_usage" not in component
-    
+        # Health is derived per request from a real signal, and the response
+        # says which one. Both fields are always present together.
+        assert "health_score" in component
+        assert "health_source" in component
+        assert component["status"] in {"active", "degraded", "unavailable", "unknown"}
+        assert component["health_source"] in _RUNTIME_HEALTH_SOURCES
+
     def test_get_components_with_filter(self, test_client):
-        """Test retrieving components with status filter"""
-        response = test_client.get("/api/synergy/components?status_filter=documented")
+        """status_filter narrows the list to entries with that runtime status."""
+        # Filter on a status the registry actually reports right now rather
+        # than a hard-coded one — a filter value no component matches returns
+        # an empty list, which would make this test pass without exercising
+        # anything.
+        all_components = test_client.get("/api/synergy/components").json()
+        target = all_components[0]["status"]
+
+        response = test_client.get(f"/api/synergy/components?status_filter={target}")
         assert response.status_code == 200
-        
+
         components = response.json()
         assert isinstance(components, list)
-        
-        # All returned components should be documented static entries.
+        assert len(components) > 0, f"no component reported status {target!r}"
         for component in components:
-            assert component["status"] == "documented"
+            assert component["status"] == target
 
     def test_components_do_not_report_placeholder_live_health(self, test_client):
-        """Static component entries do not expose synthetic live-health fields."""
+        """No component field is filled with a value nothing measured.
+
+        health_score is permitted — it is derived from an import probe, route
+        presence, or telemetry, and health_source names which. The fields below
+        have no signal behind them at all, so the route must leave them unset
+        rather than emit a plausible-looking number.
+        """
         response = test_client.get("/api/synergy/components")
         assert response.status_code == 200
 
         for component in response.json():
-            assert component["telemetry_available"] is False
-            assert component["telemetry_source"] == "static_registry"
-            assert "health_score" not in component
+            assert component["health_source"] in _RUNTIME_HEALTH_SOURCES
+            # telemetry_available claims telemetry specifically, not health
+            # generally: it must agree with where the score actually came from.
+            assert component["telemetry_available"] == (
+                component["health_source"] == "runtime_telemetry"
+            )
+            assert component["telemetry_source"] == (
+                "r2_agent_telemetry"
+                if component["health_source"] == "runtime_telemetry"
+                else "static_registry"
+            )
             assert "last_heartbeat" not in component
             assert "uptime_seconds" not in component
             assert "resource_usage" not in component

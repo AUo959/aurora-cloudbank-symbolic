@@ -4,29 +4,109 @@ FastAPI Router for Code Improvement Engine
 Provides REST API for code analysis and improvement suggestions.
 """
 
+import os
+from enum import Enum
+from pathlib import Path, PurePath
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
-from pathlib import Path
-from enum import Enum
-import os
+
 from src.improvement import (
-    get_improvement_engine,
     ImprovementCategory,
-    ImprovementSeverity
+    ImprovementSeverity,
+    get_improvement_engine,
 )
 
 
-# Define SAFE_ROOT as the workspace root directory for path security validation
 SAFE_ROOT = Path(__file__).parent.parent.parent.resolve()
+
+
+def _safe_root() -> Path:
+    """Return the configured analysis root.
+
+    The filesystem root is deliberately rejected: this administrative
+    inspection surface must retain a meaningful containment boundary.
+    """
+    override = os.environ.get("AURORA_IMPROVEMENT_ROOT", "")
+    root = Path(override).resolve() if override else SAFE_ROOT
+    if root.parent == root:
+        raise RuntimeError("AURORA_IMPROVEMENT_ROOT must not be the filesystem root")
+    return root
+
+
+def _request_parts(user_path: str, safe_root: Path) -> tuple[str, ...]:
+    """Convert a request value to lexical root-relative lookup components.
+
+    Request components are used only for equality comparisons with names
+    returned by trusted directory enumeration. They are never joined to a
+    filesystem path.
+    """
+    requested = PurePath(user_path)
+    root_key = PurePath(str(safe_root))
+
+    if requested.is_absolute():
+        try:
+            requested = requested.relative_to(root_key)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=403,
+                detail="Access to this path is not allowed.",
+            ) from exc
+    elif ".." in requested.parts:
+        raise HTTPException(
+            status_code=400,
+            detail="Parent directory references ('..') are not allowed.",
+        )
+
+    parts = tuple(part for part in requested.parts if part not in ("", "."))
+    return parts
+
+
+def _trusted_child(directory: Path, requested_name: str, safe_root: Path) -> Path:
+    """Select one child by comparing a request component to trusted names."""
+    try:
+        children = directory.iterdir()
+        child = next((entry for entry in children if entry.name == requested_name), None)
+    except OSError as exc:
+        raise HTTPException(status_code=404, detail="Path not found.") from exc
+
+    if child is None:
+        raise HTTPException(status_code=404, detail="Path not found.")
+
+    resolved = child.resolve()
+    if resolved != safe_root and safe_root not in resolved.parents:
+        raise HTTPException(
+            status_code=403,
+            detail="Access to this path is not allowed.",
+        )
+    return resolved
+
+
+def _resolve_request_path(user_path: str) -> Path:
+    """Resolve a logical lookup key through trusted directory enumeration.
+
+    Every returned path originates from ``Path.iterdir()`` beneath the trusted
+    root. Remote input participates only in string equality checks, breaking
+    the remote-input-to-filesystem-path data flow entirely.
+    """
+    safe_root = _safe_root()
+    current = safe_root
+
+    for component in _request_parts(user_path, safe_root):
+        if not current.is_dir():
+            raise HTTPException(status_code=404, detail=f"Path not found: {user_path}")
+        current = _trusted_child(current, component, safe_root)
+
+    return current
 
 
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])
 
 
-# Pydantic models
 class ImprovementCategoryEnum(str, Enum):
-    """API representation of improvement category"""
+    """API representation of improvement category."""
+
     REFACTORING = "refactoring"
     PERFORMANCE = "performance"
     SECURITY = "security"
@@ -36,7 +116,8 @@ class ImprovementCategoryEnum(str, Enum):
 
 
 class ImprovementSeverityEnum(str, Enum):
-    """API representation of improvement severity"""
+    """API representation of improvement severity."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -44,35 +125,41 @@ class ImprovementSeverityEnum(str, Enum):
 
 
 class AnalyzeFileRequest(BaseModel):
-    """Request to analyze a single file"""
-    file_path: str = Field(..., description="Path to file to analyze")
+    """Request to analyze a single file."""
+
+    file_path: str = Field(
+        ...,
+        description="File lookup key, root-relative or an absolute path contained within the configured analysis root",
+    )
 
 
 class AnalyzeDirectoryRequest(BaseModel):
-    """Request to analyze a directory"""
-    directory: str = Field(..., description="Directory to scan")
-    file_patterns: List[str] = Field(
-        default=["*.py"],
-        description="File patterns to match"
+    """Request to analyze a directory."""
+
+    directory: str = Field(
+        ...,
+        description="Directory lookup key, root-relative or an absolute path contained within the configured analysis root",
     )
+    file_patterns: List[str] = Field(default=["*.py"], description="File patterns to match")
     min_confidence: float = Field(
         default=0.5,
         ge=0.0,
         le=1.0,
-        description="Minimum confidence threshold"
+        description="Minimum confidence threshold",
     )
     categories: Optional[List[ImprovementCategoryEnum]] = Field(
         None,
-        description="Filter by categories"
+        description="Filter by categories",
     )
     severities: Optional[List[ImprovementSeverityEnum]] = Field(
         None,
-        description="Filter by severities"
+        description="Filter by severities",
     )
 
 
 class SuggestionResponse(BaseModel):
-    """Single improvement suggestion"""
+    """Single improvement suggestion."""
+
     file_path: str
     line_number: int
     category: str
@@ -86,7 +173,8 @@ class SuggestionResponse(BaseModel):
 
 
 class AnalysisReportResponse(BaseModel):
-    """Complete analysis report"""
+    """Complete analysis report."""
+
     total_files_analyzed: int
     total_suggestions: int
     by_category: Dict[str, int]
@@ -98,131 +186,76 @@ class AnalysisReportResponse(BaseModel):
 
 @router.post("/analyze-file", response_model=List[SuggestionResponse])
 async def analyze_file(request: AnalyzeFileRequest):
-    """
-    Analyze a single file for improvement opportunities
-    
-    Returns list of suggestions for the specified file.
-    """
+    """Analyze a single trusted, root-enumerated file."""
     engine = get_improvement_engine()
-    requested_path = Path(request.file_path)
-    
-    # Allow absolute paths in /tmp for testing purposes
-    if requested_path.is_absolute() and str(requested_path).startswith("/tmp/"):
-        full_path = requested_path
-    else:
-        # Explicit security: Disallow absolute paths and up-level references
-        if requested_path.is_absolute():
-            raise HTTPException(status_code=400, detail="Absolute paths are not allowed.")
-        if ".." in requested_path.parts:
-            raise HTTPException(status_code=400, detail="Parent directory references ('..') are not allowed.")
-        # Compute the full, normalized path under the SAFE_ROOT
-        full_path = (SAFE_ROOT / requested_path).resolve()
-
-        # Ensure the resolved path is inside SAFE_ROOT
-        if os.path.commonpath([str(SAFE_ROOT), str(full_path)]) != str(SAFE_ROOT):
-            raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
-
-    if not full_path.exists():
-        raise HTTPException(status_code=404, detail=f"File not found: {request.file_path}")
+    full_path = _resolve_request_path(request.file_path)
 
     if not full_path.is_file():
         raise HTTPException(status_code=400, detail=f"Not a file: {request.file_path}")
 
     suggestions = engine.analyze_file(full_path)
-    return [s.to_dict() for s in suggestions]
+    return [suggestion.to_dict() for suggestion in suggestions]
 
 
 @router.post("/analyze-directory", response_model=AnalysisReportResponse)
 async def analyze_directory(request: AnalyzeDirectoryRequest):
-    """
-    Analyze a directory for improvement opportunities
-    
-    Scans directory with specified patterns and generates comprehensive report.
-    """
+    """Analyze a trusted, root-enumerated directory."""
     engine = get_improvement_engine()
-    requested_path = Path(request.directory)
-    
-    # Allow absolute paths in /tmp for testing purposes
-    if requested_path.is_absolute() and str(requested_path).startswith("/tmp/"):
-        full_path = requested_path
-    else:
-        # Explicit security: Disallow absolute paths and up-level references
-        if requested_path.is_absolute():
-            raise HTTPException(status_code=400, detail="Absolute paths are not allowed.")
-        if ".." in requested_path.parts:
-            raise HTTPException(status_code=400, detail="Parent directory references ('..') are not allowed.")
-        # Compute the full, normalized path under the SAFE_ROOT
-        full_path = (SAFE_ROOT / requested_path).resolve()
-
-        # Ensure the resolved path is inside SAFE_ROOT
-        if os.path.commonpath([str(SAFE_ROOT), str(full_path)]) != str(SAFE_ROOT):
-            raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
-
-    if not full_path.exists():
-        raise HTTPException(status_code=404, detail=f"Directory not found: {request.directory}")
+    full_path = _resolve_request_path(request.directory)
 
     if not full_path.is_dir():
         raise HTTPException(status_code=400, detail=f"Not a directory: {request.directory}")
 
-    # Analyze directory
     results = engine.analyze_directory(full_path, request.file_patterns)
-    
-    # Apply filters
+
     if request.categories or request.severities or request.min_confidence > 0.5:
-        categories = {ImprovementCategory(c.value) for c in request.categories} if request.categories else None
-        severities = {ImprovementSeverity(s.value) for s in request.severities} if request.severities else None
-        
+        categories = (
+            {ImprovementCategory(category.value) for category in request.categories}
+            if request.categories
+            else None
+        )
+        severities = (
+            {ImprovementSeverity(severity.value) for severity in request.severities}
+            if request.severities
+            else None
+        )
+
         filtered_results = {}
         for file_path, suggestions in results.items():
             filtered = engine.filter_suggestions(
                 suggestions,
                 min_confidence=request.min_confidence,
                 categories=categories,
-                severities=severities
+                severities=severities,
             )
             if filtered:
                 filtered_results[file_path] = filtered
-        
         results = filtered_results
-    
-    # Generate report
-    report = engine.generate_report(results)
-    return report
+
+    return engine.generate_report(results)
 
 
 @router.get("/categories", response_model=List[str])
 async def list_categories():
-    """
-    List all available improvement categories
-    
-    Returns list of category identifiers.
-    """
-    return [cat.value for cat in ImprovementCategory]
+    """List all available improvement category identifiers."""
+    return [category.value for category in ImprovementCategory]
 
 
 @router.get("/severities", response_model=List[str])
 async def list_severities():
-    """
-    List all available severity levels
-    
-    Returns list of severity identifiers.
-    """
-    return [sev.value for sev in ImprovementSeverity]
+    """List all available severity identifiers."""
+    return [severity.value for severity in ImprovementSeverity]
 
 
 @router.get("/patterns", response_model=List[Dict[str, str]])
 async def list_patterns():
-    """
-    List all registered improvement patterns
-    
-    Returns information about active detection patterns.
-    """
+    """List all registered improvement patterns."""
     engine = get_improvement_engine()
     return [
         {
             "name": pattern.name,
             "category": pattern.category.value,
-            "severity": pattern.severity.value
+            "severity": pattern.severity.value,
         }
         for pattern in engine._patterns
     ]
@@ -230,16 +263,11 @@ async def list_patterns():
 
 @router.get("/health", response_model=Dict[str, Any])
 async def engine_health():
-    """
-    Get improvement engine health status
-    
-    Returns engine configuration and status.
-    """
+    """Get improvement engine health and configuration status."""
     engine = get_improvement_engine()
-    
     return {
         "status": "operational",
         "patterns_registered": len(engine._patterns),
         "categories_available": len(list(ImprovementCategory)),
-        "severities_available": len(list(ImprovementSeverity))
+        "severities_available": len(list(ImprovementSeverity)),
     }

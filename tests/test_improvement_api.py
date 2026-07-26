@@ -10,6 +10,23 @@ from fastapi.testclient import TestClient
 from src.improvement.api import router
 
 
+@pytest.fixture(autouse=True)
+def confine_analysis_to_tempdir(monkeypatch):
+    """Point the API's safe root at the temp directory these fixtures write to.
+
+    The routes used to admit any absolute path under a temp directory by
+    skipping the containment check outright — a bypass in production code,
+    reported by CodeQL as py/path-injection. That is gone.
+
+    Instead the tests declare their own root. The containment check still runs
+    on every request; it is simply enforcing a root that covers the fixture
+    files (both `tmp_path` and `tempfile.NamedTemporaryFile` live here). The
+    widened root is scoped to this test module — production keeps SAFE_ROOT,
+    with no path exempt from the check.
+    """
+    monkeypatch.setenv("AURORA_IMPROVEMENT_ROOT", tempfile.gettempdir())
+
+
 @pytest.fixture
 def client():
     """Create test client with improvement router"""

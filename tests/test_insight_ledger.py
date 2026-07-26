@@ -651,11 +651,9 @@ def test_api_get_stats(api_client):
 @pytest.mark.api
 def test_api_export_ledger(api_client, temp_ledger_dir):
     """Test POST /ledger/export endpoint."""
-    export_path = Path(temp_ledger_dir) / "api_export.json"
-
     response = api_client.post(
         "/ledger/export",
-        params={"output_path": str(export_path), "include_genesis": True},
+        params={"include_genesis": True},
         headers=_auth_header(),
     )
 
@@ -663,7 +661,9 @@ def test_api_export_ledger(api_client, temp_ledger_dir):
     data = response.json()
     assert data["success"]
     assert data["entries_exported"] >= 1
-    assert export_path.exists()
+    export_name = data["export_path"]
+    assert export_name == Path(export_name).name
+    assert (Path(temp_ledger_dir) / export_name).exists()
 
 
 @pytest.mark.api

@@ -17,11 +17,8 @@ from src.middleware.fastapi_security import require_csrf_token
 from .ledger_core import InsightLedger
 from .schemas import AuditQuery, InsightRecord, LedgerEntry, LedgerStats, VerificationReport
 
-# Initialize router
 router = APIRouter(prefix="/ledger", tags=["Insight Ledger"])
 SENSITIVE_LEDGER_DEPENDENCIES = (Depends(require_csrf_token),)
-
-# Global ledger instance (initialized by main app)
 _ledger_instance: Optional[InsightLedger] = None
 
 
@@ -99,6 +96,8 @@ async def record_insight(request: RecordInsightRequest) -> RecordInsightResponse
             entry_id=entry.entry_id,
             message="Insight recorded successfully",
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -133,6 +132,8 @@ async def verify_integrity(
             )
 
         return VerifyIntegrityResponse(report=report, summary=summary)
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -158,6 +159,8 @@ async def query_history(query: Optional[AuditQuery] = None) -> QueryHistoryRespo
             total_returned=len(entries),
             query=effective_query,
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -175,6 +178,8 @@ async def get_stats() -> LedgerStats:
     """Return ledger health, counts, and storage statistics."""
     try:
         return get_ledger().get_stats()
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -215,6 +220,8 @@ async def export_ledger(
             export_path=export_name,
             entries_exported=entries_exported,
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

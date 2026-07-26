@@ -6,6 +6,7 @@ Provides REST API for code analysis and improvement suggestions.
 
 import os
 from enum import Enum
+from itertools import chain
 from pathlib import Path, PurePath
 from typing import Any, Dict, Iterable, List, Optional
 
@@ -66,7 +67,7 @@ def _request_key(user_path: str, safe_root: Path) -> str:
     return requested.as_posix()
 
 
-def _trusted_candidates(safe_root: Path) -> Iterable[tuple[str, Path]]:
+def _trusted_candidates(safe_root: Path) -> Iterable[tuple[str, Optional[Path]]]:
     """Yield root-relative keys and resolved paths from trusted enumeration.
 
     A lexical candidate may be a symlink. It is resolved only after it has
@@ -74,7 +75,8 @@ def _trusted_candidates(safe_root: Path) -> Iterable[tuple[str, Path]]:
     root are returned with a ``None`` sentinel so an exact request can be
     rejected as an escape rather than reported as missing.
     """
-    for candidate in (safe_root, *safe_root.rglob("*")):
+    candidates = chain((safe_root,), safe_root.rglob("*"))
+    for candidate in candidates:
         try:
             key = candidate.relative_to(safe_root).as_posix()
         except ValueError:
@@ -84,7 +86,7 @@ def _trusted_candidates(safe_root: Path) -> Iterable[tuple[str, Path]]:
         if resolved == safe_root or safe_root in resolved.parents:
             yield key, resolved
         else:
-            yield key, None  # type: ignore[misc]
+            yield key, None
 
 
 def _resolve_request_path(user_path: str) -> Path:

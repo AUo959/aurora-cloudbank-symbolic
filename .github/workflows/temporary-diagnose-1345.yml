@@ -1,0 +1,59 @@
+---
+name: Temporary Diagnose 1345
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.event.pull_request.head.ref == 'agent/fix-memory-retrieval-router-1345'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: agent/fix-memory-retrieval-router-1345
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Apply diagnostic patch
+        run: python scripts/temporary_apply_issue_1345.py
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-test.txt
+
+      - name: Capture validation output
+        shell: bash
+        run: |
+          set +e
+          {
+            python -m py_compile api/aurora_api.py tests/test_memory_retrieval_app_registration.py
+            python -m pytest -q \
+              tests/test_memory_retrieval_app_registration.py \
+              tests/test_api_router_coverage.py \
+              tests/test_api_surface_inventory.py
+          } 2>&1 | tee fix-1345-validation.log
+          status=${PIPESTATUS[0]}
+          echo "validation_status=${status}" | tee -a fix-1345-validation.log
+          exit 0
+
+      - name: Upload validation log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: fix-1345-validation
+          path: fix-1345-validation.log
+          retention-days: 1
+          if-no-files-found: error

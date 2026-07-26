@@ -84,7 +84,7 @@ setup_namespace() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating namespace and RBAC manifest"
-        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | head -50
+        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | sed -n '1,50p'
     else
         kubectl apply -f "$manifest"
     fi
@@ -100,7 +100,7 @@ deploy_config() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating ConfigMap and Secret manifest"
-        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | head -80
+        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | sed -n '1,80p'
     else
         kubectl apply -f "$manifest"
     fi
@@ -120,7 +120,7 @@ deploy_relays() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating updated deployment manifest"
-        kubectl apply -f "$temp_manifest" --dry-run=client --validate=false -o yaml | head -100
+        kubectl apply -f "$temp_manifest" --dry-run=client --validate=false -o yaml | sed -n '1,100p'
     else
         kubectl apply -f "$temp_manifest"
 

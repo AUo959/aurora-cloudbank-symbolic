@@ -162,5 +162,15 @@ jobs:
       - name: Run full test suite
         run: |
           if [ -d tests ]; then
-            pytest tests/ -v --cov=. --cov-report=term-missing
+            set -o pipefail
+            pytest tests/ -v --cov=. --cov-report=term-missing --tb=short 2>&1 | tee pytest-full.log
           fi
+
+      - name: Upload full test log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: pytest-full-log
+          path: pytest-full.log
+          retention-days: 30
+          if-no-files-found: ignore

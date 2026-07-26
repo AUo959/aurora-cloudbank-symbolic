@@ -62,7 +62,10 @@ case "${1:-}" in
             echo "apply must use --validate=false" >&2
             exit 99
         fi
-        printf 'apiVersion: v1\nkind: List\nitems: []\n'
+        # Exceed a typical pipe buffer so terminating consumers trigger SIGPIPE.
+        for index in $(seq 1 20000); do
+            printf 'line-%05d: value\n' "$index"
+        done
         ;;
     cluster-info|get|create|rollout|logs|exec|describe)
         echo "live cluster command forbidden during dry-run: $*" >&2
@@ -159,9 +162,13 @@ esac
     def test_dry_run_uses_only_client_side_kubectl(
         self, script_name, cluster_rejecting_kubectl
     ):
-        """Dry-run must validate manifests without cluster credentials."""
+        """Dry-run must validate manifests without cluster credentials or SIGPIPE."""
         env, kubectl_log = cluster_rejecting_kubectl
         script = SCRIPTS_DIR / script_name
+        script_content = script.read_text()
+        assert "| head -" not in script_content, (
+            f"{script_name} uses a terminating pipeline that can fail under pipefail"
+        )
 
         result = subprocess.run(
             [str(script), "--dry-run"],

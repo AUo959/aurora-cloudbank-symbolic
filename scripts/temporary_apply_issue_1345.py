@@ -106,13 +106,37 @@ EXPECTED_ROUTE_METHODS = {
 }
 
 
+def _join_route_path(prefix: str, path: str) -> str:
+    if not prefix:
+        return path
+    if path == "/":
+        return prefix
+    return f"{prefix.rstrip('/')}/{path.lstrip('/')}"
+
+
+def _iter_routes(routes, prefix: str = ""):
+    for route in routes:
+        child_prefix = prefix
+        include_context = getattr(route, "include_context", None)
+        if include_context:
+            child_prefix = _join_route_path(
+                prefix, getattr(include_context, "prefix", "")
+            )
+        original_router = getattr(route, "original_router", None)
+        if original_router is not None:
+            yield from _iter_routes(original_router.routes, child_prefix)
+        else:
+            yield route, child_prefix
+
+
 def _route_method_counts() -> Counter:
     counts = Counter()
-    for route in app.routes:
+    for route, prefix in _iter_routes(app.routes):
         path = getattr(route, "path", None)
         methods = getattr(route, "methods", None) or set()
         if path:
-            counts.update((path, method) for method in methods)
+            full_path = _join_route_path(prefix, path)
+            counts.update((full_path, method) for method in methods)
     return counts
 
 

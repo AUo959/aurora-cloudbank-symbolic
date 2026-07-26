@@ -31,66 +31,64 @@ except ImportError:
 def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = False) -> Path:
     """
     Validate user-provided path is safe and within bounds.
-    
+
     Args:
-        user_path: User-provided path string
-        safe_root: Root directory that path must be within
+        user_path: User-provided path string (absolute or relative)
+        safe_root: Root directory that path must resolve within
         allow_create: If False, path must already exist
-        
+
     Returns:
         Validated absolute Path within safe_root
-        
+
     Raises:
         ValueError: If path is unsafe (contains .., or resolves outside bounds)
 
-    Absolute paths are permitted **only when they resolve inside safe_root**.
-    They are not a special case: both absolute and relative inputs converge on
-    the single containment check below.
+    Both absolute and relative inputs converge on the same containment check.
+    Absolute paths must sit under safe_root lexically (verified by
+    ``relative_to``) before any filesystem access occurs; the resolved path is
+    then re-checked for symlink escapes.  Relative paths must contain no ``..``
+    components; they are joined with safe_root before resolving.
 
-    This replaces a carve-out that admitted any absolute path under a system
-    temp directory and returned *before* the containment check. That existed so
-    the test-suite could hand the ledger absolute fixture paths, but it was a
-    genuine bypass — caller input could select any file under /tmp — and CodeQL
-    reported it as py/path-injection. Being under a temp root is a location
-    test, not an authorization decision, so no arrangement of it could be made
-    sound. Callers that need to accept absolute paths now point *safe_root* at
-    the directory those paths live in, which is containment rather than an
-    exemption from it.
+    Callers that legitimately accept absolute paths point *safe_root* at the
+    directory those paths live in — containment rather than exemption.
     """
     requested = Path(user_path)
     safe_root = safe_root.resolve()
+    safe_root_str = str(safe_root)
 
     if requested.is_absolute():
-        # Resolve first, then let the shared check below decide. A symlink is
-        # therefore judged by where it actually leads, not by where it sits.
-        full_path = requested.resolve()
+        # Do not call .resolve() directly on caller-supplied absolute paths.
+        # relative_to() is a pure string operation: it raises ValueError when
+        # the path is not lexically under safe_root (no filesystem access).
+        # We then reconstruct from the trusted safe_root prefix so that
+        # .resolve() is never called on unvalidated user data.
+        try:
+            rel = requested.relative_to(safe_root)
+        except ValueError:
+            raise ValueError(f"Path outside allowed directory: {user_path}")
+        full_path = (safe_root / rel).resolve()
     else:
-        # Reject parent directory references
+        # Reject parent directory references in relative paths.
         if ".." in requested.parts:
             raise ValueError(f"Parent directory references not allowed: {user_path}")
-
-        # Resolve to absolute path within safe_root
+        # Join with the trusted root before resolving (CodeQL recommended pattern).
         full_path = (safe_root / requested).resolve()
 
-    # Verify resolved path is within safe_root.
-    #
-    # The commonpath() call is what needs guarding — it raises ValueError when
-    # the paths share no root (different drives on Windows). The containment
-    # rejection below must stay *outside* that try: it raises ValueError too, so
-    # when it lived inside, every ordinary out-of-bounds path was caught by its
-    # own handler and re-reported as the far vaguer "Path validation failed".
-    try:
-        common = os.path.commonpath([safe_root, full_path])
-    except ValueError as e:
-        raise ValueError(f"Path validation failed: {user_path}") from e
-
-    if common != str(safe_root):
+    # Guard: resolved path must be within safe_root.
+    # str.startswith() is CodeQL's recognised containment barrier for path
+    # injection — it is applied to the resolved path so symlinks that lead
+    # outside the root are also rejected.  On Windows, paths on different
+    # drives share no prefix, so the check naturally fails closed without
+    # needing a separate cross-drive guard.
+    full_path_str = str(full_path)
+    if not (full_path_str == safe_root_str
+            or full_path_str.startswith(safe_root_str + os.sep)):
         raise ValueError(f"Path outside allowed directory: {user_path}")
-    
+
     # Check existence if required
     if not allow_create and not full_path.exists():
         raise ValueError(f"Path does not exist: {user_path}")
-    
+
     return full_path
 
 

@@ -37,6 +37,57 @@ def _safe_root() -> Path:
     return Path(override).resolve() if override else SAFE_ROOT
 
 
+def _resolve_request_path(user_path: str) -> Path:
+    """Validate and resolve *user_path* to an absolute path within the safe root.
+
+    Applies CodeQL's recommended ``startswith``-based containment pattern:
+
+    * Absolute inputs are first checked lexically via ``relative_to()`` (a pure
+      string operation, no filesystem access) so that ``.resolve()`` is never
+      called on unvalidated caller data.
+    * Relative inputs are joined with the trusted root before resolving.
+    * The resolved path is re-checked against the safe root to catch symlinks
+      that would otherwise escape containment.
+    * Cross-drive paths on Windows fail closed (different drive letters produce
+      no common prefix, so ``startswith`` returns False).
+
+    Raises HTTPException 400 on traversal attempts and 403 on containment
+    failures; callers add the 404/400 existence/type checks they need.
+    """
+    safe_root = _safe_root()
+    safe_root_str = str(safe_root)
+    requested = Path(user_path)
+
+    if requested.is_absolute():
+        # Lexical containment check before any filesystem access.
+        # relative_to() raises ValueError if the path is not under safe_root,
+        # which we convert to a 403.  We then reconstruct from the trusted root
+        # so that .resolve() is not called directly on caller-supplied data.
+        try:
+            rel = requested.relative_to(safe_root)
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
+        full_path = (safe_root / rel).resolve()
+    else:
+        if ".." in requested.parts:
+            raise HTTPException(
+                status_code=400,
+                detail="Parent directory references ('..') are not allowed.",
+            )
+        # Join with the trusted root before resolving (CodeQL recommended pattern).
+        full_path = (safe_root / requested).resolve()
+
+    # Guard: resolved path must sit within safe_root.
+    # startswith() is CodeQL's recognised containment barrier; os.sep ensures
+    # that /safe/root does not accidentally match /safe/rootother.
+    full_path_str = str(full_path)
+    if not (full_path_str == safe_root_str
+            or full_path_str.startswith(safe_root_str + os.sep)):
+        raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
+
+    return full_path
+
+
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])
 
 
@@ -116,27 +167,11 @@ class AnalysisReportResponse(BaseModel):
 async def analyze_file(request: AnalyzeFileRequest):
     """
     Analyze a single file for improvement opportunities
-    
+
     Returns list of suggestions for the specified file.
     """
     engine = get_improvement_engine()
-    requested_path = Path(request.file_path)
-    
-    # Absolute and relative inputs converge on one containment check. An
-    # absolute path is not exempt from it — it is simply resolved first, so a
-    # symlink is judged by where it leads rather than where it sits.
-    safe_root = _safe_root()
-    if requested_path.is_absolute():
-        full_path = requested_path.resolve()
-    else:
-        if ".." in requested_path.parts:
-            raise HTTPException(status_code=400, detail="Parent directory references ('..') are not allowed.")
-        # Compute the full, normalized path under the safe root
-        full_path = (safe_root / requested_path).resolve()
-
-    # Ensure the resolved path is inside the safe root
-    if os.path.commonpath([str(safe_root), str(full_path)]) != str(safe_root):
-        raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
+    full_path = _resolve_request_path(request.file_path)
 
     if not full_path.exists():
         raise HTTPException(status_code=404, detail=f"File not found: {request.file_path}")
@@ -152,27 +187,11 @@ async def analyze_file(request: AnalyzeFileRequest):
 async def analyze_directory(request: AnalyzeDirectoryRequest):
     """
     Analyze a directory for improvement opportunities
-    
+
     Scans directory with specified patterns and generates comprehensive report.
     """
     engine = get_improvement_engine()
-    requested_path = Path(request.directory)
-    
-    # Absolute and relative inputs converge on one containment check. An
-    # absolute path is not exempt from it — it is simply resolved first, so a
-    # symlink is judged by where it leads rather than where it sits.
-    safe_root = _safe_root()
-    if requested_path.is_absolute():
-        full_path = requested_path.resolve()
-    else:
-        if ".." in requested_path.parts:
-            raise HTTPException(status_code=400, detail="Parent directory references ('..') are not allowed.")
-        # Compute the full, normalized path under the safe root
-        full_path = (safe_root / requested_path).resolve()
-
-    # Ensure the resolved path is inside the safe root
-    if os.path.commonpath([str(safe_root), str(full_path)]) != str(safe_root):
-        raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
+    full_path = _resolve_request_path(request.directory)
 
     if not full_path.exists():
         raise HTTPException(status_code=404, detail=f"Directory not found: {request.directory}")

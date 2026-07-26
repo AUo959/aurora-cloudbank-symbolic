@@ -145,7 +145,7 @@ class ComponentStatus(BaseModel):
     category: str
     description: str
     endpoints: List[str]
-    status: str = Field(description="active|degraded|unavailable|documented")
+    status: str = Field(description="active|degraded|unavailable|unknown")
     telemetry_available: bool = False
     telemetry_source: str = "static_registry"
     health_score: Optional[float] = Field(default=None, ge=0.0, le=100.0)

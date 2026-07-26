@@ -165,10 +165,10 @@ def _truthy(value: Optional[str]) -> bool:
     return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
-_USERS_DB_CACHE: Optional[Dict[str, Any]] = None
+_USERS_DB_CACHE: Optional[Dict[str, UserInDB]] = None
 
 
-def get_users_db() -> Dict[str, Any]:
+def get_users_db() -> Dict[str, UserInDB]:
     """Return the auth user database, building it on first use.
 
     Deliberately lazy. This was previously ``USERS_DB = build_auth_users_db()``

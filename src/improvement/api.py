@@ -6,9 +6,8 @@ Provides REST API for code analysis and improvement suggestions.
 
 import os
 from enum import Enum
-from itertools import chain
 from pathlib import Path, PurePath
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -20,18 +19,14 @@ from src.improvement import (
 )
 
 
-# Define SAFE_ROOT as the workspace root directory for path security validation
 SAFE_ROOT = Path(__file__).parent.parent.parent.resolve()
 
 
 def _safe_root() -> Path:
     """Return the configured analysis root.
 
-    The root may be overridden for isolated tests and deployments. The
-    filesystem root is deliberately rejected: the improvement API is an
-    administrative inspection surface, not a general-purpose filesystem
-    browser, and a root-wide configuration would erase its containment
-    boundary.
+    The filesystem root is deliberately rejected: this administrative
+    inspection surface must retain a meaningful containment boundary.
     """
     override = os.environ.get("AURORA_IMPROVEMENT_ROOT", "")
     root = Path(override).resolve() if override else SAFE_ROOT
@@ -40,12 +35,12 @@ def _safe_root() -> Path:
     return root
 
 
-def _request_key(user_path: str, safe_root: Path) -> str:
-    """Convert a request value to a root-relative lookup key without I/O.
+def _request_parts(user_path: str, safe_root: Path) -> tuple[str, ...]:
+    """Convert a request value to lexical root-relative lookup components.
 
-    Request values are never joined to, resolved against, or opened as paths.
-    They are used only as lexical keys for matching trusted paths enumerated
-    from ``safe_root``.
+    Request components are used only for equality comparisons with names
+    returned by trusted directory enumeration. They are never joined to a
+    filesystem path.
     """
     requested = PurePath(user_path)
     root_key = PurePath(str(safe_root))
@@ -64,60 +59,53 @@ def _request_key(user_path: str, safe_root: Path) -> str:
             detail="Parent directory references ('..') are not allowed.",
         )
 
-    return requested.as_posix()
+    parts = tuple(part for part in requested.parts if part not in ("", "."))
+    return parts
 
 
-def _trusted_candidates(safe_root: Path) -> Iterable[tuple[str, Optional[Path]]]:
-    """Yield root-relative keys and resolved paths from trusted enumeration.
+def _trusted_child(directory: Path, requested_name: str, safe_root: Path) -> Path:
+    """Select one child by comparing a request component to trusted names."""
+    try:
+        children = directory.iterdir()
+        child = next((entry for entry in children if entry.name == requested_name), None)
+    except OSError as exc:
+        raise HTTPException(status_code=404, detail="Path not found.") from exc
 
-    A lexical candidate may be a symlink. It is resolved only after it has
-    been obtained from the trusted root, and candidates resolving outside the
-    root are returned with a ``None`` sentinel so an exact request can be
-    rejected as an escape rather than reported as missing.
-    """
-    candidates = chain((safe_root,), safe_root.rglob("*"))
-    for candidate in candidates:
-        try:
-            key = candidate.relative_to(safe_root).as_posix()
-        except ValueError:
-            continue
+    if child is None:
+        raise HTTPException(status_code=404, detail="Path not found.")
 
-        resolved = candidate.resolve()
-        if resolved == safe_root or safe_root in resolved.parents:
-            yield key, resolved
-        else:
-            yield key, None
+    resolved = child.resolve()
+    if resolved != safe_root and safe_root not in resolved.parents:
+        raise HTTPException(
+            status_code=403,
+            detail="Access to this path is not allowed.",
+        )
+    return resolved
 
 
 def _resolve_request_path(user_path: str) -> Path:
-    """Resolve a logical request key to a trusted enumerated path.
+    """Resolve a logical lookup key through trusted directory enumeration.
 
-    The remote request value participates only in string comparison. Every
-    returned ``Path`` originates from enumeration beneath the configured root,
-    eliminating remote-input-to-filesystem-path construction.
+    Every returned path originates from ``Path.iterdir()`` beneath the trusted
+    root. Remote input participates only in string equality checks, breaking
+    the remote-input-to-filesystem-path data flow entirely.
     """
     safe_root = _safe_root()
-    key = _request_key(user_path, safe_root)
+    current = safe_root
 
-    for candidate_key, candidate in _trusted_candidates(safe_root):
-        if candidate_key != key:
-            continue
-        if candidate is None:
-            raise HTTPException(
-                status_code=403,
-                detail="Access to this path is not allowed.",
-            )
-        return candidate
+    for component in _request_parts(user_path, safe_root):
+        if not current.is_dir():
+            raise HTTPException(status_code=404, detail=f"Path not found: {user_path}")
+        current = _trusted_child(current, component, safe_root)
 
-    raise HTTPException(status_code=404, detail=f"Path not found: {user_path}")
+    return current
 
 
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])
 
 
-# Pydantic models
 class ImprovementCategoryEnum(str, Enum):
-    """API representation of improvement category"""
+    """API representation of improvement category."""
 
     REFACTORING = "refactoring"
     PERFORMANCE = "performance"
@@ -128,7 +116,7 @@ class ImprovementCategoryEnum(str, Enum):
 
 
 class ImprovementSeverityEnum(str, Enum):
-    """API representation of improvement severity"""
+    """API representation of improvement severity."""
 
     LOW = "low"
     MEDIUM = "medium"
@@ -137,19 +125,16 @@ class ImprovementSeverityEnum(str, Enum):
 
 
 class AnalyzeFileRequest(BaseModel):
-    """Request to analyze a single file"""
+    """Request to analyze a single file."""
 
     file_path: str = Field(..., description="Root-relative file lookup key")
 
 
 class AnalyzeDirectoryRequest(BaseModel):
-    """Request to analyze a directory"""
+    """Request to analyze a directory."""
 
     directory: str = Field(..., description="Root-relative directory lookup key")
-    file_patterns: List[str] = Field(
-        default=["*.py"],
-        description="File patterns to match",
-    )
+    file_patterns: List[str] = Field(default=["*.py"], description="File patterns to match")
     min_confidence: float = Field(
         default=0.5,
         ge=0.0,
@@ -167,7 +152,7 @@ class AnalyzeDirectoryRequest(BaseModel):
 
 
 class SuggestionResponse(BaseModel):
-    """Single improvement suggestion"""
+    """Single improvement suggestion."""
 
     file_path: str
     line_number: int
@@ -182,7 +167,7 @@ class SuggestionResponse(BaseModel):
 
 
 class AnalysisReportResponse(BaseModel):
-    """Complete analysis report"""
+    """Complete analysis report."""
 
     total_files_analyzed: int
     total_suggestions: int
@@ -239,7 +224,6 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
             )
             if filtered:
                 filtered_results[file_path] = filtered
-
         results = filtered_results
 
     return engine.generate_report(results)

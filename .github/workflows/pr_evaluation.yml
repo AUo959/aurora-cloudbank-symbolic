@@ -7,7 +7,7 @@ on:
 jobs:
   evaluate:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -24,54 +24,56 @@ jobs:
         echo "Changed files:\n$changed"
         should_run=false
         echo "$changed" | grep -E '^(api/|src/|tools/|tests/|modules/(hr_system|resilience_sentinel|gumas|symbolic_core|aumemmanager)/)' && should_run=true || true
-        echo "should_run=$should_run" >> $GITHUB_OUTPUT
+        echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
         if [ "$should_run" != "true" ]; then
           echo "No first-class directory changes detected; evaluation will be skipped."
         fi
-    
+
     - name: Set up Python
       if: steps.detect.outputs.should_run == 'true'
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
       if: steps.detect.outputs.should_run == 'true'
       run: |
         python -m pip install --upgrade pip
         pip install pytest flake8
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    
+
     - name: Run PR Evaluation
       if: steps.detect.outputs.should_run == 'true'
       id: evaluate
       run: |
+        set +e
         python3 tools/pr_evaluator.py --pr ${{ github.event.pull_request.number }} --output pr_results.json
-        echo "exit_code=$?" >> $GITHUB_OUTPUT
-      continue-on-error: true
-    
+        EXIT_CODE=$?
+        set -e
+        echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
+
     - name: Upload evaluation results
       if: steps.detect.outputs.should_run == 'true'
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
       with:
         name: pr-evaluation-results
         path: pr_results.json
-    
+
     - name: Comment on PR
       if: steps.detect.outputs.should_run == 'true'
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
       with:
         script: |
           const fs = require('fs');
-          
+
           if (!fs.existsSync('pr_results.json')) {
             console.log('No evaluation results found, skipping comment');
             return;
           }
-          
+
           const results = JSON.parse(fs.readFileSync('pr_results.json', 'utf8'));
           const scoreThreshold = 0.7;
-          
+
           const MARKER = '<!-- PR_EVALUATION -->';
 
           // Build comment body
@@ -133,7 +135,7 @@ jobs:
               body: commentBody,
             });
           }
-    
+
     - name: Check evaluation status
       if: steps.detect.outputs.should_run == 'true' && steps.evaluate.outputs.exit_code != '0'
       run: |
@@ -143,4 +145,4 @@ jobs:
     - name: Skip summary
       if: steps.detect.outputs.should_run != 'true'
       run: |
-        echo "No first-class changes detected; PR Evaluation skipped." >> $GITHUB_STEP_SUMMARY
+        echo "No first-class changes detected; PR Evaluation skipped." >> "$GITHUB_STEP_SUMMARY"

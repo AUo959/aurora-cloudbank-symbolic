@@ -91,7 +91,7 @@ deploy_services() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating services manifest: $service_file"
-        kubectl apply -f "$service_file" --dry-run=client --validate=false -o yaml | head -80
+        kubectl apply -f "$service_file" --dry-run=client --validate=false -o yaml | sed -n '1,80p'
     else
         kubectl apply -f "$service_file"
     fi
@@ -113,7 +113,7 @@ deploy_hpa_monitoring() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating HPA and monitoring manifest: $hpa_file"
-        kubectl apply -f "$hpa_file" --dry-run=client --validate=false -o yaml | head -80
+        kubectl apply -f "$hpa_file" --dry-run=client --validate=false -o yaml | sed -n '1,80p'
     else
         # Check if metrics-server is available
         if kubectl get apiservice v1beta1.metrics.k8s.io &> /dev/null; then
@@ -289,13 +289,13 @@ print_summary() {
 
     if [[ "$DRY_RUN" != "true" ]]; then
         echo "Services:"
-        kubectl get svc -n "$NAMESPACE" 2>/dev/null | head -10
+        kubectl get svc -n "$NAMESPACE" 2>/dev/null | sed -n '1,10p'
         echo ""
         echo "HPA:"
         kubectl get hpa -n "$NAMESPACE" 2>/dev/null || echo "  Not configured"
         echo ""
         echo "Pods:"
-        kubectl get pods -n "$NAMESPACE" -l app=aurora-gui-cloudhub -o wide 2>/dev/null | head -10
+        kubectl get pods -n "$NAMESPACE" -l app=aurora-gui-cloudhub -o wide 2>/dev/null | sed -n '1,10p'
     fi
 
     echo "========================================"

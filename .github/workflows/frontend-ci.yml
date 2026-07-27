@@ -77,5 +77,9 @@ jobs:
       # Blocking, but currently vacuous: no *.test.* or *.spec.* files exist yet.
       # --passWithNoTests keeps it green until they do, at which point this step
       # starts enforcing them without needing to be edited.
+      #
+      # --no-install so npx can only run the vitest already pinned by
+      # package-lock.json; without it npx will silently fetch and execute an
+      # unpinned release when the local one is missing.
       - name: Unit tests
-        run: npx vitest run --passWithNoTests
+        run: npx --no-install vitest run --passWithNoTests

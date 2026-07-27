@@ -57,19 +57,29 @@ jobs:
         with:
           python-version: '3.12'
 
+      # requirements-test.txt carries pytest and its plugins; requirements.txt
+      # alone leaves the runner without a pytest to invoke.
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt -r requirements-test.txt
 
+      # `shell: bash` on every step below: the Windows default is PowerShell,
+      # which does not accept backslash line-continuations and reported the
+      # whole invocation as an unrecognised cmdlet. `python -m pytest` rather
+      # than bare `pytest` so the run does not depend on the console script
+      # landing on PATH, which differs between the runners.
+      #
       # Fail closed: these are the surfaces where platform assumptions bite.
       - name: Path, ledger and improvement tests
+        shell: bash
         run: |
-          pytest -q --tb=short \
+          python -m pytest -q --tb=short \
             tests/test_insight_ledger.py \
             tests/test_insight_ledger_integration.py \
             tests/modules/test_insight_ledger_security.py \
             tests/test_improvement_api.py
 
       - name: Security-marked tests
-        run: pytest -q -m security --tb=short
+        shell: bash
+        run: python -m pytest -q -m security --tb=short

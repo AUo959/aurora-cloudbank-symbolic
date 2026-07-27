@@ -379,10 +379,14 @@ class CodeImprovementEngine:
 
                 resolved = file_path.resolve()
                 if directory_resolved not in resolved.parents:
+                    # `pattern` is caller-controlled, so it goes through
+                    # safe_str() like every other untrusted value logged here —
+                    # a raw %r would let a crafted pattern inject newlines and
+                    # forge log entries.
                     logger.warning(
-                        "Skipping %s: pattern %r escaped the analysis directory",
+                        "Skipping %s: pattern %s escaped the analysis directory",
                         safe_path(resolved),
-                        pattern,
+                        safe_str(pattern),
                     )
                     continue
 

@@ -113,16 +113,28 @@ jobs:
       - name: Require clean moderate audit
         run: npm audit --audit-level=moderate --json > audit-after.json
 
-      - name: Run Node tests
-        run: npm run test:node
+      - name: Run JavaScript and TypeScript validation
+        run: |
+          set +e
+          set -o pipefail
 
-      - name: Run web tests
-        run: npm run test:web
+          npm run test:node 2>&1 | tee node-tests.log
+          NODE_EXIT=${PIPESTATUS[0]}
 
-      - name: Run Constellation TypeScript check
-        run: npx tsc --project tsconfig.constellation.json --noEmit --skipLibCheck --pretty false
+          npm run test:web 2>&1 | tee web-tests.log
+          WEB_EXIT=${PIPESTATUS[0]}
+
+          npx tsc --project tsconfig.constellation.json --noEmit --skipLibCheck --pretty false 2>&1 | tee typescript-check.log
+          TSC_EXIT=${PIPESTATUS[0]}
+
+          printf 'node=%s\nweb=%s\ntypescript=%s\n' "$NODE_EXIT" "$WEB_EXIT" "$TSC_EXIT" | tee validation-status.txt
+
+          if [ "$NODE_EXIT" -ne 0 ] || [ "$WEB_EXIT" -ne 0 ] || [ "$TSC_EXIT" -ne 0 ]; then
+            exit 1
+          fi
 
       - name: Capture dependency versions (informational)
+        if: always()
         continue-on-error: true
         run: npm ls ws engine.io socket.io-adapter js-yaml brace-expansion body-parser --all --json > dependency-versions-after.json
 
@@ -143,6 +155,10 @@ jobs:
             audit-after-lockfile.json
             audit-after.json
             dependency-versions-after.json
+            node-tests.log
+            web-tests.log
+            typescript-check.log
+            validation-status.txt
             package-candidate.json
             package-lock-candidate.json
           retention-days: 30

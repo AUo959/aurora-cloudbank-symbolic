@@ -38,7 +38,11 @@ jobs:
           npm --version
           npm audit --audit-level=moderate --json > audit-before.json || true
           cp package.json package.json.before
-          npm audit fix --package-lock-only
+          set +e
+          npm audit fix --package-lock-only 2>&1 | tee audit-fix.log
+          AUDIT_FIX_EXIT=${PIPESTATUS[0]}
+          set -e
+          echo "npm audit fix exit code: ${AUDIT_FIX_EXIT}"
           if ! cmp -s package.json package.json.before; then
             echo "::error::Lockfile-only remediation changed package.json"
             diff -u package.json.before package.json || true
@@ -74,6 +78,7 @@ jobs:
           name: npm-audit-remediation-1341
           path: |
             audit-before.json
+            audit-fix.log
             audit-after.json
             dependency-versions-after.json
           retention-days: 30

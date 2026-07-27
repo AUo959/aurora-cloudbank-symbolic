@@ -87,12 +87,31 @@ jobs:
           rm -rf tools/security/.gate001a_payload
 
       - name: Commit durable first-class run package
+        id: mutation
         shell: bash
         run: |
-          set -euo pipefail
-          git config user.name "aurora-githubops"
-          git config user.email "githubops@users.noreply.github.com"
-          git add -A
-          git diff --cached --check
-          git commit -m "security: record Gate-001A Run 001 evidence package"
-          git push origin HEAD:security/gate-001a-run-001-recovered-protocol-wiring
+          set +e
+          mkdir -p gate001a-mutation-diagnostic
+          {
+            git config user.name "aurora-githubops"
+            git config user.email "githubops@users.noreply.github.com"
+            git status --short
+            git add -A
+            git diff --cached --check
+            git status --short
+            git commit -m "security: record Gate-001A Run 001 evidence package"
+            git push origin HEAD:security/gate-001a-run-001-recovered-protocol-wiring
+          } > gate001a-mutation-diagnostic/mutation.log 2>&1
+          status=$?
+          printf '%s\n' "$status" > gate001a-mutation-diagnostic/exit_code.txt
+          cat gate001a-mutation-diagnostic/mutation.log
+          exit "$status"
+
+      - name: Upload package mutation diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-001a-run-001-mutation-diagnostic
+          path: gate001a-mutation-diagnostic/
+          if-no-files-found: warn
+          retention-days: 14

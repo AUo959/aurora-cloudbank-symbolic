@@ -20,6 +20,8 @@ Aurora may execute a deterministic model of a real institutional process in L1 w
 
 The simulated roles and interactions represented inside that event are **not** physical L1 entities. They are explicitly typed `simulated_role` fixtures and have no Orion Station location, staff-registry identity, or real-world agency.
 
+The execution locus—a local workstation, hosted runner, or another governed tool—does not change the event's layer or authority when the accountable baseline, provenance, evidence custody, and deterministic contract remain the same.
+
 ---
 
 ## 2. Two Different Uses of Simulation

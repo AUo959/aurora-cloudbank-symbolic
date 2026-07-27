@@ -6,7 +6,7 @@ Provides REST API for code analysis and improvement suggestions.
 
 import os
 from enum import Enum
-from pathlib import Path, PurePath
+from pathlib import Path, PurePath, PureWindowsPath
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
@@ -44,17 +44,37 @@ def _validate_file_patterns(file_patterns: Optional[List[str]]) -> None:
     siblings, and ``../../*.py`` escaped the configured root entirely, with the
     matched absolute paths echoed back in the response.
 
-    Absolute patterns already raise NotImplementedError inside pathlib, but are
+    Rooted patterns already raise NotImplementedError inside pathlib, but are
     rejected here too so the caller gets a 400 rather than a 500.
+
+    The check runs through PureWindowsPath on every platform because
+    ``is_absolute()`` alone is not sufficient and its answer is
+    platform-dependent:
+
+    ==========================  ===========  ==========  =====
+    pattern                     posix_abs    win_abs     caught by
+    ==========================  ===========  ==========  =====
+    ``/etc/*.conf``             True         **False**   root
+    ``C:foo/*.py``              False        **False**   drive
+    ``C:/x/*.py``               False        True        drive/root
+    ``\\\\srv\\share\\*.py``    False        True        drive
+    ``../*.py``                 False        False       ``..``
+    ==========================  ===========  ==========  =====
+
+    ``/etc/*.conf`` is the case that matters: on Windows it has no drive, so
+    ``is_absolute()`` is False and it slipped through to rglob(), which raised
+    NotImplementedError and turned a 400 into a 500. ``C:foo`` is the
+    drive-relative form tracked in #1337. PureWindowsPath also treats ``\\`` as
+    a separator, so ``..\\..\\x`` is caught on Linux too.
     """
     for pattern in file_patterns or []:
-        candidate = PurePath(pattern)
-        if candidate.is_absolute() or ".." in candidate.parts:
+        candidate = PureWindowsPath(pattern)
+        if candidate.drive or candidate.root or ".." in candidate.parts:
             raise HTTPException(
                 status_code=400,
                 detail=(
                     "File patterns must stay within the analyzed directory: "
-                    "absolute patterns and '..' are not allowed."
+                    "rooted, drive-qualified and '..' patterns are not allowed."
                 ),
             )
 

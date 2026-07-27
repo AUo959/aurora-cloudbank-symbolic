@@ -298,7 +298,21 @@ def test_analyze_directory_summary_statistics(client, tmp_path):
 @pytest.mark.security
 @pytest.mark.parametrize(
     "pattern",
-    ["../*.py", "../../*.py", "**/../*.py", "/etc/*.conf"],
+    [
+        "../*.py",
+        "../../*.py",
+        "**/../*.py",
+        # Rooted but NOT absolute on Windows: PurePath("/etc/*.conf").is_absolute()
+        # is False there because it carries no drive, so an is_absolute() check
+        # alone let this through to rglob(), which raised NotImplementedError —
+        # a 500 where a 400 belongs. Caught on windows-latest, not locally.
+        "/etc/*.conf",
+        # Drive-relative: no root, but a drive. Same blind spot (see #1337).
+        "C:foo/*.py",
+        "C:/x/*.py",
+        # Backslash separators must be read as separators on every platform.
+        r"..\..\*.py",
+    ],
 )
 def test_file_patterns_cannot_escape_the_analyzed_directory(client, tmp_path, pattern):
     """A glob pattern must not read files outside the requested directory.

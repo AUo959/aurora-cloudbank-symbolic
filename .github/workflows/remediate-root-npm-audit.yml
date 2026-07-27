@@ -14,9 +14,9 @@ permissions:
 
 jobs:
   remediate:
-    name: Lockfile-only audit remediation
+    name: Lockfile and targeted override remediation
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout remediation branch
@@ -25,13 +25,21 @@ jobs:
           ref: agent/remediate-root-npm-audit
           fetch-depth: 0
 
+      - name: Incorporate current main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-edit origin/main
+
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
           cache: npm
 
-      - name: Capture baseline and remediate lockfile
+      - name: Apply lockfile-first remediation
         run: |
           set -euo pipefail
           node --version
@@ -49,10 +57,57 @@ jobs:
             mv package.json.before package.json
             exit 1
           fi
-          rm package.json.before
           git diff -- package-lock.json
 
-      - name: Clean install from remediated lockfile
+      - name: Clean install lockfile-first result
+        run: npm ci
+
+      - name: Capture remaining lockfile-only findings
+        run: npm audit --audit-level=moderate --json > audit-after-lockfile.json || true
+
+      - name: Add targeted brace-expansion override
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('package.json')
+          data = json.loads(path.read_text())
+          before = json.loads(Path('package.json.before').read_text())
+
+          if data.get('dependencies') != before.get('dependencies'):
+              raise SystemExit('direct dependencies changed before override')
+          if data.get('devDependencies') != before.get('devDependencies'):
+              raise SystemExit('devDependencies changed before override')
+
+          overrides = dict(data.get('overrides', {}))
+          overrides['brace-expansion'] = '5.0.8'
+          data['overrides'] = overrides
+          path.write_text(json.dumps(data, indent=2) + '\n')
+          PY
+          npm install --package-lock-only
+
+      - name: Validate manifest scope
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          before = json.loads(Path('package.json.before').read_text())
+          after = json.loads(Path('package.json').read_text())
+
+          assert after.get('dependencies') == before.get('dependencies')
+          assert after.get('devDependencies') == before.get('devDependencies')
+
+          expected = dict(before.get('overrides', {}))
+          expected['brace-expansion'] = '5.0.8'
+          assert after.get('overrides', {}) == expected
+          PY
+          git diff -- package.json package-lock.json
+
+      - name: Clean install final candidate
         run: npm ci
 
       - name: Require clean moderate audit
@@ -71,6 +126,12 @@ jobs:
         continue-on-error: true
         run: npm ls ws engine.io socket.io-adapter js-yaml brace-expansion body-parser --all --json > dependency-versions-after.json
 
+      - name: Preserve candidate evidence
+        if: always()
+        run: |
+          cp package.json package-candidate.json || true
+          cp package-lock.json package-lock-candidate.json || true
+
       - name: Upload remediation evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -79,29 +140,27 @@ jobs:
           path: |
             audit-before.json
             audit-fix.log
+            audit-after-lockfile.json
             audit-after.json
             dependency-versions-after.json
+            package-candidate.json
+            package-lock-candidate.json
           retention-days: 30
           if-no-files-found: warn
 
-      - name: Commit validated lockfile and self-clean
+      - name: Commit validated candidate and self-clean
         run: |
           set -euo pipefail
-          git diff --exit-code -- package.json
-          if git diff --quiet -- package-lock.json; then
-            echo "::error::npm audit fix produced no package-lock.json change"
-            exit 1
-          fi
+          rm package.json.before
           git rm .github/workflows/remediate-root-npm-audit.yml
           git rm .github/agent-tasks/issue-1341.md
-          git add package-lock.json
+          git add package.json package-lock.json
           printf '%s\n' \
             '.github/agent-tasks/issue-1341.md' \
             '.github/workflows/remediate-root-npm-audit.yml' \
-            'package-lock.json' > expected-files.txt
+            'package-lock.json' \
+            'package.json' > expected-files.txt
           git diff --cached --name-only | sort > staged-files.txt
           diff -u expected-files.txt staged-files.txt
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'security: remediate root npm audit lockfile'
+          git commit -m 'security: remediate root npm audit baseline'
           git push origin HEAD:agent/remediate-root-npm-audit

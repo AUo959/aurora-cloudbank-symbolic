@@ -32,10 +32,12 @@ class NarrativeRiverStore:
     def safe_scene_name(scene_id: str) -> str:
         """Convert a scene ID into a stable filename without accepting path syntax."""
 
-        normalized = _SAFE_NAME.sub("_", scene_id.strip()).strip("._-")
+        raw = scene_id.strip()
+        normalized = _SAFE_NAME.sub("_", raw).strip("._-")
         if not normalized:
             raise ValueError("scene_id does not contain a usable filename component")
-        return normalized[:180]
+        digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:10]
+        return f"{normalized[:160]}--{digest}"
 
     def _contained(self, path: Path) -> Path:
         resolved = path.resolve()

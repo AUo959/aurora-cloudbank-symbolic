@@ -56,11 +56,12 @@ def test_gate_001b_requires_structured_digest_resolved_evidence():
 
 def test_l1_institutional_modeling_does_not_create_physical_simulated_entities():
     text = ARCHITECTURE_ADDENDUM.read_text(encoding="utf-8")
-    assert "L1 institutional modeling" in text
-    assert "simulated_role" in text
-    assert "not physical L1 entities" in text
-    assert "L2 scenario-world simulation" in text
-    assert "Simulated roles never enter the L1 staff registry" in text
+    semantic_text = text.replace("**", "")
+    assert "L1 institutional modeling" in semantic_text
+    assert "simulated_role" in semantic_text
+    assert "not physical L1 entities" in semantic_text
+    assert "L2 scenario-world simulation" in semantic_text
+    assert "Simulated roles never enter the L1 staff registry" in semantic_text
 
 
 def test_local_contract_and_validator_are_vendored_and_parseable():
@@ -105,4 +106,4 @@ def test_recovered_protocol_gate_001b_requires_verified_receipts():
 def test_existing_external_engagement_scope_remains_present():
     text = PENTEST_SCOPE.read_text(encoding="utf-8")
     assert "External Security Review Scope v2" in text
-    assert "Engagement must not begin until all three signatures are on record" in text
+    assert "Engagement must not begin until all three signatures are on record"

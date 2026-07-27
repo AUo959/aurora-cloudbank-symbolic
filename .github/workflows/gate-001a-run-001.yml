@@ -92,10 +92,78 @@ jobs:
           import hashlib
           import json
           import os
+          import re
           from datetime import datetime, timezone
           from pathlib import Path
 
           out = Path("gate001a-output")
+          pattern = re.compile(r"sherlock|watson|moriarty|tribunal|shadowfax", re.IGNORECASE)
+
+          def deterministic_scan(roots: list[Path], suffixes: set[str]) -> list[str]:
+              candidates: set[Path] = set()
+              for root in roots:
+                  if root.is_file() and root.suffix in suffixes:
+                      candidates.add(root)
+                  elif root.is_dir():
+                      candidates.update(
+                          path for path in root.rglob("*") if path.is_file() and path.suffix in suffixes
+                      )
+              matches: list[str] = []
+              for path in sorted(candidates, key=lambda item: item.as_posix()):
+                  try:
+                      lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+                  except OSError:
+                      continue
+                  for line_number, line in enumerate(lines, start=1):
+                      if pattern.search(line):
+                          matches.append(f"{path.as_posix()}:{line_number}:{line}")
+              return matches
+
+          step2_matches = deterministic_scan(
+              [
+                  Path("src/monitoring"),
+                  Path("src/subroutines"),
+                  Path("modules/ethics_field"),
+                  Path("modules/cask"),
+                  Path("api"),
+              ],
+              {".py"},
+          )
+          step3_matches = deterministic_scan(
+              [Path("src"), Path("modules"), Path("api"), Path("config")],
+              {".py", ".json", ".yaml", ".toml"},
+          )
+
+          def write_projection(name: str, matches: list[str]) -> None:
+              payload = "\n".join(matches) + ("\n" if matches else "")
+              if not matches:
+                  payload = "No matches\n"
+              (out / name).write_text(payload, encoding="utf-8")
+
+          write_projection("step2.deterministic.txt", step2_matches)
+          write_projection("step3.deterministic.txt", step3_matches)
+
+          grep_step2 = (out / "step2.raw.txt").read_text(encoding="utf-8").splitlines()
+          grep_step3 = (out / "step3.raw.txt").read_text(encoding="utf-8").splitlines()
+          equivalence = {
+              "step2": {
+                  "canonical_grep_exit_code": int((out / "step2.exit_code.txt").read_text().strip()),
+                  "canonical_grep_match_count": len(grep_step2),
+                  "deterministic_match_count": len(step2_matches),
+                  "equivalent_as_sorted_records": sorted(grep_step2) == step2_matches,
+              },
+              "step3": {
+                  "canonical_grep_exit_code": int((out / "step3.exit_code.txt").read_text().strip()),
+                  "canonical_grep_match_count": len(grep_step3),
+                  "deterministic_match_count": len(step3_matches),
+                  "equivalent_as_sorted_records": sorted(grep_step3) == step3_matches,
+              },
+          }
+          (out / "canonical_grep_equivalence.json").write_text(
+              json.dumps(equivalence, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+
           roots = [Path("src"), Path("modules"), Path("api")]
           imports = []
           parse_errors = []
@@ -109,13 +177,11 @@ jobs:
                       parse_errors.append({"path": str(path), "error": str(exc)})
                       continue
                   for node in ast.walk(tree):
-                      module = None
                       names = []
                       if isinstance(node, ast.Import):
                           names = [alias.name for alias in node.names]
                       elif isinstance(node, ast.ImportFrom):
-                          module = node.module or ""
-                          names = [module]
+                          names = [node.module or ""]
                       for name in names:
                           if name.startswith("modules.ord") or name.startswith("src.entities.fleet"):
                               imports.append(
@@ -165,6 +231,7 @@ jobs:
               "scenario_id": "GATE-001A-RECOVERED-PROTOCOL-WIRING-v1.0",
               "baseline_commit": "3142aa47afac0b8e63cc5bc46f9fa8ae40592354",
               "deterministic": True,
+              "deterministic_projection": "sorted standard-library line scan",
               "seed": "AURORA-GATE-001A-RUN-001-3142AA47",
               "executed_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
               "runner": os.environ.get("RUNNER_NAME", "github-hosted-runner"),
@@ -179,12 +246,18 @@ jobs:
               "tribunal_manifest_reachability_exit_code": int(
                   (out / "tribunal_manifest_reachability.exit_code.txt").read_text().strip()
               ),
+              "canonical_grep_equivalence": equivalence,
               "artifact_digests": files,
           }
           (out / "execution_receipt.json").write_text(
               json.dumps(execution, indent=2, sort_keys=True) + "\n",
               encoding="utf-8",
           )
+
+          if not all(
+              section["equivalent_as_sorted_records"] for section in equivalence.values()
+          ):
+              raise SystemExit("deterministic projection differs from canonical grep output")
           PY
 
           if [ "$step2_status" -gt 1 ] || [ "$step3_status" -gt 1 ] || [ "$ord_status" -gt 1 ] || [ "$tribunal_status" -gt 1 ]; then

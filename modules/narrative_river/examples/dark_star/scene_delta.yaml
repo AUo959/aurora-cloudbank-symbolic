@@ -1,0 +1,17 @@
+scene_id: DARKSTAR.EXAMPLE.QUIET_LANE
+state_changes:
+  - The direct approach is confirmed as a layered ambush.
+new_questions:
+  - Why was the recovered administrative credential left active?
+closed_questions:
+  - Who initiated the purge?
+resolved_sediment_ids:
+  - SED-LETHAN-WITHDRAWAL
+new_sediment:
+  - sediment_id: SED-IVEN-CREDENTIAL
+    source_event_id: DARKSTAR.EXAMPLE.QUIET_LANE
+    description: Iven's concealed preparation saved the crew while weakening trust in his process.
+    current_effect: Tessa relies on his judgment but requires earlier disclosure.
+next_scene_requirements:
+  - The credential dispute remains active.
+canon_candidates: []

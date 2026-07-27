@@ -1,18 +1,20 @@
-"""Validated data contracts for the passive Narrative River Adapter."""
+"""Validated data contracts for the Narrative River Adapter."""
 
 from __future__ import annotations
 
 import json
 from enum import Enum
-from typing import Any, Annotated
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+SUPPORTED_SCHEMA_VERSION = "0.1.0"
+SupportedSchemaVersion = Literal["0.1.0"]
 UnitInterval = Annotated[float, Field(ge=0.0, le=1.0)]
 
 
 class StrictModel(BaseModel):
-    """Base model that rejects undeclared state and supports safe assignment."""
+    """Base model that rejects undeclared state and validates assignment."""
 
     model_config = ConfigDict(
         extra="forbid",
@@ -23,8 +25,6 @@ class StrictModel(BaseModel):
 
 
 class PersistenceClass(str, Enum):
-    """Durability claimed by a narrative artifact."""
-
     EPHEMERAL = "ephemeral"
     DRAFT = "draft_persistent"
     PROJECT = "project_persistent"
@@ -32,8 +32,6 @@ class PersistenceClass(str, Enum):
 
 
 class AuthorityStatus(str, Enum):
-    """Authority of the sources used to construct a frame."""
-
     CANON = "canon"
     STAGING = "staging"
     DRAFT = "draft"
@@ -41,8 +39,6 @@ class AuthorityStatus(str, Enum):
 
 
 class NarrativeState(str, Enum):
-    """Lifecycle state of the narrative artifact."""
-
     OUTLINE = "outline"
     DRAFT = "draft"
     REVISED = "revised"
@@ -51,8 +47,6 @@ class NarrativeState(str, Enum):
 
 
 class EvidenceStatus(str, Enum):
-    """Epistemic status for a claim carried into prose."""
-
     CONFIRMED = "confirmed"
     OBSERVED = "observed"
     INSTRUMENT_OUTPUT = "instrument_output"
@@ -64,8 +58,6 @@ class EvidenceStatus(str, Enum):
 
 
 class ValidationSeverity(str, Enum):
-    """Advisory validator severity."""
-
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -94,7 +86,7 @@ class NarrativeStatus(StrictModel):
     storage_receipt: str | None = None
 
     @model_validator(mode="after")
-    def require_storage_for_persistence(self) -> NarrativeStatus:
+    def require_storage_for_persistence(self) -> "NarrativeStatus":
         if self.persistence_class != PersistenceClass.EPHEMERAL and not self.storage_receipt:
             raise ValueError("persistent narrative state requires a storage_receipt")
         return self
@@ -201,7 +193,7 @@ class NarrativeRiverFrame(StrictModel):
     """Scene-level causal contract supplied to a prose generator."""
 
     frame_id: str = Field(min_length=1)
-    schema_version: str = "0.1.0"
+    schema_version: SupportedSchemaVersion = SUPPORTED_SCHEMA_VERSION
     scene_id: str = Field(min_length=1)
     chapter_id: str | None = None
     generated_at_utc: str = Field(min_length=1)
@@ -227,7 +219,7 @@ class NarrativeRiverFrame(StrictModel):
     axiom_checks: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def validate_collection_ids(self) -> NarrativeRiverFrame:
+    def validate_collection_ids(self) -> "NarrativeRiverFrame":
         collections = {
             "incoming_flows": [item.flow_id for item in self.incoming_flows],
             "sediment": [item.sediment_id for item in self.sediment],
@@ -245,21 +237,16 @@ class NarrativeRiverFrame(StrictModel):
         return self
 
     def canonical_json(self) -> str:
-        """Return a deterministic UTF-8 JSON representation."""
-
-        return json.dumps(
-            self.model_dump(mode="json"),
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
-        )
+        return json.dumps(self.model_dump(mode="json"), ensure_ascii=False, indent=2, sort_keys=True)
 
 
 class SceneRiverDelta(StrictModel):
     """Approved state changes exported after a scene."""
 
+    schema_version: SupportedSchemaVersion = SUPPORTED_SCHEMA_VERSION
     scene_id: str = Field(min_length=1)
     completed_at_utc: str | None = None
+    storage_receipt: str | None = None
     state_changes: list[str] = Field(default_factory=list)
     new_sediment: list[NarrativeSediment] = Field(default_factory=list)
     resolved_sediment_ids: list[str] = Field(default_factory=list)
@@ -273,15 +260,16 @@ class SceneRiverDelta(StrictModel):
     canon_candidates: list[str] = Field(default_factory=list)
     next_scene_requirements: list[str] = Field(default_factory=list)
 
-    def canonical_json(self) -> str:
-        """Return a deterministic UTF-8 JSON representation."""
+    @model_validator(mode="after")
+    def validate_delta_sets(self) -> "SceneRiverDelta":
+        if len(self.resolved_sediment_ids) != len(set(self.resolved_sediment_ids)):
+            raise ValueError("resolved_sediment_ids contains duplicates")
+        if len(self.closed_questions) != len(set(self.closed_questions)):
+            raise ValueError("closed_questions contains duplicates")
+        return self
 
-        return json.dumps(
-            self.model_dump(mode="json"),
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
-        )
+    def canonical_json(self) -> str:
+        return json.dumps(self.model_dump(mode="json"), ensure_ascii=False, indent=2, sort_keys=True)
 
 
 class ValidationFinding(StrictModel):
@@ -293,9 +281,11 @@ class ValidationFinding(StrictModel):
 
 
 class ValidationReport(StrictModel):
+    schema_version: SupportedSchemaVersion = SUPPORTED_SCHEMA_VERSION
     frame_id: str = Field(min_length=1)
     findings: list[ValidationFinding] = Field(default_factory=list)
+    storage_receipt: str | None = None
 
     @property
     def has_errors(self) -> bool:
-        return any(item.severity == ValidationSeverity.ERROR for item in self.findings)
+        return any(item.severity == ValidationSeverity.ERROR.value for item in self.findings)

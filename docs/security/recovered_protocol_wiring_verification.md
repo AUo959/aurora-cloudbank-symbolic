@@ -20,15 +20,19 @@ The same technical procedure is used in two institutional modes:
 
 Both records are durable, operational evidence. They are not interchangeable.
 
-A Gate-001A result may validate the rehearsal capability, produce findings, and drive remediation. It does not prove that a real external assessor performed the verification. Gate-001B must be rerun against the exact engagement baseline and carry independently attributable engagement provenance.
+A Gate-001A result may validate the rehearsal capability, produce findings, and drive remediation. It does not prove that a real external assessor performed the verification. Gate-001B must be rerun against the exact engagement baseline and carry independently attributable, digest-resolved engagement evidence.
 
 ---
 
-## Classification rule
+## Classification and lineage rule
 
 Every completed record must include:
 
 ```yaml
+event_id: <stable-event-id>
+run_id: <stable-run-id>
+revision: <integer>=1
+previous_event_digest: <null-for-revision-1-or-prior-sha256>
 layer: L1
 execution_mode: <l1_simulated_institutional_rehearsal | real_world_external_engagement>
 evidence_authority: <operational_simulation_evidence | independent_external_assurance>
@@ -38,7 +42,9 @@ independent_external_assurance: <false | true>
 substitutes_for_real_world_review: false
 ```
 
-A simulated verifier, simulated engineering lead, or simulated external assessor must be labeled as a `simulated_role`. A real-world record must identify verified real participants or controlled external evidence.
+A simulated verifier, simulated engineering lead, or simulated external assessor must be labeled as a `simulated_role`. A real-world record must identify verified real participants and resolve external primary evidence beneath a controlled evidence root.
+
+Execution mode, evidence authority, Gate track, real-world interaction, independent-assurance, and non-substitution fields are immutable across revisions of the same event ID. A different mode requires a new event ID.
 
 The result body should remain complete and operational. The classification block is not a substitute for the command output, evidence, verdict, or sign-off record.
 
@@ -82,12 +88,16 @@ Matches in `docs/` are expected and safe unless a runtime loader consumes them. 
 
 **Event ID:** ________________________________________________  
 **Run ID:** _________________________________________________  
+**Revision:** _______________________________________________  
+**Previous event digest:** __________________________________  
 **Execution mode:** `l1_simulated_institutional_rehearsal`  
 **Evidence authority:** `operational_simulation_evidence`  
 **Data treatment:** `first_class_operational_data`  
 **Real-world interaction:** `false`  
 **Independent external assurance:** `false`  
 **Substitutes for real-world review:** `false`
+
+Revision 1 uses `previous_event_digest: null`. Later revisions must identify and validate against the canonical SHA-256 digest of the prior event record.
 
 ## A.2 Deterministic provenance
 
@@ -97,6 +107,8 @@ Matches in `docs/` are expected and safe unless a runtime loader consumes them. 
 **Baseline commit SHA:** _____________________________________  
 **Tool and version:** ________________________________________  
 **Operator / invoking agent:** _______________________________
+
+Gate-001A must be deterministic. A nondeterministic institutional experiment requires a different, separately governed execution mode.
 
 ## A.3 Simulated institutional roles
 
@@ -120,13 +132,19 @@ No entry in this table represents a real-world signature, vendor interaction, ag
 [Paste complete output or write "No matches".]
 ```
 
-## A.6 Gate-001A verdict
+## A.6 Evidence references
+
+| Origin | Reference | Digest / notes |
+|---|---|---|
+| `simulation_primary_evidence` | — | Preserve complete command output and run artifacts |
+
+## A.7 Gate-001A verdict
 
 - [ ] **CLEAN** — zero runtime-wiring matches; deterministic rehearsal precondition met.
 - [ ] **FINDING** — one or more runtime-wiring matches; create a normal security issue and preserve this run as finding evidence.
-- [ ] **BLOCKED** — provenance, baseline, or replay state is incomplete.
+- [ ] **BLOCKED** — provenance, baseline, replay state, or revision lineage is incomplete.
 
-## A.7 Rehearsal sign-off
+## A.8 Rehearsal sign-off
 
 | Role | Simulated role label | Date |
 |---|---|---|
@@ -143,6 +161,8 @@ This is a simulated institutional sign-off record. It is first-class operational
 
 **Event ID:** ________________________________________________  
 **Run ID / engagement reference:** ___________________________  
+**Revision:** _______________________________________________  
+**Previous event digest:** __________________________________  
 **Execution mode:** `real_world_external_engagement`  
 **Evidence authority:** `independent_external_assurance`  
 **Data treatment:** `first_class_operational_data`  
@@ -150,38 +170,57 @@ This is a simulated institutional sign-off record. It is first-class operational
 **Independent external assurance:** `true`  
 **Substitutes for real-world review:** `false`
 
-## B.2 External provenance
+Record B must use a different event ID from Record A. It may not be created by changing Record A's mode or authority fields.
+
+## B.2 Structured external verification
+
+**Verified organization:** __________________________________  
+**Verified assessor or accountable team:** ___________________  
+**Scope reference:** _________________________________________  
+**Authorization reference:** _________________________________  
+**Verified by:** _____________________________________________  
+**Verified at:** _____________________________________________  
+**Verification method:** `repository_evidence_digest`
+
+## B.3 External provenance
 
 **Verification date:** _______________________________________  
 **Baseline commit SHA:** _____________________________________  
-**Verified organization or assessor:** _______________________  
-**Scope / authorization reference:** _________________________  
-**Controlled evidence reference:** ___________________________  
-**Aurora owner / requester:** ________________________________
+**Engagement dates:** ________________________________________  
+**Aurora owner / requester:** ________________________________  
+**Controlled evidence root:** ________________________________
 
-Gate-001A records may be cited as preparation or prior operational evidence. At least one external primary-evidence reference is mandatory for this record.
+Gate-001A records may be cited as preparation or prior operational evidence. At least one resolved external primary-evidence receipt is mandatory for this record.
 
-## B.3 Step 2 output
+## B.4 External primary evidence receipts
+
+| Origin | Root-relative reference | SHA-256 | Evidence purpose |
+|---|---|---|---|
+| `external_primary_evidence` | — | — | Scope, authorization, findings, attestation, or retest evidence |
+
+A self-declared origin label is insufficient. Validation must confirm that each required receipt remains beneath the controlled evidence root, exists as a file, and matches the recorded lowercase SHA-256 digest.
+
+## B.5 Step 2 output
 
 ```text
-[Paste complete output or attach an attributable controlled evidence reference.]
+[Paste complete output or attach a digest-resolved external evidence receipt.]
 ```
 
-## B.4 Step 3 output
+## B.6 Step 3 output
 
 ```text
-[Paste complete output or attach an attributable controlled evidence reference.]
+[Paste complete output or attach a digest-resolved external evidence receipt.]
 ```
 
-## B.5 Gate-001B verdict
+## B.7 Gate-001B verdict
 
 - [ ] **CLEAN** — zero runtime-wiring matches on the exact external-engagement baseline.
 - [ ] **FINDING** — one or more runtime-wiring matches; do not begin or continue the engagement until the finding is triaged under the agreed rules of engagement.
-- [ ] **BLOCKED** — external identity, authorization, baseline, or attributable evidence is incomplete.
+- [ ] **BLOCKED** — external identity, authorization, baseline, structured verification, or digest-resolved evidence is incomplete.
 
-## B.6 Real-world sign-off
+## B.8 Real-world sign-off
 
-| Role | Verified name or organization | Date | Evidence reference |
+| Role | Verified name or organization | Date | Digest-resolved evidence reference |
 |---|---|---|---|
 | External verifier / assessor | — | | |
 | Aurora Engineering Lead | — | | |
@@ -194,11 +233,13 @@ A real-world signature or approval must be attributable to a verified participan
 
 - Record A and Record B use separate event IDs.
 - Record A may not be relabeled or copied into Record B.
+- Execution mode and assurance authority are immutable across revisions of the same event ID.
 - A clean Gate-001A result does not satisfy the Gate-001B engagement precondition.
 - Gate-001B must use the exact baseline commit supplied to the external assessor.
-- Both records remain first-class operational data and retain their full command output, provenance, verdict, and lineage.
+- Gate-001B must resolve and digest-verify external primary evidence; metadata alone is insufficient.
+- Both records remain first-class operational data and retain their full command output, provenance, verdict, evidence receipts, and lineage.
 - Summaries may be generated, but they may not replace the source records.
-- Historical results are superseded by later runs, not erased.
+- Historical results are superseded by later revisions or events, not erased.
 
 ---
 

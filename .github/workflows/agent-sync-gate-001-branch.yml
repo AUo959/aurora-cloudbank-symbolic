@@ -1,0 +1,31 @@
+name: Sync Gate-001 Branch
+
+on:
+  push:
+    branches:
+      - docs/gate-001-dual-track-assurance
+    paths:
+      - .github/workflows/agent-sync-gate-001-branch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: docs/gate-001-dual-track-assurance
+          fetch-depth: 0
+
+      - name: Merge current main and remove temporary workflow
+        run: |
+          git config user.name "aurora-githubops"
+          git config user.email "aurora-githubops@users.noreply.github.com"
+          git fetch origin main
+          git merge origin/main --no-commit --no-ff
+          git rm .github/workflows/agent-sync-gate-001-branch.yml
+          git commit -m "chore: sync Gate-001 governance with current main"
+          git push origin HEAD:docs/gate-001-dual-track-assurance

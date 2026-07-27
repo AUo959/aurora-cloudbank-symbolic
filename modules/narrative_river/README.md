@@ -62,6 +62,7 @@ Writes are path-contained beneath the selected workspace and use atomic replacem
 - questions closed by the prior delta are removed from the next frame;
 - resolved sediment is removed before new residue is imported;
 - validation remains advisory unless `--fail-on-error` is supplied;
+- `run-scene --fail-on-error` persists the frame, prompt, and report but does not close the scene or advance the continuity chain when errors are present;
 - no prose is rewritten automatically;
 - no simulation state is mutated;
 - no CanonRec content is written or promoted;

@@ -106,4 +106,4 @@ def test_recovered_protocol_gate_001b_requires_verified_receipts():
 def test_existing_external_engagement_scope_remains_present():
     text = PENTEST_SCOPE.read_text(encoding="utf-8")
     assert "External Security Review Scope v2" in text
-    assert "Engagement must not begin until all three signatures are on record"
+    assert "Engagement must not begin until all three signatures are on record" in text

@@ -7,7 +7,7 @@
   "scripts": {
     "test": "npm run test:node && npm run test:web",
     "test:node": "node --test tests/node/*.test.js",
-    "test:web": "node --test tests/web",
+    "test:web": "node --test tests/web/test-web-components.js",
     "test:unit": "npm run test:node",
     "test:integration": "npm run test:web",
     "test:jest": "jest tests/ --passWithNoTests || echo \"Tests completed - check results\"",

@@ -269,7 +269,15 @@ async def analyze_file(request: AnalyzeFileRequest):
     return [suggestion.to_dict() for suggestion in suggestions]
 
 
-@router.post("/analyze-directory", response_model=AnalysisReportResponse)
+@router.post(
+    "/analyze-directory",
+    response_model=AnalysisReportResponse,
+    responses={
+        400: {"description": "Not a directory, or a file pattern that is rooted, drive-qualified, or contains '..'"},
+        403: {"description": "Path resolves outside the analysis root"},
+        404: {"description": "Directory not found beneath the analysis root"},
+    },
+)
 async def analyze_directory(request: AnalyzeDirectoryRequest):
     """Analyze a trusted, root-enumerated directory."""
     engine = get_improvement_engine()

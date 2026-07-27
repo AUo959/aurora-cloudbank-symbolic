@@ -57,7 +57,7 @@ export default defineConfig({
             'chart-vendor': ['recharts', 'd3'],
           };
 
-          const normalised = id.replace(/\\/g, '/');
+          const normalised = id.replaceAll('\\', '/');
           for (const [chunk, packages] of Object.entries(groups)) {
             if (packages.some((pkg) => normalised.includes(`/node_modules/${pkg}/`))) {
               return chunk;

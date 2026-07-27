@@ -96,6 +96,7 @@ class NarrativeRiverWorkflow:
         axioms_text: str = "",
         prior_delta: SceneRiverDelta | dict[str, Any] | None = None,
         auto_prior: bool = True,
+        fail_on_error: bool = False,
     ) -> dict[str, Any]:
         frame, frame_path = self.build_and_store_frame(
             scene_request=scene_request,
@@ -105,15 +106,26 @@ class NarrativeRiverWorkflow:
         )
         _prompt, prompt_path = self.render_and_store_prompt(frame, axioms_text=axioms_text)
         report, report_path = self.validate_and_store_draft(frame, draft_text)
-        delta, delta_path = self.close_scene(frame=frame, delta_payload=delta_payload)
-        return {
+        result: dict[str, Any] = {
             "scene_id": frame.scene_id,
             "frame_id": frame.frame_id,
             "frame_path": str(frame_path),
             "prompt_path": str(prompt_path),
             "validation_report_path": str(report_path),
-            "delta_path": str(delta_path),
+            "delta_path": None,
             "validation_findings": len(report.findings),
             "validation_has_errors": report.has_errors,
-            "closed_scene_id": delta.scene_id,
+            "scene_closed": False,
+            "closed_scene_id": None,
         }
+        if fail_on_error and report.has_errors:
+            return result
+        delta, delta_path = self.close_scene(frame=frame, delta_payload=delta_payload)
+        result.update(
+            {
+                "delta_path": str(delta_path),
+                "scene_closed": True,
+                "closed_scene_id": delta.scene_id,
+            }
+        )
+        return result

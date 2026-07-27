@@ -132,19 +132,48 @@ No entry in this table represents a real-world signature, vendor interaction, ag
 [Paste complete output or write "No matches".]
 ```
 
-## A.6 Evidence references
+## A.6 Required replay and evidence package
+
+A completed Record A must bind the following full artifacts. Inline content or durable repository-relative references are acceptable; blank entries block sign-off.
+
+**Validated event-envelope JSON:** ___________________________  
+**Input evidence references:** _______________________________  
+**Produced evidence references:** ____________________________  
+**Ordered event and decision trace:** ________________________  
+**Finding register / no-finding record:** ____________________  
+**Severity method and rationale:** ___________________________  
+**Remediation state:** _______________________________________  
+**Retest state:** ____________________________________________  
+**Source artifact locations:** _______________________________
 
 | Origin | Reference | Digest / notes |
 |---|---|---|
-| `simulation_primary_evidence` | — | Preserve complete command output and run artifacts |
+| `simulation_primary_evidence` | — | Complete command output and run artifacts |
+| `simulation_primary_evidence` | — | Ordered decision trace |
+| `simulation_primary_evidence` | — | Finding and severity record |
+| `simulation_primary_evidence` | — | Remediation and retest record |
 
-## A.7 Gate-001A verdict
+The event envelope, evidence, decision trace, finding state, severity rationale, remediation state, retest state, and source locations are mandatory even when the verdict is CLEAN. A no-finding result must still preserve the evidence and decision path that produced it.
 
-- [ ] **CLEAN** — zero runtime-wiring matches; deterministic rehearsal precondition met.
+## A.7 Package completeness gate
+
+- [ ] Validated event-envelope JSON is attached or referenced.
+- [ ] Input and produced evidence are attached or referenced.
+- [ ] Ordered event and decision trace is attached or referenced.
+- [ ] Finding register or explicit no-finding record is attached or referenced.
+- [ ] Severity method and rationale are recorded.
+- [ ] Remediation and retest states are recorded, including `not_required` where appropriate.
+- [ ] Complete source artifact locations are recorded.
+
+If any item is unchecked, the verdict must be **BLOCKED** and the rehearsal may not be signed complete.
+
+## A.8 Gate-001A verdict
+
+- [ ] **CLEAN** — zero runtime-wiring matches; deterministic rehearsal precondition and replay-package gate met.
 - [ ] **FINDING** — one or more runtime-wiring matches; create a normal security issue and preserve this run as finding evidence.
-- [ ] **BLOCKED** — provenance, baseline, replay state, or revision lineage is incomplete.
+- [ ] **BLOCKED** — provenance, baseline, replay state, revision lineage, or required package is incomplete.
 
-## A.8 Rehearsal sign-off
+## A.9 Rehearsal sign-off
 
 | Role | Simulated role label | Date |
 |---|---|---|
@@ -237,7 +266,7 @@ A real-world signature or approval must be attributable to a verified participan
 - A clean Gate-001A result does not satisfy the Gate-001B engagement precondition.
 - Gate-001B must use the exact baseline commit supplied to the external assessor.
 - Gate-001B must resolve and digest-verify external primary evidence; metadata alone is insufficient.
-- Both records remain first-class operational data and retain their full command output, provenance, verdict, evidence receipts, and lineage.
+- Both records remain first-class operational data and retain their full command output, provenance, verdict, evidence receipts, decision trace, remediation/retest state, and lineage.
 - Summaries may be generated, but they may not replace the source records.
 - Historical results are superseded by later revisions or events, not erased.
 

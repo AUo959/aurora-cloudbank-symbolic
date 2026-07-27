@@ -78,14 +78,11 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Remove execution scaffolding
+      - name: Remove non-workflow staging scaffolding
         shell: bash
         run: |
           set -euo pipefail
           rm -rf gate001a-package-diagnostic
-          rm -f .github/workflows/gate-001a-run-001.yml
-          rm -f .github/workflows/gate-001a-run-001-deterministic-replay.yml
-          rm -f .github/workflows/gate-001a-run-001-package.yml
           rm -f tools/security/_install_gate001a_run001.py
           rm -rf tools/security/.gate001a_payload
 

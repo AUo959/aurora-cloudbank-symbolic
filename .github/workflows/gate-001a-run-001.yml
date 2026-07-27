@@ -1,0 +1,123 @@
+name: Gate-001A Run 001 Evidence Capture
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact subject baseline
+        uses: actions/checkout@v4
+        with:
+          ref: 3142aa47afac0b8e63cc5bc46f9fa8ae40592354
+          fetch-depth: 1
+
+      - name: Capture deterministic verification evidence
+        shell: bash
+        run: |
+          set -u
+          export LC_ALL=C
+          out="gate001a-output"
+          mkdir -p "$out"
+
+          actual_sha="$(git rev-parse HEAD)"
+          printf '%s\n' "$actual_sha" > "$out/baseline_commit.txt"
+          if [ "$actual_sha" != "3142aa47afac0b8e63cc5bc46f9fa8ae40592354" ]; then
+            printf 'Expected baseline 3142aa47afac0b8e63cc5bc46f9fa8ae40592354, observed %s\n' "$actual_sha" > "$out/execution_error.txt"
+            exit 2
+          fi
+
+          grep --version | head -n 1 > "$out/grep_version.txt"
+          printf '%s\n' "AURORA-GATE-001A-RUN-001-3142AA47" > "$out/deterministic_seed.txt"
+
+          set +e
+          grep -rniE 'sherlock|watson|moriarty|tribunal|shadowfax' \
+            src/monitoring/ \
+            src/subroutines/ \
+            modules/ethics_field/ \
+            modules/cask/ \
+            api/ \
+            --include='*.py' \
+            > "$out/step2.raw.txt" 2>&1
+          step2_status=$?
+
+          grep -rniE 'sherlock|watson|moriarty|tribunal|shadowfax' \
+            src/ modules/ api/ config/ \
+            --include='*.py' \
+            --include='*.json' \
+            --include='*.yaml' \
+            --include='*.toml' \
+            > "$out/step3.raw.txt" 2>&1
+          step3_status=$?
+          set -e
+
+          printf '%s\n' "$step2_status" > "$out/step2.exit_code.txt"
+          printf '%s\n' "$step3_status" > "$out/step3.exit_code.txt"
+
+          if [ "$step2_status" -eq 1 ]; then
+            printf 'No matches\n' > "$out/step2.result.txt"
+          else
+            cp "$out/step2.raw.txt" "$out/step2.result.txt"
+          fi
+
+          if [ "$step3_status" -eq 1 ]; then
+            printf 'No matches\n' > "$out/step3.result.txt"
+          else
+            cp "$out/step3.raw.txt" "$out/step3.result.txt"
+          fi
+
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          out = Path("gate001a-output")
+          files = {}
+          for path in sorted(out.iterdir()):
+              if path.is_file():
+                  files[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+
+          execution = {
+              "schema": "aurora.gate001a.execution_receipt/v1",
+              "event_id": "AURORA-GATE-001A-RECOVERED-PROTOCOL-WIRING-001",
+              "run_id": "AURORA-GATE-001A-RUN-001-3142AA47",
+              "scenario_id": "GATE-001A-RECOVERED-PROTOCOL-WIRING-v1.0",
+              "baseline_commit": "3142aa47afac0b8e63cc5bc46f9fa8ae40592354",
+              "deterministic": True,
+              "seed": "AURORA-GATE-001A-RUN-001-3142AA47",
+              "executed_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+              "runner": os.environ.get("RUNNER_NAME", "github-hosted-runner"),
+              "runner_os": os.environ.get("RUNNER_OS", "Linux"),
+              "workflow_run_id": os.environ.get("GITHUB_RUN_ID", ""),
+              "workflow_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+              "step2_exit_code": int((out / "step2.exit_code.txt").read_text().strip()),
+              "step3_exit_code": int((out / "step3.exit_code.txt").read_text().strip()),
+              "artifact_digests": files,
+          }
+          (out / "execution_receipt.json").write_text(
+              json.dumps(execution, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          if [ "$step2_status" -gt 1 ] || [ "$step3_status" -gt 1 ]; then
+            printf 'Search execution error: step2=%s step3=%s\n' "$step2_status" "$step3_status" >&2
+            exit 3
+          fi
+
+      - name: Upload complete evidence package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-001a-run-001-evidence
+          path: gate001a-output/
+          if-no-files-found: error
+          retention-days: 90

@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -7,8 +8,22 @@ ADDENDUM = (
     / "security"
     / "AURORA_SECURITY__ADDENDUM__PENTEST_SCOPE_V2_GATE_001_DUAL_TRACK__v1.0__2026-07-27.md"
 )
+ARCHITECTURE_ADDENDUM = (
+    ROOT
+    / "docs"
+    / "architecture"
+    / "AURORA_ARCHITECTURE__ADDENDUM__L1_INSTITUTIONAL_MODELING__v1.0__2026-07-27.md"
+)
 VERIFICATION = ROOT / "docs" / "security" / "recovered_protocol_wiring_verification.md"
 PENTEST_SCOPE = ROOT / "docs" / "security" / "pentest_scope_v2.md"
+CONTRACT = (
+    ROOT
+    / "docs"
+    / "security"
+    / "contracts"
+    / "AURORA_L1__CONTRACT__INSTITUTIONAL_ASSURANCE_EVENT__v1.0__2026-07-27.json"
+)
+VALIDATOR = ROOT / "tools" / "security" / "validate_institutional_assurance_event.py"
 
 
 def test_gate_001_addendum_preserves_first_class_simulation_data():
@@ -27,7 +42,7 @@ def test_gate_001_addendum_forbids_substitution_and_mode_rewrite():
     assert "simulated finding → independently discovered finding" in text
     assert "A real-world interaction requires a separate evidence event" in text
     assert "immutable across revisions of the same event ID" in text
-    assert "previous_event_digest" not in text or "prior-event digest" in text
+    assert "prior-event digest" in text
 
 
 def test_gate_001b_requires_structured_digest_resolved_evidence():
@@ -39,6 +54,25 @@ def test_gate_001b_requires_structured_digest_resolved_evidence():
     assert "metadata alone" in text
 
 
+def test_l1_institutional_modeling_does_not_create_physical_simulated_entities():
+    text = ARCHITECTURE_ADDENDUM.read_text(encoding="utf-8")
+    assert "L1 institutional modeling" in text
+    assert "simulated_role" in text
+    assert "not physical L1 entities" in text
+    assert "L2 scenario-world simulation" in text
+    assert "Simulated roles never enter the L1 staff registry" in text
+
+
+def test_local_contract_and_validator_are_vendored_and_parseable():
+    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+    assert contract["schema"] == "aurora.l1.institutional_assurance_event_contract/v1"
+    assert "immutable_revision_fields" in contract
+    assert contract["mode_rules"]["real_world_external_engagement"][
+        "evidence_resolution_required"
+    ] is True
+    assert VALIDATOR.is_file()
+
+
 def test_recovered_protocol_verification_keeps_tracks_separate():
     text = VERIFICATION.read_text(encoding="utf-8")
     assert "Record A — Gate-001A deterministic rehearsal" in text
@@ -47,6 +81,16 @@ def test_recovered_protocol_verification_keeps_tracks_separate():
     assert "real_world_external_engagement" in text
     assert "Record A may not be relabeled or copied into Record B" in text
     assert "Execution mode and assurance authority are immutable" in text
+
+
+def test_recovered_protocol_gate_001a_requires_complete_replay_package():
+    text = VERIFICATION.read_text(encoding="utf-8")
+    assert "Required replay and evidence package" in text
+    assert "Ordered event and decision trace" in text
+    assert "Severity method and rationale" in text
+    assert "Remediation state" in text
+    assert "Retest state" in text
+    assert "If any item is unchecked, the verdict must be **BLOCKED**" in text
 
 
 def test_recovered_protocol_gate_001b_requires_verified_receipts():

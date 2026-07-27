@@ -1,0 +1,61 @@
+name: Validate root Node and web tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+    paths:
+      - .github/workflows/validate-root-node-web-tests.yml
+      - package.json
+      - tests/node/crypto.test.js
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Node 22 root test validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Clean dependency install
+        run: npm ci
+
+      - name: Run Node tests
+        run: |
+          set -o pipefail
+          npm run test:node 2>&1 | tee node-tests.log
+
+      - name: Run web tests
+        run: |
+          set -o pipefail
+          npm run test:web 2>&1 | tee web-tests.log
+
+      - name: Run Constellation TypeScript check
+        run: |
+          set -o pipefail
+          npx tsc --project tsconfig.constellation.json --noEmit --skipLibCheck --pretty false 2>&1 | tee typescript-check.log
+
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: root-node-web-validation
+          path: |
+            node-tests.log
+            web-tests.log
+            typescript-check.log
+          retention-days: 30
+          if-no-files-found: error

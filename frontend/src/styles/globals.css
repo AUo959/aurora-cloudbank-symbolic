@@ -1,6 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind v4 entry point.
+ *
+ * The package has been on v4 for a while, but this file still used the v3
+ * `@tailwind base/components/utilities` directives, and v4 stopped reading
+ * `tailwind.config.ts` implicitly. The build therefore failed with "Cannot
+ * apply unknown utility class `border-border`" — every theme token defined in
+ * that config was invisible. Nothing in CI built the frontend, so it went
+ * unnoticed.
+ *
+ * `@config` is v4's supported bridge to a v3-style config. It keeps the whole
+ * existing theme — colours, fonts, keyframes, animations — working unchanged,
+ * rather than hand-porting 171 lines into `@theme` and risking silent visual
+ * drift. Porting to `@theme` remains available later as a deliberate change.
+ */
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
 
 @layer base {
   :root {

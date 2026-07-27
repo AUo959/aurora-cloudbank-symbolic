@@ -35,6 +35,44 @@ def _safe_root() -> Path:
     return root
 
 
+def _validate_file_patterns(file_patterns: Optional[List[str]]) -> None:
+    """Reject glob patterns that would walk outside the analysis directory.
+
+    ``directory`` is resolved through trusted enumeration, but the pattern was
+    passed to ``Path.rglob()`` unchecked — and rglob honours ``..``. So
+    ``{"directory": "proj", "file_patterns": ["../*.py"]}`` read proj's
+    siblings, and ``../../*.py`` escaped the configured root entirely, with the
+    matched absolute paths echoed back in the response.
+
+    Absolute patterns already raise NotImplementedError inside pathlib, but are
+    rejected here too so the caller gets a 400 rather than a 500.
+    """
+    for pattern in file_patterns or []:
+        candidate = PurePath(pattern)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "File patterns must stay within the analyzed directory: "
+                    "absolute patterns and '..' are not allowed."
+                ),
+            )
+
+
+def _root_spellings(safe_root: Path) -> tuple[PurePath, ...]:
+    """Every string form that names the analysis root.
+
+    ``relative_to`` compares lexically, so a root reached through a symlinked
+    prefix needs both its resolved and its as-configured spelling. Returns the
+    resolved form first; the configured form is added only when it differs.
+    """
+    spellings = [PurePath(str(safe_root))]
+    override = os.environ.get("AURORA_IMPROVEMENT_ROOT", "")
+    if override and str(PurePath(override)) != str(safe_root):
+        spellings.append(PurePath(override))
+    return tuple(spellings)
+
+
 def _request_parts(user_path: str, safe_root: Path) -> tuple[str, ...]:
     """Convert a request value to lexical root-relative lookup components.
 
@@ -43,16 +81,30 @@ def _request_parts(user_path: str, safe_root: Path) -> tuple[str, ...]:
     filesystem path.
     """
     requested = PurePath(user_path)
-    root_key = PurePath(str(safe_root))
 
     if requested.is_absolute():
-        try:
-            requested = requested.relative_to(root_key)
-        except ValueError as exc:
+        # relative_to() is lexical, so the root has to be tried in every
+        # spelling that names it. _safe_root() resolves, but callers hold the
+        # unresolved form: on macOS /var is a symlink to /private/var, so a
+        # request carrying the path it was just given (/var/folders/...) is
+        # lexically disjoint from the resolved root (/private/var/folders/...)
+        # and was refused with 403. Linux never showed it, because /tmp needs
+        # no resolution. Any symlinked mount or home directory behaves the same.
+        #
+        # These candidates are trusted configuration, never request data, and
+        # every returned path still comes from trusted iterdir() enumeration
+        # below — so this widens the accepted spelling, not the boundary.
+        for root_key in _root_spellings(safe_root):
+            try:
+                requested = requested.relative_to(root_key)
+                break
+            except ValueError:
+                continue
+        else:
             raise HTTPException(
                 status_code=403,
                 detail="Access to this path is not allowed.",
-            ) from exc
+            )
     elif ".." in requested.parts:
         raise HTTPException(
             status_code=400,
@@ -205,6 +257,8 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
 
     if not full_path.is_dir():
         raise HTTPException(status_code=400, detail=f"Not a directory: {request.directory}")
+
+    _validate_file_patterns(request.file_patterns)
 
     results = engine.analyze_directory(full_path, request.file_patterns)
 

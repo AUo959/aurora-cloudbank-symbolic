@@ -53,6 +53,7 @@ def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = Fal
     directory those paths live in — containment rather than exemption.
     """
     requested = Path(user_path)
+    safe_root_as_given = safe_root
     safe_root = safe_root.resolve()
     safe_root_str = str(safe_root)
 
@@ -62,9 +63,28 @@ def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = Fal
         # the path is not lexically under safe_root (no filesystem access).
         # We then reconstruct from the trusted safe_root prefix so that
         # .resolve() is never called on unvalidated user data.
-        try:
-            rel = requested.relative_to(safe_root)
-        except ValueError:
+        #
+        # Try both spellings of the root, because relative_to() is lexical and
+        # the two can be disjoint strings for the same directory. On macOS
+        # /var is a symlink to /private/var, and tempfile/env values are handed
+        # back unresolved: safe_root.resolve() is /private/var/folders/... while
+        # the caller holds /var/folders/.... Matching only the resolved spelling
+        # rejected a caller passing back the very path it had just been given,
+        # which failed 11 tests and errored 25 more on macOS while staying green
+        # on Linux, where /tmp needs no resolution. The same applies to any
+        # symlinked mount or home directory.
+        #
+        # Both candidates are trusted configuration, not request data, and the
+        # reconstruction below still happens against the *resolved* root — so
+        # the containment barrier is unchanged, only the spelling is forgiving.
+        rel = None
+        for candidate in (safe_root, safe_root_as_given):
+            try:
+                rel = requested.relative_to(candidate)
+                break
+            except ValueError:
+                continue
+        if rel is None:
             raise ValueError(f"Path outside allowed directory: {user_path}")
         full_path = (safe_root / rel).resolve()
     else:

@@ -141,8 +141,6 @@ export default function Dashboard() {
   const {
     data: memoryMetrics,
     isError: memoryError,
-    isStale: memoryStale,
-    dataUpdatedAt: memoryUpdatedAt,
     refetch: refetchMemory,
   } = useQuery({
     queryKey: ['memory-metrics'],

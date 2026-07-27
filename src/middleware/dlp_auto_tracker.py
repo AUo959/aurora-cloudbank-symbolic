@@ -11,9 +11,28 @@ import logging
 logger = logging.getLogger(__name__)
 
 import time
+import uuid
 from typing import Callable, Optional, Set
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+
+
+def _unique_suffix() -> str:
+    """Return a collision-resistant suffix for a DLP correlation tag.
+
+    Tag IDs were built from ``int(time.time() * 1000)`` alone, so any two
+    requests handled inside the same millisecond received identical tags. That
+    is a correlation ID joining a request to its audit records: colliding tags
+    can attribute two requests to one audit entry, and can attach a response to
+    the wrong request via ``add_dependency``. It also made
+    tests/test_dlp_auto_tracker.py intermittently fail — 2 failures in 12
+    isolated runs — which is the same defect seen from the outside.
+
+    The millisecond prefix is kept because it makes tags sort chronologically,
+    which is useful when reading an audit trail; uniqueness comes from the
+    random suffix rather than from the clock.
+    """
+    return f"{int(time.time() * 1000)}_{uuid.uuid4().hex[:12]}"
 
 # Import with graceful fallback
 try:
@@ -122,7 +141,7 @@ class DLPAutoTrackingMiddleware(BaseHTTPMiddleware):
         request_tag_id = self.dlp_tracker.create_tag(
             operation=f"api_request_{request.method}_{self._normalize_path(request.url.path)}",
             data=request_data,
-            tag_id=f"request_{int(time.time() * 1000)}"
+            tag_id=f"request_{_unique_suffix()}"
         )
         self.total_tracked += 1
         
@@ -136,7 +155,7 @@ class DLPAutoTrackingMiddleware(BaseHTTPMiddleware):
         response_tag_id = self.dlp_tracker.create_tag(
             operation=f"api_response_{response.status_code}",
             data=response_data,
-            tag_id=f"response_{int(time.time() * 1000)}"
+            tag_id=f"response_{_unique_suffix()}"
         )
         
         # Link request and response tags

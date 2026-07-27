@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
-import { Play, Save, Share2, GitFork, RefreshCw } from 'lucide-react';
+import { Play, Save, Share2, GitFork } from 'lucide-react';
 import { ReactNode } from 'react';
 
 interface EditorToolbarProps {

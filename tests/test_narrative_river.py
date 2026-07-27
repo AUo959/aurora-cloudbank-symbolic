@@ -317,3 +317,29 @@ def test_cli_fail_on_error_returns_nonzero(tmp_path: Path, capsys: pytest.Captur
     assert exit_code == 3
     assert json.loads(capsys.readouterr().out)["has_errors"] is True
     assert frame.scene_id in store.load_manifest()["scenes"]
+
+
+def test_safe_scene_names_do_not_collide_after_truncation(tmp_path: Path) -> None:
+    store = NarrativeRiverStore(tmp_path / "river")
+    first = "SCENE." + ("A" * 220) + ".ONE"
+    second = "SCENE." + ("A" * 220) + ".TWO"
+    assert store.frame_path(first) != store.frame_path(second)
+    assert store.root in store.frame_path(first).parents
+    assert store.root in store.frame_path(second).parents
+
+
+def test_run_scene_fail_on_error_does_not_close_or_advance_chain(tmp_path: Path) -> None:
+    store = NarrativeRiverStore(tmp_path / "river")
+    workflow = NarrativeRiverWorkflow(store)
+    result = workflow.run_scene(
+        scene_request=frame_payload(),
+        canon_snapshot=canon_snapshot(),
+        draft_text="Neither of them turned it into banter.",
+        delta_payload=delta_payload(),
+        fail_on_error=True,
+    )
+    assert result["validation_has_errors"] is True
+    assert result["scene_closed"] is False
+    assert result["delta_path"] is None
+    assert store.load_manifest()["latest_closed_scene_id"] is None
+    assert store.load_latest_delta() is None

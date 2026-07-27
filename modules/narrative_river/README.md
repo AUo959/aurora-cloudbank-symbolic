@@ -33,15 +33,15 @@ The strongest first-use path is `run-scene`, which performs the complete explici
 
 ```bash
 python -m modules.narrative_river run-scene \
-  --workspace narrative/river \
-  --scene-request scene_request.yaml \
-  --canon-snapshot canon_snapshot.yaml \
-  --axioms narrative_axioms.md \
-  --draft chapter_scene.md \
-  --delta scene_delta.yaml
+  --workspace narrative/river/dark-star \
+  --scene-request modules/narrative_river/examples/dark_star/scene_request.yaml \
+  --canon-snapshot modules/narrative_river/examples/dark_star/canon_snapshot.yaml \
+  --axioms modules/narrative_river/examples/dark_star/axioms.md \
+  --draft modules/narrative_river/examples/dark_star/draft.md \
+  --delta modules/narrative_river/examples/dark_star/scene_delta.yaml
 ```
 
-The command prints a machine-readable JSON receipt containing every generated path.
+The command above is executable as committed and prints a machine-readable JSON receipt containing every generated path. Use a separate workspace for each independent narrative continuity chain.
 
 ## Durable layout
 

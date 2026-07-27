@@ -1,12 +1,13 @@
-"""Passive Narrative River Adapter foundation.
+"""Narrative River Adapter contracts and explicit workflow trigger.
 
-This package validates scene-state frames, renders deterministic prose contracts,
-and reports advisory prose findings. It does not write canon, mutate simulation
-state, persist memory, or rewrite narrative text.
+The package can persist operator-approved scene frames and deltas inside an
+explicit workspace. It does not mutate GUMAS simulation state, rewrite prose,
+write CanonRec, or promote canon.
 """
 
 from .adapter import NarrativeRiverAdapter
 from .models import (
+    SUPPORTED_SCHEMA_VERSION,
     ActorInterpretation,
     AuthorityStatus,
     CanonSnapshot,
@@ -34,9 +35,12 @@ from .models import (
 )
 from .prompt_contract import render_prompt_contract
 from .serialization import dumps_json, dumps_yaml, loads_json, loads_yaml
+from .storage import NarrativeRiverStore, load_delta_file, load_frame_file
 from .validator import validate_draft
+from .workflow import NarrativeRiverWorkflow
 
 __all__ = [
+    "SUPPORTED_SCHEMA_VERSION",
     "ActorInterpretation",
     "AuthorityStatus",
     "CanonSnapshot",
@@ -49,6 +53,8 @@ __all__ = [
     "NarrativeReservoir",
     "NarrativeRiverAdapter",
     "NarrativeRiverFrame",
+    "NarrativeRiverStore",
+    "NarrativeRiverWorkflow",
     "NarrativeSediment",
     "NarrativeState",
     "NarrativeStatus",
@@ -64,6 +70,8 @@ __all__ = [
     "Viewpoint",
     "dumps_json",
     "dumps_yaml",
+    "load_delta_file",
+    "load_frame_file",
     "loads_json",
     "loads_yaml",
     "render_prompt_contract",

@@ -13,8 +13,6 @@ def _bullets(values: Iterable[str], *, empty: str = "- None recorded") -> str:
 
 
 def render_prompt_contract(frame: NarrativeRiverFrame, axioms_text: str = "") -> str:
-    """Create a deterministic, compact contract for a prose-generation pass."""
-
     pressure_lines = [
         f"{name}: {value:.2f}" for name, value in sorted(frame.active_pressures.items(), key=lambda item: item[0])
     ]
@@ -24,9 +22,7 @@ def render_prompt_contract(frame: NarrativeRiverFrame, axioms_text: str = "") ->
         for item in frame.incoming_flows
     ]
     sediment_lines = [f"{item.description} Current effect: {item.current_effect}" for item in frame.sediment]
-    evidence_lines = [
-        f"[{item.status}] {item.claim} (confidence {item.confidence:.2f})" for item in frame.evidence_state
-    ]
+    evidence_lines = [f"[{item.status}] {item.claim} (confidence {item.confidence:.2f})" for item in frame.evidence_state]
     actor_lines = [
         f"{item.actor_id}: {item.interpretation} Preferred response: {item.preferred_response} "
         f"Blind spot: {item.blind_spot}"
@@ -71,6 +67,9 @@ def render_prompt_contract(frame: NarrativeRiverFrame, axioms_text: str = "") ->
         "SCARCITY",
         _bullets(scarcity_lines),
         "",
+        "UNRESOLVED QUESTIONS",
+        _bullets(frame.unresolved_questions),
+        "",
         "REQUIRED DOWNSTREAM EFFECTS",
         _bullets(frame.required_downstream_effects),
         "",
@@ -85,8 +84,6 @@ def render_prompt_contract(frame: NarrativeRiverFrame, axioms_text: str = "") ->
         "unless an in-world speaker would naturally use that exact language. Translate internal state into concrete action, "
         "institutional behavior, equipment limits, timing, and consequence.",
     ]
-
     if axioms_text.strip():
         sections.extend(["", "GOVERNING NARRATIVE AXIOMS", axioms_text.strip()])
-
     return "\n".join(sections).rstrip() + "\n"

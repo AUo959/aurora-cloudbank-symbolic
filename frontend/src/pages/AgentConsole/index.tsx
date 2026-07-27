@@ -181,7 +181,7 @@ export default function AgentConsole() {
 
   const sendMessage = useMutation({
     mutationFn: (message: AgentMessage) => auroraAPI.agent.chat(message),
-    onSuccess: (data: AgentResponse, variables) => {
+    onSuccess: (data: AgentResponse) => {
       const assistantMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',

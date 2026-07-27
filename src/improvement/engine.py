@@ -360,16 +360,41 @@ class CodeImprovementEngine:
         """
         if file_patterns is None:
             file_patterns = ["*.py"]
-        
+
         results = {}
-        
+
+        # rglob() honours ".." inside a pattern, so a caller-supplied pattern
+        # can walk back out of `directory`: "../*.py" reaches its siblings and
+        # "../../*.py" escapes further still. Callers are expected to reject
+        # such patterns up front, but this method takes them as an argument and
+        # cannot assume that happened — so every match is confirmed to resolve
+        # inside `directory` before it is read. Absolute patterns raise
+        # NotImplementedError inside pathlib and never get this far.
+        directory_resolved = directory.resolve()
+
         for pattern in file_patterns:
             for file_path in directory.rglob(pattern):
-                if file_path.is_file():
-                    suggestions = self.analyze_file(file_path)
-                    if suggestions:
-                        results[str(file_path)] = suggestions
-        
+                if not file_path.is_file():
+                    continue
+
+                resolved = file_path.resolve()
+                if directory_resolved not in resolved.parents:
+                    # `pattern` is caller-controlled, so it goes through
+                    # safe_str() like every other untrusted value logged here —
+                    # a raw %r would let a crafted pattern inject newlines and
+                    # forge log entries.
+                    logger.warning(
+                        "Skipping %s: pattern %s escaped the analysis directory",
+                        safe_path(resolved),
+                        safe_str(pattern),
+                    )
+                    continue
+
+                suggestions = self.analyze_file(resolved)
+                if suggestions:
+                    results[str(resolved)] = suggestions
+
+
         logger.info("Analyzed directory %s: found improvements in %d files", safe_path(directory), len(results))
         return results
     

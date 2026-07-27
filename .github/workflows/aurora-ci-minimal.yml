@@ -29,7 +29,7 @@ jobs:
   ci:
     name: "CI Check"
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -49,8 +49,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest pytest-cov pytest-asyncio
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -r requirements.txt -r requirements-test.txt
 
       - name: Check requirements-lock.txt drift (informational)
         continue-on-error: true
@@ -85,7 +84,7 @@ jobs:
             --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,.security/*
 
       # STYLE CHECKS - informational only, allowed to fail
-      - name: Code style check
+      - name: Code style check (informational)
         continue-on-error: true
         run: |
           # Check style but don't fail the build; use same scoped areas as syntax check
@@ -147,7 +146,7 @@ jobs:
       # SUPPLY-CHAIN INTEGRITY CHECK - non-blocking, warns on hash mismatch
       # Validates that every installed package matches a known-good SHA-256 hash.
       # Regenerate requirements-hashed.txt with: bash scripts/generate_hashed_requirements.sh
-      - name: Validate package hashes (supply-chain check)
+      - name: Validate package hashes (informational)
         continue-on-error: true
         run: |
           if [ -f requirements-hashed.txt ]; then
@@ -158,10 +157,19 @@ jobs:
             echo "::warning::requirements-hashed.txt not found — run: bash scripts/generate_hashed_requirements.sh"
           fi
 
-      # FULL TEST SUITE - informational, failures tracked but do not block
+      # FULL TEST SUITE - mandatory, fail closed
       - name: Run full test suite
-        continue-on-error: true
         run: |
           if [ -d tests ]; then
-            pytest tests/ -v --cov=. --cov-report=term-missing
+            set -o pipefail
+            pytest tests/ -v --cov=. --cov-report=term-missing --tb=short 2>&1 | tee pytest-full.log
           fi
+
+      - name: Upload full test log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: pytest-full-log
+          path: pytest-full.log
+          retention-days: 30
+          if-no-files-found: ignore

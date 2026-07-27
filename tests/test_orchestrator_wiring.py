@@ -25,10 +25,28 @@ def _auth_headers():
     return {"Authorization": f"Bearer {token}"}
 
 
-@pytest.fixture(scope="module")
-def client():
+# Function-scoped: csrf_client issues a token with a 300s lifetime, and the
+# full suite runs longer than that. A module-scoped client would hand every
+# test in the file the same ageing token.
+@pytest.fixture
+def anon_client():
+    """A TestClient with no CSRF token, for tests asserting rejection.
+
+    Deliberately separate from ``client``: a test that checks an endpoint
+    refuses unauthenticated calls cannot use a fixture that supplies
+    credentials, or it proves nothing.
+    """
     from api.aurora_api import app
+
     return TestClient(app)
+
+
+@pytest.fixture
+def client(csrf_client):
+    """Delegates to the shared ``csrf_client`` fixture so unsafe-method requests
+    carry a valid CSRF token. A bare TestClient(app) now gets 403 from
+    GlobalCsrfMiddleware before reaching the handler."""
+    return csrf_client
 
 
 # ---------------------------------------------------------------------------
@@ -145,13 +163,13 @@ def test_flow_status_endpoint_exists(client):
 
 @pytest.mark.integration
 @pytest.mark.quantum
-def test_flow_optimize_requires_auth(client):
+def test_flow_optimize_requires_auth(anon_client):
     """POST /api/quantum-forge/flow/optimize must require auth (401/403 without token)."""
     from api.aurora_api import SYSTEM_FLOW_AVAILABLE
     if not SYSTEM_FLOW_AVAILABLE:
         pytest.skip("SystemFlowOrchestrator not available")
 
-    resp = client.post("/api/quantum-forge/flow/optimize")
+    resp = anon_client.post("/api/quantum-forge/flow/optimize")
     assert resp.status_code in (401, 403)
 
 

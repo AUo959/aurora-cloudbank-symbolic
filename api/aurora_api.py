@@ -217,16 +217,6 @@ except ImportError:
 
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
-# Import Memory Retrieval API router
-try:
-    from modules.memory_retrieval.router import router as memory_retrieval_router
-    MEMORY_RETRIEVAL_AVAILABLE = True
-    MEMORY_RETRIEVAL_ROUTER = memory_retrieval_router
-except ImportError:
-    logging.getLogger("aurora_api").warning("Memory Retrieval not available - memory retrieval features disabled")
-    MEMORY_RETRIEVAL_AVAILABLE = False
-    MEMORY_RETRIEVAL_ROUTER = None
-
 # Structured logger (avoids f-string interpolation for security)
 logger = logging.getLogger("aurora_api")
 
@@ -360,6 +350,7 @@ async def lifespan(app: FastAPI):
     # ── Structured startup-complete record ──────────────────────────────────────
     _optional_modules = {
         "aumemmanager": AUMEMMANAGER_AVAILABLE,
+        "memory_retrieval": MEMORY_RETRIEVAL_AVAILABLE,
         "data_guardian": DATA_GUARDIAN_AVAILABLE,
         "insight_ledger": INSIGHT_LEDGER_AVAILABLE,
         "quantum_simulator": QUANTUM_SIMULATOR_AVAILABLE,
@@ -736,15 +727,6 @@ if QUANTUM_SIMULATOR_AVAILABLE and QUANTUM_SIMULATOR_ROUTER:
     except Exception as e:
         logger.error("Failed to integrate Quantum Simulator API routes: %s", e)
         QUANTUM_SIMULATOR_AVAILABLE = False
-
-# Include Memory Retrieval API routes if available
-if MEMORY_RETRIEVAL_AVAILABLE and MEMORY_RETRIEVAL_ROUTER:
-    try:
-        app.include_router(MEMORY_RETRIEVAL_ROUTER)
-        logger.info("Memory Retrieval API routes integrated successfully")
-    except Exception as e:
-        logger.error("Failed to integrate Memory Retrieval API routes: %s", e)
-        MEMORY_RETRIEVAL_AVAILABLE = False
 
 # Include RD Productization Pipeline API routes if available
 if RD_PIPELINE_AVAILABLE:

@@ -37,10 +37,17 @@ class SessionStore:
             except Exception as exc:  # pragma: no cover - environment fallback
                 logger.warning("⚠️ Redis unavailable, using in-memory store: %s", exc)
                 self.redis = None
-        if AsyncRedis:
+        # Only build the async client when the sync ping above proved the server
+        # is actually reachable. AsyncRedis.from_url() does not connect, so on a
+        # machine without Redis this used to hand back a client that looked fine
+        # and then raised ConnectionError at first await — deep inside whatever
+        # called it, long past the point where the in-memory fallback could take
+        # over. Both clients target the same REDIS_URL, so one liveness check
+        # answers for both.
+        if AsyncRedis and self.redis is not None:
             try:
                 self.async_redis = AsyncRedis.from_url(REDIS_URL, decode_responses=True)
-            except Exception:
+            except Exception:  # pragma: no cover - environment fallback
                 self.async_redis = None
 
     def _now(self) -> float:

@@ -114,7 +114,12 @@ class TestPathSanitization:
         """Should handle Path objects."""
         path = Path("/home/user/file.txt")
         result = sanitize_path_for_logging(path)
-        assert "home/user/file.txt" in result
+        # Compare against the platform's own rendering of the Path rather than a
+        # hardcoded POSIX string: str(Path("/home/user/file.txt")) is
+        # "\\home\\user\\file.txt" on Windows, so the literal form failed there.
+        # The property under test is that the path survives sanitisation intact,
+        # which is separator-independent.
+        assert str(path) in result
         assert '\n' not in result
 
     def test_truncates_long_paths(self):

@@ -58,7 +58,7 @@ class TestAuMemLedgerHookInit:
             hook = AuMemLedgerHook.create()
             assert hook.enabled is False
 
-    def test_create_factory_wires_ledger_when_available(self):
+    def test_create_factory_wires_ledger_when_available(self, monkeypatch):
         """create() with a real temp path must return an enabled hook."""
         try:
             from modules.insight_ledger.ledger_core import InsightLedger  # noqa: F401
@@ -70,6 +70,12 @@ class TestAuMemLedgerHookInit:
             pytest.skip("InsightLedger not available in this environment")
 
         with tempfile.TemporaryDirectory() as tmp:
+            # The absolute path below used to be admitted by a carve-out that
+            # exempted anything under a temp directory from validate_safe_path's
+            # containment check. That bypass is gone, so declare this directory
+            # as the ledger root instead — the path is then legitimately inside
+            # the root being enforced rather than exempt from it.
+            monkeypatch.setenv("AURORA_LEDGER_PATH", tmp)
             hook = AuMemLedgerHook.create(storage_path=str(Path(tmp) / "ledger"))
             assert hook.enabled is True
 

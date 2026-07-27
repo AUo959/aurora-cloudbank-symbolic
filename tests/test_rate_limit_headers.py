@@ -4,6 +4,8 @@ Ensures 429 responses include Retry-After and X-RateLimit-Limit when limits exce
 """
 
 import os
+
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from slowapi.errors import RateLimitExceeded
@@ -54,6 +56,16 @@ def auth_data(username: str) -> dict[str, str]:
 
 
 class TestRateLimitHeaders:
+    @pytest.fixture(autouse=True)
+    def _require_dev_auth_env(self, dev_auth_fixture_env):  # noqa: PT004
+        """Provide the dev-auth fixture users for every test in this class.
+
+        auth_data() reads AURORA_DEV_<ROLE>_PASSWORD directly, which only
+        exists while the dev-auth fixture is active. Without it these tests
+        failed with KeyError before reaching the rate limiter they exist to
+        exercise.
+        """
+
     def test_retry_after_header_present(self):
         app = build_isolated_app(limit_token_per_min=2)
         client = TestClient(app)

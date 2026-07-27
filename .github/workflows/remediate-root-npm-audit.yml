@@ -1,12 +1,13 @@
 name: Remediate root npm audit
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/remediate-root-npm-audit
+      - main
+    types:
+      - synchronize
     paths:
       - .github/workflows/remediate-root-npm-audit.yml
-  workflow_dispatch:
 
 permissions:
   contents: write

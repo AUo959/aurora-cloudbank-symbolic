@@ -1,0 +1,40 @@
+{
+  "event_canonical_digest": "1c6510a6ed783715a505448d0280fa0840b18b95572be010e56cc6ab7dc6e809",
+  "event_id": "AURORA-GATE-001A-RECOVERED-PROTOCOL-WIRING-001",
+  "event_revision": 1,
+  "finding_issue": 1361,
+  "gate_001b": {
+    "independent_external_assurance": false,
+    "note": "Gate-001A output cannot satisfy Gate-001B.",
+    "real_world_interaction": false,
+    "status": "NOT_EVALUATED"
+  },
+  "overall_state": "REMEDIATION_REQUIRED",
+  "remediation": {
+    "mutation_in_this_pr": false,
+    "owner": "AUo959",
+    "reason": "The evidence PR preserves the finding and does not mutate ambiguous runtime surfaces from an unverified lineage assumption.",
+    "required_actions": [
+      "Record an architecture decision proving shared or independent lineage.",
+      "If independent, rename or namespace ORD-3 to prevent confusion with the blocked protocol.",
+      "If related, quarantine runtime-facing definitions until custody and promotion gates pass.",
+      "Resolve the tribunal_integration reference with attributable provenance and loader evidence.",
+      "Add a regression gate and execute revision-2 retest after remediation."
+    ],
+    "status": "OPEN"
+  },
+  "retest": {
+    "acceptance": [
+      "No unresolved recovered-protocol identity appears in runtime directories.",
+      "Any approved independent ORD identifier is namespace-distinct and provenance-bound.",
+      "Any related recovered protocol satisfies custody and promotion gates.",
+      "Canonical and deterministic scan records remain set-equivalent."
+    ],
+    "baseline": "A future remediation commit resolving issue #1361",
+    "planned_event_revision": 2,
+    "previous_event_digest_for_revision_2": "1c6510a6ed783715a505448d0280fa0840b18b95572be010e56cc6ab7dc6e809",
+    "status": "REQUIRED"
+  },
+  "run_id": "AURORA-GATE-001A-RUN-001-3142AA47",
+  "schema": "aurora.gate001a.remediation_retest_state/v1"
+}

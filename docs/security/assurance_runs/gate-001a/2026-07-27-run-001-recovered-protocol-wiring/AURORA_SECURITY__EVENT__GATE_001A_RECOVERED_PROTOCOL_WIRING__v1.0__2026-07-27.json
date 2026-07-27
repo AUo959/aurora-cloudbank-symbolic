@@ -1,0 +1,125 @@
+{
+  "canon_status": "historical_state",
+  "data_treatment": "first_class_operational_data",
+  "event_id": "AURORA-GATE-001A-RECOVERED-PROTOCOL-WIRING-001",
+  "evidence_authority": "operational_simulation_evidence",
+  "evidence_references": [
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RECEIPT__GATE_001A_EXECUTION__v1.0__2026-07-27.json"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RECEIPT__GATE_001A_DETERMINISTIC_REPLAY__v1.0__2026-07-27.json"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_STEP_2_RAW__v1.0__2026-07-27.txt"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RESULT__GATE_001A_STEP_2__v1.0__2026-07-27.txt"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_STEP_3_RAW__v1.0__2026-07-27.txt"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_STEP_3_DETERMINISTIC__v1.0__2026-07-27.txt"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_ORD_REACHABILITY__v1.0__2026-07-27.txt"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_TRIBUNAL_REACHABILITY__v1.0__2026-07-27.txt"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__EVIDENCE__GATE_001A_ORD_IMPORT_GRAPH__v1.0__2026-07-27.json"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__EVIDENCE__GATE_001A_SHADOWFAX_CUSTODY__v1.0__2026-07-27.json"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__TRACE__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.json"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__FINDINGS__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.json"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__STATE__GATE_001A_REMEDIATION_AND_RETEST__v1.0__2026-07-27.json"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__REPORT__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.md"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__REPLAY__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.md"
+    },
+    {
+      "origin": "simulation_primary_evidence",
+      "reference": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__MANIFEST__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.json"
+    }
+  ],
+  "execution_mode": "l1_simulated_institutional_rehearsal",
+  "gate_track": "GATE-001A",
+  "independent_external_assurance": false,
+  "institutional_roles": [
+    {
+      "label": "Simulated Verification Lead",
+      "representation": "simulated_role",
+      "role_id": "SIM-GATE001A-VERIFICATION-LEAD-001"
+    },
+    {
+      "label": "Simulated Engineering Lead",
+      "representation": "simulated_role",
+      "role_id": "SIM-GATE001A-ENGINEERING-LEAD-001"
+    },
+    {
+      "label": "Simulated External Assessor Role",
+      "representation": "simulated_role",
+      "role_id": "SIM-GATE001A-EXTERNAL-ASSESSOR-001"
+    },
+    {
+      "label": "Simulated Evidence Custodian",
+      "representation": "simulated_role",
+      "role_id": "SIM-GATE001A-EVIDENCE-CUSTODIAN-001"
+    }
+  ],
+  "layer": "L1",
+  "previous_event_digest": null,
+  "provenance": {
+    "baseline_commit": "3142aa47afac0b8e63cc5bc46f9fa8ae40592354",
+    "deterministic": true,
+    "evidence_pull_request": 1360,
+    "executed_at": "2026-07-27T14:22:04Z",
+    "operator": "Aurora GitHubOps",
+    "replay_verified_at": "2026-07-27T14:34:03Z",
+    "scenario_id": "GATE-001A-RECOVERED-PROTOCOL-WIRING-v1.0",
+    "seed": "AURORA-GATE-001A-RUN-001-3142AA47",
+    "source_issue": 1359,
+    "subject_repository": "AUo959/aurora-cloudbank-symbolic",
+    "tool": "GitHub Actions canonical grep capture plus sorted Python replay projection",
+    "tool_version": "GNU grep 3.11; Python 3.12.3; evidence workflow run 30274709319; replay run 30275682990"
+  },
+  "real_world_interaction": false,
+  "result": {
+    "finding_count": 1,
+    "finding_issue": 1361,
+    "gate_001b_status": "NOT_EVALUATED",
+    "institutional_process_capability": "PASS",
+    "retest_required": true,
+    "subject_verdict": "FINDING"
+  },
+  "revision": 1,
+  "run_id": "AURORA-GATE-001A-RUN-001-3142AA47",
+  "substitutes_for_real_world_review": false
+}

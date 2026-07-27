@@ -1,0 +1,75 @@
+{
+  "canon_posture": "Recovered protocol records are custody fixtures for schema validation and promotion planning only. They are not runtime canon and do not authorize enforcement wiring. No protocol listed here may be wired to runtime (EthicsEngine, ethics_gate, compliance monitor, or geometric ethics) until: (1) all custody blockers for that protocol are resolved, (2) pentest_scope_v2.md is complete and signed, and (3) the required test plan in PROTOCOL_PROMOTION_PLAN.md Section 7 passes.",
+  "runtime_posture": "planning_only_no_runtime_enforcement",
+  "shadowfax": {
+    "allowed_actions": [
+      "recommend_stillness",
+      "escalate_paradox_for_review",
+      "flag_boundary_instability",
+      "request_supervisory_review"
+    ],
+    "appeal_requirements": [
+      "Pause or escalation recommendations must preserve review and appeal paths."
+    ],
+    "audit_requirements": [
+      "record_stillness_trigger",
+      "record_paradox_basis",
+      "record_supervisory_reviewer",
+      "record_override_constraints"
+    ],
+    "custody_record": {
+      "internal_file_path": "PENDING",
+      "internal_file_sha256": "PENDING",
+      "observed_status": "sealed_bundle_reference",
+      "observed_version": "unverified-partial-lineage",
+      "promotion_decision": "blocked_pending_bundle_location",
+      "reviewer_or_agent_surface": "PENDING",
+      "source_classification": "missing_dependency",
+      "source_package_name": "PENDING",
+      "source_package_sha256": "PENDING",
+      "unresolved_blockers": [
+        "Standalone SHADOWFAX bundle not yet located \u2014 HARD BLOCK on any wiring decision.",
+        "Exact source package name and hash not yet verified.",
+        "Internal file path and hash not yet verified."
+      ],
+      "verification_date": "PENDING"
+    },
+    "forbidden_actions": [
+      "bypass_evidence",
+      "erase_review_paths",
+      "convert_instability_into_proof",
+      "override_without_audit"
+    ],
+    "handoff_targets": [
+      "tribunal",
+      "ethics_gate",
+      "human_reviewer"
+    ],
+    "layer_boundaries": {
+      "cross_layer_rules": [
+        "Stillness cannot bypass audit.",
+        "Boundary instability is not proof by itself."
+      ],
+      "l1": "May recommend pause/escalation only after review.",
+      "l2": "May flag simulation boundary instability as non-canonical evidence.",
+      "l3": "May flag THREADCORE paradox or continuity instability for review."
+    },
+    "protocol_id": "shadowfax",
+    "protocol_specific": {
+      "stillness_triggers": "boundary-instability-review-only"
+    },
+    "required_evidence": [
+      "source_package_name",
+      "source_package_sha256",
+      "internal_file_path",
+      "internal_file_sha256",
+      "standalone_bundle_status",
+      "reviewer_decision"
+    ],
+    "role": "Stillness, supervisory review, paradox escalation, and boundary-instability oversight.",
+    "rollback_requirements": [
+      "Remove runtime mapping if standalone custody cannot be verified.",
+      "Preserve supervisory review trail."
+    ]
+  }
+}

@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   remediate:
-    name: Lockfile and targeted override remediation
+    name: Lockfile and targeted override remediation after harness repair
     runs-on: ubuntu-latest
     timeout-minutes: 25
 

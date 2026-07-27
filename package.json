@@ -91,7 +91,8 @@
   },
   "homepage": "https://github.com/AUo959/aurora-cloudbank-symbolic#readme",
   "overrides": {
-    "js-yaml": "^4.1.1"
+    "js-yaml": "^4.1.1",
+    "brace-expansion": "5.0.8"
   },
   "jest": {
     "testEnvironment": "node",

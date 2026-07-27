@@ -142,6 +142,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 axioms_text=_read_optional_text(args.axioms),
                 prior_delta=prior,
                 auto_prior=not args.no_auto_prior,
+                fail_on_error=args.fail_on_error,
             )
             _emit(result)
             return 3 if args.fail_on_error and result["validation_has_errors"] else 0

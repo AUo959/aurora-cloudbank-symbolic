@@ -1,43 +1,92 @@
 # Narrative River Adapter
 
-Passive Phase 1 implementation of the Narrative River Adapter specification.
+The Narrative River Adapter now has an explicit operator trigger and durable scene-chain workflow.
 
-## What is implemented
+## Trigger
 
-- strict Pydantic v2 models for `NarrativeRiverFrame` and `SceneRiverDelta`;
-- deterministic JSON/YAML serialization;
-- stable frame IDs;
-- explicit import of prior-scene questions, sediment, and next-scene obligations;
-- compact prose-generation prompt contracts;
-- advisory checks for self-aware narration, repeated clipped dialogue, generic trailer lines, contrast templates, and RiverCycle terminology bleed.
+Run it from the repository root:
 
-## What is not implemented
-
-- no API route or background service;
-- no simulation mutation;
-- no automatic memory persistence;
-- no automatic narrative rewriting;
-- no CanonRec writes or canon promotion;
-- no claim that numeric pressure values represent psychological truth.
-
-## Minimal use
-
-```python
-from modules.narrative_river import NarrativeRiverAdapter
-
-adapter = NarrativeRiverAdapter()
-frame = adapter.build_frame(
-    scene_request=scene_payload,
-    canon_snapshot={
-        "repository": "AUo959/CanonRec",
-        "commit_sha": "<reviewed-sha>",
-        "source_files": ["canon/L2/example.md"],
-        "authority_status": "mixed",
-    },
-)
-
-prompt_contract = adapter.render_prompt_contract(frame)
-report = adapter.validate_draft(frame, draft_text)
+```bash
+python -m modules.narrative_river --help
 ```
 
-Persistence is truthful only when a frame or delta has a durable storage receipt. Git and CanonRec remain the authorities for committed canon.
+Available commands:
+
+```text
+build-frame
+render-prompt
+validate-draft
+close-scene
+run-scene
+status
+```
+
+The strongest first-use path is `run-scene`, which performs the complete explicit cycle:
+
+1. load a scene request and canon snapshot;
+2. import the approved prior delta, when one exists;
+3. build and persist the new frame;
+4. render and persist the prose prompt packet;
+5. validate the supplied draft and persist the advisory report;
+6. validate and persist the approved scene delta;
+7. mark that delta as the default continuity input for the next scene.
+
+```bash
+python -m modules.narrative_river run-scene \
+  --workspace narrative/river \
+  --scene-request scene_request.yaml \
+  --canon-snapshot canon_snapshot.yaml \
+  --axioms narrative_axioms.md \
+  --draft chapter_scene.md \
+  --delta scene_delta.yaml
+```
+
+The command prints a machine-readable JSON receipt containing every generated path.
+
+## Durable layout
+
+```text
+narrative/river/
+├── frames/
+├── deltas/
+├── prompt_packets/
+├── validation_reports/
+└── manifest.json
+```
+
+Writes are path-contained beneath the selected workspace and use atomic replacement. The manifest records SHA-256 digests and verifies stored deltas before they are carried into a later scene.
+
+## Review and safety boundaries
+
+- unsupported frame or delta schema versions fail closed;
+- questions closed by the prior delta are removed from the next frame;
+- resolved sediment is removed before new residue is imported;
+- validation remains advisory unless `--fail-on-error` is supplied;
+- no prose is rewritten automatically;
+- no simulation state is mutated;
+- no CanonRec content is written or promoted;
+- the latest delta is imported automatically only through an explicit CLI invocation and can be disabled with `--no-auto-prior`.
+
+## Individual commands
+
+```bash
+python -m modules.narrative_river build-frame \
+  --scene-request scene_request.yaml \
+  --canon-snapshot canon_snapshot.yaml
+
+python -m modules.narrative_river render-prompt \
+  --frame narrative/river/frames/SCENE.frame.yaml \
+  --axioms narrative_axioms.md
+
+python -m modules.narrative_river validate-draft \
+  --frame narrative/river/frames/SCENE.frame.yaml \
+  --draft chapter_scene.md
+
+python -m modules.narrative_river close-scene \
+  --frame narrative/river/frames/SCENE.frame.yaml \
+  --delta scene_delta.yaml
+
+python -m modules.narrative_river status
+```
+
+Git and CanonRec remain the authorities for committed canon. The adapter stores narrative working state; it does not promote that state.

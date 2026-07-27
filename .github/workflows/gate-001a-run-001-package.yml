@@ -24,19 +24,53 @@ jobs:
           python-version: "3.12"
 
       - name: Install package and validate evidence
+        id: validate
         shell: bash
         run: |
-          set -euo pipefail
-          python tools/security/_install_gate001a_run001.py
-          python -m pip install --disable-pip-version-check pytest
+          set +e
+          mkdir -p gate001a-package-diagnostic
           event="docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__EVENT__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.json"
-          python tools/security/validate_institutional_assurance_event.py "$event"
-          python -m pytest -q tests/test_gate_001a_run_001_package.py
+
+          python tools/security/_install_gate001a_run001.py \
+            > gate001a-package-diagnostic/01-installer.log 2>&1
+          installer_status=$?
+
+          validator_status=99
+          tests_status=99
+          if [ "$installer_status" -eq 0 ]; then
+            python tools/security/validate_institutional_assurance_event.py "$event" \
+              > gate001a-package-diagnostic/02-validator.log 2>&1
+            validator_status=$?
+            python -m pytest -q tests/test_gate_001a_run_001_package.py \
+              > gate001a-package-diagnostic/03-pytest.log 2>&1
+            tests_status=$?
+          fi
+
+          printf 'installer=%s\nvalidator=%s\ntests=%s\n' \
+            "$installer_status" "$validator_status" "$tests_status" \
+            > gate001a-package-diagnostic/status.txt
+          cat gate001a-package-diagnostic/status.txt
+          cat gate001a-package-diagnostic/01-installer.log
+          test "$installer_status" -eq 0
+          cat gate001a-package-diagnostic/02-validator.log
+          test "$validator_status" -eq 0
+          cat gate001a-package-diagnostic/03-pytest.log
+          test "$tests_status" -eq 0
+
+      - name: Upload package validation diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-001a-run-001-package-diagnostic
+          path: gate001a-package-diagnostic/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Remove execution scaffolding
         shell: bash
         run: |
           set -euo pipefail
+          rm -rf gate001a-package-diagnostic
           rm -f .github/workflows/gate-001a-run-001.yml
           rm -f .github/workflows/gate-001a-run-001-deterministic-replay.yml
           rm -f .github/workflows/gate-001a-run-001-package.yml

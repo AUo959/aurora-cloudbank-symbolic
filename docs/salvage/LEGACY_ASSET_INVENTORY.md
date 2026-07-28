@@ -17,6 +17,7 @@ The inventory:
 - refuses to write its report inside the inventoried source tree;
 - records file and directory symlinks without following them;
 - records FIFOs, sockets, devices, and other non-regular entries as blocked without opening them;
+- records unreadable-directory traversal failures rather than silently omitting subtrees;
 - calculates SHA-256 digests for files within configured limits;
 - treats unreadable, oversized, suspicious, and unsupported content as blocked or quarantined;
 - never extracts archive content to disk;
@@ -36,11 +37,17 @@ python tools/salvage/inventory_legacy_assets.py \
 
 Phase 0 safely inspects ZIP metadata and eligible member bytes in memory only.
 
+Before constructing Python's `ZipFile` object, the tool performs a bounded End of Central Directory preflight. That preflight rejects archives whose declared entry count or central-directory size exceeds configured limits, so the count gate operates before the standard library materializes every member record.
+
 It blocks:
 
+- malformed or missing End of Central Directory metadata;
+- multi-disk ZIPs;
+- ZIP64 metadata, pending a separately reviewed bounded parser;
+- central directories exceeding the configured byte limit;
 - absolute member paths;
 - `..` traversal;
-- symlink members;
+- symlink and special-file members;
 - duplicate member paths that create ambiguous custody records;
 - nested archives;
 - archives exceeding the configured member-count limit;
@@ -49,6 +56,10 @@ It blocks:
 - suspicious compression ratios;
 - member size mismatches;
 - unreadable members.
+
+Unix executable mode bits on ZIP members are preserved as safety signals. Executable archive members are categorized as `executable` and quarantined consistently with executable filesystem files.
+
+All numeric limits must be finite and positive. Values such as `NaN` are rejected rather than silently disabling a guard.
 
 Other archive formats are inventoried as outer files and marked `unsupported_archive`. They are not extracted or parsed in this phase.
 
@@ -83,9 +94,11 @@ A heuristic match is not proof that a valid credential exists. Absence of a matc
 
 Provider-side credential safety cannot be inferred from repository or package inspection.
 
-## Duplicate detection
+## Artifact identity and duplicate detection
 
-Exact duplicate groups are based on matching SHA-256 digests from physical filesystem files and eligible archive members. Projection records such as unsupported-archive notices are excluded so they cannot create false duplicate groups.
+Filesystem artifact identity includes source kind, relative path, digest, and size. Archive-member identity additionally includes the containing archive path. Identical member paths and bytes in different archives therefore remain distinct custody records.
+
+Exact duplicate groups are based on matching SHA-256 digests from physical filesystem files and eligible archive members. Projection records such as unsupported-archive notices are excluded so they cannot create false duplicate groups. Duplicate groups contain unique artifact IDs.
 
 Duplicate paths inside the same ZIP are blocked as ambiguous rather than being assigned colliding inventory records. Likely or semantic duplicates remain future work and must not be inferred from names alone.
 

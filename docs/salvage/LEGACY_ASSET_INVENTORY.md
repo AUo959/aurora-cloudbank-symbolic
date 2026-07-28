@@ -15,6 +15,7 @@ The inventory:
 
 - reads regular source files without modifying them;
 - refuses to write its report inside the inventoried source tree;
+- creates report files only at new paths and never replaces an existing inode;
 - records file and directory symlinks without following them;
 - records FIFOs, sockets, devices, and other non-regular entries as blocked without opening them;
 - records unreadable-directory traversal failures rather than silently omitting subtrees;
@@ -25,13 +26,21 @@ The inventory:
 - never resolves secret references;
 - never applies a migration mapping.
 
-Use an output path outside the source package:
+Use a new output path outside the source package:
 
 ```bash
 python tools/salvage/inventory_legacy_assets.py \
   /path/to/read-only-source \
   --output /separate/report-location/inventory.json
 ```
+
+## Report output posture
+
+When `--output` is supplied, the tool creates a new report with directory-relative, exclusive, no-follow filesystem operations. The target must not already exist. Existing regular files, hard links, and symlinks are rejected rather than truncated or replaced. The new report is checked to be a single-link regular file and is created with owner-only permissions before content is written and synchronized.
+
+Secure file creation requires POSIX-style directory-relative open support. On platforms without those primitives, the tool fails closed for `--output`; emit the report to stdout and redirect it using an independently reviewed platform-appropriate mechanism.
+
+The output-directory and filename checks are performed again at creation time. This narrows the validation-to-write race and prevents an external output path from modifying source custody through a pre-existing hard link or symlink.
 
 ## Archive posture
 

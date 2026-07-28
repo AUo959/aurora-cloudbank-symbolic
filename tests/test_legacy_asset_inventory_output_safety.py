@@ -102,7 +102,10 @@ def test_existing_symlink_output_is_rejected_without_touching_target(tmp_path: P
     except (OSError, NotImplementedError):
         pytest.skip("symlink creation is unavailable on this platform")
 
-    with pytest.raises(inventory_module.InventoryError, match="already exists"):
+    with pytest.raises(
+        inventory_module.InventoryError,
+        match="outside the inventory source tree|already exists",
+    ):
         inventory_module.write_report_exclusive(root, output, "replacement\n")
 
     assert target.read_text(encoding="utf-8") == "source-custody\n"

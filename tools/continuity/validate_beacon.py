@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Offline validator for Universal Thread Beacon preservation profiles.
+
+This tool validates schema conformance and deterministic serialization only. It
+never performs replay, relay, restore, network access, secret resolution, or
+execution of referenced content.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
+
+import jsonschema
+
+SUPPORTED_SCHEMA_MAJOR = 1
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_SCHEMA_PATH = REPO_ROOT / "schemas" / "continuity" / "universal_thread_beacon.schema.json"
+
+
+class BeaconValidationError(ValueError):
+    """Raised when a beacon cannot be accepted by the offline reader."""
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    """Load one UTF-8 JSON object from disk."""
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise BeaconValidationError(f"Unable to load JSON from {path}: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise BeaconValidationError(f"Expected a JSON object in {path}")
+    return payload
+
+
+def schema_major(version: str) -> int:
+    """Return the semantic-version major component or fail clearly."""
+    try:
+        return int(version.split(".", maxsplit=1)[0])
+    except (AttributeError, ValueError) as exc:
+        raise BeaconValidationError(f"Invalid schema version: {version!r}") from exc
+
+
+def canonical_json(payload: dict[str, Any]) -> str:
+    """Serialize deterministically without deleting unknown extension fields."""
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+
+
+def canonical_sha256(payload: dict[str, Any]) -> str:
+    """Return the SHA-256 digest of the deterministic JSON representation."""
+    return hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
+
+
+def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
+    """Validate one beacon and return it unchanged.
+
+    Returning the original mapping is intentional: this validator preserves
+    unknown fields rather than normalizing them away.
+    """
+    specification = payload.get("specification")
+    if not isinstance(specification, dict):
+        raise BeaconValidationError("Missing specification object")
+
+    version = specification.get("schema_version")
+    if schema_major(version) != SUPPORTED_SCHEMA_MAJOR:
+        raise BeaconValidationError(
+            f"Unsupported UTB schema major version {version!r}; supported major is {SUPPORTED_SCHEMA_MAJOR}"
+        )
+
+    try:
+        validator = jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
+        validator.validate(payload)
+    except jsonschema.ValidationError as exc:
+        location = ".".join(str(part) for part in exc.absolute_path) or "<root>"
+        raise BeaconValidationError(f"Schema validation failed at {location}: {exc.message}") from exc
+
+    return payload
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Validate a Universal Thread Beacon profile offline")
+    parser.add_argument("beacon", type=Path, help="Path to the beacon JSON file")
+    parser.add_argument("--schema", type=Path, default=DEFAULT_SCHEMA_PATH, help="Path to the UTB JSON Schema")
+    parser.add_argument("--print-canonical", action="store_true", help="Print deterministic canonical JSON")
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    schema = load_json(args.schema)
+    beacon = load_json(args.beacon)
+
+    try:
+        validated = validate_beacon(beacon, schema)
+    except BeaconValidationError as exc:
+        print(f"INVALID: {exc}")
+        return 1
+
+    print(f"VALID sha256={canonical_sha256(validated)}")
+    if args.print_canonical:
+        print(canonical_json(validated))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

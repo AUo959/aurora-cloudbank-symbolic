@@ -25,6 +25,7 @@ EXPECTED_SCHEMA_ID = (
 READER_VERSION = "1.0.0"
 CANONICALIZATION = "utb-json-subset-v1"
 MAX_SAFE_INTEGER = 9_007_199_254_740_991
+SEMVER_COMPONENT_MAX_DIGITS = 9
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SCHEMA_PATH = REPO_ROOT / "schemas" / "continuity" / "universal_thread_beacon.schema.json"
 
@@ -91,16 +92,31 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def semantic_version_tuple(version: str, field_name: str) -> tuple[int, int, int]:
-    """Parse the repository's strict three-component semantic-version form."""
+    """Parse a bounded three-component semantic-version form."""
     if not isinstance(version, str):
         raise BeaconValidationError(f"Invalid {field_name}: {version!r}")
     parts = version.split(".")
-    if len(parts) != 3 or any(not part.isdigit() for part in parts):
+    if (
+        len(parts) != 3
+        or any(not part.isdigit() for part in parts)
+        or any(len(part) > SEMVER_COMPONENT_MAX_DIGITS for part in parts)
+    ):
         raise BeaconValidationError(f"Invalid {field_name}: {version!r}")
-    return tuple(int(part) for part in parts)  # type: ignore[return-value]
+    try:
+        parsed = tuple(int(part) for part in parts)
+    except ValueError as exc:
+        raise BeaconValidationError(f"Invalid {field_name}: {version!r}") from exc
+    return parsed  # type: ignore[return-value]
 
 
-def _validate_schema_identity(schema: dict[str, Any], payload_version: str) -> None:
+def _validate_schema_contents(schema: dict[str, Any], payload_version: str) -> None:
+    """Bind validation to the committed bundled schema, not self-asserted markers."""
+    bundled_schema = load_json(DEFAULT_SCHEMA_PATH)
+    if schema != bundled_schema:
+        raise BeaconValidationError(
+            "Schema content does not match the committed bundled UTB schema"
+        )
+
     expected = {
         "$id": EXPECTED_SCHEMA_ID,
         "x-utb-specification": SPECIFICATION_NAME,
@@ -109,8 +125,7 @@ def _validate_schema_identity(schema: dict[str, Any], payload_version: str) -> N
     mismatches = [key for key, value in expected.items() if schema.get(key) != value]
     if mismatches:
         raise BeaconValidationError(
-            "Schema is not the supported UTB schema; mismatched identity fields: "
-            + ", ".join(sorted(mismatches))
+            "Bundled schema has invalid UTB identity fields: " + ", ".join(sorted(mismatches))
         )
     if payload_version != schema["x-utb-schema-version"]:
         raise BeaconValidationError(
@@ -120,12 +135,7 @@ def _validate_schema_identity(schema: dict[str, Any], payload_version: str) -> N
 
 
 def _validate_canonical_subset(value: Any, path: str = "$") -> None:
-    """Enforce the cross-reader UTB JSON subset used for hashing.
-
-    v1 permits null, booleans, strings containing Unicode scalar values,
-    arrays, objects with printable-ASCII keys, and integers within the
-    JavaScript-safe range. Floating-point values are excluded.
-    """
+    """Enforce the value domain used by the UTB canonical byte encoding."""
     if value is None or isinstance(value, bool):
         return
     if isinstance(value, int):
@@ -155,23 +165,88 @@ def _validate_canonical_subset(value: Any, path: str = "$") -> None:
     raise BeaconValidationError(f"Unsupported JSON value at {path}: {type(value).__name__}")
 
 
-def canonical_json(payload: dict[str, Any]) -> str:
-    """Serialize using the explicitly bounded UTB canonical JSON subset v1."""
-    _validate_canonical_subset(payload)
+_SHORT_ESCAPES = {
+    '"': '\\"',
+    "\\": "\\\\",
+    "\b": "\\b",
+    "\t": "\\t",
+    "\n": "\\n",
+    "\f": "\\f",
+    "\r": "\\r",
+}
+
+
+def _canonical_string(value: str) -> str:
+    """Encode one JSON string with the exact UTB v1 escaping rules."""
     try:
-        return json.dumps(
-            payload,
-            allow_nan=False,
-            ensure_ascii=False,
-            separators=(",", ":"),
-            sort_keys=True,
-        )
-    except (TypeError, ValueError, UnicodeError) as exc:
-        raise BeaconValidationError(f"Beacon cannot be serialized as canonical UTF-8 JSON: {exc}") from exc
+        value.encode("utf-8", errors="strict")
+    except UnicodeError as exc:
+        raise BeaconValidationError(f"Invalid Unicode scalar value: {exc}") from exc
+
+    encoded: list[str] = ['"']
+    for character in value:
+        escaped = _SHORT_ESCAPES.get(character)
+        if escaped is not None:
+            encoded.append(escaped)
+        elif ord(character) < 0x20:
+            encoded.append(f"\\u{ord(character):04x}")
+        else:
+            encoded.append(character)
+    encoded.append('"')
+    return "".join(encoded)
+
+
+def _canonical_serialize(value: Any, path: str = "$") -> str:
+    if value is None:
+        return "null"
+    if value is True:
+        return "true"
+    if value is False:
+        return "false"
+    if isinstance(value, int) and not isinstance(value, bool):
+        if abs(value) > MAX_SAFE_INTEGER:
+            raise BeaconValidationError(f"Integer outside canonical range at {path}: {value}")
+        return str(value)
+    if isinstance(value, float):
+        raise BeaconValidationError(f"Floating-point value is not allowed at {path}")
+    if isinstance(value, str):
+        return _canonical_string(value)
+    if isinstance(value, list):
+        return "[" + ",".join(
+            _canonical_serialize(item, f"{path}[{index}]")
+            for index, item in enumerate(value)
+        ) + "]"
+    if isinstance(value, dict):
+        items: list[str] = []
+        for key in sorted(value):
+            if not isinstance(key, str):
+                raise BeaconValidationError(f"Non-string object key at {path}: {key!r}")
+            if not key.isascii() or any(ord(character) < 0x20 or ord(character) > 0x7E for character in key):
+                raise BeaconValidationError(f"Object key is outside printable ASCII at {path}: {key!r}")
+            items.append(
+                _canonical_string(key)
+                + ":"
+                + _canonical_serialize(value[key], f"{path}.{key}")
+            )
+        return "{" + ",".join(items) + "}"
+    raise BeaconValidationError(f"Unsupported JSON value at {path}: {type(value).__name__}")
+
+
+def canonical_json(payload: dict[str, Any]) -> str:
+    """Return the exact UTB v1 canonical JSON text.
+
+    The byte representation is UTF-8 without a BOM or trailing newline. Object
+    keys are printable ASCII and sorted by ascending ASCII code. No whitespace
+    is emitted. Strings escape only quotation mark, reverse solidus, and control
+    characters; all other Unicode scalar values are emitted directly without
+    normalization. Integers use ordinary base-10 notation.
+    """
+    _validate_canonical_subset(payload)
+    return _canonical_serialize(payload)
 
 
 def canonical_sha256(payload: dict[str, Any]) -> str:
-    """Return the SHA-256 digest of the canonical JSON representation."""
+    """Return the SHA-256 digest of the canonical UTF-8 byte representation."""
     return hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
 
 
@@ -190,7 +265,7 @@ def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str
             f"Unsupported UTB schema version {version!r}; supported version is {SUPPORTED_SCHEMA_VERSION}"
         )
 
-    _validate_schema_identity(schema, version)
+    _validate_schema_contents(schema, version)
 
     try:
         jsonschema.Draft202012Validator.check_schema(schema)
@@ -223,15 +298,14 @@ def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Validate a Universal Thread Beacon profile offline")
     parser.add_argument("beacon", type=Path, help="Path to the beacon JSON file")
-    parser.add_argument("--schema", type=Path, default=DEFAULT_SCHEMA_PATH, help="Path to the bound UTB JSON Schema")
-    parser.add_argument("--print-canonical", action="store_true", help="Print canonical UTB JSON subset v1")
+    parser.add_argument("--print-canonical", action="store_true", help="Print canonical UTB JSON v1")
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
     try:
-        schema = load_json(args.schema)
+        schema = load_json(DEFAULT_SCHEMA_PATH)
         beacon = load_json(args.beacon)
         validated = validate_beacon(beacon, schema)
         canonical = canonical_json(validated)

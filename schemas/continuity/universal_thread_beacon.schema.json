@@ -1,8 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/continuity/universal_thread_beacon.schema.json",
+  "x-utb-specification": "UTB-PS-001",
+  "x-utb-schema-version": "1.0.0",
   "title": "Universal Thread Beacon",
-  "description": "Neutral preservation entry-point profile over an existing continuity package. It does not grant authority or activate replay, relay, restore, or execution.",
+  "description": "Neutral minimum preservation entry-point profile over an existing continuity package. It does not grant authority or activate replay, relay, restore, or execution.",
   "type": "object",
   "additionalProperties": true,
   "required": [
@@ -24,12 +26,15 @@
       "required": ["name", "schema_version"],
       "properties": {
         "name": {"const": "UTB-PS-001"},
-        "schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+        "schema_version": {"const": "1.0.0"}
       }
     },
     "manifest_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
     "encoding": {"const": "UTF-8"},
-    "profile": {"enum": ["minimum", "full"]},
+    "profile": {
+      "const": "minimum",
+      "description": "Version 1.0.0 defines only the minimum profile. A full profile remains reserved until its completeness contract is specified."
+    },
     "object_ref": {
       "type": "object",
       "additionalProperties": false,
@@ -75,7 +80,8 @@
       "additionalProperties": false,
       "required": [
         "canon_status",
-        "layer",
+        "residency_layer",
+        "operational_scope_layers",
         "execution_mode",
         "evidence_authority",
         "data_treatment",
@@ -94,7 +100,17 @@
             "deprecated"
           ]
         },
-        "layer": {"enum": ["L1", "L2", "L3"]},
+        "residency_layer": {
+          "enum": ["L1", "L2", "L3"],
+          "description": "Layer in which the represented continuity object resides."
+        },
+        "operational_scope_layers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["L1", "L2", "L3"]},
+          "description": "Layers whose work or records the represented object is explicitly scoped to serve. This does not grant cross-layer authority."
+        },
         "execution_mode": {"type": "string", "minLength": 1},
         "evidence_authority": {"type": "string", "minLength": 1},
         "data_treatment": {"type": "string", "minLength": 1},
@@ -148,9 +164,10 @@
     "compatibility": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["minimum_reader_version", "unknown_field_policy", "transformations"],
+      "required": ["minimum_reader_version", "canonicalization", "unknown_field_policy", "transformations"],
       "properties": {
         "minimum_reader_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "canonicalization": {"const": "utb-json-subset-v1"},
         "unknown_field_policy": {"const": "preserve"},
         "transformations": {
           "type": "array",

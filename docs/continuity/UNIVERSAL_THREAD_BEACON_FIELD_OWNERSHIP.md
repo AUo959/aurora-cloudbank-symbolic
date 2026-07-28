@@ -24,7 +24,13 @@ The beacon references these records. It does not copy or redefine their authorit
 
 ## Schema binding
 
-The offline reader accepts only the committed UTB schema identity:
+The command-line reader loads only the schema committed at:
+
+```text
+schemas/continuity/universal_thread_beacon.schema.json
+```
+
+Validation is bound to the complete parsed contents of that bundled schema, not merely to self-asserted metadata. A copied `$id`, specification marker, or version marker cannot make a relaxed or unrelated schema authoritative. The bundled schema also carries:
 
 ```text
 specification: UTB-PS-001
@@ -32,7 +38,7 @@ schema version: 1.0.0
 schema id: https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/continuity/universal_thread_beacon.schema.json
 ```
 
-A syntactically valid but unrelated JSON Schema cannot establish UTB conformance. Future schema versions require an explicit reader update and compatibility decision.
+Future schema contents or versions require an explicit reader update and compatibility decision.
 
 ## Profile scope
 
@@ -66,16 +72,37 @@ The example beacon does not claim package-level integrity verification. Its `int
 
 ## Compatibility and canonicalization
 
-- The reader enforces `compatibility.minimum_reader_version`.
-- The profile declares `canonicalization: utb-json-subset-v1`.
-- The canonical subset permits null, booleans, strings containing Unicode scalar values, arrays, objects with printable-ASCII keys, and integers in the range `-9007199254740991` through `9007199254740991`.
-- Floating-point values, non-finite values, oversized integers, duplicate keys, non-ASCII object keys, invalid UTF-8, and lone surrogates fail validation.
-- These restrictions avoid implementation-specific numeric rendering and key-order behavior across compatible readers.
-- Compatible unknown extension fields are preserved only when they conform to the canonical subset.
-- Transformations and losses are recorded.
-- Required deliverables fail validation when unavailable or intentionally omitted.
-- Included and externally referenced deliverables require integrity references.
-- Schema validation proves declaration conformance only.
+The reader enforces `compatibility.minimum_reader_version`. Semantic-version components contain at most nine decimal digits, so malformed or adversarially large components fail through a controlled validation result.
+
+The profile declares `canonicalization: utb-json-subset-v1`. This name defines both a value domain and an exact byte encoding.
+
+### Value domain
+
+- null, booleans, strings containing Unicode scalar values, arrays, and objects;
+- object keys are printable ASCII from U+0020 through U+007E;
+- integers range from `-9007199254740991` through `9007199254740991`;
+- floating-point and non-finite values are not permitted;
+- duplicate keys, invalid UTF-8, lone surrogates, and unsupported values fail validation;
+- compatible unknown extension fields are preserved only when they conform to this domain.
+
+### Canonical byte encoding
+
+- output is UTF-8 without a byte-order mark or trailing newline;
+- no insignificant whitespace is emitted;
+- object keys are sorted by ascending ASCII code;
+- array order is preserved;
+- literals are exactly `null`, `true`, and `false`;
+- integers use ordinary base-10 notation, with `0` for zero and no exponent or leading plus sign;
+- strings are enclosed in quotation marks;
+- quotation mark and reverse solidus are escaped as `\"` and `\\`;
+- backspace, tab, line feed, form feed, and carriage return use `\b`, `\t`, `\n`, `\f`, and `\r`;
+- other U+0000 through U+001F controls use lowercase `\u00xx` escapes;
+- every other Unicode scalar value is emitted directly as UTF-8, without optional escaping or Unicode normalization;
+- solidus, `<`, `>`, `&`, U+2028, and U+2029 are not escaped unless they fall under another mandatory rule.
+
+These rules make the bytes hashed by compatible readers explicit. A reader that emits `\u003c` for `<`, normalizes Unicode, changes key order, or uses alternate escaping is not producing `utb-json-subset-v1` bytes.
+
+Transformations and losses remain recorded. Required deliverables fail validation when unavailable or intentionally omitted. Included and externally referenced deliverables require integrity references. Schema validation proves declaration conformance only.
 
 ## Non-activation boundary
 
@@ -101,4 +128,4 @@ Its `utb-json-subset-v1` SHA-256 is:
 7f2999044964283108b44cd739e40a16309d1d9aea3bcca78f03e5d85f9e6ed9
 ```
 
-This digest verifies canonical serialization of the fixture under the declared subset. It does not prove signer identity, package preservation, replay, transfer, or restoration.
+This digest verifies the exact canonical UTF-8 bytes of the fixture under the declared rules. It does not prove signer identity, package preservation, replay, transfer, or restoration.

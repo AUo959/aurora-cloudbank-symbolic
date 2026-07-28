@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import math
 from pathlib import Path
 
 import jsonschema
@@ -69,6 +70,33 @@ def test_unknown_extension_fields_survive_validation(validator_module, schema: d
 
     assert validated["extensions"]["future_reader"]["unknown_field"] == ["preserve", 1, True]
     assert validator_module.canonical_sha256(validated) != EXPECTED_CANONICAL_SHA256
+
+
+@pytest.mark.unit
+def test_strict_loader_rejects_duplicate_keys(tmp_path: Path, validator_module) -> None:
+    candidate = tmp_path / "duplicate.json"
+    candidate.write_text('{"specification": {}, "specification": {}}', encoding="utf-8")
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Duplicate JSON object key"):
+        validator_module.load_json(candidate)
+
+
+@pytest.mark.unit
+def test_strict_loader_rejects_nonfinite_numbers(tmp_path: Path, validator_module) -> None:
+    candidate = tmp_path / "nonfinite.json"
+    candidate.write_text('{"value": NaN}', encoding="utf-8")
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Non-finite JSON number"):
+        validator_module.load_json(candidate)
+
+
+@pytest.mark.unit
+def test_canonical_serializer_rejects_nonfinite_python_values(validator_module, example: dict) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["extensions"]["bad"] = math.inf
+
+    with pytest.raises(validator_module.BeaconValidationError, match="strict JSON"):
+        validator_module.canonical_json(candidate)
 
 
 @pytest.mark.unit

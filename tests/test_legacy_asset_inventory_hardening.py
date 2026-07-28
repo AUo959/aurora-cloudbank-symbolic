@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import warnings
 import zipfile
 from pathlib import Path
 
@@ -70,6 +71,25 @@ def test_archive_entry_limit_blocks_report_amplification(tmp_path: Path, invento
 
     assert notice["proposed_disposition"] == "blocked"
     assert "archive_entry_count_exceeded" in notice["security_flags"]
+    assert not any(item["source_kind"] == "archive_member" for item in report["artifacts"])
+
+
+@pytest.mark.unit
+def test_duplicate_archive_paths_fail_closed(tmp_path: Path, inventory_module) -> None:
+    root = tmp_path / "legacy"
+    root.mkdir()
+    archive_path = root / "duplicate.zip"
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        with zipfile.ZipFile(archive_path, "w") as archive:
+            archive.writestr("same.txt", "first")
+            archive.writestr("same.txt", "second")
+
+    report = inventory_module.inventory_tree(root, generated_at=FIXED_TIME)
+    notice = _artifact(report, "duplicate.zip", "archive_error")
+
+    assert notice["proposed_disposition"] == "blocked"
+    assert "archive_duplicate_path" in notice["security_flags"]
     assert not any(item["source_kind"] == "archive_member" for item in report["artifacts"])
 
 

@@ -104,13 +104,26 @@ def _validate_limits(
         "max_central_directory_bytes": max_central_directory_bytes,
         "max_compression_ratio": max_compression_ratio,
     }
-    invalid = [
-        name
-        for name, value in values.items()
-        if value <= 0 or not math.isfinite(float(value))
-    ]
+    invalid = []
+    for name, value in values.items():
+        if value <= 0:
+            invalid.append(name)
+        elif isinstance(value, float) and not math.isfinite(value):
+            invalid.append(name)
     if invalid:
         raise InventoryError(f"Inventory limits must be finite and positive: {', '.join(sorted(invalid))}")
+
+
+def _normalize_generated_at(value: str | None) -> str:
+    if value is None:
+        return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (AttributeError, ValueError) as exc:
+        raise InventoryError(f"generated_at must be a valid timezone-aware ISO-8601 timestamp: {value!r}") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise InventoryError("generated_at must include timezone information")
+    return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _open_regular_file(path: Path) -> BinaryIO:
@@ -159,6 +172,67 @@ def validate_output_path(root: Path, output: Path) -> Path:
     if output_resolved == root_resolved or output_resolved.is_relative_to(root_resolved):
         raise InventoryError("Output path must be outside the inventory source tree")
     return output_resolved
+
+
+def write_report_exclusive(root: Path, output: Path, payload: str) -> Path:
+    """Create one new report without following links or replacing an inode.
+
+    Secure report creation requires POSIX-style directory-relative opens. On a
+    platform without those primitives, callers must use stdout instead.
+    """
+    output_path = validate_output_path(root, output)
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        parent_path = output_path.parent.resolve(strict=True)
+    except OSError as exc:
+        raise InventoryError(f"Unable to prepare output directory: {output_path.parent}") from exc
+
+    root_resolved = root.resolve()
+    if parent_path == root_resolved or parent_path.is_relative_to(root_resolved):
+        raise InventoryError("Output directory must remain outside the inventory source tree")
+
+    if os.open not in os.supports_dir_fd or not hasattr(os, "O_DIRECTORY"):
+        raise InventoryError("Secure output-file creation is unavailable on this platform; use stdout")
+
+    directory_flags = os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0)
+    file_flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    file_flags |= getattr(os, "O_BINARY", 0)
+
+    parent_fd = -1
+    file_fd = -1
+    created = False
+    try:
+        parent_fd = os.open(parent_path, directory_flags)
+        try:
+            file_fd = os.open(output_path.name, file_flags, 0o600, dir_fd=parent_fd)
+            created = True
+        except FileExistsError as exc:
+            raise InventoryError(f"Output path already exists and will not be replaced: {output_path}") from exc
+        except OSError as exc:
+            raise InventoryError(f"Unable to create output report safely: {output_path}") from exc
+
+        current = os.fstat(file_fd)
+        if not stat.S_ISREG(current.st_mode) or current.st_nlink != 1:
+            raise InventoryError("New output report did not resolve to a single regular-file inode")
+
+        with os.fdopen(file_fd, "w", encoding="utf-8", newline="\n") as stream:
+            file_fd = -1
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        return parent_path / output_path.name
+    except Exception:
+        if file_fd >= 0:
+            os.close(file_fd)
+        if created and parent_fd >= 0:
+            try:
+                os.unlink(output_path.name, dir_fd=parent_fd)
+            except OSError:
+                pass
+        raise
+    finally:
+        if parent_fd >= 0:
+            os.close(parent_fd)
 
 
 def _is_safe_archive_name(name: str) -> bool:
@@ -534,6 +608,7 @@ def inventory_tree(
         max_central_directory_bytes,
         max_compression_ratio,
     )
+    normalized_generated_at = _normalize_generated_at(generated_at)
     root = root.resolve()
     if not root.is_dir():
         raise InventoryError(f"Inventory root is not a directory: {root}")
@@ -723,7 +798,7 @@ def inventory_tree(
     return {
         "schema_version": "1.0.0",
         "report_id": f"inventory:{report_id}",
-        "generated_at": generated_at or datetime.now(timezone.utc).isoformat(),
+        "generated_at": normalized_generated_at,
         "source_root_name": root.name,
         "read_only": True,
         "artifacts": artifacts,
@@ -735,8 +810,8 @@ def inventory_tree(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Inventory legacy Aurora/GUMAS artifacts without mutation")
     parser.add_argument("root", type=Path, help="Directory to inventory")
-    parser.add_argument("--output", type=Path, help="Optional report path outside the source tree")
-    parser.add_argument("--generated-at", help="Optional ISO-8601 timestamp for deterministic fixtures")
+    parser.add_argument("--output", type=Path, help="New report path outside the source tree; existing paths are rejected")
+    parser.add_argument("--generated-at", help="Optional timezone-aware ISO-8601 timestamp for deterministic fixtures")
     parser.add_argument("--max-file-bytes", type=int, default=DEFAULT_MAX_FILE_BYTES)
     parser.add_argument("--max-member-bytes", type=int, default=DEFAULT_MAX_MEMBER_BYTES)
     parser.add_argument("--max-archive-bytes", type=int, default=DEFAULT_MAX_ARCHIVE_BYTES)
@@ -753,7 +828,6 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = build_parser().parse_args()
     try:
-        output_path = validate_output_path(args.root, args.output) if args.output else None
         report = inventory_tree(
             args.root,
             generated_at=args.generated_at,
@@ -764,16 +838,14 @@ def main() -> int:
             max_central_directory_bytes=args.max_central_directory_bytes,
             max_compression_ratio=args.max_compression_ratio,
         )
+        payload = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+        if args.output:
+            write_report_exclusive(args.root, args.output, payload)
+        else:
+            print(payload, end="")
     except InventoryError as exc:
         print(f"INVALID: {exc}")
         return 1
-
-    payload = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
-    if output_path:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(payload, encoding="utf-8")
-    else:
-        print(payload, end="")
     return 0
 
 

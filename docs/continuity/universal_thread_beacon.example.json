@@ -41,7 +41,7 @@
         "category": "implementation_reference",
         "required": true,
         "inclusion_state": "externally_referenced",
-        "integrity_ref": null,
+        "integrity_ref": "git:84a361019312660cada1cbfce91ddf6203569a21:src/collab/capsule_schema.py",
         "execution_risk": "data_only",
         "missing_reason": null
       }
@@ -75,7 +75,7 @@
       }
     ],
     "provenance_ref": "git:84a361019312660cada1cbfce91ddf6203569a21",
-    "integrity_ref": "beacon.integrity",
+    "integrity_ref": null,
     "policy_ref": "AUo959/Aurora_ORIONCORE_Directory_Main#46"
   },
   "classification": {
@@ -96,9 +96,9 @@
     "execution_risk_policy_ref": "AUo959/Aurora_ORIONCORE_Directory_Main#46"
   },
   "integrity": {
-    "integrity_status": "verified",
-    "digest_algorithm": "sha256",
-    "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "integrity_status": "unverified",
+    "digest_algorithm": null,
+    "digest": null,
     "signature_status": "unsigned",
     "signature_ref": null
   },

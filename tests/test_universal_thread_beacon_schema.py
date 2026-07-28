@@ -15,7 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = REPO_ROOT / "schemas" / "continuity" / "universal_thread_beacon.schema.json"
 EXAMPLE_PATH = REPO_ROOT / "docs" / "continuity" / "universal_thread_beacon.example.json"
 VALIDATOR_PATH = REPO_ROOT / "tools" / "continuity" / "validate_beacon.py"
-EXPECTED_CANONICAL_SHA256 = "13a5c6bf5806d2129a43db58ef8f7a16ec638cd0ca5929d16997b8dd9e7f1633"
+EXPECTED_CANONICAL_SHA256 = "7f2999044964283108b44cd739e40a16309d1d9aea3bcca78f03e5d85f9e6ed9"
 
 
 def _load_validator_module():
@@ -91,6 +91,24 @@ def test_strict_loader_rejects_nonfinite_numbers(tmp_path: Path, validator_modul
 
 
 @pytest.mark.unit
+def test_strict_loader_rejects_floating_numbers(tmp_path: Path, validator_module) -> None:
+    candidate = tmp_path / "float.json"
+    candidate.write_text('{"value": 0.5}', encoding="utf-8")
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Floating-point JSON numbers"):
+        validator_module.load_json(candidate)
+
+
+@pytest.mark.unit
+def test_strict_loader_rejects_oversized_integer_without_traceback(tmp_path: Path, validator_module) -> None:
+    candidate = tmp_path / "oversized-integer.json"
+    candidate.write_text('{"value": ' + ("9" * 5000) + "}", encoding="utf-8")
+
+    with pytest.raises(validator_module.BeaconValidationError, match="safe canonical range"):
+        validator_module.load_json(candidate)
+
+
+@pytest.mark.unit
 def test_strict_loader_wraps_invalid_utf8(tmp_path: Path, validator_module) -> None:
     candidate = tmp_path / "invalid-utf8.json"
     candidate.write_bytes(b'{"value":"\xff"}')
@@ -100,29 +118,47 @@ def test_strict_loader_wraps_invalid_utf8(tmp_path: Path, validator_module) -> N
 
 
 @pytest.mark.unit
-def test_canonical_serializer_rejects_nonfinite_python_values(validator_module, example: dict) -> None:
+def test_canonical_subset_rejects_python_float(validator_module, example: dict) -> None:
     candidate = copy.deepcopy(example)
     candidate["extensions"]["bad"] = math.inf
 
-    with pytest.raises(validator_module.BeaconValidationError, match="strict UTF-8 JSON"):
+    with pytest.raises(validator_module.BeaconValidationError, match="Floating-point value"):
         validator_module.canonical_json(candidate)
 
 
 @pytest.mark.unit
-def test_canonical_serializer_rejects_lone_surrogate(validator_module, example: dict) -> None:
+def test_canonical_subset_rejects_unsafe_integer(validator_module, example: dict) -> None:
     candidate = copy.deepcopy(example)
-    candidate["extensions"]["bad_unicode"] = "\ud800"
+    candidate["extensions"]["bad"] = validator_module.MAX_SAFE_INTEGER + 1
 
-    with pytest.raises(validator_module.BeaconValidationError, match="strict UTF-8 JSON"):
-        validator_module.validate_beacon(candidate, json.loads(SCHEMA_PATH.read_text(encoding="utf-8")))
+    with pytest.raises(validator_module.BeaconValidationError, match="outside canonical range"):
+        validator_module.canonical_json(candidate)
 
 
 @pytest.mark.unit
-def test_unsupported_major_version_fails_clearly(validator_module, schema: dict, example: dict) -> None:
+def test_canonical_subset_rejects_non_ascii_object_keys(validator_module, example: dict) -> None:
     candidate = copy.deepcopy(example)
-    candidate["specification"]["schema_version"] = "2.0.0"
+    candidate["extensions"]["é"] = "ambiguous ordering"
 
-    with pytest.raises(validator_module.BeaconValidationError, match="Unsupported UTB schema major version"):
+    with pytest.raises(validator_module.BeaconValidationError, match="outside printable ASCII"):
+        validator_module.canonical_json(candidate)
+
+
+@pytest.mark.unit
+def test_canonical_serializer_rejects_lone_surrogate(validator_module, schema: dict, example: dict) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["extensions"]["bad_unicode"] = "\ud800"
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Invalid Unicode scalar value"):
+        validator_module.validate_beacon(candidate, schema)
+
+
+@pytest.mark.unit
+def test_unsupported_schema_version_fails_clearly(validator_module, schema: dict, example: dict) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["specification"]["schema_version"] = "1.1.0"
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Unsupported UTB schema version"):
         validator_module.validate_beacon(candidate, schema)
 
 
@@ -136,15 +172,38 @@ def test_minimum_reader_version_is_enforced(validator_module, schema: dict, exam
 
 
 @pytest.mark.unit
-def test_invalid_reader_schema_fails_as_validation_error(validator_module, example: dict) -> None:
-    invalid_schema = {"type": "definitely-not-a-json-schema-type"}
+def test_unrelated_custom_schema_is_rejected(validator_module, example: dict) -> None:
+    with pytest.raises(validator_module.BeaconValidationError, match="not the supported UTB schema"):
+        validator_module.validate_beacon(example, {})
+
+
+@pytest.mark.unit
+def test_invalid_bound_reader_schema_fails_as_validation_error(
+    validator_module,
+    schema: dict,
+    example: dict,
+) -> None:
+    invalid_schema = copy.deepcopy(schema)
+    invalid_schema["type"] = "definitely-not-a-json-schema-type"
 
     with pytest.raises(validator_module.BeaconValidationError, match="Invalid reader schema"):
         validator_module.validate_beacon(example, invalid_schema)
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("field", ["implementation_status", "deployment_status"])
+def test_undefined_full_profile_is_rejected(validator_module, schema: dict, example: dict) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["profile"] = "full"
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Schema validation failed"):
+        validator_module.validate_beacon(candidate, schema)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "field",
+    ["residency_layer", "operational_scope_layers", "implementation_status", "deployment_status"],
+)
 def test_all_classification_dimensions_are_required(
     validator_module,
     schema: dict,
@@ -156,6 +215,18 @@ def test_all_classification_dimensions_are_required(
 
     with pytest.raises(validator_module.BeaconValidationError, match="Schema validation failed"):
         validator_module.validate_beacon(candidate, schema)
+
+
+@pytest.mark.unit
+def test_residency_and_operational_scope_are_independent(validator_module, schema: dict, example: dict) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["classification"]["residency_layer"] = "L1"
+    candidate["classification"]["operational_scope_layers"] = ["L2", "L3"]
+
+    validated = validator_module.validate_beacon(candidate, schema)
+
+    assert validated["classification"]["residency_layer"] == "L1"
+    assert validated["classification"]["operational_scope_layers"] == ["L2", "L3"]
 
 
 @pytest.mark.unit
@@ -215,9 +286,11 @@ def test_verified_integrity_requires_real_digest_fields(validator_module, schema
 @pytest.mark.unit
 def test_policy_and_classification_dimensions_remain_explicit(example: dict) -> None:
     assert example["classification"]["canon_status"] == "proposed_design"
-    assert example["classification"]["layer"] == "L3"
+    assert example["classification"]["residency_layer"] == "L3"
+    assert example["classification"]["operational_scope_layers"] == ["L3"]
     assert example["classification"]["execution_mode"] == "not_applicable"
     assert example["classification"]["evidence_authority"] == "reference_evidence"
     assert example["classification"]["implementation_status"] == "partial"
     assert example["classification"]["deployment_status"] == "not_applicable"
+    assert example["compatibility"]["canonicalization"] == "utb-json-subset-v1"
     assert example["policy_refs"]["consent_policy_ref"] == "AUo959/Aurora_ORIONCORE_Directory_Main#46"

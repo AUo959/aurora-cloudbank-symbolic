@@ -79,7 +79,9 @@
         "execution_mode",
         "evidence_authority",
         "data_treatment",
-        "determinism_status"
+        "determinism_status",
+        "implementation_status",
+        "deployment_status"
       ],
       "properties": {
         "canon_status": {

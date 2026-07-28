@@ -71,8 +71,12 @@ def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str
         )
 
     try:
+        jsonschema.Draft202012Validator.check_schema(schema)
         validator = jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
         validator.validate(payload)
+    except jsonschema.SchemaError as exc:
+        location = ".".join(str(part) for part in exc.absolute_schema_path) or "<root>"
+        raise BeaconValidationError(f"Invalid reader schema at {location}: {exc.message}") from exc
     except jsonschema.ValidationError as exc:
         location = ".".join(str(part) for part in exc.absolute_path) or "<root>"
         raise BeaconValidationError(f"Schema validation failed at {location}: {exc.message}") from exc
@@ -90,10 +94,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
-    schema = load_json(args.schema)
-    beacon = load_json(args.beacon)
-
     try:
+        schema = load_json(args.schema)
+        beacon = load_json(args.beacon)
         validated = validate_beacon(beacon, schema)
     except BeaconValidationError as exc:
         print(f"INVALID: {exc}")

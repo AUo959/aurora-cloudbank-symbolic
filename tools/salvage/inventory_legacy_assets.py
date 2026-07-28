@@ -103,6 +103,15 @@ def sha256_file(path: Path, max_bytes: int = DEFAULT_MAX_FILE_BYTES) -> str:
         return _sha256_stream(stream)
 
 
+def validate_output_path(root: Path, output: Path) -> Path:
+    """Require generated reports to live outside the inventoried source tree."""
+    root_resolved = root.resolve()
+    output_resolved = output.resolve(strict=False)
+    if output_resolved == root_resolved or output_resolved.is_relative_to(root_resolved):
+        raise InventoryError("Output path must be outside the inventory source tree")
+    return output_resolved
+
+
 def _is_safe_archive_name(name: str) -> bool:
     normalized = name.replace("\\", "/")
     if normalized.startswith("/") or re.match(r"^[A-Za-z]:/", normalized):
@@ -150,9 +159,13 @@ def proposed_disposition(category: str, security_flags: list[str]) -> str:
         "archive_member_too_large",
         "archive_total_too_large",
         "archive_compression_ratio",
+        "archive_size_mismatch",
+        "archive_read_error",
         "unsupported_archive",
         "filesystem_symlink",
         "hash_limit_exceeded",
+        "hash_error",
+        "stat_error",
         "nested_archive",
     }
     if blocking.intersection(security_flags):
@@ -275,6 +288,7 @@ def inspect_zip(
                     "archive_member_too_large",
                     "archive_total_too_large",
                     "archive_compression_ratio",
+                    "nested_archive",
                 }
                 for flag in flags
             )
@@ -325,7 +339,25 @@ def inventory_tree(
     artifacts: list[dict[str, Any]] = []
     for current, dirnames, filenames in os.walk(root, followlinks=False):
         current_path = Path(current)
-        dirnames[:] = sorted(name for name in dirnames if not (current_path / name).is_symlink())
+        retained_dirs: list[str] = []
+        for dirname in sorted(dirnames):
+            candidate = current_path / dirname
+            if candidate.is_symlink():
+                artifacts.append(
+                    _base_artifact(
+                        source_kind="filesystem",
+                        relative_path=candidate.relative_to(root).as_posix(),
+                        archive_parent=None,
+                        size_bytes=None,
+                        sha256=None,
+                        category="unknown",
+                        security_flags=["filesystem_symlink"],
+                    )
+                )
+            else:
+                retained_dirs.append(dirname)
+        dirnames[:] = retained_dirs
+
         for filename in sorted(filenames):
             path = current_path / filename
             relative = path.relative_to(root).as_posix()
@@ -347,8 +379,9 @@ def inventory_tree(
                 continue
 
             try:
-                mode = path.stat().st_mode
-                size = path.stat().st_size
+                path_stat = path.stat()
+                mode = path_stat.st_mode
+                size = path_stat.st_size
             except OSError:
                 artifacts.append(
                     _base_artifact(
@@ -463,7 +496,7 @@ def inventory_tree(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Inventory legacy Aurora/GUMAS artifacts without mutation")
     parser.add_argument("root", type=Path, help="Directory to inventory")
-    parser.add_argument("--output", type=Path, help="Optional report path; never written inside an archive")
+    parser.add_argument("--output", type=Path, help="Optional report path outside the source tree")
     parser.add_argument("--generated-at", help="Optional ISO-8601 timestamp for deterministic fixtures")
     parser.add_argument("--max-file-bytes", type=int, default=DEFAULT_MAX_FILE_BYTES)
     parser.add_argument("--max-member-bytes", type=int, default=DEFAULT_MAX_MEMBER_BYTES)
@@ -475,6 +508,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = build_parser().parse_args()
     try:
+        output_path = validate_output_path(args.root, args.output) if args.output else None
         report = inventory_tree(
             args.root,
             generated_at=args.generated_at,
@@ -488,9 +522,9 @@ def main() -> int:
         return 1
 
     payload = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
-    if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(payload, encoding="utf-8")
+    if output_path:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(payload, encoding="utf-8")
     else:
         print(payload, end="")
     return 0

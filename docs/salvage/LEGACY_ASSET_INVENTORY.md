@@ -13,9 +13,10 @@ The output is a proposed-disposition report. It is not canon promotion, implemen
 
 The inventory:
 
-- reads source files without modifying them;
+- reads regular source files without modifying them;
 - refuses to write its report inside the inventoried source tree;
 - records file and directory symlinks without following them;
+- records FIFOs, sockets, devices, and other non-regular entries as blocked without opening them;
 - calculates SHA-256 digests for files within configured limits;
 - treats unreadable, oversized, suspicious, and unsupported content as blocked or quarantined;
 - never extracts archive content to disk;
@@ -40,7 +41,9 @@ It blocks:
 - absolute member paths;
 - `..` traversal;
 - symlink members;
+- duplicate member paths that create ambiguous custody records;
 - nested archives;
+- archives exceeding the configured member-count limit;
 - members exceeding configured size;
 - archives exceeding configured total uncompressed size;
 - suspicious compression ratios;
@@ -82,7 +85,9 @@ Provider-side credential safety cannot be inferred from repository or package in
 
 ## Duplicate detection
 
-Exact duplicate groups are based on matching SHA-256 digests. Likely or semantic duplicates remain future work and must not be inferred from names alone.
+Exact duplicate groups are based on matching SHA-256 digests from physical filesystem files and eligible archive members. Projection records such as unsupported-archive notices are excluded so they cannot create false duplicate groups.
+
+Duplicate paths inside the same ZIP are blocked as ambiguous rather than being assigned colliding inventory records. Likely or semantic duplicates remain future work and must not be inferred from names alone.
 
 ## Determinism
 

@@ -43,12 +43,15 @@ The current capsule `compute_signature()` output is a SHA-256 content digest. Th
 
 A verified cryptographic signature requires a separate key-backed signature record with signer identity, algorithm, verification evidence, and revocation posture. A digest, anchor, seal, or repository relationship is not authentication or permission.
 
+The example beacon does not claim package-level integrity verification. Its `integrity_status` remains `unverified` until a real digest-bearing package record is supplied. Required included or externally referenced deliverables must carry a resolvable integrity reference.
+
 ## Compatibility behavior
 
 - Unsupported major schema versions fail clearly.
 - Compatible unknown extension fields are preserved.
 - Transformations and losses are recorded.
 - Required deliverables fail validation when unavailable or intentionally omitted.
+- Included and externally referenced deliverables require integrity references.
 - Schema validation proves declaration conformance only.
 
 ## Non-activation boundary
@@ -72,7 +75,7 @@ The initial implementation does not:
 Its canonical JSON SHA-256 is:
 
 ```text
-317e046c81f69bb15d1978274f3f9be4d63d9e5d5f1c8806114e9ae4396c39aa
+13a5c6bf5806d2129a43db58ef8f7a16ec638cd0ca5929d16997b8dd9e7f1633
 ```
 
 This digest verifies deterministic serialization of the fixture. It does not prove signer identity, package preservation, replay, transfer, or restoration.

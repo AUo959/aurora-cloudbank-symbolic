@@ -235,6 +235,46 @@ def test_filesystem_symlink_is_reported_without_following(
 
 
 @pytest.mark.unit
+def test_directory_symlink_is_reported_without_traversal(
+    tmp_path: Path,
+    inventory_module,
+) -> None:
+    root = tmp_path / "legacy"
+    root.mkdir()
+    outside = tmp_path / "outside-directory"
+    outside.mkdir()
+    (outside / "hidden.txt").write_text("outside", encoding="utf-8")
+    link = root / "outside-directory-link"
+    try:
+        link.symlink_to(outside, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("Directory symlink creation is unavailable on this platform")
+
+    report = inventory_module.inventory_tree(root, generated_at=FIXED_TIME)
+    artifact = _artifact(report, "outside-directory-link")
+
+    assert artifact["proposed_disposition"] == "blocked"
+    assert "filesystem_symlink" in artifact["security_flags"]
+    assert not any(item["relative_path"] == "outside-directory-link/hidden.txt" for item in report["artifacts"])
+    assert (outside / "hidden.txt").read_text(encoding="utf-8") == "outside"
+
+
+@pytest.mark.unit
+def test_output_path_must_remain_outside_source_tree(
+    tmp_path: Path,
+    inventory_module,
+) -> None:
+    root = tmp_path / "legacy"
+    root.mkdir()
+
+    with pytest.raises(inventory_module.InventoryError, match="outside the inventory source tree"):
+        inventory_module.validate_output_path(root, root / "generated" / "inventory.json")
+
+    external_output = tmp_path / "reports" / "inventory.json"
+    assert inventory_module.validate_output_path(root, external_output) == external_output.resolve(strict=False)
+
+
+@pytest.mark.unit
 def test_report_identifier_ignores_generation_timestamp(
     tmp_path: Path,
     inventory_module,

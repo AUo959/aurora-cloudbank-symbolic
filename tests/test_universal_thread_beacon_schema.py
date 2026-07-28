@@ -91,12 +91,30 @@ def test_strict_loader_rejects_nonfinite_numbers(tmp_path: Path, validator_modul
 
 
 @pytest.mark.unit
+def test_strict_loader_wraps_invalid_utf8(tmp_path: Path, validator_module) -> None:
+    candidate = tmp_path / "invalid-utf8.json"
+    candidate.write_bytes(b'{"value":"\xff"}')
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Unable to read UTF-8 JSON"):
+        validator_module.load_json(candidate)
+
+
+@pytest.mark.unit
 def test_canonical_serializer_rejects_nonfinite_python_values(validator_module, example: dict) -> None:
     candidate = copy.deepcopy(example)
     candidate["extensions"]["bad"] = math.inf
 
-    with pytest.raises(validator_module.BeaconValidationError, match="strict JSON"):
+    with pytest.raises(validator_module.BeaconValidationError, match="strict UTF-8 JSON"):
         validator_module.canonical_json(candidate)
+
+
+@pytest.mark.unit
+def test_canonical_serializer_rejects_lone_surrogate(validator_module, example: dict) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["extensions"]["bad_unicode"] = "\ud800"
+
+    with pytest.raises(validator_module.BeaconValidationError, match="strict UTF-8 JSON"):
+        validator_module.validate_beacon(candidate, json.loads(SCHEMA_PATH.read_text(encoding="utf-8")))
 
 
 @pytest.mark.unit
@@ -109,11 +127,35 @@ def test_unsupported_major_version_fails_clearly(validator_module, schema: dict,
 
 
 @pytest.mark.unit
+def test_minimum_reader_version_is_enforced(validator_module, schema: dict, example: dict) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["compatibility"]["minimum_reader_version"] = "1.0.1"
+
+    with pytest.raises(validator_module.BeaconValidationError, match="requires reader version 1.0.1"):
+        validator_module.validate_beacon(candidate, schema)
+
+
+@pytest.mark.unit
 def test_invalid_reader_schema_fails_as_validation_error(validator_module, example: dict) -> None:
     invalid_schema = {"type": "definitely-not-a-json-schema-type"}
 
     with pytest.raises(validator_module.BeaconValidationError, match="Invalid reader schema"):
         validator_module.validate_beacon(example, invalid_schema)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("field", ["implementation_status", "deployment_status"])
+def test_all_classification_dimensions_are_required(
+    validator_module,
+    schema: dict,
+    example: dict,
+    field: str,
+) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["classification"].pop(field)
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Schema validation failed"):
+        validator_module.validate_beacon(candidate, schema)
 
 
 @pytest.mark.unit
@@ -176,4 +218,6 @@ def test_policy_and_classification_dimensions_remain_explicit(example: dict) -> 
     assert example["classification"]["layer"] == "L3"
     assert example["classification"]["execution_mode"] == "not_applicable"
     assert example["classification"]["evidence_authority"] == "reference_evidence"
+    assert example["classification"]["implementation_status"] == "partial"
+    assert example["classification"]["deployment_status"] == "not_applicable"
     assert example["policy_refs"]["consent_policy_ref"] == "AUo959/Aurora_ORIONCORE_Directory_Main#46"

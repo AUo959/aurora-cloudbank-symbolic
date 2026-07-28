@@ -30,19 +30,42 @@ TEXT_SCAN_BYTES = 64 * 1024
 
 ARCHIVE_SUFFIXES = {".zip", ".tar", ".tgz", ".gz", ".bz2", ".xz", ".7z"}
 CODE_SUFFIXES = {
-    ".py", ".js", ".ts", ".tsx", ".jsx", ".java", ".go", ".rs", ".c", ".cc", ".cpp", ".h", ".hpp", ".sh", ".ps1"
+    ".py",
+    ".js",
+    ".ts",
+    ".tsx",
+    ".jsx",
+    ".java",
+    ".go",
+    ".rs",
+    ".c",
+    ".cc",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".sh",
+    ".ps1",
 }
 DATA_SUFFIXES = {".json", ".jsonl", ".csv", ".tsv", ".yaml", ".yml", ".xml", ".simstate"}
 DOC_SUFFIXES = {".md", ".txt", ".rst", ".pdf", ".doc", ".docx"}
 CONFIG_NAMES = {
-    "dockerfile", "makefile", "pyproject.toml", "package.json", "package-lock.json", "requirements.txt", "requirements-test.txt"
+    "dockerfile",
+    "makefile",
+    "pyproject.toml",
+    "package.json",
+    "package-lock.json",
+    "requirements.txt",
+    "requirements-test.txt",
 }
 CONFIG_SUFFIXES = {".ini", ".cfg", ".conf", ".toml", ".env"}
 MEDIA_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".mp3", ".wav", ".mp4", ".mov"}
 EXECUTABLE_SUFFIXES = {".exe", ".dll", ".so", ".dylib", ".bin", ".app", ".com", ".msi"}
 
 SECRET_FILENAME_RE = re.compile(
-    r"(^|[._-])(secret|secrets|credential|credentials|private[_-]?key|token|tokens|password|passwd|api[_-]?key)([._-]|$)",
+    (
+        r"(^|[._-])(secret|secrets|credential|credentials|private[_-]?key|token|tokens|password|passwd|"
+        r"api[_-]?key)([._-]|$)"
+    ),
     re.IGNORECASE,
 )
 SECRET_CONTENT_PATTERNS = (
@@ -164,10 +187,23 @@ def classify_path(path_name: str, executable: bool = False, archive: bool = Fals
 
 def proposed_disposition(category: str, security_flags: list[str]) -> str:
     blocking = {
-        "archive_path_traversal", "archive_absolute_path", "archive_symlink", "archive_member_too_large",
-        "archive_total_too_large", "archive_entry_count_exceeded", "archive_compression_ratio",
-        "archive_size_mismatch", "archive_read_error", "unsupported_archive", "filesystem_symlink",
-        "non_regular_file", "hash_limit_exceeded", "hash_error", "stat_error", "nested_archive",
+        "archive_path_traversal",
+        "archive_absolute_path",
+        "archive_symlink",
+        "archive_duplicate_path",
+        "archive_member_too_large",
+        "archive_total_too_large",
+        "archive_entry_count_exceeded",
+        "archive_compression_ratio",
+        "archive_size_mismatch",
+        "archive_read_error",
+        "unsupported_archive",
+        "filesystem_symlink",
+        "non_regular_file",
+        "hash_limit_exceeded",
+        "hash_error",
+        "stat_error",
+        "nested_archive",
     }
     if blocking.intersection(security_flags):
         return "blocked"
@@ -262,6 +298,10 @@ def inspect_zip(
             if len(infos) > max_archive_entries:
                 return _archive_error(relative_archive_path, size_bytes, "archive_entry_count_exceeded")
 
+            normalized_names = [info.filename.replace("\\", "/") for info in infos]
+            if len(normalized_names) != len(set(normalized_names)):
+                return _archive_error(relative_archive_path, size_bytes, "archive_duplicate_path")
+
             total_uncompressed = sum(info.file_size for info in infos)
             archive_total_exceeded = total_uncompressed > max_archive_bytes
             artifacts: list[dict[str, Any]] = []
@@ -284,7 +324,11 @@ def inspect_zip(
                 if archive_total_exceeded:
                     flags.append("archive_total_too_large")
 
-                ratio = float("inf") if info.compress_size == 0 and info.file_size else info.file_size / max(info.compress_size, 1)
+                ratio = (
+                    float("inf")
+                    if info.compress_size == 0 and info.file_size
+                    else info.file_size / max(info.compress_size, 1)
+                )
                 if ratio > max_compression_ratio:
                     flags.append("archive_compression_ratio")
 
@@ -294,12 +338,18 @@ def inspect_zip(
 
                 digest: str | None = None
                 sample = b""
-                read_blocked = bool(
-                    {
-                        "archive_absolute_path", "archive_path_traversal", "archive_symlink",
-                        "archive_member_too_large", "archive_total_too_large", "archive_compression_ratio",
+                read_blocked = any(
+                    flag
+                    in {
+                        "archive_absolute_path",
+                        "archive_path_traversal",
+                        "archive_symlink",
+                        "archive_member_too_large",
+                        "archive_total_too_large",
+                        "archive_compression_ratio",
                         "nested_archive",
-                    }.intersection(flags)
+                    }
+                    for flag in flags
                 )
                 if not read_blocked:
                     try:
@@ -380,8 +430,13 @@ def inventory_tree(
             except OSError:
                 artifacts.append(
                     _base_artifact(
-                        source_kind="filesystem", relative_path=relative, archive_parent=None,
-                        size_bytes=None, sha256=None, category="unknown", security_flags=["stat_error"]
+                        source_kind="filesystem",
+                        relative_path=relative,
+                        archive_parent=None,
+                        size_bytes=None,
+                        sha256=None,
+                        category="unknown",
+                        security_flags=["stat_error"],
                     )
                 )
                 continue
@@ -389,8 +444,13 @@ def inventory_tree(
             if stat.S_ISLNK(path_stat.st_mode):
                 artifacts.append(
                     _base_artifact(
-                        source_kind="filesystem", relative_path=relative, archive_parent=None,
-                        size_bytes=None, sha256=None, category="unknown", security_flags=["filesystem_symlink"]
+                        source_kind="filesystem",
+                        relative_path=relative,
+                        archive_parent=None,
+                        size_bytes=None,
+                        sha256=None,
+                        category="unknown",
+                        security_flags=["filesystem_symlink"],
                     )
                 )
                 continue
@@ -398,8 +458,13 @@ def inventory_tree(
             if not stat.S_ISREG(path_stat.st_mode):
                 artifacts.append(
                     _base_artifact(
-                        source_kind="filesystem", relative_path=relative, archive_parent=None,
-                        size_bytes=None, sha256=None, category="unknown", security_flags=["non_regular_file"]
+                        source_kind="filesystem",
+                        relative_path=relative,
+                        archive_parent=None,
+                        size_bytes=None,
+                        sha256=None,
+                        category="unknown",
+                        security_flags=["non_regular_file"],
                     )
                 )
                 continue
@@ -428,8 +493,12 @@ def inventory_tree(
 
             artifacts.append(
                 _base_artifact(
-                    source_kind="filesystem", relative_path=relative, archive_parent=None,
-                    size_bytes=size, sha256=digest, category=classify_path(relative, executable=executable, archive=archive),
+                    source_kind="filesystem",
+                    relative_path=relative,
+                    archive_parent=None,
+                    size_bytes=size,
+                    sha256=digest,
+                    category=classify_path(relative, executable=executable, archive=archive),
                     security_flags=flags,
                 )
             )
@@ -448,14 +517,24 @@ def inventory_tree(
             elif archive and suffix != ".zip":
                 artifacts.append(
                     _base_artifact(
-                        source_kind="archive_notice", relative_path=relative, archive_parent=None,
-                        size_bytes=size, sha256=digest, category="archive", security_flags=["unsupported_archive"]
+                        source_kind="archive_notice",
+                        relative_path=relative,
+                        archive_parent=None,
+                        size_bytes=size,
+                        sha256=digest,
+                        category="archive",
+                        security_flags=["unsupported_archive"],
                     )
                 )
 
     artifacts = sorted(
         artifacts,
-        key=lambda item: (item["archive_parent"] or "", item["relative_path"], item["source_kind"], item["artifact_id"]),
+        key=lambda item: (
+            item["archive_parent"] or "",
+            item["relative_path"],
+            item["source_kind"],
+            item["artifact_id"],
+        ),
     )
 
     duplicate_map: dict[str, list[str]] = {}
@@ -469,7 +548,11 @@ def inventory_tree(
         if len(ids) > 1
     ]
 
-    stable_material = {"root_name": root.name, "artifacts": artifacts, "duplicate_groups": duplicate_groups}
+    stable_material = {
+        "root_name": root.name,
+        "artifacts": artifacts,
+        "duplicate_groups": duplicate_groups,
+    }
     report_id = hashlib.sha256(
         json.dumps(stable_material, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     ).hexdigest()

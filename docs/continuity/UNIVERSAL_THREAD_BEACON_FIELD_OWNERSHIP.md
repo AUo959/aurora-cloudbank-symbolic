@@ -1,7 +1,7 @@
 # Universal Thread Beacon Field Ownership
 
 **Status:** Proposed design for issue #1377  
-**Scope:** Schema, mapping, and offline validation only
+**Scope:** Bound minimum-profile schema, mapping, and offline validation only
 
 ## Purpose
 
@@ -18,16 +18,33 @@ The Universal Thread Beacon is a neutral entry-point view over an existing conti
 | Symbolic names, glyphs, lore, and presentation aliases | #1372 |
 | Command execution contracts and receipts | #1373 |
 | Trust, consent, authorization, retention, revocation, deletion, execution risk | `AUo959/Aurora_ORIONCORE_Directory_Main#46`, implemented through #1380 |
-| Beacon profile, mapping, compatibility, deterministic serialization | #1377 |
+| Beacon profile, mapping, compatibility, canonical serialization | #1377 |
 
 The beacon references these records. It does not copy or redefine their authority.
+
+## Schema binding
+
+The offline reader accepts only the committed UTB schema identity:
+
+```text
+specification: UTB-PS-001
+schema version: 1.0.0
+schema id: https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/continuity/universal_thread_beacon.schema.json
+```
+
+A syntactically valid but unrelated JSON Schema cannot establish UTB conformance. Future schema versions require an explicit reader update and compatibility decision.
+
+## Profile scope
+
+Version 1.0.0 defines the `minimum` profile only. The name `full` remains reserved until its required manifests, policy records, integrity records, and completeness behavior are specified and tested. A beacon claiming `profile: full` fails validation in this version.
 
 ## Classification rule
 
 The profile preserves independent dimensions:
 
 - canon status;
-- layer;
+- residency layer;
+- operational scope layers;
 - execution mode;
 - evidence authority;
 - data treatment;
@@ -35,7 +52,9 @@ The profile preserves independent dimensions:
 - implementation status;
 - deployment status.
 
-Import, export, profile rendering, or compatibility transformation may not silently change any of these dimensions.
+Residency answers where the represented continuity object belongs. Operational scope identifies which layer records or work it is explicitly scoped to serve. Scope does not grant authority, and neither field may be inferred from the other.
+
+Import, export, profile rendering, or compatibility transformation may not silently change any classification dimension.
 
 ## Integrity rule
 
@@ -45,10 +64,14 @@ A verified cryptographic signature requires a separate key-backed signature reco
 
 The example beacon does not claim package-level integrity verification. Its `integrity_status` remains `unverified` until a real digest-bearing package record is supplied. Required included or externally referenced deliverables must carry a resolvable integrity reference.
 
-## Compatibility behavior
+## Compatibility and canonicalization
 
-- Unsupported major schema versions fail clearly.
-- Compatible unknown extension fields are preserved.
+- The reader enforces `compatibility.minimum_reader_version`.
+- The profile declares `canonicalization: utb-json-subset-v1`.
+- The canonical subset permits null, booleans, strings containing Unicode scalar values, arrays, objects with printable-ASCII keys, and integers in the range `-9007199254740991` through `9007199254740991`.
+- Floating-point values, non-finite values, oversized integers, duplicate keys, non-ASCII object keys, invalid UTF-8, and lone surrogates fail validation.
+- These restrictions avoid implementation-specific numeric rendering and key-order behavior across compatible readers.
+- Compatible unknown extension fields are preserved only when they conform to the canonical subset.
 - Transformations and losses are recorded.
 - Required deliverables fail validation when unavailable or intentionally omitted.
 - Included and externally referenced deliverables require integrity references.
@@ -72,10 +95,10 @@ The initial implementation does not:
 
 `docs/continuity/universal_thread_beacon.example.json` is a proposed-design fixture mapped from the current capsule surface at baseline `84a361019312660cada1cbfce91ddf6203569a21`.
 
-Its canonical JSON SHA-256 is:
+Its `utb-json-subset-v1` SHA-256 is:
 
 ```text
-13a5c6bf5806d2129a43db58ef8f7a16ec638cd0ca5929d16997b8dd9e7f1633
+7f2999044964283108b44cd739e40a16309d1d9aea3bcca78f03e5d85f9e6ed9
 ```
 
-This digest verifies deterministic serialization of the fixture. It does not prove signer identity, package preservation, replay, transfer, or restoration.
+This digest verifies canonical serialization of the fixture under the declared subset. It does not prove signer identity, package preservation, replay, transfer, or restoration.

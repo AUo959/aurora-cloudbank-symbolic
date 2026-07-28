@@ -14,7 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = REPO_ROOT / "schemas" / "continuity" / "universal_thread_beacon.schema.json"
 EXAMPLE_PATH = REPO_ROOT / "docs" / "continuity" / "universal_thread_beacon.example.json"
 VALIDATOR_PATH = REPO_ROOT / "tools" / "continuity" / "validate_beacon.py"
-EXPECTED_CANONICAL_SHA256 = "317e046c81f69bb15d1978274f3f9be4d63d9e5d5f1c8806114e9ae4396c39aa"
+EXPECTED_CANONICAL_SHA256 = "13a5c6bf5806d2129a43db58ef8f7a16ec638cd0ca5929d16997b8dd9e7f1633"
 
 
 def _load_validator_module():
@@ -54,6 +54,13 @@ def test_example_has_stable_canonical_digest(validator_module, schema: dict, exa
 
 
 @pytest.mark.unit
+def test_example_does_not_claim_unverified_integrity_as_verified(example: dict) -> None:
+    assert example["integrity"]["integrity_status"] == "unverified"
+    assert example["integrity"]["digest_algorithm"] is None
+    assert example["integrity"]["digest"] is None
+
+
+@pytest.mark.unit
 def test_unknown_extension_fields_survive_validation(validator_module, schema: dict, example: dict) -> None:
     candidate = copy.deepcopy(example)
     candidate["extensions"]["future_reader"] = {"unknown_field": ["preserve", 1, True]}
@@ -71,6 +78,14 @@ def test_unsupported_major_version_fails_clearly(validator_module, schema: dict,
 
     with pytest.raises(validator_module.BeaconValidationError, match="Unsupported UTB schema major version"):
         validator_module.validate_beacon(candidate, schema)
+
+
+@pytest.mark.unit
+def test_invalid_reader_schema_fails_as_validation_error(validator_module, example: dict) -> None:
+    invalid_schema = {"type": "definitely-not-a-json-schema-type"}
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Invalid reader schema"):
+        validator_module.validate_beacon(example, invalid_schema)
 
 
 @pytest.mark.unit
@@ -98,10 +113,30 @@ def test_included_deliverable_requires_path_and_integrity(validator_module, sche
 
 
 @pytest.mark.unit
+def test_external_deliverable_requires_integrity_reference(validator_module, schema: dict, example: dict) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["manifests"]["deliverables"][0]["integrity_ref"] = None
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Schema validation failed"):
+        validator_module.validate_beacon(candidate, schema)
+
+
+@pytest.mark.unit
 def test_digest_cannot_be_claimed_as_verified_signature(validator_module, schema: dict, example: dict) -> None:
     candidate = copy.deepcopy(example)
     candidate["integrity"]["signature_status"] = "verified"
     candidate["integrity"]["signature_ref"] = None
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Schema validation failed"):
+        validator_module.validate_beacon(candidate, schema)
+
+
+@pytest.mark.unit
+def test_verified_integrity_requires_real_digest_fields(validator_module, schema: dict, example: dict) -> None:
+    candidate = copy.deepcopy(example)
+    candidate["integrity"]["integrity_status"] = "verified"
+    candidate["integrity"]["digest_algorithm"] = None
+    candidate["integrity"]["digest"] = None
 
     with pytest.raises(validator_module.BeaconValidationError, match="Schema validation failed"):
         validator_module.validate_beacon(candidate, schema)

@@ -12,10 +12,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import mimetypes
 import os
 import re
 import stat
+import struct
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
@@ -25,8 +27,15 @@ DEFAULT_MAX_FILE_BYTES = 50 * 1024 * 1024
 DEFAULT_MAX_MEMBER_BYTES = 10 * 1024 * 1024
 DEFAULT_MAX_ARCHIVE_BYTES = 100 * 1024 * 1024
 DEFAULT_MAX_ARCHIVE_ENTRIES = 10_000
+DEFAULT_MAX_CENTRAL_DIRECTORY_BYTES = 8 * 1024 * 1024
 DEFAULT_MAX_COMPRESSION_RATIO = 100.0
 TEXT_SCAN_BYTES = 64 * 1024
+
+ZIP_EOCD_SIGNATURE = b"PK\x05\x06"
+ZIP_EOCD_STRUCT = struct.Struct("<4s4H2LH")
+ZIP_MAX_COMMENT_BYTES = 65_535
+ZIP64_SENTINEL_16 = 0xFFFF
+ZIP64_SENTINEL_32 = 0xFFFFFFFF
 
 ARCHIVE_SUFFIXES = {".zip", ".tar", ".tgz", ".gz", ".bz2", ".xz", ".7z"}
 CODE_SUFFIXES = {
@@ -84,6 +93,7 @@ def _validate_limits(
     max_member_bytes: int,
     max_archive_bytes: int,
     max_archive_entries: int,
+    max_central_directory_bytes: int,
     max_compression_ratio: float,
 ) -> None:
     values = {
@@ -91,11 +101,16 @@ def _validate_limits(
         "max_member_bytes": max_member_bytes,
         "max_archive_bytes": max_archive_bytes,
         "max_archive_entries": max_archive_entries,
+        "max_central_directory_bytes": max_central_directory_bytes,
         "max_compression_ratio": max_compression_ratio,
     }
-    invalid = [name for name, value in values.items() if value <= 0]
+    invalid = [
+        name
+        for name, value in values.items()
+        if value <= 0 or not math.isfinite(float(value))
+    ]
     if invalid:
-        raise InventoryError(f"Inventory limits must be positive: {', '.join(sorted(invalid))}")
+        raise InventoryError(f"Inventory limits must be finite and positive: {', '.join(sorted(invalid))}")
 
 
 def _open_regular_file(path: Path) -> BinaryIO:
@@ -154,9 +169,27 @@ def _is_safe_archive_name(name: str) -> bool:
     return all(part not in {"", ".", ".."} for part in path.parts)
 
 
+def _zip_entry_mode(info: zipfile.ZipInfo) -> int:
+    if info.create_system != 3:
+        return 0
+    return info.external_attr >> 16
+
+
 def _zip_entry_is_symlink(info: zipfile.ZipInfo) -> bool:
-    mode = (info.external_attr >> 16) & 0o170000
-    return mode == stat.S_IFLNK
+    return stat.S_ISLNK(_zip_entry_mode(info))
+
+
+def _zip_entry_is_special(info: zipfile.ZipInfo) -> bool:
+    mode = _zip_entry_mode(info)
+    if mode == 0:
+        return False
+    entry_type = stat.S_IFMT(mode)
+    return entry_type not in {0, stat.S_IFREG, stat.S_IFDIR, stat.S_IFLNK}
+
+
+def _zip_entry_is_executable(info: zipfile.ZipInfo) -> bool:
+    mode = _zip_entry_mode(info)
+    return bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
 
 
 def _potential_secret(path_name: str, sample: bytes) -> bool:
@@ -190,16 +223,22 @@ def proposed_disposition(category: str, security_flags: list[str]) -> str:
         "archive_path_traversal",
         "archive_absolute_path",
         "archive_symlink",
+        "archive_special_file",
         "archive_duplicate_path",
         "archive_member_too_large",
         "archive_total_too_large",
         "archive_entry_count_exceeded",
+        "archive_central_directory_too_large",
+        "archive_eocd_invalid",
+        "archive_multidisk_unsupported",
+        "archive_zip64_unsupported",
         "archive_compression_ratio",
         "archive_size_mismatch",
         "archive_read_error",
         "unsupported_archive",
         "filesystem_symlink",
         "non_regular_file",
+        "walk_error",
         "hash_limit_exceeded",
         "hash_error",
         "stat_error",
@@ -216,8 +255,17 @@ def proposed_disposition(category: str, security_flags: list[str]) -> str:
     return "retain_review"
 
 
-def _artifact_id(source_kind: str, relative_path: str, sha256: str | None, size_bytes: int | None) -> str:
-    material = f"{source_kind}\0{relative_path}\0{sha256 or ''}\0{size_bytes if size_bytes is not None else ''}"
+def _artifact_id(
+    source_kind: str,
+    relative_path: str,
+    sha256: str | None,
+    size_bytes: int | None,
+    archive_parent: str | None,
+) -> str:
+    material = (
+        f"{source_kind}\0{archive_parent or ''}\0{relative_path}\0{sha256 or ''}\0"
+        f"{size_bytes if size_bytes is not None else ''}"
+    )
     return f"artifact:{hashlib.sha256(material.encode('utf-8')).hexdigest()[:24]}"
 
 
@@ -242,7 +290,7 @@ def _base_artifact(
 ) -> dict[str, Any]:
     flags = sorted(set(security_flags))
     return {
-        "artifact_id": _artifact_id(source_kind, relative_path, sha256, size_bytes),
+        "artifact_id": _artifact_id(source_kind, relative_path, sha256, size_bytes, archive_parent),
         "source_kind": source_kind,
         "relative_path": relative_path,
         "archive_parent": archive_parent,
@@ -270,6 +318,65 @@ def _archive_error(relative_archive_path: str, size_bytes: int | None, flag: str
     ]
 
 
+def _zip_preflight(
+    raw: BinaryIO,
+    size_bytes: int,
+    *,
+    max_archive_entries: int,
+    max_central_directory_bytes: int,
+) -> str | None:
+    """Bound ZIP metadata before ``zipfile.ZipFile`` materializes entries."""
+    if size_bytes < ZIP_EOCD_STRUCT.size:
+        return "archive_eocd_invalid"
+
+    tail_size = min(size_bytes, ZIP_EOCD_STRUCT.size + ZIP_MAX_COMMENT_BYTES)
+    try:
+        raw.seek(size_bytes - tail_size)
+        tail = raw.read(tail_size)
+    except OSError:
+        return "archive_read_error"
+
+    eocd_index = tail.rfind(ZIP_EOCD_SIGNATURE)
+    if eocd_index < 0 or len(tail) - eocd_index < ZIP_EOCD_STRUCT.size:
+        return "archive_eocd_invalid"
+
+    try:
+        (
+            signature,
+            disk_number,
+            central_directory_disk,
+            entries_on_disk,
+            total_entries,
+            central_directory_size,
+            central_directory_offset,
+            comment_length,
+        ) = ZIP_EOCD_STRUCT.unpack_from(tail, eocd_index)
+    except struct.error:
+        return "archive_eocd_invalid"
+
+    if signature != ZIP_EOCD_SIGNATURE:
+        return "archive_eocd_invalid"
+    if eocd_index + ZIP_EOCD_STRUCT.size + comment_length != len(tail):
+        return "archive_eocd_invalid"
+    if disk_number != 0 or central_directory_disk != 0 or entries_on_disk != total_entries:
+        return "archive_multidisk_unsupported"
+    if (
+        total_entries == ZIP64_SENTINEL_16
+        or central_directory_size == ZIP64_SENTINEL_32
+        or central_directory_offset == ZIP64_SENTINEL_32
+    ):
+        return "archive_zip64_unsupported"
+    if total_entries > max_archive_entries:
+        return "archive_entry_count_exceeded"
+    if central_directory_size > max_central_directory_bytes:
+        return "archive_central_directory_too_large"
+
+    absolute_eocd_offset = size_bytes - tail_size + eocd_index
+    if central_directory_offset + central_directory_size > absolute_eocd_offset:
+        return "archive_eocd_invalid"
+    return None
+
+
 def inspect_zip(
     archive_path: Path,
     relative_archive_path: str,
@@ -277,23 +384,40 @@ def inspect_zip(
     max_member_bytes: int = DEFAULT_MAX_MEMBER_BYTES,
     max_archive_bytes: int = DEFAULT_MAX_ARCHIVE_BYTES,
     max_archive_entries: int = DEFAULT_MAX_ARCHIVE_ENTRIES,
+    max_central_directory_bytes: int = DEFAULT_MAX_CENTRAL_DIRECTORY_BYTES,
     max_compression_ratio: float = DEFAULT_MAX_COMPRESSION_RATIO,
 ) -> list[dict[str, Any]]:
-    _validate_limits(1, max_member_bytes, max_archive_bytes, max_archive_entries, max_compression_ratio)
+    _validate_limits(
+        1,
+        max_member_bytes,
+        max_archive_bytes,
+        max_archive_entries,
+        max_central_directory_bytes,
+        max_compression_ratio,
+    )
     try:
         raw = _open_regular_file(archive_path)
     except InventoryError:
         return _archive_error(relative_archive_path, None, "archive_read_error")
 
-    try:
+    with raw:
         size_bytes = os.fstat(raw.fileno()).st_size
+        preflight_error = _zip_preflight(
+            raw,
+            size_bytes,
+            max_archive_entries=max_archive_entries,
+            max_central_directory_bytes=max_central_directory_bytes,
+        )
+        if preflight_error:
+            return _archive_error(relative_archive_path, size_bytes, preflight_error)
+
         try:
+            raw.seek(0)
             archive = zipfile.ZipFile(raw)
         except (OSError, zipfile.BadZipFile):
-            raw.close()
             return _archive_error(relative_archive_path, size_bytes, "unsupported_archive")
 
-        with raw, archive:
+        with archive:
             infos = archive.infolist()
             if len(infos) > max_archive_entries:
                 return _archive_error(relative_archive_path, size_bytes, "archive_entry_count_exceeded")
@@ -307,7 +431,8 @@ def inspect_zip(
             artifacts: list[dict[str, Any]] = []
 
             for info in sorted(infos, key=lambda item: item.filename):
-                if info.is_dir():
+                is_symlink = _zip_entry_is_symlink(info)
+                if info.is_dir() and not is_symlink:
                     continue
 
                 flags: list[str] = []
@@ -317,8 +442,10 @@ def inspect_zip(
                 elif not _is_safe_archive_name(normalized):
                     flags.append("archive_path_traversal")
 
-                if _zip_entry_is_symlink(info):
+                if is_symlink:
                     flags.append("archive_symlink")
+                if _zip_entry_is_special(info):
+                    flags.append("archive_special_file")
                 if info.file_size > max_member_bytes:
                     flags.append("archive_member_too_large")
                 if archive_total_exceeded:
@@ -336,20 +463,23 @@ def inspect_zip(
                 if suffix in ARCHIVE_SUFFIXES:
                     flags.append("nested_archive")
 
+                executable = _zip_entry_is_executable(info)
+                if executable:
+                    flags.append("archive_executable")
+
                 digest: str | None = None
                 sample = b""
-                read_blocked = any(
-                    flag
-                    in {
+                read_blocked = bool(
+                    {
                         "archive_absolute_path",
                         "archive_path_traversal",
                         "archive_symlink",
+                        "archive_special_file",
                         "archive_member_too_large",
                         "archive_total_too_large",
                         "archive_compression_ratio",
                         "nested_archive",
-                    }
-                    for flag in flags
+                    }.intersection(flags)
                 )
                 if not read_blocked:
                     try:
@@ -373,15 +503,16 @@ def inspect_zip(
                         archive_parent=relative_archive_path,
                         size_bytes=info.file_size,
                         sha256=digest,
-                        category=classify_path(normalized, archive=suffix in ARCHIVE_SUFFIXES),
+                        category=classify_path(
+                            normalized,
+                            executable=executable,
+                            archive=suffix in ARCHIVE_SUFFIXES,
+                        ),
                         security_flags=flags,
                         media_type=mimetypes.guess_type(normalized)[0],
                     )
                 )
             return artifacts
-    finally:
-        if not raw.closed:
-            raw.close()
 
 
 def inventory_tree(
@@ -392,15 +523,46 @@ def inventory_tree(
     max_member_bytes: int = DEFAULT_MAX_MEMBER_BYTES,
     max_archive_bytes: int = DEFAULT_MAX_ARCHIVE_BYTES,
     max_archive_entries: int = DEFAULT_MAX_ARCHIVE_ENTRIES,
+    max_central_directory_bytes: int = DEFAULT_MAX_CENTRAL_DIRECTORY_BYTES,
     max_compression_ratio: float = DEFAULT_MAX_COMPRESSION_RATIO,
 ) -> dict[str, Any]:
-    _validate_limits(max_file_bytes, max_member_bytes, max_archive_bytes, max_archive_entries, max_compression_ratio)
+    _validate_limits(
+        max_file_bytes,
+        max_member_bytes,
+        max_archive_bytes,
+        max_archive_entries,
+        max_central_directory_bytes,
+        max_compression_ratio,
+    )
     root = root.resolve()
     if not root.is_dir():
         raise InventoryError(f"Inventory root is not a directory: {root}")
 
     artifacts: list[dict[str, Any]] = []
-    for current, dirnames, filenames in os.walk(root, followlinks=False):
+
+    def record_walk_error(error: OSError) -> None:
+        error_path = Path(error.filename) if error.filename else root
+        try:
+            relative = error_path.relative_to(root).as_posix()
+        except ValueError:
+            relative = error_path.name or "."
+        artifacts.append(
+            _base_artifact(
+                source_kind="filesystem",
+                relative_path=relative,
+                archive_parent=None,
+                size_bytes=None,
+                sha256=None,
+                category="unknown",
+                security_flags=["walk_error"],
+            )
+        )
+
+    for current, dirnames, filenames in os.walk(
+        root,
+        followlinks=False,
+        onerror=record_walk_error,
+    ):
         current_path = Path(current)
         retained_dirs: list[str] = []
         for dirname in sorted(dirnames):
@@ -511,6 +673,7 @@ def inventory_tree(
                         max_member_bytes=max_member_bytes,
                         max_archive_bytes=max_archive_bytes,
                         max_archive_entries=max_archive_entries,
+                        max_central_directory_bytes=max_central_directory_bytes,
                         max_compression_ratio=max_compression_ratio,
                     )
                 )
@@ -542,11 +705,11 @@ def inventory_tree(
         digest = artifact.get("sha256")
         if digest and artifact["source_kind"] in {"filesystem", "archive_member"}:
             duplicate_map.setdefault(digest, []).append(artifact["artifact_id"])
-    duplicate_groups = [
-        {"sha256": digest, "artifact_ids": sorted(ids)}
-        for digest, ids in sorted(duplicate_map.items())
-        if len(ids) > 1
-    ]
+    duplicate_groups = []
+    for digest, ids in sorted(duplicate_map.items()):
+        unique_ids = sorted(set(ids))
+        if len(unique_ids) > 1:
+            duplicate_groups.append({"sha256": digest, "artifact_ids": unique_ids})
 
     stable_material = {
         "root_name": root.name,
@@ -578,6 +741,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-member-bytes", type=int, default=DEFAULT_MAX_MEMBER_BYTES)
     parser.add_argument("--max-archive-bytes", type=int, default=DEFAULT_MAX_ARCHIVE_BYTES)
     parser.add_argument("--max-archive-entries", type=int, default=DEFAULT_MAX_ARCHIVE_ENTRIES)
+    parser.add_argument(
+        "--max-central-directory-bytes",
+        type=int,
+        default=DEFAULT_MAX_CENTRAL_DIRECTORY_BYTES,
+    )
     parser.add_argument("--max-compression-ratio", type=float, default=DEFAULT_MAX_COMPRESSION_RATIO)
     return parser
 
@@ -593,6 +761,7 @@ def main() -> int:
             max_member_bytes=args.max_member_bytes,
             max_archive_bytes=args.max_archive_bytes,
             max_archive_entries=args.max_archive_entries,
+            max_central_directory_bytes=args.max_central_directory_bytes,
             max_compression_ratio=args.max_compression_ratio,
         )
     except InventoryError as exc:

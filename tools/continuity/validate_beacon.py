@@ -25,12 +25,35 @@ class BeaconValidationError(ValueError):
     """Raised when a beacon cannot be accepted by the offline reader."""
 
 
+def _reject_nonfinite(value: str) -> None:
+    raise BeaconValidationError(f"Non-finite JSON number is not allowed: {value}")
+
+
+def _object_without_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise BeaconValidationError(f"Duplicate JSON object key is not allowed: {key!r}")
+        result[key] = value
+    return result
+
+
 def load_json(path: Path) -> dict[str, Any]:
-    """Load one UTF-8 JSON object from disk."""
+    """Load one strict UTF-8 JSON object from disk."""
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise BeaconValidationError(f"Unable to load JSON from {path}: {exc}") from exc
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise BeaconValidationError(f"Unable to read JSON from {path}: {exc}") from exc
+
+    try:
+        payload = json.loads(
+            text,
+            object_pairs_hook=_object_without_duplicates,
+            parse_constant=_reject_nonfinite,
+        )
+    except json.JSONDecodeError as exc:
+        raise BeaconValidationError(f"Unable to parse JSON from {path}: {exc}") from exc
+
     if not isinstance(payload, dict):
         raise BeaconValidationError(f"Expected a JSON object in {path}")
     return payload
@@ -46,7 +69,16 @@ def schema_major(version: str) -> int:
 
 def canonical_json(payload: dict[str, Any]) -> str:
     """Serialize deterministically without deleting unknown extension fields."""
-    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    try:
+        return json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+    except (TypeError, ValueError) as exc:
+        raise BeaconValidationError(f"Beacon cannot be serialized as strict JSON: {exc}") from exc
 
 
 def canonical_sha256(payload: dict[str, Any]) -> str:

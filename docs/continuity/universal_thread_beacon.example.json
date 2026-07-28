@@ -20,7 +20,8 @@
       "The beacon references package-owned records rather than duplicating authority."
     ],
     "decisions": [
-      "Treat the existing capsule SHA-256 value as an integrity digest rather than an authenticated signature."
+      "Treat the existing capsule SHA-256 value as an integrity digest rather than an authenticated signature.",
+      "Keep residency and operational layer scope as independent classifications."
     ],
     "assumptions": [],
     "risks": [
@@ -71,7 +72,7 @@
           "No execution"
         ],
         "required_permissions": [],
-        "verification_method": "jsonschema validation against the committed schema"
+        "verification_method": "jsonschema validation against the bound committed schema"
       }
     ],
     "provenance_ref": "git:84a361019312660cada1cbfce91ddf6203569a21",
@@ -80,7 +81,10 @@
   },
   "classification": {
     "canon_status": "proposed_design",
-    "layer": "L3",
+    "residency_layer": "L3",
+    "operational_scope_layers": [
+      "L3"
+    ],
     "execution_mode": "not_applicable",
     "evidence_authority": "reference_evidence",
     "data_treatment": "reference_data",
@@ -104,6 +108,7 @@
   },
   "compatibility": {
     "minimum_reader_version": "1.0.0",
+    "canonicalization": "utb-json-subset-v1",
     "unknown_field_policy": "preserve",
     "transformations": [
       {

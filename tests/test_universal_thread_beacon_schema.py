@@ -145,6 +145,17 @@ def test_canonical_subset_rejects_non_ascii_object_keys(validator_module, exampl
 
 
 @pytest.mark.unit
+def test_canonical_bytes_define_order_escaping_and_utf8(validator_module) -> None:
+    payload = {"text": '<\n"\\é', "a": 1}
+
+    canonical = validator_module.canonical_json(payload).encode("utf-8")
+
+    assert canonical == b'{"a":1,"text":"<\\n\\"\\\\\xc3\xa9"}'
+    assert b"\\u003c" not in canonical
+    assert not canonical.endswith(b"\n")
+
+
+@pytest.mark.unit
 def test_canonical_serializer_rejects_lone_surrogate(validator_module, schema: dict, example: dict) -> None:
     candidate = copy.deepcopy(example)
     candidate["extensions"]["bad_unicode"] = "\ud800"
@@ -172,22 +183,37 @@ def test_minimum_reader_version_is_enforced(validator_module, schema: dict, exam
 
 
 @pytest.mark.unit
+def test_oversized_semver_component_fails_cleanly(validator_module) -> None:
+    oversized = ("9" * 5000) + ".0.0"
+
+    with pytest.raises(validator_module.BeaconValidationError, match="Invalid minimum reader version"):
+        validator_module.semantic_version_tuple(oversized, "minimum reader version")
+
+
+@pytest.mark.unit
 def test_unrelated_custom_schema_is_rejected(validator_module, example: dict) -> None:
-    with pytest.raises(validator_module.BeaconValidationError, match="not the supported UTB schema"):
+    with pytest.raises(validator_module.BeaconValidationError, match="does not match the committed bundled"):
         validator_module.validate_beacon(example, {})
 
 
 @pytest.mark.unit
-def test_invalid_bound_reader_schema_fails_as_validation_error(
+def test_spoofed_schema_identity_cannot_bypass_committed_constraints(
     validator_module,
     schema: dict,
     example: dict,
 ) -> None:
-    invalid_schema = copy.deepcopy(schema)
-    invalid_schema["type"] = "definitely-not-a-json-schema-type"
+    spoofed_schema = {
+        "$schema": schema["$schema"],
+        "$id": schema["$id"],
+        "x-utb-specification": schema["x-utb-specification"],
+        "x-utb-schema-version": schema["x-utb-schema-version"],
+        "type": "object",
+    }
+    candidate = copy.deepcopy(example)
+    candidate["profile"] = "full"
 
-    with pytest.raises(validator_module.BeaconValidationError, match="Invalid reader schema"):
-        validator_module.validate_beacon(example, invalid_schema)
+    with pytest.raises(validator_module.BeaconValidationError, match="does not match the committed bundled"):
+        validator_module.validate_beacon(candidate, spoofed_schema)
 
 
 @pytest.mark.unit

@@ -1,1 +1,299 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/continuity/universal_thread_beacon.schema.json","title":"Universal Thread Beacon","description":"Neutral preservation entry-point profile over an existing continuity package. It does not grant authority or activate replay, relay, restore, or execution.","type":"object","additionalProperties":true,"required":["specification","manifest_version","encoding","profile","object_ref","summary","manifests","classification","compatibility","lifecycle"],"properties":{"specification":{"type":"object","additionalProperties":false,"required":["name","schema_version"],"properties":{"name":{"const":"UTB-PS-001"},"schema_version":{"type":"string","pattern":"^[0-9]+\\.[0-9]+\\.[0-9]+$"}}},"manifest_version":{"type":"string","pattern":"^[0-9]+\\.[0-9]+\\.[0-9]+$"},"encoding":{"const":"UTF-8"},"profile":{"enum":["minimum","full"]},"object_ref":{"type":"object","additionalProperties":false,"required":["object_id","object_kind","namespace","title"],"properties":{"object_id":{"type":"string","minLength":1},"object_kind":{"enum":["thread","capsule","relay_capsule","workspace","session","workstream","asset"]},"namespace":{"type":"string","minLength":1},"title":{"type":"string","minLength":1},"parent_id":{"type":["string","null"]},"related_ids":{"type":"array","items":{"type":"string"},"uniqueItems":true}}},"summary":{"type":"object","additionalProperties":false,"required":["facts","decisions","assumptions","risks","unresolved_questions"],"properties":{"facts":{"type":"array","items":{"type":"string"}},"decisions":{"type":"array","items":{"type":"string"}},"assumptions":{"type":"array","items":{"type":"string"}},"risks":{"type":"array","items":{"type":"string"}},"unresolved_questions":{"type":"array","items":{"type":"string"}}}},"manifests":{"type":"object","additionalProperties":false,"required":["deliverables","dependencies","capabilities"],"properties":{"deliverables":{"type":"array","items":{"$ref":"#/$defs/deliverable"}},"dependencies":{"type":"array","items":{"$ref":"#/$defs/dependency"}},"capabilities":{"type":"array","items":{"$ref":"#/$defs/capability"}},"provenance_ref":{"type":["string","null"]},"integrity_ref":{"type":["string","null"]},"policy_ref":{"type":["string","null"]}}},"classification":{"type":"object","additionalProperties":false,"required":["canon_status","layer","execution_mode","evidence_authority","data_treatment","determinism_status"],"properties":{"canon_status":{"enum":["current_canon","proposed_design","experimental_concept","historical_state","assumption","deprecated"]},"layer":{"enum":["L1","L2","L3"]},"execution_mode":{"type":"string","minLength":1},"evidence_authority":{"type":"string","minLength":1},"data_treatment":{"type":"string","minLength":1},"determinism_status":{"enum":["not_applicable","deterministic","nondeterministic","unknown"]},"implementation_status":{"enum":["unimplemented","partial","implemented","verified"]},"deployment_status":{"enum":["not_applicable","undeployed","staging","deployed","retired"]}}},"policy_refs":{"type":"object","additionalProperties":false,"properties":{"trust_policy_ref":{"type":["string","null"]},"consent_policy_ref":{"type":["string","null"]},"authorization_policy_ref":{"type":["string","null"]},"retention_policy_ref":{"type":["string","null"]},"execution_risk_policy_ref":{"type":["string","null"]}}},"integrity":{"type":"object","additionalProperties":false,"required":["integrity_status","signature_status"],"properties":{"integrity_status":{"enum":["unverified","verified","failed"]},"digest_algorithm":{"type":["string","null"],"enum":["sha256",null]},"digest":{"type":["string","null"],"pattern":"^[a-fA-F0-9]{64}$"},"signature_status":{"enum":["unsigned","unverified","verified","revoked"]},"signature_ref":{"type":["string","null"]}},"allOf":[{"if":{"properties":{"integrity_status":{"const":"verified"}},"required":["integrity_status"]},"then":{"required":["digest_algorithm","digest"],"properties":{"digest_algorithm":{"const":"sha256"},"digest":{"type":"string","pattern":"^[a-fA-F0-9]{64}$"}}}},{"if":{"properties":{"signature_status":{"const":"verified"}},"required":["signature_status"]},"then":{"required":["signature_ref"],"properties":{"signature_ref":{"type":"string","minLength":1}}}}]},"compatibility":{"type":"object","additionalProperties":false,"required":["minimum_reader_version","unknown_field_policy","transformations"],"properties":{"minimum_reader_version":{"type":"string","pattern":"^[0-9]+\\.[0-9]+\\.[0-9]+$"},"unknown_field_policy":{"const":"preserve"},"transformations":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["field","action","loss"],"properties":{"field":{"type":"string"},"action":{"type":"string"},"loss":{"type":"boolean"},"notes":{"type":"string"}}}}}},"lifecycle":{"type":"object","additionalProperties":false,"required":["state","created_at","updated_at"],"properties":{"state":{"enum":["active","superseded","archived","withdrawn"]},"created_at":{"type":"string","format":"date-time"},"updated_at":{"type":"string","format":"date-time"},"history_ref":{"type":["string","null"]}}},"extensions":{"type":"object","additionalProperties":true}},"$defs":{"deliverable":{"type":"object","additionalProperties":false,"required":["deliverable_id","title","media_type","category","required","inclusion_state","execution_risk"],"properties":{"deliverable_id":{"type":"string","minLength":1},"path":{"type":["string","null"]},"external_ref":{"type":["string","null"]},"title":{"type":"string","minLength":1},"media_type":{"type":"string","minLength":1},"category":{"type":"string","minLength":1},"required":{"type":"boolean"},"inclusion_state":{"enum":["included","externally_referenced","summarized","redacted","unavailable","intentionally_omitted"]},"integrity_ref":{"type":["string","null"]},"execution_risk":{"enum":["none","data_only","configuration","executable_disabled","unknown"]},"missing_reason":{"type":["string","null"]}},"allOf":[{"if":{"properties":{"required":{"const":true}},"required":["required"]},"then":{"not":{"properties":{"inclusion_state":{"enum":["unavailable","intentionally_omitted"]}},"required":["inclusion_state"]}}},{"if":{"properties":{"inclusion_state":{"const":"included"}},"required":["inclusion_state"]},"then":{"required":["path","integrity_ref"],"properties":{"path":{"type":"string","minLength":1},"integrity_ref":{"type":"string","minLength":1}}}},{"if":{"properties":{"inclusion_state":{"const":"externally_referenced"}},"required":["inclusion_state"]},"then":{"required":["external_ref","integrity_ref"],"properties":{"external_ref":{"type":"string","minLength":1},"integrity_ref":{"type":"string","minLength":1}}}},{"if":{"properties":{"inclusion_state":{"enum":["unavailable","intentionally_omitted","redacted"]}},"required":["inclusion_state"]},"then":{"required":["missing_reason"],"properties":{"missing_reason":{"type":"string","minLength":1}}}}]},"dependency":{"type":"object","additionalProperties":false,"required":["dependency_id","class","required"],"properties":{"dependency_id":{"type":"string","minLength":1},"class":{"enum":["preservation","inspection","replay","execution"]},"required":{"type":"boolean"},"reference":{"type":["string","null"]},"secret_reference":{"type":["string","null"]}}},"capability":{"type":"object","additionalProperties":false,"required":["capability_id","status","inputs","outputs","constraints","required_permissions","verification_method"],"properties":{"capability_id":{"type":"string","minLength":1},"status":{"enum":["supported","partial","planned","deprecated","unsupported","unknown"]},"inputs":{"type":"array","items":{"type":"string"}},"outputs":{"type":"array","items":{"type":"string"}},"constraints":{"type":"array","items":{"type":"string"}},"required_permissions":{"type":"array","items":{"type":"string"}},"verification_method":{"type":"string","minLength":1}}}}}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/continuity/universal_thread_beacon.schema.json",
+  "title": "Universal Thread Beacon",
+  "description": "Neutral preservation entry-point profile over an existing continuity package. It does not grant authority or activate replay, relay, restore, or execution.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "specification",
+    "manifest_version",
+    "encoding",
+    "profile",
+    "object_ref",
+    "summary",
+    "manifests",
+    "classification",
+    "compatibility",
+    "lifecycle"
+  ],
+  "properties": {
+    "specification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "schema_version"],
+      "properties": {
+        "name": {"const": "UTB-PS-001"},
+        "schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+      }
+    },
+    "manifest_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "encoding": {"const": "UTF-8"},
+    "profile": {"enum": ["minimum", "full"]},
+    "object_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["object_id", "object_kind", "namespace", "title"],
+      "properties": {
+        "object_id": {"type": "string", "minLength": 1},
+        "object_kind": {
+          "enum": ["thread", "capsule", "relay_capsule", "workspace", "session", "workstream", "asset"]
+        },
+        "namespace": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "parent_id": {"type": ["string", "null"]},
+        "related_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["facts", "decisions", "assumptions", "risks", "unresolved_questions"],
+      "properties": {
+        "facts": {"type": "array", "items": {"type": "string"}},
+        "decisions": {"type": "array", "items": {"type": "string"}},
+        "assumptions": {"type": "array", "items": {"type": "string"}},
+        "risks": {"type": "array", "items": {"type": "string"}},
+        "unresolved_questions": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "manifests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deliverables", "dependencies", "capabilities"],
+      "properties": {
+        "deliverables": {"type": "array", "items": {"$ref": "#/$defs/deliverable"}},
+        "dependencies": {"type": "array", "items": {"$ref": "#/$defs/dependency"}},
+        "capabilities": {"type": "array", "items": {"$ref": "#/$defs/capability"}},
+        "provenance_ref": {"type": ["string", "null"]},
+        "integrity_ref": {"type": ["string", "null"]},
+        "policy_ref": {"type": ["string", "null"]}
+      }
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canon_status",
+        "layer",
+        "execution_mode",
+        "evidence_authority",
+        "data_treatment",
+        "determinism_status"
+      ],
+      "properties": {
+        "canon_status": {
+          "enum": [
+            "current_canon",
+            "proposed_design",
+            "experimental_concept",
+            "historical_state",
+            "assumption",
+            "deprecated"
+          ]
+        },
+        "layer": {"enum": ["L1", "L2", "L3"]},
+        "execution_mode": {"type": "string", "minLength": 1},
+        "evidence_authority": {"type": "string", "minLength": 1},
+        "data_treatment": {"type": "string", "minLength": 1},
+        "determinism_status": {"enum": ["not_applicable", "deterministic", "nondeterministic", "unknown"]},
+        "implementation_status": {"enum": ["unimplemented", "partial", "implemented", "verified"]},
+        "deployment_status": {"enum": ["not_applicable", "undeployed", "staging", "deployed", "retired"]}
+      }
+    },
+    "policy_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trust_policy_ref": {"type": ["string", "null"]},
+        "consent_policy_ref": {"type": ["string", "null"]},
+        "authorization_policy_ref": {"type": ["string", "null"]},
+        "retention_policy_ref": {"type": ["string", "null"]},
+        "execution_risk_policy_ref": {"type": ["string", "null"]}
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["integrity_status", "signature_status"],
+      "properties": {
+        "integrity_status": {"enum": ["unverified", "verified", "failed"]},
+        "digest_algorithm": {"type": ["string", "null"], "enum": ["sha256", null]},
+        "digest": {"type": ["string", "null"], "pattern": "^[a-fA-F0-9]{64}$"},
+        "signature_status": {"enum": ["unsigned", "unverified", "verified", "revoked"]},
+        "signature_ref": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"integrity_status": {"const": "verified"}}, "required": ["integrity_status"]},
+          "then": {
+            "required": ["digest_algorithm", "digest"],
+            "properties": {
+              "digest_algorithm": {"const": "sha256"},
+              "digest": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"signature_status": {"const": "verified"}}, "required": ["signature_status"]},
+          "then": {
+            "required": ["signature_ref"],
+            "properties": {"signature_ref": {"type": "string", "minLength": 1}}
+          }
+        }
+      ]
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_reader_version", "unknown_field_policy", "transformations"],
+      "properties": {
+        "minimum_reader_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "unknown_field_policy": {"const": "preserve"},
+        "transformations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["field", "action", "loss"],
+            "properties": {
+              "field": {"type": "string"},
+              "action": {"type": "string"},
+              "loss": {"type": "boolean"},
+              "notes": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "created_at", "updated_at"],
+      "properties": {
+        "state": {"enum": ["active", "superseded", "archived", "withdrawn"]},
+        "created_at": {"type": "string", "format": "date-time"},
+        "updated_at": {"type": "string", "format": "date-time"},
+        "history_ref": {"type": ["string", "null"]}
+      }
+    },
+    "extensions": {"type": "object", "additionalProperties": true}
+  },
+  "$defs": {
+    "deliverable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deliverable_id",
+        "title",
+        "media_type",
+        "category",
+        "required",
+        "inclusion_state",
+        "execution_risk"
+      ],
+      "properties": {
+        "deliverable_id": {"type": "string", "minLength": 1},
+        "path": {"type": ["string", "null"]},
+        "external_ref": {"type": ["string", "null"]},
+        "title": {"type": "string", "minLength": 1},
+        "media_type": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "required": {"type": "boolean"},
+        "inclusion_state": {
+          "enum": [
+            "included",
+            "externally_referenced",
+            "summarized",
+            "redacted",
+            "unavailable",
+            "intentionally_omitted"
+          ]
+        },
+        "integrity_ref": {"type": ["string", "null"]},
+        "execution_risk": {"enum": ["none", "data_only", "configuration", "executable_disabled", "unknown"]},
+        "missing_reason": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"required": {"const": true}}, "required": ["required"]},
+          "then": {
+            "not": {
+              "properties": {"inclusion_state": {"enum": ["unavailable", "intentionally_omitted"]}},
+              "required": ["inclusion_state"]
+            }
+          }
+        },
+        {
+          "if": {"properties": {"inclusion_state": {"const": "included"}}, "required": ["inclusion_state"]},
+          "then": {
+            "required": ["path", "integrity_ref"],
+            "properties": {
+              "path": {"type": "string", "minLength": 1},
+              "integrity_ref": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"inclusion_state": {"const": "externally_referenced"}},
+            "required": ["inclusion_state"]
+          },
+          "then": {
+            "required": ["external_ref", "integrity_ref"],
+            "properties": {
+              "external_ref": {"type": "string", "minLength": 1},
+              "integrity_ref": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "inclusion_state": {"enum": ["unavailable", "intentionally_omitted", "redacted"]}
+            },
+            "required": ["inclusion_state"]
+          },
+          "then": {
+            "required": ["missing_reason"],
+            "properties": {"missing_reason": {"type": "string", "minLength": 1}}
+          }
+        }
+      ]
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dependency_id", "class", "required"],
+      "properties": {
+        "dependency_id": {"type": "string", "minLength": 1},
+        "class": {"enum": ["preservation", "inspection", "replay", "execution"]},
+        "required": {"type": "boolean"},
+        "reference": {"type": ["string", "null"]},
+        "secret_reference": {"type": ["string", "null"]}
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability_id",
+        "status",
+        "inputs",
+        "outputs",
+        "constraints",
+        "required_permissions",
+        "verification_method"
+      ],
+      "properties": {
+        "capability_id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["supported", "partial", "planned", "deprecated", "unsupported", "unknown"]},
+        "inputs": {"type": "array", "items": {"type": "string"}},
+        "outputs": {"type": "array", "items": {"type": "string"}},
+        "constraints": {"type": "array", "items": {"type": "string"}},
+        "required_permissions": {"type": "array", "items": {"type": "string"}},
+        "verification_method": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

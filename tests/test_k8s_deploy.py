@@ -11,6 +11,7 @@ without requiring an actual Kubernetes cluster.
 import os
 import subprocess
 from pathlib import Path
+from unittest import TestCase
 
 import pytest
 import yaml
@@ -19,6 +20,7 @@ import yaml
 # Get project root
 PROJECT_ROOT = Path(__file__).parent.parent
 SCRIPTS_DIR = PROJECT_ROOT / "scripts"
+CHECK = TestCase()
 
 
 class TestK8sDeployScripts:
@@ -164,8 +166,10 @@ exit 97
         )
 
         calls = kubectl_log.read_text().splitlines() if kubectl_log.exists() else []
-        assert calls == [], f"{script_name} contacted kubectl during dry-run: {calls}"
-        assert "validated" in result.stdout
+        CHECK.assertEqual(
+            calls, [], f"{script_name} contacted kubectl during dry-run: {calls}"
+        )
+        CHECK.assertIn("validated", result.stdout)
 
     def test_relay_script_has_help(self, deploy_relays_script):
         """Verify relay deployment script has help option."""

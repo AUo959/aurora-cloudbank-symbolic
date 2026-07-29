@@ -1,3 +1,5 @@
+from unittest import TestCase
+
 from modules.gumas.naming import (
     NameEntityType,
     NameRegistry,
@@ -9,6 +11,8 @@ from modules.gumas.naming import (
     phonetic_key,
     load_registry,
 )
+
+CHECK = TestCase()
 
 
 def test_deterministic_resolution():
@@ -79,7 +83,7 @@ def test_registry_loader_accepts_file_inside_controlled_root(tmp_path):
     )
 
     registry = load_registry(registry_path, allowed_root=tmp_path)
-    assert registry.entries[0].canonical_name == "Arian Kelm"
+    CHECK.assertEqual(registry.entries[0].canonical_name, "Arian Kelm")
 
 
 def test_registry_loader_rejects_escape_from_controlled_root(tmp_path):
@@ -91,6 +95,6 @@ def test_registry_loader_rejects_escape_from_controlled_root(tmp_path):
     try:
         load_registry(outside, allowed_root=controlled_root)
     except ValueError as exc:
-        assert "escapes controlled root" in str(exc)
+        CHECK.assertIn("escapes controlled root", str(exc))
     else:
         raise AssertionError("an out-of-root registry path must be rejected")

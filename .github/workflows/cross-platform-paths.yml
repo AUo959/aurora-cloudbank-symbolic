@@ -20,8 +20,7 @@ on:
       - 'tests/test_insight_ledger*.py'
       - 'tests/test_improvement_api.py'
       - 'tests/modules/test_insight_ledger_security.py'
-      - 'requirements-runtime-lock.txt'
-      - 'requirements-test-lock.txt'
+      - 'requirements-ci-hashed.txt'
       - '.github/workflows/cross-platform-paths.yml'
   pull_request:
     branches: [main, develop]
@@ -32,8 +31,7 @@ on:
       - 'tests/test_insight_ledger*.py'
       - 'tests/test_improvement_api.py'
       - 'tests/modules/test_insight_ledger_security.py'
-      - 'requirements-runtime-lock.txt'
-      - 'requirements-test-lock.txt'
+      - 'requirements-ci-hashed.txt'
       - '.github/workflows/cross-platform-paths.yml'
   workflow_dispatch:
 
@@ -61,13 +59,13 @@ jobs:
         with:
           python-version: '3.12'
 
-      # Universal exact-version locks keep this security-sensitive matrix
+      # A universal hash-complete lock keeps this security-sensitive matrix
       # reproducible without executing source-distribution build hooks.
       - name: Install dependencies
+        shell: bash
         run: |
-          python -m pip install --only-binary=:all: \
-            -r requirements-runtime-lock.txt \
-            -r requirements-test-lock.txt
+          python -m pip install --require-hashes --only-binary=:all: \
+            -r requirements-ci-hashed.txt
 
       # `shell: bash` on every step below: the Windows default is PowerShell,
       # which does not accept backslash line-continuations and reported the

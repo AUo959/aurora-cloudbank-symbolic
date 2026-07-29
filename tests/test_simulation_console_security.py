@@ -4,10 +4,12 @@ import base64
 import hashlib
 import re
 from pathlib import Path
+from unittest import TestCase
 
 
 ROOT = Path(__file__).resolve().parents[1]
 CONSOLE = ROOT / "static" / "aurora-simulation-console.html"
+CHECK = TestCase()
 
 
 def _sha256_source(value: str) -> str:
@@ -18,24 +20,42 @@ def _sha256_source(value: str) -> str:
 def test_console_csp_allows_only_hashed_inline_content():
     html = CONSOLE.read_text(encoding="utf-8")
     csp_match = re.search(r'http-equiv="Content-Security-Policy" content="([^"]+)"', html)
-    assert csp_match is not None
+    CHECK.assertIsNotNone(csp_match)
     csp = csp_match.group(1)
 
-    assert "'unsafe-inline'" not in csp
-    assert "'unsafe-hashes'" in csp
+    CHECK.assertNotIn("'unsafe-inline'", csp)
+    CHECK.assertNotIn("'unsafe-hashes'", csp)
 
-    style_blocks = re.findall(r"<style>(.*?)</style>", html, re.DOTALL)
-    script_blocks = re.findall(r"<script>(.*?)</script>", html, re.DOTALL)
-    event_handlers = set(re.findall(r'\son[a-z]+="([^"]+)"', html))
-    assert len(style_blocks) == 1
-    assert len(script_blocks) == 1
-    assert event_handlers
+    style_blocks = re.findall(r"<style>(.*?)</style>", html, re.DOTALL | re.IGNORECASE)
+    script_blocks = re.findall(r"<script>(.*?)</script>", html, re.DOTALL | re.IGNORECASE)
+    event_handlers = set(re.findall(r'\son[a-z]+="([^"]+)"', html, re.IGNORECASE))
+    bound_actions = set(re.findall(r'data-console-action="([^"]+)"', html))
+    CHECK.assertEqual(len(style_blocks), 1)
+    CHECK.assertEqual(len(script_blocks), 1)
+    CHECK.assertFalse(event_handlers)
+    CHECK.assertEqual(
+        bound_actions,
+        {
+            "clearCollaboration",
+            "computeGeometricProduct",
+            "computeMultiple",
+            "exploreRelationships",
+            "generateMultipleVectors",
+            "generateQuantumVector",
+            "loadOperatorSnapshot",
+            "loadSynergyComponents",
+            "performSymbolicReasoning",
+            "shareDiscovery",
+        },
+    )
 
-    for inline_source in [*style_blocks, *script_blocks, *event_handlers]:
-        assert _sha256_source(inline_source) in csp
+    for inline_source in [*style_blocks, *script_blocks]:
+        CHECK.assertIn(_sha256_source(inline_source), csp)
+    for action in bound_actions:
+        CHECK.assertRegex(script_blocks[0], rf"\b{action},")
 
 
 def test_console_uses_web_crypto_for_display_randomness():
     html = CONSOLE.read_text(encoding="utf-8")
-    assert "Math.random" not in html
-    assert "window.crypto.getRandomValues" in html
+    CHECK.assertNotIn("Math.random", html)
+    CHECK.assertIn("window.crypto.getRandomValues", html)

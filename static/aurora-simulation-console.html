@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-hashes' 'sha256-/vyL8KCBRzWWDx20UGOm0No6CkzmUgswDXtSQ6Gutfg=' 'sha256-4sfmLNGohbgCU0xmYVBPlooGVO6TwWbDg3P9m0uVu3s=' 'sha256-4iGE0btgNm5cxMLxc/lY1tFrcZXew7HaKVKmhNDdpqA=' 'sha256-Y0Z/EHQjSsNynYVRXWGY22R4FuZ7AlObpwQHlb2Z+pQ=' 'sha256-LK4bM6EephDceDOTVATp0w0AeU0s2n9jJgmvJtdJ0Vw=' 'sha256-DjL/Q6MyVhtD5czW/LHONbtXwkirvHemMMeagZ9tQ14=' 'sha256-a4lIjIdtumguT2Ji7D2BjRwF0GQSkbXSDXYmDimXRy8=' 'sha256-WLgfaMY2/9BmtB/1rx4XwF9GSfsLaZY8p2JLCXdjJO4=' 'sha256-dV/vfIrbdq939MgCzbrBjQY3Lu1GAozd+cTsaOQmOZE=' 'sha256-uX1UqI6ISA9Wvk+tcS2VuWYDZ59dVMth6FWXrwoPh2E=' 'sha256-5UzBWKdmNfADybFdyNJN4au7dsMtdcHQKAViubOvjlo='; style-src 'self' 'sha256-skN2hLcoFJVtHnmuKsCMs/qtkER0H/i1NbCfub+Rkpo='; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RH1wK36OBW8eu+sH5tqedCUVgJqJuqfWZnbD8/iiqV8='; style-src 'self' 'sha256-skN2hLcoFJVtHnmuKsCMs/qtkER0H/i1NbCfub+Rkpo='; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
     <title>Aurora Simulation Console</title>
     <script src="/static/js/aurora-security.js?v=20260627-sim"></script>
     <style>
@@ -837,7 +837,7 @@
                             <h2>Simulation Runtime</h2>
                             <p class="operator-muted">GUMAS, scenario bridge, event ledgers, and bounded smoke evidence.</p>
                         </div>
-                        <button class="btn secondary compact" onclick="loadOperatorSnapshot()">Refresh</button>
+                        <button class="btn secondary compact" data-console-action="loadOperatorSnapshot">Refresh</button>
                     </div>
                     <div id="simulation-runtime-focus" class="operator-grid">
                         <div class="operator-card">
@@ -867,7 +867,7 @@
                         <h2>Aurora Operator Console</h2>
                         <p class="operator-muted">Persisted root snapshot. No cluster mutation, live command execution, nested repo writes, or canon promotion.</p>
                     </div>
-                    <button class="btn secondary compact" onclick="loadOperatorSnapshot()">Refresh Snapshot</button>
+                    <button class="btn secondary compact" data-console-action="loadOperatorSnapshot">Refresh Snapshot</button>
                 </div>
                 <div id="operator-summary" class="operator-grid">
                     <div class="operator-card">
@@ -895,7 +895,7 @@
                             <h2>Docker Runtime</h2>
                             <p class="operator-muted">Local compose services, GUI endpoints, command node, and GPU profile gate.</p>
                         </div>
-                        <button class="btn secondary compact" onclick="loadOperatorSnapshot()">Refresh</button>
+                        <button class="btn secondary compact" data-console-action="loadOperatorSnapshot">Refresh</button>
                     </div>
                     <div id="deployment-lanes" class="operator-grid"></div>
                 </div>
@@ -927,7 +927,7 @@
                             <h2>Synergy Dashboard</h2>
                             <p class="operator-muted">Component graph and health data from the CloudBank Synergy API.</p>
                         </div>
-                        <button class="btn secondary compact" onclick="loadSynergyComponents()">Refresh</button>
+                        <button class="btn secondary compact" data-console-action="loadSynergyComponents">Refresh</button>
                     </div>
                     <div id="synergy-components" class="operator-grid">
                         <div class="operator-card">
@@ -966,8 +966,8 @@
                             <option value="64">64 (Large)</option>
                         </select>
                     </div>
-                    <button class="btn" onclick="generateQuantumVector()">Generate Vector</button>
-                    <button class="btn secondary" onclick="generateMultipleVectors()">Batch Generate</button>
+                    <button class="btn" data-console-action="generateQuantumVector">Generate Vector</button>
+                    <button class="btn secondary" data-console-action="generateMultipleVectors">Batch Generate</button>
 
                     <div id="quantum-result" class="result-area">
                         <p>Enter a symbol above to inspect quantum-enhanced symbolic encoding.</p>
@@ -986,8 +986,8 @@
                         <label for="vector-b">Vector B (coefficients):</label>
                         <input type="text" id="vector-b" placeholder="e.g., 1, 2, 4" value="1, 2, 4">
                     </div>
-                    <button class="btn" onclick="computeGeometricProduct()">Geometric Product</button>
-                    <button class="btn secondary" onclick="computeMultiple()">All Operations</button>
+                    <button class="btn" data-console-action="computeGeometricProduct">Geometric Product</button>
+                    <button class="btn secondary" data-console-action="computeMultiple">All Operations</button>
 
                     <div id="geometric-result" class="result-area">
                         <p>Enter vector coefficients to inspect geometric algebra operations.</p>
@@ -1013,8 +1013,8 @@
                             <option value="analogy">Analogy Detection</option>
                         </select>
                     </div>
-                    <button class="btn" onclick="performSymbolicReasoning()">Reason</button>
-                    <button class="btn secondary" onclick="exploreRelationships()">Explore</button>
+                    <button class="btn" data-console-action="performSymbolicReasoning">Reason</button>
+                    <button class="btn secondary" data-console-action="exploreRelationships">Explore</button>
 
                     <div id="reasoning-result" class="result-area">
                         <p>Explore how concepts relate in high-dimensional quantum-symbolic space.</p>
@@ -1027,8 +1027,8 @@
                         <label for="message-input">Share Symbolic Discovery:</label>
                         <textarea id="message-input" rows="3" placeholder="Describe your quantum VSA experiment..."></textarea>
                     </div>
-                    <button class="btn" onclick="shareDiscovery()">Broadcast</button>
-                    <button class="btn secondary" onclick="clearCollaboration()">Clear</button>
+                    <button class="btn" data-console-action="shareDiscovery">Broadcast</button>
+                    <button class="btn secondary" data-console-action="clearCollaboration">Clear</button>
 
                     <div id="collaboration-feed" class="result-area">
                         <p>Collaboration messages appear here when the WebSocket lane is available.</p>
@@ -2154,9 +2154,31 @@
             renderOperatorSnapshot(snapshot);
         }
 
+        function bindConsoleActions() {
+            const actions = {
+                clearCollaboration,
+                computeGeometricProduct,
+                computeMultiple,
+                exploreRelationships,
+                generateMultipleVectors,
+                generateQuantumVector,
+                loadOperatorSnapshot,
+                loadSynergyComponents,
+                performSymbolicReasoning,
+                shareDiscovery,
+            };
+            document.querySelectorAll('[data-console-action]').forEach(control => {
+                const action = actions[control.dataset.consoleAction];
+                if (action) {
+                    control.addEventListener('click', action);
+                }
+            });
+        }
+
         // Initialize the console
         document.addEventListener('DOMContentLoaded', async function() {
             initializeTabs();
+            bindConsoleActions();
             await ensureSecuritySession();
             await initializeWebSocket();
             updateMetrics();

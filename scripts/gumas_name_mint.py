@@ -18,18 +18,6 @@ from modules.gumas.naming import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def _resolve_output_path(path: Path) -> Path:
-    candidate = path if path.is_absolute() else REPO_ROOT / path
-    resolved = candidate.resolve(strict=False)
-    try:
-        resolved.relative_to(REPO_ROOT)
-    except ValueError as exc:
-        raise ValueError(f"output path escapes repository root: {path}") from exc
-    if not resolved.parent.is_dir():
-        raise ValueError(f"output directory does not exist: {resolved.parent}")
-    return resolved
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -54,7 +42,6 @@ def parse_args() -> argparse.Namespace:
         type=int,
         help="Select candidate index and emit a final naming receipt",
     )
-    parser.add_argument("--output", type=Path)
     return parser.parse_args()
 
 
@@ -99,14 +86,7 @@ def main() -> int:
         payload = {"naming_receipt": selected.naming_receipt()}
 
     text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
-    if args.output:
-        try:
-            output_path = _resolve_output_path(args.output)
-        except ValueError as exc:
-            raise SystemExit(str(exc)) from exc
-        output_path.write_text(text, encoding="utf-8")
-    else:
-        print(text, end="")
+    print(text, end="")
     return 0
 
 

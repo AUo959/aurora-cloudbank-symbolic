@@ -12,8 +12,8 @@
 # ===================================================================
 # CORE WEB FRAMEWORK
 # ===================================================================
-fastapi>=0.128.8,<1.0.0             # FastAPI web framework (updated for starlette 0.50+ compatibility)
-uvicorn[standard]>=0.24.0           # ASGI server
+fastapi>=0.140.13,<1.0.0             # FastAPI web framework (updated for starlette 0.50+ compatibility)
+uvicorn[standard]>=0.52.0           # ASGI server
 starlette>=1.3.1,<2.0.0            # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
 pydantic>=2.5.0,<3.0.0             # Data validation (cap at next major; V2->V3 would be breaking)
 pydantic-settings>=2.14.2            # Settings management via environment variables
@@ -25,7 +25,7 @@ python-multipart>=0.0.20             # File upload handling
 httpx>=0.28.0,<1.0.0                # Async HTTP client (requires httpcore 1.x)
 httpcore>=1.0.0                     # HTTP core (requires h11 0.16.0+)
 h11>=0.16.0                         # HTTP/1.1 implementation (security updates)
-websockets>=11.0.3                  # WebSocket support
+websockets>=16.1.1                  # WebSocket support
 aiofiles>=24.1.0                    # Async file operations
 
 # ===================================================================
@@ -40,9 +40,9 @@ passlib[bcrypt]>=1.7.4              # Password handling
 # ===================================================================
 # DATA PROCESSING & SCIENTIFIC COMPUTING
 # ===================================================================
-numpy>=1.24.3                       # Numerical computing
-scipy>=1.11.4                       # Scientific computing
-pandas>=2.1.0                       # Data analysis
+numpy>=2.5.1                       # Numerical computing
+scipy>=1.18.0                       # Scientific computing
+pandas>=3.0.5                       # Data analysis
 
 # ===================================================================
 # CONFIGURATION & UTILITIES
@@ -56,31 +56,31 @@ python-json-logger>=4.1.0           # JSON logging
 # ===================================================================
 # QUANTUM COMPUTING (Nexus)
 # ===================================================================
-qiskit>=1.4.2                       # IBM Quantum SDK
+qiskit>=2.5.1                       # IBM Quantum SDK
 qiskit-aer>=0.13.0                  # Quantum simulators
 
 # ===================================================================
 # VISUALIZATION & MONITORING
 # ===================================================================
-plotly>=5.17.0                      # Interactive visualizations
-prometheus-client>=0.19.0           # Metrics collection
+plotly>=6.9.0                      # Interactive visualizations
+prometheus-client>=0.26.0           # Metrics collection
 
 # ===================================================================
 # DATABASE & CACHING
 # ===================================================================
-redis>=5.0.0                        # Redis client
+redis>=8.0.1                        # Redis client
 
 # ===================================================================
 # RATE LIMITING & API UTILITIES
 # ===================================================================
 limits>=5.5.0                       # Rate limiting
-slowapi>=0.1.9                      # Rate limiting for FastAPI
+slowapi>=0.1.10                      # Rate limiting for FastAPI
 
 # ===================================================================
 # AI MODEL INTEGRATIONS
 # ===================================================================
-anthropic>=0.40.0,<1.0.0            # Claude 3.5/4.5 integration
-openai>=2.43.0,<3.0.0               # GPT-4/5 integration
+anthropic>=0.120.2,<1.0.0            # Claude 3.5/4.5 integration
+openai>=2.50.0,<3.0.0               # GPT-4/5 integration
 
 # ===================================================================
 # VALIDATION
@@ -92,7 +92,7 @@ jsonschema>=4.17.0                  # JSON Schema validation (MCP tool inputSche
 # ===================================================================
 requests>=2.34.2                    # HTTP library
 urllib3>=2.7.0                      # HTTP connection pooling
-certifi>=2026.5.20                   # SSL certificates
-charset-normalizer>=3.4.7           # Character encoding detection
+certifi>=2026.7.22                   # SSL certificates
+charset-normalizer>=3.4.9           # Character encoding detection
 idna>=3.18                          # Internationalized domain names
 psutil>=7.2.2                       # Process and system monitoring (for R-2 telemetry)

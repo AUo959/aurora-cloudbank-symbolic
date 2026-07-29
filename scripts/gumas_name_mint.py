@@ -63,7 +63,7 @@ def main() -> int:
     )
     try:
         registry = load_registry(args.registry, allowed_root=REPO_ROOT)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
         raise SystemExit(f"invalid registry: {exc}") from exc
     service = NameService(registry)
     source_registry_digest = service.registry.digest

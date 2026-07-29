@@ -38,4 +38,5 @@ for index, resource in enumerate(resources, start=1):
 
 print(f"validated {len(resources)} Kubernetes resource(s): {manifest}")
 PY
+    return 0
 }

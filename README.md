@@ -9,9 +9,11 @@ A FastAPI platform for keeping machine-generated knowledge coherent over long
 horizons: hierarchical memory, provenance-tracked state, geometric ethics
 enforcement, drift detection, and production observability.
 
-It is also the code and canon repository for Aurora, the simulation director of
-the Orion Station institutional simulation. That is not decoration on the
-engineering — it is what the engineering is for. Keeping a large,
+It is also the runtime and checked-in canon-mirror repository for Aurora, the
+simulation director of the Orion Station institutional simulation. CanonRec is
+the authority repository; CloudBank carries reviewable runtime copies that are
+propagated and checked by the Aurora root workspace. That is not decoration on
+the engineering — it is what the engineering is for. Keeping a large,
 LLM-generated corpus internally consistent across sessions, model changes, and
 contributors is the problem this system exists to solve, and the simulation is
 the corpus it solves it against: large enough that conflicts are non-trivial,
@@ -34,6 +36,8 @@ and both are load-bearing.
 >
 > **Looking for a specific document?** [`docs/index.md`](./docs/index.md) maps every documentation directory and states what authority each one carries.
 >
+> **Reviewing canon provenance?** [`docs/CANON_PROVENANCE.md`](./docs/CANON_PROVENANCE.md) identifies the CanonRec source revision, mirrored payload hash, and the surfaces that still require reconciliation.
+>
 > **New AI agent or Copilot session?** Start with [`AGENTS.md`](./AGENTS.md) (bootstrap protocol and rules) and [`AURORA_CONTEXT.json`](./AURORA_CONTEXT.json) (machine-readable concept map).
 
 ---
@@ -42,6 +46,7 @@ and both are load-bearing.
 
 - [Quick Start](#quick-start)
 - [Architecture](#architecture)
+- [Canon authority and provenance](#canon-authority-and-provenance)
 - [Modules](#modules)
 - [API](#api)
 - [Configuration](#configuration)
@@ -73,7 +78,8 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Edit .env — set AURORA_SECRET_KEY, JWT_SECRET_KEY, CSRF_SECRET_KEY, WS_AUTH_SECRET
+# Edit .env — set AURORA_SECRET_KEY, JWT_SECRET_KEY, CSRF_SECRET_KEY,
+# WS_AUTH_SECRET, and MONITORING_SIGNING_KEY
 # (generate with: openssl rand -hex 32)
 
 # Start the server
@@ -117,6 +123,37 @@ All modules follow a consistent layout: `__init__.py`, `core.py`, `api.py`, `mod
 - **Pydantic V2**: All request/response models use Pydantic V2 (`model_config`, `ConfigDict`). V1 patterns (`class Config`, `max_items`) are not used.
 - **DLP tracking**: Every persistent operation carries a `context_tag` and generates a SHA-256 symbolic hash for audit trail continuity.
 - **Async throughout**: All I/O-bound operations use `async def`. Blocking calls are isolated.
+
+---
+
+## Canon authority and provenance
+
+CloudBank is self-contained for application startup, but it is not the sole
+authority for Aurora canon.
+
+```text
+AUo959/CanonRec (authority)
+  -> Aurora root canon_sync.py + integration CI
+    -> CloudBank config/canonical_validation.yaml and managed persona memories
+      -> runtime consistency gates
+```
+
+The current canonical-validation mirror is tied to CanonRec revision
+`c1f25e57a99ed98f8df6ed8eb2a93ba94bd2aa14`; its source and destination
+SHA-256 are recorded in [`config/canon_provenance.json`](./config/canon_provenance.json).
+`tests/test_canon_provenance.py` fails if the checked-in mirror changes without
+an accompanying provenance update.
+
+A CanonRec checkout is therefore:
+
+- **not required** to start the base FastAPI application from this repository;
+- **required** to review or change authoritative canon;
+- **required** by the Aurora root's complete L1 integration/simulation suite.
+
+The CanonRec and CloudBank staff registries currently differ and are not yet a
+managed sync payload. Neither should be described as the sole machine-readable
+staff SSOT until that authority decision is reconciled. See
+[`docs/CANON_PROVENANCE.md`](./docs/CANON_PROVENANCE.md).
 
 ---
 
@@ -243,6 +280,7 @@ Copy `.env.example` to `.env` and set the required values:
 | `JWT_SECRET_KEY` | Yes | 64-hex JWT signing key |
 | `CSRF_SECRET_KEY` | Yes | 64-hex CSRF HMAC key |
 | `WS_AUTH_SECRET` | Yes | 64-hex WebSocket token HMAC key |
+| `MONITORING_SIGNING_KEY` | For monitoring routes | HMAC key for the monitoring audit chain; without it the monitoring dashboard router is skipped |
 | `ALLOWED_CORS_ORIGINS` | No | Comma-separated allowed origins (default: localhost) |
 | `RATE_LIMIT_ENABLED` | No | Enable rate limiting (default: `true`) |
 | `REDIS_URL` | No | Redis URL for distributed rate limiting |

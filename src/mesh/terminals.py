@@ -3,16 +3,12 @@
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
 from .manifests import normalize_lookup
 from .models import AgentManifest
-
-
-PERSONNEL_ATTENTION_TAG_RE = re.compile(r"^\{\{@[^{}]+:::.+\}\}$")
 
 
 class PersonnelAttentionTagError(ValueError):
@@ -22,7 +18,19 @@ class PersonnelAttentionTagError(ValueError):
 def is_personnel_attention_tag(value: str) -> bool:
     """Return true for EVA/HUD Personnel Attention Tag syntax."""
 
-    return bool(PERSONNEL_ATTENTION_TAG_RE.match(value.strip()))
+    candidate = value.strip()
+    if not candidate.startswith("{{@") or not candidate.endswith("}}"):
+        return False
+
+    label, separator, message = candidate[3:-2].partition(":::")
+    return bool(
+        separator
+        and label
+        and message
+        and "{" not in label
+        and "}" not in label
+        and "\n" not in message
+    )
 
 
 @dataclass

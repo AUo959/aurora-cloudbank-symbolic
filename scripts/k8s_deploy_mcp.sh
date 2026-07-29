@@ -12,6 +12,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 K8S_DIR="$PROJECT_ROOT/k8s"
+source "$SCRIPT_DIR/lib/k8s_manifest_validation.sh"
 NAMESPACE="${AURORA_NAMESPACE:-aurora-cloudbank}"
 DRY_RUN="${DRY_RUN:-false}"
 HEALTH_PORT="${HEALTH_PORT:-8000}"
@@ -91,7 +92,7 @@ deploy_services() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating services manifest: $service_file"
-        kubectl apply -f "$service_file" --dry-run=client --validate=false -o yaml | sed -n '1,80p'
+        validate_k8s_manifest_offline "$service_file"
     else
         kubectl apply -f "$service_file"
     fi
@@ -113,7 +114,7 @@ deploy_hpa_monitoring() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating HPA and monitoring manifest: $hpa_file"
-        kubectl apply -f "$hpa_file" --dry-run=client --validate=false -o yaml | sed -n '1,80p'
+        validate_k8s_manifest_offline "$hpa_file"
     else
         # Check if metrics-server is available
         if kubectl get apiservice v1beta1.metrics.k8s.io &> /dev/null; then

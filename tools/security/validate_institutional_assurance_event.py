@@ -13,10 +13,11 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_PATH = (
-    Path(__file__).resolve().parents[2]
+    REPO_ROOT
     / "docs"
     / "security"
     / "contracts"
@@ -27,8 +28,37 @@ SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
+def _resolve_controlled_path(
+    path: Path,
+    *,
+    allowed_root: Path = REPO_ROOT,
+    expected: Literal["file", "directory"] = "file",
+) -> Path:
+    """Resolve a CLI-controlled path inside an explicit trust root."""
+    root = allowed_root.resolve(strict=True)
+    candidate = path if path.is_absolute() else Path.cwd() / path
+    resolved = candidate.resolve(strict=True)
+    try:
+        resolved.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(f"path escapes controlled root {root}: {path}") from exc
+
+    matches_expected_type = resolved.is_file() if expected == "file" else resolved.is_dir()
+    if not matches_expected_type:
+        raise ValueError(f"expected {expected} path: {resolved}")
+    return resolved
+
+
+def _read_json_object(path: Path, *, allowed_root: Path = REPO_ROOT) -> dict[str, Any]:
+    controlled_path = _resolve_controlled_path(path, allowed_root=allowed_root)
+    value = json.loads(controlled_path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"{controlled_path} root must be a JSON object")
+    return value
+
+
 def load_contract(path: Path = CONTRACT_PATH) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _read_json_object(path)
 
 
 def canonical_event_digest(event: dict[str, Any]) -> str:
@@ -262,11 +292,8 @@ def validate_event(
     return errors
 
 
-def _load_json(path: Path) -> dict[str, Any]:
-    value = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} root must be a JSON object")
-    return value
+def _load_json(path: Path, *, allowed_root: Path = REPO_ROOT) -> dict[str, Any]:
+    return _read_json_object(path, allowed_root=allowed_root)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -283,6 +310,11 @@ def main(argv: list[str] | None = None) -> int:
         event = _load_json(args.event)
         contract = load_contract(args.contract)
         prior_event = _load_json(args.prior_event) if args.prior_event else None
+        evidence_root = (
+            _resolve_controlled_path(args.evidence_root, expected="directory")
+            if args.evidence_root
+            else None
+        )
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         print(f"INVALID: {exc}", file=sys.stderr)
         return 2
@@ -291,7 +323,7 @@ def main(argv: list[str] | None = None) -> int:
         event,
         contract,
         prior_event=prior_event,
-        evidence_root=args.evidence_root,
+        evidence_root=evidence_root,
     )
     if errors:
         print("INVALID")

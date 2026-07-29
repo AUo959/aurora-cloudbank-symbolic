@@ -21,6 +21,26 @@ PROTOCOL_VERSION = "GUMAS_NAMING_PROTOCOL_v0.1"
 RECEIPT_VERSION = "1.0"
 
 
+def _resolve_controlled_file(
+    path: str | Path,
+    *,
+    allowed_root: str | Path | None = None,
+) -> Path:
+    """Resolve a registry file without permitting traversal outside its trust root."""
+    root = Path(allowed_root).resolve(strict=True) if allowed_root else Path.cwd().resolve()
+    candidate = Path(path)
+    if not candidate.is_absolute():
+        candidate = root / candidate
+    resolved = candidate.resolve(strict=True)
+    try:
+        resolved.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(f"registry path escapes controlled root {root}: {path}") from exc
+    if not resolved.is_file():
+        raise ValueError(f"registry path is not a file: {resolved}")
+    return resolved
+
+
 class NameEntityType(str, Enum):
     PERSON = "PERSON"
     FACTION = "FACTION"
@@ -200,8 +220,14 @@ class NameRegistry:
         return cls(entries)
 
     @classmethod
-    def from_json(cls, path: str | Path) -> "NameRegistry":
-        return cls.from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
+    def from_json(
+        cls,
+        path: str | Path,
+        *,
+        allowed_root: str | Path | None = None,
+    ) -> "NameRegistry":
+        controlled_path = _resolve_controlled_file(path, allowed_root=allowed_root)
+        return cls.from_dict(json.loads(controlled_path.read_text(encoding="utf-8")))
 
     @property
     def entries(self) -> tuple[RegistryEntry, ...]:
@@ -595,5 +621,13 @@ class NameService:
         return aliases
 
 
-def load_registry(path: str | Path | None) -> NameRegistry:
-    return NameRegistry.from_json(path) if path else NameRegistry()
+def load_registry(
+    path: str | Path | None,
+    *,
+    allowed_root: str | Path | None = None,
+) -> NameRegistry:
+    return (
+        NameRegistry.from_json(path, allowed_root=allowed_root)
+        if path
+        else NameRegistry()
+    )

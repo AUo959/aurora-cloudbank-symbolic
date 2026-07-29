@@ -15,6 +15,20 @@ from modules.gumas.naming import (
     load_registry,
 )
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _resolve_output_path(path: Path) -> Path:
+    candidate = path if path.is_absolute() else REPO_ROOT / path
+    resolved = candidate.resolve(strict=False)
+    try:
+        resolved.relative_to(REPO_ROOT)
+    except ValueError as exc:
+        raise ValueError(f"output path escapes repository root: {path}") from exc
+    if not resolved.parent.is_dir():
+        raise ValueError(f"output directory does not exist: {resolved.parent}")
+    return resolved
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -60,7 +74,11 @@ def main() -> int:
         seed_hint=args.seed,
         candidate_count=max(1, args.count),
     )
-    service = NameService(load_registry(args.registry))
+    try:
+        registry = load_registry(args.registry, allowed_root=REPO_ROOT)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"invalid registry: {exc}") from exc
+    service = NameService(registry)
     source_registry_digest = service.registry.digest
     candidates = service.resolve_candidates(request)
     for candidate in candidates:
@@ -82,7 +100,11 @@ def main() -> int:
 
     text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     if args.output:
-        args.output.write_text(text, encoding="utf-8")
+        try:
+            output_path = _resolve_output_path(args.output)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
+        output_path.write_text(text, encoding="utf-8")
     else:
         print(text, end="")
     return 0

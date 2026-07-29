@@ -7,6 +7,7 @@ from modules.gumas.naming import (
     cadence_signature,
     normalize_name,
     phonetic_key,
+    load_registry,
 )
 
 
@@ -67,3 +68,29 @@ def test_receipt_contains_registry_and_signature():
     assert receipt["signature"]["cadence"] == cadence_signature(
         result.canonical_name
     )
+
+
+def test_registry_loader_accepts_file_inside_controlled_root(tmp_path):
+    registry_path = tmp_path / "registries" / "names.json"
+    registry_path.parent.mkdir()
+    registry_path.write_text(
+        '{"entries":[{"canonical_name":"Arian Kelm","entity_id":"char_1"}]}',
+        encoding="utf-8",
+    )
+
+    registry = load_registry(registry_path, allowed_root=tmp_path)
+    assert registry.entries[0].canonical_name == "Arian Kelm"
+
+
+def test_registry_loader_rejects_escape_from_controlled_root(tmp_path):
+    controlled_root = tmp_path / "controlled"
+    controlled_root.mkdir()
+    outside = tmp_path / "outside.json"
+    outside.write_text('{"entries":[]}', encoding="utf-8")
+
+    try:
+        load_registry(outside, allowed_root=controlled_root)
+    except ValueError as exc:
+        assert "escapes controlled root" in str(exc)
+    else:
+        raise AssertionError("an out-of-root registry path must be rejected")

@@ -20,6 +20,8 @@ on:
       - 'tests/test_insight_ledger*.py'
       - 'tests/test_improvement_api.py'
       - 'tests/modules/test_insight_ledger_security.py'
+      - 'requirements-runtime-lock.txt'
+      - 'requirements-test-lock.txt'
       - '.github/workflows/cross-platform-paths.yml'
   pull_request:
     branches: [main, develop]
@@ -30,6 +32,8 @@ on:
       - 'tests/test_insight_ledger*.py'
       - 'tests/test_improvement_api.py'
       - 'tests/modules/test_insight_ledger_security.py'
+      - 'requirements-runtime-lock.txt'
+      - 'requirements-test-lock.txt'
       - '.github/workflows/cross-platform-paths.yml'
   workflow_dispatch:
 
@@ -57,12 +61,13 @@ jobs:
         with:
           python-version: '3.12'
 
-      # requirements-test.txt carries pytest and its plugins; requirements.txt
-      # alone leaves the runner without a pytest to invoke.
+      # Universal exact-version locks keep this security-sensitive matrix
+      # reproducible without executing source-distribution build hooks.
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-test.txt
+          python -m pip install --only-binary=:all: \
+            -r requirements-runtime-lock.txt \
+            -r requirements-test-lock.txt
 
       # `shell: bash` on every step below: the Windows default is PowerShell,
       # which does not accept backslash line-continuations and reported the

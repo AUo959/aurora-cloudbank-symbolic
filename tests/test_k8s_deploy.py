@@ -41,7 +41,7 @@ class TestK8sDeployScripts:
 
     @pytest.fixture
     def cluster_rejecting_kubectl(self, tmp_path):
-        """Provide kubectl that permits client apply but rejects cluster access."""
+        """Provide kubectl that rejects every invocation."""
         bin_dir = tmp_path / "bin"
         bin_dir.mkdir()
         kubectl_log = tmp_path / "kubectl.log"
@@ -51,31 +51,8 @@ class TestK8sDeployScripts:
 set -euo pipefail
 printf '%s\n' "$*" >> "${KUBECTL_LOG:?}"
 
-case "${1:-}" in
-    apply)
-        args=" $* "
-        if [[ "$args" != *" --dry-run=client "* ]]; then
-            echo "apply must use --dry-run=client" >&2
-            exit 98
-        fi
-        if [[ "$args" != *" --validate=false "* ]]; then
-            echo "apply must use --validate=false" >&2
-            exit 99
-        fi
-        # Exceed a typical pipe buffer so terminating consumers trigger SIGPIPE.
-        for index in $(seq 1 20000); do
-            printf 'line-%05d: value\n' "$index"
-        done
-        ;;
-    cluster-info|get|create|rollout|logs|exec|describe)
-        echo "live cluster command forbidden during dry-run: $*" >&2
-        exit 97
-        ;;
-    *)
-        echo "unexpected kubectl command: $*" >&2
-        exit 96
-        ;;
-esac
+echo "kubectl invocation forbidden during offline dry-run: $*" >&2
+exit 97
 """
         )
         kubectl.chmod(0o755)
@@ -186,11 +163,9 @@ esac
             f"stderr:\n{result.stderr}"
         )
 
-        calls = kubectl_log.read_text().splitlines()
-        assert calls, f"{script_name} did not perform client-side manifest validation"
-        assert all(call.startswith("apply ") for call in calls), calls
-        assert all("--dry-run=client" in call for call in calls), calls
-        assert all("--validate=false" in call for call in calls), calls
+        calls = kubectl_log.read_text().splitlines() if kubectl_log.exists() else []
+        assert calls == [], f"{script_name} contacted kubectl during dry-run: {calls}"
+        assert "validated" in result.stdout
 
     def test_relay_script_has_help(self, deploy_relays_script):
         """Verify relay deployment script has help option."""

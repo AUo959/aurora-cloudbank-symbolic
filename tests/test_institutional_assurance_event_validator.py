@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -223,3 +224,25 @@ def test_revision_greater_than_one_requires_prior_event():
     event["previous_event_digest"] = "c" * 64
     errors = validator.validate_event(event)
     assert any("requires --prior-event" in error for error in errors)
+
+
+def test_cli_json_loader_accepts_files_inside_controlled_root(tmp_path):
+    event_path = tmp_path / "events" / "event.json"
+    event_path.parent.mkdir()
+    event_path.write_text(json.dumps(simulated_event()), encoding="utf-8")
+
+    assert validator._load_json(event_path, allowed_root=tmp_path) == simulated_event()
+
+
+def test_cli_json_loader_rejects_escape_from_controlled_root(tmp_path):
+    controlled_root = tmp_path / "controlled"
+    controlled_root.mkdir()
+    outside = tmp_path / "outside.json"
+    outside.write_text(json.dumps(simulated_event()), encoding="utf-8")
+
+    try:
+        validator._load_json(outside, allowed_root=controlled_root)
+    except ValueError as exc:
+        assert "escapes controlled root" in str(exc)
+    else:
+        raise AssertionError("an out-of-root CLI path must be rejected")

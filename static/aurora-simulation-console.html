@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-hashes' 'sha256-/vyL8KCBRzWWDx20UGOm0No6CkzmUgswDXtSQ6Gutfg=' 'sha256-4sfmLNGohbgCU0xmYVBPlooGVO6TwWbDg3P9m0uVu3s=' 'sha256-4iGE0btgNm5cxMLxc/lY1tFrcZXew7HaKVKmhNDdpqA=' 'sha256-Y0Z/EHQjSsNynYVRXWGY22R4FuZ7AlObpwQHlb2Z+pQ=' 'sha256-LK4bM6EephDceDOTVATp0w0AeU0s2n9jJgmvJtdJ0Vw=' 'sha256-DjL/Q6MyVhtD5czW/LHONbtXwkirvHemMMeagZ9tQ14=' 'sha256-a4lIjIdtumguT2Ji7D2BjRwF0GQSkbXSDXYmDimXRy8=' 'sha256-WLgfaMY2/9BmtB/1rx4XwF9GSfsLaZY8p2JLCXdjJO4=' 'sha256-dV/vfIrbdq939MgCzbrBjQY3Lu1GAozd+cTsaOQmOZE=' 'sha256-uX1UqI6ISA9Wvk+tcS2VuWYDZ59dVMth6FWXrwoPh2E=' 'sha256-5UzBWKdmNfADybFdyNJN4au7dsMtdcHQKAViubOvjlo='; style-src 'self' 'sha256-skN2hLcoFJVtHnmuKsCMs/qtkER0H/i1NbCfub+Rkpo='; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
     <title>Aurora Simulation Console</title>
     <script src="/static/js/aurora-security.js?v=20260627-sim"></script>
     <style>
@@ -1084,6 +1084,12 @@
         let securitySession;
         let latestOperatorSnapshot = null;
 
+        function secureRandomUnit() {
+            const sample = new Uint32Array(1);
+            window.crypto.getRandomValues(sample);
+            return sample[0] / 0x100000000;
+        }
+
         function setActiveTab(targetId, updateHash = true) {
             const targetPanel = document.getElementById(targetId);
             if (!targetPanel) {
@@ -1421,13 +1427,13 @@
                                      "${conceptA}": ${circuitA.most_frequent_probability * 100}% → |${circuitA.most_frequent_state}⟩<br>
                                      "${conceptB}": ${circuitB.most_frequent_probability * 100}% → |${circuitB.most_frequent_state}⟩<br>
                                      Combined Gates: ${circuitA.circuit_gates + circuitB.circuit_gates}<br>
-                                     Coherence: ${Math.random() * 85 + 10}%`;
+                                     Coherence: ${secureRandomUnit() * 85 + 10}%`;
                     } else if (operation === 'analogy') {
                         resultText = `Quantum Analogy Detection<br>
                                      Pattern A (${conceptA}): ${circuitA.circuit_gates} quantum gates<br>
                                      Pattern B (${conceptB}): ${circuitB.circuit_gates} quantum gates<br>
                                      Structural similarity: ${Math.abs(circuitA.circuit_gates - circuitB.circuit_gates) < 3 ? 'High' : 'Moderate'}<br>
-                                     Analogy strength: ${Math.random() * 40 + 50}%`;
+                                     Analogy strength: ${secureRandomUnit() * 40 + 50}%`;
                     }
                 }
 

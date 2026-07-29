@@ -19,7 +19,7 @@ python scripts/gumas_name_mint.py \
   --entity-id char_example \
   --faction galactic_union \
   --region kharis_sector \
-  --registry /tmp/l2_name_registry.json \
+  --registry ./l2_name_registry.json \
   --seed 4718224 \
   --count 6
 ```
@@ -32,11 +32,13 @@ python scripts/gumas_name_mint.py \
   --entity-id char_example \
   --faction galactic_union \
   --region kharis_sector \
-  --registry /tmp/l2_name_registry.json \
+  --registry ./l2_name_registry.json \
   --seed 4718224 \
   --count 6 \
   --select 2 \
-  --output /tmp/char_example_naming_receipt.json
+  > char_example_naming_receipt.json
 ```
 
+Registry inputs must resolve inside the repository checkout. The generator emits JSON to
+standard output so the caller controls any destination through ordinary shell redirection.
 The generator proposes and audits names. CanonRec remains the authority that admits them.

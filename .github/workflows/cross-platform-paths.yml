@@ -20,6 +20,7 @@ on:
       - 'tests/test_insight_ledger*.py'
       - 'tests/test_improvement_api.py'
       - 'tests/modules/test_insight_ledger_security.py'
+      - 'requirements-ci-hashed.txt'
       - '.github/workflows/cross-platform-paths.yml'
   pull_request:
     branches: [main, develop]
@@ -30,6 +31,7 @@ on:
       - 'tests/test_insight_ledger*.py'
       - 'tests/test_improvement_api.py'
       - 'tests/modules/test_insight_ledger_security.py'
+      - 'requirements-ci-hashed.txt'
       - '.github/workflows/cross-platform-paths.yml'
   workflow_dispatch:
 
@@ -57,12 +59,13 @@ jobs:
         with:
           python-version: '3.12'
 
-      # requirements-test.txt carries pytest and its plugins; requirements.txt
-      # alone leaves the runner without a pytest to invoke.
+      # A universal hash-complete lock keeps this security-sensitive matrix
+      # reproducible without executing source-distribution build hooks.
       - name: Install dependencies
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-test.txt
+          python -m pip install --require-hashes --only-binary=:all: \
+            -r requirements-ci-hashed.txt
 
       # `shell: bash` on every step below: the Windows default is PowerShell,
       # which does not accept backslash line-continuations and reported the

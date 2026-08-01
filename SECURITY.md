@@ -150,7 +150,7 @@ on each one's limits.
 
 | Check | Runs on | What it does *not* cover |
 |---|---|---|
-| CodeQL | every PR | Alerts dismissed as "won't fix" do not reappear. Query all states, not just `open`, before concluding a branch is clean. |
+| CodeQL | every PR | Alerts dismissed as "won't fix" do not reappear. Query all states, not just `open`, before concluding a branch is clean. Every high/critical dismissal is adjudicated in [docs/CODEQL_TRIAGE.md](docs/CODEQL_TRIAGE.md). |
 | SonarCloud | every PR | Quality gate is scoped to changed lines, not the whole tree. |
 | Codacy | every PR | Currently fails any PR that adds pytest tests — see the tracking issue on the zero-new-issues threshold. |
 | GitGuardian | every PR | Detects committed secrets; says nothing about secrets supplied at runtime. |

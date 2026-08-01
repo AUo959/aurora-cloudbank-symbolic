@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from src.middleware.exception_handler import processing_handler, integration_handler
 from src.middleware.fastapi_security import require_csrf_token
 
@@ -30,13 +30,24 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/coordination", tags=["Event Coordination"])
 
 
+# Identifiers arriving from a request are echoed into log messages downstream.
+# Constraining them at the boundary means a control character cannot enter the
+# system at all, rather than relying on every future log site remembering to
+# sanitise. This is defence in depth: the log sites in event_registry.py also
+# run values through safe_str().
+#
+# The pattern deliberately excludes newlines and carriage returns, which are
+# what let a crafted agent id forge an entire additional log entry.
+_IDENTIFIER = Field(..., min_length=1, max_length=128, pattern=r"^[A-Za-z0-9._:-]+$")
+
+
 # Request/Response models
 class PublishEventRequest(BaseModel):
     """Request to publish an event"""
 
     event_type: EventType
     priority: EventPriority = EventPriority.NORMAL
-    source_agent_id: str
+    source_agent_id: str = _IDENTIFIER
     target_agent_ids: Optional[List[str]] = None
     payload: Dict[str, Any] = {}
     metadata: Dict[str, Any] = {}
@@ -48,7 +59,7 @@ class PublishEventRequest(BaseModel):
 class SubscribeRequest(BaseModel):
     """Request to subscribe to events"""
 
-    agent_id: str
+    agent_id: str = _IDENTIFIER
     event_types: Optional[List[EventType]] = None
     priorities: Optional[List[EventPriority]] = None
     source_agent_ids: Optional[List[str]] = None
@@ -59,8 +70,8 @@ class SubscribeRequest(BaseModel):
 class LockRequest(BaseModel):
     """Request to acquire resource lock"""
 
-    agent_id: str
-    resource_id: str
+    agent_id: str = _IDENTIFIER
+    resource_id: str = _IDENTIFIER
     resource_type: str = "generic"
     ttl_seconds: int = 300
 
@@ -68,8 +79,8 @@ class LockRequest(BaseModel):
 class ConflictDetectionRequest(BaseModel):
     """Request to detect conflicts"""
 
-    agent_id: str
-    resource_id: str
+    agent_id: str = _IDENTIFIER
+    resource_id: str = _IDENTIFIER
     resource_type: str
     operation: str
 

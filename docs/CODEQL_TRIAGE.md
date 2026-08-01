@@ -8,6 +8,13 @@ A dismissed alert with no recorded reason is indistinguishable from an ignored o
 carried no rationale for 110 of the 118 high/critical dismissals, so the reasoning lived nowhere a reviewer
 could read it. This file is the durable record; it is versioned, reviewable, and travels with the code.
 
+The rationale has **also been written back into GitHub's alert metadata** (67 of 118 as of 2026-08-01, up
+from 8). The remaining 51 are the 34 marked NOT YET ADJUDICATED below plus the 17 being fixed rather than
+dismissed. Writing it back is awkward by design: the API rejects `PATCH` on an already-dismissed alert
+(`400 "Alert is already dismissed."`), so each alert must be re-opened and re-dismissed with the same
+reason plus the comment, and `dismissed_comment` is capped at **280 characters**. Net alert state was
+verified unchanged afterwards across all 822 alerts: 0 state changes, 0 reason changes, 0 left open.
+
 ## How reachability was determined
 
 "Reachable" means: inside the transitive Python import closure of an entrypoint that is actually deployed.

@@ -891,13 +891,13 @@ def mcp_bridge_health_check():
         capsule_summary = _get_capsule_summary(capsules)
 
         return _build_response(mcp_data, sec, functions_count, mesh_sync_active, capsule_summary)
-    except Exception as e:  # pragma: no cover - defensive fallback
-        logger.error("MCP health check failed: %s", str(e))
+    except Exception as exc:  # pragma: no cover - defensive fallback
+        logger.error("MCP health check failed (%s)", type(exc).__name__)
         return JSONResponse(
             status_code=503,
             content={
                 "status": "unhealthy",
-                "error": str(e),
+                "error": "internal error",
                 "kubernetes": {"ready": False, "live": True},
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             },

@@ -18,7 +18,7 @@ from typing import List, Dict, Optional, Any, Set
 from enum import Enum
 from pathlib import Path
 
-from src.core.logging_security import safe_str, safe_path, safe_error
+from src.core.logging_security import safe_path, safe_str
 
 logger = logging.getLogger(__name__)
 
@@ -315,7 +315,7 @@ class CodeImprovementEngine:
     def register_pattern(self, pattern: ImprovementPattern):
         """Register custom improvement pattern"""
         self._patterns.append(pattern)
-        logger.info("Registered improvement pattern: %s", safe_str(pattern.name))
+        logger.info("Registered improvement pattern type: %s", type(pattern).__name__)
     
     def analyze_file(self, file_path: Path) -> List[ImprovementSuggestion]:
         """
@@ -330,7 +330,7 @@ class CodeImprovementEngine:
         try:
             content = file_path.read_text()
         except Exception as e:
-            logger.error("Failed to read file %s: %s", safe_path(file_path), safe_error(e))
+            logger.error("Failed to read analysis file (%s)", type(e).__name__)
             return []
         
         suggestions = []
@@ -339,7 +339,11 @@ class CodeImprovementEngine:
                 pattern_suggestions = pattern.detect(str(file_path), content)
                 suggestions.extend(pattern_suggestions)
             except Exception as e:
-                logger.error("Pattern %s failed on %s: %s", safe_str(pattern.name), safe_path(file_path), safe_error(e))
+                logger.error(
+                    "Improvement pattern %s failed while analyzing a file (%s)",
+                    type(pattern).__name__,
+                    type(e).__name__,
+                )
         
         return suggestions
     
@@ -395,7 +399,7 @@ class CodeImprovementEngine:
                     results[str(resolved)] = suggestions
 
 
-        logger.info("Analyzed directory %s: found improvements in %d files", safe_path(directory), len(results))
+        logger.info("Directory analysis found improvements in %d files", len(results))
         return results
     
     def filter_suggestions(

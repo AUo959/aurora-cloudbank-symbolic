@@ -96,6 +96,27 @@ class NativeSymbolicVector:
         return NativeSymbolicVector(symbol=bound_symbol, dim=self.dim, vector=bound_vec, vector_type=self.vector_type)
 
     @classmethod
+    def _normalize_superposition(
+        cls,
+        totals: Sequence[float],
+        vector_type: Literal["bipolar", "binary", "real"],
+        vector_count: int,
+        tie_symbol: str,
+    ) -> List[float]:
+        """Normalize summed coordinates without changing their vector domain."""
+        if vector_type == "real":
+            magnitude = math.sqrt(sum(total * total for total in totals))
+            return [total / magnitude if magnitude > 0 else 0.0 for total in totals]
+
+        threshold = 0.0 if vector_type == "bipolar" else vector_count / 2.0
+        low_value = -1.0 if vector_type == "bipolar" else 0.0
+        tie_breaker = cls.from_symbol(tie_symbol, len(totals), vector_type).vector
+        return [
+            1.0 if total > threshold else low_value if total < threshold else tie_breaker[index]
+            for index, total in enumerate(totals)
+        ]
+
+    @classmethod
     def bundle(cls, vectors: Sequence["NativeSymbolicVector"]) -> "NativeSymbolicVector":
         """Bundle vectors with one order-invariant normalization pass."""
         items = list(vectors)
@@ -108,23 +129,19 @@ class NativeSymbolicVector:
         if any(vector.vector_type != first.vector_type for vector in items):
             raise ValueError("Vector type mismatch in bundling")
 
-        totals = [sum(values) for values in zip(*(vector.vector for vector in items))]
-        ordered_symbols = sorted(vector.symbol for vector in items)
+        ordered_items = sorted(items, key=lambda vector: (vector.symbol, tuple(vector.vector)))
+        totals = [sum(values) for values in zip(*(vector.vector for vector in ordered_items))]
+        ordered_symbols = [vector.symbol for vector in ordered_items]
         bundle_symbol = f"bundle({','.join(ordered_symbols)})"
-
-        if first.vector_type in ["bipolar", "binary"]:
-            tie_breaker = cls.from_symbol(f"{bundle_symbol}:tie", first.dim, "bipolar").vector
-            normed = []
-            for index, total in enumerate(totals):
-                if total > 0:
-                    normed.append(1.0)
-                elif total < 0:
-                    normed.append(-1.0)
-                else:
-                    normed.append(tie_breaker[index])
+        if len(items) == 1:
+            normed = list(first.vector)
         else:
-            magnitude = math.sqrt(sum(total * total for total in totals))
-            normed = [total / magnitude if magnitude > 0 else 0.0 for total in totals]
+            normed = cls._normalize_superposition(
+                totals,
+                first.vector_type,
+                len(items),
+                f"{bundle_symbol}:tie",
+            )
 
         return cls(
             symbol=bundle_symbol,
@@ -140,18 +157,8 @@ class NativeSymbolicVector:
 
         superposed = [a + b for a, b in zip(self.vector, other.vector)]
 
-        # Sign normalization for bipolar/binary, regular normalization for real
-        if self.vector_type in ["bipolar", "binary"]:
-            tie_symbol = f"tie({','.join(sorted([self.symbol, other.symbol]))})"
-            tie_breaker = NativeSymbolicVector.from_symbol(tie_symbol, self.dim, "bipolar").vector
-            normed = [
-                1.0 if value > 0 else -1.0 if value < 0 else tie_breaker[index]
-                for index, value in enumerate(superposed)
-            ]
-        else:
-            # Normalize to unit length for real vectors
-            magnitude = math.sqrt(sum(x * x for x in superposed))
-            normed = [x / magnitude if magnitude > 0 else 0.0 for x in superposed]
+        tie_symbol = f"tie({','.join(sorted([self.symbol, other.symbol]))})"
+        normed = self._normalize_superposition(superposed, self.vector_type, 2, tie_symbol)
 
         superposed_symbol = f"({self.symbol})+({other.symbol})"
 

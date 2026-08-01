@@ -15,17 +15,37 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Sonnet4Config:
-    """Configuration for Claude Sonnet 4 integration"""
+    """Configuration for the Claude Sonnet integration.
+
+    ``model`` defaulted to ``claude-3-5-sonnet-20241022``, which was **retired
+    on 2025-10-28** and returns 404. #1330 replaced the retired and fabricated
+    identifiers in ``AIModel`` but did not reach this hub, which carries its own
+    parallel default and is reachable from the API via ``/sonnet4/enable``.
+
+    ``api_version`` was ``2024-06-01``; the Anthropic API version is
+    ``2023-06-01``. The former is not a released version string.
+
+    .. warning::
+       ``temperature`` and ``top_p`` are **rejected with a 400 by Claude Sonnet
+       5** — sampling parameters were removed on that model. They are retained
+       here because callers read them and removing the fields would break
+       those callers, but they must **not** be forwarded to the Messages API
+       alongside ``model``. Nothing in this repository does so today: this hub
+       builds configuration dicts and never calls the API itself, and its only
+       consumer (``tools/validators/verify_sonnet4.py``) just displays them.
+       Anything wiring this to a real request must drop both fields and steer
+       with the prompt, or with ``output_config.effort``, instead.
+    """
 
     enabled: bool = True
     enable_for_all_clients: bool = True
-    api_version: str = "2024-06-01"
-    model: str = "claude-3-5-sonnet-20241022"
-    max_tokens: int = 8192
+    api_version: str = "2023-06-01"
+    model: str = "claude-sonnet-5"
+    max_tokens: int = 64000
     temperature: float = 0.7
     top_p: float = 0.9
     safety_level: str = "high"
-    context_window: int = 200000
+    context_window: int = 1_000_000
     preserve_4o_logic: bool = True
     fallback_model: str = "gpt-4o"
 
@@ -70,13 +90,16 @@ class Sonnet4IntegrationHub:
         config_fields = {
             "enabled": sonnet_config.get("enabled", True),
             "enable_for_all_clients": sonnet_config.get("enable_for_all_clients", True),
-            "api_version": sonnet_config.get("api_version", "2024-06-01"),
-            "model": sonnet_config.get("model", "claude-3-5-sonnet-20241022"),
-            "max_tokens": sonnet_config.get("settings", {}).get("max_tokens", 8192),
+            # Defaults kept in step with Sonnet4Config above — a stale duplicate
+            # here would silently reintroduce the retired identifier for any
+            # config file that omits the key.
+            "api_version": sonnet_config.get("api_version", "2023-06-01"),
+            "model": sonnet_config.get("model", "claude-sonnet-5"),
+            "max_tokens": sonnet_config.get("settings", {}).get("max_tokens", 64000),
             "temperature": sonnet_config.get("settings", {}).get("temperature", 0.7),
             "top_p": sonnet_config.get("settings", {}).get("top_p", 0.9),
             "safety_level": sonnet_config.get("settings", {}).get("safety_level", "high"),
-            "context_window": sonnet_config.get("settings", {}).get("context_window", 200000),
+            "context_window": sonnet_config.get("settings", {}).get("context_window", 1_000_000),
             "preserve_4o_logic": sonnet_config.get("integration", {}).get("preserve_4o_logic", True),
             "fallback_model": sonnet_config.get("integration", {}).get("fallback_model", "gpt-4o"),
         }

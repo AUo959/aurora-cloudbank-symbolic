@@ -16,6 +16,8 @@ import logging
 from datetime import datetime, UTC
 from dataclasses import dataclass
 
+from src.core.logging_security import safe_str
+
 logger = logging.getLogger(__name__)
 
 
@@ -207,13 +209,13 @@ class EthicsComplianceMonitor:
             
             logger.info(
                 "Ethics check completed: operation=%s score=%.2f approved=%s",
-                operation_id, ethics_score, approved
+                safe_str(operation_id), ethics_score, approved
             )
             
             return result
             
         except Exception as e:
-            logger.error("Ethics check failed: operation=%s error=%s", operation_id, str(e))
+            logger.error("Ethics check failed: operation=%s error=%s", safe_str(operation_id), safe_str(e))
             return EthicsCheckResult(
                 success=False,
                 operation_id=operation_id,
@@ -242,7 +244,7 @@ class EthicsComplianceMonitor:
                 }
             )
         except Exception as e:
-            logger.error("Failed to send ethics alert: %s", str(e))
+            logger.error("Failed to send ethics alert: %s", safe_str(e))
 
     def _log_compliance_check(
         self,
@@ -270,7 +272,7 @@ class EthicsComplianceMonitor:
                 symbolic_validation=True
             )
         except Exception as e:
-            logger.error("Failed to log compliance check: %s", str(e))
+            logger.error("Failed to log compliance check: %s", safe_str(e))
 
     def record_operation_blocked(self, result: EthicsCheckResult) -> bool:
         """
@@ -288,7 +290,7 @@ class EthicsComplianceMonitor:
 
         self._blocked_operation_ids.add(result.operation_id)
         self._operations_blocked += 1
-        logger.info("Ethics block enforced: operation=%s", result.operation_id)
+        logger.info("Ethics block enforced: operation=%s", safe_str(result.operation_id))
         return True
 
     def get_compliance_stats(self) -> Dict[str, Any]:

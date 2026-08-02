@@ -39,7 +39,8 @@ def test_context_window_drift_is_caught():
         {"max_input_tokens": 1_000_000, "max_tokens": 128_000},
     )
     assert [f.kind for f in findings] == ["context_window"]
-    assert "200,000" in findings[0].detail and "1,000,000" in findings[0].detail
+    assert "200,000" in findings[0].detail, "message should quote the catalog value"
+    assert "1,000,000" in findings[0].detail, "message should quote the provider value"
 
 
 def test_max_output_drift_is_caught():

@@ -50,19 +50,24 @@ jobs:
         with:
           python-version: '3.12'
 
-      # The validator needs only the anthropic SDK, not the full application
-      # dependency set. Pinned and hash-free by design: this job must keep
-      # working when the main lock is mid-regeneration.
-      - name: Install validator dependencies
+      # Only the anthropic SDK: this job's whole purpose is the live provider
+      # call, and installing the full application set would couple it to a lock
+      # it does not need.
+      #
+      # Pinned exactly, matching requirements-ci-hashed.txt. An unpinned floor
+      # here would be the same class of hole #1366 closed everywhere else, and
+      # SonarCloud rightly flagged the first version of this file for it.
+      - name: Install validator dependency
         run: |
-          python -m pip install --only-binary=:all: 'anthropic>=0.107.1'
+          python -m pip install --only-binary=:all: 'anthropic==0.107.1'
 
-      # Offline guardrails first: format rules and claim staleness need no
-      # secret, so they must fail independently of whether the key is present.
-      - name: Offline catalog guardrails
-        run: |
-          python -m pip install --only-binary=:all: pytest
-          python -m pytest tests/test_model_catalog_freshness.py -q
+      # NOTE: the offline guardrails (tests/test_model_catalog_freshness.py)
+      # deliberately do NOT run here. They need no secret and already run in
+      # the authoritative suite, so duplicating them would repeat the mistake
+      # #1342 fixed -- a second, differently-configured copy of a check that
+      # already has an owner. The first version of this file did duplicate
+      # them, and failed: the root conftest.py imports fastapi, which this
+      # job does not install.
 
       # Exits 0 with a visible SKIPPED notice when the secret is absent, so a
       # missing key never reads as a verified catalog.

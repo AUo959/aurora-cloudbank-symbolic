@@ -215,7 +215,7 @@ class EthicsEngine:
             logger.info("Loaded %d rules from %s", len(self.rules), safe_path(rules_path))
             
         except Exception as e:
-            logger.error("Failed to load rules from %s: %s", safe_path(rules_path), safe_str(e))
+            logger.exception("Failed to load rules from %s: %s", safe_path(rules_path), safe_str(e))
             self._load_default_rules()
     
     def _map_category(self, category_name: str) -> RuleCategory:
@@ -457,7 +457,7 @@ class EthicsEngine:
             with self._write_lock:
                 append_jsonl(self.violations_path, violation.to_dict())
         except Exception as e:
-            logger.error("Failed to persist ethics violation: %s", safe_str(e))
+            logger.exception("Failed to persist ethics violation: %s", safe_str(e))
 
     def _load_violations(self):
         """Load persisted violations from the shared violation store."""
@@ -473,7 +473,7 @@ class EthicsEngine:
                 ]
             logger.info("Loaded %d ethics violations", len(self.violations))
         except Exception as e:
-            logger.error("Failed to load ethics violations: %s", safe_str(e))
+            logger.exception("Failed to load ethics violations: %s", safe_str(e))
 
     def _rewrite_violations(self):
         """Rewrite the shared violation store after explicit mutation."""
@@ -496,7 +496,7 @@ class EthicsEngine:
                     tmp.unlink(missing_ok=True)
                     raise
         except Exception as e:
-            logger.error("Failed to rewrite ethics violations: %s", safe_str(e))
+            logger.exception("Failed to rewrite ethics violations: %s", safe_str(e))
 
     def _violation_from_dict(self, data: Dict[str, Any]) -> EthicsViolation:
         """Restore a violation from persisted data."""

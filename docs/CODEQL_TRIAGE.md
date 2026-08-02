@@ -323,6 +323,12 @@ This module *is* inside the deployed import closure and logged `context.agent_id
 fixed the same way rather than dismissed: nine call sites now wrap their arguments in `safe_str()` /
 `safe_path()`.
 
+The four sites inside `except` blocks use `logger.exception()` rather than `logger.error()`, on
+SonarCloud's advice — it attaches the traceback. Note the residual caveat: `safe_str(e)` sanitises the
+*interpolated* argument, but Python's traceback rendering still prints the raw exception text on its
+final line. That is accepted because a traceback is structurally multi-line and log parsers already
+treat it as one record, so it does not forge a separate entry the way an interpolated newline does.
+
 **[820](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/820)
 `py/clear-text-storage-sensitive-data` `modules/insight_ledger/ledger_core.py` — accepted risk.**
 CodeQL is correct: when encrypted storage is unavailable, `_save_key_securely` falls back to

@@ -1,0 +1,118 @@
+---
+name: Model Catalog Validation
+# Checks the AI model catalog against Anthropic's live Models API.
+#
+# `claude-3-5-sonnet-20241022` was retired on 2025-10-28 but kept a
+# "# Verified live" comment while being the only selectable Anthropic entry, so
+# every Anthropic call 404'd and silently fell back to GPT-4o. One
+# models.retrieve() call would have caught it the day it was written (#1329).
+#
+# Runs weekly because catalog drift is driven by the provider's release
+# cadence, not ours: a PR-only check never fires on the failure mode that
+# actually happened, where the repository sat still and the world moved.
+on:
+  schedule:
+    # Mondays 06:00 UTC — before the working week, so a retirement surfaces
+    # as an open issue rather than as production 404s.
+    - cron: '0 6 * * 1'
+  push:
+    branches: [main]
+    paths:
+      - 'modules/ai_core/**'
+      - 'scripts/validate_model_catalog.py'
+      - '.github/workflows/model-catalog-validation.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'modules/ai_core/**'
+      - 'scripts/validate_model_catalog.py'
+      - '.github/workflows/model-catalog-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write        # to file a drift report on a scheduled failure
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-catalog:
+    name: "Model catalog vs provider"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: '3.12'
+
+      # Only the anthropic SDK: this job's whole purpose is the live provider
+      # call, and installing the full application set would couple it to a lock
+      # it does not need.
+      #
+      # Pinned exactly, matching requirements-ci-hashed.txt. An unpinned floor
+      # here would be the same class of hole #1366 closed everywhere else, and
+      # SonarCloud rightly flagged the first version of this file for it.
+      - name: Install validator dependency
+        run: |
+          python -m pip install --only-binary=:all: 'anthropic==0.107.1'
+
+      # NOTE: the offline guardrails (tests/test_model_catalog_freshness.py)
+      # deliberately do NOT run here. They need no secret and already run in
+      # the authoritative suite, so duplicating them would repeat the mistake
+      # #1342 fixed -- a second, differently-configured copy of a check that
+      # already has an owner. The first version of this file did duplicate
+      # them, and failed: the root conftest.py imports fastapi, which this
+      # job does not install.
+
+      # Exits 0 with a visible SKIPPED notice when the secret is absent, so a
+      # missing key never reads as a verified catalog.
+      - name: Validate against provider catalog
+        id: validate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/validate_model_catalog.py
+
+      # Only on the scheduled run: a PR failure is already visible to its
+      # author, but a weekly drift finding has no one watching it.
+      - name: Open an issue on scheduled drift
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const title = 'Model catalog drift detected against provider';
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'model-catalog-drift',
+            });
+            if (existing.data.length > 0) {
+              console.log(`Issue #${existing.data[0].number} is already open; not filing a duplicate.`);
+              return;
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              labels: ['model-catalog-drift'],
+              body: [
+                'The weekly model catalog validation failed.',
+                '',
+                `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                '',
+                'An entry in `UnifiedAIInterface.CAPABILITIES` either no longer',
+                'resolves against the provider catalog, or its capability numbers',
+                'disagree with it. A model that does not resolve returns 404 at',
+                'runtime and the fallback chain rolls over silently, which is the',
+                'failure mode #1329 was filed for.',
+                '',
+                'Fix in `modules/ai_core/unified_ai_interface.py`, then update',
+                '`verified_on` / `verified_source` for the affected entries.',
+              ].join('\n'),
+            });

@@ -132,36 +132,50 @@ class PIIMiddleware(BaseHTTPMiddleware):
                 extra={"pii_types": findings, "path": path},
             )
 
+    def _scan_string(self, text: str, findings: List[str], failures: List[str]) -> None:
+        """Scan one string value, recording PII type names or a failure class.
+
+        Split out of :meth:`_walk` to keep that method's branching within the
+        complexity budget; it also isolates the one place an exception may be
+        raised by detector code.
+        """
+        try:
+            # PIIDetector.detect() returns a list of dicts:
+            # [{'start': int, 'end': int, 'match': str, 'type': str,
+            #   'confidence': float, 'region': str|None}, ...]
+            matches = self._detector.detect(text)
+        except Exception as exc:
+            # Scanning must never break the request; record the class only
+            # (never the value, which is the PII itself) and continue.
+            failures.append(type(exc).__name__)
+            return
+
+        for match in matches:
+            pii_type = match.get("type", "unknown")
+            if pii_type not in findings:
+                findings.append(pii_type)
+
     def _walk(
         self,
         data: Any,
         findings: List[str],
         depth: int = 0,
-        failures: Optional[List[str]] = None,
+        *,
+        failures: List[str],
     ) -> None:
         """Recursively walk data and collect PII type names into *findings*.
 
         Detector failures are appended to *failures* as exception class names
         so the caller can report them once, rather than being swallowed.
+        *failures* is required rather than defaulted: an optional accumulator
+        would let a caller silently discard failures again, which is the exact
+        behaviour #1344 set out to remove.
         """
         if depth > 10:
             return
 
         if isinstance(data, str):
-            try:
-                # PIIDetector.detect() returns a list of dicts:
-                # [{'start': int, 'end': int, 'match': str, 'type': str,
-                #   'confidence': float, 'region': str|None}, ...]
-                matches = self._detector.detect(data)
-                for match in matches:
-                    pii_type = match.get("type", "unknown")
-                    if pii_type not in findings:
-                        findings.append(pii_type)
-            except Exception as exc:
-                # Scanning must never break the request; record the class only
-                # (never the value, which is the PII itself) and continue.
-                if failures is not None:
-                    failures.append(type(exc).__name__)
+            self._scan_string(data, findings, failures)
 
         elif isinstance(data, dict):
             for v in data.values():

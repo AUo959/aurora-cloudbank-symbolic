@@ -186,6 +186,13 @@ class PREvaluator:
                 result.append(rel)
         return result
 
+    def changed_test_files(self, changed_files: List[str]) -> List[str]:
+        """Changed Python files that pytest would collect as tests."""
+        return [
+            rel for rel in self.changed_python_files(changed_files)
+            if rel.startswith("tests/") or Path(rel).name.startswith("test_")
+        ]
+
     def _evaluate_changed_tests(
         self, changed_files: List[str], evidence: List[ScoreEvidence],
         findings: List[str], recommendations: List[str],
@@ -202,10 +209,7 @@ class PREvaluator:
         attributable. When a PR changes no tests, no penalty is applied and the
         evidence says where the real gate lives, rather than inventing a signal.
         """
-        changed_tests = [
-            rel for rel in self.changed_python_files(changed_files)
-            if rel.startswith("tests/") or Path(rel).name.startswith("test_")
-        ]
+        changed_tests = self.changed_test_files(changed_files)
         if not changed_tests:
             findings.append("No test files changed; full suite gates separately")
             evidence.append(
@@ -255,6 +259,59 @@ class PREvaluator:
         )
         return 0.35
 
+    def _run_py_compile(
+        self, py_files: List[str], evidence: List[ScoreEvidence],
+        findings: List[str], recommendations: List[str],
+    ) -> float:
+        """Compile the changed Python files; return the score penalty."""
+        try:
+            result = subprocess.run(
+                ["python3", "-m", "py_compile", *py_files],
+                capture_output=True, text=True, cwd=self.workspace_root, timeout=45,
+            )
+        except Exception as exc:
+            evidence.append(ScoreEvidence("py_compile_error", 0.35, 0.0, str(exc)))
+            return 0.0
+
+        if result.returncode == 0:
+            findings.append(f"No syntax errors in {len(py_files)} changed file(s)")
+            evidence.append(ScoreEvidence("py_compile", 0.35, 0.0, "py_compile exited 0"))
+            return 0.0
+
+        findings.append("Python syntax errors in changed files")
+        recommendations.append("Fix Python syntax errors")
+        evidence.append(
+            ScoreEvidence("py_compile", 0.35, -0.4, result.stderr[-1000:], "Fix Python syntax errors", True)
+        )
+        return 0.4
+
+    def _run_critical_lint(
+        self, py_files: List[str], evidence: List[ScoreEvidence],
+        findings: List[str], recommendations: List[str],
+    ) -> float:
+        """Run the critical flake8 selection on changed files; return penalty."""
+        try:
+            lint_result = subprocess.run(
+                ["flake8", "--count", "--select=E9,F63,F7,F82", "--show-source", *py_files],
+                capture_output=True, text=True, cwd=self.workspace_root, timeout=30,
+            )
+        except Exception as exc:
+            evidence.append(ScoreEvidence("critical_flake8_unavailable", 0.25, 0.0, str(exc)))
+            return 0.0
+
+        if lint_result.returncode == 0:
+            findings.append("No critical lint errors in changed files")
+            evidence.append(ScoreEvidence("critical_flake8", 0.25, 0.0, "flake8 critical check exited 0"))
+            return 0.0
+
+        findings.append("Critical lint errors in changed files")
+        recommendations.append("Fix critical linting issues")
+        evidence.append(
+            ScoreEvidence("critical_flake8", 0.25, -0.2, lint_result.stdout[-1000:],
+                          "Fix critical linting issues", True)
+        )
+        return 0.2
+
     def _evaluate_technical_quality(self, changed_files: Optional[List[str]] = None) -> EvaluationResult:
         findings: List[str] = []
         recommendations: List[str] = []
@@ -283,54 +340,8 @@ class PREvaluator:
                 evidence=evidence,
             )
 
-        try:
-            result = subprocess.run(
-                ["python3", "-m", "py_compile", *py_files],
-                capture_output=True,
-                text=True,
-                cwd=self.workspace_root,
-                timeout=45,
-            )
-            if result.returncode == 0:
-                findings.append(f"No syntax errors in {len(py_files)} changed file(s)")
-                evidence.append(ScoreEvidence("py_compile", 0.35, 0.0, "py_compile exited 0"))
-            else:
-                findings.append("Python syntax errors in changed files")
-                recommendations.append("Fix Python syntax errors")
-                evidence.append(
-                    ScoreEvidence("py_compile", 0.35, -0.4, result.stderr[-1000:], "Fix Python syntax errors", True)
-                )
-                score -= 0.4
-        except Exception as exc:
-            evidence.append(ScoreEvidence("py_compile_error", 0.35, 0.0, str(exc)))
-
-        try:
-            lint_result = subprocess.run(
-                ["flake8", "--count", "--select=E9,F63,F7,F82", "--show-source", *py_files],
-                capture_output=True,
-                text=True,
-                cwd=self.workspace_root,
-                timeout=30,
-            )
-            if lint_result.returncode == 0:
-                findings.append("No critical lint errors in changed files")
-                evidence.append(ScoreEvidence("critical_flake8", 0.25, 0.0, "flake8 critical check exited 0"))
-            else:
-                findings.append("Critical lint errors in changed files")
-                recommendations.append("Fix critical linting issues")
-                evidence.append(
-                    ScoreEvidence(
-                        "critical_flake8",
-                        0.25,
-                        -0.2,
-                        lint_result.stdout[-1000:],
-                        "Fix critical linting issues",
-                        True,
-                    )
-                )
-                score -= 0.2
-        except Exception as exc:
-            evidence.append(ScoreEvidence("critical_flake8_unavailable", 0.25, 0.0, str(exc)))
+        score -= self._run_py_compile(py_files, evidence, findings, recommendations)
+        score -= self._run_critical_lint(py_files, evidence, findings, recommendations)
 
         return EvaluationResult(
             category="Technical Quality",

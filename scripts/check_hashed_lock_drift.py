@@ -69,15 +69,13 @@ def locked_names(lock_path: Path) -> set[str]:
     return names
 
 
-def main() -> int:
-    lock_path = REPO_ROOT / LOCK
-    if not lock_path.exists():
-        print(f"error: {LOCK} not found", file=sys.stderr)
-        return 1
+def find_missing(locked: set[str]) -> list[tuple[str, str]]:
+    """Return (source_file, package) for every declared requirement not locked.
 
-    locked = locked_names(lock_path)
+    Split out of :func:`main` to keep that function within the complexity
+    budget the repository's static analysis enforces.
+    """
     missing: list[tuple[str, str]] = []
-
     for source in SOURCES:
         source_path = REPO_ROOT / source
         if not source_path.exists():
@@ -86,6 +84,17 @@ def main() -> int:
             name = requirement_name(raw)
             if name and name not in locked:
                 missing.append((source, name))
+    return missing
+
+
+def main() -> int:
+    lock_path = REPO_ROOT / LOCK
+    if not lock_path.exists():
+        print(f"error: {LOCK} not found", file=sys.stderr)
+        return 1
+
+    locked = locked_names(lock_path)
+    missing = find_missing(locked)
 
     if missing:
         print(

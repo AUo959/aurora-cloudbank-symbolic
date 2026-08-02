@@ -2,10 +2,28 @@
 
 ## Security Overview
 
-Aurora CloudBank implements enterprise-grade security measures to protect user data, 
-system integrity, and ensure secure operations across all components.
+Aurora CloudBank applies defence-in-depth to protect user data and system
+integrity: CSRF enforcement on every state-changing route, PII scrubbing before
+logging, a hash-linked tamper-evident audit ledger, and path containment on
+every filesystem-touching surface.
 
-**Security Score: 100/100 (Outstanding)**
+**This project has not been independently audited, and carries no security
+score.** Any number here would be self-assigned, and a self-assigned score is
+the kind of claim this repository tries not to make — see
+[`docs/VERIFIED_CLAIMS.md`](docs/VERIFIED_CLAIMS.md) for the standard: every
+claim shows the command that produces it.
+
+What can be said with evidence:
+
+- **114 security-marked tests** cover path containment, CSRF, PII redaction, and
+  ledger tamper detection. Run them with `pytest -m security -q`
+  (114 passed, 4 skipped, ~2 s on the machine this was measured on).
+- Static analysis runs on every PR (CodeQL, SonarCloud, Codacy, GitGuardian).
+- Known open security work is tracked in public issues rather than closed
+  silently — see the `security:` prefixed issues.
+
+Known-open findings are listed in the issue tracker, not summarised here, so
+that this file cannot drift away from them.
 
 ## 🛡️ Security Framework
 
@@ -123,22 +141,36 @@ python security_monitoring_system.py
 curl http://localhost:8000/security/status
 ```
 
-## 📊 Security Metrics
+## 📊 What runs, and what it does not tell you
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Vulnerability Response Time | < 24h | ✅ Achieved |
-| Security Scan Coverage | 100% | ✅ Achieved |
-| Dependency Security | 100% | ✅ Achieved |
-| Code Security Score | 95+ | ✅ 100/100 |
-| Monitoring Coverage | 100% | ✅ Achieved |
+This table previously reported five metrics as "✅ Achieved", including a
+self-assigned 100/100 code security score. None of those figures were measured,
+so they have been replaced with the checks that actually run and an honest note
+on each one's limits.
 
-## 🏆 Security Certifications
+| Check | Runs on | What it does *not* cover |
+|---|---|---|
+| CodeQL | every PR | Alerts dismissed as "won't fix" do not reappear. Query all states, not just `open`, before concluding a branch is clean. Every high/critical dismissal is adjudicated in [docs/CODEQL_TRIAGE.md](docs/CODEQL_TRIAGE.md). |
+| SonarCloud | every PR | Quality gate is scoped to changed lines, not the whole tree. |
+| Codacy | every PR | Currently fails any PR that adds pytest tests — see the tracking issue on the zero-new-issues threshold. |
+| GitGuardian | every PR | Detects committed secrets; says nothing about secrets supplied at runtime. |
+| Security-marked tests | `pytest -m security` | Covers path containment, CSRF, PII redaction, ledger tamper detection. Not exhaustive. |
+| Dependabot | continuous | Opens PRs; merging them is not automatic, and the `frontend/` package has no build gate verifying them. |
 
-- **OWASP Compliance**: Following OWASP Top 10 guidelines
-- **Security by Design**: Built-in security architecture
-- **Zero Trust**: Implemented zero trust principles
-- **Enterprise Ready**: Production-grade security measures
+**No CI job runs on macOS or Windows.** Every workflow is `ubuntu-latest`, so
+platform-specific defects reach `main` unchallenged — three have, all in path
+handling.
+
+## 🏆 Design principles
+
+These are the principles the architecture is built to, **not certifications** —
+nothing here has been certified or independently assessed:
+
+- **OWASP Top 10**: used as a design reference
+- **Security by design**: security considered at architecture level, not bolted on
+- **Zero trust**: verify at each boundary rather than trusting callers
+- **Defence in depth**: containment enforced at more than one layer, so a single
+  missed check is not sufficient on its own
 
 ## 📋 Security Checklist
 

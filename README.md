@@ -1,15 +1,42 @@
 # Aurora CloudBank Symbolic
 
+[![CI](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/aurora-ci-minimal.yml/badge.svg?branch=main)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/aurora-ci-minimal.yml)
+[![CodeQL](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml/badge.svg?branch=main)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml)
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.128+-green)](https://fastapi.tiangolo.com/)
-[![Pydantic](https://img.shields.io/badge/Pydantic-v2-orange)](https://docs.pydantic.dev/)
 
-A quantum-symbolic computing platform for enterprise AI. Combines hierarchical memory management, quantum circuit simulation, multi-model AI orchestration, geometric ethics enforcement, and production observability in a single FastAPI application.
+A FastAPI platform for keeping machine-generated knowledge coherent over long
+horizons: hierarchical memory, provenance-tracked state, geometric ethics
+enforcement, drift detection, and production observability.
+
+It is also the runtime and checked-in canon-mirror repository for Aurora, the
+simulation director of the Orion Station institutional simulation. CanonRec is
+the authority repository; CloudBank carries reviewable runtime copies that are
+propagated and checked by the Aurora root workspace. That is not decoration on
+the engineering — it is what the engineering is for. Keeping a large,
+LLM-generated corpus internally consistent across sessions, model changes, and
+contributors is the problem this system exists to solve, and the simulation is
+the corpus it solves it against: large enough that conflicts are non-trivial,
+long-lived enough that drift is real rather than hypothetical, and without
+external ground truth, which forces genuine internal-consistency machinery
+rather than a lookup against someone else's answer key.
+
+So the module list contains both `src/middleware/` and `modules/crew_agents/`,
+and both are load-bearing.
 
 > **New engineer?** Start with [`GETTING_STARTED_ENGINEER.md`](./GETTING_STARTED_ENGINEER.md), then run `python scripts/aurora_onboard.py` for a repository-grounded first interaction.
 >
 > **Reviewing the architecture?** Start with [`ARCHITECTURE_QUICKMAP.md`](./ARCHITECTURE_QUICKMAP.md) for a 10-minute orientation to the layer structure, runtime flow, and code map.
+>
+> **Want to know why it is built this way?** Read [`docs/archive/philosophy/`](./docs/archive/philosophy/PHILOSOPHY.md) — seven documents deriving the architecture from one principle about auditable reasoning. Foundational design intent, not current runtime canon.
+>
+> **Want to see it work?** [`docs/WALKTHROUGH.md`](./docs/WALKTHROUGH.md) traces one request end to end — ten middlewares, both CSRF checks, the memory tier, and what observability recorded. Every response in it was produced by running the commands.
+>
+> **Sceptical?** [`docs/VERIFIED_CLAIMS.md`](./docs/VERIFIED_CLAIMS.md) pairs every claim in this README with the command that proves or falsifies it, and the result that command produced.
+>
+> **Looking for a specific document?** [`docs/index.md`](./docs/index.md) maps every documentation directory and states what authority each one carries.
+>
+> **Reviewing canon provenance?** [`docs/CANON_PROVENANCE.md`](./docs/CANON_PROVENANCE.md) identifies the CanonRec source revision, mirrored payload hash, and the surfaces that still require reconciliation.
 >
 > **New AI agent or Copilot session?** Start with [`AGENTS.md`](./AGENTS.md) (bootstrap protocol and rules) and [`AURORA_CONTEXT.json`](./AURORA_CONTEXT.json) (machine-readable concept map).
 
@@ -19,6 +46,7 @@ A quantum-symbolic computing platform for enterprise AI. Combines hierarchical m
 
 - [Quick Start](#quick-start)
 - [Architecture](#architecture)
+- [Canon authority and provenance](#canon-authority-and-provenance)
 - [Modules](#modules)
 - [API](#api)
 - [Configuration](#configuration)
@@ -50,7 +78,8 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Edit .env — set AURORA_SECRET_KEY, JWT_SECRET_KEY, CSRF_SECRET_KEY, WS_AUTH_SECRET
+# Edit .env — set AURORA_SECRET_KEY, JWT_SECRET_KEY, CSRF_SECRET_KEY,
+# WS_AUTH_SECRET, and MONITORING_SIGNING_KEY
 # (generate with: openssl rand -hex 32)
 
 # Start the server
@@ -80,7 +109,7 @@ aurora-cloudbank-symbolic/
 │   ├── synergy/           # Component registry and dependency graph
 │   ├── integrations/      # ChatGPT and Gemini agent integrations
 │   └── core/              # DLP tracking, request envelope, time utilities
-├── tests/                 # 253 test files (pytest)
+├── tests/                 # 293 test files (pytest)
 ├── docs/                  # Reference documentation
 ├── scripts/               # Development and maintenance automation
 └── cli/                   # Command-line tools
@@ -94,6 +123,37 @@ All modules follow a consistent layout: `__init__.py`, `core.py`, `api.py`, `mod
 - **Pydantic V2**: All request/response models use Pydantic V2 (`model_config`, `ConfigDict`). V1 patterns (`class Config`, `max_items`) are not used.
 - **DLP tracking**: Every persistent operation carries a `context_tag` and generates a SHA-256 symbolic hash for audit trail continuity.
 - **Async throughout**: All I/O-bound operations use `async def`. Blocking calls are isolated.
+
+---
+
+## Canon authority and provenance
+
+CloudBank is self-contained for application startup, but it is not the sole
+authority for Aurora canon.
+
+```text
+AUo959/CanonRec (authority)
+  -> Aurora root canon_sync.py + integration CI
+    -> CloudBank config/canonical_validation.yaml and managed persona memories
+      -> runtime consistency gates
+```
+
+The current canonical-validation mirror is tied to CanonRec revision
+`c1f25e57a99ed98f8df6ed8eb2a93ba94bd2aa14`; its source and destination
+SHA-256 are recorded in [`config/canon_provenance.json`](./config/canon_provenance.json).
+`tests/test_canon_provenance.py` fails if the checked-in mirror changes without
+an accompanying provenance update.
+
+A CanonRec checkout is therefore:
+
+- **not required** to start the base FastAPI application from this repository;
+- **required** to review or change authoritative canon;
+- **required** by the Aurora root's complete L1 integration/simulation suite.
+
+The CanonRec and CloudBank staff registries currently differ and are not yet a
+managed sync payload. Neither should be described as the sole machine-readable
+staff SSOT until that authority decision is reconciled. See
+[`docs/CANON_PROVENANCE.md`](./docs/CANON_PROVENANCE.md).
 
 ---
 
@@ -147,7 +207,7 @@ All modules follow a consistent layout: `__init__.py`, `core.py`, `api.py`, `mod
 
 ## API
 
-The server exposes ~339 HTTP routes across 30+ routers. All routes return JSON.
+The server exposes 290 operations across 282 paths and 30 tags with core requirements and the four required secrets set; 302 across 294 with a full `.env` and optional extras installed. Route registration skips modules whose optional dependencies are absent, so the count varies with your configuration. All routes return JSON.
 
 **Access the interactive docs:**
 
@@ -159,14 +219,30 @@ The server exposes ~339 HTTP routes across 30+ routers. All routes return JSON.
 
 | Group | Prefix | Description |
 |---|---|---|
-| AuMemManager | `/aumem/` | Memory CRUD, semantic retrieval, quantum vector creation, metrics |
-| Quantum Simulator | `/api/quantum/` | Scenario execution, backend selection, result retrieval |
-| Synergy | `/api/synergy/` | Component registry, dependency graph, health |
-| Monitoring | `/api/monitoring/` | Drift alerts, ethics compliance, audit logs |
-| R2 Telemetry | `/api/telemetry/` | Trace export, Prometheus metrics |
-| Auth | `/api/auth/` | JWT token issuance and refresh |
-| GUMAS | `/api/gumas/` | Ethics alignment enforcement |
+| AuMemManager | `/memory/` | Memory CRUD, semantic retrieval, quantum vector creation, metrics |
+| Quantum Simulator | `/simulate/` | Scenario execution, backend selection, result retrieval, forecasting |
+| Synergy | `/synergy/` | Component registry, dependency graph, health |
+| Monitoring | `/monitoring/` | Drift alerts, baselines, behavioural checks |
+| Insight Ledger | `/ledger/` | Audit entries, chain verification, export |
+| R2 Telemetry | `/r2-telemetry/` | Trace export, Prometheus metrics |
+| GUMAS | `/gumas/` | Ethics alignment enforcement |
 | Sensors | `/api/sensors/` | System sensor array |
+| Subroutines | `/subroutines/` | Registration and sandboxed execution |
+
+**State-changing requests need a CSRF token.** Fetch one from
+`GET /api/csrf-token` and send it back as the `X-CSRF-Token` header:
+
+```bash
+TOKEN=$(curl -s localhost:8000/api/csrf-token | jq -r .csrf_token)
+curl -X POST localhost:8000/memory/create \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: $TOKEN" -H "Authorization: Bearer $TOKEN" \
+  -d '{"content":"hello","memory_type":"agent","owner":"you"}'
+```
+
+The `/api/auth/` router registers only when authentication users are
+configured (`AURORA_AUTH_USERS_JSON` or `AURORA_AUTH_USERS_FILE`); a default
+local run starts without it and logs the reason.
 
 **CloudHub GUI routes:**
 
@@ -175,6 +251,22 @@ The server exposes ~339 HTTP routes across 30+ routers. All routes return JSON.
 - `/legacy/vsa` — Retired Quantum VSA playground notice
 
 See [`docs/reference/API_CATALOG.md`](docs/reference/API_CATALOG.md) for the full route listing.
+
+### MCP connector
+
+Aurora's live state is also exposed over the [Model Context Protocol](https://modelcontextprotocol.io),
+so any MCP-capable host (Claude Desktop, Claude Code, and others) can read it
+directly. Five read-only tools: `aurora_get_state`, `aurora_get_agents`,
+`aurora_get_drift`, `aurora_get_ethics_log`, `aurora_get_capsules`.
+
+```bash
+pip install -r requirements-optional.txt   # provides the mcp SDK
+python -m connector.server                 # stdio transport
+```
+
+Elevated operations are gated behind an HMAC-signed, expiring Pilot seal.
+Setup, transport options, and a ready `claude_desktop_config.json` block are in
+[`connector/README.md`](connector/README.md).
 
 ---
 
@@ -188,6 +280,7 @@ Copy `.env.example` to `.env` and set the required values:
 | `JWT_SECRET_KEY` | Yes | 64-hex JWT signing key |
 | `CSRF_SECRET_KEY` | Yes | 64-hex CSRF HMAC key |
 | `WS_AUTH_SECRET` | Yes | 64-hex WebSocket token HMAC key |
+| `MONITORING_SIGNING_KEY` | For monitoring routes | HMAC key for the monitoring audit chain; without it the monitoring dashboard router is skipped |
 | `ALLOWED_CORS_ORIGINS` | No | Comma-separated allowed origins (default: localhost) |
 | `RATE_LIMIT_ENABLED` | No | Enable rate limiting (default: `true`) |
 | `REDIS_URL` | No | Redis URL for distributed rate limiting |

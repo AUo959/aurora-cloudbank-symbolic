@@ -17,47 +17,47 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
-    
+
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
-    
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38  # v5.4.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Cache pip dependencies
-      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements*.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-${{ matrix.python-version }}-
-    
+
     - name: Create virtual environment
       run: |
         python -m venv .venv
         source .venv/bin/activate
         pip install --upgrade pip wheel setuptools
-    
-    - name: Test dependency resolution (dry run)
+
+    - name: Test dependency resolution (informational)
       continue-on-error: true
       run: |
         source .venv/bin/activate
         echo "🧪 Testing dependency resolution..."
-        pip install -r requirements.txt --dry-run || echo "⚠️ Dependency resolution check failed (non-blocking)"
+        pip install -r requirements.txt --dry-run
 
     - name: Install dependencies
       run: |
         source .venv/bin/activate
         pip install -r requirements.txt
-    
+
     - name: Validate dependency compatibility
       run: |
         source .venv/bin/activate
         echo "🔍 Checking for dependency conflicts..."
         pip check
-    
+
     - name: Run Aurora dependency validator
       run: |
         source .venv/bin/activate
@@ -66,7 +66,7 @@ jobs:
         else
           echo "⚠️ Dependency validator not found, skipping Aurora-specific validation"
         fi
-    
+
     - name: Run Aurora dependency conflict detector
       run: |
         source .venv/bin/activate
@@ -76,13 +76,13 @@ jobs:
         else
           echo "⚠️ Conflict detector not found, skipping conflict detection"
         fi
-    
+
     - name: Test critical imports
       run: |
         source .venv/bin/activate
         echo "🔍 Testing critical imports..."
         python -c "import fastapi, httpx, httpcore, h11; print('✅ All imports successful')"
-    
+
     - name: Upload dependency report
       if: always()
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
@@ -94,14 +94,15 @@ jobs:
           .backup/requirements/dependency_report_*.json
           .venv/lib/python*/site-packages/*/METADATA
         retention-days: 7
-    
-    - name: Dependency security check
+
+    - name: Dependency security check (non-blocking)
+      continue-on-error: true
       run: |
         source .venv/bin/activate
         pip install safety bandit
         echo "🔒 Running security checks..."
-        safety check --json --output safety-report.json || echo "⚠️ Safety check found vulnerabilities (see security-report artifact)"
-        
+        safety check --json --output safety-report.json
+
     - name: Upload security report
       if: always()
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1

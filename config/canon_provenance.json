@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "authority": {
+    "repository": "https://github.com/AUo959/CanonRec",
+    "revision": "c1f25e57a99ed98f8df6ed8eb2a93ba94bd2aa14",
+    "source_path": "canon/L3/canonical_validation.yaml",
+    "source_sha256": "c0604d68b3d2a0e8d35336caa4e8275ca0d19409a43f23d6f65e43dbf04c7cd6"
+  },
+  "cloudbank_mirror": {
+    "path": "config/canonical_validation.yaml",
+    "sha256": "c0604d68b3d2a0e8d35336caa4e8275ca0d19409a43f23d6f65e43dbf04c7cd6",
+    "requires_canonrec_checkout_at_runtime": false
+  },
+  "propagation": {
+    "control_plane_repository": "AUo959/Aurora_ORIONCORE_Directory_Main",
+    "command": "python3 tools/canon_sync.py --check",
+    "verified_at": "2026-07-29"
+  },
+  "unreconciled_surfaces": [
+    {
+      "name": "orion_station_staff_registry",
+      "status": "owner_authority_decision_required",
+      "canonrec_path": "canon/L1/station/ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
+      "canonrec_sha256": "4cc8bf4f808f68e1c4e3e505d32c15bf7c92959fd09a9d419e6c6254e848542d",
+      "cloudbank_path": "ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
+      "cloudbank_sha256": "0a5c6eff0ab8f45a07257e8e99e4f96fdd4e94b7253be9210d2275f4969348ca"
+    }
+  ]
+}

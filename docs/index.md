@@ -15,7 +15,7 @@ This directory contains reference documentation for developers working with Auro
 | [`reference/`](reference/) | Convenience catalogs and reference guides | Verify generated or snapshot material against its governed source before citing it as current. |
 | [`security/`](security/) | Remediation records, status reports, and penetration-test scope/history | Root [`SECURITY.md`](../SECURITY.md) governs disclosure policy; current controls require code and test evidence. |
 | [`review-notes/`](review-notes/) | Dated review and audit evidence | Non-canonical observations; revalidate findings against live repository state. |
-| [`archive/`](archive/) | Superseded, historical, or custody material | Historical context only; archive placement does not confer current authority. |
+| [`archive/`](archive/) | Superseded, historical, or custody material — including the [design philosophy suite](#design-philosophy) | Historical context only; archive placement does not confer current authority. |
 
 ## Root structural controls
 
@@ -23,6 +23,16 @@ This directory contains reference documentation for developers working with Auro
 | --- | --- |
 | [`.pre-commit-config.yaml`](../.pre-commit-config.yaml) | The single canonical pre-commit configuration. `pre-commit` discovers this default filename, and repository scripts target it directly. |
 | `.rebuild_prevention_active` | An ignored, local timestamp receipt written in the script's current working directory (normally the repository root) by [`scripts/activate_rebuild_protection.sh`](../scripts/activate_rebuild_protection.sh). No build or runtime path consumes it as an enforcement lock; it is safe to delete and regenerate. |
+
+---
+
+## Canon authority and provenance
+
+| Document | Description |
+| --- | --- |
+| [CANON_PROVENANCE.md](CANON_PROVENANCE.md) | CanonRec authority revision, CloudBank mirror hash, runtime dependency boundary, and unreconciled staff-registry surface |
+| [`../CANON_INDEX.md`](../CANON_INDEX.md) | Topic-to-document authority routing inside CloudBank |
+| [`../config/canon_provenance.json`](../config/canon_provenance.json) | Machine-readable provenance receipt enforced by tests |
 
 ---
 
@@ -136,12 +146,45 @@ and `DOCUMENT_PACKAGE_ONLY`; links here do not implement runtime activation.
 | ----------------------------------------------------------------- | ---------------------------- |
 | [INCIDENT_RESPONSE_RUNBOOK.md](INCIDENT_RESPONSE_RUNBOOK.md)      | Incident response procedures |
 
+## Seeing it work
+
+[WALKTHROUGH.md](WALKTHROUGH.md) follows a single `POST /memory/create`
+through the middleware stack, both CSRF checks, the memory tier and the
+observability surface, with the real request/response at each step. Start
+here if you want to understand the runtime rather than the architecture.
+
+## Verifying claims
+
+[VERIFIED_CLAIMS.md](VERIFIED_CLAIMS.md) pairs each claim the project makes
+about itself with a runnable command and the result it produced, including
+the limits of what is implemented. Start here if you want to check rather
+than trust.
+
+## Design philosophy
+
+The suite below states the design intent the architecture derives from. It is
+**foundational, not current runtime canon**: it lives under `archive/` by the
+ruling in #1139, and archive placement does not confer present authority. Read it
+to understand *why* the system is shaped this way; read `architecture/` and the
+committed code plus tests for what it currently *does*.
+
+| Document | Description |
+| --- | --- |
+| [archive/philosophy/PHILOSOPHY.md](archive/philosophy/PHILOSOPHY.md) | Master index and the derivation chain linking all six documents to one root principle |
+| [archive/philosophy/01_EPISTEMIC_FOUNDATION.md](archive/philosophy/01_EPISTEMIC_FOUNDATION.md) | The Palantír argument — why unauditable reasoning is indistinguishable from guessing |
+| [archive/philosophy/02_SYMBOLIC_ARCHITECTURE.md](archive/philosophy/02_SYMBOLIC_ARCHITECTURE.md) | What Aurora is at the cognitive substrate level |
+| [archive/philosophy/03_CONSENT_AND_IDENTITY.md](archive/philosophy/03_CONSENT_AND_IDENTITY.md) | Consent gating and identity architecture |
+| [archive/philosophy/04_ETHICS_PROTOCOL.md](archive/philosophy/04_ETHICS_PROTOCOL.md) | Picard_Delta_3, drift monitoring, ethics enforcement — historical narrative; see [ethics/README.md](ethics/README.md) for current runtime evidence |
+| [archive/philosophy/05_GANDALF_STANDARD.md](archive/philosophy/05_GANDALF_STANDARD.md) | Constrained amplification; why only falsifiable claims count |
+| [archive/philosophy/06_SCOPE_AND_LIMITS.md](archive/philosophy/06_SCOPE_AND_LIMITS.md) | The no-master-node guarantee — what Aurora refuses to become |
+| [archive/philosophy/07_ANALYST_ORIENTATION.md](archive/philosophy/07_ANALYST_ORIENTATION.md) | Orientation for analysts consuming Aurora output |
+
 ---
 
 ## Not finding what you need?
 
-- See `docs/archive/` for historical internal reports, phase summaries, and session notes.
+- See `archive/` for historical internal reports, phase summaries, and session notes.
 - The interactive API docs are at `http://localhost:8000/docs` when the server is running.
-- `API_CATALOG.md` (root) has the full route listing.
+- [`reference/API_CATALOG.md`](reference/API_CATALOG.md) has the full route listing.
 - `CONTRIBUTING.md` (root) has the contribution guide.
 - `CLAUDE.md` (root) has AI assistant guidance for working with this codebase.

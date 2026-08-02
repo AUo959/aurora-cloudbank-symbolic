@@ -1,0 +1,88 @@
+---
+name: Cross-Platform Path Checks
+# Every other workflow is ubuntu-latest. That is why three path-handling bugs
+# reached main unchallenged: a "/tmp/" prefix test that never matched macOS's
+# /var/folders temp dir, a Windows drive-relative case, and a validator that
+# compared an unresolved caller path against a resolved root — the last of which
+# failed 11 tests and errored 25 more on macOS while staying green on Linux,
+# because /tmp needs no resolution there.
+#
+# This job runs the path- and security-sensitive tests on macOS and Windows.
+# It is deliberately narrow: the point is to catch platform assumptions early,
+# not to duplicate the full suite on three operating systems.
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'modules/insight_ledger/**'
+      - 'src/improvement/**'
+      - 'src/utils/**'
+      - 'tests/test_insight_ledger*.py'
+      - 'tests/test_improvement_api.py'
+      - 'tests/modules/test_insight_ledger_security.py'
+      - 'requirements-ci-hashed.txt'
+      - '.github/workflows/cross-platform-paths.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'modules/insight_ledger/**'
+      - 'src/improvement/**'
+      - 'src/utils/**'
+      - 'tests/test_insight_ledger*.py'
+      - 'tests/test_improvement_api.py'
+      - 'tests/modules/test_insight_ledger_security.py'
+      - 'requirements-ci-hashed.txt'
+      - '.github/workflows/cross-platform-paths.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paths:
+    name: "Path checks (${{ matrix.os }})"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: '3.12'
+
+      # A universal hash-complete lock keeps this security-sensitive matrix
+      # reproducible without executing source-distribution build hooks.
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: \
+            -r requirements-ci-hashed.txt
+
+      # `shell: bash` on every step below: the Windows default is PowerShell,
+      # which does not accept backslash line-continuations and reported the
+      # whole invocation as an unrecognised cmdlet. `python -m pytest` rather
+      # than bare `pytest` so the run does not depend on the console script
+      # landing on PATH, which differs between the runners.
+      #
+      # Fail closed: these are the surfaces where platform assumptions bite.
+      - name: Path, ledger and improvement tests
+        shell: bash
+        run: |
+          python -m pytest -q --tb=short \
+            tests/test_insight_ledger.py \
+            tests/test_insight_ledger_integration.py \
+            tests/modules/test_insight_ledger_security.py \
+            tests/test_improvement_api.py
+
+      - name: Security-marked tests
+        shell: bash
+        run: python -m pytest -q -m security --tb=short

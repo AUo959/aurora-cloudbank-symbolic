@@ -1,5 +1,23 @@
+# Dependabot configuration
+#
+# Nine ecosystem/directory entries previously ran ungrouped at a limit of five
+# each — up to 45 concurrent pull requests, one per dependency. In practice that
+# produced a standing backlog of ~23, which reads to any visitor as an
+# unmaintained repository regardless of how current the code actually is.
+#
+# Every entry below groups its updates, so a week's worth of bumps arrives as
+# one reviewable PR per ecosystem rather than one per package. Limits are low
+# because grouping makes them sufficient: if a limit is ever hit, that is a
+# signal the queue is not being reviewed, not a reason to raise it.
+#
+# Majors are deliberately separated from patch/minor on the larger ecosystems.
+# A grouped patch PR is usually safe to merge on green CI; a major needs
+# reading. Mixing them forces the whole group to move at the speed of its
+# riskiest member — which is how the previous backlog accumulated.
+
 version: 2
 updates:
+  # ── CI infrastructure ──────────────────────────────────────────────────
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -7,12 +25,13 @@ updates:
       day: "monday"
       time: "08:00"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2
     commit-message:
       prefix: "deps"
-    labels:
-      - "dependencies"
-      - "github-actions"
+    labels: ["dependencies", "github-actions"]
+    groups:
+      actions:
+        patterns: ["*"]
 
   - package-ecosystem: "pre-commit"
     directory: "/"
@@ -21,13 +40,15 @@ updates:
       day: "monday"
       time: "08:15"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2
     commit-message:
       prefix: "deps"
-    labels:
-      - "dependencies"
-      - "pre-commit"
+    labels: ["dependencies", "pre-commit"]
+    groups:
+      pre-commit:
+        patterns: ["*"]
 
+  # ── Python ─────────────────────────────────────────────────────────────
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
@@ -35,12 +56,17 @@ updates:
       day: "monday"
       time: "08:30"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     commit-message:
       prefix: "deps"
-    labels:
-      - "dependencies"
-      - "python"
+    labels: ["dependencies", "python"]
+    groups:
+      python-patch-minor:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      python-major:
+        patterns: ["*"]
+        update-types: ["major"]
 
   - package-ecosystem: "pip"
     directory: "/cli"
@@ -49,12 +75,13 @@ updates:
       day: "monday"
       time: "08:45"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2
     commit-message:
       prefix: "deps"
-    labels:
-      - "dependencies"
-      - "python"
+    labels: ["dependencies", "python"]
+    groups:
+      cli-python:
+        patterns: ["*"]
 
   - package-ecosystem: "pip"
     directory: "/sdk/python"
@@ -63,12 +90,13 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2
     commit-message:
       prefix: "deps"
-    labels:
-      - "dependencies"
-      - "python"
+    labels: ["dependencies", "python"]
+    groups:
+      sdk-python:
+        patterns: ["*"]
 
   - package-ecosystem: "pip"
     directory: "/services/nemo_service"
@@ -77,13 +105,15 @@ updates:
       day: "monday"
       time: "09:15"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2
     commit-message:
       prefix: "deps"
-    labels:
-      - "dependencies"
-      - "python"
+    labels: ["dependencies", "python", "service"]
+    groups:
+      nemo-service:
+        patterns: ["*"]
 
+  # ── JavaScript ─────────────────────────────────────────────────────────
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -91,11 +121,17 @@ updates:
       day: "monday"
       time: "09:30"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     commit-message:
       prefix: "deps"
-    labels:
-      - "dependencies"
+    labels: ["dependencies"]
+    groups:
+      npm-patch-minor:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      npm-major:
+        patterns: ["*"]
+        update-types: ["major"]
 
   - package-ecosystem: "npm"
     directory: "/frontend"
@@ -104,12 +140,17 @@ updates:
       day: "monday"
       time: "09:45"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     commit-message:
       prefix: "deps"
-    labels:
-      - "dependencies"
-      - "frontend"
+    labels: ["dependencies", "frontend"]
+    groups:
+      frontend-patch-minor:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      frontend-major:
+        patterns: ["*"]
+        update-types: ["major"]
 
   - package-ecosystem: "npm"
     directory: "/services/command_node"
@@ -118,9 +159,10 @@ updates:
       day: "monday"
       time: "10:00"
       timezone: "America/New_York"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2
     commit-message:
       prefix: "deps"
-    labels:
-      - "dependencies"
-      - "service"
+    labels: ["dependencies", "service"]
+    groups:
+      command-node:
+        patterns: ["*"]

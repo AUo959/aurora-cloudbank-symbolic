@@ -68,7 +68,7 @@ No `networkx` dependency — trust graph uses adjacency dicts.
 ## Related Documents
 
 - [QGIA L1 Node Registration](../../docs/architecture/QGIA_L1_NODE_REGISTRATION.md)
-- [Analyst Orientation Guide](../../docs/philosophy/07_ANALYST_ORIENTATION.md)
+- [Analyst Orientation Guide](../../docs/archive/philosophy/07_ANALYST_ORIENTATION.md)
 - [QGIA Canon Staff Registry](../../docs/architecture/QGIA_CANON_STAFF_REGISTRY.md)
 
 ## Parameter Reference

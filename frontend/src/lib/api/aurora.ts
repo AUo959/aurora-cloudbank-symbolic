@@ -63,9 +63,11 @@ export const auroraAPI = {
     chat: (message: AgentMessage) =>
       apiClient.post<AgentResponse>('/api/agent/chat', message),
 
-    stream: (message: AgentMessage) =>
-      // For streaming, we'll use EventSource in a separate hook
-      `/api/agent/stream`,
+    // Returns the endpoint only; the caller opens an EventSource against it.
+    // The message is not sent from here, so the parameter is deliberately
+    // unused and underscore-prefixed to say so — it keeps the signature
+    // symmetrical with chat() above for callers that pass the same object.
+    stream: (_message: AgentMessage) => `/api/agent/stream`,
   },
 
   // ===== Compliance =====

@@ -33,29 +33,38 @@ def test_pre_rebuild_mode_succeeds_without_venv():
 
 
 @pytest.mark.unit
-def test_regular_mode_succeeds_without_venv():
-    """Test that regular validation mode handles missing venv gracefully."""
+def test_regular_mode_reports_interpreter_choice_either_way():
+    """Regular validation exits 0 and says which interpreter it picked.
+
+    This was named ``..._without_venv`` and its accepted-output list covered
+    only the venv-missing branch. The script's environment check has exactly
+    two outcomes — "Using virtual environment Python" when .venv/bin/python
+    exists, "Using system Python (venv not available)" otherwise — so on any
+    machine that does have a venv (developers, and CI after it builds one) the
+    script printed the first message and the test failed, despite the script
+    behaving correctly.
+
+    The property that actually holds in both environments is the one asserted
+    here: the run succeeds and states which interpreter it used.
+    """
     script_path = Path(__file__).parent.parent / "scripts" / "prevent_rebuild_failures.py"
-    
+
     result = subprocess.run(
         [sys.executable, str(script_path)],
         capture_output=True,
         text=True,
         timeout=30
     )
-    
+
     # Should succeed (exit code 0)
     assert result.returncode == 0, f"Script failed with: {result.stderr}"
-    
-    # Should skip dependency check when venv is missing
+
+    # Should report which interpreter the environment check selected.
     output = result.stdout + result.stderr
     assert (
-        "Virtual environment not found" in output
-        or "Dependencies OK" in output
+        "Using virtual environment Python" in output
         or "Using system Python" in output
-        or "skipping dependency" in output.lower()
-        or "requirements-lock.txt not found" in output
-    )
+    ), f"No interpreter-selection line in output:\n{output}"
     
     # Should complete successfully
     assert "Aurora CloudBank rebuild protection is active!" in result.stdout

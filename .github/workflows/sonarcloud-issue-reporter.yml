@@ -25,45 +25,6 @@ jobs:
         run: |
           echo "number=${{ github.event.check_run.pull_requests[0].number }}" >> $GITHUB_OUTPUT
 
-      - name: Fetch SonarCloud violations
-        id: sonar
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          PR_NUMBER: ${{ steps.pr.outputs.number }}
-          PROJECT_KEY: AUo959_aurora-cloudbank-symbolic
-        run: |
-          RESPONSE=$(curl -sf -u "${SONAR_TOKEN}:" \
-            "https://sonarcloud.io/api/issues/search?componentKeys=${PROJECT_KEY}&pullRequest=${PR_NUMBER}&types=BUG,VULNERABILITY&resolved=false&severities=BLOCKER,CRITICAL,MAJOR&ps=50" \
-            2>/dev/null || echo '{"issues":[]}')
-
-          python3 - <<'PYEOF'
-          import json, os, sys
-
-          data = json.loads(os.environ.get('SONAR_RESPONSE', '{}'))
-          issues = data.get('issues', [])
-
-          if not issues:
-              body = '### ✅ SonarCloud: No open BUG/VULNERABILITY issues in new code\n'
-              body += '_The quality gate failure may be caused by a rating threshold rather than individual issues._'
-          else:
-              lines = [f'### ⚠️ SonarCloud Violations ({len(issues)} open)', '']
-              for iss in issues:
-                  component = iss.get('component', '').split(':')[-1]
-                  line = iss.get('line', '?')
-                  rule = iss.get('rule', '')
-                  severity = iss.get('severity', '')
-                  msg = iss.get('message', '')
-                  lines.append(f'- **{severity}** `{component}` line {line} `[{rule}]` {msg}')
-              body = '\n'.join(lines)
-
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write('body<<BODYEOF\n')
-              f.write(body + '\n')
-              f.write('BODYEOF\n')
-          PYEOF
-        env:
-          SONAR_RESPONSE: ${{ steps.sonar.outputs.response }}
-
       - name: Fetch SonarCloud violations (curl + python)
         id: fetch
         env:
@@ -75,37 +36,43 @@ jobs:
             "https://sonarcloud.io/api/issues/search?componentKeys=${PROJECT_KEY}&pullRequest=${PR_NUMBER}&types=BUG,VULNERABILITY&resolved=false&severities=BLOCKER,CRITICAL,MAJOR&ps=50" \
             || echo '{"issues":[]}')
 
-          BODY=$(echo "$RESPONSE" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-issues = data.get('issues', [])
-if not issues:
-    print('### SonarCloud: No open BUG/VULNERABILITY issues returned')
-    print('')
-    print('The quality gate may be failing on a rating metric rather than a specific issue.')
-    print('Check the SonarCloud dashboard directly for details.')
-else:
-    print(f'### ⚠️ SonarCloud Violations ({len(issues)} open)')
-    print('')
-    for iss in issues:
-        component = iss.get('component', '').split(':')[-1]
-        line = iss.get('line', '?')
-        rule = iss.get('rule', '')
-        severity = iss.get('severity', '')
-        msg = iss.get('message', '')
-        print(f'- **{severity}** \`{component}\` line {line} \`[{rule}]\` {msg}')
-")
+          SONAR_RESPONSE="$RESPONSE" python3 <<'PYEOF'
+          import json
+          import os
 
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$BODY" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          data = json.loads(os.environ["SONAR_RESPONSE"])
+          issues = data.get("issues", [])
+          if not issues:
+              lines = [
+                  "### SonarCloud: No open BUG/VULNERABILITY issues returned",
+                  "",
+                  "The quality gate may be failing on a rating metric rather than a specific issue.",
+                  "Check the SonarCloud dashboard directly for details.",
+              ]
+          else:
+              lines = [f"### ⚠️ SonarCloud Violations ({len(issues)} open)", ""]
+              for issue in issues:
+                  component = issue.get("component", "").split(":")[-1]
+                  line = issue.get("line", "?")
+                  rule = issue.get("rule", "")
+                  severity = issue.get("severity", "")
+                  message = issue.get("message", "")
+                  lines.append(f"- **{severity}** `{component}` line {line} `[{rule}]` {message}")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write("body<<EOF\n")
+              output.write("\n".join(lines) + "\n")
+              output.write("EOF\n")
+          PYEOF
 
       - name: Post violations comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
+        env:
+          SONAR_REPORT_BODY: ${{ steps.fetch.outputs.body }}
         with:
           script: |
             const prNumber = parseInt('${{ steps.pr.outputs.number }}');
-            const body = `## 🔍 SonarCloud Violation Report\n\n${{ steps.fetch.outputs.body }}\n\n_Auto-fetched after quality gate failure. Fix these specific violations to get the gate to pass._`;
+            const body = `## 🔍 SonarCloud Violation Report\n\n${process.env.SONAR_REPORT_BODY}\n\n_Auto-fetched after quality gate failure. Fix these specific violations to get the gate to pass._`;
 
             // Delete previous reports from this workflow to avoid clutter
             const comments = await github.rest.issues.listComments({

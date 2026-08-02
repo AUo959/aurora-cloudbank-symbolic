@@ -1,7 +1,8 @@
 # Aurora Cloudbank MCP Connector
 
-> Version: 0.1.0 (scaffold)  
+> Version: 0.1.0  
 > Status: ✅ v0.1.0 — all five read-only tools wired to live Aurora API endpoints  
+> Install: `pip install -r requirements-optional.txt` (provides the `mcp` SDK)  
 > Protocol: [Model Context Protocol (MCP)](https://modelcontextprotocol.io)  
 > Transport: stdio (default) | SSE (HTTP streaming)
 

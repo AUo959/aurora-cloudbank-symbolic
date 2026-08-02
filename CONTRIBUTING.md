@@ -1,47 +1,34 @@
-# Contributing to Aurora CloudBank Symbolic# Contributing to Aurora Reflective Autonomy System
+# Contributing to Aurora CloudBank Symbolic
 
-Thank you for your interest in contributing to Aurora! This guide will help you get started and understand our development workflow.Thank you for your interest in contributing!
+Thank you for your interest in contributing to Aurora! This guide will help you
+get started and understand our development workflow.
 
-## 🚀 Quick Start## How to Contribute
+## 🚀 Quick Start
 
-### Prerequisites- Fork the repository
+### Prerequisites
 
-- **Python 3.11+** (3.12 recommended)- Create a new branch for your feature or fix
-
-- **Git** with GPG signing configured (optional but recommended)- Write clear, well-documented code
-
-- **VS Code** with Dev Containers extension (recommended for consistent environment)- Add or update tests as needed
-
-- Submit a pull request with a clear description
+- **Python 3.11+** (3.12 recommended)
+- **Git** with GPG signing configured (optional but recommended)
+- **VS Code** with Dev Containers extension (recommended for a consistent environment)
 
 ### Setup
 
-## Code Style
-
 1. **Fork and clone the repository**
-
-   ```bash- Follow PEP8 for Python code
-
-   git clone https://github.com/YOUR_USERNAME/aurora-cloudbank-symbolic.git- Use descriptive commit messages
-
-   cd aurora-cloudbank-symbolic
-
-   ```## Reporting Issues
-
-
-
-2. **Install dependencies**- Use GitHub Issues to report bugs or request features
-
    ```bash
+   git clone https://github.com/YOUR_USERNAME/aurora-cloudbank-symbolic.git
+   cd aurora-cloudbank-symbolic
+   ```
 
-   # Option A: Dev Container (recommended)## Code of Conduct
-
+2. **Install dependencies**
+   ```bash
+   # Option A: Dev Container (recommended)
    # Open in VS Code and select "Reopen in Container"
 
-   - Be respectful and collaborative
-
    # Option B: Local setup
-   pip3 install -r requirements.txt
+   pip install -r requirements.txt
+
+   # Optional extras (quantum backends, MCP connector, telemetry)
+   pip install -r requirements-optional.txt
    ```
 
 3. **Verify setup**
@@ -232,14 +219,14 @@ pytest -m field_state             # Field state tests only
 
 ### Manual Testing
 ```bash
-# Start Aurora API server
-python aurora_api.py
+# Start the Aurora API server
+make serve-dev            # or: python api/aurora_api.py
 
-# Run CLI
-python aurora_cli.py --help
+# Run the live 4-step onboarding demo against it (second terminal)
+make demo
 
-# Test specific module
-python -c "from modules.field_state_manager import FieldStateManager; print('✅ Import success')"
+# Test a specific module imports cleanly
+python -c "from modules.field_state_manager.field_state_manager import FieldStateManager; print('✅ Import success')"
 ```
 
 ## 📚 Documentation
@@ -255,7 +242,7 @@ python -c "from modules.field_state_manager import FieldStateManager; print('✅
 - `README.md` - Overview and quick start
 - `CONTRIBUTING.md` - This file
 - `docs/LOCAL_TESTING_GUIDE.md` - Testing workflow
-- `docs/CI_WORKFLOW_FIX.md` - CI strategy
+- `docs/archive/CI_WORKFLOW_FIX.md` - CI strategy
 - `ops/work_queue/README.md` - Work queue authority model and `aurora(queue):` convention
 
 ## 🎯 Aurora-Specific Guidelines
@@ -348,7 +335,7 @@ Contributors are recognized in several ways:
 
 - [Geometric Ethics Architecture](docs/GEOMETRIC_ETHICS_ARCHITECTURE.md)
 - [Local Testing Guide](docs/LOCAL_TESTING_GUIDE.md)
-- [CI Workflow Strategy](docs/CI_WORKFLOW_FIX.md)
+- [CI Workflow Strategy](docs/archive/CI_WORKFLOW_FIX.md)
 - [Aurora Documentation](https://auo959.github.io/aurora-cloudbank-symbolic)
 - [Work Queue Guide](ops/work_queue/QUEUE_GUIDE.md)
 

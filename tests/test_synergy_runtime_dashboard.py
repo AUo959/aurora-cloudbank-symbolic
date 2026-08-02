@@ -124,8 +124,16 @@ def test_runtime_health_degraded_when_route_missing():
 @pytest.mark.synergy
 def test_runtime_health_uses_r2_telemetry_when_available():
     """When R2 telemetry reports a success_rate, health score is derived from it."""
-    mock_r2 = MagicMock()
-    mock_r2.get_metrics_summary.return_value = {"total_operations": 10, "success_rate": 1.0}
+    # get_r2_telemetry is a factory: _runtime_health calls it and then calls
+    # get_metrics_summary() on what it returns. The summary therefore has to be
+    # configured on .return_value — hanging it off the factory mock itself left
+    # summary as a bare MagicMock, so success_rate was a MagicMock rather than
+    # None and the score arithmetic produced a MagicMock instead of a float.
+    mock_get_r2 = MagicMock()
+    mock_get_r2.return_value.get_metrics_summary.return_value = {
+        "total_operations": 10,
+        "success_rate": 1.0,
+    }
 
     with (
         patch(
@@ -136,28 +144,41 @@ def test_runtime_health_uses_r2_telemetry_when_available():
             "src.synergy.dashboard_api._get_app_route_paths",
             return_value={"/aumem/memory/create"},
         ),
-        patch("src.synergy.dashboard_api.get_r2_telemetry" if hasattr(
-            __import__("src.synergy.dashboard_api", fromlist=["get_r2_telemetry"]),
-            "get_r2_telemetry",
-        ) else "src.observability.get_r2_telemetry", mock_r2, create=True),
+        # _runtime_health imports get_r2_telemetry inside the function body, so
+        # the patch has to land on the source module, not on dashboard_api.
+        patch("src.observability.get_r2_telemetry", mock_get_r2),
     ):
-        # Direct test: success_rate=1.0 → score = 70 + 1.0*30 = 100
         result = _runtime_health("aumemmanager")
-        # May fall through to static if patching the nested import is tricky;
-        # just assert it's a valid score and status is active or unknown.
-        assert 0.0 <= result["score"] <= 100.0
+
+    # success_rate=1.0 → score = 70 + 1.0*30 = 100
+    assert result["score"] == 100.0
+    assert result["source"] == "runtime_telemetry"
+    assert result["status"] == "active"
 
 
 @pytest.mark.unit
 @pytest.mark.synergy
 def test_runtime_health_falls_back_to_static_when_all_signals_absent():
     """With no module map entry, no R2 telemetry, score comes from static fallback."""
-    # Use a component_id not in _COMPONENT_MODULE_MAP or _COMPONENT_ROUTE_PREFIX_MAP
-    with patch("src.synergy.dashboard_api._COMPONENT_MODULE_MAP", {}):
-        with patch("src.synergy.dashboard_api._COMPONENT_ROUTE_PREFIX_MAP", {}):
-            result = _runtime_health("aumemmanager")
+    # Emptying the two maps only silences signals 1 and 2. Signal 3 (telemetry)
+    # still ran against the real R-2 collector, which reports a success_rate
+    # even in fallback mode — so this returned "runtime_telemetry" and never
+    # reached the static branch the test is named for. Silence signal 3 too, by
+    # returning a summary with no success_rate in it.
+    mock_get_r2 = MagicMock()
+    mock_get_r2.return_value.get_metrics_summary.return_value = {"total_operations": 0}
+
+    with (
+        patch("src.synergy.dashboard_api._COMPONENT_MODULE_MAP", {}),
+        patch("src.synergy.dashboard_api._COMPONENT_ROUTE_PREFIX_MAP", {}),
+        patch("src.observability.get_r2_telemetry", mock_get_r2),
+    ):
+        result = _runtime_health("aumemmanager")
+
     # Should hit static fallback; source tag must be "static"
     assert result["source"] == "static"
+    assert result["status"] == "unknown"
+    assert result["score"] == 95.0
 
 
 # ── API endpoints ─────────────────────────────────────────────────────────────

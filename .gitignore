@@ -7,26 +7,36 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+# Anchored to the repository root. These come from the standard Python
+# template, where they are meant to catch build output beside setup.py — but
+# as bare patterns they match at any depth, and `lib/` was shadowing
+# frontend/src/lib/, which is real TypeScript source. Keep the leading slash.
 .Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
+/env/
+/build/
+/develop-eggs/
+/dist/
+/downloads/
+/eggs/
+/.eggs/
+/lib/
+/lib64/
+/parts/
+/sdist/
+/var/
 *.egg-info/
 .installed.cfg
 *.egg
 
 # Logs and data
 logs/
-data/
+# Runtime data at the repo root. data/hr/ holds committed seed data, so it is
+# negated back in — a directory rule needs the directory itself unignored
+# before files inside it can be.
+# Exclude the *contents*, not the directory itself: git will not descend into
+# an excluded directory, so a negation inside one can never re-include.
+/data/*
+!/data/hr/
 monitoring_data/
 .monitoring/
 *.log
@@ -37,11 +47,14 @@ monitoring_data/
 
 # Security and temporary files
 security_scan_report.json
-test_security_fixes.py
 /tmp/
 .security_temp/
 .security/scan_log.json
+# Private key material only. Public keys are deliberately tracked so that
+# signatures can be verified from a clean clone.
 .security/keys/*.asc
+!.security/keys/*public*.asc
+!.security/keys/*pubkey*.asc
 
 # Unit test / coverage reports
 htmlcov/
@@ -67,8 +80,12 @@ coverage.xml
 
 # Environment variables
 .env
-!.env.example
 .env.*
+# Templates are deliberately tracked. Negations must follow the broad rule
+# above to take effect, and must cover nested copies (frontend/.env.example).
+!.env.example
+!**/.env.example
+!.env.secure.template
 
 # System files
 Thumbs.db
@@ -115,13 +132,14 @@ keyring/
 .gitwiz/*.tmp
 .gitwiz/*.lock
 
-# Automation audit reports (local analysis)
-automation_audit_report.json
+# Automation audit reports (local analysis, generated at root)
+/automation_audit_report.json
 
-# SSMT maintenance scheduler local state
-weekly_schedule.json
-ssmt_maintenance_config.json
-maintenance_report_*.json
+# SSMT maintenance scheduler local state (generated at root).
+# Anchored so the committed reference copies under config/ stay visible.
+/weekly_schedule.json
+/ssmt_maintenance_config.json
+/maintenance_report_*.json
 
 # Node.js dependencies and artifacts
 node_modules/
@@ -293,3 +311,18 @@ runtime/mesh/transcripts/*.jsonl
 # Claude Code internal directory
 .claude/
 shutdown_manifest.json
+
+# Regenerated wholesale by tools/workflow/workflow_consolidation_implementor.py,
+# which rmtree()s the directory before each run — committed contents are
+# meaningless to it.
+.github/workflows_backup/
+
+# git-lfs writes its own hooks into whatever core.hookspath points at, which
+# here is .husky/. They appear the moment anyone with git-lfs installed runs a
+# git command, so without this a fresh clone reports four untracked files that
+# nobody authored. Only the generated LFS hooks are listed — .husky/pre-commit
+# is a real project hook and stays tracked.
+.husky/post-checkout
+.husky/post-commit
+.husky/post-merge
+.husky/pre-push

@@ -289,12 +289,19 @@ def test_monitoring_system_concurrent_persist_consistent_state(tmp_path, monkeyp
 
 
 @pytest.mark.unit
-def test_insight_ledger_already_has_write_lock():
+def test_insight_ledger_already_has_write_lock(tmp_path, monkeypatch):
     """InsightLedger._lock must be a threading.Lock (regression guard)."""
     import threading
     from modules.insight_ledger.ledger_core import InsightLedger
 
-    ledger = InsightLedger(storage_path="/tmp/test_lock_ledger_regression")
+    # Was a hardcoded "/tmp/test_lock_ledger_regression", which only worked
+    # because validate_safe_path exempted anything under a temp directory from
+    # its containment check. That exemption is gone, so point the ledger root at
+    # a per-test directory instead — which also stops this test sharing on-disk
+    # state with every other run on the machine.
+    monkeypatch.setenv("AURORA_LEDGER_PATH", str(tmp_path))
+
+    ledger = InsightLedger(storage_path="test_lock_ledger_regression")
     assert hasattr(ledger, "_lock"), "InsightLedger must have a _lock attribute"
     assert isinstance(ledger._lock, type(threading.Lock())), (
         "InsightLedger._lock must be a threading.Lock instance"

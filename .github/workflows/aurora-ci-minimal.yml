@@ -46,10 +46,27 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: Install dependencies
+      # Hash-checked install. requirements-ci-hashed.txt is compiled from BOTH
+      # requirements.txt and requirements-test.txt, so it carries pytest and
+      # every transitive dependency with a sha256 — pip's hash-checking mode
+      # requires *every* package in the resolution to be hashed, which is why
+      # the older requirements-hashed.txt (application deps only) could not be
+      # used by a job that runs tests. See #1366, follow-up to #835.
+      #
+      # --only-binary=:all: is required alongside --require-hashes: an sdist
+      # would be built locally and its artifact hash could not be verified.
+      - name: Install dependencies (hash-checked)
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-test.txt
+          python -m pip install --require-hashes --only-binary=:all: \
+            -r requirements-ci-hashed.txt
+
+      # Blocking. The hash-checked install above installs ONLY what the lock
+      # names, so a requirement added to requirements.txt without regenerating
+      # the lock is silently absent and surfaces much later as an ImportError
+      # in an unrelated test. This names the missing package and the fix.
+      - name: Check hashed lock covers declared requirements
+        run: python scripts/check_hashed_lock_drift.py
 
       - name: Check requirements-lock.txt drift (informational)
         continue-on-error: true
@@ -143,10 +160,17 @@ jobs:
           fi
           echo "Critical tests done (exit $PYTEST_EXIT — treating as pass)"
 
-      # SUPPLY-CHAIN INTEGRITY CHECK - non-blocking, warns on hash mismatch
-      # Validates that every installed package matches a known-good SHA-256 hash.
-      # Regenerate requirements-hashed.txt with: bash scripts/generate_hashed_requirements.sh
-      - name: Validate package hashes (informational)
+      # Covers the *container* lock, which this job does not otherwise install.
+      #
+      # The CI dependency install above is now itself hash-checked, so it is
+      # the real supply-chain gate for this workflow. This step remains because
+      # requirements-hashed.txt is a different file, consumed by
+      # Dockerfile.opal2 — nothing else in CI would notice it going stale.
+      #
+      # Still advisory: it guards the container build, not this job, so failing
+      # the test workflow on it would report the breakage in the wrong place.
+      # Regenerate with: bash scripts/generate_hashed_requirements.sh
+      - name: Validate container lock hashes (advisory; covers Dockerfile.opal2)
         continue-on-error: true
         run: |
           if [ -f requirements-hashed.txt ]; then

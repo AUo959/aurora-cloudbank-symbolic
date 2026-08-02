@@ -80,7 +80,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-test.txt
+          # Hash-checked: requirements-ci-hashed.txt is compiled from both
+          # requirements.txt and requirements-test.txt (#1366).
+          python -m pip install --require-hashes --only-binary=:all: \
+            -r requirements-ci-hashed.txt
 
       - name: Python syntax check
         run: |

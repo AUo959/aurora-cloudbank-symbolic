@@ -60,6 +60,18 @@ updates:
     commit-message:
       prefix: "deps"
     labels: ["dependencies", "python"]
+    # pydantic-core is not an independently upgradable package: each pydantic
+    # release pins an EXACT pydantic-core build (pydantic 2.13.4 requires
+    # pydantic-core==2.46.4). Dependabot was proposing pydantic-core on its own,
+    # which is unsatisfiable -- no pydantic release pairs with it yet -- so the
+    # PR failed with ResolutionImpossible and simply re-rolled each week:
+    # #1390, then #1412, identical failure both times.
+    #
+    # Ignoring it here does not freeze it. It still moves whenever pydantic
+    # moves, because regenerating the lock resolves it transitively; it just
+    # stops being offered as a standalone bump.
+    ignore:
+      - dependency-name: "pydantic-core"
     groups:
       python-patch-minor:
         patterns: ["*"]

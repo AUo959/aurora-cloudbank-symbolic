@@ -11,7 +11,7 @@ machine-readable register. Created for #1133.
 ## Phases
 
 | Phase | Division / scope | Roster | Date | Records |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | 1 | Command & Ethics Division | 1.1 → 1.2 | 2025-11-09 | [narrative](CODEX_PHASE1_COMMAND_ETHICS_COMPLETE.md) · [register](CODEX_PHASE1_TECHNICAL_REGISTER.json) |
 | 2 | Systems & Infrastructure Division | 1.2 → 1.3 | 2025-11-09 | [narrative](CODEX_PHASE2_SYSTEMS_INFRASTRUCTURE_COMPLETE.md) · [register](CODEX_PHASE2_TECHNICAL_REGISTER.json) |
 | 3 | Simulation & Cognitive Systems Division | 1.3 → 1.4 | 2025-11-09 | [narrative](CODEX_PHASE3_SIMULATION_COGNITIVE_COMPLETE.md) · [register](CODEX_PHASE3_TECHNICAL_REGISTER.json) |
@@ -24,10 +24,10 @@ Phase 6 register marks `2.0 (COMPLETE)`.
 
 ## Related documents, with their real paths
 
-#1133 refers to two of these as if they sat in `simulation/`. They do not:
+Issue #1133 refers to two of these as if they sat in `simulation/`. They do not:
 
 | Document | Actual path |
-|---|---|
+| --- | --- |
 | Layer architecture | [`docs/architecture/LAYER_ARCHITECTURE.md`](../docs/architecture/LAYER_ARCHITECTURE.md) |
 | Simulation state / mission taxonomy | [`.aurora/SIMULATION_STATE.json`](../.aurora/SIMULATION_STATE.json) |
 | Canonical roster | [`L1_CANON_CHARACTER_ROSTER.md`](L1_CANON_CHARACTER_ROSTER.md) |

@@ -72,6 +72,18 @@ def test_roster_span_handles_every_register_shape() -> None:
 
 
 def test_render_is_deterministic() -> None:
-    """Two renders of the same input must match, or --check would flap."""
-    phases = load_phases()
-    assert render(phases) == render(phases)
+    """Two independent loads must render identically, or --check would flap.
+
+    Loading twice rather than rendering the same list twice: the earlier version
+    asserted `render(phases) == render(phases)`, which compares an expression to
+    itself and so could not detect non-determinism arising in `load_phases`
+    (glob ordering, dict construction). SonarCloud flagged it, correctly.
+    """
+    first = render(load_phases())
+    second = render(load_phases())
+    assert first == second
+
+
+def test_render_matches_the_committed_index() -> None:
+    """The renderer's output is what is actually on disk."""
+    assert render(load_phases()) == INDEX.read_text()

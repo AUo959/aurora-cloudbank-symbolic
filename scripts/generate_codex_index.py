@@ -39,9 +39,7 @@ def load_phases() -> List[Dict[str, Any]]:
         if number is None:
             m = re.search(r"PHASE(\d+)", path.name)
             number = int(m.group(1)) if m else 0
-        narrative = next(
-            (p for p in SIM_DIR.glob(f"CODEX_PHASE{number}_*_COMPLETE.md")), None
-        )
+        narrative = next(SIM_DIR.glob(f"CODEX_PHASE{number}_*_COMPLETE.md"), None)
         phases.append(
             {
                 "number": number,
@@ -56,93 +54,127 @@ def load_phases() -> List[Dict[str, Any]]:
     return sorted(phases, key=lambda p: p["number"])
 
 
+def _pair(source: Any, before: str, after: str) -> str | None:
+    """Return "X → Y" when *source* is a mapping carrying both keys."""
+    if isinstance(source, dict) and before in source and after in source:
+        return f"{source[before]} → {source[after]}"
+    return None
+
+
 def roster_span(data: Dict[str, Any]) -> str:
-    """Roster version movement, which the registers spell three different ways."""
+    """Roster version movement, which the registers spell three different ways.
+
+    Phases 1-2 use integration_status.roster_version_from/to, phase 3 uses
+    integration_status.roster_version_change, phases 4-5 use
+    roster_version.before/after. Missing a shape yields "—", which
+    test_roster_span_handles_every_register_shape treats as a failure.
+    """
     status = data.get("integration_status") or {}
-    for before, after in (
-        ("roster_version_from", "roster_version_to"),
-        ("before", "after"),
-    ):
-        src = status if before in status else data.get("roster_version")
-        if isinstance(src, dict) and before in src and after in src:
-            return f"{src[before]} → {src[after]}"
-    if "roster_version_change" in status:
-        return str(status["roster_version_change"]).replace(" → ", " → ")
     version = data.get("roster_version")
-    if isinstance(version, dict):
-        return f"{version.get('before', '?')} → {version.get('after', '?')}"
+
+    for source, before, after in (
+        (status, "roster_version_from", "roster_version_to"),
+        (version, "before", "after"),
+        (status, "before", "after"),
+    ):
+        found = _pair(source, before, after)
+        if found:
+            return found
+
+    if "roster_version_change" in status:
+        return str(status["roster_version_change"])
     return str(version) if version else "—"
 
 
-def render(phases: List[Dict[str, Any]]) -> str:
-    lines: List[str] = []
-    add = lines.append
-
-    add("# CODEX Phase Index")
-    add("")
-    add("<!-- GENERATED FILE — do not edit by hand.")
-    add("     Regenerate: python scripts/generate_codex_index.py")
-    add("     Source: simulation/CODEX_PHASE*_TECHNICAL_REGISTER.json -->")
-    add("")
-    add("Index of the CODEX character-integration phases. Each phase ships a pair:")
-    add("a `*_COMPLETE.md` narrative record and a `*_TECHNICAL_REGISTER.json`")
-    add("machine-readable register. Created for #1133.")
-    add("")
-    add("## Phases")
-    add("")
-    add("| Phase | Division / scope | Roster | Date | Records |")
-    add("|---|---|---|---|---|")
-    for p in phases:
-        records = f"[register]({p['register']})"
-        if p["narrative"]:
-            records = f"[narrative]({p['narrative']}) · " + records
-        add(
-            f"| {p['number']} | {p['name']} | {p['roster']} | "
-            f"{p['date'] or '—'} | {records} |"
+def _phase_table(phases: List[Dict[str, Any]]) -> List[str]:
+    rows = [
+        "## Phases",
+        "",
+        "| Phase | Division / scope | Roster | Date | Records |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for phase in phases:
+        records = f"[register]({phase['register']})"
+        if phase["narrative"]:
+            records = f"[narrative]({phase['narrative']}) · " + records
+        rows.append(
+            f"| {phase['number']} | {phase['name']} | {phase['roster']} | "
+            f"{phase['date'] or '—'} | {records} |"
         )
-    add("")
+    rows.append("")
 
     final = phases[-1]["status"] if phases else {}
     total = final.get("total_entities_in_roster")
     if total:
-        add(f"The roster reaches **{total} entities** at the final phase, which the")
-        add("Phase 6 register marks `2.0 (COMPLETE)`.")
-        add("")
+        rows += [
+            f"The roster reaches **{total} entities** at the final phase, which the",
+            "Phase 6 register marks `2.0 (COMPLETE)`.",
+            "",
+        ]
+    return rows
 
-    add("## Related documents, with their real paths")
-    add("")
-    add("#1133 refers to two of these as if they sat in `simulation/`. They do not:")
-    add("")
-    add("| Document | Actual path |")
-    add("|---|---|")
-    add("| Layer architecture | [`docs/architecture/LAYER_ARCHITECTURE.md`](../docs/architecture/LAYER_ARCHITECTURE.md) |")
-    add("| Simulation state / mission taxonomy | [`.aurora/SIMULATION_STATE.json`](../.aurora/SIMULATION_STATE.json) |")
-    add("| Canonical roster | [`L1_CANON_CHARACTER_ROSTER.md`](L1_CANON_CHARACTER_ROSTER.md) |")
-    add("| Crew manifest (generated) | [`.aurora/ORION_STATION_CREW_MANIFEST.md`](../.aurora/ORION_STATION_CREW_MANIFEST.md) |")
-    add("")
 
-    add("## Notes recorded while indexing")
-    add("")
-    add("These are observations from the registers themselves, not judgements about")
-    add("the work:")
-    add("")
-    add("- **QGIA postdates every phase.** The `QGIA_Integration/` package is not")
-    add("  accounted for in any phase register, so the phase sequence is not a")
-    add("  complete picture of the simulation layer's integrations.")
-    add("- **Phases 4 and 5 record `git_commit_status: \"Pending\"`** in their")
-    add("  registers, although both are committed. The field was never updated after")
-    add("  the commit landed; it reflects the state at authoring time, not now.")
-    add("- **Phases 4 and 5 both note a character-count discrepancy** (32 loaded vs")
-    add("  33 total human staff; 35 vs 36), attributed in-register to parsing rather")
-    add("  than to missing characters. Unresolved in both.")
-    add("- **Phase 6 has no `integration_date`** and no division summary; it records")
-    add("  L2/L3 systems rather than a staffed division.")
-    add("")
-    add("The Phase 6 terminology audit against `LAYER_ARCHITECTURE.md` that #1133")
-    add("also asks for is *not* done here — it is a canon-consistency review rather")
-    add("than an indexing task.")
-    add("")
-    return "\n".join(lines)
+def _related_documents() -> List[str]:
+    return [
+        "## Related documents, with their real paths",
+        "",
+        "Issue #1133 refers to two of these as if they sat in `simulation/`. They do not:",
+        "",
+        "| Document | Actual path |",
+        "| --- | --- |",
+        "| Layer architecture | [`docs/architecture/LAYER_ARCHITECTURE.md`]"
+        "(../docs/architecture/LAYER_ARCHITECTURE.md) |",
+        "| Simulation state / mission taxonomy | [`.aurora/SIMULATION_STATE.json`]"
+        "(../.aurora/SIMULATION_STATE.json) |",
+        "| Canonical roster | [`L1_CANON_CHARACTER_ROSTER.md`](L1_CANON_CHARACTER_ROSTER.md) |",
+        "| Crew manifest (generated) | [`.aurora/ORION_STATION_CREW_MANIFEST.md`]"
+        "(../.aurora/ORION_STATION_CREW_MANIFEST.md) |",
+        "",
+    ]
+
+
+def _indexing_notes() -> List[str]:
+    return [
+        "## Notes recorded while indexing",
+        "",
+        "These are observations from the registers themselves, not judgements about",
+        "the work:",
+        "",
+        "- **QGIA postdates every phase.** The `QGIA_Integration/` package is not",
+        "  accounted for in any phase register, so the phase sequence is not a",
+        "  complete picture of the simulation layer's integrations.",
+        '- **Phases 4 and 5 record `git_commit_status: "Pending"`** in their',
+        "  registers, although both are committed. The field was never updated after",
+        "  the commit landed; it reflects the state at authoring time, not now.",
+        "- **Phases 4 and 5 both note a character-count discrepancy** (32 loaded vs",
+        "  33 total human staff; 35 vs 36), attributed in-register to parsing rather",
+        "  than to missing characters. Unresolved in both.",
+        "- **Phase 6 has no `integration_date`** and no division summary; it records",
+        "  L2/L3 systems rather than a staffed division.",
+        "",
+        "The Phase 6 terminology audit against `LAYER_ARCHITECTURE.md` that #1133",
+        "also asks for is *not* done here — it is a canon-consistency review rather",
+        "than an indexing task.",
+        "",
+    ]
+
+
+def render(phases: List[Dict[str, Any]]) -> str:
+    header = [
+        "# CODEX Phase Index",
+        "",
+        "<!-- GENERATED FILE — do not edit by hand.",
+        "     Regenerate: python scripts/generate_codex_index.py",
+        "     Source: simulation/CODEX_PHASE*_TECHNICAL_REGISTER.json -->",
+        "",
+        "Index of the CODEX character-integration phases. Each phase ships a pair:",
+        "a `*_COMPLETE.md` narrative record and a `*_TECHNICAL_REGISTER.json`",
+        "machine-readable register. Created for #1133.",
+        "",
+    ]
+    return "\n".join(
+        header + _phase_table(phases) + _related_documents() + _indexing_notes()
+    )
 
 
 def main() -> int:

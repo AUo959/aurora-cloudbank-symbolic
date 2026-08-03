@@ -23,6 +23,16 @@ VERSION: 1.0
 DATE: 2025-11-09
 AUTHOR: Aurora-GUMAS Simulation Team
 VERIFIED BY: STARLING_AU (RELAY_004)
+
+STATUS (recorded 2026-08-02, #1132 / #1234): **duplicate pair, designation pending.**
+
+See the matching note in `triplex_handshake_simulation.py`. The two model the
+same event and differ in the drift figure they reproduce — Δ 0.000 here, +0.004
+in the sibling. Neither is imported by any module or test.
+
+Resolving this means deciding which drift figure is canonical for "The
+Reflection Event", which is a canon determination rather than a duplicate-file
+tidy-up. See #1132.
 """
 
 import logging

@@ -32,6 +32,21 @@ Author: Aurora-GUMAS Project Team
 Version: 1.0
 Date: 2025-11-09
 License: Project Internal
+
+STATUS (recorded 2026-08-02, #1132 / #1234): **duplicate pair, designation pending.**
+
+This file and `triplex_handshake_simulator.py` are two models of the same
+subject — the Triplex Handshake under "The Reflection Event" (Narrative Cycle
+01) — and their opening descriptions are near-identical. They differ in what
+they claim to reproduce: this one records a drift variance of +0.004 "observed
+in the event"; the sibling models drift held at Δ 0.000.
+
+Neither is imported by any module or test; both are standalone scripts. The
+sibling is referenced only from `.sprint_metrics/`, this one from
+`SIMULATION_STATUS_REPORT.md`.
+
+Because they encode *different* claims about the same canonical event, choosing
+between them is a canon question, not a cleanup. See #1132.
 """
 
 import random

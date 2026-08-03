@@ -25,13 +25,13 @@ python-multipart>=0.0.20,<1.0.0     # File upload handling
 httpx>=0.28.0,<1.0.0                # Async HTTP client (requires httpcore 1.x)
 httpcore>=1.0.0,<2.0.0              # HTTP core (requires h11 0.16.0+)
 h11>=0.16.0,<1.0.0                  # HTTP/1.1 implementation (security updates)
-websockets>=11.0.3,<17.0.0          # WebSocket support
+websockets>=17.0.1,<18.0.0          # WebSocket support
 aiofiles>=24.1.0,<26.0.0            # Async file operations
 
 # ===================================================================
 # SECURITY & CRYPTOGRAPHY
 # ===================================================================
-cryptography>=49.0.0,<50.0.0        # Cryptographic library (cap reviewed quarterly; bump for security releases)
+cryptography>=50.0.0,<51.0.0        # Cryptographic library (cap reviewed quarterly; bump for security releases)
 bcrypt>=4.1.2,<6.0.0                # Password hashing
 pyjwt>=2.10.0,<3.0.0                 # JWT tokens (migrated from python-jose)
 passlib[bcrypt]>=1.7.4,<2.0.0       # Password handling

@@ -13,6 +13,21 @@ Key Improvements from v1.0:
 - Phase 1 role integration
 
 Symbolic Tag: s.tag::sim.orion.v2
+
+STATUS (recorded 2026-08-02, #1132 / #1234): **successor by intent, not yet wired.**
+
+This file states it supersedes v1 ("Key Improvements from v1.0": canonical
+character loading from `L1_CANON_CHARACTER_ROSTER.md` instead of hardcoded
+profiles, 40+ roster support, collaboration bonuses).
+
+It is not, however, what the repository runs. `ORION_SIMULATION_PROTOCOL.md`
+documents v1, and `tests/test_orion_simulation.py` imports v1 at module scope
+while importing this file only inside a single test function via a `sys.path`
+insert — an optional path, not a dependency.
+
+So the supersession is documented but incomplete. #1132 asks which is canonical;
+until that is decided, both remain, and this note exists so the next reader is
+not misled by the "v2" name into assuming it is live.
 """
 
 from __future__ import annotations

@@ -45,7 +45,7 @@ azure-quantum>=1.0.0                # Azure Quantum workspace SDK
 cirq>=1.3.0                         # Required for Azure Quantum + other use cases
 
 # AWS Braket (Amazon)
-amazon-braket-sdk>=1.65.0           # AWS Braket SDK
+amazon-braket-sdk>=1.124.3           # AWS Braket SDK
 
 # ===================================================================
 # ADDITIONAL QUANTUM FRAMEWORKS (Optional)

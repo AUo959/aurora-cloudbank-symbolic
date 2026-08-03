@@ -35,19 +35,23 @@ Success criteria:
 
 Note: Keep stdlib only for portability.
 
-STATUS (recorded 2026-08-02, #1132 / #1234): **currently wired, designation pending.**
+STATUS (corrected 2026-08-03, #1132): **superseded by v2; wiring is stale.**
 
-This file is what the repository actually runs today:
-  - `ORION_SIMULATION_PROTOCOL.md` documents invoking it directly;
-  - `tests/test_orion_simulation.py` imports `OrionSimulation` from it at module
-    scope, so the suite fails without it;
-  - `simulation/interactive_collab_demo.py` uses it.
+An earlier note here said intent and wiring "disagree" and left the designation
+open. Git history settles it:
 
-But `orion_station_simulation_v2.py` describes itself as its successor
-("Key Improvements from v1.0"). Intent and wiring therefore disagree, and that
-disagreement is the open question in #1132 — not something to settle by
-deleting either file. Nothing here is deprecated until the owner designates a
-canonical implementation.
+  - `orion_station_simulation_v2.py` received a behavioural bug fix on
+    2026-06-12 (#1023, "emit emergent events after task assignment in tick()");
+  - this file has had no substantive change since the 2025-11-14 bulk restore.
+
+Active maintenance has been going to v2 for months. What still points here —
+`ORION_SIMULATION_PROTOCOL.md`, `tests/test_orion_simulation.py` (module-scope
+import) and `interactive_collab_demo.py` — is stale wiring, not a competing
+designation.
+
+Retained, not deleted: it is still what the test suite imports, so removing it
+breaks the build. Rewire those three call sites to v2 first.
+
 """
 from __future__ import annotations
 

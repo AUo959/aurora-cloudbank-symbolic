@@ -33,20 +33,25 @@ Version: 1.0
 Date: 2025-11-09
 License: Project Internal
 
-STATUS (recorded 2026-08-02, #1132 / #1234): **duplicate pair, designation pending.**
+STATUS (corrected 2026-08-03, #1132): **unmaintained prototype; prefer the sibling.**
 
-This file and `triplex_handshake_simulator.py` are two models of the same
-subject — the Triplex Handshake under "The Reflection Event" (Narrative Cycle
-01) — and their opening descriptions are near-identical. They differ in what
-they claim to reproduce: this one records a drift variance of +0.004 "observed
-in the event"; the sibling models drift held at Δ 0.000.
+An earlier note here claimed this file and `triplex_handshake_simulator.py`
+"encode different claims about the same canonical event" — one reproducing
++0.004 drift, the other Δ 0.000 — and called choosing between them a canon
+determination. **That was wrong, and this corrects it.**
 
-Neither is imported by any module or test; both are standalone scripts. The
-sibling is referenced only from `.sprint_metrics/`, this one from
-`SIMULATION_STATUS_REPORT.md`.
+`NARRATIVE_CYCLE_01_REFLECTION_EVENT.md` records both figures, in sequence:
+"Drift Variance: +0.004 (peak) → 0.000 (restored)". +0.004 is the peak that
+triggers the Triplex Handshake; Δ 0.000 is the restored state. They are phases
+of one event, not rival claims. Both files use Δ 0.000 as their baseline and
+share identical constants (`BASE_DRIFT_RATE = 0.0002`,
+`INTERVENE_LATENCY_COST = 0.004`), and both expose the same eleven top-level
+names. There was never a canon question here.
 
-Because they encode *different* claims about the same canonical event, choosing
-between them is a canon question, not a cleanup. See #1132.
+What does distinguish them is maintenance. This file is the original prototype
+(2025-11-09). The sprint maintenance pass of 2025-11-12 (#321/#326) modified
+*only* the sibling, so this copy never received it.
+
 """
 
 import random

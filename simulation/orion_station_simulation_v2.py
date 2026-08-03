@@ -14,20 +14,22 @@ Key Improvements from v1.0:
 
 Symbolic Tag: s.tag::sim.orion.v2
 
-STATUS (recorded 2026-08-02, #1132 / #1234): **successor by intent, not yet wired.**
+STATUS (corrected 2026-08-03, #1132): **canonical implementation.**
 
-This file states it supersedes v1 ("Key Improvements from v1.0": canonical
-character loading from `L1_CANON_CHARACTER_ROSTER.md` instead of hardcoded
-profiles, 40+ roster support, collaboration bonuses).
+Supersedes `orion_station_simulation.py`: loads characters from
+`L1_CANON_CHARACTER_ROSTER.md` rather than hardcoded profiles, supports the 40+
+roster, and adds collaboration bonuses.
 
-It is not, however, what the repository runs. `ORION_SIMULATION_PROTOCOL.md`
-documents v1, and `tests/test_orion_simulation.py` imports v1 at module scope
-while importing this file only inside a single test function via a `sys.path`
-insert — an optional path, not a dependency.
+Evidence this is the maintained one, not merely the newer name: it received a
+behavioural bug fix on 2026-06-12 (#1023, "emit emergent events after task
+assignment in tick()"), while v1 has had no substantive change since the
+2025-11-14 bulk restore.
 
-So the supersession is documented but incomplete. #1132 asks which is canonical;
-until that is decided, both remain, and this note exists so the next reader is
-not misled by the "v2" name into assuming it is live.
+The repository has not finished switching over. `ORION_SIMULATION_PROTOCOL.md`,
+`tests/test_orion_simulation.py` and `interactive_collab_demo.py` still reach
+for v1; this file is imported only inside one test function behind a `sys.path`
+insert. Completing that rewiring is the remaining work on #1132.
+
 """
 
 from __future__ import annotations

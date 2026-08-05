@@ -198,7 +198,13 @@ jobs:
               `Intended project board status: ${target_status}.`,
             ].join('\n');
 
-            const { data: existing } = await github.rest.issues.listComments({
+            // Paginate: a single listComments page caps at 100, and comments
+            // come back oldest first. On a PR that already had 100+ comments
+            // before its first status comment -- #1381 sits at 420, #1306 at 88
+            // -- the marker would land on a later page, every run would miss it,
+            // and each would append a new comment: exactly the spam this step
+            // exists to stop.
+            const existing = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pr_number,

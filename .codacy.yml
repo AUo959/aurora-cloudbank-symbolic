@@ -1,0 +1,40 @@
+---
+# Codacy Cloud configuration.
+#
+# WHY THIS FILE EXISTS
+# --------------------
+# The Codacy GitHub App gate is configured with a zero-new-issues threshold
+# while bandit's B101 ("use of assert") is enabled for test files. pytest
+# expresses every assertion with `assert`, so *any* pull request that adds a
+# test failed the gate by construction -- see issue #1334. On PR #1327, 13 of
+# the 17 reported "new issues" were `use of assert` in test files.
+#
+# The effect was worse than the cause: every merged PR carried a red check,
+# which trains reviewers to ignore the signal entirely, and it penalised adding
+# coverage. Three PRs (#1394, #1396, #1398) were merged over this red check.
+#
+# THIS IS A MITIGATION, NOT THE CORRECT FIX
+# -----------------------------------------
+# The correct fix is to disable the B101 pattern for test paths in the Codacy
+# dashboard, which keeps every other tool reporting on test code. That setting
+# is server-side and cannot be expressed in this repository -- both in-repo
+# Codacy workflows (.github/workflows/codacy.yml, codacy-analysis.yml) are
+# disabled with `if: false`, so the gate is driven entirely by the Codacy App.
+#
+# Excluding the paths below is the only lever available in-repo. The trade-off
+# is real and is stated plainly: Codacy no longer reports ANY finding in test
+# code, not just the inapplicable assert one. That is judged acceptable because
+# test code is not shipped -- it sits outside the import closure of all four
+# deployed entrypoints (see docs/CODEQL_TRIAGE.md) -- and because CodeQL,
+# SonarCloud and GitGuardian still analyse these paths.
+#
+# When the dashboard pattern is fixed, DELETE this file so test code is covered
+# again. Track that on #1334.
+
+exclude_paths:
+  - 'tests/**'
+  - '**/tests/**'
+  - '**/test_*.py'
+  - '**/*_test.py'
+  - 'conftest.py'
+  - '**/conftest.py'

@@ -217,3 +217,135 @@ Not shipped in any container image and not reachable from a served route.
 
 Before dismissing any future alert as unreachable, recompute the closure against **all four** entrypoints above.
 Do not root it at a single API module. Record the reason at dismissal time.
+
+---
+
+## Round 2 adjudication (2026-08-02)
+
+The alerts this file previously marked NOT YET ADJUDICATED have been worked through.
+
+### Fixed in #1394 — log injection, event coordination (8)
+
+Caller-supplied ids are wrapped in `safe_str()` at the logging call sites. The alerts anchor to pre-fix lines.
+
+| Alert | Rule | Path |
+|---|---|---|
+| [824](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/824) | `py/log-injection` | `src/coordination/event_registry.py` |
+| [825](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/825) | `py/log-injection` | `src/coordination/event_registry.py` |
+| [826](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/826) | `py/log-injection` | `src/coordination/event_registry.py` |
+| [827](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/827) | `py/log-injection` | `src/coordination/event_registry.py` |
+| [828](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/828) | `py/log-injection` | `src/coordination/event_registry.py` |
+| [829](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/829) | `py/log-injection` | `src/coordination/event_registry.py` |
+| [830](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/830) | `py/log-injection` | `src/coordination/event_registry.py` |
+| [831](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/831) | `py/log-injection` | `src/coordination/event_registry.py` |
+
+### Fixed in #1396 — log injection, deployed monitoring (9)
+
+Same fix, applied after these modules were found inside the deployed import closure.
+
+| Alert | Rule | Path |
+|---|---|---|
+| [869](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/869) | `py/log-injection` | `src/monitoring/drift_detector.py` |
+| [870](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/870) | `py/log-injection` | `src/monitoring/drift_detector.py` |
+| [832](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/832) | `py/log-injection` | `src/monitoring/monitoring_system.py` |
+| [833](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/833) | `py/log-injection` | `src/monitoring/monitoring_system.py` |
+| [834](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/834) | `py/log-injection` | `src/monitoring/monitoring_system.py` |
+| [851](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/851) | `py/log-injection` | `src/subroutines/ethics_compliance_monitor.py` |
+| [852](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/852) | `py/log-injection` | `src/subroutines/ethics_compliance_monitor.py` |
+| [853](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/853) | `py/log-injection` | `src/subroutines/subroutine_suite.py` |
+| [854](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/854) | `py/log-injection` | `src/subroutines/subroutine_suite.py` |
+
+### Fixed in earlier work — path injection (13)
+
+Containment guards verified present on `main` 2026-08-02: `validate_safe_path()` reconstructs from the trusted root prefix before resolving (`ledger_core.py`), `_validate_file_patterns()` / `_root_spellings()` reject drive-relative and traversal patterns via `PureWindowsPath` (`api.py`), and `analyze_directory` re-checks `directory_resolved not in resolved.parents` (`engine.py`).
+
+| Alert | Rule | Path |
+|---|---|---|
+| [813](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/813) | `py/path-injection` | `modules/insight_ledger/ledger_core.py` |
+| [814](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/814) | `py/path-injection` | `modules/insight_ledger/ledger_core.py` |
+| [815](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/815) | `py/path-injection` | `modules/insight_ledger/ledger_core.py` |
+| [816](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/816) | `py/path-injection` | `modules/insight_ledger/ledger_core.py` |
+| [823](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/823) | `py/path-injection` | `modules/insight_ledger/ledger_core.py` |
+| [798](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/798) | `py/path-injection` | `src/improvement/api.py` |
+| [799](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/799) | `py/path-injection` | `src/improvement/api.py` |
+| [801](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/801) | `py/path-injection` | `src/improvement/api.py` |
+| [802](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/802) | `py/path-injection` | `src/improvement/api.py` |
+| [821](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/821) | `py/path-injection` | `src/improvement/api.py` |
+| [822](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/822) | `py/path-injection` | `src/improvement/api.py` |
+| [789](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/789) | `py/path-injection` | `src/improvement/engine.py` |
+| [817](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/817) | `py/path-injection` | `src/improvement/engine.py` |
+
+### Served over HTTP, but not loaded by any served page (3)
+
+`static/` is mounted at `/static` by the deployed `aurora_gui_cloudhub_fastapi.py` and `opal2_api.py`, so this file is fetchable. But the only page that includes it, `aurora_dashboard.html`, is served solely by `api/aurora_api_server.py`, which no Dockerfile or k8s manifest launches. **A latent gap remains** — see the note below.
+
+| Alert | Rule | Path |
+|---|---|---|
+| [34](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/34) | `js/incomplete-multi-character-sanitization` | `static/js/aurora-security.js` |
+| [38](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/38) | `js/bad-tag-filter` | `static/js/aurora-security.js` |
+| [48](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/48) | `js/incomplete-url-scheme-check` | `static/js/aurora-security.js` |
+
+### Not present in any deployed image (Node) (6)
+
+The only Node container, `services/command_node/Dockerfile`, builds from `services/command_node/` — its `COPY . .` context excludes root `middleware/` and `config/`. Referenced nowhere outside `tests/test_security_fixes.py`.
+
+| Alert | Rule | Path |
+|---|---|---|
+| [78](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/78) | `js/incomplete-sanitization` | `config/aurora-security-config.js` |
+| [79](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/79) | `js/incomplete-sanitization` | `config/aurora-security-config.js` |
+| [74](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/74) | `js/incomplete-url-scheme-check` | `middleware/aurora-security-middleware.js` |
+| [75](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/75) | `js/bad-tag-filter` | `middleware/aurora-security-middleware.js` |
+| [76](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/76) | `js/incomplete-multi-character-sanitization` | `middleware/aurora-security-middleware.js` |
+| [77](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/77) | `js/incomplete-multi-character-sanitization` | `middleware/aurora-security-middleware.js` |
+
+### JavaScript/HTML outside every deployed entrypoint (10)
+
+The deployed apps are Python FastAPI. These are referenced only by scripts, docs, or other non-deployed JS. `aurora_collaboration_chamber.html` is served at `/chamber` by `src/servers/l2_integration_server.py`, which no manifest launches.
+
+| Alert | Rule | Path |
+|---|---|---|
+| [96](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/96) | `py/bad-tag-filter` | `.security/secure_helpers.py` |
+| [156](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/156) | `py/bad-tag-filter` | `.security/secure_helpers.py` |
+| [398](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/398) | `js/file-system-race` | `src/core/diagnostics.js` |
+| [55](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/55) | `js/insecure-randomness` | `src/core/mesh_agent.js` |
+| [69](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/69) | `js/xss` | `src/interfaces/aurora_collaboration_chamber.html` |
+| [60](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/60) | `js/missing-rate-limiting` | `src/orchestrators/holographic_interface_orchestrator.js` |
+| [65](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/65) | `js/missing-rate-limiting` | `src/orchestrators/holographic_interface_orchestrator.js` |
+| [66](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/66) | `js/missing-rate-limiting` | `src/orchestrators/holographic_interface_orchestrator.js` |
+| [54](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/54) | `js/insecure-randomness` | `src/utils/aurora_logger.js` |
+| [399](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/399) | `js/file-system-race` | `src/utils/aurora_logger.js` |
+
+### Adjudicated in round 2 — remaining two
+
+**[835](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/835) `py/log-injection` `src/monitoring/ethics_engine.py` — FIXED.**
+This module *is* inside the deployed import closure and logged `context.agent_id`, `rule_id`,
+`rule.id`/`rule.name` and `condition` unsanitised, in `%`-style. Same class as #1394/#1396, so it is
+fixed the same way rather than dismissed: nine call sites now wrap their arguments in `safe_str()` /
+`safe_path()`.
+
+The four sites inside `except` blocks use `logger.exception()` rather than `logger.error()`, on
+SonarCloud's advice — it attaches the traceback. Note the residual caveat: `safe_str(e)` sanitises the
+*interpolated* argument, but Python's traceback rendering still prints the raw exception text on its
+final line. That is accepted because a traceback is structurally multi-line and log parsers already
+treat it as one record, so it does not forge a separate entry the way an interpolated newline does.
+
+**[820](https://github.com/AUo959/aurora-cloudbank-symbolic/security/code-scanning/820)
+`py/clear-text-storage-sensitive-data` `modules/insight_ledger/ledger_core.py` — accepted risk.**
+CodeQL is correct: when encrypted storage is unavailable, `_save_key_securely` falls back to
+`self.key_file.write_text(key_hex)`. This is a deliberate, documented fallback — it emits a
+`UserWarning` naming the consequence ("Keys will be stored unencrypted") and immediately applies
+`chmod(0o600)`. Removing the fallback would make the ledger unusable wherever the encryption
+dependency is absent. Recorded as an accepted risk rather than a false positive, because the finding
+describes the code accurately. Revisit if encrypted storage becomes a hard requirement.
+
+### Latent gap found while adjudicating
+
+`static/js/aurora-security.js` exposes `createSafeElement(tag, content, attributes)`, which allows the
+`src` and `href` attributes and sets them via `setAttribute(key, this.escapeHtml(String(value)))`.
+`escapeHtml` escapes HTML entities; it does **not** validate the URL scheme, and `javascript:alert(1)`
+contains no character it escapes. A caller passing an untrusted `href` would therefore produce a
+working `javascript:` URL, in a file named for security.
+
+This is currently unreachable — no served page loads the file, and no caller passes `href`/`src` —
+so it is a latent defect rather than a live vulnerability. It is recorded here instead of being
+dismissed as a false positive, because the CodeQL finding is correct about the code.

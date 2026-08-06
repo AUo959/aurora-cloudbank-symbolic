@@ -152,7 +152,7 @@ on each one's limits.
 |---|---|---|
 | CodeQL | every PR | Alerts dismissed as "won't fix" do not reappear. Query all states, not just `open`, before concluding a branch is clean. Every high/critical dismissal is adjudicated in [docs/CODEQL_TRIAGE.md](docs/CODEQL_TRIAGE.md). |
 | SonarCloud | every PR | Quality gate is scoped to changed lines, not the whole tree. |
-| Codacy | every PR | Currently fails any PR that adds pytest tests — see the tracking issue on the zero-new-issues threshold. |
+| Codacy | every PR | Test paths are excluded via `.codacy.yml`, so Codacy reports nothing about test code at all. This works around a zero-new-issues threshold that failed any PR adding a pytest `assert` (#1334); the correct dashboard-side fix would restore coverage of tests. |
 | GitGuardian | every PR | Detects committed secrets; says nothing about secrets supplied at runtime. |
 | Security-marked tests | `pytest -m security` | Covers path containment, CSRF, PII redaction, ledger tamper detection. Not exhaustive. |
 | Dependabot | continuous | Opens PRs; merging them is not automatic, and the `frontend/` package has no build gate verifying them. |

@@ -33,13 +33,19 @@ jobs:
       if: steps.detect.outputs.should_run == 'true'
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
       with:
-        python-version: '3.11'
+        # Must match the interpreter requirements-ci-hashed.txt was compiled
+        # for (--python-version 3.12). The lock pins version-specific wheels
+        # (cp312), which will not install on 3.11.
+        python-version: '3.12'
 
     - name: Install dependencies
       if: steps.detect.outputs.should_run == 'true'
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt -r requirements-test.txt
+        # Hash-checked: requirements-ci-hashed.txt is compiled from both
+        # requirements.txt and requirements-test.txt (#1366).
+        python -m pip install --require-hashes --only-binary=:all: \
+          -r requirements-ci-hashed.txt
 
     - name: Run PR Evaluation
       if: steps.detect.outputs.should_run == 'true'
@@ -51,8 +57,11 @@ jobs:
         set -e
         echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
 
+    # always(): if the evaluator crashes, its partial evidence is exactly what
+    # is needed to diagnose the failure. Without this the upload is skipped on
+    # step failure and the run reports a red gate with nothing to inspect.
     - name: Upload evaluation results
-      if: steps.detect.outputs.should_run == 'true'
+      if: always() && steps.detect.outputs.should_run == 'true'
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
       with:
         name: pr-evaluation-results

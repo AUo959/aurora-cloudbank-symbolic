@@ -2,7 +2,7 @@
 
 > Version: 0.1.0  
 > Status: ✅ v0.1.0 — all five read-only tools wired to live Aurora API endpoints  
-> Install: `pip install -r requirements-optional.txt` (provides the `mcp` SDK)  
+> Install: `pip install -r requirements-optional.txt` (provides MCP SDK v1)
 > Protocol: [Model Context Protocol (MCP)](https://modelcontextprotocol.io)  
 > Transport: stdio (default) | SSE (HTTP streaming)
 
@@ -69,10 +69,25 @@ prompting required. Aurora's state becomes a first-class data source.
 
 ## Setup
 
+### MCP SDK Compatibility Contract
+
+The connector supports `mcp>=1.28.1,<2.0.0`. Its low-level server uses the
+MCP v1 `Server.list_tools()` and `Server.call_tool()` registration decorators.
+Repository test and lock environments pin `mcp==1.28.1` so CI exercises that
+exact public API. MCP 2.x uses a different handler-registration API and is not
+supported until a dedicated connector migration lands.
+
+Keep these declarations aligned when changing the contract:
+
+- `connector/pyproject.toml` for standalone connector installs;
+- `requirements-optional.txt` for repository optional installs;
+- `requirements-test.txt`, `requirements-lock.txt`, and
+  `requirements-ci-hashed.txt` for reproducible CI/test installs.
+
 ### Prerequisites
 
 ```bash
-pip install mcp httpx python-dotenv
+pip install "mcp>=1.28.1,<2.0.0" httpx python-dotenv
 ```
 
 ### Environment Variables

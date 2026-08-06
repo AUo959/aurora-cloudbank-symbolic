@@ -19,6 +19,23 @@ from modules.ai_core.unified_ai_interface import (
 )
 
 
+@pytest.fixture(autouse=True)
+def restore_model_availability():
+    """Restore the shipped ``available`` flags after every test.
+
+    ``UnifiedAIInterface.CAPABILITIES`` is a class attribute, so every instance
+    (including the module-level ``unified_ai`` singleton) shares one dict.
+    Tests that flip availability would otherwise leak into later tests and make
+    assertions about shipped defaults order-dependent.
+    """
+    original = {
+        model: caps.available for model, caps in UnifiedAIInterface.CAPABILITIES.items()
+    }
+    yield
+    for model, available in original.items():
+        UnifiedAIInterface.CAPABILITIES[model].available = available
+
+
 @pytest.mark.unit
 @pytest.mark.ai
 class TestUnifiedAIInterface:
@@ -29,8 +46,8 @@ class TestUnifiedAIInterface:
         interface = UnifiedAIInterface()
 
         assert len(interface.CAPABILITIES) > 0
-        assert AIModel.CLAUDE_35_SONNET in interface.CAPABILITIES
-        assert AIModel.CLAUDE_45_OPUS in interface.CAPABILITIES
+        assert AIModel.CLAUDE_SONNET_5 in interface.CAPABILITIES
+        assert AIModel.CLAUDE_OPUS_5 in interface.CAPABILITIES
         assert AIModel.GPT_4O in interface.CAPABILITIES
         assert AIModel.GPT_5 in interface.CAPABILITIES
         assert AIModel.GPT_5_CODEX in interface.CAPABILITIES
@@ -104,9 +121,9 @@ class TestUnifiedAIInterface:
         selected_code = await interface.select_optimal_model(request, "code_generation")
         assert selected_code == AIModel.GPT_5_CODEX  # First in code gen chain
 
-        # For reasoning, should prefer Claude 4.5 Opus
+        # For reasoning, should prefer Claude Opus 5
         selected_reasoning = await interface.select_optimal_model(request, "reasoning")
-        assert selected_reasoning == AIModel.CLAUDE_45_OPUS  # First in reasoning chain
+        assert selected_reasoning == AIModel.CLAUDE_OPUS_5  # First in reasoning chain
 
     def test_get_available_models(self):
         """Test getting list of available models"""
@@ -114,13 +131,13 @@ class TestUnifiedAIInterface:
 
         # Set some models as available
         interface.CAPABILITIES[AIModel.GPT_4O].available = True
-        interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+        interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5].available = True
         interface.CAPABILITIES[AIModel.GPT_5].available = False
 
         available = interface.get_available_models()
 
         assert AIModel.GPT_4O in available
-        assert AIModel.CLAUDE_35_SONNET in available
+        assert AIModel.CLAUDE_SONNET_5 in available
         assert AIModel.GPT_5 not in available
 
     def test_enable_disable_models(self):
@@ -139,11 +156,55 @@ class TestUnifiedAIInterface:
         """Aspirational placeholder IDs must ship gated (available=False)."""
         interface = UnifiedAIInterface()
 
-        for model in (AIModel.CLAUDE_45_OPUS, AIModel.GPT_5, AIModel.GPT_5_CODEX):
+        for model in (AIModel.GPT_5, AIModel.GPT_5_CODEX):
             assert interface.CAPABILITIES[model].available is False, (
                 f"{model.value} is an unverified placeholder and must default to "
                 "available=False"
             )
+
+    def test_claude_models_are_current_catalog_ids(self):
+        """Claude entries must carry live, date-suffix-free catalog IDs and be
+        selectable — the retired 3.5 Sonnet ID and the fabricated 4.5 Opus ID
+        must not reappear."""
+        interface = UnifiedAIInterface()
+
+        retired_or_fabricated = {
+            "claude-3-5-sonnet-20241022",  # retired 2025-10-28, returns 404
+            "claude-4-5-opus-20250115",  # never existed in any form
+        }
+
+        claude_models = [
+            model
+            for model, caps in interface.CAPABILITIES.items()
+            if caps.provider is AIProvider.ANTHROPIC
+        ]
+        assert claude_models, "at least one Anthropic model must be registered"
+
+        for model in claude_models:
+            assert model.value not in retired_or_fabricated, (
+                f"{model.value} is a retired or fabricated identifier"
+            )
+            assert interface.CAPABILITIES[model].available is True, (
+                f"{model.value} is verified live and must be selectable"
+            )
+
+        assert AIModel.CLAUDE_OPUS_5.value == "claude-opus-5"
+        assert AIModel.CLAUDE_SONNET_5.value == "claude-sonnet-5"
+
+    def test_claude_capability_profiles_match_catalog(self):
+        """Context window, output ceiling, and cost must match the published
+        Anthropic catalog rather than carrying over the previous entries."""
+        interface = UnifiedAIInterface()
+
+        opus = interface.CAPABILITIES[AIModel.CLAUDE_OPUS_5]
+        assert opus.context_window == 1_000_000
+        assert opus.max_output_tokens == 128_000
+        assert opus.cost_per_1k_tokens == 0.005
+
+        sonnet = interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5]
+        assert sonnet.context_window == 1_000_000
+        assert sonnet.max_output_tokens == 128_000
+        assert sonnet.cost_per_1k_tokens == 0.003
 
     @pytest.mark.asyncio
     async def test_unavailable_model_cannot_be_selected(self):
@@ -200,15 +261,15 @@ class TestAIRequestResponse:
             system_prompt="system context",
             max_tokens=8192,
             temperature=0.5,
-            model_preference=AIModel.CLAUDE_45_OPUS,
-            fallback_chain=[AIModel.CLAUDE_35_SONNET, AIModel.GPT_4O],
+            model_preference=AIModel.CLAUDE_OPUS_5,
+            fallback_chain=[AIModel.CLAUDE_SONNET_5, AIModel.GPT_4O],
             context_tag="custom_tag",
         )
 
         assert request.system_prompt == "system context"
         assert request.max_tokens == 8192
         assert request.temperature == 0.5
-        assert request.model_preference == AIModel.CLAUDE_45_OPUS
+        assert request.model_preference == AIModel.CLAUDE_OPUS_5
         assert len(request.fallback_chain) == 2
         assert request.context_tag == "custom_tag"
 
@@ -249,8 +310,8 @@ class TestModelIntegration:
         request = AIRequest(
             prompt="test",
             fallback_chain=[
-                AIModel.CLAUDE_45_OPUS,
-                AIModel.CLAUDE_35_SONNET,
+                AIModel.CLAUDE_OPUS_5,
+                AIModel.CLAUDE_SONNET_5,
                 AIModel.GPT_4O,
             ],
         )
@@ -301,13 +362,13 @@ class TestAIIntegrationErrorHandling:
             mock_call.side_effect = asyncio.TimeoutError("Request timeout")
 
             # Should handle timeout gracefully
-            interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+            interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5].available = True
 
             try:
                 # Timeout should be caught and handled
                 result = await interface._execute_anthropic(
                     AIRequest(prompt="test"),
-                    AIModel.CLAUDE_35_SONNET
+                    AIModel.CLAUDE_SONNET_5
                 )
                 # If it returns, should indicate failure
                 if result is not None:
@@ -353,7 +414,7 @@ class TestAIIntegrationErrorHandling:
         with patch.object(interface, '_execute_anthropic', new_callable=AsyncMock) as mock_call:
             error_response = AIResponse(
                 content="",
-                model_used=AIModel.CLAUDE_35_SONNET,
+                model_used=AIModel.CLAUDE_SONNET_5,
                 provider=AIProvider.ANTHROPIC,
                 tokens_used=0,
                 latency_ms=50,
@@ -364,7 +425,7 @@ class TestAIIntegrationErrorHandling:
 
             result = await interface._execute_anthropic(
                 AIRequest(prompt="test"),
-                AIModel.CLAUDE_35_SONNET
+                AIModel.CLAUDE_SONNET_5
             )
 
             assert result.success is False
@@ -407,11 +468,11 @@ class TestAIIntegrationErrorHandling:
             # Return invalid response structure
             mock_call.return_value = None
 
-            interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+            interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5].available = True
 
             result = await interface._execute_anthropic(
                 AIRequest(prompt="test"),
-                AIModel.CLAUDE_35_SONNET
+                AIModel.CLAUDE_SONNET_5
             )
 
             # Should handle None response gracefully
@@ -423,19 +484,19 @@ class TestAIIntegrationErrorHandling:
         interface = UnifiedAIInterface()
 
         # Set primary model as unavailable, backup as available
-        interface.CAPABILITIES[AIModel.CLAUDE_45_OPUS].available = False
-        interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+        interface.CAPABILITIES[AIModel.CLAUDE_OPUS_5].available = False
+        interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5].available = True
 
         request = AIRequest(
             prompt="test",
-            model_preference=AIModel.CLAUDE_45_OPUS,
-            fallback_chain=[AIModel.CLAUDE_35_SONNET]
+            model_preference=AIModel.CLAUDE_OPUS_5,
+            fallback_chain=[AIModel.CLAUDE_SONNET_5]
         )
 
         selected = await interface.select_optimal_model(request, "general")
 
         # Should select from fallback chain
-        assert selected == AIModel.CLAUDE_35_SONNET
+        assert selected == AIModel.CLAUDE_SONNET_5
 
     @pytest.mark.asyncio
     async def test_all_models_unavailable(self):
@@ -496,7 +557,7 @@ class TestAIIntegrationErrorHandling:
         with patch.object(interface, '_execute_anthropic', new_callable=AsyncMock) as mock_call:
             error_response = AIResponse(
                 content="",
-                model_used=AIModel.CLAUDE_35_SONNET,
+                model_used=AIModel.CLAUDE_SONNET_5,
                 provider=AIProvider.ANTHROPIC,
                 tokens_used=0,
                 latency_ms=100,
@@ -509,7 +570,7 @@ class TestAIIntegrationErrorHandling:
             for _ in range(3):
                 result = await interface._execute_anthropic(
                     AIRequest(prompt="test"),
-                    AIModel.CLAUDE_35_SONNET
+                    AIModel.CLAUDE_SONNET_5
                 )
                 assert result.success is False
 
@@ -575,20 +636,20 @@ class TestAIIntegrationErrorHandling:
         with patch.object(interface, '_execute_anthropic', new_callable=AsyncMock) as mock_call:
             mock_call.return_value = AIResponse(
                 content="test response",
-                model_used=AIModel.CLAUDE_35_SONNET,
+                model_used=AIModel.CLAUDE_SONNET_5,
                 provider=AIProvider.ANTHROPIC,
                 tokens_used=50,
                 latency_ms=200,
                 success=True
             )
 
-            interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+            interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5].available = True
 
             # Fire multiple requests concurrently
             requests = [
                 interface._execute_anthropic(
                     AIRequest(prompt=f"test {i}"),
-                    AIModel.CLAUDE_35_SONNET
+                    AIModel.CLAUDE_SONNET_5
                 )
                 for i in range(5)
             ]
@@ -640,22 +701,22 @@ class TestAIIntegrationResilience:
         interface = UnifiedAIInterface()
 
         # Set up fallback chain
-        interface.CAPABILITIES[AIModel.CLAUDE_45_OPUS].available = False
-        interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+        interface.CAPABILITIES[AIModel.CLAUDE_OPUS_5].available = False
+        interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5].available = True
         interface.CAPABILITIES[AIModel.GPT_4O].available = True
 
         request = AIRequest(
             prompt="test",
-            model_preference=AIModel.CLAUDE_45_OPUS,
+            model_preference=AIModel.CLAUDE_OPUS_5,
             fallback_chain=[
-                AIModel.CLAUDE_35_SONNET,
+                AIModel.CLAUDE_SONNET_5,
                 AIModel.GPT_4O
             ]
         )
 
         # Should successfully select from fallback
         selected = await interface.select_optimal_model(request, "general")
-        assert selected in [AIModel.CLAUDE_35_SONNET, AIModel.GPT_4O]
+        assert selected in [AIModel.CLAUDE_SONNET_5, AIModel.GPT_4O]
 
     @pytest.mark.asyncio
     async def test_model_recovery_after_failure(self):

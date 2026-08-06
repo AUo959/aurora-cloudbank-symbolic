@@ -6,7 +6,7 @@ Provides REST API for code analysis and improvement suggestions.
 
 import os
 from enum import Enum
-from pathlib import Path, PurePath
+from pathlib import Path, PurePath, PureWindowsPath
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
@@ -35,6 +35,64 @@ def _safe_root() -> Path:
     return root
 
 
+def _validate_file_patterns(file_patterns: Optional[List[str]]) -> None:
+    """Reject glob patterns that would walk outside the analysis directory.
+
+    ``directory`` is resolved through trusted enumeration, but the pattern was
+    passed to ``Path.rglob()`` unchecked — and rglob honours ``..``. So
+    ``{"directory": "proj", "file_patterns": ["../*.py"]}`` read proj's
+    siblings, and ``../../*.py`` escaped the configured root entirely, with the
+    matched absolute paths echoed back in the response.
+
+    Rooted patterns already raise NotImplementedError inside pathlib, but are
+    rejected here too so the caller gets a 400 rather than a 500.
+
+    The check runs through PureWindowsPath on every platform because
+    ``is_absolute()`` alone is not sufficient and its answer is
+    platform-dependent:
+
+    ==========================  ===========  ==========  =====
+    pattern                     posix_abs    win_abs     caught by
+    ==========================  ===========  ==========  =====
+    ``/etc/*.conf``             True         **False**   root
+    ``C:foo/*.py``              False        **False**   drive
+    ``C:/x/*.py``               False        True        drive/root
+    ``\\\\srv\\share\\*.py``    False        True        drive
+    ``../*.py``                 False        False       ``..``
+    ==========================  ===========  ==========  =====
+
+    ``/etc/*.conf`` is the case that matters: on Windows it has no drive, so
+    ``is_absolute()`` is False and it slipped through to rglob(), which raised
+    NotImplementedError and turned a 400 into a 500. ``C:foo`` is the
+    drive-relative form tracked in #1337. PureWindowsPath also treats ``\\`` as
+    a separator, so ``..\\..\\x`` is caught on Linux too.
+    """
+    for pattern in file_patterns or []:
+        candidate = PureWindowsPath(pattern)
+        if candidate.drive or candidate.root or ".." in candidate.parts:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "File patterns must stay within the analyzed directory: "
+                    "rooted, drive-qualified and '..' patterns are not allowed."
+                ),
+            )
+
+
+def _root_spellings(safe_root: Path) -> tuple[PurePath, ...]:
+    """Every string form that names the analysis root.
+
+    ``relative_to`` compares lexically, so a root reached through a symlinked
+    prefix needs both its resolved and its as-configured spelling. Returns the
+    resolved form first; the configured form is added only when it differs.
+    """
+    spellings = [PurePath(str(safe_root))]
+    override = os.environ.get("AURORA_IMPROVEMENT_ROOT", "")
+    if override and str(PurePath(override)) != str(safe_root):
+        spellings.append(PurePath(override))
+    return tuple(spellings)
+
+
 def _request_parts(user_path: str, safe_root: Path) -> tuple[str, ...]:
     """Convert a request value to lexical root-relative lookup components.
 
@@ -43,16 +101,30 @@ def _request_parts(user_path: str, safe_root: Path) -> tuple[str, ...]:
     filesystem path.
     """
     requested = PurePath(user_path)
-    root_key = PurePath(str(safe_root))
 
     if requested.is_absolute():
-        try:
-            requested = requested.relative_to(root_key)
-        except ValueError as exc:
+        # relative_to() is lexical, so the root has to be tried in every
+        # spelling that names it. _safe_root() resolves, but callers hold the
+        # unresolved form: on macOS /var is a symlink to /private/var, so a
+        # request carrying the path it was just given (/var/folders/...) is
+        # lexically disjoint from the resolved root (/private/var/folders/...)
+        # and was refused with 403. Linux never showed it, because /tmp needs
+        # no resolution. Any symlinked mount or home directory behaves the same.
+        #
+        # These candidates are trusted configuration, never request data, and
+        # every returned path still comes from trusted iterdir() enumeration
+        # below — so this widens the accepted spelling, not the boundary.
+        for root_key in _root_spellings(safe_root):
+            try:
+                requested = requested.relative_to(root_key)
+                break
+            except ValueError:
+                continue
+        else:
             raise HTTPException(
                 status_code=403,
                 detail="Access to this path is not allowed.",
-            ) from exc
+            )
     elif ".." in requested.parts:
         raise HTTPException(
             status_code=400,
@@ -197,7 +269,15 @@ async def analyze_file(request: AnalyzeFileRequest):
     return [suggestion.to_dict() for suggestion in suggestions]
 
 
-@router.post("/analyze-directory", response_model=AnalysisReportResponse)
+@router.post(
+    "/analyze-directory",
+    response_model=AnalysisReportResponse,
+    responses={
+        400: {"description": "Not a directory, or a file pattern that is rooted, drive-qualified, or contains '..'"},
+        403: {"description": "Path resolves outside the analysis root"},
+        404: {"description": "Directory not found beneath the analysis root"},
+    },
+)
 async def analyze_directory(request: AnalyzeDirectoryRequest):
     """Analyze a trusted, root-enumerated directory."""
     engine = get_improvement_engine()
@@ -205,6 +285,8 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
 
     if not full_path.is_dir():
         raise HTTPException(status_code=400, detail=f"Not a directory: {request.directory}")
+
+    _validate_file_patterns(request.file_patterns)
 
     results = engine.analyze_directory(full_path, request.file_patterns)
 

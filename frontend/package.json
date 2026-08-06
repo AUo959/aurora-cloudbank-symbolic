@@ -70,6 +70,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.62.0",
+    "@tailwindcss/postcss": "^4.3.3",
     "@tanstack/react-query-devtools": "^5.101.4",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^16.3.2",
@@ -101,6 +102,9 @@
     "typescript": "^5.3.3",
     "vite": "^8.1.5",
     "vitest": "^4.1.9"
+  },
+  "overrides": {
+    "dompurify": "3.4.12"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

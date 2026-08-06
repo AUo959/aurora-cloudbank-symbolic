@@ -18,7 +18,7 @@ from typing import List, Dict, Optional, Any, Set
 from enum import Enum
 from pathlib import Path
 
-from src.core.logging_security import safe_str, safe_path, safe_error
+from src.core.logging_security import safe_path, safe_str
 
 logger = logging.getLogger(__name__)
 
@@ -315,7 +315,7 @@ class CodeImprovementEngine:
     def register_pattern(self, pattern: ImprovementPattern):
         """Register custom improvement pattern"""
         self._patterns.append(pattern)
-        logger.info("Registered improvement pattern: %s", safe_str(pattern.name))
+        logger.info("Registered improvement pattern type: %s", type(pattern).__name__)
     
     def analyze_file(self, file_path: Path) -> List[ImprovementSuggestion]:
         """
@@ -330,7 +330,7 @@ class CodeImprovementEngine:
         try:
             content = file_path.read_text()
         except Exception as e:
-            logger.error("Failed to read file %s: %s", safe_path(file_path), safe_error(e))
+            logger.error("Failed to read analysis file (%s)", type(e).__name__)
             return []
         
         suggestions = []
@@ -339,7 +339,11 @@ class CodeImprovementEngine:
                 pattern_suggestions = pattern.detect(str(file_path), content)
                 suggestions.extend(pattern_suggestions)
             except Exception as e:
-                logger.error("Pattern %s failed on %s: %s", safe_str(pattern.name), safe_path(file_path), safe_error(e))
+                logger.error(
+                    "Improvement pattern %s failed while analyzing a file (%s)",
+                    type(pattern).__name__,
+                    type(e).__name__,
+                )
         
         return suggestions
     
@@ -360,17 +364,42 @@ class CodeImprovementEngine:
         """
         if file_patterns is None:
             file_patterns = ["*.py"]
-        
+
         results = {}
-        
+
+        # rglob() honours ".." inside a pattern, so a caller-supplied pattern
+        # can walk back out of `directory`: "../*.py" reaches its siblings and
+        # "../../*.py" escapes further still. Callers are expected to reject
+        # such patterns up front, but this method takes them as an argument and
+        # cannot assume that happened — so every match is confirmed to resolve
+        # inside `directory` before it is read. Absolute patterns raise
+        # NotImplementedError inside pathlib and never get this far.
+        directory_resolved = directory.resolve()
+
         for pattern in file_patterns:
             for file_path in directory.rglob(pattern):
-                if file_path.is_file():
-                    suggestions = self.analyze_file(file_path)
-                    if suggestions:
-                        results[str(file_path)] = suggestions
-        
-        logger.info("Analyzed directory %s: found improvements in %d files", safe_path(directory), len(results))
+                if not file_path.is_file():
+                    continue
+
+                resolved = file_path.resolve()
+                if directory_resolved not in resolved.parents:
+                    # `pattern` is caller-controlled, so it goes through
+                    # safe_str() like every other untrusted value logged here —
+                    # a raw %r would let a crafted pattern inject newlines and
+                    # forge log entries.
+                    logger.warning(
+                        "Skipping %s: pattern %s escaped the analysis directory",
+                        safe_path(resolved),
+                        safe_str(pattern),
+                    )
+                    continue
+
+                suggestions = self.analyze_file(resolved)
+                if suggestions:
+                    results[str(resolved)] = suggestions
+
+
+        logger.info("Directory analysis found improvements in %d files", len(results))
         return results
     
     def filter_suggestions(

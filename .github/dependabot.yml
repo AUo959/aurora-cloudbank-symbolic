@@ -60,6 +60,32 @@ updates:
     commit-message:
       prefix: "deps"
     labels: ["dependencies", "python"]
+    # pydantic-core is not an independently upgradable package: each pydantic
+    # release pins an EXACT pydantic-core build (pydantic 2.13.4 requires
+    # pydantic-core==2.46.4). Dependabot was proposing pydantic-core on its own,
+    # which is unsatisfiable -- no pydantic release pairs with it yet -- so the
+    # PR failed with ResolutionImpossible and simply re-rolled each week:
+    # #1390, then #1412, identical failure both times.
+    #
+    # Ignoring it here does not freeze it. It still moves whenever pydantic
+    # moves, because regenerating the lock resolves it transitively; it just
+    # stops being offered as a standalone bump.
+    #
+    # mcp majors are held back because the connector is written against the
+    # MCP v1 low-level API: connector/server.py registers handlers with
+    # @server.list_tools() / @server.call_tool(), which mcp 2.x removed. A
+    # v2 bump therefore fails the connector suite with
+    # "AttributeError: 'Server' object has no attribute 'list_tools'" -- the
+    # baseline defect tracked in #1384, which #1421 would have re-landed.
+    #
+    # This pins the ceiling in one place rather than relying on every future
+    # grouped bump being caught in review. Minor and patch releases within v1
+    # still flow normally. Lift this together with the connector migration to
+    # the v2 handler API, not before.
+    ignore:
+      - dependency-name: "pydantic-core"
+      - dependency-name: "mcp"
+        update-types: ["version-update:semver-major"]
     groups:
       python-patch-minor:
         patterns: ["*"]

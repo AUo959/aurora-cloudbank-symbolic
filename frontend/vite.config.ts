@@ -35,16 +35,35 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-          'ui-vendor': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-          ],
-          'chart-vendor': ['recharts', 'd3'],
+        // Vite 8 / Rollup 4 dropped the object form of manualChunks — it now
+        // warns "Invalid type: Expected Function but received Object" and
+        // silently stops chunking. Same grouping, expressed as the function
+        // form: match on the module id rather than declaring package lists.
+        //
+        // Matching is on `/node_modules/<name>/` so a package cannot be caught
+        // by a substring of an unrelated dependency's path.
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return undefined;
+
+          const groups: Record<string, string[]> = {
+            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+            'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+            'ui-vendor': [
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-dropdown-menu',
+              '@radix-ui/react-select',
+              '@radix-ui/react-tabs',
+            ],
+            'chart-vendor': ['recharts', 'd3'],
+          };
+
+          const normalised = id.replaceAll('\\', '/');
+          for (const [chunk, packages] of Object.entries(groups)) {
+            if (packages.some((pkg) => normalised.includes(`/node_modules/${pkg}/`))) {
+              return chunk;
+            }
+          }
+          return undefined;
         },
       },
     },

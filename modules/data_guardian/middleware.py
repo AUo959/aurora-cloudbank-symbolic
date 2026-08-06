@@ -4,6 +4,27 @@ FastAPI Middleware for Data Guardian
 Intercepts requests and responses to automatically detect and redact PII.
 
 Anchor: T1-EDG-001-MIDDLEWARE
+
+.. deprecated::
+    **DataGuardianMiddleware is not registered on any application.** The
+    middleware actually served in production is
+    ``src.middleware.pii_middleware.PIIMiddleware`` (see
+    ``api/aurora_api.py``); this class is reachable only from
+    ``modules.data_guardian`` re-exports and ``tests/test_data_guardian.py``.
+
+    Do not adopt it without fixing ``_scan_response`` first. It carries the
+    consume-then-return defect that #1344 fixed in ``PIIMiddleware``: it drains
+    ``response.body_iterator`` into ``body_bytes`` and then, on *any*
+    exception — and also when ``body_bytes`` is empty — falls through to
+    ``return response, []``. That response object is exhausted, so the client
+    receives an empty or partial body under the original status and headers. It
+    also copies ``Content-Length`` from the pre-redaction body, and swallows
+    every failure with a bare ``except Exception: pass``, so a redactor that
+    always throws is indistinguishable from one that finds nothing.
+
+    Left in place rather than repaired because repairing unregistered code
+    invites its adoption; prefer ``PIIMiddleware``, which is tested for these
+    exact failure modes in ``tests/test_pii_middleware_failure_safe.py``.
 """
 
 import json

@@ -15,13 +15,46 @@ jobs:
       with:
         fetch-depth: 0  # Need full history
     
+    # Establish what to compare against.
+    #
+    # `github.event.before` is a PUSH field. On a pull_request `synchronize`
+    # event -- which is what the "Update branch" button fires -- it is the
+    # branch's PREVIOUS head, while `github.sha` is the new merge commit. The
+    # diff between them therefore contains everything `main` did since the
+    # branch diverged, including every file main deleted in that window. The
+    # guard then attributed those deletions to the branch and blocked the PR.
+    #
+    # #1306 tripped this with "150 files deleted" while its actual diff was
+    # +404/-211 across 7 files, deleting nothing. The older a branch is, the
+    # more likely syncing it trips the guard -- so the check penalised exactly
+    # the branches that most needed updating. See #1400.
+    #
+    # For a pull_request, the merge base with the target branch gives the PR's
+    # own net change. For a push to main, `event.before` remains correct.
+    - name: Determine comparison range
+      id: range
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          git fetch --no-tags origin "${{ github.base_ref }}" >/dev/null 2>&1 || true
+          BASE=$(git merge-base "origin/${{ github.base_ref }}" HEAD)
+        else
+          BASE="${{ github.event.before }}"
+          # All-zeros is a newly created branch with no prior state to diff.
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            BASE=$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)
+          fi
+        fi
+        echo "base=$BASE" >> "$GITHUB_OUTPUT"
+        echo "Comparing $BASE..HEAD (event: ${{ github.event_name }})"
+
     - name: Check for mass deletions
       run: |
         echo "🔍 Checking for catastrophic changes..."
         
-        # Count deletions in this push
-        DELETED=$(git diff --name-status ${{ github.event.before }}..${{ github.sha }} | grep -c "^D" || true)
-        TOTAL=$(git diff --name-status ${{ github.event.before }}..${{ github.sha }} | wc -l || echo "0")
+        BASE="${{ steps.range.outputs.base }}"
+        # Count deletions attributable to this change only
+        DELETED=$(git diff --name-status "$BASE"..HEAD | grep -c "^D" || true)
+        TOTAL=$(git diff --name-status "$BASE"..HEAD | wc -l || echo "0")
         
         echo "📊 Changes in this push:"
         echo "   Deleted: $DELETED files"
@@ -41,7 +74,7 @@ jobs:
         # Warn for significant deletions
         if [ "$DELETED" -gt 10 ]; then
           echo "⚠️  Warning: $DELETED files deleted in this push"
-          git diff --name-status ${{ github.event.before }}..${{ github.sha }} | grep "^D"
+          git diff --name-status "${{ steps.range.outputs.base }}"..HEAD | grep "^D"
         fi
         
         echo "✅ No catastrophic changes detected"

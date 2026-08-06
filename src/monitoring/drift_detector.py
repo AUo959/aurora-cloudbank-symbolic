@@ -19,6 +19,8 @@ from src.utils.schema_migrations import get_registry
 
 from src.utils.atomic_io import atomic_write_json, append_jsonl
 
+from src.core.logging_security import safe_str
+
 logger = logging.getLogger(__name__)
 
 
@@ -170,7 +172,7 @@ class DriftDetector:
         
         logger.info(
             "Baseline established for %s:%s - mean=%.2f, std=%.2f",
-            agent_id, metric_name, mean, std_dev
+            safe_str(agent_id), safe_str(metric_name), mean, std_dev
         )
         
         return baseline
@@ -197,7 +199,7 @@ class DriftDetector:
         key = f"{agent_id}:{metric_name}"
         
         if key not in self.baselines:
-            logger.warning("No baseline for %s:%s - cannot detect drift", agent_id, metric_name)
+            logger.warning("No baseline for %s:%s - cannot detect drift", safe_str(agent_id), safe_str(metric_name))
             return None
         
         baseline = self.baselines[key]
@@ -260,7 +262,7 @@ class DriftDetector:
             self.alerts.append(alert)
             logger.warning(
                 "Drift detected: %s:%s [%s] - current=%.2f, baseline=%.2f",
-                agent_id, metric_name, alert.level.value, current_value, baseline.mean
+                safe_str(agent_id), safe_str(metric_name), alert.level.value, current_value, baseline.mean
             )
         
         return alert
@@ -364,7 +366,7 @@ class DriftDetector:
                 record = get_registry().stamp(alert_dict, "drift_alert")
                 append_jsonl(self.alerts_path, record)
         except Exception as e:
-            logger.error("Failed to persist drift alert: %s", e)
+            logger.error("Failed to persist drift alert: %s", safe_str(e))
 
     def _load_alerts(self):
         """Load persisted alerts from the shared alert store."""
@@ -380,7 +382,7 @@ class DriftDetector:
                 ]
             logger.info("Loaded %d drift alerts", len(self.alerts))
         except Exception as e:
-            logger.error("Failed to load drift alerts: %s", e)
+            logger.error("Failed to load drift alerts: %s", safe_str(e))
 
     def _rewrite_alerts(self):
         """Rewrite the shared alert store after explicit mutation."""
@@ -403,7 +405,7 @@ class DriftDetector:
                     tmp.unlink(missing_ok=True)
                     raise
         except Exception as e:
-            logger.error("Failed to rewrite drift alerts: %s", e)
+            logger.error("Failed to rewrite drift alerts: %s", safe_str(e))
 
     def _alert_from_dict(self, data: Dict[str, Any]) -> DriftAlert:
         """Restore a drift alert from persisted data."""

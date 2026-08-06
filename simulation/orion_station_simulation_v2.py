@@ -13,6 +13,23 @@ Key Improvements from v1.0:
 - Phase 1 role integration
 
 Symbolic Tag: s.tag::sim.orion.v2
+
+STATUS (corrected 2026-08-03, #1132): **canonical implementation.**
+
+Supersedes `orion_station_simulation.py`: loads characters from
+`L1_CANON_CHARACTER_ROSTER.md` rather than hardcoded profiles, supports the 40+
+roster, and adds collaboration bonuses.
+
+Evidence this is the maintained one, not merely the newer name: it received a
+behavioural bug fix on 2026-06-12 (#1023, "emit emergent events after task
+assignment in tick()"), while v1 has had no substantive change since the
+2025-11-14 bulk restore.
+
+The repository has not finished switching over. `ORION_SIMULATION_PROTOCOL.md`,
+`tests/test_orion_simulation.py` and `interactive_collab_demo.py` still reach
+for v1; this file is imported only inside one test function behind a `sys.path`
+insert. Completing that rewiring is the remaining work on #1132.
+
 """
 
 from __future__ import annotations

@@ -12,6 +12,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 K8S_DIR="$PROJECT_ROOT/k8s"
+source "$SCRIPT_DIR/lib/k8s_manifest_validation.sh"
 NAMESPACE="${AURORA_NAMESPACE:-aurora-cloudbank}"
 REGISTRY="${CONTAINER_REGISTRY:-ghcr.io}"
 IMAGE_NAME="${IMAGE_NAME:-aurora-cloudbank-symbolic}"
@@ -84,7 +85,7 @@ setup_namespace() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating namespace and RBAC manifest"
-        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | sed -n '1,50p'
+        validate_k8s_manifest_offline "$manifest"
     else
         kubectl apply -f "$manifest"
     fi
@@ -100,7 +101,7 @@ deploy_config() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating ConfigMap and Secret manifest"
-        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | sed -n '1,80p'
+        validate_k8s_manifest_offline "$manifest"
     else
         kubectl apply -f "$manifest"
     fi
@@ -120,7 +121,7 @@ deploy_relays() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating updated deployment manifest"
-        kubectl apply -f "$temp_manifest" --dry-run=client --validate=false -o yaml | sed -n '1,100p'
+        validate_k8s_manifest_offline "$temp_manifest"
     else
         kubectl apply -f "$temp_manifest"
 

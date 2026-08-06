@@ -402,7 +402,8 @@ async def test_glyph_core() -> Dict[str, Any]:
         result = await glyph_core.test_generation()
         return {"healthy": bool(result.get("success")), "test_result": result}
     except Exception as exc:  # pragma: no cover - defensive path
-        return {"healthy": False, "error": str(exc)}
+        logger.error("Glyph core health probe failed (%s)", type(exc).__name__)
+        return {"healthy": False, "error": "internal error"}
 
 
 async def test_quantum_renderer() -> Dict[str, Any]:
@@ -410,7 +411,8 @@ async def test_quantum_renderer() -> Dict[str, Any]:
         result = await quantum_renderer.test_render()
         return {"healthy": bool(result.get("success")), "test_result": result}
     except Exception as exc:  # pragma: no cover - defensive path
-        return {"healthy": False, "error": str(exc)}
+        logger.error("Quantum renderer health probe failed (%s)", type(exc).__name__)
+        return {"healthy": False, "error": "internal error"}
 
 
 async def test_plugin_system() -> Dict[str, Any]:
@@ -418,7 +420,8 @@ async def test_plugin_system() -> Dict[str, Any]:
         plugin_count = len(plugin_system.list_plugins())
         return {"healthy": True, "plugin_count": plugin_count}
     except Exception as exc:  # pragma: no cover - defensive path
-        return {"healthy": False, "error": str(exc)}
+        logger.error("Plugin system health probe failed (%s)", type(exc).__name__)
+        return {"healthy": False, "error": "internal error"}
 
 
 async def test_cache_system() -> Dict[str, Any]:
@@ -426,7 +429,8 @@ async def test_cache_system() -> Dict[str, Any]:
         stats = await glyph_cache.get_stats()
         return {"healthy": True, "stats": stats}
     except Exception as exc:  # pragma: no cover - defensive path
-        return {"healthy": False, "error": str(exc)}
+        logger.error("Cache system health probe failed (%s)", type(exc).__name__)
+        return {"healthy": False, "error": "internal error"}
 
 
 def test_tool_registry() -> Dict[str, Any]:
@@ -434,7 +438,8 @@ def test_tool_registry() -> Dict[str, Any]:
         tools = tool_registry.list_manifests()
         return {"healthy": bool(tools), "tool_count": len(tools)}
     except Exception as exc:  # pragma: no cover - defensive path
-        return {"healthy": False, "error": str(exc)}
+        logger.error("Tool registry health probe failed (%s)", type(exc).__name__)
+        return {"healthy": False, "error": "internal error"}
 
 
 def _verify_token(token: HTTPAuthorizationCredentials | None) -> None:

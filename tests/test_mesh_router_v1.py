@@ -73,8 +73,19 @@ def test_alias_resolution_and_live_fallback(tmp_path: Path) -> None:
         result = await runtime.send_message(
             MeshMessageRequest(to="Alex Thorne", content="Need a routing decision before the next checkpoint.")
         )
-        await asyncio.sleep(0.08)
-        history = runtime.get_channel_history("private:captain:alex")["events"]
+        # Poll for the terminal event rather than sleeping a fixed interval.
+        # The six events below are emitted asynchronously, so a fixed wait races
+        # the pipeline: on a loaded runner only the first four had landed, which
+        # failed an unrelated PR (#1367, a one-line model-identifier change).
+        # Waiting on the condition keeps the assertion strict while removing the
+        # dependency on how fast the runner happens to be.
+        history = []
+        deadline = time.monotonic() + 10.0
+        while time.monotonic() < deadline:
+            history = runtime.get_channel_history("private:captain:alex")["events"]
+            if any(event["event_type"] == "agent_reply" for event in history):
+                break
+            await asyncio.sleep(0.01)
         return result, history
 
     result, history = asyncio.run(scenario())

@@ -81,6 +81,25 @@ class ModelCapabilities:
     latency_avg_ms: int = 1000
     available: bool = True
 
+    # Machine-readable verification claim, replacing the "# Verified live"
+    # comment convention. A comment is a *claim*; nothing can falsify it, which
+    # is how a model retired on 2025-10-28 kept its "Verified live" tag while
+    # being the only selectable Anthropic entry (#1329).
+    #
+    # verified_on: ISO date (YYYY-MM-DD) the entry was last checked against the
+    #     source named below. Empty means never verified.
+    # verified_source: where the check was made --
+    #     "models-api"   the provider's own Models endpoint (authoritative)
+    #     "pricing-docs" published pricing pages; the Models API exposes no cost
+    #     "manual"       a human read the catalog; weakest, still dated
+    #     "unverified"   deliberately unchecked; must not be selectable
+    #
+    # tests/test_model_catalog_freshness.py fails the build when a selectable
+    # entry's claim ages past the threshold, which puts a clock on the pricing
+    # numbers no API can confirm.
+    verified_on: str = ""
+    verified_source: str = "unverified"
+
 
 @dataclass
 class AIRequest:
@@ -145,6 +164,8 @@ class UnifiedAIInterface:
             mathematical_strength=10,
             cost_per_1k_tokens=0.005,  # $5 / 1M input tokens
             latency_avg_ms=1200,
+            verified_on="2026-07-25",
+            verified_source="manual",
         ),
         AIModel.CLAUDE_SONNET_5: ModelCapabilities(
             model=AIModel.CLAUDE_SONNET_5,
@@ -159,6 +180,8 @@ class UnifiedAIInterface:
             mathematical_strength=9,
             cost_per_1k_tokens=0.003,  # $3 / 1M input tokens
             latency_avg_ms=800,
+            verified_on="2026-07-25",
+            verified_source="manual",
         ),
         AIModel.GPT_4: ModelCapabilities(
             model=AIModel.GPT_4,
@@ -171,6 +194,8 @@ class UnifiedAIInterface:
             mathematical_strength=8,
             cost_per_1k_tokens=0.03,
             latency_avg_ms=1500,
+            verified_on="2026-07-25",
+            verified_source="manual",
         ),
         AIModel.GPT_4O: ModelCapabilities(
             model=AIModel.GPT_4O,
@@ -184,6 +209,8 @@ class UnifiedAIInterface:
             mathematical_strength=8,
             cost_per_1k_tokens=0.005,
             latency_avg_ms=600,
+            verified_on="2026-07-25",
+            verified_source="manual",
         ),
         AIModel.GPT_5: ModelCapabilities(
             model=AIModel.GPT_5,
@@ -199,6 +226,8 @@ class UnifiedAIInterface:
             cost_per_1k_tokens=0.02,  # Expected pricing
             latency_avg_ms=1000,
             available=False,  # Not yet released
+            verified_on="",
+            verified_source="unverified",
         ),
         AIModel.GPT_5_CODEX: ModelCapabilities(
             model=AIModel.GPT_5_CODEX,
@@ -214,6 +243,8 @@ class UnifiedAIInterface:
             cost_per_1k_tokens=0.025,  # Expected pricing
             latency_avg_ms=900,
             available=False,  # Not yet released
+            verified_on="",
+            verified_source="unverified",
         ),
     }
 

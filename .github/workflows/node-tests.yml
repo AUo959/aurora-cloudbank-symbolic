@@ -1,0 +1,73 @@
+---
+name: Node Tests
+# The root package.json has run 51 Node tests under `npm run test:node` (plus
+# `npm run test:web`) and NO workflow has ever invoked either one — the same gap
+# frontend/ had before .github/workflows/frontend-ci.yml. 51 passing tests that
+# CI never runs are not a gate; they are documentation that happens to execute.
+#
+# #1362 reported both commands as broken. Re-checked on 2026-08-02: both exit 0
+# from a clean clone once dependencies are installed. The original report came
+# from an environment without node_modules, so `express` and friends could not
+# resolve. The stale part of that issue is the failure; the real and still-open
+# part is that nothing runs them.
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tests/node/**'
+      - 'tests/web/**'
+      - 'src/**/*.js'
+      - 'middleware/**/*.js'
+      - '.github/workflows/node-tests.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tests/node/**'
+      - 'tests/web/**'
+      - 'src/**/*.js'
+      - 'middleware/**/*.js'
+      - '.github/workflows/node-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node-tests:
+    name: "Node and web tests"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v5.0.0
+        with:
+          node-version: '22'          # package.json engines: node 22.x
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # --ignore-scripts: the root postinstall is only an echo, and skipping
+      # lifecycle scripts keeps a compromised transitive dependency from
+      # executing at install time. Verified both suites pass without them.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      # Blocking. 51 tests across the bridge, mesh, command-node, PAS and
+      # session-flow surfaces.
+      - name: Node tests
+        run: npm run test:node
+
+      # Blocking, but thin: tests/web/test-web-components.js is a single test.
+      # It is wired here so the command cannot rot unnoticed the way it did
+      # before; broadening the web coverage is tracked separately on #1362.
+      - name: Web component tests
+        run: npm run test:web

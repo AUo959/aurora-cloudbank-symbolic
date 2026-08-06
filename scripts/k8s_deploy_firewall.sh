@@ -12,6 +12,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 K8S_DIR="$PROJECT_ROOT/k8s"
+source "$SCRIPT_DIR/lib/k8s_manifest_validation.sh"
 NAMESPACE="${AURORA_NAMESPACE:-aurora-cloudbank}"
 DRY_RUN="${DRY_RUN:-false}"
 
@@ -81,7 +82,7 @@ deploy_network_policies() {
 
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Validating namespace, RBAC, and network policy manifest"
-        kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml | sed -n '1,80p'
+        validate_k8s_manifest_offline "$manifest"
 
         # Show NetworkPolicy resources while consuming the complete input.
         log_info "NetworkPolicy resources that would be deployed:"
@@ -124,7 +125,7 @@ deploy_ingress() {
     if [[ -f "$ingress_file" ]]; then
         if [[ "$DRY_RUN" == "true" ]]; then
             log_info "[DRY-RUN] Validating Ingress manifest: $ingress_file"
-            kubectl apply -f "$ingress_file" --dry-run=client --validate=false -o yaml | sed -n '1,50p'
+            validate_k8s_manifest_offline "$ingress_file"
         else
             # Check if ingress-nginx is available
             if kubectl get ingressclass nginx &> /dev/null; then

@@ -8,6 +8,23 @@ This applies even if you believe you already know the answer.
 
 ---
 
+## Authority Boundary
+
+CanonRec is the cross-repository authority source. This index maps the
+CloudBank documents and runtime mirrors that consume or present that canon; it
+does not make CloudBank the sole authority repository.
+
+| Topic | Governing Document |
+| --- | --- |
+| CanonRec source revision, mirror hashes, and sync boundary | `docs/CANON_PROVENANCE.md` |
+| Machine-readable provenance receipt | `config/canon_provenance.json` |
+| CloudBank runtime canon consistency gate | `tests/test_canon_consistency.py` |
+
+The staff-registry authority remains explicitly unreconciled between CanonRec
+and CloudBank. Do not resolve that conflict from this index alone.
+
+---
+
 ## Architecture & Layers
 
 | Topic | Authoritative Document |

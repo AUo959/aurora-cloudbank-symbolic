@@ -18,8 +18,9 @@ RUN useradd -m -u 10001 clouduser
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-hashed.txt ./
+RUN python -m pip install --no-cache-dir --only-binary=:all: --require-hashes \
+    -r requirements-hashed.txt
 
 # Copy source files
 COPY api/aurora_gui_cloudhub_fastapi.py ./aurora_gui_cloudhub_fastapi.py

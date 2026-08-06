@@ -23,6 +23,21 @@ VERSION: 1.0
 DATE: 2025-11-09
 AUTHOR: Aurora-GUMAS Simulation Team
 VERIFIED BY: STARLING_AU (RELAY_004)
+
+STATUS (corrected 2026-08-03, #1132): **maintained copy; prefer this one.**
+
+An earlier note here framed this file and `triplex_handshake_simulation.py` as
+encoding competing drift figures. **That was wrong.**
+`NARRATIVE_CYCLE_01_REFLECTION_EVENT.md` records both, in sequence: "Drift
+Variance: +0.004 (peak) → 0.000 (restored)". Both files use Δ 0.000 as their
+baseline and share identical constants; both expose the same eleven top-level
+names. See the matching note in the sibling.
+
+The real distinction is maintenance: the sprint pass of 2025-11-12 (#321/#326)
+modified only this file, so the sibling never received it.
+
+Neither is imported by any module or test, so nothing is wired to either.
+
 """
 
 import logging
@@ -452,7 +467,7 @@ def plot_results(results: Dict[str, Any], show: bool = True, save_path: str = No
     
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        logger.info("Visualization saved to: {save_path}")
+        logger.info("Visualization saved to: %s", save_path)
     
     if show:
         plt.show()

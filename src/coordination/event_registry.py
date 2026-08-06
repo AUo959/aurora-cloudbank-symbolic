@@ -23,6 +23,8 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Set
 
+from src.core.logging_security import safe_str
+
 from src.coordination.task_utils import fire_and_forget as _fire_and_forget
 
 from src.coordination.event_models import (
@@ -113,7 +115,7 @@ class EventCoordinationRegistry:
         async with self._lock:
             # Validate event hasn't expired
             if event.is_expired():
-                logger.warning(f"Event {event.event_id} has expired, not publishing")
+                logger.warning("Event %s has expired, not publishing", safe_str(event.event_id))
                 return {"success": False, "error": "event_expired", "event_id": event.event_id}
 
             # Store event
@@ -133,7 +135,10 @@ class EventCoordinationRegistry:
             event.status = EventStatus.PROCESSING
 
             logger.info(
-                f"Event published: {event.event_type} from {event.source_agent_id} (priority: {event.priority})"
+                "Event published: %s from %s (priority: %s)",
+                safe_str(event.event_type),
+                safe_str(event.source_agent_id),
+                safe_str(event.priority),
             )
 
         # Deliver to subscribers (outside lock for better concurrency)
@@ -197,10 +202,10 @@ class EventCoordinationRegistry:
                 await asyncio.wait_for(task, timeout=timeout)
                 delivered_to.append(agent_id)
             except asyncio.TimeoutError:
-                logger.warning(f"Handler timeout for agent {agent_id}")
+                logger.warning("Handler timeout for agent %s", safe_str(agent_id))
                 failed.append(agent_id)
             except Exception as e:
-                logger.error(f"Handler error for agent {agent_id}: {e}")
+                logger.error("Handler error for agent %s: %s", safe_str(agent_id), safe_str(e))
                 failed.append(agent_id)
 
         # Update event delivery tracking
@@ -234,7 +239,7 @@ class EventCoordinationRegistry:
             else:
                 handler(event)
         except Exception as e:
-            logger.error(f"Handler invocation failed for agent {agent_id}: {e}")
+            logger.error("Handler invocation failed for agent %s: %s", safe_str(agent_id), safe_str(e))
             raise
 
     async def subscribe(
@@ -260,7 +265,7 @@ class EventCoordinationRegistry:
             if handler:
                 self._event_handlers[subscription.subscription_id].append(handler)
 
-            logger.info(f"Agent {agent_id} subscribed with filter: {event_filter}")
+            logger.info("Agent %s subscribed with filter: %s", safe_str(agent_id), safe_str(event_filter))
 
             return {
                 "success": True,
@@ -290,7 +295,7 @@ class EventCoordinationRegistry:
             if subscription_id in self._event_handlers:
                 del self._event_handlers[subscription_id]
 
-            logger.info(f"Subscription {subscription_id} cancelled")
+            logger.info("Subscription %s cancelled", safe_str(subscription_id))
 
             return {"success": True, "subscription_id": subscription_id}
 
@@ -348,7 +353,7 @@ class EventCoordinationRegistry:
 
                 events.append(event.to_dict())
 
-            logger.info(f"Replayed {len(events)} events for agent {agent_id}")
+            logger.info("Replayed %d events for agent %s", len(events), safe_str(agent_id))
             return events
 
     async def detect_conflict(
@@ -388,7 +393,7 @@ class EventCoordinationRegistry:
                     self._conflicts[conflict.conflict_id] = conflict
                     self._metrics["conflicts_detected"] += 1
 
-                    logger.warning(f"Conflict detected: {conflict.description}")
+                    logger.warning("Conflict detected: %s", safe_str(conflict.description))
 
                     # Prepare conflict event for publishing outside lock
                     conflict_event_to_publish = Event(
@@ -435,7 +440,7 @@ class EventCoordinationRegistry:
                 context_tag="COORD_LOCK",
             )
 
-            logger.info(f"Lock acquired by {agent_id} on {resource_id}")
+            logger.info("Lock acquired by %s on %s", safe_str(agent_id), safe_str(resource_id))
 
         # Publish lock event outside lock to prevent deadlock
         if lock_event_to_publish:
@@ -482,7 +487,7 @@ class EventCoordinationRegistry:
                 context_tag="COORD_LOCK",
             )
 
-            logger.info(f"Lock released by {agent_id} on {resource_id}")
+            logger.info("Lock released by %s on %s", safe_str(agent_id), safe_str(resource_id))
 
         # Publish unlock event outside lock to prevent deadlock
         if unlock_event_to_publish:
@@ -496,7 +501,7 @@ class EventCoordinationRegistry:
         async with self._lock:
             if resource_id in self._resource_locks and self._resource_locks[resource_id] == agent_id:
                 del self._resource_locks[resource_id]
-                logger.info(f"Lock auto-released on {resource_id} after {ttl_seconds}s TTL")
+                logger.info("Lock auto-released on %s after %ss TTL", safe_str(resource_id), ttl_seconds)
 
     async def resolve_conflict(self, conflict_id: str, strategy: str, resolved_by: str) -> Dict[str, Any]:
         """
@@ -533,7 +538,7 @@ class EventCoordinationRegistry:
                 context_tag="COORD_CONFLICT",
             )
 
-            logger.info(f"Conflict {conflict_id} resolved using strategy: {strategy}")
+            logger.info("Conflict %s resolved using strategy: %s", safe_str(conflict_id), safe_str(strategy))
 
         # Publish resolution event outside lock to prevent deadlock
         if resolution_event_to_publish:
@@ -565,7 +570,7 @@ class EventCoordinationRegistry:
                 context_tag="COORD_WORKFLOW",
             )
 
-            logger.info(f"Workflow {workflow.name} created by {workflow.created_by}")
+            logger.info("Workflow %s created by %s", safe_str(workflow.name), safe_str(workflow.created_by))
 
         # Publish workflow event outside lock to prevent deadlock
         if workflow_event_to_publish:

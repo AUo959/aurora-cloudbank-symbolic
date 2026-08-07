@@ -17,6 +17,8 @@ from typing import Dict, List, Optional, Any, Callable
 
 from src.utils.atomic_io import atomic_write_json, append_jsonl
 
+from src.core.logging_security import safe_path, safe_str
+
 logger = logging.getLogger(__name__)
 
 
@@ -210,10 +212,10 @@ class EthicsEngine:
                         )
                         self.rules[rule.id] = rule
             
-            logger.info("Loaded %d rules from %s", len(self.rules), rules_path)
+            logger.info("Loaded %d rules from %s", len(self.rules), safe_path(rules_path))
             
         except Exception as e:
-            logger.error("Failed to load rules from %s: %s", rules_path, e)
+            logger.exception("Failed to load rules from %s: %s", safe_path(rules_path), safe_str(e))
             self._load_default_rules()
     
     def _map_category(self, category_name: str) -> RuleCategory:
@@ -237,7 +239,7 @@ class EthicsEngine:
             evaluator: Function that takes context and returns boolean
         """
         self.custom_evaluators[condition] = evaluator
-        logger.info("Registered custom evaluator for condition: %s", condition)
+        logger.info("Registered custom evaluator for condition: %s", safe_str(condition))
     
     def evaluate_action(
         self,
@@ -264,7 +266,7 @@ class EthicsEngine:
         if violations:
             logger.warning(
                 "Ethics violations detected for %s: %d violations",
-                context.agent_id, len(violations)
+                safe_str(context.agent_id), len(violations)
             )
         
         return violations
@@ -455,7 +457,7 @@ class EthicsEngine:
             with self._write_lock:
                 append_jsonl(self.violations_path, violation.to_dict())
         except Exception as e:
-            logger.error("Failed to persist ethics violation: %s", e)
+            logger.exception("Failed to persist ethics violation: %s", safe_str(e))
 
     def _load_violations(self):
         """Load persisted violations from the shared violation store."""
@@ -471,7 +473,7 @@ class EthicsEngine:
                 ]
             logger.info("Loaded %d ethics violations", len(self.violations))
         except Exception as e:
-            logger.error("Failed to load ethics violations: %s", e)
+            logger.exception("Failed to load ethics violations: %s", safe_str(e))
 
     def _rewrite_violations(self):
         """Rewrite the shared violation store after explicit mutation."""
@@ -494,7 +496,7 @@ class EthicsEngine:
                     tmp.unlink(missing_ok=True)
                     raise
         except Exception as e:
-            logger.error("Failed to rewrite ethics violations: %s", e)
+            logger.exception("Failed to rewrite ethics violations: %s", safe_str(e))
 
     def _violation_from_dict(self, data: Dict[str, Any]) -> EthicsViolation:
         """Restore a violation from persisted data."""
@@ -527,13 +529,13 @@ class EthicsEngine:
     def add_rule(self, rule: EthicsRule):
         """Add a new rule to the engine"""
         self.rules[rule.id] = rule
-        logger.info("Added rule: %s (%s)", rule.id, rule.name)
+        logger.info("Added rule: %s (%s)", safe_str(rule.id), safe_str(rule.name))
     
     def remove_rule(self, rule_id: str):
         """Remove a rule from the engine"""
         if rule_id in self.rules:
             del self.rules[rule_id]
-            logger.info("Removed rule: %s", rule_id)
+            logger.info("Removed rule: %s", safe_str(rule_id))
     
     def export_rules(self) -> Dict[str, Any]:
         """Export all rules for persistence"""

@@ -4,10 +4,11 @@ Covers: unknown tool, known tool dispatch, exception sanitization, list_tools.
 """
 
 import json
+from importlib.metadata import version
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from mcp.types import TextContent, Tool
+from mcp.types import TextContent
 
 from connector.tools import TOOL_REGISTRY
 from connector.server import build_server
@@ -43,14 +44,24 @@ async def test_tool_registry_length():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.unit
+def test_mcp_v1_handler_registration_contract():
+    """The supported MCP v1 range must expose both connector handlers."""
+    from mcp.types import CallToolRequest, ListToolsRequest
+
+    sdk_version = version("mcp")
+    assert sdk_version.split(".", maxsplit=1)[0] == "1"
+
+    server = build_server()
+    assert server.request_handlers.get(ListToolsRequest) is not None
+    assert server.request_handlers.get(CallToolRequest) is not None
+
+
 def _get_call_tool_handler():
     """
     Build a server instance and extract the call_tool handler so we can
     invoke it directly without starting a transport.
     """
-    from mcp.server import Server
-    from mcp.types import CallToolRequest, CallToolRequestParams
-
     server = build_server()
 
     async def dispatch(name: str, arguments: dict) -> list[TextContent]:
@@ -104,8 +115,8 @@ async def test_known_tool_dispatched():
 async def test_tool_exception_sanitized():
     """
     If a tool raises an exception, the error message in TextContent must
-    NOT expose the verbatim internal exception message (it is sanitised /
-    wrapped with 'ERROR executing').  The raw secret detail must not leak.
+    NOT expose the verbatim internal exception message. The raw secret detail
+    must not leak.
     """
     dispatch = _get_call_tool_handler()
 
@@ -119,20 +130,14 @@ async def test_tool_exception_sanitized():
 
     assert len(results) >= 1
     text = results[0].text
-    # server.py wraps exceptions as:
-    #   f"ERROR executing '{name}': {exc}"
-    # The raw exception message IS included in that wrapper, so we check
-    # that the wrapper prefix is present (i.e. not a bare traceback dump).
-    assert "ERROR" in text
-    # Confirm it is a controlled error response, not an unhandled exception
-    assert "executing" in text or "Unknown" in text or "ERROR" in text
+    assert text == "TOOL_EXECUTION_ERROR: tool 'aurora_get_state' failed; check server logs"
+    assert secret not in text
 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_list_tools_returns_all():
     """list_tools() handler must return Tool objects for all registered tools."""
-    from mcp.server import Server
     from mcp.types import ListToolsRequest
 
     server = build_server()

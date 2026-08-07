@@ -38,10 +38,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -50,8 +50,9 @@ jobs:
       # sync_queue.py itself has no third-party dependencies.
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install jsonschema pytest
+          python -m pip install --only-binary=:all: \
+            jsonschema==4.26.0 \
+            pytest==9.0.3
 
       - name: Validate queue.json exists and is valid JSON
         run: |

@@ -15,6 +15,8 @@ from modules.gumas.naming import (
     load_registry,
 )
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -40,7 +42,6 @@ def parse_args() -> argparse.Namespace:
         type=int,
         help="Select candidate index and emit a final naming receipt",
     )
-    parser.add_argument("--output", type=Path)
     return parser.parse_args()
 
 
@@ -60,7 +61,11 @@ def main() -> int:
         seed_hint=args.seed,
         candidate_count=max(1, args.count),
     )
-    service = NameService(load_registry(args.registry))
+    try:
+        registry = load_registry(args.registry, allowed_root=REPO_ROOT)
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f"invalid registry: {exc}") from exc
+    service = NameService(registry)
     source_registry_digest = service.registry.digest
     candidates = service.resolve_candidates(request)
     for candidate in candidates:
@@ -81,10 +86,7 @@ def main() -> int:
         payload = {"naming_receipt": selected.naming_receipt()}
 
     text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
-    if args.output:
-        args.output.write_text(text, encoding="utf-8")
-    else:
-        print(text, end="")
+    print(text, end="")
     return 0
 
 

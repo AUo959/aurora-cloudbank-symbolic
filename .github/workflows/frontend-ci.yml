@@ -1,0 +1,85 @@
+---
+name: Frontend CI
+# frontend/ is a full Vite/React application with its own package.json, and
+# until now no workflow referenced it — zero of 58 jobs. Dependabot merged into
+# it continuously (#1318 alone carried 39 updates) with nothing verifying the
+# result, so the app had been unbuildable for some time without anyone noticing:
+# Tailwind's PostCSS plugin had moved packages, Vite 8 no longer accepted the
+# object form of manualChunks, the v3 @tailwind directives no longer loaded the
+# theme config, and 15 TypeScript errors had accumulated.
+#
+# type-check and build are blocking, because they now pass and they are what
+# catches the next unverified dependency bump. Lint is advisory only because
+# ESLint is not wired to the TypeScript parser and reports parse errors on every
+# .ts/.tsx file — a config defect tracked in #1340, not a code defect.
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  frontend:
+    name: "Frontend build and type-check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v5.0.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # `npm ci` runs the "prepare" script, which invokes husky; husky exits
+      # non-zero when it cannot find .git relative to the working directory.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      # Blocking: this is the gate that catches a dependency bump breaking the
+      # type surface.
+      - name: Type-check
+        run: npm run type-check
+
+      # Blocking: catches PostCSS/bundler/config breakage that type-check cannot
+      # see, which is exactly how the Tailwind and Vite majors slipped through.
+      - name: Build
+        run: npm run build
+
+      # Advisory: ESLint currently parses .ts/.tsx with the default parser and
+      # reports "The keyword 'interface' is reserved" and "Unexpected token <"
+      # across the codebase. That is the lint setup, not the source. Tracked in
+      # #1340; promote this to blocking once the baseline is truthful.
+      - name: Lint (advisory; tracked in #1340)
+        continue-on-error: true
+        run: npm run lint
+
+      # Blocking, but currently vacuous: no *.test.* or *.spec.* files exist yet.
+      # --passWithNoTests keeps it green until they do, at which point this step
+      # starts enforcing them without needing to be edited.
+      #
+      # --no-install so npx can only run the vitest already pinned by
+      # package-lock.json; without it npx will silently fetch and execute an
+      # unpinned release when the local one is missing.
+      - name: Unit tests
+        run: npx --no-install vitest run --passWithNoTests

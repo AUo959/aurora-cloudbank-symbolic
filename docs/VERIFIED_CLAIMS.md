@@ -52,21 +52,39 @@ for a minimal install, not a ceiling.
 pytest -q
 ```
 
-Observed on a clean clone with core requirements only:
+Observed on a clean clone with core requirements only, on macOS (Darwin 25.5.0,
+CPython 3.12.13):
 
 | | count |
 |---|---|
-| passed | **3,008** |
-| failed | 36 |
-| errors | 27 |
+| passed | **3,146** |
+| failed | 0 |
+| errors | 0 |
 | skipped | 123 |
-| duration | ~5 min 30 s |
+| xfailed | 9 |
+| xpassed | 2 |
+| duration | ~5 min 50 s |
 
-The 36 failures and 27 errors are **environmental, not logic**, and are honest
-about it — a hardcoded `/var/lib/nemo_snapshots` path, absent Redis, and
-unconfigured auth users account for most of them. They are listed here rather
-than hidden because a reader will hit them, and discovering them unannounced is
-worse than being told.
+An earlier revision of this page recorded 3,008 passed with 36 failures and 27
+errors, described as environmental rather than logic. That was accurate when
+written and is no longer: the causes were fixed rather than explained away — a
+hardcoded `/var/lib/nemo_snapshots` snapshot path, a module-level auth-users
+build that stopped `/api/auth/` registering at all, a missing CSRF-token
+issuance endpoint, an async Redis client constructed without a liveness check,
+and a path validator that compared an unresolved caller path against a resolved
+root and so rejected every macOS temp directory.
+
+The 123 skips are honest skips — optional dependencies (`aiohttp`, `z3`,
+`pytest-benchmark`), connector integration tests that need a running API and a
+token, and one Cryptography-availability branch that cannot be exercised while
+Cryptography is installed. Each states its reason in the skip message.
+
+The 2 xpassed entries are tests marked environment-specific that happen to pass
+here; they are left marked because they depend on a working `.venv/bin/pip` and
+a devcontainer, neither of which is guaranteed.
+
+> Re-measure before citing. This table is a reading taken on one machine, not a
+> guarantee. `pytest -q` prints the same summary line in about six minutes.
 
 Fast path: `pytest -m unit`.
 

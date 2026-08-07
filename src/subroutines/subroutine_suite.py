@@ -19,6 +19,8 @@ from importlib.util import find_spec
 import json
 import re
 
+from src.core.logging_security import safe_str
+
 logger = logging.getLogger(__name__)
 
 
@@ -109,7 +111,7 @@ class AnomalyDetectionEngine:
                 
                 logger.warning(
                     "Anomaly detected: metric=%s deviation=%.2f",
-                    metric_name, deviation
+                    safe_str(metric_name), deviation
                 )
                 
                 # Send alert
@@ -125,7 +127,7 @@ class AnomalyDetectionEngine:
             return None
             
         except Exception as e:
-            logger.error("Anomaly detection failed: %s", str(e))
+            logger.error("Anomaly detection failed: %s", safe_str(e))
             return None
 
     async def _get_baseline(self, metric_name: str) -> Optional[Dict[str, float]]:
@@ -301,7 +303,7 @@ class KnowledgeBaseSyncManager:
         except Exception as e:
             results["sync_status"] = "failed"
             results["error"] = str(e)
-            logger.error("Knowledge base sync failed: %s", str(e))
+            logger.error("Knowledge base sync failed: %s", safe_str(e))
         
         return results
 
@@ -596,7 +598,7 @@ class DependencyHealthMonitor:
         except Exception as e:
             logger.error(
                 "Dependency health check failed: %s - %s",
-                dependency_name, str(e)
+                safe_str(dependency_name), safe_str(e)
             )
             return {
                 "dependency": dependency_name,
@@ -632,7 +634,7 @@ class DependencyHealthMonitor:
         
         logger.warning(
             "Circuit breaker opened for dependency: %s",
-            dependency_name
+            safe_str(dependency_name)
         )
         
         if self.alert_system:
@@ -725,7 +727,7 @@ class PerformanceProfiler:
             
             logger.warning(
                 "Slow operation detected: %s took %.2fms",
-                operation_name, duration_ms
+                safe_str(operation_name), duration_ms
             )
 
     def get_performance_report(self) -> Dict[str, Any]:

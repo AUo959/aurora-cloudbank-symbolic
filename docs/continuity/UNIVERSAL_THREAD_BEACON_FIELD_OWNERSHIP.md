@@ -34,7 +34,7 @@ Validation is bound to the complete parsed contents of that bundled schema, not 
 
 ```text
 specification: UTB-PS-001
-schema version: 1.0.0
+schema version: 0.1.0
 schema id: https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/continuity/universal_thread_beacon.schema.json
 ```
 
@@ -42,7 +42,7 @@ Future schema contents or versions require an explicit reader update and compati
 
 ## Profile scope
 
-Version 1.0.0 defines the `minimum` profile only. The name `full` remains reserved until its required manifests, policy records, integrity records, and completeness behavior are specified and tested. A beacon claiming `profile: full` fails validation in this version.
+Version 0.1.0 defines the `minimum` profile only. The name `full` remains reserved until its required manifests, policy records, integrity records, and completeness behavior are specified and tested. A beacon claiming `profile: full` fails validation in this version.
 
 ## Classification rule
 

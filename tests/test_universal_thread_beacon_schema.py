@@ -15,7 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = REPO_ROOT / "schemas" / "continuity" / "universal_thread_beacon.schema.json"
 EXAMPLE_PATH = REPO_ROOT / "docs" / "continuity" / "universal_thread_beacon.example.json"
 VALIDATOR_PATH = REPO_ROOT / "tools" / "continuity" / "validate_beacon.py"
-EXPECTED_CANONICAL_SHA256 = "7f2999044964283108b44cd739e40a16309d1d9aea3bcca78f03e5d85f9e6ed9"
+EXPECTED_CANONICAL_SHA256 = "d2b5b2c564c969d5bc177d6ebb81f50946f2b6c01f9e7f202b5b24c5e37422b6"
 
 
 def _load_validator_module():

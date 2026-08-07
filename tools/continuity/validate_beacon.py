@@ -17,7 +17,7 @@ from typing import Any
 import jsonschema
 
 SPECIFICATION_NAME = "UTB-PS-001"
-SUPPORTED_SCHEMA_VERSION = "1.0.0"
+SUPPORTED_SCHEMA_VERSION = "0.1.0"
 EXPECTED_SCHEMA_ID = (
     "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/"
     "main/schemas/continuity/universal_thread_beacon.schema.json"

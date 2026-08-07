@@ -16,18 +16,32 @@ import stat
 from pathlib import Path
 from typing import Optional, Union
 
+# Broken cryptography builds do not necessarily fail with ImportError
+# (e.g. pyo3 Rust panic from a missing _cffi_backend), so catch BaseException
+# here as modules/insight_ledger/secure_storage.py already does. Letting one of
+# those escape would break importers of this module rather than degrading to
+# CRYPTOGRAPHY_AVAILABLE = False.
 try:
     from cryptography.fernet import Fernet
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
     CRYPTOGRAPHY_AVAILABLE = True
-except ImportError:
+except BaseException:  # noqa: BLE001
     CRYPTOGRAPHY_AVAILABLE = False
 
 
 class SecureStorageError(Exception):
     """Exception raised for secure storage errors."""
     pass
+
+
+# Length of the random per-payload salt prepended to every ciphertext.
+SALT_BYTES = 16
+
+# OWASP's current floor for PBKDF2-HMAC-SHA256. The module previously used
+# 100_000, the 2018-era figure. Raising it cost nothing: the module has never
+# successfully encrypted anything, so there was no stored ciphertext to re-key.
+KDF_ITERATIONS = 600000
 
 
 class SecureStorage:
@@ -74,34 +88,29 @@ class SecureStorage:
         
         if not isinstance(master_key, bytes):
             master_key = master_key.encode('utf-8')
-        
-        # Derive encryption key using PBKDF2HMAC.
-        # This allows using passwords/passphrases as master keys.
-        #
-        # The salt is fixed so that the same master key derives the same cipher
-        # across processes -- without that, nothing written by one instance
-        # could ever be read back by another. A per-installation salt would be
-        # stronger, but requires somewhere to persist it; see #1438.
-        salt = b'aurora_cloudbank_salt_v1'
+
+        # Keep the master key; the cipher is derived per payload against that
+        # payload's own random salt (see _cipher_for). Building a single cipher
+        # in __init__ -- as this did before -- required a hardcoded salt, which
+        # let one precomputation attack every Aurora installation at once.
+        self._master_key = master_key
+
+    def _cipher_for(self, salt: bytes) -> "Fernet":
+        """Derive the Fernet cipher for a given salt.
+
+        Deriving from the master key is what makes ciphertext portable across
+        instances and processes. A previous version derived a key here and then
+        discarded it in favour of Fernet.generate_key(), which silently made
+        every instance's cipher random and unrecoverable.
+        """
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
             salt=salt,
-            # OWASP's current floor for PBKDF2-HMAC-SHA256. The previous 100_000
-            # was the 2018-era figure and is no longer sufficient. Raising it is
-            # free here: the module has never successfully encrypted anything,
-            # so there is no stored ciphertext to re-key. Costs ~280ms per
-            # instantiation, which is acceptable for a key-storage path.
-            iterations=600000,
+            iterations=KDF_ITERATIONS,
         )
-        derived_key = kdf.derive(master_key)
-
-        # Fernet wants a url-safe base64-encoded 32-byte key. Deriving one and
-        # then constructing the cipher from Fernet.generate_key() instead --
-        # as this did before -- silently discarded the master key and produced
-        # a fresh random cipher per instance, so encrypted data could never be
-        # decrypted again after the process exited.
-        self.cipher = Fernet(base64.urlsafe_b64encode(derived_key))
+        # Fernet wants a url-safe base64-encoded 32-byte key.
+        return Fernet(base64.urlsafe_b64encode(kdf.derive(self._master_key)))
     
     def encrypt_file(self, file_path: Union[str, Path], data: str) -> None:
         """
@@ -117,10 +126,9 @@ class SecureStorage:
         try:
             path = Path(file_path)
             
-            # Encrypt data
-            if isinstance(data, str):
-                data = data.encode('utf-8')
-            encrypted_data = self.cipher.encrypt(data)
+            # Encrypt data (salt-prefixed, so any instance with the same
+            # master key can read it back)
+            encrypted_data = self.encrypt_string(data)
             
             # Write encrypted data
             path.write_bytes(encrypted_data)
@@ -153,10 +161,8 @@ class SecureStorage:
             # Read encrypted data
             encrypted_data = path.read_bytes()
             
-            # Decrypt
-            decrypted_data = self.cipher.decrypt(encrypted_data)
-            
-            return decrypted_data.decode('utf-8')
+            # Decrypt (the salt travels in the first SALT_BYTES)
+            return self.decrypt_string(encrypted_data)
             
         except SecureStorageError:
             raise
@@ -166,29 +172,38 @@ class SecureStorage:
     def encrypt_string(self, data: str) -> bytes:
         """
         Encrypt a string and return encrypted bytes.
-        
+
+        The returned payload is ``salt || fernet_token``. Carrying the salt
+        alongside the ciphertext is what lets a fresh random salt be used per
+        payload while keeping the result readable by any instance holding the
+        same master key.
+
         Args:
             data: String to encrypt
-            
+
         Returns:
-            Encrypted bytes
+            Encrypted bytes, prefixed with the salt used to derive the key
         """
         if isinstance(data, str):
             data = data.encode('utf-8')
-        return self.cipher.encrypt(data)
-    
+        salt = os.urandom(SALT_BYTES)
+        return salt + self._cipher_for(salt).encrypt(data)
+
     def decrypt_string(self, encrypted_data: bytes) -> str:
         """
         Decrypt bytes and return string.
-        
+
         Args:
-            encrypted_data: Encrypted bytes
-            
+            encrypted_data: Encrypted bytes as produced by encrypt_string
+
         Returns:
             Decrypted string
+
+        Raises:
+            InvalidToken: If the payload is malformed or the key is wrong
         """
-        decrypted = self.cipher.decrypt(encrypted_data)
-        return decrypted.decode('utf-8')
+        salt, token = encrypted_data[:SALT_BYTES], encrypted_data[SALT_BYTES:]
+        return self._cipher_for(salt).decrypt(token).decode('utf-8')
     
     @staticmethod
     def validate_storage_path(file_path: Union[str, Path]) -> Path:

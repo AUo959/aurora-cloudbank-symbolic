@@ -203,10 +203,15 @@ class TestKeyDerivation:
         if not CRYPTOGRAPHY_AVAILABLE:
             pytest.skip("Cryptography library not available")
 
+        from cryptography.fernet import InvalidToken
+
         blob = SecureStorage(master_key=b"first_master_key_value").encrypt_string("secret")
         other = SecureStorage(master_key=b"second_master_key_value")
 
-        with pytest.raises(Exception):
+        # Assert the specific failure, not just "something raised" -- a broad
+        # Exception would also pass if the ciphertext were malformed for an
+        # unrelated reason, which is not what this test is about.
+        with pytest.raises(InvalidToken):
             other.decrypt_string(blob)
 
     def test_file_written_by_one_instance_reads_back_in_another(self, tmp_path):

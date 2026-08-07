@@ -11,7 +11,6 @@ DLP Context: secure_storage_implementation
 """
 
 import base64
-import hashlib
 import os
 import stat
 from pathlib import Path
@@ -88,7 +87,12 @@ class SecureStorage:
             algorithm=hashes.SHA256(),
             length=32,
             salt=salt,
-            iterations=100000,
+            # OWASP's current floor for PBKDF2-HMAC-SHA256. The previous 100_000
+            # was the 2018-era figure and is no longer sufficient. Raising it is
+            # free here: the module has never successfully encrypted anything,
+            # so there is no stored ciphertext to re-key. Costs ~280ms per
+            # instantiation, which is acceptable for a key-storage path.
+            iterations=600000,
         )
         derived_key = kdf.derive(master_key)
 

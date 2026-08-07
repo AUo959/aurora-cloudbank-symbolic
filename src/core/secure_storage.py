@@ -10,6 +10,7 @@ SRB Anchor: SRB-CRYPTO-STORAGE-v1.0
 DLP Context: secure_storage_implementation
 """
 
+import base64
 import hashlib
 import os
 import stat
@@ -19,7 +20,7 @@ from typing import Optional, Union
 try:
     from cryptography.fernet import Fernet
     from cryptography.hazmat.primitives import hashes
-    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
     CRYPTOGRAPHY_AVAILABLE = True
 except ImportError:
     CRYPTOGRAPHY_AVAILABLE = False
@@ -75,19 +76,28 @@ class SecureStorage:
         if not isinstance(master_key, bytes):
             master_key = master_key.encode('utf-8')
         
-        # Derive encryption key using PBKDF2
-        # This allows using passwords/passphrases as master keys
-        salt = b'aurora_cloudbank_salt_v1'  # In production: unique per installation
-        kdf = PBKDF2(
+        # Derive encryption key using PBKDF2HMAC.
+        # This allows using passwords/passphrases as master keys.
+        #
+        # The salt is fixed so that the same master key derives the same cipher
+        # across processes -- without that, nothing written by one instance
+        # could ever be read back by another. A per-installation salt would be
+        # stronger, but requires somewhere to persist it; see #1438.
+        salt = b'aurora_cloudbank_salt_v1'
+        kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
             salt=salt,
-            iterations=100000,  # OWASP recommendation
+            iterations=100000,
         )
         derived_key = kdf.derive(master_key)
-        
-        # Create Fernet cipher
-        self.cipher = Fernet(Fernet.generate_key())  # Use derived key for production
+
+        # Fernet wants a url-safe base64-encoded 32-byte key. Deriving one and
+        # then constructing the cipher from Fernet.generate_key() instead --
+        # as this did before -- silently discarded the master key and produced
+        # a fresh random cipher per instance, so encrypted data could never be
+        # decrypted again after the process exited.
+        self.cipher = Fernet(base64.urlsafe_b64encode(derived_key))
     
     def encrypt_file(self, file_path: Union[str, Path], data: str) -> None:
         """

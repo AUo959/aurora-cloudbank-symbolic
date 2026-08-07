@@ -26,6 +26,33 @@ from src.core.secure_storage import (
 
 
 # =============================================================================
+# Import-Health Guard
+# =============================================================================
+
+def test_cryptography_flag_reflects_real_availability():
+    """CRYPTOGRAPHY_AVAILABLE must not mask a broken guarded import.
+
+    Every encryption test below skips itself when this flag is False. That
+    makes a broken import in secure_storage.py silently green: the module
+    imported a class that does not exist, the except ImportError swallowed it,
+    and the whole suite skipped for months while reporting no failures (#1438).
+
+    This asserts the flag against the real world, so the next broken import
+    fails loudly instead of disappearing into the skip count.
+    """
+    try:
+        import cryptography  # noqa: F401
+    except ImportError:
+        pytest.skip("cryptography genuinely not installed in this environment")
+
+    assert CRYPTOGRAPHY_AVAILABLE, (
+        "cryptography imports fine, but secure_storage set "
+        "CRYPTOGRAPHY_AVAILABLE=False -- its guarded import block is broken "
+        "and every encryption test is silently skipping."
+    )
+
+
+# =============================================================================
 # Secure Storage Tests
 # =============================================================================
 
@@ -147,6 +174,64 @@ class TestSecureStorage:
         # Should not raise exception
         storage = SecureStorage()
         assert storage is not None
+
+
+class TestKeyDerivation:
+    """The master key must actually determine the cipher.
+
+    Every other test in this file encrypts and decrypts through a single
+    instance, so all of them passed even while __init__ derived a key and then
+    threw it away in favour of Fernet.generate_key(). These cross-instance
+    cases are what make that failure visible.
+    """
+
+    def test_same_master_key_round_trips_across_instances(self):
+        """Data written by one instance must be readable by another."""
+        if not CRYPTOGRAPHY_AVAILABLE:
+            pytest.skip("Cryptography library not available")
+
+        master_key = b"shared_master_key_for_round_trip"
+        secret = "sensitive_secret_12345"
+
+        writer = SecureStorage(master_key=master_key)
+        reader = SecureStorage(master_key=master_key)
+
+        assert reader.decrypt_string(writer.encrypt_string(secret)) == secret
+
+    def test_different_master_keys_do_not_interoperate(self):
+        """A different master key must not decrypt another key's ciphertext."""
+        if not CRYPTOGRAPHY_AVAILABLE:
+            pytest.skip("Cryptography library not available")
+
+        blob = SecureStorage(master_key=b"first_master_key_value").encrypt_string("secret")
+        other = SecureStorage(master_key=b"second_master_key_value")
+
+        with pytest.raises(Exception):
+            other.decrypt_string(blob)
+
+    def test_file_written_by_one_instance_reads_back_in_another(self, tmp_path):
+        """The on-disk path must survive a process boundary, not just an object."""
+        if not CRYPTOGRAPHY_AVAILABLE:
+            pytest.skip("Cryptography library not available")
+
+        master_key = b"master_key_for_file_round_trip"
+        key_file = tmp_path / "persisted.enc"
+        secret = "a" * 64
+
+        SecureStorage(master_key=master_key).encrypt_file(key_file, secret)
+
+        assert SecureStorage(master_key=master_key).decrypt_file(key_file) == secret
+
+    def test_environment_master_key_is_honoured(self, monkeypatch):
+        """SECURE_STORAGE_KEY must drive derivation, not just be accepted."""
+        if not CRYPTOGRAPHY_AVAILABLE:
+            pytest.skip("Cryptography library not available")
+
+        monkeypatch.setenv("SECURE_STORAGE_KEY", "env_supplied_master_key")
+
+        blob = SecureStorage().encrypt_string("from_env")
+
+        assert SecureStorage().decrypt_string(blob) == "from_env"
 
 
 class TestPathValidation:

@@ -1,0 +1,136 @@
+{
+  "event_canonical_digest": "1c6510a6ed783715a505448d0280fa0840b18b95572be010e56cc6ab7dc6e809",
+  "event_id": "AURORA-GATE-001A-RECOVERED-PROTOCOL-WIRING-001",
+  "external_execution_artifacts": [
+    {
+      "artifact_id": "8656283617",
+      "name": "gate-001a-run-001-evidence",
+      "purpose": "Canonical search, reachability, custody, and import-graph capture.",
+      "sha256": "6992ce308a4d595afba8ecf8b8a48552926cc9c2ef9c78049ecf284728e71022",
+      "workflow_run_id": "30274709319"
+    },
+    {
+      "artifact_id": "8656675213",
+      "name": "gate-001a-run-001-deterministic-replay",
+      "purpose": "Independent deterministic replay and set-equivalence proof.",
+      "sha256": "6b29670cb010297e782a690208b497537745e0841e60a2b7dc8370593251673c",
+      "workflow_run_id": "30275682990"
+    }
+  ],
+  "files": [
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__EVENT__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.json",
+      "purpose": "Validated institutional-assurance event envelope.",
+      "sha256": "80a601dc081076bdfe5f2e1eabc7dcb3bedc391e87e595a910bd38523b7f7247",
+      "size_bytes": 6008
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__EVIDENCE__GATE_001A_ORD_IMPORT_GRAPH__v1.0__2026-07-27.json",
+      "purpose": "AST import graph for ORD and fleet packages.",
+      "sha256": "14b49d2f23c5ede094ea6c8b93ac8f3c7b4b199252b1456445997b0dfbdeb510",
+      "size_bytes": 1520
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__EVIDENCE__GATE_001A_SHADOWFAX_CUSTODY__v1.0__2026-07-27.json",
+      "purpose": "Bound SHADOWFAX custody-manifest excerpt.",
+      "sha256": "b10d700f214733ee3c251f2ad009988d1760fad12fd616764b43ab07d8e0a11a",
+      "size_bytes": 3044
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__FINDINGS__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.json",
+      "purpose": "Finding register and clean-scope observations.",
+      "sha256": "f3a2243a568b2736e1cc58f5e09d093a72600c03159898eaa084e9f7c763eb95",
+      "size_bytes": 4195
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_ORD_REACHABILITY__v1.0__2026-07-27.txt",
+      "purpose": "ORD policy and fleet reachability search output.",
+      "sha256": "83001c53d98d82a226346a14950c2df1161fde216a1bb3d3e0329bb92a0adc19",
+      "size_bytes": 3832
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_STEP_2_RAW__v1.0__2026-07-27.txt",
+      "purpose": "Exact canonical Step 2 grep stdout/stderr; zero-byte no-match output.",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_STEP_3_DETERMINISTIC__v1.0__2026-07-27.txt",
+      "purpose": "Sorted deterministic Step 3 projection.",
+      "sha256": "c8472404565b9efef3bfb2fe1ee569371e4a154477e72fb5372a26cbe25946ef",
+      "size_bytes": 7341
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_STEP_3_RAW__v1.0__2026-07-27.txt",
+      "purpose": "Exact canonical Step 3 grep output.",
+      "sha256": "ea9784abc0ba590b134affe8c769a32953b217c6ab81c751cc74e17975c168d4",
+      "size_bytes": 7341
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_TRIBUNAL_REACHABILITY__v1.0__2026-07-27.txt",
+      "purpose": "Tribunal-manifest reachability search output.",
+      "sha256": "f73267dc7e46a6445f8a1659d17402bd0079a1398bb8b5c351b9773e744ac9b6",
+      "size_bytes": 79
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RECEIPT__GATE_001A_DETERMINISTIC_REPLAY__v1.0__2026-07-27.json",
+      "purpose": "Successful deterministic replay and set-equivalence receipt.",
+      "sha256": "784ff2ee88cf8d96bc87a8106df3034e77078b10d9830a2e36495757b27a0c04",
+      "size_bytes": 1548
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RECEIPT__GATE_001A_EXECUTION__v1.0__2026-07-27.json",
+      "purpose": "Successful GitHub Actions evidence-capture receipt.",
+      "sha256": "8028828cc518c4d139900e8084d6b1290348ce9897631de6c7b8c48a83d4e8ff",
+      "size_bytes": 2273
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__REPLAY__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.md",
+      "purpose": "Cross-context replay procedure and invariants.",
+      "sha256": "126e3c63bc8aff5f518de0f7ef82551d718be121db7ee8150b06e6434c7ef32e",
+      "size_bytes": 2654
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__REPORT__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.md",
+      "purpose": "Complete institutional report and simulated-role sign-off.",
+      "sha256": "7155a3cad44529bdcc200fa6d795c306e2ccb753d835c4a0e51770852b126eb9",
+      "size_bytes": 6195
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RESULT__GATE_001A_STEP_2__v1.0__2026-07-27.txt",
+      "purpose": "Operator-readable Step 2 result.",
+      "sha256": "4209f934eb97c8d5d559c4c584e4fb931c748f88e639f3c225aacebd3d5a3abf",
+      "size_bytes": 11
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__STATE__GATE_001A_REMEDIATION_AND_RETEST__v1.0__2026-07-27.json",
+      "purpose": "Remediation and retest state.",
+      "sha256": "6d3834ebf4e212036283f94a17827ffd723ae86a82e0c3d62e4a5e54e70eeccf",
+      "size_bytes": 1901
+    },
+    {
+      "path": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__TRACE__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.json",
+      "purpose": "Ordered event and decision trace.",
+      "sha256": "0d85f816f5f84f4dbe7e085ea634a53e37c5728da31bdee65bc1e6b3e44c6ff9",
+      "size_bytes": 4790
+    }
+  ],
+  "finding_issue": 1361,
+  "manifest_self_digest": null,
+  "package_completeness": {
+    "deterministic_replay_verified": true,
+    "event_envelope": true,
+    "finding_register": true,
+    "input_and_produced_evidence": true,
+    "ordered_decision_trace": true,
+    "raw_outputs_preserved": true,
+    "remediation_state": true,
+    "retest_state": true,
+    "severity_method": true,
+    "source_locations": true
+  },
+  "package_root": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring",
+  "run_id": "AURORA-GATE-001A-RUN-001-3142AA47",
+  "schema": "aurora.gate001a.evidence_manifest/v1",
+  "verdict": "FINDING"
+}

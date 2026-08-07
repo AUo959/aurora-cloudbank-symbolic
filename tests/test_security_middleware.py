@@ -12,6 +12,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from fastapi.security import HTTPAuthorizationCredentials
 
+import src.middleware.fastapi_security as fastapi_security
 from src.middleware.fastapi_security import (
     security,
     limiter,
@@ -234,29 +235,23 @@ class TestSecurityIntegration:
         assert response.status_code == 200
         assert response.json()["status"] == "secure"
 
-    def test_timing_attack_resistance(self):
-        """Test secure_compare timing attack resistance"""
-        import time
+    def test_secure_compare_uses_constant_time_primitive(self, monkeypatch):
+        """Test secure_compare delegates byte inputs to hmac.compare_digest."""
+        calls = []
 
-        token1 = "a" * 100
-        token2_same = "a" * 100
-        token2_diff = "b" * 100
+        def fake_compare_digest(left: bytes, right: bytes) -> bool:
+            calls.append((left, right))
+            return left == right
 
-        # Test with same strings
-        start = time.perf_counter()
-        result1 = secure_compare(token1, token2_same)
-        time1 = time.perf_counter() - start
+        monkeypatch.setattr(
+            fastapi_security.hmac,
+            "compare_digest",
+            fake_compare_digest,
+        )
 
-        # Test with different strings
-        start = time.perf_counter()
-        result2 = secure_compare(token1, token2_diff)
-        time2 = time.perf_counter() - start
-
-        # Results should be correct
-        assert result1 is True
-        assert result2 is False
-
-        # Timing should be similar (within reasonable variance)
-        # Note: This is a basic check, real timing attacks are more sophisticated
-        time_ratio = max(time1, time2) / min(time1, time2)
-        assert time_ratio < 10  # Allow 10x variance due to system noise
+        assert secure_compare("a" * 100, "a" * 100) is True
+        assert secure_compare("a" * 100, "b" * 100) is False
+        assert calls == [
+            (b"a" * 100, b"a" * 100),
+            (b"a" * 100, b"b" * 100),
+        ]

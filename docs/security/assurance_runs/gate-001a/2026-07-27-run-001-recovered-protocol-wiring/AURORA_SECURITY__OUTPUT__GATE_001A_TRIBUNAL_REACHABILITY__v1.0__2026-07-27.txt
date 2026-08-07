@@ -1,0 +1,1 @@
+src/core/quantum_bayesian_manifest.yaml:58:  tribunal_integration: "SHADOWFAX"

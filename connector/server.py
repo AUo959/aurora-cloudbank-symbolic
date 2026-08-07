@@ -29,21 +29,18 @@ except ImportError:
     _jsonschema = None  # type: ignore[assignment]
     _JSONSCHEMA_AVAILABLE = False
 
-# MCP SDK -- install via: pip install mcp
+# MCP SDK v1 -- keep this contract aligned with connector/pyproject.toml and
+# requirements-optional.txt. MCP v2 uses a different Server handler API.
 try:
     from mcp.server import Server
     from mcp.server.stdio import stdio_server
     from mcp.types import (
-        CallToolRequest,
-        CallToolResult,
-        ListToolsRequest,
-        ListToolsResult,
         TextContent,
         Tool,
     )
 except ImportError:
     print(
-        "ERROR: MCP SDK not installed. Run: pip install mcp",
+        'ERROR: MCP SDK not installed. Run: pip install "mcp>=1.28.1,<2.0.0"',
         file=sys.stderr,
     )
     sys.exit(1)
@@ -112,7 +109,7 @@ def build_server() -> Server:
         try:
             result = await tool.run(arguments)
             return [TextContent(type="text", text=result)]
-        except Exception as exc:  # noqa: BLE001
+        except Exception:  # noqa: BLE001
             log.exception("Tool '%s' raised an exception", name)
             return [TextContent(
                 type="text",

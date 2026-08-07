@@ -34,6 +34,24 @@ Success criteria:
 - Minimal idle time; dependencies respected; emergent boosts logged
 
 Note: Keep stdlib only for portability.
+
+STATUS (corrected 2026-08-03, #1132): **superseded by v2; wiring is stale.**
+
+An earlier note here said intent and wiring "disagree" and left the designation
+open. Git history settles it:
+
+  - `orion_station_simulation_v2.py` received a behavioural bug fix on
+    2026-06-12 (#1023, "emit emergent events after task assignment in tick()");
+  - this file has had no substantive change since the 2025-11-14 bulk restore.
+
+Active maintenance has been going to v2 for months. What still points here —
+`ORION_SIMULATION_PROTOCOL.md`, `tests/test_orion_simulation.py` (module-scope
+import) and `interactive_collab_demo.py` — is stale wiring, not a competing
+designation.
+
+Retained, not deleted: it is still what the test suite imports, so removing it
+breaks the build. Rewire those three call sites to v2 first.
+
 """
 from __future__ import annotations
 

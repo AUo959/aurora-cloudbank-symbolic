@@ -64,24 +64,28 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
     client = TestClient(create_app(project_root))
 
     chamber_html = client.get("/chamber")
-    assert chamber_html.status_code == 200
-    assert "socket.io" not in chamber_html.text.lower()
-    assert "new WebSocket" in chamber_html.text
+    checks.assertEqual(chamber_html.status_code, 200)
+    checks.assertNotIn("socket.io", chamber_html.text.lower())
+    checks.assertIn("new WebSocket", chamber_html.text)
 
     dashboard_html = client.get("/")
-    assert dashboard_html.status_code == 200
-    assert "/api/mesh/status" in dashboard_html.text
+    checks.assertEqual(dashboard_html.status_code, 200)
+    checks.assertIn("/api/mesh/status", dashboard_html.text)
 
     health = client.get("/health").json()
-    assert health["status"] == "healthy"
-    assert health["mesh_status"] == "operational"
+    checks.assertEqual(health["status"], "healthy")
+    checks.assertEqual(health["mesh_status"], "operational")
 
     status = client.get("/api/mesh/status").json()
-    assert status["mesh_status"] == "operational"
-    assert status["total_agents"] == 47
+    checks.assertEqual(status["mesh_status"], "operational")
+    checks.assertEqual(status["total_agents"], 47)
     checks.assertEqual(status["total_terminals"], 55)
     agent_ids = {agent["agent_id"] for agent in status["agents"]}
-    assert "aurora" in agent_ids, "Aurora's seat is canonical: L1 station core, always-on arbitration"
+    checks.assertIn(
+        "aurora",
+        agent_ids,
+        "Aurora's seat is canonical: L1 station core, always-on arbitration",
+    )
 
     terminals = client.get("/api/mesh/terminals").json()
     checks.assertEqual(terminals["total"], 55)
@@ -103,10 +107,10 @@ def test_mesh_runtime_api_surface(tmp_path: Path) -> None:
 
     with client.websocket_connect("/ws/mesh") as websocket:
         initial = websocket.receive_json()
-        assert initial["payload"]["phase"] == "socket_connected"
+        checks.assertEqual(initial["payload"]["phase"], "socket_connected")
         websocket.send_text("ping")
         pong = websocket.receive_json()
-        assert pong["payload"]["phase"] == "pong"
+        checks.assertEqual(pong["payload"]["phase"], "pong")
 
 
 @pytest.mark.skipif(TestClient is None, reason="fastapi test client is not installed")
@@ -121,9 +125,9 @@ def test_mesh_runtime_api_message_routing(tmp_path: Path) -> None:
         "/api/mesh/messages",
         json={"to": "Alex Thorne", "channel": "private:captain:alex", "content": "Status check."},
     )
-    assert send.status_code == 200
+    checks.assertEqual(send.status_code, 200)
     history = wait_for_agent_reply(client, "private:captain:alex")
-    assert any(event["event_type"] == "agent_reply" for event in history["events"])
+    checks.assertTrue(any(event["event_type"] == "agent_reply" for event in history["events"]))
 
     # Aurora handshake: the station core must be reachable and answer on
     # their direct channel (registry: "All staff must handshake with Aurora").
@@ -131,13 +135,13 @@ def test_mesh_runtime_api_message_routing(tmp_path: Path) -> None:
         "/api/mesh/messages",
         json={"to": "Aurora", "channel": "direct:aurora", "content": "Handshake. Please report status."},
     )
-    assert handshake.status_code == 200
+    checks.assertEqual(handshake.status_code, 200)
     aurora_history = wait_for_agent_reply(client, "direct:aurora")
     aurora_replies = [
         event for event in aurora_history["events"] if event["event_type"] == "agent_reply"
     ]
-    assert aurora_replies, "Aurora must answer the handshake"
-    assert any(event.get("agent_id") == "aurora" for event in aurora_replies)
+    checks.assertTrue(aurora_replies, "Aurora must answer the handshake")
+    checks.assertTrue(any(event.get("agent_id") == "aurora" for event in aurora_replies))
 
     terminal_send = client.post(
         "/api/mesh/messages",

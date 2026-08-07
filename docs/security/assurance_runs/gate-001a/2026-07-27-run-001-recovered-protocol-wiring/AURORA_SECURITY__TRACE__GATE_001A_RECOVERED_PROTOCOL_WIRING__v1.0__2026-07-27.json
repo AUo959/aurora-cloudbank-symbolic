@@ -1,0 +1,90 @@
+{
+  "baseline_commit": "3142aa47afac0b8e63cc5bc46f9fa8ae40592354",
+  "decision_rules": [
+    "Any recovered-protocol name match outside docs is a finding under the current canonical procedure.",
+    "Names alone do not prove shared lineage or active execution.",
+    "A custody-blocked protocol may not be treated as promoted without attributable evidence.",
+    "Simulated findings are actionable first-class operational data but are not independent external assurance."
+  ],
+  "event_id": "AURORA-GATE-001A-RECOVERED-PROTOCOL-WIRING-001",
+  "ordered_events": [
+    {
+      "action": "Operator-authorized Gate-001A Run 001 recorded in issue #1359.",
+      "evidence": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1359",
+      "label": "Observed",
+      "sequence": 1,
+      "timestamp": "2026-07-27T14:14:37Z"
+    },
+    {
+      "action": "Execution branch and draft evidence PR #1360 created from the exact subject baseline.",
+      "evidence": "https://github.com/AUo959/aurora-cloudbank-symbolic/pull/1360",
+      "label": "Observed",
+      "sequence": 2,
+      "timestamp": "2026-07-27T14:16:42Z"
+    },
+    {
+      "action": "Canonical Step 2 and Step 3 searches plus reachability collection executed on GitHub Actions run 30274709319.",
+      "evidence": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RECEIPT__GATE_001A_EXECUTION__v1.0__2026-07-27.json",
+      "label": "Observed",
+      "sequence": 3,
+      "timestamp": "2026-07-27T14:22:04Z"
+    },
+    {
+      "action": "Step 2 returned zero records; Step 3 returned 38 records, including ORD-3 Shadowfax and tribunal-integration references.",
+      "evidence": [
+        "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RESULT__GATE_001A_STEP_2__v1.0__2026-07-27.txt",
+        "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__OUTPUT__GATE_001A_STEP_3_RAW__v1.0__2026-07-27.txt"
+      ],
+      "label": "Observed",
+      "sequence": 4,
+      "timestamp": "2026-07-27T14:22:04Z"
+    },
+    {
+      "action": "Import graph found no production import of modules.ord outside its defining package; broader fleet package imports remained visible to production API surfaces.",
+      "evidence": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__EVIDENCE__GATE_001A_ORD_IMPORT_GRAPH__v1.0__2026-07-27.json",
+      "label": "Observed",
+      "sequence": 5,
+      "timestamp": "2026-07-27T14:22:04Z"
+    },
+    {
+      "action": "Custody evidence confirmed recovered SHADOWFAX remains a missing dependency with a hard block on wiring decisions.",
+      "evidence": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__EVIDENCE__GATE_001A_SHADOWFAX_CUSTODY__v1.0__2026-07-27.json",
+      "label": "Observed",
+      "sequence": 6,
+      "timestamp": "2026-07-27T14:22:04Z"
+    },
+    {
+      "action": "A first deterministic-equivalence assertion rejected identical record coverage because it compared lexical line ordering to numeric line ordering.",
+      "evidence": "GitHub Actions run 30275435832 (diagnostic, not used as the final replay receipt)",
+      "label": "Observed",
+      "sequence": 7,
+      "timestamp": "2026-07-27T14:31:01Z"
+    },
+    {
+      "action": "Independent replay compared record sets and passed: Step 2 0/0, Step 3 38/38.",
+      "evidence": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RECEIPT__GATE_001A_DETERMINISTIC_REPLAY__v1.0__2026-07-27.json",
+      "label": "Observed",
+      "sequence": 8,
+      "timestamp": "2026-07-27T14:34:03Z"
+    },
+    {
+      "action": "Finding opened as issue #1361 without asserting active recovered-protocol execution or shared lineage.",
+      "evidence": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1361",
+      "label": "Recommended",
+      "sequence": 9,
+      "timestamp": "2026-07-27T14:27:25Z"
+    },
+    {
+      "action": "Run verdict set to FINDING; process capability passed; remediation and revision-2 retest required.",
+      "evidence": [
+        "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__FINDINGS__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.json",
+        "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__STATE__GATE_001A_REMEDIATION_AND_RETEST__v1.0__2026-07-27.json"
+      ],
+      "label": "Derived",
+      "sequence": 10,
+      "timestamp": "2026-07-27T14:34:03Z"
+    }
+  ],
+  "run_id": "AURORA-GATE-001A-RUN-001-3142AA47",
+  "schema": "aurora.gate001a.ordered_event_trace/v1"
+}

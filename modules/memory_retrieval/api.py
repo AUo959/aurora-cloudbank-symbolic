@@ -1,16 +1,22 @@
 """Memory Retrieval Module - API Interface.
 
-Provides both a FastAPI router (``router``) for HTTP exposure and plain
-Python helper functions for in-process use.
+Provides both a FastAPI router (``router``) for authenticated HTTP exposure and
+plain Python helper functions for trusted in-process use.
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+import copy
+import hashlib
 import logging
+from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
+
+from src.middleware.fastapi_security import limiter, verify_csrf_token
+from src.security.oauth2 import User, get_current_active_user
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +26,15 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/memory-retrieval", tags=["MemoryRetrieval"])
 
+MEMORY_WRITE_RATE_LIMIT = "60/minute"
+MEMORY_READ_RATE_LIMIT = "120/minute"
+_OWNER_METADATA_KEY = "_aurora_owner"
+_CONTEXT_METADATA_KEY = "_aurora_context_id"
+
 
 class AddMemoryRequest(BaseModel):
-    context_id: str
-    content: str
+    context_id: str = Field(min_length=1, max_length=256)
+    content: str = Field(min_length=1, max_length=100_000)
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -33,11 +44,10 @@ class AddMemoryResponse(BaseModel):
 
 
 class RetrieveMemoriesRequest(BaseModel):
-    context_id: str
-    query: str
+    context_id: str = Field(min_length=1, max_length=256)
+    query: str = Field(min_length=1, max_length=10_000)
     top_k: int = Field(default=10, ge=1, le=100)
-    user_id: str = "default"
-    max_tokens: Optional[int] = Field(default=None, ge=1)
+    max_tokens: Optional[int] = Field(default=None, ge=1, le=1_000_000)
 
 
 class RetrieveMemoriesResponse(BaseModel):
@@ -45,14 +55,64 @@ class RetrieveMemoriesResponse(BaseModel):
     count: int
 
 
+def require_memory_mutation_auth(
+    csrf_token: Optional[str] = Header(None, alias="X-CSRF-Token"),
+    current_user: User = Depends(get_current_active_user),
+) -> User:
+    """Require JWT authentication plus a separate CSRF token for writes."""
+    if not csrf_token:
+        raise HTTPException(status_code=403, detail="Missing CSRF token")
+    verify_csrf_token(
+        HTTPAuthorizationCredentials(scheme="Bearer", credentials=csrf_token)
+    )
+    return current_user
+
+
+def _scoped_context_id(username: str, context_id: str) -> str:
+    """Build a deterministic tenant-private storage key."""
+    user_digest = hashlib.sha256(username.encode("utf-8")).hexdigest()
+    return f"tenant:{user_digest}:context:{context_id}"
+
+
+def _owned_by(memory: Dict[str, Any], username: str) -> bool:
+    metadata = memory.get("metadata")
+    return isinstance(metadata, dict) and metadata.get(_OWNER_METADATA_KEY) == username
+
+
+def _public_memory(memory: Dict[str, Any]) -> Dict[str, Any]:
+    """Remove internal ownership fields and restore the caller-facing context ID."""
+    public_memory = copy.deepcopy(memory)
+    metadata = public_memory.get("metadata")
+    if not isinstance(metadata, dict):
+        return public_memory
+
+    original_context_id = metadata.pop(_CONTEXT_METADATA_KEY, None)
+    metadata.pop(_OWNER_METADATA_KEY, None)
+    if original_context_id is not None:
+        public_memory["context_id"] = original_context_id
+    return public_memory
+
+
 @router.post("/memories", response_model=AddMemoryResponse)
-async def add_memory_endpoint(request: AddMemoryRequest):
-    """Add a memory entry to the retrieval store."""
+@limiter.limit(MEMORY_WRITE_RATE_LIMIT)
+async def add_memory_endpoint(
+    payload: AddMemoryRequest,
+    request: Request,
+    current_user: User = Depends(require_memory_mutation_auth),
+):
+    """Add a memory entry scoped to the authenticated user."""
     try:
         from modules.memory_retrieval.core import MemoryRetrievalCore
 
         core = MemoryRetrievalCore.get_instance()
-        memory_id = core.add_memory(request.context_id, request.content, request.metadata)
+        metadata = dict(payload.metadata)
+        metadata[_OWNER_METADATA_KEY] = current_user.username
+        metadata[_CONTEXT_METADATA_KEY] = payload.context_id
+        memory_id = core.add_memory(
+            _scoped_context_id(current_user.username, payload.context_id),
+            payload.content,
+            metadata,
+        )
         return AddMemoryResponse(memory_id=memory_id)
     except Exception as exc:
         logger.exception("Failed to add memory")
@@ -60,39 +120,53 @@ async def add_memory_endpoint(request: AddMemoryRequest):
 
 
 @router.post("/retrieve", response_model=RetrieveMemoriesResponse)
-async def retrieve_memories_endpoint(request: RetrieveMemoriesRequest):
-    """Retrieve relevant memories for a context/query pair."""
+@limiter.limit(MEMORY_READ_RATE_LIMIT)
+async def retrieve_memories_endpoint(
+    payload: RetrieveMemoriesRequest,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+):
+    """Retrieve memories from the authenticated user's scoped context."""
     try:
         from modules.memory_retrieval.core import MemoryRetrievalCore
 
         core = MemoryRetrievalCore.get_instance()
         kwargs: Dict[str, Any] = {}
-        if request.max_tokens is not None:
-            kwargs["max_tokens"] = request.max_tokens
+        if payload.max_tokens is not None:
+            kwargs["max_tokens"] = payload.max_tokens
         memories = core.retrieve_memories(
-            request.context_id,
-            request.query,
-            top_k=request.top_k,
-            user_id=request.user_id,
+            _scoped_context_id(current_user.username, payload.context_id),
+            payload.query,
+            top_k=payload.top_k,
+            user_id=current_user.username,
             **kwargs,
         )
-        return RetrieveMemoriesResponse(memories=memories, count=len(memories))
+        public_memories = [_public_memory(memory) for memory in memories]
+        return RetrieveMemoriesResponse(
+            memories=public_memories,
+            count=len(public_memories),
+        )
     except Exception as exc:
         logger.exception("Failed to retrieve memories")
         raise HTTPException(status_code=500, detail="Failed to retrieve memories") from exc
 
 
 @router.get("/memories/{memory_id}", response_model=Dict[str, Any])
-async def get_memory_endpoint(memory_id: str):
-    """Fetch a single memory entry by ID."""
+@limiter.limit(MEMORY_READ_RATE_LIMIT)
+async def get_memory_endpoint(
+    memory_id: str,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+):
+    """Fetch a memory only when it belongs to the authenticated user."""
     try:
         from modules.memory_retrieval.core import MemoryRetrievalCore
 
         core = MemoryRetrievalCore.get_instance()
         memory = core.get_memory(memory_id)
-        if memory is None:
-            raise HTTPException(status_code=404, detail=f"Memory {memory_id!r} not found")
-        return memory
+        if memory is None or not _owned_by(memory, current_user.username):
+            raise HTTPException(status_code=404, detail="Memory not found")
+        return _public_memory(memory)
     except HTTPException:
         raise
     except Exception as exc:
@@ -101,15 +175,22 @@ async def get_memory_endpoint(memory_id: str):
 
 
 @router.delete("/memories/{memory_id}")
-async def delete_memory_endpoint(memory_id: str):
-    """Delete a memory entry."""
+@limiter.limit(MEMORY_WRITE_RATE_LIMIT)
+async def delete_memory_endpoint(
+    memory_id: str,
+    request: Request,
+    current_user: User = Depends(require_memory_mutation_auth),
+):
+    """Delete a memory only when it belongs to the authenticated user."""
     try:
         from modules.memory_retrieval.core import MemoryRetrievalCore
 
         core = MemoryRetrievalCore.get_instance()
-        deleted = core.delete_memory(memory_id)
-        if not deleted:
-            raise HTTPException(status_code=404, detail=f"Memory {memory_id!r} not found")
+        memory = core.get_memory(memory_id)
+        if memory is None or not _owned_by(memory, current_user.username):
+            raise HTTPException(status_code=404, detail="Memory not found")
+        if not core.delete_memory(memory_id):
+            raise HTTPException(status_code=404, detail="Memory not found")
         return {"status": "deleted", "memory_id": memory_id}
     except HTTPException:
         raise
@@ -119,8 +200,12 @@ async def delete_memory_endpoint(memory_id: str):
 
 
 @router.get("/cache-stats")
-async def get_cache_stats_endpoint():
-    """Get memory cache statistics."""
+@limiter.limit(MEMORY_WRITE_RATE_LIMIT)
+async def get_cache_stats_endpoint(
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+):
+    """Get memory cache statistics for authenticated operators."""
     try:
         from modules.memory_retrieval.core import MemoryRetrievalCore
 

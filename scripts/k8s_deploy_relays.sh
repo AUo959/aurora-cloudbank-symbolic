@@ -12,6 +12,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 K8S_DIR="$PROJECT_ROOT/k8s"
+source "$SCRIPT_DIR/lib/k8s_manifest_validation.sh"
 NAMESPACE="${AURORA_NAMESPACE:-aurora-cloudbank}"
 REGISTRY="${CONTAINER_REGISTRY:-ghcr.io}"
 IMAGE_NAME="${IMAGE_NAME:-aurora-cloudbank-symbolic}"
@@ -45,64 +46,66 @@ log_error() {
 # Check prerequisites
 check_prerequisites() {
     log_info "Checking prerequisites..."
-    
-    # Check kubectl
+
+    # kubectl is required for both live deployment and client-side validation.
     if ! command -v kubectl &> /dev/null; then
         log_error "kubectl is not installed. Please install kubectl first."
         exit 1
     fi
-    
-    # Check cluster connection
-    if ! kubectl cluster-info &> /dev/null; then
-        log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
-        exit 1
-    fi
-    
-    # Check if required manifest files exist
+
+    # Check if required manifest files exist before any cluster access.
     local required_files=(
         "$K8S_DIR/aurora-namespace-rbac.yaml"
         "$K8S_DIR/aurora-configmap-secrets.yaml"
         "$K8S_DIR/aurora-gui-cloudhub-deployment.yaml"
     )
-    
+
     for file in "${required_files[@]}"; do
         if [[ ! -f "$file" ]]; then
             log_error "Required manifest file not found: $file"
             exit 1
         fi
     done
-    
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log_info "[DRY-RUN] Skipping live cluster connectivity checks"
+    elif ! kubectl cluster-info &> /dev/null; then
+        log_error "Cannot connect to Kubernetes cluster. Check your kubeconfig."
+        exit 1
+    fi
+
     log_success "Prerequisites check passed"
 }
 
 # Create namespace and RBAC
 setup_namespace() {
     log_info "Setting up namespace and RBAC..."
-    
-    local kubectl_cmd="kubectl apply -f $K8S_DIR/aurora-namespace-rbac.yaml"
-    
+
+    local manifest="$K8S_DIR/aurora-namespace-rbac.yaml"
+
     if [[ "$DRY_RUN" == "true" ]]; then
-        log_info "[DRY-RUN] Would execute: $kubectl_cmd"
-        kubectl apply -f "$K8S_DIR/aurora-namespace-rbac.yaml" --dry-run=client -o yaml | head -50
+        log_info "[DRY-RUN] Validating namespace and RBAC manifest"
+        validate_k8s_manifest_offline "$manifest"
     else
-        $kubectl_cmd
+        kubectl apply -f "$manifest"
     fi
-    
+
     log_success "Namespace and RBAC configured"
 }
 
 # Deploy ConfigMaps and Secrets
 deploy_config() {
     log_info "Deploying ConfigMaps and Secrets..."
-    
-    local kubectl_cmd="kubectl apply -f $K8S_DIR/aurora-configmap-secrets.yaml"
-    
+
+    local manifest="$K8S_DIR/aurora-configmap-secrets.yaml"
+
     if [[ "$DRY_RUN" == "true" ]]; then
-        log_info "[DRY-RUN] Would execute: $kubectl_cmd"
+        log_info "[DRY-RUN] Validating ConfigMap and Secret manifest"
+        validate_k8s_manifest_offline "$manifest"
     else
-        $kubectl_cmd
+        kubectl apply -f "$manifest"
     fi
-    
+
     log_success "ConfigMaps and Secrets deployed"
 }
 
@@ -110,18 +113,18 @@ deploy_config() {
 deploy_relays() {
     log_info "Deploying Aurora relay pods..."
     log_info "Using image: ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-    
+
     # Update image in deployment manifest (temporary copy)
     local temp_manifest="/tmp/aurora-gui-cloudhub-deployment-updated.yaml"
     sed "s|aurora-cloudbank-symbolic:latest|${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g" \
         "$K8S_DIR/aurora-gui-cloudhub-deployment.yaml" > "$temp_manifest"
-    
+
     if [[ "$DRY_RUN" == "true" ]]; then
-        log_info "[DRY-RUN] Would deploy with updated manifest"
-        kubectl apply -f "$temp_manifest" --dry-run=client -o yaml | head -100
+        log_info "[DRY-RUN] Validating updated deployment manifest"
+        validate_k8s_manifest_offline "$temp_manifest"
     else
         kubectl apply -f "$temp_manifest"
-        
+
         # Wait for rollout
         log_info "Waiting for deployment rollout..."
         if kubectl rollout status deployment/aurora-gui-cloudhub -n "$NAMESPACE" --timeout=300s; then
@@ -131,7 +134,7 @@ deploy_relays() {
             exit 1
         fi
     fi
-    
+
     # Clean up temp file
     rm -f "$temp_manifest"
 }
@@ -139,21 +142,21 @@ deploy_relays() {
 # Verify relay pods are healthy
 verify_relays() {
     log_info "Verifying relay pods..."
-    
+
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Would verify pods in namespace: $NAMESPACE"
         return 0
     fi
-    
+
     # Get pod status
     local pods
     pods=$(kubectl get pods -n "$NAMESPACE" -l app=aurora-gui-cloudhub -o jsonpath='{.items[*].status.phase}')
-    
+
     if [[ -z "$pods" ]]; then
         log_error "No relay pods found"
         exit 1
     fi
-    
+
     # Check if all pods are running
     local all_running=true
     for status in $pods; do
@@ -162,7 +165,7 @@ verify_relays() {
             break
         fi
     done
-    
+
     if [[ "$all_running" == "true" ]]; then
         log_success "All relay pods are running"
     else
@@ -174,12 +177,12 @@ verify_relays() {
 # Output relay logs for verification
 show_relay_logs() {
     log_info "Fetching relay logs for verification..."
-    
+
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY-RUN] Would fetch logs from namespace: $NAMESPACE"
         return 0
     fi
-    
+
     # Get logs from all relay pods (last 50 lines)
     echo ""
     echo "=== Relay Pod Logs ==="
@@ -188,27 +191,27 @@ show_relay_logs() {
     }
     echo "======================"
     echo ""
-    
+
     # Check for specific initialization markers
     log_info "Checking for initialization markers..."
-    
+
     local logs
     logs=$(kubectl logs -n "$NAMESPACE" -l app=aurora-gui-cloudhub --all-containers=true 2>/dev/null || echo "")
-    
+
     # Check for ZIPWIZ handshake
     if echo "$logs" | grep -qi "zipwiz\|handshake"; then
         log_success "ZIPWIZ handshake detected in logs"
     else
         log_warn "No ZIPWIZ handshake detected (may not be initialized yet)"
     fi
-    
+
     # Check for anchor sync
     if echo "$logs" | grep -qi "anchor.*sync\|sync.*anchor"; then
         log_success "Anchor sync detected in logs"
     else
         log_warn "No anchor sync detected (may not be initialized yet)"
     fi
-    
+
     # Check for drift status
     if echo "$logs" | grep -qi "drift.*status\|zero.*drift"; then
         log_success "Drift status detected in logs"
@@ -227,7 +230,7 @@ print_summary() {
     echo "Image: ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
     echo "Dry Run: $DRY_RUN"
     echo ""
-    
+
     if [[ "$DRY_RUN" != "true" ]]; then
         echo "Pod Status:"
         kubectl get pods -n "$NAMESPACE" -l app=aurora-gui-cloudhub -o wide 2>/dev/null || echo "Unable to get pod status"
@@ -235,7 +238,7 @@ print_summary() {
         echo "Services:"
         kubectl get svc -n "$NAMESPACE" 2>/dev/null || echo "Unable to get services"
     fi
-    
+
     echo "========================================"
 }
 
@@ -244,7 +247,7 @@ main() {
     log_info "Aurora CloudBank - Relay Deployment Script"
     log_info "Chain: #K8S//DEPLOY//RELAYS//"
     echo ""
-    
+
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -286,7 +289,7 @@ main() {
                 ;;
         esac
     done
-    
+
     # Execute deployment steps
     check_prerequisites
     setup_namespace
@@ -295,7 +298,7 @@ main() {
     verify_relays
     show_relay_logs
     print_summary
-    
+
     log_success "Relay deployment completed!"
 }
 

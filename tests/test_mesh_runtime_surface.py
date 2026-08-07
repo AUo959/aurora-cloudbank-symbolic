@@ -16,6 +16,9 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.mesh.runtime import MeshRuntime  # noqa: E402
 
 
+CHECKS = unittest.TestCase()
+
+
 def test_mesh_runtime_initializes_from_agent_manifests(tmp_path: Path) -> None:
     """The current mesh runtime should initialize from the checked-in agent manifests."""
 
@@ -25,18 +28,18 @@ def test_mesh_runtime_initializes_from_agent_manifests(tmp_path: Path) -> None:
     shutil.copytree(mesh_src, mesh_dst, dirs_exist_ok=True)
 
     manifest_paths = sorted((mesh_src / "agents").glob("*.json"))
-    assert manifest_paths, "expected checked-in mesh agent manifests"
+    CHECKS.assertTrue(manifest_paths, "expected checked-in mesh agent manifests")
 
     runtime = MeshRuntime(tmp_path)
     status = runtime.get_status()
 
     checks = unittest.TestCase()
-    assert status["mesh_status"] == "operational"
-    assert status["total_agents"] == len(manifest_paths)
+    checks.assertEqual(status["mesh_status"], "operational")
+    checks.assertEqual(status["total_agents"], len(manifest_paths))
     checks.assertGreater(status["total_terminals"], status["total_agents"])
     checks.assertEqual(runtime.get_agent("captain alex line")["agent_id"], "alex_thorne")
     checks.assertEqual(runtime.get_terminal("core_development.carmen.term")["owner_agent_id"], "carmen_rivas")
-    assert (tmp_path / "config" / "mesh" / "memory" / "alex_thorne.md").exists()
+    checks.assertTrue((tmp_path / "config" / "mesh" / "memory" / "alex_thorne.md").exists())
 
 
 def test_pilot_is_default_sender_and_captain_stays_legacy_alias(tmp_path):
@@ -44,13 +47,13 @@ def test_pilot_is_default_sender_and_captain_stays_legacy_alias(tmp_path):
     from src.mesh.models import MeshMessageRequest
 
     default = MeshMessageRequest.from_dict({"to": "alex_thorne", "content": "hi"})
-    assert default.sender_id == "pilot"
-    assert default.sender_name == "Pilot"
+    CHECKS.assertEqual(default.sender_id, "pilot")
+    CHECKS.assertEqual(default.sender_name, "Pilot")
 
     legacy = MeshMessageRequest.from_dict(
         {"to": "alex_thorne", "content": "hi", "sender_id": "captain", "sender_name": "Captain"}
     )
-    assert legacy.sender_name == "Captain"  # historical senders remain representable
+    CHECKS.assertEqual(legacy.sender_name, "Captain")  # historical senders remain representable
 
 
 def test_mesh_runtime_routes_terminal_namespace_to_owner_channel(tmp_path: Path) -> None:

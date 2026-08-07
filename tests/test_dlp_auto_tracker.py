@@ -448,3 +448,25 @@ class TestPerformance:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+@pytest.mark.unit
+@pytest.mark.security
+def test_request_tags_are_unique_under_rapid_requests(client):
+    """Tags must stay distinct for requests issued inside the same millisecond.
+
+    Tag IDs were derived from int(time.time() * 1000) and nothing else, so any
+    two requests handled in the same millisecond shared a tag. X-DLP-Request-Tag
+    is the correlation ID joining a request to its audit records, so collisions
+    can attribute two requests to one audit entry.
+
+    A tight loop is the point: it is what puts several requests inside one
+    millisecond, which is exactly the window the old scheme could not separate.
+    """
+    tags = [
+        client.get("/test").headers["X-DLP-Request-Tag"]
+        for _ in range(50)
+    ]
+
+    duplicates = len(tags) - len(set(tags))
+    assert duplicates == 0, f"{duplicates} duplicate tag(s) across {len(tags)} requests"

@@ -36,6 +36,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from modules.hr.consent.store import ConsentError, ConsentStore
+from src.middleware.error_helpers import http_error
 
 # Aurora security + rate limiting (guard optional import failures gracefully).
 # Uses require_csrf_token (token = Depends(security)) — the dependency form
@@ -165,7 +166,7 @@ def create_grant(
             expires_in_days=body.expires_in_days,
         )
     except ConsentError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        raise http_error(409, "Consent state conflict.", e)
     return {
         "success": True,
         "grant": grant.to_dict(),
@@ -204,7 +205,7 @@ def revoke_grant(
     try:
         grant, audited = store.revoke(grant_id, body.reason)
     except ConsentError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        raise http_error(409, "Consent state conflict.", e)
     return {
         "success": True,
         "grant": grant.to_dict(),

@@ -9,10 +9,14 @@ from fastapi.testclient import TestClient
 
 
 @pytest.fixture
-def test_client():
-    """Create test client for API testing"""
-    from api.aurora_api import app
-    return TestClient(app)
+def test_client(csrf_client):
+    """Create test client for API testing
+
+    Delegates to the shared ``csrf_client`` fixture so unsafe-method
+    requests carry a valid CSRF token. A bare TestClient(app) now gets
+    403 from GlobalCsrfMiddleware before reaching the handler.
+    """
+    return csrf_client
 
 
 class TestGUMASEthicsAPI:

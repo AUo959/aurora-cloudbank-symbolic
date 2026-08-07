@@ -6,7 +6,7 @@ Lightweight symbolic data encoding/decoding without numpy.
 
 import hashlib
 import math
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List, Literal, Optional, Sequence
 
 
 class NativeSymbolicVector:
@@ -16,12 +16,13 @@ class NativeSymbolicVector:
         self,
         symbol: str,
         dim: int = 512,
-        vector: List[float] = None,
+        vector: Optional[List[float]] = None,
         vector_type: Literal["bipolar", "binary", "real"] = "bipolar",
     ):
         self.symbol = symbol
         self.dim = dim
         self.vector_type = vector_type
+        self.vector: List[float]
 
         if vector is None:
             self.vector = self._generate_vector()
@@ -32,52 +33,38 @@ class NativeSymbolicVector:
 
     def _generate_vector(self) -> List[float]:
         """Generate deterministic vector from symbol using native Python"""
-        # Use symbol hash for deterministic generation
-        h = hashlib.sha256(self.symbol.encode()).digest()
+        required_bytes = max(2, self.dim + (self.dim % 2))
+        entropy = bytearray()
+        block_index = 0
+        while len(entropy) < required_bytes:
+            block_seed = f"{self.symbol}#{block_index}".encode()
+            entropy.extend(hashlib.sha256(block_seed).digest())
+            block_index += 1
 
-        # Generate deterministic vector from hash bytes
+        if self.vector_type == "bipolar":
+            return [-1.0 if byte < 128 else 1.0 for byte in entropy[: self.dim]]
+        if self.vector_type == "binary":
+            return [0.0 if byte < 128 else 1.0 for byte in entropy[: self.dim]]
+        if self.vector_type != "real":
+            raise ValueError(f"Unknown vector_type: {self.vector_type}")
+
         vector = []
-        byte_index = 0
-
-        for i in range(self.dim):
-            # Use hash bytes cyclically for deterministic generation
-            byte_val = h[byte_index % len(h)]
-            byte_index += 1
-
-            if self.vector_type == "bipolar":
-                vector.append(-1.0 if byte_val < 128 else 1.0)
-            elif self.vector_type == "binary":
-                vector.append(0.0 if byte_val < 128 else 1.0)
-            elif self.vector_type == "real":
-                # Generate normal distribution deterministically from hash
-                if i % 2 == 0 and i + 1 < self.dim:
-                    # Get two bytes for uniform values
-                    u1 = max(0.001, (h[byte_index % len(h)] + 1) / 257.0)  # Avoid 0
-                    byte_index += 1
-                    u2 = (h[byte_index % len(h)] + 1) / 257.0
-                    byte_index += 1
-
-                    z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
-                    z1 = math.sqrt(-2.0 * math.log(u1)) * math.sin(2.0 * math.pi * u2)
-
-                    vector.append(z0)
-                    if i + 1 < self.dim:
-                        vector.append(z1)
-                elif len(vector) < self.dim:
-                    # Handle odd dimension case
-                    u1 = max(0.001, (h[byte_index % len(h)] + 1) / 257.0)
-                    byte_index += 1
-                    u2 = (h[(byte_index + 1) % len(h)] + 1) / 257.0
-                    byte_index += 1
-                    z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
-                    vector.append(z0)
-            else:
-                raise ValueError(f"Unknown vector_type: {self.vector_type}")
-
-        return vector[:self.dim]  # Ensure exact dimension
+        for byte_index in range(0, required_bytes, 2):
+            u1 = max(0.001, (entropy[byte_index] + 1) / 257.0)
+            u2 = (entropy[byte_index + 1] + 1) / 257.0
+            radius = math.sqrt(-2.0 * math.log(u1))
+            vector.append(radius * math.cos(2.0 * math.pi * u2))
+            if len(vector) < self.dim:
+                vector.append(radius * math.sin(2.0 * math.pi * u2))
+        return vector[: self.dim]
 
     @classmethod
-    def from_symbol(cls, symbol: str, dim: int = 512, vector_type: str = "bipolar") -> "NativeSymbolicVector":
+    def from_symbol(
+        cls,
+        symbol: str,
+        dim: int = 512,
+        vector_type: Literal["bipolar", "binary", "real"] = "bipolar",
+    ) -> "NativeSymbolicVector":
         """Create symbolic vector from symbol"""
         return cls(symbol, dim, None, vector_type)
 
@@ -108,6 +95,61 @@ class NativeSymbolicVector:
 
         return NativeSymbolicVector(symbol=bound_symbol, dim=self.dim, vector=bound_vec, vector_type=self.vector_type)
 
+    @classmethod
+    def _normalize_superposition(
+        cls,
+        totals: Sequence[float],
+        vector_type: Literal["bipolar", "binary", "real"],
+        vector_count: int,
+        tie_symbol: str,
+    ) -> List[float]:
+        """Normalize summed coordinates without changing their vector domain."""
+        if vector_type == "real":
+            magnitude = math.sqrt(sum(total * total for total in totals))
+            return [total / magnitude if magnitude > 0 else 0.0 for total in totals]
+
+        threshold = 0.0 if vector_type == "bipolar" else vector_count / 2.0
+        low_value = -1.0 if vector_type == "bipolar" else 0.0
+        tie_breaker = cls.from_symbol(tie_symbol, len(totals), vector_type).vector
+        return [
+            1.0 if total > threshold else low_value if total < threshold else tie_breaker[index]
+            for index, total in enumerate(totals)
+        ]
+
+    @classmethod
+    def bundle(cls, vectors: Sequence["NativeSymbolicVector"]) -> "NativeSymbolicVector":
+        """Bundle vectors with one order-invariant normalization pass."""
+        items = list(vectors)
+        if not items:
+            raise ValueError("At least one vector is required for bundling")
+
+        first = items[0]
+        if any(vector.dim != first.dim for vector in items):
+            raise ValueError("Dimension mismatch in bundling")
+        if any(vector.vector_type != first.vector_type for vector in items):
+            raise ValueError("Vector type mismatch in bundling")
+
+        ordered_items = sorted(items, key=lambda vector: (vector.symbol, tuple(vector.vector)))
+        totals = [sum(values) for values in zip(*(vector.vector for vector in ordered_items))]
+        ordered_symbols = [vector.symbol for vector in ordered_items]
+        bundle_symbol = f"bundle({','.join(ordered_symbols)})"
+        if len(items) == 1:
+            normed = list(first.vector)
+        else:
+            normed = cls._normalize_superposition(
+                totals,
+                first.vector_type,
+                len(items),
+                f"{bundle_symbol}:tie",
+            )
+
+        return cls(
+            symbol=bundle_symbol,
+            dim=first.dim,
+            vector=normed,
+            vector_type=first.vector_type,
+        )
+
     def superpose(self, other: "NativeSymbolicVector") -> "NativeSymbolicVector":
         """Superpose two symbolic vectors (elementwise addition with normalization)"""
         if self.dim != other.dim:
@@ -115,13 +157,8 @@ class NativeSymbolicVector:
 
         superposed = [a + b for a, b in zip(self.vector, other.vector)]
 
-        # Sign normalization for bipolar/binary, regular normalization for real
-        if self.vector_type in ["bipolar", "binary"]:
-            normed = [1.0 if x > 0 else -1.0 if x < 0 else 0.0 for x in superposed]
-        else:
-            # Normalize to unit length for real vectors
-            magnitude = math.sqrt(sum(x * x for x in superposed))
-            normed = [x / magnitude if magnitude > 0 else 0.0 for x in superposed]
+        tie_symbol = f"tie({','.join(sorted([self.symbol, other.symbol]))})"
+        normed = self._normalize_superposition(superposed, self.vector_type, 2, tie_symbol)
 
         superposed_symbol = f"({self.symbol})+({other.symbol})"
 
@@ -202,7 +239,11 @@ class NativeVSAMemory:
         return len(self.memory)
 
 
-def encode_symbol(symbol: str, dim: int = 512, vector_type: str = "bipolar") -> List[float]:
+def encode_symbol(
+    symbol: str,
+    dim: int = 512,
+    vector_type: Literal["bipolar", "binary", "real"] = "bipolar",
+) -> List[float]:
     """Utility function to encode symbol as vector"""
     vector = NativeSymbolicVector.from_symbol(symbol, dim, vector_type)
     return vector.vector

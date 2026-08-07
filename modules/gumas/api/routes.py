@@ -26,6 +26,7 @@ from src.monitoring.ethics_engine import (
 )
 from src.core.native_dlp_export import NativeDLPTracker
 from src.middleware.fastapi_security import require_csrf_token
+from src.middleware.error_helpers import http_error
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/gumas", tags=["GUMAS Ethics"])
@@ -272,7 +273,7 @@ async def get_violations(request: ViolationQueryRequest) -> List[Dict[str, Any]]
         return violations_data
         
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid parameter: {e}")
+        raise http_error(400, "Invalid parameter.", e)
     except Exception as e:
         logger.error("Violations query failed: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -369,7 +370,7 @@ async def add_rule(request: AddRuleRequest) -> RuleResponse:
             category = RuleCategory(request.category)
             severity = ViolationSeverity(request.severity)
         except ValueError as e:
-            raise HTTPException(status_code=400, detail=f"Invalid parameter: {e}")
+            raise http_error(400, "Invalid parameter.", e)
 
         # Create rule
         rule = EthicsRule(
@@ -488,7 +489,7 @@ async def clear_violations(
         return None
         
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid timestamp: {e}")
+        raise http_error(400, "Invalid timestamp.", e)
     except Exception as e:
         logger.error("Clear violations failed: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error")

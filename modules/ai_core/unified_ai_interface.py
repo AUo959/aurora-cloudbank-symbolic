@@ -2,7 +2,7 @@
 Unified AI Interface for Aurora CloudBank Symbolic
 
 Multi-model AI abstraction layer supporting:
-- Claude 3.5 Sonnet, 4.5 Opus
+- Claude Opus 5, Claude Sonnet 5
 - GPT-4, GPT-4o, GPT-5 (Codex)
 - Intelligent fallback chains
 - Runtime model selection
@@ -10,6 +10,7 @@ Multi-model AI abstraction layer supporting:
 """
 
 import asyncio
+import copy
 import logging
 import os
 from dataclasses import dataclass, field
@@ -30,7 +31,7 @@ class AIProvider(Enum):
 class AIModel(Enum):
     """Supported AI models with version tracking.
 
-    Catalog reconciliation: 2026-06-02.
+    Catalog reconciliation: 2026-07-25 (Anthropic entries).
 
     Identifiers tagged "UNVERIFIED placeholder" below are aspirational and are
     NOT confirmed against the provider's live catalog. They are gated by
@@ -38,11 +39,21 @@ class AIModel(Enum):
     through the public interface (see ``select_optimal_model``). Promote one to
     a live identifier only after confirming it against the provider catalog and
     flipping its ``available`` flag in the same change.
+
+    A "Verified live" tag means the identifier was checked against the
+    provider's own catalog on the reconciliation date above — not that it was
+    once believed correct. The previous Claude entries violated that rule: a
+    retired identifier (``claude-3-5-sonnet-20241022``, retired 2025-10-28)
+    carried the tag while being the only selectable Anthropic model, and the
+    gated entry (``claude-4-5-opus-20250115``) named a release that never
+    existed in any form. Both were replaced against the current Anthropic
+    catalog. Anthropic IDs below take no date suffix — they are complete as
+    written.
     """
 
-    # Claude family
-    CLAUDE_35_SONNET = "claude-3-5-sonnet-20241022"  # Verified live
-    CLAUDE_45_OPUS = "claude-4-5-opus-20250115"  # UNVERIFIED placeholder (available=False)
+    # Claude family — verified against the Anthropic catalog on 2026-07-25
+    CLAUDE_OPUS_5 = "claude-opus-5"  # Verified live
+    CLAUDE_SONNET_5 = "claude-sonnet-5"  # Verified live
 
     # GPT family
     GPT_4 = "gpt-4"  # Verified live
@@ -69,6 +80,25 @@ class ModelCapabilities:
     cost_per_1k_tokens: float = 0.0  # USD
     latency_avg_ms: int = 1000
     available: bool = True
+
+    # Machine-readable verification claim, replacing the "# Verified live"
+    # comment convention. A comment is a *claim*; nothing can falsify it, which
+    # is how a model retired on 2025-10-28 kept its "Verified live" tag while
+    # being the only selectable Anthropic entry (#1329).
+    #
+    # verified_on: ISO date (YYYY-MM-DD) the entry was last checked against the
+    #     source named below. Empty means never verified.
+    # verified_source: where the check was made --
+    #     "models-api"   the provider's own Models endpoint (authoritative)
+    #     "pricing-docs" published pricing pages; the Models API exposes no cost
+    #     "manual"       a human read the catalog; weakest, still dated
+    #     "unverified"   deliberately unchecked; must not be selectable
+    #
+    # tests/test_model_catalog_freshness.py fails the build when a selectable
+    # entry's claim ages past the threshold, which puts a clock on the pricing
+    # numbers no API can confirm.
+    verified_on: str = ""
+    verified_source: str = "unverified"
 
 
 @dataclass
@@ -121,33 +151,37 @@ class UnifiedAIInterface:
 
     # Model capabilities registry
     CAPABILITIES: Dict[AIModel, ModelCapabilities] = {
-        AIModel.CLAUDE_35_SONNET: ModelCapabilities(
-            model=AIModel.CLAUDE_35_SONNET,
+        AIModel.CLAUDE_OPUS_5: ModelCapabilities(
+            model=AIModel.CLAUDE_OPUS_5,
             provider=AIProvider.ANTHROPIC,
-            context_window=200_000,
-            max_output_tokens=8192,
-            supports_function_calling=True,
-            supports_vision=True,
-            reasoning_strength=9,
-            code_generation_strength=8,
-            mathematical_strength=9,
-            cost_per_1k_tokens=0.003,
-            latency_avg_ms=800,
-        ),
-        AIModel.CLAUDE_45_OPUS: ModelCapabilities(
-            model=AIModel.CLAUDE_45_OPUS,
-            provider=AIProvider.ANTHROPIC,
-            context_window=500_000,
-            max_output_tokens=16384,
+            context_window=1_000_000,
+            max_output_tokens=128_000,
             supports_function_calling=True,
             supports_vision=True,
             supports_code_execution=True,
             reasoning_strength=10,
-            code_generation_strength=9,
+            code_generation_strength=10,
             mathematical_strength=10,
-            cost_per_1k_tokens=0.015,  # Expected pricing
+            cost_per_1k_tokens=0.005,  # $5 / 1M input tokens
             latency_avg_ms=1200,
-            available=False,  # Not yet released
+            verified_on="2026-07-25",
+            verified_source="manual",
+        ),
+        AIModel.CLAUDE_SONNET_5: ModelCapabilities(
+            model=AIModel.CLAUDE_SONNET_5,
+            provider=AIProvider.ANTHROPIC,
+            context_window=1_000_000,
+            max_output_tokens=128_000,
+            supports_function_calling=True,
+            supports_vision=True,
+            supports_code_execution=True,
+            reasoning_strength=9,
+            code_generation_strength=9,
+            mathematical_strength=9,
+            cost_per_1k_tokens=0.003,  # $3 / 1M input tokens
+            latency_avg_ms=800,
+            verified_on="2026-07-25",
+            verified_source="manual",
         ),
         AIModel.GPT_4: ModelCapabilities(
             model=AIModel.GPT_4,
@@ -160,6 +194,8 @@ class UnifiedAIInterface:
             mathematical_strength=8,
             cost_per_1k_tokens=0.03,
             latency_avg_ms=1500,
+            verified_on="2026-07-25",
+            verified_source="manual",
         ),
         AIModel.GPT_4O: ModelCapabilities(
             model=AIModel.GPT_4O,
@@ -173,6 +209,8 @@ class UnifiedAIInterface:
             mathematical_strength=8,
             cost_per_1k_tokens=0.005,
             latency_avg_ms=600,
+            verified_on="2026-07-25",
+            verified_source="manual",
         ),
         AIModel.GPT_5: ModelCapabilities(
             model=AIModel.GPT_5,
@@ -188,6 +226,8 @@ class UnifiedAIInterface:
             cost_per_1k_tokens=0.02,  # Expected pricing
             latency_avg_ms=1000,
             available=False,  # Not yet released
+            verified_on="",
+            verified_source="unverified",
         ),
         AIModel.GPT_5_CODEX: ModelCapabilities(
             model=AIModel.GPT_5_CODEX,
@@ -203,41 +243,57 @@ class UnifiedAIInterface:
             cost_per_1k_tokens=0.025,  # Expected pricing
             latency_avg_ms=900,
             available=False,  # Not yet released
+            verified_on="",
+            verified_source="unverified",
         ),
     }
 
     # Default fallback chains for different task types
     FALLBACK_CHAINS = {
         "reasoning": [
-            AIModel.CLAUDE_45_OPUS,
+            AIModel.CLAUDE_OPUS_5,
             AIModel.GPT_5,
-            AIModel.CLAUDE_35_SONNET,
+            AIModel.CLAUDE_SONNET_5,
             AIModel.GPT_4O,
         ],
         "code_generation": [
             AIModel.GPT_5_CODEX,
             AIModel.GPT_5,
-            AIModel.CLAUDE_45_OPUS,
-            AIModel.CLAUDE_35_SONNET,
+            AIModel.CLAUDE_OPUS_5,
+            AIModel.CLAUDE_SONNET_5,
             AIModel.GPT_4O,
         ],
         "mathematical": [
-            AIModel.CLAUDE_45_OPUS,
-            AIModel.CLAUDE_35_SONNET,
+            AIModel.CLAUDE_OPUS_5,
+            AIModel.CLAUDE_SONNET_5,
             AIModel.GPT_5,
             AIModel.GPT_4,
         ],
         "general": [
             AIModel.GPT_4O,
-            AIModel.CLAUDE_35_SONNET,
+            AIModel.CLAUDE_SONNET_5,
             AIModel.GPT_5,
-            AIModel.CLAUDE_45_OPUS,
+            AIModel.CLAUDE_OPUS_5,
         ],
     }
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initialize unified AI interface"""
         self.config = config or {}
+
+        # Per-instance capability table.
+        #
+        # CAPABILITIES is declared at class level, so every instance shared one
+        # dict and enable_model()/disable_model() mutated it process-wide: one
+        # caller ungating a model ungated it for every other caller, including
+        # the IDs deliberately shipped as available=False unverified
+        # placeholders. A gate that any instance can silently open for all the
+        # others is not a gate.
+        #
+        # deepcopy because the values are mutable ModelCapabilities dataclasses;
+        # a shallow copy would still share them.
+        self.CAPABILITIES = copy.deepcopy(type(self).CAPABILITIES)
+
         self.anthropic_client = None
         self.openai_client = None
         self.performance_metrics: Dict[AIModel, List[float]] = {}
@@ -542,7 +598,7 @@ class UnifiedAIInterface:
         return [model for model, caps in self.CAPABILITIES.items() if caps.available]
 
     def enable_model(self, model: AIModel):
-        """Enable a model (e.g., when Claude 4.5 or GPT-5 become available)"""
+        """Enable a model (e.g., when a gated placeholder like GPT-5 becomes available)"""
         if model in self.CAPABILITIES:
             self.CAPABILITIES[model].available = True
             logger.info(f"✅ Model {model.value} enabled")

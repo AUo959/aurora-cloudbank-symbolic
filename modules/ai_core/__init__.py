@@ -2,7 +2,7 @@
 AI Core Module for Aurora CloudBank Symbolic
 
 Unified AI integration supporting multiple models:
-- Claude 3.5 Sonnet, 4.5 Opus (Anthropic)
+- Claude Opus 5, Claude Sonnet 5 (Anthropic)
 - GPT-4, GPT-4o, GPT-5, GPT-5 Codex (OpenAI)
 
 Features:

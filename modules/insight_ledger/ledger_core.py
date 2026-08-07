@@ -11,7 +11,7 @@ import json
 import os
 from datetime import datetime, timezone
 from enum import Enum
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from threading import Lock
 from typing import Any, Dict, List, Optional
 
@@ -28,55 +28,156 @@ except ImportError:
     CRYPTOGRAPHY_AVAILABLE = False
 
 
+def resolve_export_root(env_value: str) -> Path:
+    """
+    Resolve and validate the ledger export root.
+
+    ``AURORA_LEDGER_EXPORT_PATH`` is operator configuration, not request data,
+    but a misconfigured value silently weakens the containment boundary that
+    :func:`validate_safe_path` enforces against it. Pointing it at the
+    filesystem root makes *every* path "contained"; pointing it at a file makes
+    the failure surface as a confusing ``mkdir`` error much later. Both are
+    rejected here, at the point of configuration, with a message naming the
+    variable. See #1337.
+
+    Args:
+        env_value: Raw ``AURORA_LEDGER_EXPORT_PATH`` value; empty means default.
+
+    Returns:
+        An existing, validated export root directory.
+
+    Raises:
+        ValueError: If the configured root is the filesystem root or is not a
+            directory.
+    """
+    if env_value:
+        export_root = Path(env_value)
+        # Validate against the *resolved* form, but return the path as given.
+        # validate_safe_path() matches a caller-supplied absolute path against
+        # both spellings of the root, and on macOS the unresolved spelling is
+        # the one callers hold: tempfile hands back /var/folders/... while
+        # resolve() yields /private/var/folders/.... Resolving here would throw
+        # the as-given spelling away and reject a caller passing back the very
+        # path it was just handed — the exact macOS regression fixed earlier in
+        # validate_safe_path, and caught here by test_export_ledger.
+        probe = export_root.resolve()
+        # A root of "/" (or "C:\\") makes the containment check vacuous: every
+        # absolute path on that volume is lexically "inside" it.
+        if probe == Path(probe.anchor):
+            raise ValueError(
+                "AURORA_LEDGER_EXPORT_PATH must not be the filesystem root "
+                f"({probe}); containment would be vacuous."
+            )
+        if probe.exists() and not probe.is_dir():
+            raise ValueError(
+                f"AURORA_LEDGER_EXPORT_PATH must be a directory, got: {probe}"
+            )
+    else:
+        export_root = Path.cwd() / "data" / "exports"
+
+    export_root.mkdir(parents=True, exist_ok=True)
+    return export_root
+
+
 def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = False) -> Path:
     """
     Validate user-provided path is safe and within bounds.
-    
+
     Args:
-        user_path: User-provided path string
-        safe_root: Root directory that path must be within
+        user_path: User-provided path string (absolute or relative)
+        safe_root: Root directory that path must resolve within
         allow_create: If False, path must already exist
-        
+
     Returns:
         Validated absolute Path within safe_root
-        
+
     Raises:
-        ValueError: If path is unsafe (absolute, contains .., outside bounds)
+        ValueError: If path is unsafe (contains .., or resolves outside bounds)
+
+    Both absolute and relative inputs converge on the same containment check.
+    Absolute paths must sit under safe_root lexically (verified by
+    ``relative_to``) before any filesystem access occurs; the resolved path is
+    then re-checked for symlink escapes.  Relative paths must contain no ``..``
+    components; they are joined with safe_root before resolving.
+
+    Callers that legitimately accept absolute paths point *safe_root* at the
+    directory those paths live in — containment rather than exemption.
     """
     requested = Path(user_path)
-    
-    # Allow absolute paths in /tmp for testing purposes
-    if requested.is_absolute() and str(requested).startswith("/tmp/"):
-        # Test path - allow it directly but ensure it exists or can be created
-        if not allow_create and not requested.exists():
-            raise ValueError(f"Path does not exist: {user_path}")
-        return requested
-    
-    # Reject other absolute paths from user input
-    if requested.is_absolute():
-        raise ValueError(f"Absolute paths not allowed: {user_path}")
-    
-    # Reject parent directory references
-    if ".." in requested.parts:
-        raise ValueError(f"Parent directory references not allowed: {user_path}")
-    
-    # Resolve to absolute path within safe_root
+    safe_root_as_given = safe_root
     safe_root = safe_root.resolve()
-    full_path = (safe_root / requested).resolve()
-    
-    # Verify resolved path is within safe_root
-    try:
-        common = os.path.commonpath([safe_root, full_path])
-        if common != str(safe_root):
+    safe_root_str = str(safe_root)
+
+    # Windows drive-relative input (``C:foo``) carries a drive but is NOT
+    # absolute, so ``Path.is_absolute()`` alone routes it down the relative
+    # branch.  That branch joins with safe_root before resolving — and joining
+    # an anchored path *discards* the left operand:
+    #
+    #     PureWindowsPath("D:/ledger") / "C:foo"  ->  PureWindowsPath("C:foo")
+    #
+    # which silently leaves the containment root.  Treat anything carrying a
+    # drive or a root as path-rooted so it goes through the lexical
+    # ``relative_to`` barrier below and fails closed instead.
+    #
+    # The check runs through PureWindowsPath on *every* platform so the
+    # behaviour is identical on Linux CI and on Windows; otherwise this would
+    # only be exercised on a Windows runner, and no CI job runs on Windows for
+    # the Python suite.  See #1337.
+    windows_view = PureWindowsPath(user_path)
+    is_path_rooted = bool(requested.is_absolute() or windows_view.drive or windows_view.root)
+
+    if is_path_rooted:
+        # Do not call .resolve() directly on caller-supplied absolute paths.
+        # relative_to() is a pure string operation: it raises ValueError when
+        # the path is not lexically under safe_root (no filesystem access).
+        # We then reconstruct from the trusted safe_root prefix so that
+        # .resolve() is never called on unvalidated user data.
+        #
+        # Try both spellings of the root, because relative_to() is lexical and
+        # the two can be disjoint strings for the same directory. On macOS
+        # /var is a symlink to /private/var, and tempfile/env values are handed
+        # back unresolved: safe_root.resolve() is /private/var/folders/... while
+        # the caller holds /var/folders/.... Matching only the resolved spelling
+        # rejected a caller passing back the very path it had just been given,
+        # which failed 11 tests and errored 25 more on macOS while staying green
+        # on Linux, where /tmp needs no resolution. The same applies to any
+        # symlinked mount or home directory.
+        #
+        # Both candidates are trusted configuration, not request data, and the
+        # reconstruction below still happens against the *resolved* root — so
+        # the containment barrier is unchanged, only the spelling is forgiving.
+        rel = None
+        for candidate in (safe_root, safe_root_as_given):
+            try:
+                rel = requested.relative_to(candidate)
+                break
+            except ValueError:
+                continue
+        if rel is None:
             raise ValueError(f"Path outside allowed directory: {user_path}")
-    except ValueError as e:
-        # commonpath raises ValueError if paths are on different drives (Windows)
-        raise ValueError(f"Path validation failed: {user_path}") from e
-    
+        full_path = (safe_root / rel).resolve()
+    else:
+        # Reject parent directory references in relative paths.
+        if ".." in requested.parts:
+            raise ValueError(f"Parent directory references not allowed: {user_path}")
+        # Join with the trusted root before resolving (CodeQL recommended pattern).
+        full_path = (safe_root / requested).resolve()
+
+    # Guard: resolved path must be within safe_root.
+    # str.startswith() is CodeQL's recognised containment barrier for path
+    # injection — it is applied to the resolved path so symlinks that lead
+    # outside the root are also rejected.  On Windows, paths on different
+    # drives share no prefix, so the check naturally fails closed without
+    # needing a separate cross-drive guard.
+    full_path_str = str(full_path)
+    if not (full_path_str == safe_root_str
+            or full_path_str.startswith(safe_root_str + os.sep)):
+        raise ValueError(f"Path outside allowed directory: {user_path}")
+
     # Check existence if required
     if not allow_create and not full_path.exists():
         raise ValueError(f"Path does not exist: {user_path}")
-    
+
     return full_path
 
 
@@ -616,10 +717,15 @@ class InsightLedger:
         Raises:
             ValueError: If output_path is invalid or outside safe directory
         """
-        # Define safe export root
-        # In production, this should come from config
-        export_root = Path.cwd() / "data" / "exports"
-        
+        # Define safe export root. AURORA_LEDGER_EXPORT_PATH makes this
+        # configurable, which the previous comment here asked for ("in
+        # production, this should come from config") and which is also how
+        # callers legitimately accept absolute export paths now that
+        # validate_safe_path has no temp-directory exemption: point the root at
+        # the directory the export belongs in, rather than exempting it.
+        _export_env = os.environ.get("AURORA_LEDGER_EXPORT_PATH", "")
+        export_root = resolve_export_root(_export_env)
+
         # Validate output path is safe
         validated_path = validate_safe_path(output_path, export_root, allow_create=True)
         

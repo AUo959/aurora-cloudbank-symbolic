@@ -45,7 +45,7 @@ azure-quantum>=1.0.0                # Azure Quantum workspace SDK
 cirq>=1.3.0                         # Required for Azure Quantum + other use cases
 
 # AWS Braket (Amazon)
-amazon-braket-sdk>=1.65.0           # AWS Braket SDK
+amazon-braket-sdk>=1.124.3           # AWS Braket SDK
 
 # ===================================================================
 # ADDITIONAL QUANTUM FRAMEWORKS (Optional)
@@ -90,4 +90,4 @@ sentry-sdk>=2.65.0                  # Error tracking
 # Required by connector/server.py to expose Aurora state over the Model
 # Context Protocol. Without it the connector and tests/connector are
 # unavailable; the core API is unaffected. See connector/README.md.
-mcp>=1.28.1                         # Model Context Protocol SDK
+mcp>=1.28.1,<2.0.0                  # Model Context Protocol SDK (v1 API)

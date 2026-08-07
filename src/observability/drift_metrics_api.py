@@ -19,6 +19,7 @@ from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 from src.monitoring.drift_detector import DriftDetector, DriftLevel
+from src.middleware.error_helpers import http_error
 
 logger = logging.getLogger(__name__)
 
@@ -334,7 +335,7 @@ async def establish_baseline(request: EstablishBaselineRequest) -> Dict[str, Any
     except HTTPException:
         raise
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid value: {e}")
+        raise http_error(400, "Invalid value.", e)
     except Exception as e:
         logger.error("Failed to establish baseline: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error")

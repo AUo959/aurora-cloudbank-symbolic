@@ -1,13 +1,11 @@
 # Aurora CloudBank Symbolic - Development & Testing Dependencies
-# Install along with core requirements: pip install -r requirements.txt -r requirements-dev.txt
+# Install with core requirements: pip install -r requirements.txt -r requirements-dev.txt
 
 # ===================================================================
-# TESTING FRAMEWORK
+# TESTING AND CI BASELINE
 # ===================================================================
-pytest>=8.4.2                       # Testing framework
-pytest-asyncio>=0.23.0              # Async test support
-pytest-cov>=7.0.0                   # Coverage reporting
-coverage>=7.10.7                    # Coverage measurement
+# Shared test/CI requirements, including connector test support.
+-r requirements-test.txt
 
 # ===================================================================
 # FORMAL VERIFICATION & PROPERTY-BASED TESTING
@@ -24,7 +22,6 @@ hypothesis>=6.100.0                 # Property-based testing
 # CODE QUALITY & FORMATTING
 # ===================================================================
 black>=26.5.1                       # Code formatting
-flake8>=6.1.0                       # Linting
 isort>=5.12.0                       # Import sorting
 mypy>=2.1.0                         # Static type checking
 
@@ -35,7 +32,7 @@ bandit>=1.7.5                       # Security vulnerability scanner
 bandit[toml]>=1.7.5                 # Bandit with TOML support
 safety>=3.8.1                       # Dependency vulnerability scanning
 pip-audit>=2.9.0                    # Security auditing tool
-semgrep>=1.165.0                     # Static analysis security scanner
+semgrep>=1.165.0                    # Static analysis security scanner
 
 # ===================================================================
 # DEVELOPMENT PRODUCTIVITY

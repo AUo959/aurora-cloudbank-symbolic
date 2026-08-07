@@ -1,7 +1,7 @@
 *
 
 !Dockerfile_aurora_gui_cloudhub
-!requirements.txt
+!requirements-hashed.txt
 
 !api/
 !api/aurora_gui_cloudhub_fastapi.py

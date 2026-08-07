@@ -32,10 +32,17 @@ class TestFireAndForget:
             pass
 
         async def _run():
-            fire_and_forget(_noop(), name="test-stored", pending_tasks=pending)
+            task = fire_and_forget(_noop(), name="test-stored", pending_tasks=pending)
             # Task is in the set immediately after scheduling
             assert len(pending) == 1
-            await asyncio.sleep(0)  # let the task finish
+            # Await the task itself rather than yielding a fixed number of
+            # times. The coroutine body finishing and the done-callback running
+            # are separate loop iterations — add_done_callback dispatches via
+            # loop.call_soon() — so a single `await asyncio.sleep(0)` lets the
+            # body complete but returns before the callback discards the task.
+            # Awaiting the task is deterministic: our callback was registered
+            # before the waiter's, so it runs first.
+            await task
             # Task removes itself via done-callback
             assert len(pending) == 0
 
@@ -92,7 +99,9 @@ class TestFireAndForget:
             task = fire_and_forget(_noop(), name="test-fallback")
             # The fallback set should contain the task until it finishes
             assert task in task_utils._fallback_tasks
-            await asyncio.sleep(0)
+            # See test_task_stored_in_pending_set: await the task rather than
+            # yielding once, so the done-callback has actually run.
+            await task
             assert task not in task_utils._fallback_tasks
 
         asyncio.run(_run())

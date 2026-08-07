@@ -26,6 +26,16 @@ This directory contains reference documentation for developers working with Auro
 
 ---
 
+## Canon authority and provenance
+
+| Document | Description |
+| --- | --- |
+| [CANON_PROVENANCE.md](CANON_PROVENANCE.md) | CanonRec authority revision, CloudBank mirror hash, runtime dependency boundary, and unreconciled staff-registry surface |
+| [`../CANON_INDEX.md`](../CANON_INDEX.md) | Topic-to-document authority routing inside CloudBank |
+| [`../config/canon_provenance.json`](../config/canon_provenance.json) | Machine-readable provenance receipt enforced by tests |
+
+---
+
 ## Setup and Development
 
 | Document | Description |

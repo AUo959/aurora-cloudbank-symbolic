@@ -10,6 +10,23 @@ from fastapi.testclient import TestClient
 from src.improvement.api import router
 
 
+@pytest.fixture(autouse=True)
+def confine_analysis_to_tempdir(monkeypatch):
+    """Point the API's safe root at the temp directory these fixtures write to.
+
+    The routes used to admit any absolute path under a temp directory by
+    skipping the containment check outright — a bypass in production code,
+    reported by CodeQL as py/path-injection. That is gone.
+
+    Instead the tests declare their own root. The containment check still runs
+    on every request; it is simply enforcing a root that covers the fixture
+    files (both `tmp_path` and `tempfile.NamedTemporaryFile` live here). The
+    widened root is scoped to this test module — production keeps SAFE_ROOT,
+    with no path exempt from the check.
+    """
+    monkeypatch.setenv("AURORA_IMPROVEMENT_ROOT", tempfile.gettempdir())
+
+
 @pytest.fixture
 def client():
     """Create test client with improvement router"""
@@ -274,3 +291,86 @@ def test_analyze_directory_summary_statistics(client, tmp_path):
     assert "by_category" in data
     assert "by_severity" in data
     assert data["total_files_analyzed"] >= 2
+
+
+@pytest.mark.api
+@pytest.mark.improvement
+@pytest.mark.security
+@pytest.mark.parametrize(
+    "pattern",
+    [
+        "../*.py",
+        "../../*.py",
+        "**/../*.py",
+        # Rooted but NOT absolute on Windows: PurePath("/etc/*.conf").is_absolute()
+        # is False there because it carries no drive, so an is_absolute() check
+        # alone let this through to rglob(), which raised NotImplementedError —
+        # a 500 where a 400 belongs. Caught on windows-latest, not locally.
+        "/etc/*.conf",
+        # Drive-relative: no root, but a drive. Same blind spot (see #1337).
+        "C:foo/*.py",
+        "C:/x/*.py",
+        # Backslash separators must be read as separators on every platform.
+        r"..\..\*.py",
+    ],
+)
+def test_file_patterns_cannot_escape_the_analyzed_directory(client, tmp_path, pattern):
+    """A glob pattern must not read files outside the requested directory.
+
+    `directory` is resolved through trusted enumeration, but `file_patterns`
+    reached `Path.rglob()` unvalidated — and rglob honours "..". So
+    {"directory": "proj", "file_patterns": ["../*.py"]} read proj's siblings,
+    and "../../*.py" escaped the configured root entirely, echoing the matched
+    absolute paths back in the response.
+    """
+    project = tmp_path / "proj"
+    project.mkdir()
+    (project / "a.py").write_text("max_items = 9999\n")
+
+    # Sibling of the analyzed directory — must stay unreachable.
+    (tmp_path / "sibling_secret.py").write_text("API_KEY = 'sk-live'\nmax_items = 9999\n")
+
+    response = client.post(
+        "/improvements/analyze-directory",
+        json={"directory": str(project), "file_patterns": [pattern]},
+    )
+
+    # Rejected outright is the intended behaviour; a 200 is only acceptable if
+    # nothing outside the directory came back.
+    assert response.status_code == 400, (
+        f"pattern {pattern!r} should be rejected, got {response.status_code}"
+    )
+
+    if response.status_code == 200:
+        analyzed = response.json().get("suggestions", {})
+        assert not [k for k in analyzed if "sibling_secret" in k], (
+            f"pattern {pattern!r} escaped the analyzed directory: {list(analyzed)}"
+        )
+
+
+@pytest.mark.api
+@pytest.mark.improvement
+@pytest.mark.security
+def test_engine_drops_matches_outside_the_directory(tmp_path):
+    """The engine filters escaping matches even when handed a bad pattern.
+
+    The API rejects these patterns, but analyze_directory() accepts patterns as
+    an argument and cannot assume every caller validated them, so it confirms
+    each match resolves inside the directory before reading it.
+    """
+    from src.improvement import get_improvement_engine
+
+    project = tmp_path / "proj"
+    project.mkdir()
+    (project / "a.py").write_text("max_items = 9999\n")
+    (tmp_path / "secret.py").write_text("API_KEY = 'sk-live'\nmax_items = 9999\n")
+
+    engine = get_improvement_engine()
+
+    contained = engine.analyze_directory(project, ["*.py"])
+    assert any("a.py" in key for key in contained)
+
+    escaped = engine.analyze_directory(project, ["../*.py"])
+    assert not [key for key in escaped if "secret.py" in key], (
+        f"engine returned files outside the directory: {list(escaped)}"
+    )

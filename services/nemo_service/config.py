@@ -8,6 +8,8 @@ Aurora NeMo Service — Configuration Management
 # Anchor Seed: EOS_SEED_ORION
 """
 
+import os
+import tempfile
 from enum import Enum
 from functools import lru_cache
 from typing import Optional
@@ -96,11 +98,15 @@ class NeMoConfig(BaseSettings):
         description="Root directory containing NeMo model checkpoints",
     )
     snapshots_dir: str = Field(
-        default="/var/lib/nemo_snapshots",
+        default_factory=lambda: os.path.join(tempfile.gettempdir(), "nemo_snapshots"),
         description=(
-            "Directory for state snapshots. "
-            "PRODUCTION: override with a persistent path (e.g. /var/lib/nemo_snapshots) "
-            "or set NEMO_SNAPSHOTS_DIR to a mounted PVC path so snapshots survive restarts."
+            "Directory for state snapshots. Defaults to a writable path under the "
+            "system temp directory so the service imports on any developer machine "
+            "— StateManager calls os.makedirs() at construction, and a default of "
+            "/var/lib/nemo_snapshots raised PermissionError for every non-root user. "
+            "PRODUCTION: set NEMO_SNAPSHOTS_DIR to a persistent path (e.g. "
+            "/var/lib/nemo_snapshots or a mounted PVC) so snapshots survive restarts. "
+            "The default is ephemeral by design; temp directories are cleared."
         ),
     )
     default_model_path: Optional[str] = Field(

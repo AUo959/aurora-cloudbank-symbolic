@@ -145,7 +145,7 @@ class ComponentStatus(BaseModel):
     category: str
     description: str
     endpoints: List[str]
-    status: str = Field(description="active|degraded|unavailable|documented")
+    status: str = Field(description="active|degraded|unavailable|unknown")
     telemetry_available: bool = False
     telemetry_source: str = "static_registry"
     health_score: Optional[float] = Field(default=None, ge=0.0, le=100.0)
@@ -335,14 +335,26 @@ def calculate_synergy_score(component1: str, component2: str) -> float:
 
 @router.get("/components", response_model=List[ComponentStatus], response_model_exclude_none=True)
 async def get_components(
-    status_filter: Optional[str] = Query(None, description="Filter by status: documented")
+    status_filter: Optional[str] = Query(
+        None,
+        description="Filter by runtime status: active|degraded|unavailable|unknown",
+    )
 ) -> List[ComponentStatus]:
     """
-    Get registered R-2 component topology entries.
+    Get registered R-2 component topology entries, enriched with runtime health.
 
-    This route intentionally returns static registry data only. It does not
-    synthesize health, uptime, heartbeat, or resource usage values.
-    
+    Topology (id, name, category, description, endpoints) is static registry
+    data. ``status``, ``health_score`` and ``health_source`` are derived per
+    request by ``_runtime_health()`` from real signals only — an import probe,
+    mounted-route presence, or R-2 telemetry success rate — and ``health_source``
+    always names which of those produced the score.
+
+    No value here is synthesized: ``last_heartbeat``, ``uptime_seconds`` and
+    ``resource_usage`` have no runtime signal behind them, so they are left
+    unset and omitted from the response rather than filled with plausible
+    numbers. ``telemetry_available`` is true only when the score actually came
+    from telemetry.
+
     DLP: synergy_dashboard_components
     """
     components = get_component_registry()

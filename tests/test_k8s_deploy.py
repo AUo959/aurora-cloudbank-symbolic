@@ -10,14 +10,17 @@ without requiring an actual Kubernetes cluster.
 
 import os
 import subprocess
+from pathlib import Path
+from unittest import TestCase
+
 import pytest
 import yaml
-from pathlib import Path
 
 
 # Get project root
 PROJECT_ROOT = Path(__file__).parent.parent
 SCRIPTS_DIR = PROJECT_ROOT / "scripts"
+CHECK = TestCase()
 
 
 class TestK8sDeployScripts:
@@ -38,113 +41,177 @@ class TestK8sDeployScripts:
         """Path to the MCP deployment script."""
         return SCRIPTS_DIR / "k8s_deploy_mcp.sh"
 
+    @pytest.fixture
+    def cluster_rejecting_kubectl(self, tmp_path):
+        """Provide kubectl that rejects every invocation."""
+        bin_dir = tmp_path / "bin"
+        bin_dir.mkdir()
+        kubectl_log = tmp_path / "kubectl.log"
+        kubectl = bin_dir / "kubectl"
+        kubectl.write_text(
+            """#!/bin/bash
+set -euo pipefail
+printf '%s\n' "$*" >> "${KUBECTL_LOG:?}"
+
+echo "kubectl invocation forbidden during offline dry-run: $*" >&2
+exit 97
+"""
+        )
+        kubectl.chmod(0o755)
+
+        env = os.environ.copy()
+        env["PATH"] = f"{bin_dir}{os.pathsep}{env.get('PATH', '')}"
+        env["KUBECTL_LOG"] = str(kubectl_log)
+        return env, kubectl_log
+
     def test_relay_script_exists(self, deploy_relays_script):
         """Verify relay deployment script exists."""
-        assert deploy_relays_script.exists(), \
+        assert deploy_relays_script.exists(), (
             f"Relay deployment script not found: {deploy_relays_script}"
+        )
 
     def test_firewall_script_exists(self, deploy_firewall_script):
         """Verify firewall deployment script exists."""
-        assert deploy_firewall_script.exists(), \
+        assert deploy_firewall_script.exists(), (
             f"Firewall deployment script not found: {deploy_firewall_script}"
+        )
 
     def test_mcp_script_exists(self, deploy_mcp_script):
         """Verify MCP deployment script exists."""
-        assert deploy_mcp_script.exists(), \
+        assert deploy_mcp_script.exists(), (
             f"MCP deployment script not found: {deploy_mcp_script}"
+        )
 
     def test_relay_script_is_executable(self, deploy_relays_script):
         """Verify relay deployment script is executable."""
-        assert os.access(deploy_relays_script, os.X_OK), \
+        assert os.access(deploy_relays_script, os.X_OK), (
             "Relay deployment script should be executable"
+        )
 
     def test_firewall_script_is_executable(self, deploy_firewall_script):
         """Verify firewall deployment script is executable."""
-        assert os.access(deploy_firewall_script, os.X_OK), \
+        assert os.access(deploy_firewall_script, os.X_OK), (
             "Firewall deployment script should be executable"
+        )
 
     def test_mcp_script_is_executable(self, deploy_mcp_script):
         """Verify MCP deployment script is executable."""
-        assert os.access(deploy_mcp_script, os.X_OK), \
+        assert os.access(deploy_mcp_script, os.X_OK), (
             "MCP deployment script should be executable"
+        )
 
     def test_relay_script_syntax(self, deploy_relays_script):
         """Verify relay deployment script has valid bash syntax."""
         result = subprocess.run(
             ["bash", "-n", str(deploy_relays_script)],
             capture_output=True,
-            text=True
+            text=True,
+            check=False,
         )
-        assert result.returncode == 0, \
-            f"Relay script syntax error: {result.stderr}"
+        assert result.returncode == 0, f"Relay script syntax error: {result.stderr}"
 
     def test_firewall_script_syntax(self, deploy_firewall_script):
         """Verify firewall deployment script has valid bash syntax."""
         result = subprocess.run(
             ["bash", "-n", str(deploy_firewall_script)],
             capture_output=True,
-            text=True
+            text=True,
+            check=False,
         )
-        assert result.returncode == 0, \
-            f"Firewall script syntax error: {result.stderr}"
+        assert result.returncode == 0, f"Firewall script syntax error: {result.stderr}"
 
     def test_mcp_script_syntax(self, deploy_mcp_script):
         """Verify MCP deployment script has valid bash syntax."""
         result = subprocess.run(
             ["bash", "-n", str(deploy_mcp_script)],
             capture_output=True,
-            text=True
+            text=True,
+            check=False,
         )
-        assert result.returncode == 0, \
-            f"MCP script syntax error: {result.stderr}"
+        assert result.returncode == 0, f"MCP script syntax error: {result.stderr}"
+
+    @pytest.mark.parametrize(
+        "script_name",
+        [
+            "k8s_deploy_relays.sh",
+            "k8s_deploy_firewall.sh",
+            "k8s_deploy_mcp.sh",
+        ],
+    )
+    def test_dry_run_uses_only_client_side_kubectl(
+        self, script_name, cluster_rejecting_kubectl
+    ):
+        """Dry-run must validate manifests without cluster credentials or SIGPIPE."""
+        env, kubectl_log = cluster_rejecting_kubectl
+        script = SCRIPTS_DIR / script_name
+        script_content = script.read_text()
+        assert "| head -" not in script_content, (
+            f"{script_name} uses a terminating pipeline that can fail under pipefail"
+        )
+
+        result = subprocess.run(
+            [str(script), "--dry-run"],
+            cwd=PROJECT_ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+
+        assert result.returncode == 0, (
+            f"{script_name} dry-run failed without cluster access:\n"
+            f"stdout:\n{result.stdout}\n"
+            f"stderr:\n{result.stderr}"
+        )
+
+        calls = kubectl_log.read_text().splitlines() if kubectl_log.exists() else []
+        CHECK.assertEqual(
+            calls, [], f"{script_name} contacted kubectl during dry-run: {calls}"
+        )
+        CHECK.assertIn("validated", result.stdout)
 
     def test_relay_script_has_help(self, deploy_relays_script):
         """Verify relay deployment script has help option."""
         content = deploy_relays_script.read_text()
-        assert "--help" in content or "-h" in content, \
-            "Script should have help option"
+        assert "--help" in content or "-h" in content, "Script should have help option"
 
     def test_firewall_script_has_help(self, deploy_firewall_script):
         """Verify firewall deployment script has help option."""
         content = deploy_firewall_script.read_text()
-        assert "--help" in content or "-h" in content, \
-            "Script should have help option"
+        assert "--help" in content or "-h" in content, "Script should have help option"
 
     def test_mcp_script_has_help(self, deploy_mcp_script):
         """Verify MCP deployment script has help option."""
         content = deploy_mcp_script.read_text()
-        assert "--help" in content or "-h" in content, \
-            "Script should have help option"
+        assert "--help" in content or "-h" in content, "Script should have help option"
 
     def test_relay_script_has_dry_run(self, deploy_relays_script):
         """Verify relay deployment script has dry-run option."""
         content = deploy_relays_script.read_text()
-        assert "--dry-run" in content, \
-            "Script should have dry-run option"
+        assert "--dry-run" in content, "Script should have dry-run option"
 
     def test_firewall_script_has_dry_run(self, deploy_firewall_script):
         """Verify firewall deployment script has dry-run option."""
         content = deploy_firewall_script.read_text()
-        assert "--dry-run" in content, \
-            "Script should have dry-run option"
+        assert "--dry-run" in content, "Script should have dry-run option"
 
     def test_mcp_script_has_dry_run(self, deploy_mcp_script):
         """Verify MCP deployment script has dry-run option."""
         content = deploy_mcp_script.read_text()
-        assert "--dry-run" in content, \
-            "Script should have dry-run option"
+        assert "--dry-run" in content, "Script should have dry-run option"
 
     def test_relay_script_has_chain_notation(self, deploy_relays_script):
         """Verify relay script includes chain notation comment."""
         content = deploy_relays_script.read_text()
-        assert "Chain Notation" in content or "#K8S//" in content, \
+        assert "Chain Notation" in content or "#K8S//" in content, (
             "Script should include chain notation"
+        )
 
     def test_relay_script_has_dlp_tag(self, deploy_relays_script):
         """Verify relay script includes DLP tag comment."""
         content = deploy_relays_script.read_text()
-        assert "DLP" in content, \
-            "Script should include DLP tag"
+        assert "DLP" in content, "Script should include DLP tag"
 
     def test_relay_script_references_correct_manifests(self, deploy_relays_script):
         """Verify relay script references correct K8s manifest files."""
@@ -152,11 +219,10 @@ class TestK8sDeployScripts:
         expected_manifests = [
             "aurora-namespace-rbac.yaml",
             "aurora-configmap-secrets.yaml",
-            "aurora-gui-cloudhub-deployment.yaml"
+            "aurora-gui-cloudhub-deployment.yaml",
         ]
         for manifest in expected_manifests:
-            assert manifest in content, \
-                f"Script should reference {manifest}"
+            assert manifest in content, f"Script should reference {manifest}"
 
 
 class TestK8sManifests:
@@ -212,10 +278,10 @@ class TestWorkflowFile:
     def test_workflow_has_valid_yaml(self, workflow_file):
         """Verify workflow file has valid YAML syntax."""
         try:
-            with open(workflow_file) as f:
-                yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            pytest.fail(f"Workflow YAML is invalid: {e}")
+            with open(workflow_file) as file_handle:
+                yaml.safe_load(file_handle)
+        except yaml.YAMLError as exc:
+            pytest.fail(f"Workflow YAML is invalid: {exc}")
 
     def test_workflow_has_trigger_on_push(self, workflow_file):
         """Verify workflow triggers on push to main/develop."""
@@ -227,20 +293,19 @@ class TestWorkflowFile:
     def test_workflow_has_build_job(self, workflow_file):
         """Verify workflow has a build job."""
         content = workflow_file.read_text()
-        assert "build:" in content.lower() or "Build" in content, \
+        assert "build:" in content.lower() or "Build" in content, (
             "Workflow should have a build job"
+        )
 
     def test_workflow_has_deploy_job(self, workflow_file):
         """Verify workflow has a deploy job."""
         content = workflow_file.read_text()
-        assert "deploy" in content.lower(), \
-            "Workflow should have a deploy job"
+        assert "deploy" in content.lower(), "Workflow should have a deploy job"
 
     def test_workflow_uses_ghcr(self, workflow_file):
-        """Verify workflow uses GitHub Container Registry."""
-        content = workflow_file.read_text()
-        assert "ghcr.io" in content, \
-            "Workflow should use GitHub Container Registry"
+        """Verify workflow uses GitHub Container Registry exactly."""
+        workflow = yaml.safe_load(workflow_file.read_text())
+        assert workflow["env"]["REGISTRY"] == "ghcr.io"
 
 
 if __name__ == "__main__":

@@ -379,5 +379,6 @@ async def health_check():
             "quantum_vectors": metrics.get("quantum_vectors", 0),
             "system_uptime": time.time() - metrics.get("last_cleanup", time.time()),
         }
-    except Exception as e:
-        return {"status": "unhealthy", "error": str(e), "timestamp": time.time()}
+    except Exception as exc:
+        logger.error("AuMemManager health probe failed (%s)", type(exc).__name__)
+        return {"status": "unhealthy", "error": "internal error", "timestamp": time.time()}

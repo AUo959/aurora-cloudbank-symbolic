@@ -9,6 +9,7 @@ without turning routine PRs into noisy review comments.
 
 import json
 import os
+import re
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -84,8 +85,8 @@ class PREvaluator:
     def __init__(self, workspace_root: Optional[str] = None):
         self.workspace_root = Path(workspace_root or os.getcwd())
 
-    def evaluate_pr(self, pr_number: Optional[int] = None, branch: Optional[str] = None) -> Dict[str, Any]:
-        """Evaluate a pull request and return traceable JSON."""
+    @staticmethod
+    def _print_header(pr_number: Optional[int], branch: Optional[str]) -> None:
         print("=" * 80)
         print("AURORA PR EVALUATION")
         print("=" * 80)
@@ -97,11 +98,28 @@ class PREvaluator:
             print("Evaluating current changes")
         print()
 
+    @staticmethod
+    def _actionable_findings(results: List[EvaluationResult]) -> List[Dict[str, Any]]:
+        """Collect only the evidence a reviewer can act on."""
+        return [
+            {
+                "category": result.category,
+                "recommendations": result.recommendations,
+                "evidence": [item.__dict__ for item in result.evidence if item.actionable],
+            }
+            for result in results
+            if result.actionable
+        ]
+
+    def evaluate_pr(self, pr_number: Optional[int] = None, branch: Optional[str] = None) -> Dict[str, Any]:
+        """Evaluate a pull request and return traceable JSON."""
+        self._print_header(pr_number, branch)
+
         changed_files = self._changed_files()
         print(f"Changed files: {len(changed_files)}")
 
         results = [
-            self._evaluate_technical_quality(),
+            self._evaluate_technical_quality(changed_files),
             self._evaluate_boundary_safety(changed_files),
             self._evaluate_traceability(),
             self._evaluate_documentation_fit(changed_files),
@@ -112,15 +130,7 @@ class PREvaluator:
         weight_sum = sum(result.weight for result in results)
         overall_score = weighted_total / weight_sum if weight_sum else 0.0
         all_passed = all(result.passed for result in results)
-        actionable_findings = [
-            {
-                "category": result.category,
-                "recommendations": result.recommendations,
-                "evidence": [item.__dict__ for item in result.evidence if item.actionable],
-            }
-            for result in results
-            if result.actionable
-        ]
+        actionable_findings = self._actionable_findings(results)
         recommendation = self._generate_recommendation(overall_score, all_passed, actionable_findings)
 
         print("=" * 80)
@@ -157,100 +167,181 @@ class PREvaluator:
         except Exception:
             return []
 
-    def _evaluate_technical_quality(self) -> EvaluationResult:
+    def changed_python_files(self, changed_files: List[str]) -> List[str]:
+        """Changed .py files that still exist, excluding vendored/build trees.
+
+        Evidence must be attributable to the diff. Scanning the whole tree made
+        the evaluator report pre-existing errors in files the PR never touched
+        (#1342), which forces unrelated repo-wide cleanup into every PR.
+        Deleted files are filtered out because they cannot be compiled.
+        """
+        excluded = (".venv", "__pycache__", "node_modules", "site-packages")
+        result: List[str] = []
+        for rel in changed_files:
+            if not rel.endswith(".py"):
+                continue
+            if any(part in rel for part in excluded):
+                continue
+            if (self.workspace_root / rel).is_file():
+                result.append(rel)
+        return result
+
+    def changed_test_files(self, changed_files: List[str]) -> List[str]:
+        """Changed Python files that pytest would collect as tests."""
+        return [
+            rel for rel in self.changed_python_files(changed_files)
+            if rel.startswith("tests/") or Path(rel).name.startswith("test_")
+        ]
+
+    def _evaluate_changed_tests(
+        self, changed_files: List[str], evidence: List[ScoreEvidence],
+        findings: List[str], recommendations: List[str],
+    ) -> float:
+        """Run only the test files this PR changed.
+
+        The evaluator used to run the COMPLETE pytest suite with a 90-second
+        timeout while that suite needs roughly six minutes, so it recorded a
+        timeout penalty on every PR (#1342). It also duplicated work: the
+        authoritative full suite is a separate mandatory, fail-closed job in
+        aurora-ci-minimal.yml.
+
+        Running just the changed test files keeps the evidence bounded and
+        attributable. When a PR changes no tests, no penalty is applied and the
+        evidence says where the real gate lives, rather than inventing a signal.
+        """
+        changed_tests = self.changed_test_files(changed_files)
+        if not changed_tests:
+            findings.append("No test files changed; full suite gates separately")
+            evidence.append(
+                ScoreEvidence(
+                    "pytest_changed", 0.4, 0.0,
+                    "No changed test files. The authoritative full suite runs as a "
+                    "required check in aurora-ci-minimal.yml.",
+                )
+            )
+            return 0.0
+
+        try:
+            test_result = subprocess.run(
+                ["python3", "-m", "pytest", "-q", "--tb=short", *changed_tests],
+                capture_output=True, text=True, cwd=self.workspace_root, timeout=600,
+            )
+        except subprocess.TimeoutExpired:
+            findings.append("Changed tests timed out")
+            recommendations.append("Investigate long-running or hanging tests")
+            evidence.append(
+                ScoreEvidence("pytest_changed_timeout", 0.4, -0.25,
+                              f"pytest timed out on {len(changed_tests)} changed test file(s)",
+                              recommendations[-1], True)
+            )
+            return 0.25
+        except Exception as exc:
+            findings.append(f"Could not run changed tests: {exc}")
+            evidence.append(
+                ScoreEvidence("pytest_changed_error", 0.4, -0.1, str(exc), "Review test environment", True)
+            )
+            return 0.1
+
+        if test_result.returncode == 0:
+            findings.append(f"Changed tests pass ({len(changed_tests)} file(s))")
+            evidence.append(
+                ScoreEvidence("pytest_changed", 0.4, 0.0,
+                              f"pytest passed on: {', '.join(changed_tests[:10])}")
+            )
+            return 0.0
+
+        findings.append("Changed tests failing")
+        recommendations.append("Fix failing tests before merge")
+        evidence.append(
+            ScoreEvidence("pytest_changed", 0.4, -0.35,
+                          (test_result.stdout + test_result.stderr)[-1000:],
+                          "Fix failing tests before merge", True)
+        )
+        return 0.35
+
+    def _run_py_compile(
+        self, py_files: List[str], evidence: List[ScoreEvidence],
+        findings: List[str], recommendations: List[str],
+    ) -> float:
+        """Compile the changed Python files; return the score penalty."""
+        try:
+            result = subprocess.run(
+                ["python3", "-m", "py_compile", *py_files],
+                capture_output=True, text=True, cwd=self.workspace_root, timeout=45,
+            )
+        except Exception as exc:
+            evidence.append(ScoreEvidence("py_compile_error", 0.35, 0.0, str(exc)))
+            return 0.0
+
+        if result.returncode == 0:
+            findings.append(f"No syntax errors in {len(py_files)} changed file(s)")
+            evidence.append(ScoreEvidence("py_compile", 0.35, 0.0, "py_compile exited 0"))
+            return 0.0
+
+        findings.append("Python syntax errors in changed files")
+        recommendations.append("Fix Python syntax errors")
+        evidence.append(
+            ScoreEvidence("py_compile", 0.35, -0.4, result.stderr[-1000:], "Fix Python syntax errors", True)
+        )
+        return 0.4
+
+    def _run_critical_lint(
+        self, py_files: List[str], evidence: List[ScoreEvidence],
+        findings: List[str], recommendations: List[str],
+    ) -> float:
+        """Run the critical flake8 selection on changed files; return penalty."""
+        try:
+            lint_result = subprocess.run(
+                ["flake8", "--count", "--select=E9,F63,F7,F82", "--show-source", *py_files],
+                capture_output=True, text=True, cwd=self.workspace_root, timeout=30,
+            )
+        except Exception as exc:
+            evidence.append(ScoreEvidence("critical_flake8_unavailable", 0.25, 0.0, str(exc)))
+            return 0.0
+
+        if lint_result.returncode == 0:
+            findings.append("No critical lint errors in changed files")
+            evidence.append(ScoreEvidence("critical_flake8", 0.25, 0.0, "flake8 critical check exited 0"))
+            return 0.0
+
+        findings.append("Critical lint errors in changed files")
+        recommendations.append("Fix critical linting issues")
+        evidence.append(
+            ScoreEvidence("critical_flake8", 0.25, -0.2, lint_result.stdout[-1000:],
+                          "Fix critical linting issues", True)
+        )
+        return 0.2
+
+    def _evaluate_technical_quality(self, changed_files: Optional[List[str]] = None) -> EvaluationResult:
         findings: List[str] = []
         recommendations: List[str] = []
         evidence: List[ScoreEvidence] = []
         score = 1.0
 
-        try:
-            test_result = subprocess.run(
-                ["python3", "-m", "pytest", "-q", "--tb=short"],
-                capture_output=True,
-                text=True,
-                cwd=self.workspace_root,
-                timeout=90,
-            )
-            if test_result.returncode == 0:
-                findings.append("Tests pass")
-                evidence.append(ScoreEvidence("pytest", 0.6, 0.0, "pytest -q --tb=short exited 0"))
-            else:
-                findings.append("Tests failing")
-                recommendations.append("Fix failing tests before merge")
-                evidence.append(
-                    ScoreEvidence(
-                        "pytest",
-                        0.6,
-                        -0.35,
-                        (test_result.stdout + test_result.stderr)[-1000:],
-                        "Fix failing tests before merge",
-                        True,
-                    )
-                )
-                score -= 0.35
-        except subprocess.TimeoutExpired:
-            findings.append("Tests timed out")
-            recommendations.append("Investigate long-running or hanging tests")
-            evidence.append(ScoreEvidence("pytest_timeout", 0.6, -0.25, "pytest timed out", recommendations[-1], True))
-            score -= 0.25
-        except Exception as exc:
-            findings.append(f"Could not run tests: {exc}")
-            evidence.append(ScoreEvidence("pytest_error", 0.6, -0.1, str(exc), "Review test environment", True))
-            score -= 0.1
+        changed_files = changed_files if changed_files is not None else []
+        py_files = self.changed_python_files(changed_files)
 
-        try:
-            py_files = [
-                str(path)
-                for path in self.workspace_root.rglob("*.py")
-                if not any(part in str(path) for part in [".venv", "__pycache__", "node_modules"])
-            ]
-            result = subprocess.run(
-                ["python3", "-m", "py_compile", *py_files],
-                capture_output=True,
-                text=True,
-                cwd=self.workspace_root,
-                timeout=45,
-            )
-            if result.returncode == 0:
-                findings.append("No Python syntax errors")
-                evidence.append(ScoreEvidence("py_compile", 0.3, 0.0, "py_compile exited 0"))
-            else:
-                findings.append("Python syntax errors present")
-                recommendations.append("Fix Python syntax errors")
-                evidence.append(
-                    ScoreEvidence("py_compile", 0.3, -0.4, result.stderr[-1000:], "Fix Python syntax errors", True)
-                )
-                score -= 0.4
-        except Exception as exc:
-            evidence.append(ScoreEvidence("py_compile_error", 0.3, 0.0, str(exc)))
+        score -= self._evaluate_changed_tests(changed_files, evidence, findings, recommendations)
 
-        try:
-            lint_result = subprocess.run(
-                ["flake8", "--count", "--select=E9,F63,F7,F82", "--show-source"],
-                capture_output=True,
-                text=True,
-                cwd=self.workspace_root,
-                timeout=30,
+        if not py_files:
+            evidence.append(
+                ScoreEvidence("py_compile", 0.35, 0.0, "No changed Python files to compile.")
             )
-            if lint_result.returncode == 0:
-                findings.append("No critical lint errors")
-                evidence.append(ScoreEvidence("critical_flake8", 0.1, 0.0, "flake8 critical check exited 0"))
-            else:
-                findings.append("Critical lint errors present")
-                recommendations.append("Fix critical linting issues")
-                evidence.append(
-                    ScoreEvidence(
-                        "critical_flake8",
-                        0.1,
-                        -0.2,
-                        lint_result.stdout[-1000:],
-                        "Fix critical linting issues",
-                        True,
-                    )
-                )
-                score -= 0.2
-        except Exception as exc:
-            evidence.append(ScoreEvidence("critical_flake8_unavailable", 0.1, 0.0, str(exc)))
+            evidence.append(
+                ScoreEvidence("critical_flake8", 0.25, 0.0, "No changed Python files to lint.")
+            )
+            return EvaluationResult(
+                category="Technical Quality",
+                passed=score >= 0.7,
+                score=max(0.0, score),
+                weight=self.CATEGORY_WEIGHTS["Technical Quality"],
+                findings=findings or ["No Python changes"],
+                recommendations=recommendations,
+                evidence=evidence,
+            )
+
+        score -= self._run_py_compile(py_files, evidence, findings, recommendations)
+        score -= self._run_critical_lint(py_files, evidence, findings, recommendations)
 
         return EvaluationResult(
             category="Technical Quality",
@@ -299,6 +390,47 @@ class PREvaluator:
             evidence=evidence,
         )
 
+    # Messages GitHub generates for the synthetic merge commit on pull_request
+    # events. HEAD is that commit, not the author's work, so reading it produced
+    # false "missing prefix" and "missing issue reference" findings on PRs whose
+    # own commits were perfectly traceable (#1342).
+    _SYNTHETIC_MERGE_RE = re.compile(r"^Merge\s+[0-9a-f]{7,40}\s+into\s+[0-9a-f]{7,40}\s*$", re.I)
+
+    def _traceability_commit_message(self) -> str:
+        """Return the message to judge traceability against.
+
+        Prefers the PR head commit. On a ``pull_request`` event HEAD is a
+        synthetic merge commit GitHub creates; ``GITHUB_HEAD_REF`` names the
+        real source branch, and its tip is what the author actually wrote. If
+        HEAD is not synthetic (a push build, or a local run) it is used as-is.
+        """
+        def git(*args: str) -> str:
+            result = subprocess.run(
+                ["git", *args],
+                capture_output=True, text=True, cwd=self.workspace_root, timeout=15,
+            )
+            return result.stdout.strip()
+
+        head_message = git("log", "-1", "--pretty=%B")
+        first_line = head_message.splitlines()[0].strip() if head_message else ""
+        if not self._SYNTHETIC_MERGE_RE.match(first_line):
+            return head_message
+
+        # HEAD is GitHub's synthetic merge; find the real head commit instead.
+        for ref in (
+            os.environ.get("GITHUB_HEAD_REF", ""),
+            "HEAD^2",  # second parent of the merge is the PR head
+        ):
+            if not ref:
+                continue
+            candidate = git("log", "-1", "--pretty=%B", ref)
+            if candidate and not self._SYNTHETIC_MERGE_RE.match(
+                candidate.splitlines()[0].strip()
+            ):
+                return candidate
+
+        return head_message
+
     def _evaluate_traceability(self) -> EvaluationResult:
         findings: List[str] = []
         recommendations: List[str] = []
@@ -306,14 +438,7 @@ class PREvaluator:
         score = 1.0
 
         try:
-            msg_result = subprocess.run(
-                ["git", "log", "-1", "--pretty=%B"],
-                capture_output=True,
-                text=True,
-                cwd=self.workspace_root,
-                timeout=15,
-            )
-            commit_msg = msg_result.stdout.strip()
+            commit_msg = self._traceability_commit_message()
             has_issue_ref = "#" in commit_msg or "issue" in commit_msg.lower()
             has_functional_prefix = any(commit_msg.startswith(prefix) for prefix in ["fix:", "feat:", "docs:", "test:", "chore:"])
             if has_issue_ref:

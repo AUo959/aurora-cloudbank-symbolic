@@ -2,7 +2,20 @@
 
 ## What this is
 
-Aurora CloudBank Symbolic is the code and canon repository for Aurora, the simulation director of the Orion Station institutional simulation, plus the runtime services that support ethics-governed simulation, symbolic memory, QGIA signal intake, and auditable operations. The repository has one ontological layer model—L1 station operations, L2 simulation/research environments, and L3 conceptual frameworks—and a separate three-step Triplex consent protocol. Treat those two uses of “layer” as distinct.
+Aurora CloudBank Symbolic is Aurora's runtime and checked-in canon-mirror repository, plus the services that support ethics-governed simulation, symbolic memory, QGIA signal intake, and auditable operations. CanonRec is the authority repository; the Aurora root workspace propagates selected CanonRec and L1-ledger payloads into CloudBank and verifies the combined integration surface. The repository has one ontological layer model—L1 station operations, L2 simulation/research environments, and L3 conceptual frameworks—and a separate three-step Triplex consent protocol. Treat those two uses of “layer” as distinct.
+
+## Authority flow
+
+```text
+CanonRec authority
+  -> Aurora root propagation and integration gates
+    -> CloudBank runtime mirrors
+```
+
+CloudBank can boot without a CanonRec checkout because the runtime mirrors are
+versioned here. Authoritative canon review and the full L1 integration suite do
+require CanonRec. The exact source revision and mirror hash are recorded in
+[`docs/CANON_PROVENANCE.md`](./docs/CANON_PROVENANCE.md).
 
 ## Layer architecture → code map
 
@@ -62,3 +75,4 @@ QGIA supplies real-world analytical signals. L1 crew and relay systems interpret
 - Symbolic memory → `modules/aumemmanager/`, `modules/symbolic_core/`
 - `src/` orientation and polyglot boundary → [`src/README.md`](./src/README.md)
 - Canon authority map → [`CANON_INDEX.md`](./CANON_INDEX.md)
+- Cross-repository source revision and mirror hashes → [`docs/CANON_PROVENANCE.md`](./docs/CANON_PROVENANCE.md)

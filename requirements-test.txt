@@ -1,0 +1,17 @@
+# Aurora CloudBank Symbolic - Test and CI Dependencies
+# Install with core requirements:
+#   pip install -r requirements.txt -r requirements-test.txt
+
+# Test execution and coverage
+pytest==9.0.3
+pytest-asyncio==1.4.0
+pytest-cov==7.1.0
+coverage==7.14.1
+
+# Syntax gate used by CI
+flake8==7.3.0
+
+# Connector test support
+# Runtime use remains optional, but tests/connector and test_mcp_connector_wired
+# import the MCP SDK during collection.
+mcp==1.28.1

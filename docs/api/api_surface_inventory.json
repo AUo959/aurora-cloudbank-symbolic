@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "last_reviewed": "2026-07-16",
+  "last_reviewed": "2026-07-26",
   "governance_decision": "primary-fastapi-with-declared-standalone-services",
   "status_values": [
     "active",
@@ -50,7 +50,7 @@
       "status": "active-optional",
       "status_evidence": [
         "Router prefix is /api/memory-retrieval (modules/memory_retrieval/api.py line 21).",
-        "api/aurora_api.py includes it twice, both gated behind MEMORY_RETRIEVAL_AVAILABLE \u2014 appears to be a redundant duplicate include, not two distinct surfaces; flagged separately, not fixed here.",
+        "api/aurora_api.py imports modules.memory_retrieval.api and includes the router once when MEMORY_RETRIEVAL_AVAILABLE is true.",
         "Found via tests/test_api_router_coverage.py (issue #1204) \u2014 was included in the primary app with no inventory entry at all."
       ],
       "notes": "Memory retrieval surface, conditionally mounted."

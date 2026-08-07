@@ -1,0 +1,138 @@
+{
+  "schema": "aurora.l1.institutional_assurance_event_contract/v1",
+  "document_id": "AURORA_L1__CONTRACT__INSTITUTIONAL_ASSURANCE_EVENT",
+  "version": "1.0",
+  "date": "2026-07-27",
+  "layer": "L1",
+  "purpose": "Preserve institutional-assurance events as first-class operational data while preventing simulated events from claiming real-world interaction or independent external assurance.",
+  "required_fields": [
+    "event_id",
+    "run_id",
+    "revision",
+    "previous_event_digest",
+    "canon_status",
+    "layer",
+    "execution_mode",
+    "evidence_authority",
+    "data_treatment",
+    "gate_track",
+    "real_world_interaction",
+    "independent_external_assurance",
+    "substitutes_for_real_world_review",
+    "provenance",
+    "institutional_roles",
+    "evidence_references"
+  ],
+  "enums": {
+    "canon_status": [
+      "current_canon",
+      "proposed_design",
+      "experimental_concept",
+      "historical_state",
+      "assumption",
+      "deprecated"
+    ],
+    "layer": ["L1"],
+    "execution_mode": [
+      "l1_simulated_institutional_rehearsal",
+      "real_world_internal_exercise",
+      "real_world_external_engagement"
+    ],
+    "evidence_authority": [
+      "operational_simulation_evidence",
+      "internal_assessment_evidence",
+      "independent_external_assurance"
+    ],
+    "data_treatment": ["first_class_operational_data"],
+    "gate_track": ["GATE-001A", "GATE-001B", "SUPPORTING_ASSURANCE"],
+    "role_representation": [
+      "simulated_role",
+      "verified_internal_person",
+      "verified_internal_team",
+      "verified_external_person",
+      "verified_external_organization"
+    ],
+    "evidence_origin": [
+      "simulation_primary_evidence",
+      "internal_primary_evidence",
+      "external_primary_evidence",
+      "reference_evidence"
+    ],
+    "external_verification_method": ["repository_evidence_digest"]
+  },
+  "mode_rules": {
+    "l1_simulated_institutional_rehearsal": {
+      "evidence_authority": "operational_simulation_evidence",
+      "gate_track": "GATE-001A",
+      "real_world_interaction": false,
+      "independent_external_assurance": false,
+      "substitutes_for_real_world_review": false,
+      "deterministic_required": true,
+      "allowed_role_representations": ["simulated_role"],
+      "required_evidence_origin": "simulation_primary_evidence"
+    },
+    "real_world_internal_exercise": {
+      "evidence_authority": "internal_assessment_evidence",
+      "gate_track": "SUPPORTING_ASSURANCE",
+      "real_world_interaction": true,
+      "independent_external_assurance": false,
+      "substitutes_for_real_world_review": false,
+      "deterministic_required": false,
+      "allowed_role_representations": [
+        "verified_internal_person",
+        "verified_internal_team"
+      ],
+      "required_evidence_origin": "internal_primary_evidence"
+    },
+    "real_world_external_engagement": {
+      "evidence_authority": "independent_external_assurance",
+      "gate_track": "GATE-001B",
+      "real_world_interaction": true,
+      "independent_external_assurance": true,
+      "substitutes_for_real_world_review": false,
+      "deterministic_required": false,
+      "allowed_role_representations": [
+        "verified_external_person",
+        "verified_external_organization"
+      ],
+      "required_evidence_origin": "external_primary_evidence",
+      "external_verification_required": true,
+      "evidence_resolution_required": true
+    }
+  },
+  "provenance_required": [
+    "scenario_id",
+    "baseline_commit",
+    "tool",
+    "tool_version",
+    "executed_at",
+    "operator"
+  ],
+  "simulated_provenance_required": ["deterministic", "seed"],
+  "external_verification_required": [
+    "organization",
+    "assessor",
+    "scope_reference",
+    "authorization_reference",
+    "verified_by",
+    "verified_at",
+    "verification_method"
+  ],
+  "immutable_revision_fields": [
+    "event_id",
+    "layer",
+    "execution_mode",
+    "evidence_authority",
+    "gate_track",
+    "real_world_interaction",
+    "independent_external_assurance",
+    "substitutes_for_real_world_review"
+  ],
+  "non_substitution_rules": [
+    "Execution mode is historical provenance and may not be changed on an existing event revision.",
+    "A simulated role may not be promoted into a verified real identity by relabeling.",
+    "A GATE-001A event may not satisfy GATE-001B.",
+    "A GATE-001B event requires structured external verification and a digest-resolved external_primary_evidence reference.",
+    "substitutes_for_real_world_review must always be false."
+  ]
+}

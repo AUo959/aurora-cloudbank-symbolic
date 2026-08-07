@@ -14,27 +14,72 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    
+
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
       with:
         node-version: '20'
         cache: 'npm'
-        
+
     - name: Install dependencies
-      run: npm ci
-      
+      run: npm ci --ignore-scripts
+
     - name: Type check
-      run: npx tsc --noEmit --skipLibCheck || echo "TypeScript check completed with warnings"
-      
-    - name: Lint JavaScript/TypeScript
-      run: npm run lint:check || echo "Lint check completed"
-      
-    - name: Build
-      run: npm run build || echo "Build step completed"
+      run: |
+        set +e
+        {
+          echo "TypeScript version: $(./node_modules/.bin/tsc --version)"
+          echo "--- Effective configuration ---"
+          ./node_modules/.bin/tsc --project tsconfig.constellation.json --showConfig
+          echo "--- Type check ---"
+          ./node_modules/.bin/tsc --project tsconfig.constellation.json --noEmit --skipLibCheck --pretty false
+        } > typescript-check.log 2>&1
+        TYPECHECK_EXIT=$?
+        set -e
+        cat typescript-check.log
+        exit "$TYPECHECK_EXIT"
+
+    - name: Upload TypeScript diagnostics
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      with:
+        name: typescript-check
+        path: typescript-check.log
+        retention-days: 30
+        if-no-files-found: error
+
+    - name: Lint JavaScript/TypeScript (advisory; tracked in #1340)
+      continue-on-error: true
+      run: |
+        set -o pipefail
+        npm run lint:check 2>&1 | tee lint-check.log
+
+    - name: Upload lint diagnostics
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      with:
+        name: lint-check
+        path: lint-check.log
+        retention-days: 30
+        if-no-files-found: ignore
+
+    - name: Build (advisory; blocked by lint baseline #1340)
+      continue-on-error: true
+      run: |
+        set -o pipefail
+        npm run build 2>&1 | tee build.log
+
+    - name: Upload build diagnostics
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      with:
+        name: build-log
+        path: build.log
+        retention-days: 30
+        if-no-files-found: ignore
 
   integration:
     runs-on: ubuntu-latest
@@ -42,20 +87,20 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
-    
+
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       with:
         repository: AUo959/aurora-cloudbank-symbolic
-        
+
     - name: Setup Node.js
       uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
       with:
         node-version: '20'
-        
+
     - name: Install dependencies
-      run: npm ci
-      
+      run: npm ci --ignore-scripts
+
     - name: Run constellation health check
       run: |
         echo "Constellation integration tests would run here"
@@ -66,22 +111,24 @@ jobs:
     needs: test
     permissions:
       contents: read
-    
+
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
       with:
         node-version: '20'
-        
-    - name: Run npm audit
-      run: npm audit --audit-level=moderate || echo "Audit completed"
-      
-    - name: Check for vulnerable dependencies
-      run: npm audit --json > audit-results.json || true
-      
+
+    - name: Install dependencies
+      run: npm ci --ignore-scripts
+
+    - name: Run npm audit (advisory; security blocker tracked in #1341)
+      continue-on-error: true
+      run: npm audit --audit-level=moderate --json > audit-results.json
+
     - name: Upload audit results
+      if: always()
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
       with:
         name: security-audit

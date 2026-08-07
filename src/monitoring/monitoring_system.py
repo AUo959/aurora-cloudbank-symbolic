@@ -24,6 +24,8 @@ from .ethics_engine import EthicsEngine, EthicsViolation, ActionContext, Violati
 from .behavioral_monitor import BehaviorMonitor
 from .audit_logger import AuditLogger
 
+from src.core.logging_security import safe_str
+
 logger = logging.getLogger(__name__)
 
 
@@ -245,7 +247,7 @@ class MonitoringSystem:
         
         logger.info(
             "Established baseline for %s with %d metrics",
-            agent_id, len(historical_data)
+            safe_str(agent_id), len(historical_data)
         )
     
     def record_agent_behavior(
@@ -401,7 +403,7 @@ class MonitoringSystem:
         if agent_id in self.last_intervention_time:
             elapsed = (utc_now() - self.last_intervention_time[agent_id]).total_seconds()
             if elapsed < self.config.intervention_cooldown_seconds:
-                logger.debug("Intervention cooldown active for %s", agent_id)
+                logger.debug("Intervention cooldown active for %s", safe_str(agent_id))
                 return
         
         # Determine intervention type
@@ -455,7 +457,7 @@ class MonitoringSystem:
                 error = str(exc)
                 logger.error(
                     "Intervention handler failed for %s on %s: %s",
-                    intervention_type.value, agent_id, error
+                    intervention_type.value, safe_str(agent_id), safe_str(error)
                 )
         else:
             error = f"No enforcement handler registered for {intervention_type.value}"
@@ -488,7 +490,7 @@ class MonitoringSystem:
         
         logger.warning(
             "Intervention recorded for %s: %s success=%s - %s",
-            agent_id, intervention_type.value, success, reason
+            safe_str(agent_id), intervention_type.value, success, safe_str(reason)
         )
         
         # Notify critical handlers
@@ -533,7 +535,7 @@ class MonitoringSystem:
             try:
                 handler(data)
             except Exception as e:
-                logger.error("Alert handler failed: %s", e)
+                logger.error("Alert handler failed: %s", safe_str(e))
     
     def get_agent_status(self, agent_id: str) -> Dict[str, Any]:
         """
@@ -672,7 +674,7 @@ class MonitoringSystem:
                 with open(self._state_path, 'r') as f:
                     state = json.load(f)
             except Exception as e:
-                logger.error("Failed to load monitoring state: %s", e)
+                logger.error("Failed to load monitoring state: %s", safe_str(e))
                 return False
 
         if 'baselines' in state:
@@ -717,4 +719,4 @@ class MonitoringSystem:
                 )
                 atomic_write_json(self._state_path, state)
         except Exception as e:
-            logger.error("Failed to persist monitoring state: %s", e)
+            logger.error("Failed to persist monitoring state: %s", safe_str(e))

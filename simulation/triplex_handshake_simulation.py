@@ -32,6 +32,26 @@ Author: Aurora-GUMAS Project Team
 Version: 1.0
 Date: 2025-11-09
 License: Project Internal
+
+STATUS (corrected 2026-08-03, #1132): **unmaintained prototype; prefer the sibling.**
+
+An earlier note here claimed this file and `triplex_handshake_simulator.py`
+"encode different claims about the same canonical event" — one reproducing
++0.004 drift, the other Δ 0.000 — and called choosing between them a canon
+determination. **That was wrong, and this corrects it.**
+
+`NARRATIVE_CYCLE_01_REFLECTION_EVENT.md` records both figures, in sequence:
+"Drift Variance: +0.004 (peak) → 0.000 (restored)". +0.004 is the peak that
+triggers the Triplex Handshake; Δ 0.000 is the restored state. They are phases
+of one event, not rival claims. Both files use Δ 0.000 as their baseline and
+share identical constants (`BASE_DRIFT_RATE = 0.0002`,
+`INTERVENE_LATENCY_COST = 0.004`), and both expose the same eleven top-level
+names. There was never a canon question here.
+
+What does distinguish them is maintenance. This file is the original prototype
+(2025-11-09). The sprint maintenance pass of 2025-11-12 (#321/#326) modified
+*only* the sibling, so this copy never received it.
+
 """
 
 import random

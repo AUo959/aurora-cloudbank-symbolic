@@ -9,19 +9,17 @@ Version: 1.0.0
 Date: July 13, 2025
 """
 
+import difflib
+import json
 import logging
+import re
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
+
 
 logger = logging.getLogger(__name__)
-
-import json
-import re
-import subprocess
-import difflib
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
-from typing import List
-
 
 
 @dataclass
@@ -193,10 +191,13 @@ class CanonicalValidator:
             # Common variations to auto-fix
             auto_fix_patterns = [
                 name_lower,                                    # alex thorne
-                name_lower.replace(" ", "_"),                  # Alex Thorne
                 name_lower.replace("dr. ", "dr "),            # Dr. Amira Sato
                 name_lower.replace(".", ""),                   # Dr. Amira Sato
             ]
+            if file_path.suffix in {".md", ".txt"}:
+                # Snake case is commonly an identifier in code and structured data,
+                # so only normalize it when it appears in narrative documents.
+                auto_fix_patterns.append(name_lower.replace(" ", "_"))
 
             for pattern in auto_fix_patterns:
                 if pattern != name_lower and pattern in updated_content.lower():
@@ -256,7 +257,7 @@ class CanonicalValidator:
             agent_name = match.upper()
             if agent_name in self.canonical.relay_endpoints:
                 canonical_endpoint = self.canonical.relay_endpoints[agent_name]
-                current_endpoint = "/api/relay/{match}"
+                current_endpoint = f"/api/relay/{match}"
 
                 if current_endpoint != canonical_endpoint:
                     # Auto-fix case mismatches
@@ -270,7 +271,7 @@ class CanonicalValidator:
             else:
                 results.append(ValidationResult(
                     "api_endpoint_unknown_{match}", "ESCALATE", "MEDIUM",
-                    "Unknown API endpoint: /api/relay/{match}",
+                    f"Unknown API endpoint: /api/relay/{match}",
                     "Verify endpoint is required or use canonical relay endpoints"
                 ))
 
@@ -388,9 +389,9 @@ class CanonicalValidator:
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(corrected_content)
             self.auto_fixes_applied += 1
-            logger.info("AUTO-FIX APPLIED: {file_path}")
-        except Exception as e:
-            logger.error("AUTO-FIX FAILED: {file_path} - {e}")
+            logger.info("AUTO-FIX APPLIED: %s", file_path)
+        except Exception:
+            logger.exception("AUTO-FIX FAILED: %s", file_path)
 
     def _apply_json_fix(self, file_path: Path, corrected_data: dict):
         """Apply automatic fix to JSON file"""
@@ -398,9 +399,9 @@ class CanonicalValidator:
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(corrected_data, f, indent=2)
             self.auto_fixes_applied += 1
-            logger.info("AUTO-FIX APPLIED: {file_path}")
-        except Exception as e:
-            logger.error("AUTO-FIX FAILED: {file_path} - {e}")
+            logger.info("AUTO-FIX APPLIED: %s", file_path)
+        except Exception:
+            logger.exception("AUTO-FIX FAILED: %s", file_path)
 
     def validate_workspace(self, file_patterns: Optional[List[str]] = None) -> List[ValidationResult]:
         """Validate entire workspace against canonical specifications"""
@@ -455,9 +456,10 @@ class CanonicalValidator:
         medium = [r for r in escalations if r.severity == "MEDIUM"]
         low = [r for r in escalations if r.severity == "LOW"]
 
-        report = """
+        generated_at = datetime.now().astimezone().isoformat(timespec="seconds")
+        report = f"""
 # Aurora CloudBank Canonical Validation Report
-**Generated**: {subprocess.check_output(['date']).decode().strip()}
+**Generated**: {generated_at}
 **Workspace**: {self.workspace_path.absolute()}
 
 ## 📊 Validation Summary
@@ -467,40 +469,40 @@ class CanonicalValidator:
 - 🎯 **Total Checks**: {len(self.validation_results)}
 
 ## 🔧 Auto-Fixes Applied ({len(auto_fixed)})
-"""
+        """
 
         for result in auto_fixed:
-            report += "- ✅ {result.check_name}: {result.message}\n"
+            report += f"- ✅ {result.check_name}: {result.message}\n"
 
-        report += """
+        report += f"""
 ## ⚠️ Escalations Required ({len(escalations)})
 
 ### 🚨 Critical Issues ({len(critical)})
-"""
+        """
         for result in critical:
-            report += "- ❗ **{result.check_name}**: {result.message}\n"
-            report += "  - **Suggested Fix**: {result.suggested_fix}\n\n"
+            report += f"- ❗ **{result.check_name}**: {result.message}\n"
+            report += f"  - **Suggested Fix**: {result.suggested_fix}\n\n"
 
-        report += """
+        report += f"""
 ### 🔴 High Priority Issues ({len(high)})
 """
         for result in high:
-            report += "- 🔴 **{result.check_name}**: {result.message}\n"
-            report += "  - **Suggested Fix**: {result.suggested_fix}\n\n"
+            report += f"- 🔴 **{result.check_name}**: {result.message}\n"
+            report += f"  - **Suggested Fix**: {result.suggested_fix}\n\n"
 
-        report += """
+        report += f"""
 ### 🟡 Medium Priority Issues ({len(medium)})
 """
         for result in medium:
-            report += "- 🟡 **{result.check_name}**: {result.message}\n"
-            report += "  - **Suggested Fix**: {result.suggested_fix}\n\n"
+            report += f"- 🟡 **{result.check_name}**: {result.message}\n"
+            report += f"  - **Suggested Fix**: {result.suggested_fix}\n\n"
 
-        report += """
+        report += f"""
 ### 🟢 Low Priority Issues ({len(low)})
 """
         for result in low:
-            report += "- 🟢 **{result.check_name}**: {result.message}\n"
-            report += "  - **Suggested Fix**: {result.suggested_fix}\n\n"
+            report += f"- 🟢 **{result.check_name}**: {result.message}\n"
+            report += f"  - **Suggested Fix**: {result.suggested_fix}\n\n"
 
         report += """
 ## 🎯 Canonical Compliance Status
@@ -529,7 +531,8 @@ class CanonicalValidator:
         report = self.generate_report()
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(report)
-        print("📊 Validation report saved to: {output_path}")
+        print(f"📊 Validation report saved to: {output_path}")
+
 
 def main():
     """Main execution function"""
@@ -550,14 +553,15 @@ def main():
     auto_fixes = [r for r in results if r.status == "AUTO_FIXED"]
 
     print("\n🎯 Validation Complete:")
-    print("  - Auto-fixes applied: {len(auto_fixes)}")
-    print("  - Escalations raised: {len(escalations)}")
+    print(f"  - Auto-fixes applied: {len(auto_fixes)}")
+    print(f"  - Escalations raised: {len(escalations)}")
 
     if escalations:
-        print("\n⚠️ {len(escalations)} issues require attention!")
+        print(f"\n⚠️ {len(escalations)} issues require attention!")
         print("📊 See CANONICAL_VALIDATION_REPORT.md for details")
     else:
         print("\n✅ All canonical validations passed!")
+
 
 if __name__ == "__main__":
     main()

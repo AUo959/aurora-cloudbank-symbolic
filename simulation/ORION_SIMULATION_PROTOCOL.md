@@ -1,79 +1,116 @@
-# Orion Station Simulation Protocol (Phase 1)
+# Orion Station Phase-1 Benchmark Protocol
 
-Version: 1.0 • Date: 2025-11-09
+**Version:** 2.0  
+**Updated:** 2026-08-08  
+**Status:** Canonical deterministic benchmark component
 
 ## Purpose
-Standardize how the Orion Station multi-agent simulation is executed, measured, and reproduced. This protocol ensures Phase 1 security work (CORS, CSRF, WebSocket auth, eval→AST) is simulated consistently with deterministic seeds and documented emergent behaviors.
 
-## Objectives
-- Validate Phase 1 completion within a practical tick budget.
-- Observe team dynamics (assignment flow, fatigue, emergent boosts).
-- Produce a lightweight transcript suitable for review and postmortems.
-- Enable deterministic replays via seed and event toggles.
+This protocol standardizes the historical Phase-1 Orion institutional/task
+benchmark. It is useful for deterministic regression testing of assignment,
+fatigue, collaboration, and emergent-event mechanics.
 
-## Agents (L1 Canon Human Staff - Orion Station)
-**Using canonical character roster from established system development**
+It is **not** the live Orion L1 world runtime and is **not** the INIT entry
+point. Live L1 initialization is governed by `.aurora/SIMULATION_INIT_PROTOCOL.md`
+and implemented by `simulation/l1_runtime.py`.
 
-- **Alex Thorne** — Station Commander (mission/ethics lead, strategic coordination)
-- **Julian Markov** — Chief Security Officer (primary security implementation lead)
-- **Jiro Tanaka** — Engineering Lead (technical system modifications, backend work)
-- **Raj Patel** — Chief Engineer (infrastructure, DevOps, systems engineering)
-- **Dr. Amira Sato** — Chief Ethics Officer (ethics compliance, protocol audits)
-- **Varya Lin** — Chief Science Officer (technical validation, documentation)
-- **Maya Shepard** — Executive Officer/XO (cross-functional coordination, oversight)
-- **Leena Porter** — Bridge Operations (dispatch, monitoring, operations)
+## Canonical implementation
 
-## Tasks (Phase 1)
-- T1: CORS Fix (2h)
-- T2: CSRF Validation (4h) — depends on T1
-- T3: WebSocket Auth (4h) — depends on T2
-- T4: Replace eval() with AST (3h) — independent
+Use:
 
-## Event Model
-- swarm_sync: +15% productivity for assignees (p=0.20)
-- insight_pulse: +10% team-wide (p=0.15)
-- cross_pollination: +5% unblock assist (p=0.10)
-- obstruction (stochastic friction): -15% multiplier chance each tick (p≈0.10)
+```bash
+python simulation/orion_station_simulation_v2.py --seed 1337 --ticks 20 --no-emergent
+```
 
-## Stochastic Model
-- Agent effort per tick = base_speed × fatigue_factor × focus_bonus × event_multiplier × noise
-- noise ∈ [0.85, 1.15]; bounded output to [0.1, 2.0] hours per tick per agent.
-- Fatigue accumulates when working; recovers slightly when idle.
+Canonical class:
+
+```python
+OrionSimulationV2
+```
+
+Canonical module:
+
+```text
+simulation/orion_station_simulation_v2.py
+```
+
+`simulation/orion_station_simulation.py` is the superseded v1 implementation.
+It may remain temporarily for historical compatibility, but tests, demos, and
+documentation must not designate it as active.
+
+## Why v2 is canonical
+
+- it loads characters from `L1_CANON_CHARACTER_ROSTER.md` rather than using the
+  original hard-coded profile set;
+- it supports the expanded character registry;
+- it includes canonical specialization/collaboration data;
+- it received maintained behavioral fixes after v1 stopped receiving
+  substantive changes;
+- repository history already resolved the v1/v2 designation in favor of v2.
+
+## Benchmark task set
+
+The benchmark intentionally preserves the historical Phase-1 security tasks:
+
+- T1 — CORS Fix
+- T2 — CSRF Validation
+- T3 — WebSocket Auth
+- T4 — Replace `eval()` with AST
+
+These tasks are a regression fixture. Their presence does not mean a newly
+initialized live Orion Station run begins by replaying this old project sprint.
 
 ## Reproducibility
-- Deterministic runs achieved by providing `--seed` and disabling emergent events (`--no-emergent`).
-- CLI parameters:
-  - `--seed <int>`: RNG seed (default 1337)
-  - `--ticks <int>`: Max ticks (default 30)
-  - `--no-emergent`: Disable emergent events
-  - `--log-level <level>`: Logging verbosity (default INFO)
-  - `--transcript-out <path>`: Write transcript to a file
 
-### Example (Deterministic)
+- `--seed <int>` controls deterministic RNG behavior.
+- `--ticks <int>` sets the maximum benchmark length.
+- `--no-emergent` disables stochastic emergent events.
+- `--transcript-out <path>` writes a benchmark transcript.
+- `--json-out <path>` writes a result summary.
+
+Example:
+
+```bash
+python simulation/orion_station_simulation_v2.py \
+  --seed 1337 \
+  --ticks 20 \
+  --no-emergent \
+  --transcript-out /tmp/orion-phase1.txt \
+  --json-out /tmp/orion-phase1.json
 ```
-python simulation/orion_station_simulation.py --seed 1337 --ticks 20 --no-emergent --log-level INFO --transcript-out /tmp/orion.txt
-```
 
-## Transcript Format
-- Line format: `[TT] AgentName: message`
-- First tick includes kickoff by Alex Thorn.
-- Events result in short system/crew messages; progress lines reflect agent/task effort.
+## Success criteria
 
-## Success Criteria
 - `completed == True`
-- All task IDs present in `completed_ids` (T1, T2, T3, T4)
-- Ticks elapsed within configured maximum
+- completed task IDs are exactly `T1`, `T2`, `T3`, `T4`
+- deterministic runs are reproducible for the same seed/configuration
+- first-tick working-agent emergence remains possible when emergent events are
+  enabled
+- canonical character names are used
 
-## Output Summary
-The script prints a summary with:
-- ticks elapsed
-- completion status
-- task completion list
-- total estimated hours vs. simulated effort
-- last N activity lines (tail)
-- optional transcript file path
+## Authority boundary
 
-## Notes & Limitations
-- Phase 1 models core security tasks only; later phases can extend the task graph and roles.
-- Complexity warnings in coordination helpers are known; progressive refactors will further decompose logic.
-- No external dependencies; stdlib-only for portability.
+The benchmark may generate transcript text and task outcomes, but those outputs
+are benchmark/run artifacts, not primary Orion canon.
+
+The live L1 runtime has additional invariants that this benchmark does not own:
+
+- Earth-side Pilot boundary;
+- discovery-through-observation;
+- explicit epistemic-state separation;
+- population/persona semantics;
+- orbital-locus quarantine;
+- run lifecycle and canon-promotion boundary;
+- Triplex fail-closed authorization for exceptional actionable changes.
+
+Do not expand this benchmark into the general world runtime by accretion. Those
+responsibilities belong to `simulation/l1_runtime.py` and its runtime contract.
+
+## Related files
+
+- `simulation/orion_station_simulation_v2.py`
+- `simulation/character_loader.py`
+- `tests/test_orion_simulation.py`
+- `simulation/interactive_collab_demo.py`
+- `.aurora/SIMULATION_INIT_PROTOCOL.md`
+- `simulation/l1_runtime.py`

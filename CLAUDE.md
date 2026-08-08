@@ -172,7 +172,7 @@ Organized by topic:
 
 ## Tech Stack
 
-### Backend (Python 3.11+)
+### Backend (Python 3.12+)
 
 #### Core Web Framework
 - **FastAPI** 0.118.0+ - Modern async web framework
@@ -1320,7 +1320,7 @@ bottlenecks = analyzer.identify_bottlenecks()
 - Pydantic V2 migration complete
 
 **Dependencies**:
-- Python 3.11+ required (3.12 recommended)
+- Python 3.12+ required
 - Node.js 20+ for web components
 - Graceful degradation for optional deps (qiskit, scipy, pandas)
 

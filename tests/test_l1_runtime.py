@@ -178,6 +178,28 @@ def test_epistemic_states_do_not_collapse_into_each_other(tmp_path: Path):
 
 
 @pytest.mark.unit
+def test_observation_payloads_are_isolated_across_epistemic_ledgers(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=91,
+        run_root=tmp_path,
+    )
+
+    observation = runtime.observe("Engineering")
+    assert runtime.state is not None
+    runtime_value = runtime.state.runtime_observations[0].value
+    pilot_value = runtime.state.pilot_knowledge[0].value
+
+    observation["focus"] = "caller annotation"
+    runtime_value["records"].append({"caller": "runtime ledger mutation"})
+
+    assert runtime_value["focus"] == "Engineering"
+    assert pilot_value["focus"] == "Engineering"
+    assert pilot_value["records"] == []
+
+
+@pytest.mark.unit
 def test_population_schema_allows_large_complement_with_smaller_resolved_subset():
     snapshot = PopulationSnapshot(
         crew_capacity=250,
@@ -255,6 +277,22 @@ def test_actionable_event_fails_closed_without_complete_triplex_receipt(tmp_path
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "invalid_stage",
+    ["false", 1, None],
+)
+def test_triplex_receipt_rejects_non_boolean_stages(invalid_stage):
+    with pytest.raises(ValueError, match="stages must be booleans"):
+        GovernanceReceipt(
+            l3_glyph_arbitration=invalid_stage,
+            continuity_and_relay_verification=True,
+            l1_human_consent=True,
+            receipt_id="triplex-invalid-type",
+            provenance="unit-test",
+        )
+
+
+@pytest.mark.unit
 def test_complete_triplex_receipt_can_apply_run_scoped_fact(tmp_path: Path):
     runtime = OrionL1Runtime()
     runtime.init_run(
@@ -279,6 +317,25 @@ def test_complete_triplex_receipt_can_apply_run_scoped_fact(tmp_path: Path):
     assert record.canon_status == "run_state"
     assert runtime.state is not None
     assert runtime.state.world_state["exceptional_action"] == "executed"
+    assert runtime.state.governance_receipts == [complete]
+    assert runtime.state.governed_records == [record]
+    exported = runtime.export_state()
+    assert exported["governance_receipts"][0] == {
+        "l3_glyph_arbitration": True,
+        "continuity_and_relay_verification": True,
+        "l1_human_consent": True,
+        "receipt_id": "triplex-test-complete",
+        "provenance": "unit-test",
+    }
+    assert exported["governed_records"][0]["record_id"] == record.record_id
+    event = exported["events"][-1]
+    assert event["record_id"] == record.record_id
+    assert event["receipt_id"] == complete.receipt_id
+
+    persisted = tmp_path / runtime.state.manifest.run_id / "state.json"
+    payload = json.loads(persisted.read_text(encoding="utf-8"))
+    assert payload["governance_receipts"] == exported["governance_receipts"]
+    assert payload["governed_records"] == exported["governed_records"]
 
 
 @pytest.mark.unit

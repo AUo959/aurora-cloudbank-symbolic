@@ -359,6 +359,10 @@ def export_run_state(state: Any) -> Dict[str, Any]:
             asdict(record) for record in state.runtime_observations
         ],
         "pilot_knowledge": [asdict(record) for record in state.pilot_knowledge],
+        "governance_receipts": [
+            asdict(receipt) for receipt in state.governance_receipts
+        ],
+        "governed_records": [asdict(record) for record in state.governed_records],
         "communications": state.communications,
         "events": state.events,
         "promotion_candidates": state.promotion_candidates,

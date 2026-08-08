@@ -8,7 +8,11 @@
 
 This protocol standardizes the historical Phase-1 Orion institutional/task
 benchmark. It is useful for deterministic regression testing of assignment,
-fatigue, collaboration, and emergent-event mechanics.
+collaboration, and emergent-event mechanics.
+
+The legacy `fatigue` field remains only as non-evaluative compatibility state.
+It must never affect task assignment, work speed, progress, completion, scores,
+or any other evaluation surface.
 
 It is **not** the live Orion L1 world runtime and is **not** the INIT entry
 point. Live L1 initialization is governed by `.aurora/SIMULATION_INIT_PROTOCOL.md`

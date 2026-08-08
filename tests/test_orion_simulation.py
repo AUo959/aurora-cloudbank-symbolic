@@ -8,7 +8,22 @@ SIMULATION_PATH = str(SIMULATION_DIR)
 if SIMULATION_PATH not in sys.path:
     sys.path.insert(0, SIMULATION_PATH)
 
-from orion_station_simulation_v2 import OrionSimulationV2  # noqa: E402
+from orion_station_simulation_v2 import Agent, OrionSimulationV2  # noqa: E402
+
+
+@pytest.mark.unit
+def test_fatigue_never_scores_benchmark_work_speed():
+    agent = Agent(
+        name="Benchmark Agent",
+        role="Regression fixture",
+        character_id="TEST_001",
+        base_speed=1.5,
+        collaboration_bonus=0.2,
+        fatigue=100.0,
+    )
+
+    assert agent.effective_speed() == pytest.approx(1.5)
+    assert agent.effective_speed(is_collaborative_context=True) == pytest.approx(1.8)
 
 
 @pytest.mark.unit

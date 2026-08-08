@@ -20,6 +20,7 @@ Core invariants:
 
 from __future__ import annotations
 
+import copy
 import os
 import uuid
 from dataclasses import asdict
@@ -233,7 +234,7 @@ class OrionL1Runtime:
         observation = EpistemicRecord(
             record_id=payload["observation_id"],
             subject=f"observation:{payload['focus']}",
-            value=payload,
+            value=copy.deepcopy(payload),
             epistemic_class="runtime_observation",
             provenance="l1_observation_aperture",
             confidence=1.0,
@@ -244,7 +245,7 @@ class OrionL1Runtime:
             EpistemicRecord(
                 record_id=str(uuid.uuid4()),
                 subject=observation.subject,
-                value=payload,
+                value=copy.deepcopy(payload),
                 epistemic_class="pilot_knowledge",
                 provenance=f"runtime_observation:{observation.record_id}",
                 confidence=1.0,
@@ -252,7 +253,7 @@ class OrionL1Runtime:
             )
         )
         self._persist_if_configured()
-        return payload
+        return copy.deepcopy(payload)
 
     def route_operator_input(
         self,
@@ -375,6 +376,8 @@ class OrionL1Runtime:
             confidence=1.0,
             tick=state.manifest.tick,
         )
+        state.governance_receipts.append(receipt)
+        state.governed_records.append(record)
         state.world_state[subject] = value
         state.events.append(
             {
@@ -382,6 +385,7 @@ class OrionL1Runtime:
                 "tick": state.manifest.tick,
                 "kind": "governed_action",
                 "subject": subject,
+                "record_id": record.record_id,
                 "receipt_id": receipt.receipt_id,
                 "canon_status": "run_state",
             }

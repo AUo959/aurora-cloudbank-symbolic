@@ -149,12 +149,23 @@ class GovernanceReceipt:
     receipt_id: str
     provenance: str
 
+    def __post_init__(self) -> None:
+        stages = (
+            self.l3_glyph_arbitration,
+            self.continuity_and_relay_verification,
+            self.l1_human_consent,
+        )
+        if not all(type(stage) is bool for stage in stages):
+            raise ValueError("Triplex authorization stages must be booleans")
+
     @property
     def complete(self) -> bool:
-        return (
-            self.l3_glyph_arbitration
-            and self.continuity_and_relay_verification
-            and self.l1_human_consent
+        return all(
+            (
+                self.l3_glyph_arbitration,
+                self.continuity_and_relay_verification,
+                self.l1_human_consent,
+            )
         )
 
 
@@ -184,6 +195,8 @@ class L1RunState:
     station_records: List[EpistemicRecord] = field(default_factory=list)
     runtime_observations: List[EpistemicRecord] = field(default_factory=list)
     pilot_knowledge: List[EpistemicRecord] = field(default_factory=list)
+    governance_receipts: List[GovernanceReceipt] = field(default_factory=list)
+    governed_records: List[EpistemicRecord] = field(default_factory=list)
     communications: List[Dict[str, Any]] = field(default_factory=list)
     events: List[Dict[str, Any]] = field(default_factory=list)
     promotion_candidates: List[Dict[str, Any]] = field(default_factory=list)

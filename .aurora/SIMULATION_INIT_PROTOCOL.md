@@ -136,6 +136,28 @@ A quiet advancement window is valid. The runtime must not manufacture drama,
 character availability, emergencies, discoveries, or convenient explanations
 for engagement.
 
+Persisted runs continue through the governed continuation entry point:
+
+```bash
+python .aurora/run_l1.py status --run-id <uuid>
+python .aurora/run_l1.py sensors --run-id <uuid>
+python .aurora/run_l1.py advance --run-id <uuid> --minutes 1
+python .aurora/run_l1.py await-response --run-id <uuid> \
+  --message-id <uuid> --minutes 1 --max-windows 4
+python .aurora/run_l1.py explain-response --run-id <uuid> \
+  --message-id <uuid>
+```
+
+Continuation restores the deterministic replay position from the persisted
+autonomous-event ledger. It rejects malformed run identifiers, mismatched
+manifest paths, unsupported schemas, and runtime-contract or CanonRec drift.
+
+The `sensors` command reports live simulation-ledger telemetry only. Unbound
+physical channels remain explicitly unavailable; their framework defaults are
+not presented as live readings. The accompanying logical schematic projects
+only causal-safe topology. Historical deck layouts that conflict with current
+locus, population, or Earth-side Pilot rulings remain reference-only.
+
 ---
 
 ## Observation controls
@@ -173,6 +195,35 @@ latency model. A queued message is not delivered at the same tick; it becomes a
 station record only after a positive advancement window. This models elapsed
 time without pretending the unresolved exact range or exact light-time is
 known.
+
+A station response is a separate communication. The initial bounded character
+actor is restricted to Commander Alex Thorne (`CMD_001`) and to delivered
+traffic explicitly addressed to that endpoint. Before a response is queued,
+the actor:
+
+1. validates the runtime profile against the authoritative staff projection and
+   exact anchors in `simulation/L1_CANON_CHARACTER_ROSTER.md`;
+2. classifies the delivered message using only Alex's information aperture;
+3. weighs current records, canon-projected duties and principles, alternatives,
+   unresolved facts, and his own prior commitments;
+4. selects a concrete command action and persists its causal receipt;
+5. derives the response from that action; and
+6. links the response to the receipt through `caused_by_action_id`.
+
+The actor may read the delivered message, station records, Alex's own knowledge,
+recent run events, and Alex's prior action receipts. It cannot read Pilot-only
+knowledge, runtime observation apertures, or operator personal knowledge. Use
+`explain-response` with either the inbound or response message ID to inspect the
+action that caused a reply without advancing the run.
+
+The current policy, `bounded_character_action_v1`, is deterministic and
+auditable. It is not a free-form language-model impersonation. Its profile is a
+non-authoritative runtime projection of established character canon, and its
+outputs remain run-scoped. The actor uses Alex's roster authority at
+`L4_COMMAND`; conflicting legacy `L5_COMMAND` and workspace project-manager
+descriptions are excluded from this L1 projection. The policy does not promote
+testimony into canon, give Pilot command authority, or let Pilot dictate the
+response text.
 
 Ambiguous text must not silently become transmitted speech.
 

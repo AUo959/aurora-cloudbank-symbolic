@@ -142,6 +142,7 @@ class ProviderSensor(Sensor):
     ):
         super().__init__(sensor_id, layer, category)
         self.metrics = metrics
+        self.provider_bound = provider is not None
         self.provider = provider or (lambda: {})
 
     def read(self) -> SensorReading:
@@ -155,4 +156,15 @@ class ProviderSensor(Sensor):
             units[m.name] = m.unit
             if m.alert_when is not None and m.alert_when(v):
                 alerts.append(m.alert_message or f"{m.name} threshold breach: {v}")
-        return self._reading(values, units=units, alerts=alerts)
+        reported_metrics = sorted(name for name in raw if name in values)
+        defaulted_metrics = sorted(name for name in values if name not in raw)
+        return self._reading(
+            values,
+            units=units,
+            alerts=alerts,
+            metadata={
+                "provider_bound": self.provider_bound,
+                "reported_metrics": reported_metrics,
+                "defaulted_metrics": defaulted_metrics,
+            },
+        )

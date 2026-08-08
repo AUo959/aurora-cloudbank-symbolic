@@ -114,6 +114,54 @@ reply or evidence that the named recipient has acted.
 The receiving institution may later read, defer, answer, forward, ignore, or
 act on the message under its own circumstances and authority.
 
+### Bounded character causality
+
+The reference implementation provides one initial character actor for
+Commander Alex Thorne (`CMD_001`). The actor is bounded by a
+`runtime_projection_non_authoritative` profile in
+`config/l1_character_actor_profiles.json`; that projection consumes canon and
+cannot amend it.
+
+For each delivered message explicitly addressed to `CMD_001`, the actor must:
+
+1. validate its identity and behavioral anchors against repository authority;
+2. construct an actor-local context from the inbound message, station records,
+   Alex's character knowledge, recent events, prior Alex actions, and explicit
+   unresolved facts;
+3. classify the request and select a concrete command action;
+4. record duties, principles, evidence, gaps, alternatives, rationale,
+   operational steps, and commitments in a character-action receipt;
+5. persist that receipt before queuing the response; and
+6. link the response to the receipt with `caused_by_action_id`.
+
+The actor-local context must not include runtime observations, Pilot-position
+knowledge, or operator personal knowledge. Observation therefore cannot cause
+Alex to know, notice, or say something. A later Alex decision may consider his
+own prior active commitments, allowing bounded continuity without converting
+run state into biography.
+
+`bounded_character_action_v1` is deterministic and auditable. It does not use
+free-form model improvisation. Different message meanings may select different
+actions, but claims in the rendered response remain limited to the actor's
+available evidence. The current scope does not claim general agency for every
+character.
+
+The character-action receipt and the spoken response have a strict one-way
+boundary. Audit fields such as canon status, profile projection, runtime state,
+knowledge gaps, policy identifiers, and observation bookkeeping may constrain
+what Alex is allowed to claim, but they are not facts in Alex's lived L1 frame
+and MUST NOT be rendered as his dialogue. A missing or unresolved audit fact is
+normally expressed through omission, not by having Alex explain the runtime's
+uncertainty. The response renderer receives only the selected action, relevant
+station event, prior character commitments, and the canon-bounded voice opening.
+Known control-plane phrases fail the L1 speech boundary closed.
+
+Alex's L1 profile uses the authoritative roster projection: Station Commander,
+Command & Ethics, `L4_COMMAND`. Conflicting legacy descriptions of `L5_COMMAND`
+or a workspace project-manager/system-architect role are not inputs to this L1
+actor. A source conflict or missing roster anchor fails actor construction
+closed.
+
 ## Epistemic model
 
 The runtime keeps separate containers/classes for:
@@ -123,6 +171,8 @@ The runtime keeps separate containers/classes for:
 3. **station records** — sensors, logs, messages, institutional records;
 4. **runtime observations** — instrumentation selected for exposure;
 5. **Pilot knowledge** — information actually exposed to the Earth-side Pilot.
+6. **character actions** — auditable decisions produced from one character's
+   bounded information aperture and linked to any resulting communication.
 
 Each `EpistemicRecord` carries:
 

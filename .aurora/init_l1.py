@@ -18,7 +18,9 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SIMULATION_DIR = PROJECT_ROOT / "simulation"
-sys.path.insert(0, str(SIMULATION_DIR))
+SIMULATION_PATH = str(SIMULATION_DIR)
+if SIMULATION_PATH not in sys.path:
+    sys.path.insert(0, SIMULATION_PATH)
 
 from l1_runtime import OrionL1Runtime, PreflightError  # noqa: E402
 
@@ -27,10 +29,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Governed Orion L1 preflight and INIT")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    subparsers.add_parser("preflight", help="Validate INIT gates without creating or advancing a run")
+    subparsers.add_parser(
+        "preflight",
+        help="Validate INIT gates without creating or advancing a run",
+    )
 
-    init_parser = subparsers.add_parser("init", help="Create a tick-zero advancement-capable L1 run")
-    init_parser.add_argument("--seed", type=int, default=1337, help="Deterministic runtime seed")
+    init_parser = subparsers.add_parser(
+        "init",
+        help="Create a tick-zero advancement-capable L1 run",
+    )
+    init_parser.add_argument(
+        "--seed",
+        type=int,
+        default=1337,
+        help="Deterministic runtime seed",
+    )
     init_parser.add_argument(
         "--run-root",
         type=Path,
@@ -60,7 +73,9 @@ def main() -> int:
         return 0 if report["ready"] else 2
 
     try:
-        cloudbank_revision = args.cloudbank_revision or runtime.resolve_cloudbank_revision()
+        cloudbank_revision = (
+            args.cloudbank_revision or runtime.resolve_cloudbank_revision()
+        )
         state = runtime.init_run(
             cloudbank_revision=cloudbank_revision,
             canonrec_revision=args.canonrec_revision,

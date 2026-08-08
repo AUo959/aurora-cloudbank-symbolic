@@ -7,7 +7,9 @@ from pathlib import Path
 import pytest
 
 SIMULATION_DIR = Path(__file__).resolve().parents[1] / "simulation"
-sys.path.insert(0, str(SIMULATION_DIR))
+SIMULATION_PATH = str(SIMULATION_DIR)
+if SIMULATION_PATH not in sys.path:
+    sys.path.insert(0, SIMULATION_PATH)
 
 from l1_runtime import (  # noqa: E402
     GovernanceError,
@@ -52,6 +54,7 @@ def test_init_creates_tick_zero_run_outside_repo(tmp_path: Path):
         "l1_entity": False,
     }
     assert "orion_orbital_locus" in state.manifest.active_quarantines
+    assert "current_crew_81" in state.manifest.active_quarantines
     persisted = tmp_path / state.manifest.run_id / "state.json"
     assert persisted.is_file()
     payload = json.loads(persisted.read_text(encoding="utf-8"))
@@ -166,6 +169,36 @@ def test_population_schema_allows_large_complement_with_smaller_resolved_subset(
     )
 
     snapshot.validate()
+
+
+@pytest.mark.unit
+def test_population_baseline_rejects_non_integer_numeric_fields(tmp_path: Path):
+    baseline = json.loads(
+        (Path(__file__).resolve().parents[1] / "config" / "l1_runtime_baseline.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    baseline["population"]["crew_capacity"] = "250"
+    path = tmp_path / "invalid-baseline.json"
+    path.write_text(json.dumps(baseline), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="crew_capacity must be an integer or null"):
+        OrionL1Runtime(baseline_path=path)
+
+
+@pytest.mark.unit
+def test_population_baseline_rejects_boolean_system_entity_count(tmp_path: Path):
+    baseline = json.loads(
+        (Path(__file__).resolve().parents[1] / "config" / "l1_runtime_baseline.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    baseline["population"]["system_entities"]["aurora_core"] = True
+    path = tmp_path / "invalid-system-count.json"
+    path.write_text(json.dumps(baseline), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="system_entities.aurora_core must be an integer"):
+        OrionL1Runtime(baseline_path=path)
 
 
 @pytest.mark.unit

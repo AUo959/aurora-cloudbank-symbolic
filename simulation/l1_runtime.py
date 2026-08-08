@@ -55,7 +55,7 @@ class DeterministicReplayRNG:
     """
 
     def __init__(self, seed: int) -> None:
-        self._seed = str(int(seed)).encode("ascii")
+        self._seed = str(seed).encode("ascii")
         self._counter = 0
 
     def random(self) -> float:
@@ -76,6 +76,8 @@ class PopulationSnapshot:
     historical_aggregate_claims: Dict[str, str] = field(default_factory=dict)
 
     def validate(self) -> None:
+        if self.crew_capacity is not None and self.crew_capacity < 0:
+            raise ValueError("crew_capacity cannot be negative")
         if self.identified_human_records < 0:
             raise ValueError("identified_human_records cannot be negative")
         if self.persona_resolved_humans is not None:
@@ -250,6 +252,10 @@ class OrionL1Runtime:
         if staff.get("authority_repository") != "AUo959/CanonRec":
             blockers.append("CanonRec is not configured as staff canon authority")
 
+        expected_revision = authority.get("canonrec", {}).get("revision")
+        if not isinstance(expected_revision, str) or not _is_git_sha(expected_revision):
+            blockers.append("L1 baseline does not pin a valid CanonRec revision")
+
         try:
             provenance = _read_json(CANON_PROVENANCE_PATH)
         except (OSError, ValueError):
@@ -271,7 +277,6 @@ class OrionL1Runtime:
             blockers.append("canon provenance does not assign staff authority to CanonRec")
         if receipt.get("cloudbank_role") != "runtime_projection_non_authoritative":
             blockers.append("CloudBank staff registry is not typed as a runtime projection")
-        expected_revision = authority.get("canonrec", {}).get("revision")
         if receipt.get("authority_revision") != expected_revision:
             blockers.append("staff authority revision does not match the L1 baseline")
 
@@ -339,10 +344,17 @@ class OrionL1Runtime:
         if not report["ready"]:
             raise PreflightError("; ".join(report["blockers"]))
         self._validate_revision(cloudbank_revision, "cloudbank_revision")
+        seed = _required_int(seed, "seed")
 
-        canonrec_revision = (
-            canonrec_revision or self.baseline["authority"]["canonrec"]["revision"]
-        )
+        expected_canonrec_revision = self.baseline["authority"]["canonrec"]["revision"]
+        if (
+            canonrec_revision is not None
+            and canonrec_revision != expected_canonrec_revision
+        ):
+            raise PreflightError(
+                "CanonRec revision override does not match the preflight authority receipt"
+            )
+        canonrec_revision = expected_canonrec_revision
         self._validate_revision(canonrec_revision, "canonrec_revision")
 
         resolved_run_root = None
@@ -357,7 +369,7 @@ class OrionL1Runtime:
             created_at=_utcnow(),
             cloudbank_revision=cloudbank_revision,
             canonrec_revision=canonrec_revision,
-            seed=int(seed),
+            seed=seed,
             station_cycle_length_minutes=int(defaults["station_cycle_length_minutes"]),
             station_cycle_minute=int(defaults["station_cycle_start_minute"]),
             tick=0,

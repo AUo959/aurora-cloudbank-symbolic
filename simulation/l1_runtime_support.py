@@ -164,26 +164,43 @@ def _check_locus_authority(
 ) -> None:
     authority = baseline.get("authority", {}).get("orbital_locus", {})
     locus = baseline.get("orbital_locus", {})
+    expected_revision = (
+        baseline.get("authority", {}).get("canonrec", {}).get("revision")
+    )
 
+    _check_locus_authority_config(authority, expected_revision, blockers)
+    _check_locus_authority_receipt(authority, provenance_path, blockers)
+    _check_locus_resolution(locus, blockers)
+    _check_locus_latency(locus.get("communications_latency", {}), blockers)
+
+    warnings.append(
+        "exact Lagrange point and exact one-way communications light-time remain "
+        "unresolved; runtime uses a provenance-labeled approximate nonzero latency model"
+    )
+
+
+def _check_locus_authority_config(
+    authority: Dict[str, Any],
+    expected_revision: Optional[str],
+    blockers: List[str],
+) -> None:
     if authority.get("status") != "resolved_authority_boundary":
         blockers.append("orbital locus authority boundary is unresolved")
     if authority.get("authority_repository") != "AUo959/CanonRec":
         blockers.append("CanonRec is not configured as orbital-locus authority")
-    if authority.get("authority_revision") != baseline.get("authority", {}).get(
-        "canonrec", {}
-    ).get("revision"):
+    if authority.get("authority_revision") != expected_revision:
         blockers.append("orbital-locus authority revision does not match CanonRec")
     if (
         authority.get("authority_path")
         != "canon/L1/station/STATION_PURPOSE_DEFINITION.md"
     ):
         blockers.append("orbital-locus authority path is not the owner ruling")
-    _check_locus_authority_receipt(
-        authority,
-        provenance_path,
-        blockers,
-    )
 
+
+def _check_locus_resolution(
+    locus: Dict[str, Any],
+    blockers: List[str],
+) -> None:
     if locus.get("status") != "resolved_siting_class_exact_point_unresolved":
         blockers.append("Lagrange-point siting class is not resolved")
     if locus.get("certainty") != "CANON":
@@ -196,15 +213,15 @@ def _check_locus_authority(
     if not locus.get("prohibited_causal_derivations"):
         blockers.append("exact orbital uncertainty lacks causal-use restrictions")
 
-    latency = locus.get("communications_latency", {})
+
+def _check_locus_latency(
+    latency: Dict[str, Any],
+    blockers: List[str],
+) -> None:
     if latency.get("policy") != "modeled_nonzero_exact_value_unresolved":
         blockers.append("communications latency does not preserve a nonzero model")
     modeled_seconds = latency.get("modeled_one_way_light_time_seconds")
-    if (
-        isinstance(modeled_seconds, bool)
-        or not isinstance(modeled_seconds, int)
-        or modeled_seconds <= 0
-    ):
+    if not _is_positive_integer(modeled_seconds):
         blockers.append("communications latency model must be a positive integer")
     if latency.get("certainty") != "APPROX":
         blockers.append("communications latency model is not marked approximate")
@@ -213,10 +230,9 @@ def _check_locus_authority(
     if latency.get("delivery_resolution") != "first_positive_advancement_window":
         blockers.append("communications delivery does not require elapsed time")
 
-    warnings.append(
-        "exact Lagrange point and exact one-way communications light-time remain "
-        "unresolved; runtime uses a provenance-labeled approximate nonzero latency model"
-    )
+
+def _is_positive_integer(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
 
 
 def _check_locus_authority_receipt(
@@ -224,11 +240,18 @@ def _check_locus_authority_receipt(
     provenance_path: Path,
     blockers: List[str],
 ) -> None:
-    try:
-        provenance = read_json(provenance_path)
-    except (OSError, ValueError):
-        blockers.append("canon provenance receipt is unavailable or invalid")
+    provenance = _load_canon_provenance(provenance_path, blockers)
+    if provenance is None:
         return
+    receipt = _locus_authority_receipt(provenance, blockers)
+    if receipt is not None:
+        _check_locus_authority_receipt_values(receipt, authority, blockers)
+
+
+def _locus_authority_receipt(
+    provenance: Dict[str, Any],
+    blockers: List[str],
+) -> Optional[Dict[str, Any]]:
     receipts = [
         item
         for item in provenance.get("resolved_surfaces", [])
@@ -236,8 +259,15 @@ def _check_locus_authority_receipt(
     ]
     if len(receipts) != 1:
         blockers.append("canon provenance lacks one resolved orbital-locus receipt")
-        return
-    receipt = receipts[0]
+        return None
+    return receipts[0]
+
+
+def _check_locus_authority_receipt_values(
+    receipt: Dict[str, Any],
+    authority: Dict[str, Any],
+    blockers: List[str],
+) -> None:
     if receipt.get("status") != "resolved_siting_class_exact_point_unresolved":
         blockers.append("canon provenance does not preserve exact-point uncertainty")
     if receipt.get("authority_revision") != authority.get("authority_revision"):

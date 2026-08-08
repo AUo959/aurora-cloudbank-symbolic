@@ -179,12 +179,19 @@ def _delivered_response(
         return None
     for communication in state.communications:
         if (
-            communication.get("direction") == "station_to_earth"
+            _station_response(communication)
             and communication.get("reply_to_message_id") == message_id
             and communication.get("status") == "delivered_to_earth"
         ):
             return communication
     return None
+
+
+def _station_response(message: Dict[str, Any]) -> bool:
+    direction = message.get("direction")
+    return direction == "station_to_earth" or (
+        direction is None and message.get("origin") == "Orion Station"
+    )
 
 
 def _explain_response(

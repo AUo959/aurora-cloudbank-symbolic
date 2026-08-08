@@ -103,6 +103,45 @@ def test_await_response_continues_persisted_run_until_delivery(tmp_path: Path):
     assert action["knowledge_inputs"]
 
 
+def test_await_response_detects_legacy_response_without_direction(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=1337,
+        run_root=tmp_path,
+    )
+    inbound = runtime.send_communication("Status report, Commander.", target="CMD_001")[
+        "message"
+    ]
+    runtime.advance(elapsed_minutes=1)
+    persisted_path = tmp_path / state.manifest.run_id / "state.json"
+    persisted = json.loads(persisted_path.read_text(encoding="utf-8"))
+    response = next(
+        item
+        for item in persisted["communications"]
+        if item.get("reply_to_message_id") == inbound["message_id"]
+    )
+    response.pop("direction")
+    persisted_path.write_text(json.dumps(persisted), encoding="utf-8")
+
+    result = _run_cli(
+        "await-response",
+        "--run-id",
+        state.manifest.run_id,
+        "--run-root",
+        str(tmp_path),
+        "--message-id",
+        inbound["message_id"],
+        "--minutes",
+        "1",
+        "--max-windows",
+        "1",
+    )
+
+    assert result["advancement_windows"] == 1
+    assert result["response"]["status"] == "delivered_to_earth"
+
+
 def test_await_response_rejects_unknown_message_without_advancing(tmp_path: Path):
     runtime = OrionL1Runtime()
     state = runtime.init_run(

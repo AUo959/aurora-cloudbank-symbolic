@@ -107,8 +107,10 @@ def test_status_request_is_driven_by_character_duties_and_local_records():
 def test_actor_decision_is_deterministic_for_the_same_context():
     actor = BoundedCharacterActor()
     context = _context("Status report, Commander.")
+    first_decision = actor.decide(context)
+    repeated_decision = actor.decide(context)
 
-    assert actor.decide(context) == actor.decide(context)
+    assert first_decision == repeated_decision
 
 
 @pytest.mark.unit

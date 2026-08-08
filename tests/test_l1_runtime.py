@@ -238,9 +238,10 @@ def test_load_run_rejects_manifest_path_mismatch(tmp_path: Path):
     payload = json.loads(payload_path.read_text(encoding="utf-8"))
     payload["manifest"]["run_id"] = "3b62eecf-5a9e-4784-920d-f83f15da950f"
     payload_path.write_text(json.dumps(payload), encoding="utf-8")
+    loader = OrionL1Runtime()
 
     with pytest.raises(PreflightError, match="does not match its persistence path"):
-        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+        loader.load_run(state.manifest.run_id, run_root=tmp_path)
 
 
 @pytest.mark.unit
@@ -256,9 +257,10 @@ def test_load_run_rejects_malformed_communication_ledger(tmp_path: Path):
     payload = json.loads(payload_path.read_text(encoding="utf-8"))
     payload["communications"][0]["message_id"] = ""
     payload_path.write_text(json.dumps(payload), encoding="utf-8")
+    loader = OrionL1Runtime()
 
     with pytest.raises(PreflightError, match="message_id must be a non-empty string"):
-        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+        loader.load_run(state.manifest.run_id, run_root=tmp_path)
 
 
 @pytest.mark.unit
@@ -372,9 +374,10 @@ def test_load_run_rejects_character_action_with_missing_response(tmp_path: Path)
     payload = json.loads(payload_path.read_text(encoding="utf-8"))
     payload["character_actions"][0]["response_message_id"] = "missing-message"
     payload_path.write_text(json.dumps(payload), encoding="utf-8")
+    loader = OrionL1Runtime()
 
     with pytest.raises(PreflightError, match="unavailable communication"):
-        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+        loader.load_run(state.manifest.run_id, run_root=tmp_path)
 
 
 @pytest.mark.unit
@@ -396,9 +399,10 @@ def test_load_run_rejects_inconsistent_character_response_causality(tmp_path: Pa
     )
     response["caused_by_action_id"] = "tampered-action"
     payload_path.write_text(json.dumps(payload), encoding="utf-8")
+    loader = OrionL1Runtime()
 
     with pytest.raises(PreflightError, match="causality is inconsistent"):
-        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+        loader.load_run(state.manifest.run_id, run_root=tmp_path)
 
 
 @pytest.mark.unit

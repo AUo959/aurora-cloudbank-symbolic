@@ -361,7 +361,7 @@ class OrionL1Runtime:
             for item in state.communications
             if item.get("direction") == "station_to_earth"
         }
-        for message in list(state.communications):
+        for message in tuple(state.communications):
             if not self._commander_response_is_due(message, replied_to):
                 continue
             decision = self._commander_actor.decide(

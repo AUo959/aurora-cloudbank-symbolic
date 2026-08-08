@@ -22,6 +22,11 @@ from l1_runtime import (  # noqa: E402
 CLOUDBANK_SHA = "f572b8e8204a8fd48f3c8a55d3b1c3cec6603579"
 
 
+def _baseline_payload() -> dict:
+    path = Path(__file__).resolve().parents[1] / "config" / "l1_runtime_baseline.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 @pytest.mark.unit
 def test_preflight_is_ready_and_does_not_advance_or_create_run():
     runtime = OrionL1Runtime()
@@ -59,6 +64,21 @@ def test_init_creates_tick_zero_run_outside_repo(tmp_path: Path):
     assert persisted.is_file()
     payload = json.loads(persisted.read_text(encoding="utf-8"))
     assert payload["manifest"]["tick"] == 0
+
+
+@pytest.mark.unit
+def test_init_rejects_canonrec_revision_override():
+    runtime = OrionL1Runtime()
+
+    with pytest.raises(PreflightError, match="override does not match"):
+        runtime.init_run(
+            cloudbank_revision=CLOUDBANK_SHA,
+            canonrec_revision="0" * 40,
+            seed=1337,
+            persist=False,
+        )
+
+    assert runtime.state is None
 
 
 @pytest.mark.unit
@@ -173,11 +193,7 @@ def test_population_schema_allows_large_complement_with_smaller_resolved_subset(
 
 @pytest.mark.unit
 def test_population_baseline_rejects_non_integer_numeric_fields(tmp_path: Path):
-    baseline = json.loads(
-        (Path(__file__).resolve().parents[1] / "config" / "l1_runtime_baseline.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    baseline = _baseline_payload()
     baseline["population"]["crew_capacity"] = "250"
     path = tmp_path / "invalid-baseline.json"
     path.write_text(json.dumps(baseline), encoding="utf-8")
@@ -188,16 +204,15 @@ def test_population_baseline_rejects_non_integer_numeric_fields(tmp_path: Path):
 
 @pytest.mark.unit
 def test_population_baseline_rejects_boolean_system_entity_count(tmp_path: Path):
-    baseline = json.loads(
-        (Path(__file__).resolve().parents[1] / "config" / "l1_runtime_baseline.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    baseline = _baseline_payload()
     baseline["population"]["system_entities"]["aurora_core"] = True
     path = tmp_path / "invalid-system-count.json"
     path.write_text(json.dumps(baseline), encoding="utf-8")
 
-    with pytest.raises(ValueError, match="system_entities.aurora_core must be an integer"):
+    with pytest.raises(
+        ValueError,
+        match="system_entities.aurora_core must be an integer",
+    ):
         OrionL1Runtime(baseline_path=path)
 
 
@@ -207,7 +222,9 @@ def test_false_missing_human_claim_is_not_active():
 
     assert runtime.population.identified_human_records == 35
     assert runtime.population.missing_named_human_claim is False
-    assert runtime.population.historical_aggregate_claims["declared_humans_36"].startswith("retired")
+    assert runtime.population.historical_aggregate_claims[
+        "declared_humans_36"
+    ].startswith("retired")
 
 
 @pytest.mark.unit

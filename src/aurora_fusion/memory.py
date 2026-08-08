@@ -712,10 +712,10 @@ class AuroraMemoryOptimizer:
         if not symbols:
             symbols = [self.doctrine.anchor_seed]
 
-        vector = NativeSymbolicVector.from_symbol(symbols[0], self.symbolic_dim)
-        for symbol in symbols[1:]:
-            vector = vector.superpose(NativeSymbolicVector.from_symbol(symbol, self.symbolic_dim))
-        return vector
+        vectors = [NativeSymbolicVector.from_symbol(symbol, self.symbolic_dim) for symbol in symbols]
+        if len(vectors) == 1:
+            return vectors[0]
+        return NativeSymbolicVector.bundle(vectors)
 
     def _tokenize(self, text: str) -> List[str]:
         return [token.lower() for token in TOKEN_PATTERN.findall(text) if len(token) > 2]

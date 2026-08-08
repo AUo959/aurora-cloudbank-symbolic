@@ -5,7 +5,8 @@
 **Operator decision:** Issue #1126, 2026-06-22; issue #1350, 2026-07-27  
 **Classification:** Internal / Institutional assurance gate  
 **Data treatment:** First-class operational data  
-**Status:** ⏳ PENDING — Gate-001A and Gate-001B records are maintained separately
+**Status:** ⚠️ Gate-001A Run 001 FINDING — deterministic capability PASS; subject finding tracked in issue #1361; Gate-001B remains PENDING  
+**Latest Gate-001A event:** `AURORA-GATE-001A-RECOVERED-PROTOCOL-WIRING-001` · baseline `3142aa47afac0b8e63cc5bc46f9fa8ae40592354` · report `docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__REPORT__GATE_001A_RECOVERED_PROTOCOL_WIRING__v1.0__2026-07-27.md`
 
 ---
 

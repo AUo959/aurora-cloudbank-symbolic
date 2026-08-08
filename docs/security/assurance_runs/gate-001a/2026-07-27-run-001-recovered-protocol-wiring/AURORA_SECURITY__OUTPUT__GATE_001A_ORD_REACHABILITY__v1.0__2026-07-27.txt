@@ -1,0 +1,45 @@
+src/entities/fleet_entities.py:51:    get_shadowfax_oppy,
+src/entities/fleet_entities.py:52:    get_shadowfax_lucent,
+src/entities/fleet_entities.py:87:    "get_shadowfax_oppy",
+src/entities/fleet_entities.py:88:    "get_shadowfax_lucent",
+src/entities/fleet/registry_drones.py:14:    "get_shadowfax_oppy",
+src/entities/fleet/registry_drones.py:15:    "get_shadowfax_lucent",
+src/entities/fleet/registry_drones.py:74:def get_shadowfax_oppy() -> OPPYNavigator:
+src/entities/fleet/registry_drones.py:82:def get_shadowfax_lucent() -> AuroraSubCore:
+src/entities/fleet/__init__.py:97:        get_shadowfax_oppy,
+src/entities/fleet/__init__.py:98:        get_shadowfax_lucent,
+src/entities/fleet/__init__.py:109:            "get_shadowfax_oppy",
+src/entities/fleet/__init__.py:110:            "get_shadowfax_lucent",
+modules/ord/__init__.py:18:from modules.ord.ord_inspection_policy import (
+modules/ord/__init__.py:21:    OrdInspectionPolicy,
+modules/ord/__init__.py:25:from modules.ord.ord_policy_engine import (
+modules/ord/__init__.py:30:    OrdPolicyEngine,
+modules/ord/__init__.py:34:from modules.ord.ord_receipts import canonical_json, canonical_sha256
+modules/ord/__init__.py:35:from modules.ord.ord_threshold_registry import (
+modules/ord/__init__.py:49:    "OrdInspectionPolicy",
+modules/ord/__init__.py:50:    "OrdPolicyEngine",
+modules/ord/ord_inspection_policy.py:17:from modules.ord.ord_threshold_registry import ThresholdRegistry, load_default_registry
+modules/ord/ord_inspection_policy.py:63:class OrdInspectionPolicy:
+modules/ord/ord_inspection_policy.py:187:    "OrdInspectionPolicy",
+modules/ord/ord_policy_engine.py:19:from modules.ord.ord_threshold_registry import ThresholdRegistry, load_default_registry
+modules/ord/ord_policy_engine.py:87:class OrdPolicyEngine:
+modules/ord/ord_policy_engine.py:117:            self._append_unique(drones_required, DroneType.SHADOWFAX)
+modules/ord/ord_policy_engine.py:118:            self._append_unique(post_flight, DroneType.SHADOWFAX)
+modules/ord/ord_policy_engine.py:251:    "OrdPolicyEngine",
+tests/ord/test_ord_threshold_registry.py:5:from modules.ord.ord_inspection_policy import InspectionInput, OrdInspectionPolicy, QuarantineDecision
+tests/ord/test_ord_threshold_registry.py:6:from modules.ord.ord_policy_engine import MissionBrief, OrdPolicyEngine
+tests/ord/test_ord_threshold_registry.py:7:from modules.ord.ord_threshold_registry import load_default_registry
+tests/ord/test_ord_threshold_registry.py:14:        engine = OrdPolicyEngine()
+tests/ord/test_ord_threshold_registry.py:27:        policy = OrdInspectionPolicy()
+tests/ord/test_ord_inspection_policy.py:5:from modules.ord.ord_inspection_policy import (
+tests/ord/test_ord_inspection_policy.py:7:    OrdInspectionPolicy,
+tests/ord/test_ord_inspection_policy.py:15:class TestOrdInspectionPolicy(unittest.TestCase):
+tests/ord/test_ord_inspection_policy.py:17:        self.policy = OrdInspectionPolicy()
+tests/ord/test_ord_policy_engine.py:5:from modules.ord.ord_policy_engine import DroneType, MissionBrief, OrdPolicyEngine, SensitivityClass
+tests/ord/test_ord_policy_engine.py:6:from modules.ord.ord_receipts import canonical_json, canonical_sha256
+tests/ord/test_ord_policy_engine.py:11:class TestOrdPolicyEngine(unittest.TestCase):
+tests/ord/test_ord_policy_engine.py:13:        self.engine = OrdPolicyEngine()
+tests/ord/test_ord_policy_engine.py:24:        self.assertIn(DroneType.SHADOWFAX, order.drones_required)
+tests/ord/test_ord_policy_engine.py:48:            [DroneType.DELTA_SCOUT, DroneType.SHADOWFAX, DroneType.GAMMA_SWARM, DroneType.WISP],
+tests/ord/test_ord_policy_engine.py:73:            [DroneType.DELTA_SCOUT, DroneType.SHADOWFAX, DroneType.GAMMA_SWARM],
+tests/ord/test_ord_policy_engine.py:119:            [DroneType.DELTA_SCOUT, DroneType.SHADOWFAX, DroneType.GAMMA_SWARM, DroneType.WISP],

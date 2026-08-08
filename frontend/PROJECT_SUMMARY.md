@@ -14,7 +14,7 @@ I've built a **production-grade frontend foundation** for the Aurora CloudBank S
 ### What's Been Delivered
 
 ✅ **Complete project setup** with modern tooling
-✅ **Production-ready architecture** with TypeScript, React 18, Vite
+✅ **Production-ready architecture** with TypeScript, React 19, Vite
 ✅ **Custom design system** with Aurora branding
 ✅ **Type-safe API client** integrated with backend
 ✅ **System Dashboard** with real-time metrics
@@ -268,6 +268,7 @@ All methods in `src/lib/api/aurora.ts`:
 
 1. **Install** (not in package.json — add it as the first step of this feature):
 ```bash
+cd frontend   # repo root has its own package.json
 npm install three @react-three/fiber @react-three/drei @react-three/postprocessing
 npm install -D @types/three
 ```

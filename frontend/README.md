@@ -65,7 +65,7 @@ Visit **http://localhost:5173** in your browser.
    - Dark theme
 
 4. **Core Infrastructure**
-   - React 18 + TypeScript 5.3
+   - React 19 + TypeScript 5.3
    - Vite build system
    - React Query for server state
    - Tailwind CSS + custom design system
@@ -114,16 +114,16 @@ Visit **http://localhost:5173** in your browser.
 ## Tech Stack
 
 ### Core
-- **React 18.2** - UI library with concurrent features
+- **React 19.2** - UI library with concurrent features
 - **TypeScript 5.3** - Type safety
-- **Vite 5.0** - Build tool with HMR
+- **Vite 8.2** - Build tool with HMR
 
 ### State Management
 - **React Query (TanStack Query)** - Server state, caching
 - **Zustand** - Client state
 
 ### Styling
-- **Tailwind CSS 3.4** - Utility-first CSS
+- **Tailwind CSS 4.3** - Utility-first CSS (CSS-first config, no tailwind.config.js)
 - **class-variance-authority** - Component variants
 - **clsx + tailwind-merge** - Class merging via the `cn()` helper
 - **Lucide React** - Icons
@@ -394,6 +394,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 **Install first** (not in `package.json` — see *Chosen but not installed*):
 ```bash
+cd frontend   # repo root has its own package.json
 npm install three @react-three/fiber @react-three/drei @react-three/postprocessing
 npm install -D @types/three
 ```

@@ -8,12 +8,13 @@ Aurora is a cutting-edge platform enabling high-fidelity simulations of complex 
 ## Tech Stack
 
 ### Core Framework
-- **React 18.2+** - Modern concurrent features, Suspense, streaming SSR
+- **React 19.2+** - Modern concurrent features, Suspense, streaming SSR
 - **TypeScript 5.3+** - Full type safety across codebase
-- **Vite 5.0+** - Lightning-fast HMR, optimized production builds
+- **Vite 8.2+** - Lightning-fast HMR, optimized production builds
 
 ### UI & Styling
-- **Tailwind CSS 3.4+** - Utility-first styling with custom design system
+- **Tailwind CSS 4.3+** - Utility-first styling with custom design system
+  (v4: CSS-first config via `@tailwindcss/postcss`, not `tailwind.config.js`)
 - **class-variance-authority + clsx + tailwind-merge** - Component variants and
   class merging. `src/components/ui/` follows the shadcn/ui *pattern* (variants
   in the component, `cn()` for class merging) without the Radix dependency.
@@ -34,6 +35,10 @@ The stack below is **chosen but not installed**. Nothing under `src/` imports
 these yet, so they are not in `package.json` — carrying them unused meant
 dependency-bot churn against code that did not exist. Install each one as part
 of the feature that first needs it, in the same commit.
+
+> **Run every command below from `frontend/`.** The repository root has its own
+> `package.json`; installing from there adds the dependency to the wrong
+> project.
 
 ### UI primitives — when a component needs behaviour `cn()` cannot express
 

@@ -45,15 +45,20 @@ export default defineConfig({
         manualChunks(id: string) {
           if (!id.includes('node_modules')) return undefined;
 
+          // ui-vendor named four @radix-ui packages that were removed as unused
+          // dependencies; a group whose members cannot be installed can never
+          // match, so it is dropped rather than left as a false signal that the
+          // app chunks a UI library it does not have.
+          //
+          // three-vendor and chart-vendor are retained. Nothing imports their
+          // members yet either, so neither chunk is currently emitted, but the
+          // packages are deliberately staged for the visualiser work described
+          // in ARCHITECTURE.md and PROJECT_SUMMARY.md and the grouping should
+          // be in place when that lands.
           const groups: Record<string, string[]> = {
             'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+            'editor-vendor': ['@monaco-editor/react', 'monaco-editor'],
             'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-            'ui-vendor': [
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-select',
-              '@radix-ui/react-tabs',
-            ],
             'chart-vendor': ['recharts', 'd3'],
           };
 

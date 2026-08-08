@@ -129,6 +129,7 @@ jobs:
             tests/test_opal2_glyph_core.py \
             tests/test_opal2_integration.py \
             tests/test_opal2_regex_workshop.py \
+            tests/test_opal2_sherlock_watson.py \
             tests/test_opal2_simple.py \
             tests/test_opal2_staging_dashboard.py \
             tests/test_opal2_system.py \

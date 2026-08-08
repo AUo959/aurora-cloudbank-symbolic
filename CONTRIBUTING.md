@@ -7,7 +7,7 @@ get started and understand our development workflow.
 
 ### Prerequisites
 
-- **Python 3.11+** (3.12 recommended)
+- **Python 3.12+**
 - **Git** with GPG signing configured (optional but recommended)
 - **VS Code** with Dev Containers extension (recommended for a consistent environment)
 

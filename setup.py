@@ -27,7 +27,7 @@ setup(
     description="Quantum-Symbolic Computing Platform with AI Integration",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    python_requires=">=3.11",
+    python_requires=">=3.12",
     # Single source of truth: requirements.txt drives production install_requires.
     # Adding a package here means adding it to requirements.txt — not both places.
     install_requires=_load_requirements("requirements.txt"),
@@ -39,7 +39,6 @@ setup(
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
     ],
 )

@@ -101,6 +101,12 @@ def _schematic_nodes(
             "layer": "L1",
         },
         {
+            "id": "character_actor:CMD_001",
+            "type": "bounded_character_action",
+            "policy": "bounded_character_action_v1",
+            "knowledge_scope": "station_records_plus_actor_knowledge",
+        },
+        {
             "id": "internal.l1_runtime",
             "type": "read_only_instrumentation",
             "source": "persisted_run_ledger",
@@ -124,6 +130,11 @@ def _schematic_links(
             "from": "orion_station",
             "to": command_endpoint["id"],
             "type": "station_routing",
+        },
+        {
+            "from": command_endpoint["id"],
+            "to": "character_actor:CMD_001",
+            "type": "canon_profile_plus_local_knowledge",
         },
         {
             "from": "orion_station",
@@ -155,6 +166,7 @@ def _provider(state: L1RunState):
                     for item in communications
                 )
             ),
+            "character_action_count": float(len(state.character_actions)),
         }
 
     return read_state

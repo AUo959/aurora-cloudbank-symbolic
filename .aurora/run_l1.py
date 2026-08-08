@@ -32,6 +32,7 @@ def build_parser() -> argparse.ArgumentParser:
         ("sensors", "Read ledger-bound sensors and the causal-safe schematic"),
         ("advance", "Advance one bounded autonomous simulation window"),
         ("await-response", "Advance until a specific station response reaches Earth"),
+        ("explain-response", "Show the character action that caused a response"),
     ):
         command = subparsers.add_parser(name, help=help_text)
         _add_run_arguments(command)
@@ -41,6 +42,8 @@ def build_parser() -> argparse.ArgumentParser:
             command.add_argument("--message-id", required=True)
             command.add_argument("--minutes", type=int, default=1)
             command.add_argument("--max-windows", type=int, default=4)
+        if name == "explain-response":
+            command.add_argument("--message-id", required=True)
     return parser
 
 
@@ -77,12 +80,14 @@ def _execute(runtime: OrionL1Runtime, args: argparse.Namespace) -> Dict[str, Any
     if args.command == "advance":
         event = runtime.advance(elapsed_minutes=args.minutes)
         return {**_status(runtime), "event": event}
-    return _await_response(
-        runtime,
-        message_id=args.message_id,
-        elapsed_minutes=args.minutes,
-        max_windows=args.max_windows,
-    )
+    if args.command == "await-response":
+        return _await_response(
+            runtime,
+            message_id=args.message_id,
+            elapsed_minutes=args.minutes,
+            max_windows=args.max_windows,
+        )
+    return _explain_response(runtime, args.message_id)
 
 
 def _status(runtime: OrionL1Runtime) -> Dict[str, Any]:
@@ -97,6 +102,7 @@ def _status(runtime: OrionL1Runtime) -> Dict[str, Any]:
         "station_cycle_minute": state.manifest.station_cycle_minute,
         "event_count": len(state.events),
         "communication_count": len(state.communications),
+        "character_action_count": len(state.character_actions),
     }
 
 
@@ -149,6 +155,22 @@ def _delivered_response(
         ):
             return communication
     return None
+
+
+def _explain_response(
+    runtime: OrionL1Runtime,
+    message_id: str,
+) -> Dict[str, Any]:
+    state = runtime.state
+    if state is None:
+        raise RuntimeError("persisted run failed to load")
+    for action in state.character_actions:
+        if message_id in {
+            action.get("trigger_message_id"),
+            action.get("response_message_id"),
+        }:
+            return {**_status(runtime), "character_action": action}
+    raise RuntimeError("no character action is recorded for that communication")
 
 
 if __name__ == "__main__":

@@ -193,6 +193,7 @@ class L1RunState:
     manifest: RunManifest
     world_state: Dict[str, Any]
     character_knowledge: Dict[str, List[EpistemicRecord]] = field(default_factory=dict)
+    character_actions: List[Dict[str, Any]] = field(default_factory=list)
     station_records: List[EpistemicRecord] = field(default_factory=list)
     runtime_observations: List[EpistemicRecord] = field(default_factory=list)
     pilot_knowledge: List[EpistemicRecord] = field(default_factory=list)
@@ -212,6 +213,9 @@ def l1_run_state_from_payload(payload: Dict[str, Any]) -> L1RunState:
         world_state=copy.deepcopy(_mapping(payload.get("world_state"), "world_state")),
         character_knowledge=_character_knowledge_from_payload(
             payload.get("character_knowledge", {})
+        ),
+        character_actions=_mapping_list(
+            payload.get("character_actions", []), "character_actions"
         ),
         station_records=_epistemic_records(
             payload.get("station_records", []), "station_records"

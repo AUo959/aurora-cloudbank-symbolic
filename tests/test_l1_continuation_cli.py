@@ -84,4 +84,20 @@ def test_await_response_continues_persisted_run_until_delivery(tmp_path: Path):
     assert result["advancement_windows"] == 1
     assert result["response"]["sender_id"] == "CMD_001"
     assert result["response"]["status"] == "delivered_to_earth"
+    assert result["response"]["response_policy"] == "bounded_character_action_v1"
+    assert result["character_action_count"] == 1
     assert result["tick"] == 2
+
+    explanation = _run_cli(
+        "explain-response",
+        "--run-id",
+        state.manifest.run_id,
+        "--run-root",
+        str(tmp_path),
+        "--message-id",
+        result["response"]["message_id"],
+    )
+    action = explanation["character_action"]
+    assert action["selected_action"] == "review_watch_and_report"
+    assert action["response_message_id"] == result["response"]["message_id"]
+    assert action["knowledge_inputs"]

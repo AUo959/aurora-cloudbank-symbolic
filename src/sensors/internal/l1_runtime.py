@@ -15,6 +15,7 @@ METRICS = [
     MetricSpec("queued_communication_count", MetricUnit.COUNT),
     MetricSpec("delivered_communication_count", MetricUnit.COUNT),
     MetricSpec("station_response_count", MetricUnit.COUNT),
+    MetricSpec("character_action_count", MetricUnit.COUNT),
 ]
 
 

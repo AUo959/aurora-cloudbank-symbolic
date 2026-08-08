@@ -473,6 +473,7 @@ def export_run_state(state: Any) -> Dict[str, Any]:
             key: [asdict(record) for record in records]
             for key, records in state.character_knowledge.items()
         },
+        "character_actions": state.character_actions,
         "station_records": [asdict(record) for record in state.station_records],
         "runtime_observations": [
             asdict(record) for record in state.runtime_observations

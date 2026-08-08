@@ -29,6 +29,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from l1_character_actor import BoundedCharacterActor, CharacterContext
 from l1_runtime_support import (
     GovernanceError,
     PreflightError,
@@ -71,6 +72,7 @@ class OrionL1Runtime:
         self.state: Optional[L1RunState] = None
         self._rng: Optional[DeterministicReplayRNG] = None
         self._run_root: Optional[Path] = None
+        self._commander_actor = BoundedCharacterActor()
 
     def preflight(self) -> Dict[str, Any]:
         """Validate bootstrap invariants without creating or advancing a run."""
@@ -293,13 +295,34 @@ class OrionL1Runtime:
     def _record_station_delivery(self, message: Dict[str, Any]) -> None:
         state = self._require_state()
         message["status"] = "delivered_to_station"
-        state.station_records.append(
+        station_record = EpistemicRecord(
+            record_id=str(uuid.uuid4()),
+            subject=f"communication:{message['message_id']}",
+            value=self._communication_record_value(message),
+            epistemic_class="station_record",
+            provenance="earth_to_orion_communications_ledger",
+            confidence=1.0,
+            tick=state.manifest.tick,
+        )
+        state.station_records.append(station_record)
+        self._record_direct_character_delivery(message, station_record)
+
+    def _record_direct_character_delivery(
+        self,
+        message: Dict[str, Any],
+        station_record: EpistemicRecord,
+    ) -> None:
+        target = message.get("target")
+        if not isinstance(target, str) or not target:
+            return
+        state = self._require_state()
+        state.character_knowledge.setdefault(target, []).append(
             EpistemicRecord(
                 record_id=str(uuid.uuid4()),
-                subject=f"communication:{message['message_id']}",
-                value=self._communication_record_value(message),
-                epistemic_class="station_record",
-                provenance="earth_to_orion_communications_ledger",
+                subject=station_record.subject,
+                value=copy.deepcopy(station_record.value),
+                epistemic_class="testimony",
+                provenance="direct_communication_delivery",
                 confidence=1.0,
                 tick=state.manifest.tick,
             )
@@ -341,19 +364,99 @@ class OrionL1Runtime:
         for message in list(state.communications):
             if not self._commander_response_is_due(message, replied_to):
                 continue
-            response = self._build_commander_status_response(message)
-            state.communications.append(response)
-            state.character_knowledge.setdefault("CMD_001", []).append(
-                EpistemicRecord(
-                    record_id=str(uuid.uuid4()),
-                    subject=f"communication:{response['message_id']}",
-                    value=response["content"],
-                    epistemic_class="testimony",
-                    provenance="deterministic_status_report_v1",
-                    confidence=1.0,
-                    tick=state.manifest.tick,
-                )
+            decision = self._commander_actor.decide(
+                self._commander_context(message)
             )
+            response = self._build_commander_action_response(message, decision)
+            decision["response_message_id"] = response["message_id"]
+            decision["operational_steps"][-1]["message_id"] = response["message_id"]
+            state.character_actions.append(decision)
+            state.communications.append(response)
+            self._record_character_action_knowledge(decision)
+
+    def _commander_context(self, inbound: Dict[str, Any]) -> CharacterContext:
+        state = self._require_state()
+        return CharacterContext(
+            run_id=state.manifest.run_id,
+            tick=state.manifest.tick,
+            inbound=copy.deepcopy(inbound),
+            station_records=tuple(
+                asdict(item) for item in state.station_records[-8:]
+            ),
+            character_knowledge=tuple(
+                asdict(item)
+                for item in state.character_knowledge.get("CMD_001", [])[-8:]
+            ),
+            recent_events=tuple(copy.deepcopy(state.events[-8:])),
+            prior_actions=tuple(
+                copy.deepcopy(
+                    [
+                        item
+                        for item in state.character_actions
+                        if item.get("actor_id") == "CMD_001"
+                    ][-8:]
+                )
+            ),
+            unresolved_facts=self._commander_unresolved_facts(),
+        )
+
+    def _commander_unresolved_facts(self) -> tuple[str, ...]:
+        state = self._require_state()
+        unresolved = list(
+            state.world_state["orbital_locus"].get("unresolved_parameters", [])
+        )
+        if state.manifest.population.current_human_crew_complement is None:
+            unresolved.append("exact_current_human_crew_complement")
+        return tuple(unresolved)
+
+    def _record_character_action_knowledge(
+        self,
+        decision: Dict[str, Any],
+    ) -> None:
+        state = self._require_state()
+        knowledge = state.character_knowledge.setdefault("CMD_001", [])
+        known_subjects = {item.subject for item in knowledge}
+        station_by_id = {item.record_id: item for item in state.station_records}
+        for item in decision["knowledge_inputs"]:
+            if item.get("scope") != "station_record":
+                continue
+            source = station_by_id.get(item["record_id"])
+            if source is None or source.subject in known_subjects:
+                continue
+            knowledge.append(self._character_review_record(source, decision))
+            known_subjects.add(source.subject)
+        knowledge.append(
+            EpistemicRecord(
+                record_id=str(uuid.uuid4()),
+                subject=f"character_action:{decision['action_id']}",
+                value={
+                    "selected_action": decision["selected_action"],
+                    "rationale": decision["rationale"],
+                    "commitments": copy.deepcopy(decision["commitments"]),
+                    "response_message_id": decision["response_message_id"],
+                },
+                epistemic_class="inference",
+                provenance=decision["policy"],
+                confidence=1.0,
+                tick=state.manifest.tick,
+            )
+        )
+
+    def _character_review_record(
+        self,
+        source: EpistemicRecord,
+        decision: Dict[str, Any],
+    ) -> EpistemicRecord:
+        state = self._require_state()
+        return EpistemicRecord(
+            record_id=str(uuid.uuid4()),
+            subject=source.subject,
+            value=copy.deepcopy(source.value),
+            epistemic_class="station_record",
+            provenance=f"character_review:{decision['action_id']}:{source.provenance}",
+            confidence=source.confidence,
+            tick=state.manifest.tick,
+        )
 
     def _commander_response_is_due(
         self,
@@ -367,30 +470,30 @@ class OrionL1Runtime:
             and message.get("message_id") not in replied_to
         )
 
-    def _build_commander_status_response(
+    def _build_commander_action_response(
         self,
         inbound: Dict[str, Any],
+        decision: Dict[str, Any],
     ) -> Dict[str, Any]:
         state = self._require_state()
-        latest_summary = self._latest_autonomous_event_summary()
-        content = (
-            "Pilot, this is Commander Thorne. Your transmission is received. "
-            f"Current run ledger: Orion is active at tick {state.manifest.tick}. "
-            f"{latest_summary} No emergency event is recorded in the current run "
-            "ledger. The exact Lagrange point and exact current crew complement "
-            "remain unresolved. Station operations continue under standing authority."
+        response_id = str(
+            uuid.uuid5(
+                uuid.NAMESPACE_URL,
+                f"aurora:l1:response:{decision['action_id']}",
+            )
         )
         latency = self.baseline["orbital_locus"]["communications_latency"]
         return {
-            "message_id": str(uuid.uuid4()),
+            "message_id": response_id,
             "reply_to_message_id": inbound["message_id"],
+            "caused_by_action_id": decision["action_id"],
             "tick": state.manifest.tick,
             "direction": "station_to_earth",
             "sender_id": "CMD_001",
             "sender_name": "Commander Alex Thorne",
             "origin": "Orion Station",
             "target": "pilot",
-            "content": content,
+            "content": decision["response_content"],
             "status": "queued",
             "delivery_resolution": latency["delivery_resolution"],
             "modeled_one_way_light_time_seconds": latency[
@@ -399,18 +502,9 @@ class OrionL1Runtime:
             "latency_certainty": latency["certainty"],
             "automatic_l1_action": False,
             "pilot_directed_content": False,
-            "response_policy": "deterministic_status_report_v1",
+            "response_policy": decision["policy"],
             "canon_status": "run_state",
         }
-
-    def _latest_autonomous_event_summary(self) -> str:
-        state = self._require_state()
-        for event in reversed(state.events):
-            if event.get("cause") == "autonomous_world_process":
-                return str(
-                    event.get("summary", "Autonomous event summary unavailable.")
-                )
-        return "No autonomous station event is recorded."
 
     def observe(self, focus: str = "station") -> Dict[str, Any]:
         """Expose instrumentation without advancing or rearranging L1."""
@@ -667,6 +761,100 @@ class OrionL1Runtime:
             raise PreflightError("persisted station cycle minute is out of range")
         manifest.population.validate()
         self._validate_loaded_communications(state)
+        self._validate_loaded_character_actions(state)
+
+    def _validate_loaded_character_actions(self, state: L1RunState) -> None:
+        action_ids = set()
+        response_ids = set()
+        messages = {item["message_id"]: item for item in state.communications}
+        for index, action in enumerate(state.character_actions):
+            prefix = f"persisted character action {index}"
+            action_id = self._require_action_string(action, "action_id", prefix)
+            actor_id = self._require_action_string(action, "actor_id", prefix)
+            trigger_id = self._require_action_string(
+                action, "trigger_message_id", prefix
+            )
+            response_id = self._require_action_string(
+                action, "response_message_id", prefix
+            )
+            self._require_action_string(action, "selected_action", prefix)
+            policy = self._require_action_string(action, "policy", prefix)
+            if action_id in action_ids:
+                raise PreflightError("persisted character actions contain duplicate IDs")
+            if response_id in response_ids:
+                raise PreflightError(
+                    "persisted character actions reuse a response communication"
+                )
+            self._validate_character_action_references(
+                prefix, trigger_id, response_id, messages
+            )
+            self._validate_character_action_links(
+                prefix,
+                action_id,
+                actor_id,
+                policy,
+                trigger_id,
+                response_id,
+                messages,
+            )
+            self._validate_character_action_tick(
+                prefix, action.get("tick"), state.manifest.tick
+            )
+            action_ids.add(action_id)
+            response_ids.add(response_id)
+
+    @staticmethod
+    def _validate_character_action_references(
+        prefix: str,
+        trigger_id: str,
+        response_id: str,
+        messages: Dict[str, Dict[str, Any]],
+    ) -> None:
+        if trigger_id not in messages or response_id not in messages:
+            raise PreflightError(f"{prefix} references an unavailable communication")
+
+    @staticmethod
+    def _validate_character_action_tick(
+        prefix: str,
+        tick: Any,
+        manifest_tick: int,
+    ) -> None:
+        if type(tick) is not int or not 0 <= tick <= manifest_tick:
+            raise PreflightError(f"{prefix} tick is invalid")
+
+    def _validate_character_action_links(
+        self,
+        prefix: str,
+        action_id: str,
+        actor_id: str,
+        policy: str,
+        trigger_id: str,
+        response_id: str,
+        messages: Dict[str, Dict[str, Any]],
+    ) -> None:
+        trigger = messages[trigger_id]
+        response = messages[response_id]
+        links_match = (
+            self._communication_direction(trigger) == "earth_to_orion"
+            and self._communication_direction(response) == "station_to_earth"
+            and response.get("reply_to_message_id") == trigger_id
+            and response.get("caused_by_action_id") == action_id
+            and response.get("sender_id") == actor_id
+            and response.get("response_policy") == policy
+        )
+        if not links_match:
+            raise PreflightError(f"{prefix} communication causality is inconsistent")
+
+    @staticmethod
+    def _require_action_string(
+        action: Dict[str, Any],
+        field: str,
+        prefix: str,
+    ) -> str:
+        value = action.get(field)
+        if not isinstance(value, str) or not value:
+            raise PreflightError(f"{prefix} {field} must be a non-empty string")
+        return value
 
     def _validate_loaded_communications(self, state: L1RunState) -> None:
         message_ids = set()

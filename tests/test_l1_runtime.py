@@ -541,6 +541,26 @@ def test_load_run_rejects_communication_origin_direction_mismatch(
 
 
 @pytest.mark.unit
+def test_load_run_rejects_explicit_invalid_direction_even_with_known_origin(
+    tmp_path: Path,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=42,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["communications"][0]["direction"] = "unsupported"
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="direction is unsupported"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ("direction", "origin", "status"),
     [

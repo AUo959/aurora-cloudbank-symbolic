@@ -294,8 +294,12 @@ class OrionL1Runtime:
         direction = message.get("direction")
         if direction in {"earth_to_orion", "station_to_earth"}:
             return direction
+        if direction is not None:
+            return None
         if message.get("origin") == "Earth":
             return "earth_to_orion"
+        if message.get("origin") == "Orion Station":
+            return "station_to_earth"
         return None
 
     def _record_station_delivery(self, message: Dict[str, Any]) -> None:
@@ -499,7 +503,7 @@ class OrionL1Runtime:
             "tick": state.manifest.tick,
             "direction": "station_to_earth",
             "sender_id": "CMD_001",
-            "sender_name": "Commander Alex Thorne",
+            "sender_name": decision["actor_name"],
             "origin": "Orion Station",
             "target": "pilot",
             "content": decision["response_content"],

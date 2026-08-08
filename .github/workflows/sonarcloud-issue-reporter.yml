@@ -195,9 +195,14 @@ jobs:
           else:
               found = hotspots.get("hotspots", [])
               if found:
-                  lines.append(f"### Security Hotspots to review ({len(found)})")
+                  # Count what is shown, not what was returned. A header that
+                  # says 30 above a list of 25 is the same species of quietly
+                  # wrong output this workflow exists to remove.
+                  shown = found[:25]
+                  suffix = f" — showing {len(shown)} of {len(found)}" if len(shown) < len(found) else ""
+                  lines.append(f"### Security Hotspots to review ({len(found)}){suffix}")
                   lines.append("")
-                  for hotspot in found[:25]:
+                  for hotspot in shown:
                       component = hotspot.get("component", "").split(":")[-1]
                       lines.append(
                           f"- **{hotspot.get('vulnerabilityProbability','?')}** "
@@ -213,9 +218,11 @@ jobs:
           else:
               found = issues.get("issues", [])
               if found:
-                  lines.append(f"### Open issues ({len(found)})")
+                  shown = found[:40]
+                  suffix = f" — showing {len(shown)} of {len(found)}" if len(shown) < len(found) else ""
+                  lines.append(f"### Open issues ({len(found)}){suffix}")
                   lines.append("")
-                  for issue in found[:40]:
+                  for issue in shown:
                       component = issue.get("component", "").split(":")[-1]
                       lines.append(
                           f"- **{issue.get('severity','')}** `{component}` "

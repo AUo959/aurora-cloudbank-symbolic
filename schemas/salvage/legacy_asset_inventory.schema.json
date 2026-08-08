@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/salvage/legacy_asset_inventory.schema.json",
+  "title": "Legacy Asset Inventory Report",
+  "description": "Read-only inventory and proposed-disposition report for legacy Aurora/GUMAS artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_id",
+    "generated_at",
+    "source_root_name",
+    "read_only",
+    "artifacts",
+    "duplicate_groups",
+    "migration_applied"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "report_id": {"type": "string", "pattern": "^inventory:[a-f0-9]{64}$"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "source_root_name": {"type": "string", "minLength": 1},
+    "read_only": {"const": true},
+    "artifacts": {"type": "array", "items": {"$ref": "#/$defs/artifact"}},
+    "duplicate_groups": {"type": "array", "items": {"$ref": "#/$defs/duplicate_group"}},
+    "migration_applied": {"const": false}
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "source_kind",
+        "relative_path",
+        "archive_parent",
+        "size_bytes",
+        "sha256",
+        "media_type",
+        "category",
+        "security_flags",
+        "proposed_disposition"
+      ],
+      "properties": {
+        "artifact_id": {"type": "string", "pattern": "^artifact:[a-f0-9]{24}$"},
+        "source_kind": {"enum": ["filesystem", "archive_member", "archive_notice", "archive_error"]},
+        "relative_path": {"type": "string", "minLength": 1},
+        "archive_parent": {"type": ["string", "null"]},
+        "size_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+        "media_type": {"type": ["string", "null"]},
+        "category": {
+          "enum": [
+            "code",
+            "data",
+            "documentation",
+            "generated_media",
+            "configuration",
+            "archive",
+            "executable",
+            "unknown"
+          ]
+        },
+        "security_flags": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "proposed_disposition": {"enum": ["retain_review", "archive", "review", "quarantine", "blocked"]}
+      }
+    },
+    "duplicate_group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "artifact_ids"],
+      "properties": {
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "artifact_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^artifact:[a-f0-9]{24}$"}
+        }
+      }
+    }
+  }
+}

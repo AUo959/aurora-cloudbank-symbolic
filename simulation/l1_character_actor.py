@@ -173,13 +173,16 @@ class BoundedCharacterActor:
 
     def _profile_evidence(self) -> list[Dict[str, str]]:
         paths = [self.profile_path, *self._authority_paths()]
-        return [
-            {
-                "path": str(path.relative_to(PROJECT_ROOT)),
-                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-            }
-            for path in paths
-        ]
+        evidence = []
+        for path in paths:
+            bounded_path = _bounded_authority_path(str(path))
+            evidence.append(
+                {
+                    "path": str(bounded_path.relative_to(PROJECT_ROOT)),
+                    "sha256": hashlib.sha256(bounded_path.read_bytes()).hexdigest(),
+                }
+            )
+        return evidence
 
     def _authority_paths(self) -> list[Path]:
         authority = self.profile.get("authority")

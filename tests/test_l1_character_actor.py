@@ -253,3 +253,15 @@ def test_actor_fails_closed_when_identity_projection_conflicts(
 
     with pytest.raises(CharacterProfileError, match="conflicts with staff authority"):
         BoundedCharacterActor(drifted)
+
+
+@pytest.mark.unit
+def test_actor_fails_closed_when_profile_evidence_escapes_repository(
+    tmp_path: Path,
+):
+    external_profile = tmp_path / "valid-external-profile.json"
+    external_profile.write_text(PROFILE_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+    actor = BoundedCharacterActor(external_profile)
+
+    with pytest.raises(CharacterProfileError, match="escapes the repository"):
+        actor.decide(_context("Status report, Commander."))

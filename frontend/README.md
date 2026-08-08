@@ -449,14 +449,29 @@ Configured with sensible defaults:
 
 Vite automatically code-splits vendors:
 
+Vite 8 / Rollup 4 dropped the object form of `manualChunks` — it now warns
+"Invalid type: Expected Function but received Object" and silently stops
+chunking — so `vite.config.ts` uses the function form and matches on
+`/node_modules/<name>/`:
+
 ```typescript
-manualChunks: {
-  'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-  'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-  'ui-vendor': ['@radix-ui/...'],
-  'chart-vendor': ['recharts', 'd3'],
+manualChunks(id: string) {
+  if (!id.includes('node_modules')) return undefined;
+
+  const groups: Record<string, string[]> = {
+    'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+    'editor-vendor': ['@monaco-editor/react', 'monaco-editor'],
+    'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+    'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu',
+                  '@radix-ui/react-select', '@radix-ui/react-tabs'],
+    'chart-vendor': ['recharts', 'd3'],
+  };
+  // ...match id against `/node_modules/${pkg}/`
 }
 ```
+
+Only `react-vendor` and `editor-vendor` are emitted today; the other three name
+packages that are installed but not yet imported by anything under `src/`.
 
 ---
 

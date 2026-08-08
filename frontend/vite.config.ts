@@ -45,8 +45,15 @@ export default defineConfig({
         manualChunks(id: string) {
           if (!id.includes('node_modules')) return undefined;
 
+          // Only react-vendor and editor-vendor are emitted today. three-vendor,
+          // ui-vendor and chart-vendor name packages that are installed but not
+          // yet imported by anything under src/ — staged for the visualiser and
+          // component work described in ARCHITECTURE.md and PROJECT_SUMMARY.md.
+          // They are kept so the grouping is already correct when that lands;
+          // recording it here so the empty chunks are not mistaken for a bug.
           const groups: Record<string, string[]> = {
             'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+            'editor-vendor': ['@monaco-editor/react', 'monaco-editor'],
             'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
             'ui-vendor': [
               '@radix-ui/react-dialog',

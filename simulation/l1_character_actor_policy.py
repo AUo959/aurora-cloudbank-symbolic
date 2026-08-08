@@ -39,6 +39,7 @@ class CharacterContextView(Protocol):
     inbound: Mapping[str, Any]
     station_records: Sequence[Mapping[str, Any]]
     character_knowledge: Sequence[Mapping[str, Any]]
+    governed_records: Sequence[Mapping[str, Any]]
 
 
 def classify_intents(content: str) -> list[str]:
@@ -62,8 +63,10 @@ def _contains_any(content: str, phrases: Sequence[str]) -> bool:
 def select_action(
     intents: Sequence[str],
     recent_events: Sequence[Mapping[str, Any]],
+    emergency_state: bool | None = None,
 ) -> str:
-    if "emergency_inquiry" in intents or _has_emergency_event(recent_events):
+    event_is_active = emergency_state is None and _has_emergency_event(recent_events)
+    if "emergency_inquiry" in intents or emergency_state is True or event_is_active:
         return "assess_and_escalate_if_warranted"
     if "station_operations_status" in intents or "welfare_check" in intents:
         return "review_watch_and_report"
@@ -79,8 +82,14 @@ def _has_emergency_event(events: Sequence[Mapping[str, Any]]) -> bool:
 def decision_event(
     selected_action: str,
     events: Sequence[Mapping[str, Any]],
+    emergency_state: bool | None = None,
 ) -> Mapping[str, Any] | None:
     if selected_action == "assess_and_escalate_if_warranted":
+        if emergency_state is not None:
+            return {
+                "kind": "governed_emergency_state",
+                "emergency_active": emergency_state,
+            }
         emergency = next(
             (
                 item
@@ -92,6 +101,18 @@ def decision_event(
         if emergency is not None:
             return emergency
     return events[-1] if events else None
+
+
+def governed_emergency_state(
+    records: Sequence[Mapping[str, Any]],
+) -> bool | None:
+    """Return the latest typed Triplex-governed emergency fact, if one exists."""
+    for record in reversed(records):
+        if record.get("subject") != "emergency_active":
+            continue
+        value = record.get("value")
+        return value if isinstance(value, bool) else None
+    return None
 
 
 def stable_action_id(context: CharacterContextView, selected_action: str) -> str:
@@ -123,7 +144,17 @@ def knowledge_inputs(context: CharacterContextView) -> list[Dict[str, Any]]:
         }
         for item in context.character_knowledge[-8:]
     ]
-    return station + known
+    governed = [
+        {
+            "record_id": item["record_id"],
+            "subject": item["subject"],
+            "provenance": item["provenance"],
+            "tick": item["tick"],
+            "scope": "governed_record",
+        }
+        for item in context.governed_records[-8:]
+    ]
+    return station + known + governed
 
 
 def duty_drivers(selected_action: str) -> list[str]:
@@ -229,11 +260,16 @@ def operational_steps(
 def _emergency_assessment_step(
     latest_event: Mapping[str, Any] | None,
 ) -> Dict[str, Any]:
-    emergency = bool(latest_event and "emergency" in str(latest_event.get("kind", "")))
+    emergency = _event_emergency_state(latest_event)
+    result = {
+        True: "recorded_emergency",
+        False: "recorded_no_emergency",
+        None: "emergency_status_unconfirmed",
+    }[emergency]
     return {
         "kind": "assess_command_exception",
         "status": "completed",
-        "result": "recorded_emergency" if emergency else "no_recorded_emergency",
+        "result": result,
     }
 
 
@@ -351,22 +387,41 @@ def _commitment_sentence(decision: Mapping[str, Any]) -> str:
             "I'm keeping the remaining work under command review and will relay any "
             "material change."
         )
-    return "Nothing in the command record requires emergency action."
+    return "I am maintaining the command watch and will relay any material change."
 
 
 def _render_emergency_assessment(
     latest_event: Mapping[str, Any] | None,
     opening: str,
 ) -> str:
-    if latest_event and "emergency" in str(latest_event.get("kind", "")):
+    emergency = _event_emergency_state(latest_event)
+    if emergency is True:
         return (
             f"{opening} An emergency has been recorded. The response is with Command "
             "and Ethics now. I will report the disposition when it is confirmed."
         )
+    if emergency is False:
+        return (
+            f"{opening} The governed station record shows no active emergency. "
+            "If that changes, you'll hear it from Command."
+        )
     return (
-        f"{opening} There is no emergency in the current command record. If that "
-        "changes, you'll hear it from Command."
+        f"{opening} I cannot confirm the current emergency status yet. I am checking "
+        "with Command and will report the confirmed disposition."
     )
+
+
+def _event_emergency_state(
+    event: Mapping[str, Any] | None,
+) -> bool | None:
+    if event is None:
+        return None
+    active = event.get("emergency_active")
+    if isinstance(active, bool):
+        return active
+    if "emergency" in str(event.get("kind", "")):
+        return True
+    return None
 
 
 def _render_authority_response(opening: str) -> str:

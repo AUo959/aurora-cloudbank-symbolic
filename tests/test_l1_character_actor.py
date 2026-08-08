@@ -143,7 +143,7 @@ def test_message_meaning_changes_the_selected_character_action():
         if item["disposition"] == "selected"
     ] == ["acknowledge_and_open_channel"]
     assert emergency["selected_action"] == "assess_and_escalate_if_warranted"
-    assert "no emergency in the current command record" in emergency[
+    assert "cannot confirm the current emergency status" in emergency[
         "response_content"
     ].casefold()
 
@@ -171,6 +171,32 @@ def test_recorded_emergency_remains_decision_relevant_after_a_later_event():
         if item["kind"] == "assess_command_exception"
     )
     assert assessment["result"] == "recorded_emergency"
+
+
+@pytest.mark.unit
+def test_governed_emergency_overrides_later_routine_event_for_status_report():
+    context = replace(
+        _context("Commander, report station status."),
+        governed_records=(
+            {
+                "record_id": "record-emergency",
+                "subject": "emergency_active",
+                "value": True,
+                "provenance": "triplex:test:unit-test",
+                "tick": 6,
+            },
+        ),
+    )
+
+    action = BoundedCharacterActor().decide(context)
+
+    assert action["selected_action"] == "assess_and_escalate_if_warranted"
+    assert "An emergency has been recorded" in action["response_content"]
+    assert not any(
+        phrase in action["response_content"].casefold()
+        for phrase in ("no emergency", "nothing in the command record")
+    )
+    assert action["knowledge_inputs"][-1]["scope"] == "governed_record"
 
 
 @pytest.mark.unit

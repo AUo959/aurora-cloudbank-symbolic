@@ -25,6 +25,7 @@ from l1_character_actor_policy import (
     render_response,
     select_action,
     stable_action_id,
+    governed_emergency_state,
 )
 
 
@@ -44,6 +45,7 @@ class CharacterContext:
     recent_events: Sequence[Mapping[str, Any]]
     prior_actions: Sequence[Mapping[str, Any]]
     unresolved_facts: Sequence[str]
+    governed_records: Sequence[Mapping[str, Any]] = ()
 
 
 class CharacterProfileError(RuntimeError):
@@ -62,8 +64,11 @@ class BoundedCharacterActor:
     def decide(self, context: CharacterContext) -> Dict[str, Any]:
         """Return a deterministic character action and its causal receipt."""
         intents = classify_intents(str(context.inbound["content"]))
-        selected_action = select_action(intents, context.recent_events)
-        relevant_event = decision_event(selected_action, context.recent_events)
+        emergency_state = governed_emergency_state(context.governed_records)
+        selected_action = select_action(intents, context.recent_events, emergency_state)
+        relevant_event = decision_event(
+            selected_action, context.recent_events, emergency_state
+        )
         prior_commitments = active_commitments(context.prior_actions)
         action_id = stable_action_id(context, selected_action)
         decision = {

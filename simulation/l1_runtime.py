@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from l1_character_actor import BoundedCharacterActor, CharacterContext
+from l1_character_actor_policy import POLICY_VERSION
 from l1_runtime_support import (
     GovernanceError,
     PreflightError,
@@ -120,6 +121,9 @@ class OrionL1Runtime:
         run_root: Optional[Path] = None,
     ) -> L1RunState:
         """Restore a persisted run and its deterministic replay position."""
+        report = self.preflight()
+        if not report["ready"]:
+            raise PreflightError("; ".join(report["blockers"]))
         normalized_run_id = self._validated_run_id(run_id)
         resolved_run_root = self._resolve_run_root(run_root or DEFAULT_RUN_ROOT)
         state_path = resolved_run_root / normalized_run_id / "state.json"
@@ -265,12 +269,14 @@ class OrionL1Runtime:
         for message in state.communications:
             if not self._communication_is_due(message, state.manifest.tick):
                 continue
+            direction = self._communication_direction(message)
+            if direction is None:
+                raise RuntimeError("queued communication direction is unsupported")
             message["delivered_tick"] = state.manifest.tick
             message["latency"] = copy.deepcopy(latency)
-            direction = self._communication_direction(message)
             if direction == "earth_to_orion":
                 self._record_station_delivery(message)
-            elif direction == "station_to_earth":
+            else:
                 self._record_earth_delivery(message)
 
     @staticmethod
@@ -398,6 +404,9 @@ class OrionL1Runtime:
                 )
             ),
             unresolved_facts=self._commander_unresolved_facts(),
+            governed_records=tuple(
+                asdict(item) for item in state.governed_records[-8:]
+            ),
         )
 
     def _commander_unresolved_facts(self) -> tuple[str, ...]:
@@ -760,8 +769,37 @@ class OrionL1Runtime:
         ):
             raise PreflightError("persisted station cycle minute is out of range")
         manifest.population.validate()
+        self._validate_loaded_world_state(state)
+        self._validate_replay_position(state)
         self._validate_loaded_communications(state)
         self._validate_loaded_character_actions(state)
+
+    @staticmethod
+    def _validate_loaded_world_state(state: L1RunState) -> None:
+        world_state = state.world_state
+        locus = world_state.get("orbital_locus")
+        pilot = world_state.get("pilot")
+        if not isinstance(world_state.get("station"), str):
+            raise PreflightError("persisted world state lacks its station identity")
+        if not isinstance(locus, dict) or not isinstance(
+            locus.get("unresolved_parameters"), list
+        ):
+            raise PreflightError("persisted world state lacks its orbital locus")
+        if not isinstance(pilot, dict) or (
+            pilot.get("residency") != "Earth" or pilot.get("l1_entity") is not False
+        ):
+            raise PreflightError("persisted world state violates the Pilot boundary")
+
+    @staticmethod
+    def _validate_replay_position(state: L1RunState) -> None:
+        autonomous_events = sum(
+            event.get("cause") == "autonomous_world_process"
+            for event in state.events
+        )
+        if autonomous_events != state.manifest.tick:
+            raise PreflightError(
+                "persisted autonomous event ledger does not match manifest tick"
+            )
 
     def _validate_loaded_character_actions(self, state: L1RunState) -> None:
         action_ids = set()
@@ -779,6 +817,10 @@ class OrionL1Runtime:
             )
             self._require_action_string(action, "selected_action", prefix)
             policy = self._require_action_string(action, "policy", prefix)
+            if actor_id != "CMD_001" or policy != POLICY_VERSION:
+                raise PreflightError(
+                    f"{prefix} actor or policy is unsupported"
+                )
             if action_id in action_ids:
                 raise PreflightError("persisted character actions contain duplicate IDs")
             if response_id in response_ids:
@@ -894,7 +936,8 @@ class OrionL1Runtime:
         self._require_message_string(message, "origin", prefix)
         if type(message.get("tick")) is not int:
             raise PreflightError(f"{prefix} tick must be an integer")
-        if message.get("status") not in {
+        status = message.get("status")
+        if status not in {
             "queued",
             "delivered_to_station",
             "delivered_to_earth",
@@ -903,6 +946,12 @@ class OrionL1Runtime:
         direction = self._communication_direction(message)
         if direction is None:
             raise PreflightError(f"{prefix} direction is unsupported")
+        allowed_statuses = {
+            "earth_to_orion": {"queued", "delivered_to_station"},
+            "station_to_earth": {"queued", "delivered_to_earth"},
+        }[direction]
+        if status not in allowed_statuses:
+            raise PreflightError(f"{prefix} status contradicts direction")
         expected_origin = {
             "earth_to_orion": "Earth",
             "station_to_earth": "Orion Station",

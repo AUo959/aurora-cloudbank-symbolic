@@ -41,8 +41,8 @@ def build_sensor_snapshot(state: L1RunState) -> Dict[str, Any]:
             "astronomical",
         ],
         "unavailable_channel_policy": (
-            "unbound physical channels remain unavailable; default sensor values "
-            "are excluded from this live snapshot"
+            "unbound physical channels remain unavailable; provider metadata "
+            "identifies any default-filled metrics in this snapshot"
         ),
     }
 

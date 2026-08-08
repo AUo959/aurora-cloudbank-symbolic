@@ -19,7 +19,7 @@ import {
   WifiOff,
   Zap,
 } from 'lucide-react';
-import { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // Error Boundary Component for resilient rendering
@@ -80,6 +80,18 @@ interface DataFreshnessProps {
 }
 
 function DataFreshnessIndicator({ dataUpdatedAt, isStale, isError, refetch }: DataFreshnessProps) {
+  // The relative age is derived from a clock held in state and ticked by an
+  // effect, rather than read from Date.now() during render. Reading the clock
+  // while rendering is impure — the same render can produce different output —
+  // and it also meant "Updated Xs ago" only changed when the component happened
+  // to re-render for some other reason, so the number shown was usually wrong.
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   if (isError) {
     return (
       <div className="flex items-center space-x-2 text-xs text-red-400" role="status" aria-live="polite">
@@ -107,7 +119,7 @@ function DataFreshnessIndicator({ dataUpdatedAt, isStale, isError, refetch }: Da
   }
 
   if (dataUpdatedAt) {
-    const secondsAgo = Math.floor((Date.now() - dataUpdatedAt) / 1000);
+    const secondsAgo = Math.floor((now - dataUpdatedAt) / 1000);
     return (
       <div className="flex items-center space-x-1 text-xs text-gray-500" role="status">
         <Clock className="h-3 w-3" aria-hidden="true" />

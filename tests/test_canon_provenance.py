@@ -1,4 +1,4 @@
-"""Machine-checkable provenance for CloudBank's CanonRec mirror."""
+"""Machine-checkable provenance for CloudBank's CanonRec mirrors/projections."""
 
 from __future__ import annotations
 
@@ -43,17 +43,26 @@ class TestCanonProvenance(unittest.TestCase):
         self.assertEqual(mirror["sha256"], receipt["authority"]["source_sha256"])
         self.assertFalse(mirror["requires_canonrec_checkout_at_runtime"])
 
-    def test_unreconciled_staff_registry_drift_is_explicit(self) -> None:
+    def test_staff_registry_authority_boundary_is_resolved(self) -> None:
         receipt = load_provenance()
         staff = next(
             item
-            for item in receipt["unreconciled_surfaces"]
+            for item in receipt["resolved_surfaces"]
             if item["name"] == "orion_station_staff_registry"
         )
 
-        self.assertEqual(staff["status"], "owner_authority_decision_required")
+        self.assertEqual(staff["status"], "resolved_authority_boundary")
+        self.assertEqual(staff["authority_repository"], "AUo959/CanonRec")
+        self.assertRegex(staff["authority_revision"], r"\A[0-9a-f]{40}\Z")
+        self.assertEqual(staff["cloudbank_role"], "runtime_projection_non_authoritative")
         self.assertEqual(
             sha256_file(PROJECT_ROOT / staff["cloudbank_path"]),
             staff["cloudbank_sha256"],
         )
         self.assertNotEqual(staff["canonrec_sha256"], staff["cloudbank_sha256"])
+        self.assertIn("CanonRec controls canon authority", staff["conflict_policy"])
+
+    def test_no_surface_remains_blocked_on_owner_staff_authority_decision(self) -> None:
+        receipt = load_provenance()
+
+        self.assertEqual(receipt["unreconciled_surfaces"], [])

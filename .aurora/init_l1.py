@@ -55,11 +55,6 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Explicit CloudBank 40-character git SHA; otherwise resolve current checkout HEAD",
     )
-    init_parser.add_argument(
-        "--canonrec-revision",
-        default=None,
-        help="Optional CanonRec 40-character git SHA override",
-    )
     return parser
 
 
@@ -78,7 +73,6 @@ def main() -> int:
         )
         state = runtime.init_run(
             cloudbank_revision=cloudbank_revision,
-            canonrec_revision=args.canonrec_revision,
             seed=args.seed,
             run_root=args.run_root,
             persist=True,

@@ -170,6 +170,24 @@ updates:
     commit-message:
       prefix: "deps"
     labels: ["dependencies", "frontend"]
+    # typescript majors are held back because the linter cannot follow yet.
+    # @typescript-eslint/eslint-plugin declares
+    # "peer typescript >=4.8.4 <6.1.0", and that range is unchanged as of its
+    # latest release (8.66.0) -- there is no published version that accepts
+    # TypeScript 7. So a typescript@^7 bump does not merely risk type errors,
+    # it makes `npm install` fail outright with ERESOLVE, which took the whole
+    # frontend-major group down with it in #1443: React 19, R3F 9, zod 4 and
+    # 20 other majors could not even be evaluated because the tree would not
+    # install.
+    #
+    # Holding typescript here lets the rest of the group be reviewed on a
+    # build that actually runs. Minor and patch releases within the current
+    # major still flow normally. Lift this once typescript-eslint ships a
+    # release whose peer range admits TypeScript 7, and bump the two
+    # @typescript-eslint/* packages in the same PR.
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       frontend-patch-minor:
         patterns: ["*"]

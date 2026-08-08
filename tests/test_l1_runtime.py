@@ -37,6 +37,14 @@ def test_preflight_is_ready_and_does_not_advance_or_create_run():
     assert report["blockers"] == []
     assert report["tick"] == 0
     assert report["run_created"] is False
+    assert report["orbital_locus"]["siting_class"] == "lagrange_point"
+    assert report["orbital_locus"]["exact_point_resolved"] is False
+    assert (
+        report["orbital_locus"]["communications_latency"][
+            "modeled_one_way_light_time_seconds"
+        ]
+        == 5
+    )
     assert runtime.state is None
 
 
@@ -58,8 +66,11 @@ def test_init_creates_tick_zero_run_outside_repo(tmp_path: Path):
         "residency": "Earth",
         "l1_entity": False,
     }
-    assert "orion_orbital_locus" in state.manifest.active_quarantines
+    assert "orion_orbital_locus" not in state.manifest.active_quarantines
+    assert "orion_exact_lagrange_point" in state.manifest.active_quarantines
     assert "current_crew_81" in state.manifest.active_quarantines
+    assert state.world_state["orbital_locus"]["siting_class"] == "lagrange_point"
+    assert state.world_state["orbital_locus"]["certainty"] == "CANON"
     persisted = tmp_path / state.manifest.run_id / "state.json"
     assert persisted.is_file()
     payload = json.loads(persisted.read_text(encoding="utf-8"))
@@ -148,6 +159,69 @@ def test_explicit_communication_is_queued_without_automatic_l1_action(tmp_path: 
     assert message["sender_id"] == "pilot"
     assert message["automatic_l1_action"] is False
     assert message["status"] == "queued"
+    assert message["modeled_one_way_light_time_seconds"] == 5
+    assert message["latency_certainty"] == "APPROX"
+
+
+@pytest.mark.unit
+def test_communication_requires_positive_advancement_before_delivery(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=8,
+        run_root=tmp_path,
+    )
+
+    result = runtime.send_communication(
+        "Cmdr Thorne, this is Pilot - Earth side.",
+        target="CMD_001",
+    )
+    message = result["message"]
+
+    assert message["status"] == "queued"
+    assert runtime.state is not None
+    assert runtime.state.manifest.tick == 0
+    assert runtime.state.station_records == []
+
+    runtime.advance(elapsed_minutes=1)
+
+    assert message["status"] == "delivered_to_station"
+    assert message["delivered_tick"] == 1
+    assert message["latency"]["exact_value_known"] is False
+    delivery_record = runtime.state.station_records[-1]
+    assert delivery_record.subject == f"communication:{message['message_id']}"
+    assert delivery_record.provenance == "earth_to_orion_communications_ledger"
+    assert delivery_record.value["target"] == "CMD_001"
+
+
+@pytest.mark.unit
+def test_locus_preflight_rejects_broad_unknown_status(tmp_path: Path):
+    baseline = _baseline_payload()
+    baseline["orbital_locus"]["status"] = "quarantined_conflict"
+    path = tmp_path / "stale-locus-baseline.json"
+    path.write_text(json.dumps(baseline), encoding="utf-8")
+
+    report = OrionL1Runtime(baseline_path=path).preflight()
+
+    assert report["ready"] is False
+    assert "Lagrange-point siting class is not resolved" in report["blockers"]
+
+
+@pytest.mark.unit
+def test_locus_preflight_rejects_zero_latency_model(tmp_path: Path):
+    baseline = _baseline_payload()
+    baseline["orbital_locus"]["communications_latency"][
+        "modeled_one_way_light_time_seconds"
+    ] = 0
+    path = tmp_path / "zero-latency-baseline.json"
+    path.write_text(json.dumps(baseline), encoding="utf-8")
+
+    report = OrionL1Runtime(baseline_path=path).preflight()
+
+    assert report["ready"] is False
+    assert (
+        "communications latency model must be a positive integer" in report["blockers"]
+    )
 
 
 @pytest.mark.unit

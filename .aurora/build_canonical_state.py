@@ -3,8 +3,8 @@
 
 This file used to rebuild ``.aurora/SIMULATION_STATE.json`` by combining a v1
 backup with historical infrastructure fragments. That process hard-coded
-physical and population claims that are now explicitly disputed or semantically
-untyped, including Earth-Moon L4 and the aggregate value ``81``.
+physical and population claims without current authority, including Earth-Moon
+L4 as an exact point and the semantically untyped aggregate value ``81``.
 
 It is retained at its historical path so old automation fails safely and points
 to the governed L1 lifecycle instead of silently rewriting tracked state.

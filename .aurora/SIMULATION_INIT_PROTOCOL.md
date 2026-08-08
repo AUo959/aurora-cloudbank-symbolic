@@ -1,6 +1,6 @@
 # Aurora CloudBank — Orion L1 INIT Protocol
 
-**Version:** 2.0.0  
+**Version:** 2.1.0
 **Last Updated:** 2026-08-08  
 **Purpose:** Governed, reproducible initialization of a live Orion Station L1 run
 
@@ -43,8 +43,9 @@ L1 genesis authority.
    records, runtime observation, and Pilot knowledge are not interchangeable.
 8. **Run state is not primary canon.** Runtime-derived facts remain run-scoped
    unless separately reviewed and promoted.
-9. **Known canon conflicts are quarantined.** Disputed data may not drive
-   causality merely because it appears in an older state file.
+9. **Resolved canon is projected precisely.** Orion's Lagrange-point siting is
+   causal-safe; only the exact point/system and exact derived parameters remain
+   quarantined.
 10. **Actionable exceptional changes fail closed.** A complete Triplex receipt
     is required before `simulation/l1_runtime.py` applies a governed action.
 11. **Normal runtime persistence stays outside the repository.** Ordinary L1
@@ -67,7 +68,8 @@ Preflight validates, without creating a run:
 - Pilot is Earth-side and non-embodied;
 - the false `36th named human` claim is retired;
 - ambiguous historical population counters are typed/quarantined;
-- the orbital-locus conflict is quarantined from causal use;
+- CanonRec's Lagrange-point siting ruling is active;
+- exact-point and exact-light-time uncertainty remains narrowly quarantined;
 - `.aurora/SIMULATION_STATE.json` is not genesis authority;
 - `simulation/orion_station_simulation_v2.py` is the canonical Phase-1
   benchmark component;
@@ -166,6 +168,12 @@ A Pilot message:
   to Orion's institutional circumstances and authority;
 - grants no implied rank or command authority to the sender.
 
+The runtime uses CanonRec's provenance-labeled approximate, nonzero one-way
+latency model. A queued message is not delivered at the same tick; it becomes a
+station record only after a positive advancement window. This models elapsed
+time without pretending the unresolved exact range or exact light-time is
+known.
+
 Ambiguous text must not silently become transmitted speech.
 
 ---
@@ -192,25 +200,22 @@ See `config/l1_runtime_baseline.json` and issue #1454/#1455 provenance.
 
 ---
 
-## Orbital-locus quarantine
+## Lagrange-point siting and exact-point quarantine
 
-Two historical location claims remain in the repository. Until canon
-reconciliation completes, the live runtime may use only:
+CanonRec's owner ruling resolves the current siting class:
 
-> **Spaceborne and remote from Earth; exact orbital locus unavailable for causal use.**
+> **Orion Station is stationed at a Lagrange point in real space.**
 
-Do not derive from either disputed location claim:
+The historical `38,600 km` datum is STAGING and is not current siting
+authority. `Earth-Moon L4` remains a historical named candidate, not exact
+current canon. Issue #1456 remains open for the narrower question of the exact
+libration point and primary-body system.
 
-- communications light-time;
-- orbital sunrise/sunset;
-- radiation environment;
-- transfer windows;
-- Earth visibility;
-- docking/navigation trajectories;
-- gravity/orbital mechanics.
-
-This quarantine allows a safe INIT while preserving the unresolved historical
-record for #1456.
+The runtime may therefore use Lagrange-point siting and a provenance-labeled
+approximate nonzero communications latency. It must not claim exact
+communications light-time, orbital lighting, radiation environment, transfer
+windows, Earth visibility, docking/navigation trajectories, or orbital
+mechanics until the exact point is reconciled.
 
 ---
 
@@ -266,7 +271,9 @@ Before issuing INIT:
 - [ ] Pilot is Earth-side and non-embodied
 - [ ] CanonRec authority boundary is explicit
 - [ ] false 36th-person claim is inactive
-- [ ] disputed orbital data is quarantined
+- [ ] Lagrange-point siting authority is active
+- [ ] exact point/system uncertainty is narrowly quarantined
+- [ ] communications require a positive advancement window
 - [ ] legacy state is non-genesis
 - [ ] canonical Phase-1 benchmark is v2
 - [ ] Triplex fail-closed policy is present

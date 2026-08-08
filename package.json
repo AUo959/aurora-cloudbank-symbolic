@@ -65,18 +65,18 @@
     "jest": "^30.4.2",
     "markdownlint-cli": "^0.49.1",
     "prettier": "^3.9.6",
-    "terser": "^5.49.0",
-    "tsx": "^4.23.5",
+    "terser": "^5.49.2",
+    "tsx": "^4.23.7",
     "typescript": "^7.0.2"
   },
   "dependencies": {
     "babel-jest": "^30.2.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.6.1",
+    "express-rate-limit": "^8.6.2",
     "helmet": "^8.3.0",
     "socket.io": "^4.7.0",
-    "ws": "^8.21.1"
+    "ws": "^8.21.2"
   },
   "engines": {
     "node": "22.x",

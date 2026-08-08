@@ -100,16 +100,35 @@ class PopulationSnapshot:
 
     @classmethod
     def from_baseline(cls, baseline: Dict[str, Any]) -> "PopulationSnapshot":
-        payload = baseline["population"]
+        payload = baseline.get("population")
+        if not isinstance(payload, dict):
+            raise ValueError("population must be a JSON object")
+
         snapshot = cls(
-            crew_capacity=payload.get("crew_capacity"),
-            current_human_crew_complement=payload.get("current_human_crew_complement"),
-            identified_human_records=int(payload["identified_human_records"]),
-            persona_resolved_humans=payload.get("persona_resolved_humans"),
-            missing_named_human_claim=bool(payload["missing_named_human_claim"]),
-            system_entities=dict(payload.get("system_entities", {})),
-            historical_aggregate_claims=dict(
-                payload.get("historical_aggregate_claims", {})
+            crew_capacity=_optional_int(payload.get("crew_capacity"), "crew_capacity"),
+            current_human_crew_complement=_optional_int(
+                payload.get("current_human_crew_complement"),
+                "current_human_crew_complement",
+            ),
+            identified_human_records=_required_int(
+                payload.get("identified_human_records"),
+                "identified_human_records",
+            ),
+            persona_resolved_humans=_optional_int(
+                payload.get("persona_resolved_humans"),
+                "persona_resolved_humans",
+            ),
+            missing_named_human_claim=_required_bool(
+                payload.get("missing_named_human_claim"),
+                "missing_named_human_claim",
+            ),
+            system_entities=_int_mapping(
+                payload.get("system_entities"),
+                "system_entities",
+            ),
+            historical_aggregate_claims=_string_mapping(
+                payload.get("historical_aggregate_claims", {}),
+                "historical_aggregate_claims",
             ),
         )
         snapshot.validate()
@@ -233,7 +252,7 @@ class OrionL1Runtime:
 
         try:
             provenance = _read_json(CANON_PROVENANCE_PATH)
-        except (OSError, ValueError, json.JSONDecodeError):
+        except (OSError, ValueError):
             blockers.append("canon provenance receipt is unavailable or invalid")
             return
 
@@ -346,7 +365,7 @@ class OrionL1Runtime:
             canon_status="run_state",
             active_quarantines=[
                 "orion_orbital_locus",
-                "historical_current_crew_81",
+                "current_crew_81",
             ],
             population=self.population,
         )
@@ -638,7 +657,9 @@ class OrionL1Runtime:
         """Resolve a checked-out git SHA without executing a subprocess."""
         git_dir = project_root / ".git"
         if not git_dir.is_dir():
-            raise PreflightError("unable to pin CloudBank git revision: .git directory missing")
+            raise PreflightError(
+                "unable to pin CloudBank git revision: .git directory missing"
+            )
         head_path = git_dir / "HEAD"
         try:
             head = head_path.read_text(encoding="utf-8").strip()
@@ -755,6 +776,50 @@ def _read_json(path: Path) -> Dict[str, Any]:
     return payload
 
 
+def _required_int(value: Any, name: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{name} must be an integer")
+    return value
+
+
+def _optional_int(value: Any, name: str) -> Optional[int]:
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{name} must be an integer or null")
+    return value
+
+
+def _required_bool(value: Any, name: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{name} must be a boolean")
+    return value
+
+
+def _int_mapping(value: Any, name: str) -> Dict[str, int]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{name} must be a JSON object")
+    result: Dict[str, int] = {}
+    for key, item in value.items():
+        if not isinstance(key, str) or not key:
+            raise ValueError(f"{name} keys must be non-empty strings")
+        result[key] = _required_int(item, f"{name}.{key}")
+    return result
+
+
+def _string_mapping(value: Any, name: str) -> Dict[str, str]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{name} must be a JSON object")
+    result: Dict[str, str] = {}
+    for key, item in value.items():
+        if not isinstance(key, str) or not key:
+            raise ValueError(f"{name} keys must be non-empty strings")
+        if not isinstance(item, str):
+            raise ValueError(f"{name}.{key} must be a string")
+        result[key] = item
+    return result
+
+
 def _safe_git_ref(ref_name: str) -> bool:
     if not ref_name.startswith("refs/"):
         return False
@@ -764,7 +829,9 @@ def _safe_git_ref(ref_name: str) -> bool:
 
 
 def _is_git_sha(value: str) -> bool:
-    return len(value) == 40 and all(char in "0123456789abcdefABCDEF" for char in value)
+    return len(value) == 40 and all(
+        char in "0123456789abcdefABCDEF" for char in value
+    )
 
 
 def _utcnow() -> str:

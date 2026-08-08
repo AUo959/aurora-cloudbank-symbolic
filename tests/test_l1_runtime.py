@@ -970,6 +970,42 @@ def test_triplex_emergency_fact_governs_later_commander_status_response(
 
 
 @pytest.mark.unit
+def test_commander_context_orders_governed_subjects_by_latest_record(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=11,
+        run_root=tmp_path,
+    )
+
+    def apply(subject: str, value: object, suffix: str) -> None:
+        runtime.apply_governed_event(
+            subject=subject,
+            value=value,
+            receipt=GovernanceReceipt(
+                l3_glyph_arbitration=True,
+                continuity_and_relay_verification=True,
+                l1_human_consent=True,
+                receipt_id=f"triplex-recency-{suffix}",
+                provenance="unit-test",
+            ),
+        )
+
+    apply("updated_subject", "old", "old")
+    for index in range(8):
+        apply(f"intervening_subject_{index}", index, str(index))
+    apply("updated_subject", "current", "current")
+
+    context = runtime._commander_governed_records()
+
+    assert [item["subject"] for item in context][-1] == "updated_subject"
+    assert context[-1]["value"] == "current"
+    assert "intervening_subject_0" not in {
+        item["subject"] for item in context
+    }
+
+
+@pytest.mark.unit
 def test_run_persistence_rejects_repository_paths():
     runtime = OrionL1Runtime()
 

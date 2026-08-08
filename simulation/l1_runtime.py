@@ -414,9 +414,10 @@ class OrionL1Runtime:
     def _commander_governed_records(self) -> tuple[Dict[str, Any], ...]:
         """Bound actor context while retaining the current emergency fact."""
         state = self._require_state()
-        latest_by_subject = {
-            record.subject: record for record in state.governed_records
-        }
+        latest_by_subject = {}
+        for record in state.governed_records:
+            latest_by_subject.pop(record.subject, None)
+            latest_by_subject[record.subject] = record
         emergency = latest_by_subject.pop("emergency_active", None)
         limit = 7 if emergency is not None else 8
         records = list(latest_by_subject.values())[-limit:]
@@ -913,14 +914,20 @@ class OrionL1Runtime:
     ) -> None:
         trigger = messages[trigger_id]
         response = messages[response_id]
+        expected_response_fields = {
+            "reply_to_message_id": trigger_id,
+            "caused_by_action_id": action_id,
+            "sender_id": actor_id,
+            "response_policy": policy,
+            "content": response_content,
+        }
         links_match = (
             self._communication_direction(trigger) == "earth_to_orion"
             and self._communication_direction(response) == "station_to_earth"
-            and response.get("reply_to_message_id") == trigger_id
-            and response.get("caused_by_action_id") == action_id
-            and response.get("sender_id") == actor_id
-            and response.get("response_policy") == policy
-            and response.get("content") == response_content
+            and all(
+                response.get(field) == expected
+                for field, expected in expected_response_fields.items()
+            )
         )
         if not links_match:
             raise PreflightError(f"{prefix} communication causality is inconsistent")

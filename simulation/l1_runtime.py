@@ -833,9 +833,7 @@ class OrionL1Runtime:
             )
             self._require_action_string(action, "selected_action", prefix)
             policy = self._require_action_string(action, "policy", prefix)
-            response_content = self._require_action_string(
-                action, "response_content", prefix
-            )
+            self._require_action_string(action, "response_content", prefix)
             if actor_id != "CMD_001" or policy != POLICY_VERSION:
                 raise PreflightError(
                     f"{prefix} actor or policy is unsupported"
@@ -851,12 +849,7 @@ class OrionL1Runtime:
             )
             self._validate_character_action_links(
                 prefix,
-                action_id,
-                actor_id,
-                policy,
-                trigger_id,
-                response_id,
-                response_content,
+                action,
                 messages,
             )
             self._validate_character_action_tick(
@@ -904,14 +897,14 @@ class OrionL1Runtime:
     def _validate_character_action_links(
         self,
         prefix: str,
-        action_id: str,
-        actor_id: str,
-        policy: str,
-        trigger_id: str,
-        response_id: str,
-        response_content: str,
+        action: Dict[str, Any],
         messages: Dict[str, Dict[str, Any]],
     ) -> None:
+        action_id = action["action_id"]
+        actor_id = action["actor_id"]
+        policy = action["policy"]
+        trigger_id = action["trigger_message_id"]
+        response_id = action["response_message_id"]
         trigger = messages[trigger_id]
         response = messages[response_id]
         expected_response_fields = {
@@ -919,7 +912,7 @@ class OrionL1Runtime:
             "caused_by_action_id": action_id,
             "sender_id": actor_id,
             "response_policy": policy,
-            "content": response_content,
+            "content": action["response_content"],
         }
         links_match = (
             self._communication_direction(trigger) == "earth_to_orion"

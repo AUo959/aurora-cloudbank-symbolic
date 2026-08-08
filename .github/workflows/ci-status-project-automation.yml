@@ -49,8 +49,13 @@ jobs:
             // counting them would pin every PR to `ci: pending` forever.
             const SELF = new Set(['Display CI Status on Project Cards']);
 
+            // `ci: passed` is asserted from an allow-list, never by falling
+            // through. A deny-list would mean any conclusion GitHub adds later,
+            // or any this file forgot, silently reads as green -- which is the
+            // shape of the bug this workflow exists to fix.
             const FAILING = new Set([
               'failure', 'cancelled', 'timed_out', 'action_required',
+              'startup_failure',
             ]);
             const PASSING = new Set(['success', 'skipped', 'neutral']);
 
@@ -85,13 +90,25 @@ jobs:
             const unfinished = relevant.filter(
               c => c.status !== 'completed' || c.conclusion === null
             );
+            // Completed, not failing, but not a conclusion we recognise as
+            // passing either -- e.g. `stale`, or whatever GitHub adds next.
+            // Deliberately not treated as green.
+            const unknown = relevant.filter(
+              c => c.status === 'completed' &&
+                   c.conclusion !== null &&
+                   !FAILING.has(c.conclusion) &&
+                   !PASSING.has(c.conclusion)
+            );
 
             // Failure wins over pending: a PR with one red check and three still
-            // running is not "pending", it already needs attention.
+            // running is not "pending", it already needs attention. Unknown
+            // conclusions hold at pending rather than resolving either way --
+            // "I cannot tell" is the honest answer and it does not read as a
+            // merge signal.
             let statusLabel;
             if (failed.length > 0) {
               statusLabel = 'ci: failed';
-            } else if (relevant.length === 0 || unfinished.length > 0) {
+            } else if (relevant.length === 0 || unfinished.length > 0 || unknown.length > 0) {
               statusLabel = 'ci: pending';
             } else {
               statusLabel = 'ci: passed';
@@ -99,10 +116,17 @@ jobs:
 
             core.info(
               `PR #${prNumber} @ ${sha.slice(0, 7)}: ${relevant.length} checks, ` +
-              `${failed.length} failed, ${unfinished.length} unfinished -> ${statusLabel}`
+              `${failed.length} failed, ${unfinished.length} unfinished, ` +
+              `${unknown.length} unknown -> ${statusLabel}`
             );
             if (failed.length > 0) {
               core.info(`Failing: ${failed.map(c => c.name).join(', ')}`);
+            }
+            if (unknown.length > 0) {
+              core.warning(
+                'Unrecognised check conclusions (treated as not-passing): ' +
+                unknown.map(c => `${c.name}=${c.conclusion}`).join(', ')
+              );
             }
 
             const { data: current } = await github.rest.issues.listLabelsOnIssue({

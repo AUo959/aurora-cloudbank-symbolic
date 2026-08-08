@@ -12,7 +12,9 @@ import time
 from pathlib import Path
 
 SIMULATION_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(SIMULATION_DIR))
+SIMULATION_PATH = str(SIMULATION_DIR)
+if SIMULATION_PATH not in sys.path:
+    sys.path.insert(0, SIMULATION_PATH)
 
 from orion_station_simulation_v2 import OrionSimulationV2  # noqa: E402
 
@@ -30,7 +32,9 @@ def print_crew_status(agents) -> None:
     for name, agent in agents.items():
         status = "🔴 BUSY" if agent.assigned_task else "🟢 IDLE"
         task = agent.assigned_task or "Awaiting assignment"
-        fatigue_bar = "█" * int(agent.fatigue / 10) + "░" * (10 - int(agent.fatigue / 10))
+        fatigue_bar = "█" * int(agent.fatigue / 10) + "░" * (
+            10 - int(agent.fatigue / 10)
+        )
         print(f"   {name:24} {status} | Task: {task:10} | Energy: [{fatigue_bar}]")
 
 
@@ -45,7 +49,10 @@ def print_tick_header(tick, events) -> None:
                 "insight_pulse": "💡",
                 "cross_pollination": "🔄",
             }.get(event.kind, "✨")
-            print(f"   {icon} {event.description} (+{int((event.multiplier - 1) * 100)}%)")
+            print(
+                f"   {icon} {event.description} "
+                f"(+{int((event.multiplier - 1) * 100)}%)"
+            )
     else:
         print("   routine cycle — no emergent event")
     print("━" * 70)
@@ -85,7 +92,11 @@ def interactive_simulation(seed: int = 42, ticks: int = 10, delay: float = 1.5) 
         print("\n📈 TASK STATUS:")
         for task in sim.tasks.values():
             status = "✅ COMPLETE" if task.completed else f"🔄 {task.remaining:.1f}h left"
-            bar_filled = int((1 - task.remaining / task.est_hours) * 20) if task.est_hours > 0 else 20
+            bar_filled = (
+                int((1 - task.remaining / task.est_hours) * 20)
+                if task.est_hours > 0
+                else 20
+            )
             bar = "█" * bar_filled + "░" * (20 - bar_filled)
             print(f"   {task.id}: [{bar}] {status}")
 
@@ -116,8 +127,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Interactive Orion Phase-1 benchmark v2")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument("--ticks", type=int, default=10, help="Max cycles")
-    parser.add_argument("--delay", type=float, default=1.5, help="Delay between cycles (seconds)")
-    parser.add_argument("--fast", action="store_true", help="Run without visible delays")
+    parser.add_argument(
+        "--delay",
+        type=float,
+        default=1.5,
+        help="Delay between cycles (seconds)",
+    )
+    parser.add_argument(
+        "--fast",
+        action="store_true",
+        help="Run without visible delays",
+    )
     args = parser.parse_args()
 
     delay = 0.1 if args.fast else args.delay

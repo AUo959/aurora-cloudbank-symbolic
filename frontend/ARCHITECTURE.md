@@ -14,30 +14,82 @@ Aurora is a cutting-edge platform enabling high-fidelity simulations of complex 
 
 ### UI & Styling
 - **Tailwind CSS 3.4+** - Utility-first styling with custom design system
-- **shadcn/ui** - High-quality, accessible component primitives
-- **Radix UI** - Unstyled, accessible component foundation
-- **Framer Motion** - Fluid animations and transitions
+- **class-variance-authority + clsx + tailwind-merge** - Component variants and
+  class merging. `src/components/ui/` follows the shadcn/ui *pattern* (variants
+  in the component, `cn()` for class merging) without the Radix dependency.
 - **Lucide React** - Consistent icon system
 
-### 3D Visualization
+### Editor
+- **@monaco-editor/react** - Code editor used by the playground
+
+### State Management
+- **Zustand** - Lightweight, scalable state management
+- **React Query (TanStack Query)** - Server state, caching, synchronization
+
+---
+
+## Planned Additions
+
+The stack below is **chosen but not installed**. Nothing under `src/` imports
+these yet, so they are not in `package.json` — carrying them unused meant
+dependency-bot churn against code that did not exist. Install each one as part
+of the feature that first needs it, in the same commit.
+
+### UI primitives — when a component needs behaviour `cn()` cannot express
+
+Dialogs, dropdowns, selects, tabs and tooltips are the expected first need.
+Add only the primitives that component uses:
+
+```bash
+npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu
+```
+
+Radix stays the intended foundation: unstyled, accessible, and composable with
+the existing `cn()`-based components. `forwardRef` is already used throughout
+`src/components/ui/` partly in anticipation of it.
+
+### 3D visualization — Memory Visualizer
+
+```bash
+npm install three @react-three/fiber @react-three/drei @react-three/postprocessing
+npm install -D @types/three
+```
+
 - **Three.js** - WebGL 3D graphics engine
 - **React Three Fiber** - React renderer for Three.js
 - **@react-three/drei** - Useful helpers for R3F
 - **@react-three/postprocessing** - Post-processing effects
 
-### Data Visualization
+### Data visualization — dashboards and metrics
+
+```bash
+npm install recharts d3 @visx/visx
+npm install -D @types/d3
+```
+
 - **Recharts** - Declarative charting library
 - **D3.js** - Advanced custom visualizations
 - **visx** - Low-level visualization primitives
 
-### State Management
-- **Zustand** - Lightweight, scalable state management
-- **React Query (TanStack Query)** - Server state, caching, synchronization
-- **Jotai** - Atomic state management for complex forms
+### Form state — when forms outgrow local state
+
+```bash
+npm install jotai zod @hookform/resolvers react-hook-form
+```
 
 ### Real-Time Communication
+
+```bash
+npm install socket.io-client
+```
+
 - **Socket.io Client** - WebSocket communication with Aurora API
-- **EventSource** - Server-sent events for streaming updates
+- **EventSource** - Server-sent events for streaming updates (no dependency;
+  browser built-in)
+
+When adding any of these, also add its `manualChunks` group in
+`vite.config.ts` in the same commit, so the chunk list never names packages
+that are not installed.
 
 ### API Integration
 - **Axios** - HTTP client with interceptors
@@ -124,7 +176,7 @@ frontend/
 
 **State**:
 - Dashboard metrics (React Query)
-- Real-time updates (Socket.io)
+- Real-time updates (Socket.io — see Planned Additions; not yet installed)
 - User preferences (Zustand)
 
 #### 2. AI Agent Console
@@ -392,7 +444,7 @@ Orion Station is a persistent environment where multiple AI agents conduct resea
 - React.memo for pure components
 - useMemo for expensive computations
 - useCallback for stable references
-- Virtualization for long lists (react-window)
+- Virtualization for long lists (`npm install react-window` when a list needs it)
 
 ### 3D Performance
 - Frustum culling

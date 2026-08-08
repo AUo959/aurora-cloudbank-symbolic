@@ -120,28 +120,42 @@ Visit **http://localhost:5173** in your browser.
 
 ### State Management
 - **React Query (TanStack Query)** - Server state, caching
-- **Zustand** - Client state (planned for complex forms)
+- **Zustand** - Client state
 
 ### Styling
 - **Tailwind CSS 3.4** - Utility-first CSS
-- **Radix UI** - Unstyled accessible components
 - **class-variance-authority** - Component variants
-- **Framer Motion** - Animations (planned)
+- **clsx + tailwind-merge** - Class merging via the `cn()` helper
+- **Lucide React** - Icons
 
-### 3D Graphics (Planned)
-- **Three.js** - WebGL 3D engine
-- **React Three Fiber** - React renderer for Three.js
-- **@react-three/drei** - R3F helpers
+### Editor
+- **@monaco-editor/react** - Playground code editor
 
-### Data Visualization
-- **Recharts** - Declarative charts
-- **D3.js** - Advanced visualizations (planned)
+### API
+- **Axios** - HTTP client
 
 ### Development
 - **ESLint** - Linting
 - **Prettier** - Code formatting
 - **Vitest** - Unit testing (configured)
 - **Playwright** - E2E testing (configured)
+
+### Chosen but not installed
+
+`package.json` lists only what the app imports, so dependency updates never
+arrive for code that does not exist yet. The following are planned — install
+each with the feature that first uses it, and add its `manualChunks` group in
+`vite.config.ts` at the same time. See `ARCHITECTURE.md` → *Planned Additions*
+for the exact commands.
+
+| Area | Packages |
+| --- | --- |
+| UI primitives | `@radix-ui/react-*` (per primitive, as needed) |
+| 3D graphics | `three`, `@react-three/fiber`, `@react-three/drei`, `@react-three/postprocessing` |
+| Data visualization | `recharts`, `d3`, `@visx/visx` |
+| Forms & validation | `react-hook-form`, `@hookform/resolvers`, `zod`, `jotai` |
+| Real-time | `socket.io-client` |
+| Long lists | `react-window` |
 
 ---
 
@@ -378,6 +392,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 **Tech**: React Three Fiber + drei
 
+**Install first** (not in `package.json` — see *Chosen but not installed*):
+```bash
+npm install three @react-three/fiber @react-three/drei @react-three/postprocessing
+npm install -D @types/three
+```
+
 **Implementation**:
 ```typescript
 // src/pages/MemoryVisualizer/MemoryScene.tsx
@@ -461,17 +481,13 @@ manualChunks(id: string) {
   const groups: Record<string, string[]> = {
     'react-vendor': ['react', 'react-dom', 'react-router-dom'],
     'editor-vendor': ['@monaco-editor/react', 'monaco-editor'],
-    'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-    'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu',
-                  '@radix-ui/react-select', '@radix-ui/react-tabs'],
-    'chart-vendor': ['recharts', 'd3'],
   };
   // ...match id against `/node_modules/${pkg}/`
 }
 ```
 
-Only `react-vendor` and `editor-vendor` are emitted today; the other three name
-packages that are installed but not yet imported by anything under `src/`.
+Every group names packages the app imports, so every group emits a chunk. When
+you add a dependency worth splitting out, add its group in the same commit.
 
 ---
 

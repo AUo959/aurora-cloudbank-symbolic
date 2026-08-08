@@ -12,7 +12,9 @@ Core invariants:
 - observation is instrumentation and does not alter world causality;
 - ambiguous operator input is never silently transmitted into L1;
 - epistemic states remain separate;
-- disputed population/orbital claims are quarantined from causal use;
+- canonical Lagrange-point siting is active while exact-point uncertainty is
+  quarantined from causal use;
+- communications use an approximate nonzero latency and require advancement;
 - actionable state changes fail closed without an explicit Triplex receipt;
 - normal runtime persistence is outside the repository and never promotes run
   state into primary canon automatically.
@@ -147,7 +149,7 @@ class OrionL1Runtime:
             status="INITIALIZED",
             canon_status="run_state",
             active_quarantines=[
-                "orion_orbital_locus",
+                "orion_exact_lagrange_point",
                 "current_crew_81",
             ],
             population=self.population,
@@ -166,9 +168,19 @@ class OrionL1Runtime:
                 },
                 "orbital_locus": {
                     "status": self.baseline["orbital_locus"]["status"],
+                    "certainty": self.baseline["orbital_locus"]["certainty"],
+                    "siting_class": self.baseline["orbital_locus"]["siting_class"],
                     "description": self.baseline["orbital_locus"][
                         "safe_runtime_description"
                     ],
+                    "unresolved_parameters": copy.deepcopy(
+                        self.baseline["orbital_locus"]["unresolved_parameters"]
+                    ),
+                },
+                "communications": {
+                    "latency": copy.deepcopy(
+                        self.baseline["orbital_locus"]["communications_latency"]
+                    )
                 },
                 "population": asdict(self.population),
             },
@@ -215,8 +227,41 @@ class OrionL1Runtime:
                 tick=state.manifest.tick,
             )
         )
+        self._deliver_queued_communications()
         self._persist_if_configured()
         return event
+
+    def _deliver_queued_communications(self) -> None:
+        """Deliver prior-tick Earth traffic after a positive time advance."""
+        state = self._require_state()
+        latency = self.baseline["orbital_locus"]["communications_latency"]
+        for message in state.communications:
+            if message.get("origin") != "Earth" or message.get("status") != "queued":
+                continue
+            queued_tick = message.get("tick")
+            if not isinstance(queued_tick, int) or queued_tick >= state.manifest.tick:
+                continue
+
+            message["status"] = "delivered_to_station"
+            message["delivered_tick"] = state.manifest.tick
+            message["latency"] = copy.deepcopy(latency)
+            state.station_records.append(
+                EpistemicRecord(
+                    record_id=str(uuid.uuid4()),
+                    subject=f"communication:{message['message_id']}",
+                    value={
+                        "message_id": message["message_id"],
+                        "origin": message["origin"],
+                        "target": message.get("target"),
+                        "content": message["content"],
+                        "status": message["status"],
+                    },
+                    epistemic_class="station_record",
+                    provenance="earth_to_orion_communications_ledger",
+                    confidence=1.0,
+                    tick=state.manifest.tick,
+                )
+            )
 
     def observe(self, focus: str = "station") -> Dict[str, Any]:
         """Expose instrumentation without advancing or rearranging L1."""
@@ -315,6 +360,7 @@ class OrionL1Runtime:
         state = self._require_state()
         if not content:
             raise ValueError("communication content cannot be empty")
+        latency = self.baseline["orbital_locus"]["communications_latency"]
         message = {
             "message_id": str(uuid.uuid4()),
             "tick": state.manifest.tick,
@@ -324,6 +370,11 @@ class OrionL1Runtime:
             "target": target,
             "content": content,
             "status": "queued",
+            "delivery_resolution": latency["delivery_resolution"],
+            "modeled_one_way_light_time_seconds": latency[
+                "modeled_one_way_light_time_seconds"
+            ],
+            "latency_certainty": latency["certainty"],
             "automatic_l1_action": False,
             "canon_status": "run_state",
         }

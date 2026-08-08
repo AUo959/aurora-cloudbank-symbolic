@@ -29,7 +29,7 @@ def test_retired_builder_refuses_to_construct_live_state():
 
 
 @pytest.mark.unit
-def test_retired_builder_status_is_read_only_and_quarantines_old_claims():
+def test_retired_builder_status_is_read_only_and_preserves_old_claims_as_history():
     result = subprocess.run(
         [sys.executable, str(AURORA_DIR / "build_canonical_state.py"), "--status"],
         cwd=PROJECT_ROOT,
@@ -41,7 +41,10 @@ def test_retired_builder_status_is_read_only_and_quarantines_old_claims():
 
     assert payload["status"] == "retired_builder"
     assert payload["legacy_state_genesis_authority"] is False
-    assert payload["orbital_locus_status"] == "quarantined_conflict"
+    assert (
+        payload["orbital_locus_status"]
+        == "resolved_siting_class_exact_point_unresolved"
+    )
     assert payload["historical_current_crew_81"].startswith("quarantined")
 
 

@@ -66,3 +66,24 @@ class TestCanonProvenance(unittest.TestCase):
         receipt = load_provenance()
 
         self.assertEqual(receipt["unreconciled_surfaces"], [])
+
+    def test_orbital_locus_authority_boundary_is_narrowly_resolved(self) -> None:
+        receipt = load_provenance()
+        locus = next(
+            item
+            for item in receipt["resolved_surfaces"]
+            if item["name"] == "orion_station_orbital_locus"
+        )
+
+        self.assertEqual(
+            locus["status"],
+            "resolved_siting_class_exact_point_unresolved",
+        )
+        self.assertEqual(locus["authority_repository"], "AUo959/CanonRec")
+        self.assertRegex(locus["authority_revision"], r"\A[0-9a-f]{40}\Z")
+        self.assertEqual(
+            sha256_file(PROJECT_ROOT / locus["cloudbank_path"]),
+            locus["cloudbank_sha256"],
+        )
+        self.assertIn("Lagrange point", locus["resolved_claim"])
+        self.assertIn("Exact libration point", locus["remaining_uncertainty"])

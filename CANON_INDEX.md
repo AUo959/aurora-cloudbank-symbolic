@@ -47,7 +47,7 @@ projection conflict must not override CanonRec canon.
 | Orion Station layout, decks, facilities | `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` |
 | Crew roster, divisions, uniforms | `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` |
 | Live-run safe population interpretation and 35/36 correction | `config/l1_runtime_baseline.json` |
-| Live-run orbital-locus handling | `config/l1_runtime_baseline.json` (quarantined conflict pending #1456) |
+| Live-run orbital-locus handling | CanonRec `STATION_PURPOSE_DEFINITION.md` via `config/l1_runtime_baseline.json` (Lagrange-point siting canonical; exact point pending #1456) |
 | GUMAS 9-node orbital network | `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` |
 | Halo Array, relay-crew pairings | `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` |
 | Ethics governance, Picard_Delta_3 | `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` |

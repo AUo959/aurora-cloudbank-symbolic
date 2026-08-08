@@ -1,6 +1,6 @@
 # Aurora L1 Runtime Contract
 
-**Version:** 1.0.0  
+**Version:** 1.1.0
 **Date:** 2026-08-08  
 **Status:** Runtime contract for governed Orion L1 initialization and advancement  
 **Machine-readable baseline:** `config/l1_runtime_baseline.json`  
@@ -106,6 +106,11 @@ An Earth→Orion communication must be explicitly typed/routed as a
 communication. It enters the communications ledger as queued traffic and does
 not automatically become a station action.
 
+Queued traffic is not delivered in the same tick. The runtime records delivery
+only after a positive advancement window, using the approximate nonzero latency
+model described below. Delivery becomes a station record; it is not itself a
+reply or evidence that the named recipient has acted.
+
 The receiving institution may later read, defer, answer, forward, ignore, or
 act on the message under its own circumstances and authority.
 
@@ -154,22 +159,24 @@ The `PopulationSnapshot` type also permits a future evidence-supported state in
 which, for example, human complement is 81 while identified/persona-resolved
 subsets are smaller.
 
-## Orbital-locus quarantine
+## Lagrange-point authority and remaining uncertainty
 
-The repository currently preserves two incompatible literal location claims.
-The live runtime does not select either one by convenience.
+CanonRec's owner ruling establishes the current siting class:
 
-Until #1456 is reconciled, the only causal-safe runtime statement is:
+> Orion Station is stationed at a Lagrange point in real space.
 
-> Orion is spaceborne and remote from Earth; exact orbital locus is unavailable
-> for causal use.
+The historical `38,600 km` value is a STAGING parameter and is not current
+siting authority. The historical `Earth-Moon L4` value remains a named
+candidate, not exact current canon. Issue #1456 therefore remains open only for
+the exact libration point, primary-body system, range, and exact derived
+parameters.
 
-The runtime must not derive communications light-time, orbital lighting,
-radiation environment, transfer windows, Earth visibility, docking/navigation
-trajectories, or orbital mechanics from either disputed claim.
-
-A quarantined contradiction is acceptable preflight state because it is denied
-causal authority rather than silently resolved.
+The runtime uses the canonical Lagrange-point class and CanonRec's explicitly
+approximate, nonzero one-way communications model. A message queued at one tick
+is delivered only after a positive advancement window. Exact communications
+light-time, orbital lighting, radiation environment, transfer windows, Earth
+visibility, docking/navigation trajectories, and orbital mechanics remain
+quarantined until the exact point is reconciled.
 
 ## Governance
 

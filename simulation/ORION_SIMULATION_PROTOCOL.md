@@ -103,7 +103,7 @@ The live L1 runtime has additional invariants that this benchmark does not own:
 - discovery-through-observation;
 - explicit epistemic-state separation;
 - population/persona semantics;
-- orbital-locus quarantine;
+- canonical Lagrange-point siting with exact-point quarantine;
 - run lifecycle and canon-promotion boundary;
 - Triplex fail-closed authorization for exceptional actionable changes.
 

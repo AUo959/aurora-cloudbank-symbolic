@@ -29,6 +29,22 @@
       "cloudbank_sha256": "0a5c6eff0ab8f45a07257e8e99e4f96fdd4e94b7253be9210d2275f4969348ca",
       "cloudbank_role": "runtime_projection_non_authoritative",
       "conflict_policy": "CanonRec controls canon authority. A differing CloudBank projection must not override CanonRec; CloudBank-only details remain provenance-labeled runtime/reference data until traced or promoted through canon review."
+    },
+    {
+      "name": "orion_station_orbital_locus",
+      "status": "resolved_siting_class_exact_point_unresolved",
+      "decision_date": "2026-06-13",
+      "authority_repository": "AUo959/CanonRec",
+      "authority_revision": "1fc35f08a2937b10a2a3c15abe4b7ed39245b64e",
+      "canonrec_path": "canon/L1/station/STATION_PURPOSE_DEFINITION.md",
+      "canonrec_sha256": "d993965f82fef80b63be3c9233473e9f21004c043e2c1bc42e4cea23f141e6d4",
+      "supporting_canonrec_path": "canon/L1/station/POWERED_WATCH_AND_GROUND_SEGMENT.md",
+      "supporting_canonrec_sha256": "710eceefc5c09f17864ea845469d7d6725d19ed4cf560108dcb542e4a2d1bc4c",
+      "cloudbank_path": "config/l1_runtime_baseline.json",
+      "cloudbank_sha256": "358bbd9e7d9a1f549bdb8efbdfedbf4d9e676580c219230ccb96485138d666d4",
+      "cloudbank_role": "runtime_projection_non_authoritative",
+      "resolved_claim": "Orion Station is stationed at a Lagrange point in real space.",
+      "remaining_uncertainty": "Exact libration point, primary-body system, range, and exact one-way light-time remain unresolved."
     }
   ],
   "unreconciled_surfaces": []

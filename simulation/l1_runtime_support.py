@@ -33,9 +33,11 @@ def evaluate_preflight(
     _check_staff_authority(baseline, provenance_path, blockers)
     _check_pilot_boundary(baseline, blockers)
     _check_population(population, blockers, warnings)
-    _check_locus_quarantine(baseline, blockers)
+    _check_locus_authority(baseline, provenance_path, blockers, warnings)
     _check_legacy_and_benchmark(baseline, blockers)
     _check_governance(baseline, blockers)
+    locus = baseline["orbital_locus"]
+    unresolved_parameters = locus.get("unresolved_parameters", [])
     return {
         "ready": not blockers,
         "blockers": blockers,
@@ -43,6 +45,12 @@ def evaluate_preflight(
         "tick": 0,
         "run_created": run_created,
         "runtime_contract_version": baseline["runtime_contract_version"],
+        "orbital_locus": {
+            "status": locus["status"],
+            "siting_class": locus["siting_class"],
+            "exact_point_resolved": "exact_lagrange_point" not in unresolved_parameters,
+            "communications_latency": locus["communications_latency"],
+        },
     }
 
 
@@ -148,15 +156,126 @@ def _check_population(
         )
 
 
-def _check_locus_quarantine(
+def _check_locus_authority(
     baseline: Dict[str, Any],
+    provenance_path: Path,
+    blockers: List[str],
+    warnings: List[str],
+) -> None:
+    authority = baseline.get("authority", {}).get("orbital_locus", {})
+    locus = baseline.get("orbital_locus", {})
+    expected_revision = (
+        baseline.get("authority", {}).get("canonrec", {}).get("revision")
+    )
+
+    _check_locus_authority_config(authority, expected_revision, blockers)
+    _check_locus_authority_receipt(authority, provenance_path, blockers)
+    _check_locus_resolution(locus, blockers)
+    _check_locus_latency(locus.get("communications_latency", {}), blockers)
+
+    warnings.append(
+        "exact Lagrange point and exact one-way communications light-time remain "
+        "unresolved; runtime uses a provenance-labeled approximate nonzero latency model"
+    )
+
+
+def _check_locus_authority_config(
+    authority: Dict[str, Any],
+    expected_revision: Optional[str],
     blockers: List[str],
 ) -> None:
-    locus = baseline.get("orbital_locus", {})
-    if locus.get("status") != "quarantined_conflict":
-        blockers.append("orbital locus conflict is not safely quarantined")
+    if authority.get("status") != "resolved_authority_boundary":
+        blockers.append("orbital locus authority boundary is unresolved")
+    if authority.get("authority_repository") != "AUo959/CanonRec":
+        blockers.append("CanonRec is not configured as orbital-locus authority")
+    if authority.get("authority_revision") != expected_revision:
+        blockers.append("orbital-locus authority revision does not match CanonRec")
+    if (
+        authority.get("authority_path")
+        != "canon/L1/station/STATION_PURPOSE_DEFINITION.md"
+    ):
+        blockers.append("orbital-locus authority path is not the owner ruling")
+
+
+def _check_locus_resolution(
+    locus: Dict[str, Any],
+    blockers: List[str],
+) -> None:
+    if locus.get("status") != "resolved_siting_class_exact_point_unresolved":
+        blockers.append("Lagrange-point siting class is not resolved")
+    if locus.get("certainty") != "CANON":
+        blockers.append("orbital siting class is not marked as canonical")
+    if locus.get("siting_class") != "lagrange_point":
+        blockers.append("orbital siting class is not Lagrange point")
+    unresolved = locus.get("unresolved_parameters", [])
+    if "exact_lagrange_point" not in unresolved:
+        blockers.append("exact Lagrange-point uncertainty is not preserved")
     if not locus.get("prohibited_causal_derivations"):
-        blockers.append("orbital locus quarantine lacks causal-use restrictions")
+        blockers.append("exact orbital uncertainty lacks causal-use restrictions")
+
+
+def _check_locus_latency(
+    latency: Dict[str, Any],
+    blockers: List[str],
+) -> None:
+    if latency.get("policy") != "modeled_nonzero_exact_value_unresolved":
+        blockers.append("communications latency does not preserve a nonzero model")
+    modeled_seconds = latency.get("modeled_one_way_light_time_seconds")
+    if not _is_positive_integer(modeled_seconds):
+        blockers.append("communications latency model must be a positive integer")
+    if latency.get("certainty") != "APPROX":
+        blockers.append("communications latency model is not marked approximate")
+    if latency.get("exact_value_known") is not False:
+        blockers.append("communications latency incorrectly claims exact knowledge")
+    if latency.get("delivery_resolution") != "first_positive_advancement_window":
+        blockers.append("communications delivery does not require elapsed time")
+
+
+def _is_positive_integer(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
+def _check_locus_authority_receipt(
+    authority: Dict[str, Any],
+    provenance_path: Path,
+    blockers: List[str],
+) -> None:
+    provenance = _load_canon_provenance(provenance_path, blockers)
+    if provenance is None:
+        return
+    receipt = _locus_authority_receipt(provenance, blockers)
+    if receipt is not None:
+        _check_locus_authority_receipt_values(receipt, authority, blockers)
+
+
+def _locus_authority_receipt(
+    provenance: Dict[str, Any],
+    blockers: List[str],
+) -> Optional[Dict[str, Any]]:
+    receipts = [
+        item
+        for item in provenance.get("resolved_surfaces", [])
+        if item.get("name") == "orion_station_orbital_locus"
+    ]
+    if len(receipts) != 1:
+        blockers.append("canon provenance lacks one resolved orbital-locus receipt")
+        return None
+    return receipts[0]
+
+
+def _check_locus_authority_receipt_values(
+    receipt: Dict[str, Any],
+    authority: Dict[str, Any],
+    blockers: List[str],
+) -> None:
+    if receipt.get("status") != "resolved_siting_class_exact_point_unresolved":
+        blockers.append("canon provenance does not preserve exact-point uncertainty")
+    if receipt.get("authority_revision") != authority.get("authority_revision"):
+        blockers.append("orbital-locus receipt revision does not match the baseline")
+    if receipt.get("canonrec_path") != authority.get("authority_path"):
+        blockers.append("orbital-locus receipt path does not match the baseline")
+    if receipt.get("canonrec_sha256") != authority.get("authority_sha256"):
+        blockers.append("orbital-locus authority hash does not match the receipt")
 
 
 def _check_legacy_and_benchmark(

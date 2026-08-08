@@ -69,6 +69,26 @@ identical or mechanically merging them.
 Machine-readable status lives in `config/canon_provenance.json` under
 `resolved_surfaces`.
 
+## Orbital-locus authority decision — 2026-06-13
+
+CanonRec's owner ruling in
+`canon/L1/station/STATION_PURPOSE_DEFINITION.md` establishes that Orion Station
+is stationed at a Lagrange point in real space. CloudBank projects that ruling
+into `config/l1_runtime_baseline.json` as
+`resolved_siting_class_exact_point_unresolved`.
+
+This resolves the broad siting conflict without overclaiming precision:
+
+- `38,600 km` remains a STAGING datum and is not current siting authority;
+- `Earth-Moon L4` remains a historical named candidate, not exact current canon;
+- the exact point/system, range, and exact one-way light-time remain unresolved;
+- CanonRec's approximate nonzero latency model is usable only with `APPROX`
+  certainty and a positive advancement window.
+
+The authority and projection hashes are recorded under the
+`orion_station_orbital_locus` resolved surface in
+`config/canon_provenance.json`.
+
 ### Conflict behavior
 
 If the CanonRec authority record and the CloudBank runtime projection disagree:
@@ -93,7 +113,7 @@ the first live L1 run. It records:
 - the staff projection boundary;
 - the Earth-side Pilot boundary;
 - typed population uncertainty;
-- orbital-locus quarantine;
+- canonical Lagrange-point siting with exact-point uncertainty;
 - historical `SIMULATION_STATE.json` as non-genesis provenance;
 - canonical Phase-1 benchmark v2;
 - Picard_Delta_3 / Triplex fail-closed requirements.

@@ -19,6 +19,10 @@ from l1_character_actor import (  # noqa: E402
     CharacterContext,
     CharacterProfileError,
 )
+from l1_character_actor_policy import (  # noqa: E402
+    CharacterSpeechBoundaryError,
+    enforce_diegetic_speech,
+)
 
 
 def _context(content: str, *, prior_actions=()) -> CharacterContext:
@@ -100,7 +104,19 @@ def test_status_request_is_driven_by_character_duties_and_local_records():
             "scope": "character_knowledge",
         },
     ]
-    assert "maintenance queue on command watch" in action["response_content"]
+    assert action["response_content"] == (
+        "Pilot, Thorne. We're steady here. Maintenance moved forward this watch. "
+        "I'm keeping the remaining work under command review and will relay any "
+        "material change."
+    )
+    assert action["knowledge_gaps"] == [
+        "exact_lagrange_point",
+        "exact_current_human_crew_complement",
+    ]
+    assert "Lagrange" not in action["response_content"]
+    assert "crew complement" not in action["response_content"]
+    assert "unresolved" not in action["response_content"]
+    assert "run" not in action["response_content"]
 
 
 @pytest.mark.unit
@@ -120,14 +136,16 @@ def test_message_meaning_changes_the_selected_character_action():
     emergency = actor.decide(_context("Commander, is there an emergency?"))
 
     assert contact["selected_action"] == "acknowledge_and_open_channel"
-    assert "clarify the matter" in contact["response_content"]
+    assert "operational question or decision" in contact["response_content"]
     assert [
         item["action"]
         for item in contact["options_considered"]
         if item["disposition"] == "selected"
     ] == ["acknowledge_and_open_channel"]
     assert emergency["selected_action"] == "assess_and_escalate_if_warranted"
-    assert "checked the current command record" in emergency["response_content"]
+    assert "no emergency in the current command record" in emergency[
+        "response_content"
+    ].casefold()
 
 
 @pytest.mark.unit
@@ -146,7 +164,7 @@ def test_recorded_emergency_remains_decision_relevant_after_a_later_event():
 
     action = BoundedCharacterActor().decide(context)
 
-    assert "An emergency is recorded" in action["response_content"]
+    assert "An emergency has been recorded" in action["response_content"]
     assessment = next(
         item
         for item in action["operational_steps"]
@@ -173,7 +191,23 @@ def test_prior_character_commitment_shapes_followup_language():
     )
 
     assert action["continuity_inputs"] == ["prior-action"]
-    assert "remains on command watch" in action["response_content"]
+    assert "stays under command review" in action["response_content"]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "phrase",
+    (
+        "in this run",
+        "runtime projection",
+        "canon-level",
+        "knowledge gaps",
+        "observation aperture",
+    ),
+)
+def test_character_speech_boundary_rejects_control_plane_language(phrase: str):
+    with pytest.raises(CharacterSpeechBoundaryError, match="non-diegetic"):
+        enforce_diegetic_speech(f"Pilot, Thorne. The {phrase} is clear.")
 
 
 @pytest.mark.unit

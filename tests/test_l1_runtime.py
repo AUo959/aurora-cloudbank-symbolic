@@ -295,14 +295,18 @@ def test_commander_response_is_character_caused_grounded_and_delayed(tmp_path: P
     assert response["status"] == "queued"
     assert response["pilot_directed_content"] is False
     assert response["response_policy"] == "bounded_character_action_v1"
-    assert "reviewed the current watch record" in response["content"]
-    assert "scheduled maintenance queue" in response["content"]
-    assert "No emergency is recorded" in response["content"]
-    assert "will not turn either into an estimate" in response["content"]
+    assert response["content"] == (
+        "Pilot, Thorne. We're steady here. Maintenance moved forward this watch. "
+        "I'm keeping the remaining work under command review and will relay any "
+        "material change."
+    )
     assert len(runtime.state.character_actions) == 1
     action = runtime.state.character_actions[0]
     assert response["caused_by_action_id"] == action["action_id"]
     assert action["selected_action"] == "review_watch_and_report"
+    assert "exact_lagrange_point" in action["knowledge_gaps"]
+    assert "exact_current_human_crew_complement" in action["knowledge_gaps"]
+    assert all(gap not in response["content"] for gap in action["knowledge_gaps"])
     assert action["perceived_intents"] == ["station_operations_status"]
     assert "station_operations" in {
         item["id"] for item in action["duty_drivers"]

@@ -102,7 +102,6 @@ class BoundedCharacterActor:
         decision["response_content"] = render_response(
             decision,
             relevant_event,
-            context.unresolved_facts,
             self._opening(),
         )
         return decision
@@ -203,6 +202,7 @@ class BoundedCharacterActor:
         ):
             raise CharacterProfileError("character voice opening is incomplete")
         return f"{address}, {self_identification}."
+
 
 def _read_json(path: Path) -> Dict[str, Any]:
     try:

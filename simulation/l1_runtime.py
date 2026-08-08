@@ -50,6 +50,7 @@ from l1_runtime_types import (
     L1RunState,
     PopulationSnapshot,
     RunManifest,
+    l1_run_state_from_payload,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -109,6 +110,29 @@ class OrionL1Runtime:
         if persist:
             self._persist()
         return new_state
+
+    def load_run(
+        self,
+        run_id: str,
+        *,
+        run_root: Optional[Path] = None,
+    ) -> L1RunState:
+        """Restore a persisted run and its deterministic replay position."""
+        normalized_run_id = self._validated_run_id(run_id)
+        resolved_run_root = self._resolve_run_root(run_root or DEFAULT_RUN_ROOT)
+        state_path = resolved_run_root / normalized_run_id / "state.json"
+        try:
+            payload = read_json(state_path)
+            restored = l1_run_state_from_payload(payload)
+        except (OSError, ValueError, TypeError) as exc:
+            raise PreflightError(
+                "persisted L1 run state is unavailable or invalid"
+            ) from exc
+        self._validate_loaded_state(restored, normalized_run_id)
+        self.state = restored
+        self._run_root = resolved_run_root
+        self._restore_replay_generator(restored)
+        return restored
 
     def _resolve_canonrec_revision(self, override: Optional[str]) -> str:
         expected = self.baseline["authority"]["canonrec"]["revision"]
@@ -228,6 +252,7 @@ class OrionL1Runtime:
             )
         )
         self._deliver_queued_communications()
+        self._queue_due_station_responses()
         self._persist_if_configured()
         return event
 
@@ -236,32 +261,156 @@ class OrionL1Runtime:
         state = self._require_state()
         latency = self.baseline["orbital_locus"]["communications_latency"]
         for message in state.communications:
-            if message.get("origin") != "Earth" or message.get("status") != "queued":
+            if not self._communication_is_due(message, state.manifest.tick):
                 continue
-            queued_tick = message.get("tick")
-            if not isinstance(queued_tick, int) or queued_tick >= state.manifest.tick:
-                continue
-
-            message["status"] = "delivered_to_station"
             message["delivered_tick"] = state.manifest.tick
             message["latency"] = copy.deepcopy(latency)
-            state.station_records.append(
+            direction = self._communication_direction(message)
+            if direction == "earth_to_orion":
+                self._record_station_delivery(message)
+            elif direction == "station_to_earth":
+                self._record_earth_delivery(message)
+
+    @staticmethod
+    def _communication_is_due(message: Dict[str, Any], tick: int) -> bool:
+        queued_tick = message.get("tick")
+        return (
+            message.get("status") == "queued"
+            and isinstance(queued_tick, int)
+            and not isinstance(queued_tick, bool)
+            and queued_tick < tick
+        )
+
+    @staticmethod
+    def _communication_direction(message: Dict[str, Any]) -> Optional[str]:
+        direction = message.get("direction")
+        if direction in {"earth_to_orion", "station_to_earth"}:
+            return direction
+        if message.get("origin") == "Earth":
+            return "earth_to_orion"
+        return None
+
+    def _record_station_delivery(self, message: Dict[str, Any]) -> None:
+        state = self._require_state()
+        message["status"] = "delivered_to_station"
+        state.station_records.append(
+            EpistemicRecord(
+                record_id=str(uuid.uuid4()),
+                subject=f"communication:{message['message_id']}",
+                value=self._communication_record_value(message),
+                epistemic_class="station_record",
+                provenance="earth_to_orion_communications_ledger",
+                confidence=1.0,
+                tick=state.manifest.tick,
+            )
+        )
+
+    def _record_earth_delivery(self, message: Dict[str, Any]) -> None:
+        state = self._require_state()
+        message["status"] = "delivered_to_earth"
+        state.pilot_knowledge.append(
+            EpistemicRecord(
+                record_id=str(uuid.uuid4()),
+                subject=f"communication:{message['message_id']}",
+                value=self._communication_record_value(message),
+                epistemic_class="testimony",
+                provenance="station_to_earth_communications_ledger",
+                confidence=1.0,
+                tick=state.manifest.tick,
+            )
+        )
+
+    @staticmethod
+    def _communication_record_value(message: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "message_id": message["message_id"],
+            "origin": message["origin"],
+            "sender_id": message["sender_id"],
+            "target": message.get("target"),
+            "content": message["content"],
+            "status": message["status"],
+        }
+
+    def _queue_due_station_responses(self) -> None:
+        state = self._require_state()
+        replied_to = {
+            item.get("reply_to_message_id")
+            for item in state.communications
+            if item.get("direction") == "station_to_earth"
+        }
+        for message in list(state.communications):
+            if not self._commander_response_is_due(message, replied_to):
+                continue
+            response = self._build_commander_status_response(message)
+            state.communications.append(response)
+            state.character_knowledge.setdefault("CMD_001", []).append(
                 EpistemicRecord(
                     record_id=str(uuid.uuid4()),
-                    subject=f"communication:{message['message_id']}",
-                    value={
-                        "message_id": message["message_id"],
-                        "origin": message["origin"],
-                        "target": message.get("target"),
-                        "content": message["content"],
-                        "status": message["status"],
-                    },
-                    epistemic_class="station_record",
-                    provenance="earth_to_orion_communications_ledger",
+                    subject=f"communication:{response['message_id']}",
+                    value=response["content"],
+                    epistemic_class="testimony",
+                    provenance="deterministic_status_report_v1",
                     confidence=1.0,
                     tick=state.manifest.tick,
                 )
             )
+
+    def _commander_response_is_due(
+        self,
+        message: Dict[str, Any],
+        replied_to: set[Any],
+    ) -> bool:
+        return (
+            self._communication_direction(message) == "earth_to_orion"
+            and message.get("status") == "delivered_to_station"
+            and message.get("target") == "CMD_001"
+            and message.get("message_id") not in replied_to
+        )
+
+    def _build_commander_status_response(
+        self,
+        inbound: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        state = self._require_state()
+        latest_summary = self._latest_autonomous_event_summary()
+        content = (
+            "Pilot, this is Commander Thorne. Your transmission is received. "
+            f"Current run ledger: Orion is active at tick {state.manifest.tick}. "
+            f"{latest_summary} No emergency event is recorded in the current run "
+            "ledger. The exact Lagrange point and exact current crew complement "
+            "remain unresolved. Station operations continue under standing authority."
+        )
+        latency = self.baseline["orbital_locus"]["communications_latency"]
+        return {
+            "message_id": str(uuid.uuid4()),
+            "reply_to_message_id": inbound["message_id"],
+            "tick": state.manifest.tick,
+            "direction": "station_to_earth",
+            "sender_id": "CMD_001",
+            "sender_name": "Commander Alex Thorne",
+            "origin": "Orion Station",
+            "target": "pilot",
+            "content": content,
+            "status": "queued",
+            "delivery_resolution": latency["delivery_resolution"],
+            "modeled_one_way_light_time_seconds": latency[
+                "modeled_one_way_light_time_seconds"
+            ],
+            "latency_certainty": latency["certainty"],
+            "automatic_l1_action": False,
+            "pilot_directed_content": False,
+            "response_policy": "deterministic_status_report_v1",
+            "canon_status": "run_state",
+        }
+
+    def _latest_autonomous_event_summary(self) -> str:
+        state = self._require_state()
+        for event in reversed(state.events):
+            if event.get("cause") == "autonomous_world_process":
+                return str(
+                    event.get("summary", "Autonomous event summary unavailable.")
+                )
+        return "No autonomous station event is recorded."
 
     def observe(self, focus: str = "station") -> Dict[str, Any]:
         """Expose instrumentation without advancing or rearranging L1."""
@@ -364,6 +513,7 @@ class OrionL1Runtime:
         message = {
             "message_id": str(uuid.uuid4()),
             "tick": state.manifest.tick,
+            "direction": "earth_to_orion",
             "sender_id": "pilot",
             "sender_name": "Pilot",
             "origin": "Earth",
@@ -486,6 +636,95 @@ class OrionL1Runtime:
         if self._run_root is None:
             raise RuntimeError("run persistence root is not configured")
         persist_run_state(state, self._run_root)
+
+    def _validate_loaded_state(self, state: L1RunState, run_id: str) -> None:
+        manifest = state.manifest
+        if manifest.run_id != run_id:
+            raise PreflightError("persisted run ID does not match its persistence path")
+        if manifest.schema_version != 1:
+            raise PreflightError("persisted run schema version is unsupported")
+        if (
+            manifest.runtime_contract_version
+            != self.baseline["runtime_contract_version"]
+        ):
+            raise PreflightError("persisted run contract does not match this runtime")
+        if (
+            manifest.canonrec_revision
+            != self.baseline["authority"]["canonrec"]["revision"]
+        ):
+            raise PreflightError(
+                "persisted run CanonRec revision does not match preflight"
+            )
+        self._validate_revision(manifest.cloudbank_revision, "cloudbank_revision")
+        self._validate_revision(manifest.canonrec_revision, "canonrec_revision")
+        if manifest.tick < 0:
+            raise PreflightError("persisted run tick cannot be negative")
+        if (
+            not 0
+            <= manifest.station_cycle_minute
+            < manifest.station_cycle_length_minutes
+        ):
+            raise PreflightError("persisted station cycle minute is out of range")
+        manifest.population.validate()
+        self._validate_loaded_communications(state)
+
+    def _validate_loaded_communications(self, state: L1RunState) -> None:
+        message_ids = set()
+        for index, message in enumerate(state.communications):
+            self._validate_loaded_communication(message, index)
+            message_id = message["message_id"]
+            if message_id in message_ids:
+                raise PreflightError("persisted communications contain duplicate IDs")
+            message_ids.add(message_id)
+
+    def _validate_loaded_communication(
+        self,
+        message: Dict[str, Any],
+        index: int,
+    ) -> None:
+        prefix = f"persisted communication {index}"
+        self._require_message_string(message, "message_id", prefix)
+        self._require_message_string(message, "content", prefix)
+        self._require_message_string(message, "sender_id", prefix)
+        self._require_message_string(message, "origin", prefix)
+        if type(message.get("tick")) is not int:
+            raise PreflightError(f"{prefix} tick must be an integer")
+        if message.get("status") not in {
+            "queued",
+            "delivered_to_station",
+            "delivered_to_earth",
+        }:
+            raise PreflightError(f"{prefix} status is unsupported")
+        if self._communication_direction(message) is None:
+            raise PreflightError(f"{prefix} direction is unsupported")
+
+    @staticmethod
+    def _require_message_string(
+        message: Dict[str, Any],
+        field: str,
+        prefix: str,
+    ) -> None:
+        value = message.get(field)
+        if not isinstance(value, str) or not value:
+            raise PreflightError(f"{prefix} {field} must be a non-empty string")
+
+    def _restore_replay_generator(self, state: L1RunState) -> None:
+        self._rng = DeterministicReplayRNG(state.manifest.seed)
+        autonomous_event_count = sum(
+            event.get("cause") == "autonomous_world_process" for event in state.events
+        )
+        for _ in range(autonomous_event_count):
+            self._rng.random()
+
+    @staticmethod
+    def _validated_run_id(run_id: str) -> str:
+        try:
+            normalized = str(uuid.UUID(run_id))
+        except (AttributeError, TypeError, ValueError) as exc:
+            raise PreflightError("run_id must be a canonical UUID") from exc
+        if normalized != run_id:
+            raise PreflightError("run_id must be a canonical UUID")
+        return normalized
 
     @staticmethod
     def _resolve_run_root(path: Path) -> Path:

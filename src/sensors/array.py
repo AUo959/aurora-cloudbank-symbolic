@@ -37,6 +37,7 @@ from src.sensors.fusion import (
 from src.sensors.internal import (
     BiometricsSensor,
     EnvironmentalSensor,
+    L1RuntimeSensor,
     OperationalSensor,
     StructuralSensor,
 )
@@ -91,6 +92,7 @@ class SensorArrayFacade:
         self._sensors = [
             self.salvage,
             EnvironmentalSensor(p.get("environmental")),
+            L1RuntimeSensor(p.get("l1_runtime")),
             StructuralSensor(p.get("structural")),
             BiometricsSensor(p.get("biometrics")),
             OperationalSensor(p.get("operational")),

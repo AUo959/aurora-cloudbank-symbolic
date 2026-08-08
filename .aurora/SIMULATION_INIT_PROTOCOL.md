@@ -136,6 +136,26 @@ A quiet advancement window is valid. The runtime must not manufacture drama,
 character availability, emergencies, discoveries, or convenient explanations
 for engagement.
 
+Persisted runs continue through the governed continuation entry point:
+
+```bash
+python .aurora/run_l1.py status --run-id <uuid>
+python .aurora/run_l1.py sensors --run-id <uuid>
+python .aurora/run_l1.py advance --run-id <uuid> --minutes 1
+python .aurora/run_l1.py await-response --run-id <uuid> \
+  --message-id <uuid> --minutes 1 --max-windows 4
+```
+
+Continuation restores the deterministic replay position from the persisted
+autonomous-event ledger. It rejects malformed run identifiers, mismatched
+manifest paths, unsupported schemas, and runtime-contract or CanonRec drift.
+
+The `sensors` command reports live simulation-ledger telemetry only. Unbound
+physical channels remain explicitly unavailable; their framework defaults are
+not presented as live readings. The accompanying logical schematic projects
+only causal-safe topology. Historical deck layouts that conflict with current
+locus, population, or Earth-side Pilot rulings remain reference-only.
+
 ---
 
 ## Observation controls
@@ -173,6 +193,13 @@ latency model. A queued message is not delivered at the same tick; it becomes a
 station record only after a positive advancement window. This models elapsed
 time without pretending the unresolved exact range or exact light-time is
 known.
+
+A station response is a separate communication. The initial deterministic
+response policy is restricted to Commander Alex Thorne (`CMD_001`) and to
+delivered traffic explicitly addressed to that endpoint. It reports only
+run-ledger facts, records the utterance as run-scoped testimony, and requires a
+later positive advancement window before delivery to Earth. The policy does not
+promote testimony into canon or let Pilot dictate the response text.
 
 Ambiguous text must not silently become transmitted speech.
 

@@ -52,14 +52,35 @@ jobs:
     steps:
       - name: Resolve PR number
         id: pr
+        # Values reach the shell through env, never through ${{ }} interpolation
+        # into the script body. pull_request_number is a workflow_dispatch string
+        # input, so interpolating it directly would splice caller-supplied text
+        # into the command -- expression injection, executable by anyone able to
+        # trigger the workflow. The numeric check below is a second gate: the
+        # value ends up inside a URL, so it must not carry separators either.
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_PR: ${{ inputs.pull_request_number }}
+          EVENT_PR: ${{ github.event.check_run.pull_requests[0].number }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "number=${{ inputs.pull_request_number }}" >> "$GITHUB_OUTPUT"
-            echo "dry_run=true" >> "$GITHUB_OUTPUT"
+          set -eu
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            number="$DISPATCH_PR"
+            dry_run=true
           else
-            echo "number=${{ github.event.check_run.pull_requests[0].number }}" >> "$GITHUB_OUTPUT"
-            echo "dry_run=false" >> "$GITHUB_OUTPUT"
+            number="$EVENT_PR"
+            dry_run=false
           fi
+
+          case "$number" in
+            ''|*[!0-9]*)
+              echo "::error::Refusing to run: PR number '$number' is not a positive integer."
+              exit 1
+              ;;
+          esac
+
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "dry_run=$dry_run" >> "$GITHUB_OUTPUT"
 
       - name: Build SonarCloud report
         id: fetch
@@ -67,6 +88,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           PROJECT_KEY: AUo959_aurora-cloudbank-symbolic
+          # Consumed via env, never interpolated into the script body.
+          CHECK_RUN_SUMMARY: ${{ github.event.check_run.output.summary }}
         run: |
           set -uo pipefail
           BASE="https://sonarcloud.io/api"
@@ -79,6 +102,13 @@ jobs:
             code=$(curl -sS -u "${SONAR_TOKEN}:" -o "$out" -w '%{http_code}' "$url" 2>"$out.err" || echo "000")
             echo "$code"
           }
+
+          # SonarCloud already states the failing condition in the check run it
+          # publishes, and that arrives with the event -- no API call, no token,
+          # no network. It is therefore the one source that cannot be knocked
+          # out by an expired token or an unreachable host, so it is recorded
+          # first and used verbatim if every query below fails.
+          printf '%s' "${CHECK_RUN_SUMMARY:-}" > check_summary.txt
 
           GATE_CODE=$(fetch "${BASE}/qualitygates/project_status?projectKey=${PROJECT_KEY}&pullRequest=${PR_NUMBER}" gate.json)
           ISSUES_CODE=$(fetch "${BASE}/issues/search?componentKeys=${PROJECT_KEY}&pullRequest=${PR_NUMBER}&resolved=false&ps=100" issues.json)
@@ -109,7 +139,19 @@ jobs:
           issues, issues_err = load("issues.json", os.environ["ISSUES_CODE"])
           hotspots, hotspots_err = load("hotspots.json", os.environ["HOTSPOTS_CODE"])
 
+          try:
+              with open("check_summary.txt", encoding="utf-8") as handle:
+                  check_summary = handle.read().strip()
+          except OSError:
+              check_summary = ""
+
           lines = []
+
+          # 0. What SonarCloud itself published on the check run. Available
+          #    without any API call, so it survives an expired token or an
+          #    unreachable host.
+          if check_summary:
+              lines += ["### Reported by the SonarCloud check run", "", check_summary, ""]
 
           # 1. The gate condition. This is the question the reader actually has,
           #    and the old reporter never asked it.

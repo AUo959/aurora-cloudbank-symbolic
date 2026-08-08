@@ -1,41 +1,39 @@
+import sys
+from pathlib import Path
+
 import pytest
 
-from simulation.orion_station_simulation import OrionSimulation
+SIMULATION_DIR = Path(__file__).resolve().parent.parent / "simulation"
+sys.path.insert(0, str(SIMULATION_DIR))
+
+from orion_station_simulation_v2 import OrionSimulationV2  # noqa: E402
 
 
 @pytest.mark.unit
 def test_phase1_completes_deterministic():
-    sim = OrionSimulation(seed=1337, enable_emergent=False)
+    sim = OrionSimulationV2(seed=1337, enable_emergent=False)
     result = sim.run(max_ticks=20)
 
     assert result["completed"] is True
     assert set(result["completed_ids"]) == {"T1", "T2", "T3", "T4"}
     assert result["ticks"] <= 20
+    assert result["version"] == "2.0_l1_canon"
 
 
 @pytest.mark.unit
-def test_transcript_contains_kickoff_message():
-    sim = OrionSimulation(seed=1337, enable_emergent=False)
+def test_transcript_contains_canonical_kickoff_message():
+    sim = OrionSimulationV2(seed=1337, enable_emergent=False)
     result = sim.run(max_ticks=5)
 
     transcript = result["transcript"]
     assert transcript, "Transcript should not be empty"
-    # First tick should include Alex Thorn kickoff note
-    assert any("Alex Thorn" in line for line in transcript)
+    assert any("Alex Thorne" in line for line in transcript)
 
 
 @pytest.mark.unit
 @pytest.mark.simulation
 def test_first_tick_emergence_is_possible():
-    """Regression: events were emitted before assignment, so working-agent
-    emergence (swarm_sync, collaboration_boost, cross_pollination) could
-    never fire on the first tick of any run."""
-    import sys
-    from pathlib import Path
-
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "simulation"))
-    from orion_station_simulation_v2 import OrionSimulationV2
-
+    """Working-agent emergence must remain possible on tick zero."""
     working_kinds = {"swarm_sync", "collaboration_boost", "cross_pollination"}
     for seed in range(30):
         sim = OrionSimulationV2(seed=seed, enable_emergent=True)

@@ -30,6 +30,7 @@ and CloudBank. Do not resolve that conflict from this index alone.
 | Topic | Authoritative Document |
 | ------- | ---------------------- |
 | L1/L2/L3 layer model | `docs/architecture/LAYER_ARCHITECTURE.md` |
+| Earth-based user / Pilot boundary, communications-only interaction, no physical L1 representation | `docs/architecture/AURORA_ARCHITECTURE__ADDENDUM__EARTH_PILOT_L1_BOUNDARY__v1.0__2026-08-07.md` |
 | What GUMAS is | `docs/architecture/LAYER_ARCHITECTURE.md` |
 | Relay agents — what layer they exist in | `docs/architecture/LAYER_ARCHITECTURE.md` |
 | Triplex Handshake Protocol | `docs/architecture/LAYER_ARCHITECTURE.md` |

@@ -87,10 +87,16 @@ function DataFreshnessIndicator({ dataUpdatedAt, isStale, isError, refetch }: Da
   // to re-render for some other reason, so the number shown was usually wrong.
   const [now, setNow] = useState(() => Date.now());
 
+  // Only the last branch below renders the elapsed time, so the timer runs only
+  // when that branch is the one showing. The hook itself stays unconditional —
+  // the condition lives inside the effect, not around it.
+  const showsElapsedTime = !isError && !isStale && Boolean(dataUpdatedAt);
+
   useEffect(() => {
+    if (!showsElapsedTime) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [showsElapsedTime]);
 
   if (isError) {
     return (
@@ -121,7 +127,12 @@ function DataFreshnessIndicator({ dataUpdatedAt, isStale, isError, refetch }: Da
   if (dataUpdatedAt) {
     const secondsAgo = Math.floor((now - dataUpdatedAt) / 1000);
     return (
-      <div className="flex items-center space-x-1 text-xs text-gray-500" role="status">
+      // No role="status" here, unlike the two branches above. This text now
+      // changes every second, and role="status" is an implicit aria-live
+      // region, so keeping it would make a screen reader announce the elapsed
+      // time once a second. The connection-lost and stale messages keep their
+      // live regions: those change rarely and are worth announcing.
+      <div className="flex items-center space-x-1 text-xs text-gray-500">
         <Clock className="h-3 w-3" aria-hidden="true" />
         <span>Updated {secondsAgo}s ago</span>
       </div>

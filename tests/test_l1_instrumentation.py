@@ -38,6 +38,11 @@ def test_sensor_snapshot_is_bound_to_run_ledger_without_physical_claims(tmp_path
     assert snapshot["reading"]["values"]["event_count"] == 1.0
     assert snapshot["reading"]["values"]["character_action_count"] == 0.0
     assert "environmental" in snapshot["unavailable_physical_channels"]
+    assert "proximity" not in snapshot["unavailable_physical_channels"]
+    assert snapshot["fleet_channels"]["fleet"]["status"] == "available"
+    assert snapshot["fleet_channels"]["proximity"]["status"] == "available"
+    assert snapshot["fleet_channels"]["docking"]["status"] == "available"
+    assert snapshot["fleet_channels"]["drone"]["status"] == "available"
 
 
 def test_logical_schematic_quarantines_stale_physical_layout_claims(tmp_path: Path):

@@ -1,6 +1,10 @@
 {
   "schema_version": 1,
-  "runtime_contract_version": "1.1.0",
+  "runtime_contract_version": "1.2.0",
+  "compatible_persisted_contract_versions": [
+    "1.1.0",
+    "1.2.0"
+  ],
   "status": "INIT_ELIGIBLE_WHEN_PREFLIGHT_PASSES",
   "authority": {
     "canonrec": {
@@ -27,6 +31,17 @@
       "supporting_sha256": "710eceefc5c09f17864ea845469d7d6725d19ed4cf560108dcb542e4a2d1bc4c",
       "cloudbank_projection_path": "config/l1_runtime_baseline.json",
       "cloudbank_projection_role": "runtime_projection_non_authoritative"
+    },
+    "fleet": {
+      "status": "resolved_cloudbank_projection_canon_authority_unverified",
+      "decision_date": "2026-08-08",
+      "receipt_path": "config/l1_fleet_authority_receipt.json",
+      "receipt_sha256": "bd91c0d1d12350dda324d427b1bea262085846ede92860b3509f632f92738602",
+      "cloudbank_projection_role": "runtime_projection_non_authoritative",
+      "current_state_source": "deterministic_l1_run_state",
+      "historical_mission_policy": "provenance_only_never_current_run_truth",
+      "canonrec_authority_status": "not_verified_in_current_canonrec_projection",
+      "ord_policy_boundary": "mcp_validation_policy_requires_explicit_physical_mission_adapter"
     }
   },
   "pilot_boundary": {

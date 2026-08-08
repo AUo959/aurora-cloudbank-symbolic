@@ -30,6 +30,13 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from l1_character_actor import BoundedCharacterActor, CharacterContext
+from l1_fleet import (
+    OrdPhysicalMissionAdapter,
+    OrdPhysicalMissionProposal,
+    advance_fleet_world_process,
+    build_initial_fleet_state,
+    observation_for_focus,
+)
 from l1_runtime_support import (
     GovernanceError,
     PreflightError,
@@ -53,10 +60,14 @@ from l1_runtime_types import (
     RunManifest,
     l1_run_state_from_payload,
 )
+from modules.ord.ord_policy_engine import DispatchOrder
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_PATH = PROJECT_ROOT / "config" / "l1_runtime_baseline.json"
 CANON_PROVENANCE_PATH = PROJECT_ROOT / "config" / "canon_provenance.json"
+FLEET_AUTHORITY_RECEIPT_PATH = (
+    PROJECT_ROOT / "config" / "l1_fleet_authority_receipt.json"
+)
 DEFAULT_RUN_ROOT = Path(
     os.environ.get("AURORA_L1_RUN_ROOT", Path.home() / ".aurora" / "l1-runs")
 )
@@ -68,11 +79,13 @@ class OrionL1Runtime:
     def __init__(self, baseline_path: Path = BASELINE_PATH) -> None:
         self.baseline_path = baseline_path
         self.baseline = read_json(baseline_path)
+        self.fleet_receipt = read_json(FLEET_AUTHORITY_RECEIPT_PATH)
         self.population = PopulationSnapshot.from_baseline(self.baseline)
         self.state: Optional[L1RunState] = None
         self._rng: Optional[DeterministicReplayRNG] = None
         self._run_root: Optional[Path] = None
         self._commander_actor = BoundedCharacterActor()
+        self._ord_physical_adapter = OrdPhysicalMissionAdapter()
 
     def preflight(self) -> Dict[str, Any]:
         """Validate bootstrap invariants without creating or advancing a run."""
@@ -80,6 +93,7 @@ class OrionL1Runtime:
             self.baseline,
             self.population,
             CANON_PROVENANCE_PATH,
+            FLEET_AUTHORITY_RECEIPT_PATH,
             run_created=self.state is not None,
         )
 
@@ -130,7 +144,9 @@ class OrionL1Runtime:
             raise PreflightError(
                 "persisted L1 run state is unavailable or invalid"
             ) from exc
+        source_contract_version = restored.manifest.runtime_contract_version
         self._validate_loaded_state(restored, normalized_run_id)
+        self._upgrade_loaded_fleet(restored, source_contract_version)
         self.state = restored
         self._run_root = resolved_run_root
         self._restore_replay_generator(restored)
@@ -184,6 +200,7 @@ class OrionL1Runtime:
     def _build_initial_state(self, manifest: RunManifest) -> L1RunState:
         return L1RunState(
             manifest=manifest,
+            fleet=build_initial_fleet_state(self.fleet_receipt),
             world_state={
                 "station": "Orion Station",
                 "l1_status": "initialized",
@@ -230,6 +247,31 @@ class OrionL1Runtime:
 
         roll = self._rng.random()
         kind, summary = event_for_roll(roll)
+        fleet_transitions = advance_fleet_world_process(
+            state.fleet,
+            seed=state.manifest.seed,
+            tick=state.manifest.tick,
+            elapsed_minutes=elapsed_minutes,
+        )
+        event = self._record_autonomous_event(
+            elapsed_minutes,
+            kind,
+            summary,
+            fleet_transitions,
+        )
+        self._deliver_queued_communications()
+        self._queue_due_station_responses()
+        self._persist_if_configured()
+        return event
+
+    def _record_autonomous_event(
+        self,
+        elapsed_minutes: int,
+        kind: str,
+        summary: str,
+        fleet_transitions: list[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        state = self._require_state()
         event = {
             "event_id": str(uuid.uuid4()),
             "tick": state.manifest.tick,
@@ -239,6 +281,9 @@ class OrionL1Runtime:
             "cause": "autonomous_world_process",
             "pilot_attention_influenced_probability": False,
             "governance": "standing_authority_routine",
+            "fleet_transition_ids": [
+                transition["transition_id"] for transition in fleet_transitions
+            ],
             "canon_status": "run_state",
         }
         state.events.append(event)
@@ -253,9 +298,6 @@ class OrionL1Runtime:
                 tick=state.manifest.tick,
             )
         )
-        self._deliver_queued_communications()
-        self._queue_due_station_responses()
-        self._persist_if_configured()
         return event
 
     def _deliver_queued_communications(self) -> None:
@@ -509,6 +551,7 @@ class OrionL1Runtime:
     def observe(self, focus: str = "station") -> Dict[str, Any]:
         """Expose instrumentation without advancing or rearranging L1."""
         state = self._require_state()
+        provider_payload = observation_for_focus(state, focus)
         recent = [asdict(item) for item in state.station_records[-5:]]
         payload = {
             "observation_id": str(uuid.uuid4()),
@@ -517,8 +560,16 @@ class OrionL1Runtime:
             "instrumentation": True,
             "pilot_embodied": False,
             "generated_world_event": False,
-            "records": recent,
+            "records": recent if provider_payload is None else provider_payload["records"],
         }
+        if provider_payload is not None:
+            payload.update(
+                {
+                    key: copy.deepcopy(value)
+                    for key, value in provider_payload.items()
+                    if key not in {"tick", "records"}
+                }
+            )
         observation = EpistemicRecord(
             record_id=payload["observation_id"],
             subject=f"observation:{payload['focus']}",
@@ -542,6 +593,52 @@ class OrionL1Runtime:
         )
         self._persist_if_configured()
         return copy.deepcopy(payload)
+
+    def propose_ord_physical_mission(
+        self,
+        order: DispatchOrder,
+        *,
+        physical_mission_class: str,
+        docking_location_class: str,
+    ) -> OrdPhysicalMissionProposal:
+        """Create a non-executing bridge proposal from ORD MCP policy."""
+        self._require_state()
+        return self._ord_physical_adapter.propose(
+            order,
+            physical_mission_class=physical_mission_class,
+            docking_location_class=docking_location_class,
+        )
+
+    def activate_ord_physical_mission(
+        self,
+        proposal: OrdPhysicalMissionProposal,
+        *,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Apply an explicit physical ORD mission without advancing simulation time."""
+        state = self._require_state()
+        transitions = self._ord_physical_adapter.activate(
+            state.fleet,
+            proposal,
+            receipt=receipt,
+            tick=state.manifest.tick,
+        )
+        state.governance_receipts.append(receipt)
+        event = {
+            "event_id": str(uuid.uuid4()),
+            "tick": state.manifest.tick,
+            "kind": "governed_ord_physical_mission_activation",
+            "cause": "explicit_ord_physical_mission_adapter",
+            "proposal_id": proposal.proposal_id,
+            "policy_mission_id": proposal.policy_mission_id,
+            "receipt_id": receipt.receipt_id,
+            "transition_ids": [item["transition_id"] for item in transitions],
+            "pilot_attention_influenced_probability": False,
+            "canon_status": "run_state",
+        }
+        state.events.append(event)
+        self._persist_if_configured()
+        return event
 
     def route_operator_input(
         self,
@@ -737,10 +834,11 @@ class OrionL1Runtime:
             raise PreflightError("persisted run ID does not match its persistence path")
         if manifest.schema_version != 1:
             raise PreflightError("persisted run schema version is unsupported")
-        if (
-            manifest.runtime_contract_version
-            != self.baseline["runtime_contract_version"]
-        ):
+        compatible_versions = self.baseline.get(
+            "compatible_persisted_contract_versions",
+            [self.baseline["runtime_contract_version"]],
+        )
+        if manifest.runtime_contract_version not in compatible_versions:
             raise PreflightError("persisted run contract does not match this runtime")
         if (
             manifest.canonrec_revision
@@ -762,6 +860,8 @@ class OrionL1Runtime:
         manifest.population.validate()
         self._validate_loaded_communications(state)
         self._validate_loaded_character_actions(state)
+        self._validate_autonomous_event_replay(state)
+        self._validate_loaded_fleet(state)
 
     def _validate_loaded_character_actions(self, state: L1RunState) -> None:
         action_ids = set()
@@ -855,6 +955,68 @@ class OrionL1Runtime:
         if not isinstance(value, str) or not value:
             raise PreflightError(f"{prefix} {field} must be a non-empty string")
         return value
+    def _validate_autonomous_event_replay(self, state: L1RunState) -> None:
+        autonomous_events = [
+            event
+            for event in state.events
+            if event.get("cause") == "autonomous_world_process"
+        ]
+        if len(autonomous_events) != state.manifest.tick:
+            raise PreflightError(
+                "persisted autonomous event ledger does not match run tick"
+            )
+        for expected_tick, event in enumerate(autonomous_events, start=1):
+            if event.get("tick") != expected_tick:
+                raise PreflightError(
+                    "persisted autonomous event ledger is not contiguous"
+                )
+            elapsed = event.get("elapsed_minutes")
+            if type(elapsed) is not int or elapsed <= 0:
+                raise PreflightError(
+                    "persisted autonomous event elapsed time is invalid"
+                )
+
+    def _validate_loaded_fleet(self, state: L1RunState) -> None:
+        try:
+            state.fleet.validate()
+        except ValueError as exc:
+            raise PreflightError("persisted fleet state is invalid") from exc
+        current_version = self.baseline["runtime_contract_version"]
+        if (
+            state.manifest.runtime_contract_version == current_version
+            and state.fleet.provider_status != "bound"
+        ):
+            raise PreflightError("persisted current-contract fleet provider is unbound")
+        if (
+            state.fleet.provider_status == "bound"
+            and state.fleet.process_position != state.manifest.tick
+        ):
+            raise PreflightError("persisted fleet replay position does not match run tick")
+
+    def _upgrade_loaded_fleet(
+        self,
+        state: L1RunState,
+        source_contract_version: str,
+    ) -> None:
+        current_version = self.baseline["runtime_contract_version"]
+        if state.fleet.provider_status == "unbound":
+            state.fleet = build_initial_fleet_state(self.fleet_receipt)
+            autonomous_events = [
+                event
+                for event in state.events
+                if event.get("cause") == "autonomous_world_process"
+            ]
+            for event in autonomous_events:
+                advance_fleet_world_process(
+                    state.fleet,
+                    seed=state.manifest.seed,
+                    tick=event["tick"],
+                    elapsed_minutes=event["elapsed_minutes"],
+                )
+            state.fleet.migrated_from_contract_version = source_contract_version
+        if state.fleet.authority_receipt_id != self.fleet_receipt.get("receipt_id"):
+            raise PreflightError("persisted fleet authority receipt does not match runtime")
+        state.manifest.runtime_contract_version = current_version
 
     def _validate_loaded_communications(self, state: L1RunState) -> None:
         message_ids = set()

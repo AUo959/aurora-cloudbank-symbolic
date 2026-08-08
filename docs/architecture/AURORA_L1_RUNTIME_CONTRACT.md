@@ -1,6 +1,6 @@
 # Aurora L1 Runtime Contract
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Date:** 2026-08-08  
 **Status:** Runtime contract for governed Orion L1 initialization and advancement  
 **Machine-readable baseline:** `config/l1_runtime_baseline.json`  
@@ -55,6 +55,15 @@ but it cannot overrule CanonRec on canon conflicts.
 Run state is lower authority than both. Runtime facts begin as `run_state` and
 must not become primary canon without explicit post-run review.
 
+Fleet identity is currently a CloudBank
+`runtime_projection_non_authoritative`, governed by
+`config/l1_fleet_authority_receipt.json`. The active projection selects the
+ORF/ORS/ORP/ORD identity surface in `src/entities/fleet/`. Detailed
+`simulation/fleet/` records remain design provenance, and their dated 2025
+missions, coordinates, assignments, and counters are not current 2026 run
+state. The conflicting Dark Matter aggregate at `.aurora/canonical/fleet.json`
+is legacy provenance only.
+
 ## Pilot boundary
 
 Pilot is an Earth-side institutional operator role.
@@ -83,6 +92,12 @@ frequently.
 
 A no-material-event result is valid. The runtime does not manufacture content
 to reward attention.
+
+Fleet advancement is a second deterministic world process namespaced by seed,
+fleet identity, and tick. It does not consume observation state or the station
+event generator's replay position. It advances only qualitative mission,
+status, proximity, and docking/location classes; exact trajectories and
+coordinates remain quarantined.
 
 ## Input routing
 
@@ -199,6 +214,30 @@ The `PopulationSnapshot` type also permits a future evidence-supported state in
 which, for example, human complement is 81 while identified/persona-resolved
 subsets are smaller.
 
+## Fleet state and observation providers
+
+`L1RunState.fleet` carries typed state for each projected asset:
+
+- identity and display name;
+- asset class and autonomy class;
+- run-scoped status and mission-state class;
+- qualitative docking/location class;
+- authority receipt and source provenance;
+- deterministic fleet-process replay position.
+
+The fleet, proximity, docking, and drone observation providers read this state
+without advancing it. A bound provider returns `available` with the receipt and
+projection role. An unbound provider returns
+`unavailable / provider_unbound`; it must never turn missing provider data into
+a claim that no craft are active. Exact range, docking bay, and navigation
+trajectory remain unavailable.
+
+ORD policy and physical flight are separate domains. `modules/ord/` may create
+an MCP-validation `DispatchOrder`, but the order has no physical effect. The
+explicit ORD-to-L1 adapter first creates a non-executing proposal; physical
+drone mission state changes only after a separate call supplies a complete
+Triplex governance receipt.
+
 ## Lagrange-point authority and remaining uncertainty
 
 CanonRec's owner ruling establishes the current siting class:
@@ -245,7 +284,15 @@ INIT records at minimum:
 - station-cycle position;
 - active quarantines;
 - typed population snapshot;
+- the fleet authority receipt, typed fleet projection, and fleet replay
+  position;
 - tick/status.
+
+Contract `1.2.0` accepts persisted `1.1.0` continuation states from PR #1480.
+When their fleet field is absent, the runtime reconstructs it from seed plus the
+contiguous autonomous-event ledger without advancing the tick, station cycle,
+or central replay generator. The upgraded state is persisted only on a later
+explicit mutation such as advancement.
 
 Run persistence is rejected if the requested run root is inside the repository.
 The default is external user state under `~/.aurora/l1-runs`.
@@ -289,6 +336,9 @@ The live L1 path is INIT-eligible when:
 - Phase-1 benchmark wiring points to v2;
 - live L1 runtime is distinct from that benchmark;
 - Picard_Delta_3 / Triplex exceptional-action policy fails closed;
+- the fleet authority receipt and all hashed sources match;
+- historical fleet missions cannot seed current run state;
+- ORD MCP policy cannot become physical flight without the explicit adapter;
 - preflight leaves tick 0 and creates no run.
 
 Warnings may remain for quarantined uncertainty. Warnings are not blockers when

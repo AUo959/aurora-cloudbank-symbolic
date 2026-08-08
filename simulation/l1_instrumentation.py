@@ -6,6 +6,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
+from l1_fleet import (
+    docking_observation,
+    drone_observation,
+    fleet_observation,
+    proximity_observation,
+)
 from l1_runtime_support import read_json
 from l1_runtime_types import L1RunState
 from src.sensors.internal import L1RuntimeSensor
@@ -33,11 +39,16 @@ def build_sensor_snapshot(state: L1RunState) -> Dict[str, Any]:
             "alerts": reading.alerts,
             **reading.metadata,
         },
+        "fleet_channels": {
+            "fleet": fleet_observation(state),
+            "proximity": proximity_observation(state),
+            "docking": docking_observation(state),
+            "drone": drone_observation(state),
+        },
         "unavailable_physical_channels": [
             "environmental",
             "structural_hull",
             "crew_biometrics",
-            "proximity",
             "astronomical",
         ],
         "unavailable_channel_policy": (

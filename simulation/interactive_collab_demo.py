@@ -50,60 +50,67 @@ def print_tick_header(tick, events) -> None:
                 "cross_pollination": "🔄",
             }.get(event.kind, "✨")
             print(
-                f"   {icon} {event.description} "
-                f"(+{int((event.multiplier - 1) * 100)}%)"
+                f"   {icon} {event.description} (+{int((event.multiplier - 1) * 100)}%)"
             )
     else:
         print("   routine cycle — no emergent event")
     print("━" * 70)
 
 
-def interactive_simulation(seed: int = 42, ticks: int = 10, delay: float = 1.5) -> None:
-    print_header()
-    sim = OrionSimulationV2(seed=seed, enable_emergent=True)
-
+def print_benchmark_tasks(sim: OrionSimulationV2) -> None:
     print("\n📋 HISTORICAL PHASE-1 BENCHMARK TASKS:")
     for task_id, task in sim.tasks.items():
         deps = f" (depends: {', '.join(task.depends_on)})" if task.depends_on else ""
         print(f"   {task_id}: {task.name} ({task.est_hours}h){deps}")
 
-    print_crew_status(sim.agents)
-    input("\n▶️  Press ENTER to begin benchmark...")
 
+def print_active_assignments(sim: OrionSimulationV2) -> None:
+    print("\n📊 ACTIVE ASSIGNMENTS:")
+    active_agents = [agent for agent in sim.agents.values() if agent.assigned_task]
+    if not active_agents:
+        print("   none")
+    for agent in active_agents:
+        task = sim.tasks.get(agent.assigned_task)
+        if task:
+            print(f"   {agent.name} → {task.name} ({task.remaining:.1f}h remaining)")
+
+
+def print_task_status(sim: OrionSimulationV2) -> None:
+    print("\n📈 TASK STATUS:")
+    for task in sim.tasks.values():
+        status = "✅ COMPLETE" if task.completed else f"🔄 {task.remaining:.1f}h left"
+        bar_filled = (
+            int((1 - task.remaining / task.est_hours) * 20)
+            if task.est_hours > 0
+            else 20
+        )
+        bar = "█" * bar_filled + "░" * (20 - bar_filled)
+        print(f"   {task.id}: [{bar}] {status}")
+
+
+def run_interactive_ticks(
+    sim: OrionSimulationV2,
+    ticks: int,
+    delay: float,
+) -> None:
     for _ in range(ticks):
         if all(task.completed for task in sim.tasks.values()):
             break
-
-        tick = sim.ticks
-        event_start = len(sim.aurora.events)
-        sim.tick()
-        events = sim.aurora.events[event_start:]
-
-        print_tick_header(tick, events)
-        print("\n📊 ACTIVE ASSIGNMENTS:")
-        active_agents = [agent for agent in sim.agents.values() if agent.assigned_task]
-        if not active_agents:
-            print("   none")
-        for agent in active_agents:
-            task = sim.tasks.get(agent.assigned_task)
-            if task:
-                print(f"   {agent.name} → {task.name} ({task.remaining:.1f}h remaining)")
-
-        print("\n📈 TASK STATUS:")
-        for task in sim.tasks.values():
-            status = "✅ COMPLETE" if task.completed else f"🔄 {task.remaining:.1f}h left"
-            bar_filled = (
-                int((1 - task.remaining / task.est_hours) * 20)
-                if task.est_hours > 0
-                else 20
-            )
-            bar = "█" * bar_filled + "░" * (20 - bar_filled)
-            print(f"   {task.id}: [{bar}] {status}")
-
+        run_interactive_tick(sim)
         time.sleep(delay)
 
-    result = sim.run(max_ticks=0)
 
+def run_interactive_tick(sim: OrionSimulationV2) -> None:
+    tick = sim.ticks
+    event_start = len(sim.aurora.events)
+    sim.tick()
+    events = sim.aurora.events[event_start:]
+    print_tick_header(tick, events)
+    print_active_assignments(sim)
+    print_task_status(sim)
+
+
+def print_benchmark_result(sim: OrionSimulationV2, result) -> None:
     print("\n" + "=" * 70)
     print("BENCHMARK COMPLETE")
     print("=" * 70)
@@ -121,10 +128,23 @@ def interactive_simulation(seed: int = 42, ticks: int = 10, delay: float = 1.5) 
     print("\nLive L1 INIT remains: python .aurora/init_l1.py preflight / init")
 
 
+def interactive_simulation(seed: int = 42, ticks: int = 10, delay: float = 1.5) -> None:
+    print_header()
+    sim = OrionSimulationV2(seed=seed, enable_emergent=True)
+    print_benchmark_tasks(sim)
+    print_crew_status(sim.agents)
+    input("\n▶️  Press ENTER to begin benchmark...")
+    run_interactive_ticks(sim, ticks, delay)
+    result = sim.run(max_ticks=0)
+    print_benchmark_result(sim, result)
+
+
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Interactive Orion Phase-1 benchmark v2")
+    parser = argparse.ArgumentParser(
+        description="Interactive Orion Phase-1 benchmark v2"
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument("--ticks", type=int, default=10, help="Max cycles")
     parser.add_argument(

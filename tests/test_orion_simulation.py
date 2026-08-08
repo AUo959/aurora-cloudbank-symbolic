@@ -4,7 +4,9 @@ from pathlib import Path
 import pytest
 
 SIMULATION_DIR = Path(__file__).resolve().parent.parent / "simulation"
-sys.path.insert(0, str(SIMULATION_DIR))
+SIMULATION_PATH = str(SIMULATION_DIR)
+if SIMULATION_PATH not in sys.path:
+    sys.path.insert(0, SIMULATION_PATH)
 
 from orion_station_simulation_v2 import OrionSimulationV2  # noqa: E402
 

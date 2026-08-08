@@ -24,7 +24,9 @@ from typing import Any, Dict, List, Optional
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SIMULATION_DIR = PROJECT_ROOT / "simulation"
-sys.path.insert(0, str(SIMULATION_DIR))
+SIMULATION_PATH = str(SIMULATION_DIR)
+if SIMULATION_PATH not in sys.path:
+    sys.path.insert(0, SIMULATION_PATH)
 
 from l1_runtime import OrionL1Runtime  # noqa: E402
 

@@ -802,6 +802,23 @@ class OrionL1Runtime:
             )
             action_ids.add(action_id)
             response_ids.add(response_id)
+        self._validate_character_response_coverage(messages, response_ids)
+
+    def _validate_character_response_coverage(
+        self,
+        messages: Dict[str, Dict[str, Any]],
+        response_ids: set[str],
+    ) -> None:
+        unlinked_responses = {
+            message_id
+            for message_id, message in messages.items()
+            if self._communication_direction(message) == "station_to_earth"
+            and message_id not in response_ids
+        }
+        if unlinked_responses:
+            raise PreflightError(
+                "persisted station-to-Earth communication lacks a character action"
+            )
 
     @staticmethod
     def _validate_character_action_references(
@@ -883,8 +900,15 @@ class OrionL1Runtime:
             "delivered_to_earth",
         }:
             raise PreflightError(f"{prefix} status is unsupported")
-        if self._communication_direction(message) is None:
+        direction = self._communication_direction(message)
+        if direction is None:
             raise PreflightError(f"{prefix} direction is unsupported")
+        expected_origin = {
+            "earth_to_orion": "Earth",
+            "station_to_earth": "Orion Station",
+        }[direction]
+        if message["origin"] != expected_origin:
+            raise PreflightError(f"{prefix} origin does not match direction")
 
     @staticmethod
     def _require_message_string(

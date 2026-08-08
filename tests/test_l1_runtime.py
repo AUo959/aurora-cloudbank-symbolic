@@ -219,6 +219,8 @@ def test_persisted_run_can_reload_and_continue_deterministically(tmp_path: Path)
         reloaded_state.manifest.run_id,
         run_root=tmp_path / "reloaded",
     )
+    assert loaded.manifest.tick == 1
+
     continued_second = continued.advance(elapsed_minutes=1)
 
     assert loaded.manifest.tick == 2
@@ -403,6 +405,55 @@ def test_load_run_rejects_inconsistent_character_response_causality(tmp_path: Pa
 
     with pytest.raises(PreflightError, match="causality is inconsistent"):
         loader.load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_load_run_rejects_station_response_without_character_action(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=1337,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    runtime.advance(elapsed_minutes=1)
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["character_actions"] = []
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="lacks a character action"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("direction", "origin"),
+    [
+        ("earth_to_orion", "Orion Station"),
+        ("station_to_earth", "Earth"),
+    ],
+)
+def test_load_run_rejects_communication_origin_direction_mismatch(
+    tmp_path: Path,
+    direction: str,
+    origin: str,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=42,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["communications"][0]["direction"] = direction
+    payload["communications"][0]["origin"] = origin
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="origin does not match direction"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
 
 
 @pytest.mark.unit

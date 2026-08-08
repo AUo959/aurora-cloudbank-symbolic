@@ -11,6 +11,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -29,9 +31,114 @@ SEMVER_COMPONENT_MAX_DIGITS = 9
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SCHEMA_PATH = REPO_ROOT / "schemas" / "continuity" / "universal_thread_beacon.schema.json"
 
+# A minimum-profile beacon is a small descriptive record. The cap exists so an
+# oversized input is refused before it is read, rather than after the reader has
+# materialised it and walked it several times.
+MAX_BEACON_BYTES = 1 << 20  # 1 MiB
+
+# Several identity fields are compared before schema validation can bound their
+# length, so error messages must not echo them whole.
+ERROR_ECHO_MAX_CHARS = 96
+
+# Instance locations the schema constrains with `pattern` or `format`, re-checked
+# here because jsonschema alone does not enforce either one strictly enough:
+#
+#   pattern - jsonschema compiles patterns with Python's `re`, where `$` also
+#     matches immediately before a final newline. "a"*64 + "\n" therefore
+#     satisfies "^[a-fA-F0-9]{64}$". Two of these fields feed the canonical
+#     digest, so the same logical value would have two distinct encodings.
+#     Fixed with re.fullmatch, which has no such leniency. The schema keeps `$`
+#     because that is correct under ECMA-262, which is what JSON Schema
+#     specifies and what non-Python readers implement.
+#
+#   format - format assertions are annotations by default, and `date-time` is
+#     only checked when rfc3339-validator is installed. It is not a declared
+#     dependency, so these were silently unenforced and a beacon could validate
+#     for one reader and not another depending on what happened to be on the
+#     path. Checked here instead of adding the dependency, matching how this
+#     module already hand-validates semantic versions and integer bounds.
+#
+# test_reader_covers_every_schema_pattern_and_format re-derives this table from
+# the schema and fails if a constraint is added without being covered.
+PATTERNED_FIELDS: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("manifest_version",), r"[0-9]+\.[0-9]+\.[0-9]+"),
+    (("integrity", "digest"), r"[a-fA-F0-9]{64}"),
+    (("compatibility", "minimum_reader_version"), r"[0-9]+\.[0-9]+\.[0-9]+"),
+)
+FORMATTED_FIELDS: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("lifecycle", "created_at"), "date-time"),
+    (("lifecycle", "updated_at"), "date-time"),
+)
+
+# RFC 3339 date-time. Deliberately stricter than datetime.fromisoformat, which
+# accepts spellings RFC 3339 does not (a space separator, an omitted offset).
+_RFC3339_RE = re.compile(
+    r"\d{4}-\d{2}-\d{2}"
+    r"[Tt]"
+    r"\d{2}:\d{2}:\d{2}(?:\.\d+)?"
+    r"(?:[Zz]|[+-]\d{2}:\d{2})"
+)
+
 
 class BeaconValidationError(ValueError):
     """Raised when a beacon cannot be accepted by the offline reader."""
+
+
+def _echo(value: Any) -> str:
+    """Return a length-bounded repr safe to put in an error message.
+
+    specification.name, specification.schema_version and
+    compatibility.canonicalization are all compared before schema validation
+    runs, so no maxLength bounds them at that point. Interpolating them raw let
+    a 5 MB field produce a 5 MB message, printed verbatim to stdout by main().
+    """
+    text = repr(value)
+    if len(text) <= ERROR_ECHO_MAX_CHARS:
+        return text
+    return f"{text[:ERROR_ECHO_MAX_CHARS]}... ({len(text)} chars total)"
+
+
+def _resolve(payload: Any, path: tuple[str, ...]) -> Any:
+    """Return the value at a dotted instance path, or None if absent."""
+    current = payload
+    for key in path:
+        if not isinstance(current, dict) or key not in current:
+            return None
+        current = current[key]
+    return current
+
+
+def _validate_strict_formats(payload: dict[str, Any]) -> None:
+    """Re-check pattern and format constraints that jsonschema under-enforces.
+
+    See PATTERNED_FIELDS / FORMATTED_FIELDS for why each is needed.
+    """
+    for path, pattern in PATTERNED_FIELDS:
+        value = _resolve(payload, path)
+        if value is None or not isinstance(value, str):
+            continue
+        if re.fullmatch(pattern, value) is None:
+            raise BeaconValidationError(
+                f"Invalid {'.'.join(path)}: {_echo(value)} does not match {pattern!r} "
+                f"under strict full-string matching"
+            )
+
+    for path, fmt in FORMATTED_FIELDS:
+        value = _resolve(payload, path)
+        if value is None or not isinstance(value, str):
+            continue
+        if fmt != "date-time":
+            raise BeaconValidationError(f"Reader cannot enforce format {fmt!r} at {'.'.join(path)}")
+        if _RFC3339_RE.fullmatch(value) is None:
+            raise BeaconValidationError(
+                f"Invalid {'.'.join(path)}: {_echo(value)} is not an RFC 3339 date-time"
+            )
+        try:
+            datetime.fromisoformat(value.replace("Z", "+00:00").replace("z", "+00:00"))
+        except ValueError as exc:
+            raise BeaconValidationError(
+                f"Invalid {'.'.join(path)}: {_echo(value)} is not a real date-time ({exc})"
+            ) from exc
 
 
 def _reject_nonfinite(value: str) -> None:
@@ -69,6 +176,16 @@ def _object_without_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 def load_json(path: Path) -> dict[str, Any]:
     """Load one strict UTF-8 JSON object from disk."""
     try:
+        size = path.stat().st_size
+    except OSError as exc:
+        raise BeaconValidationError(f"Unable to stat {path}: {exc}") from exc
+    if size > MAX_BEACON_BYTES:
+        raise BeaconValidationError(
+            f"Refusing to read {path}: {size} bytes exceeds the {MAX_BEACON_BYTES}-byte "
+            f"limit for a minimum-profile beacon"
+        )
+
+    try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
         raise BeaconValidationError(f"Unable to read UTF-8 JSON from {path}: {exc}") from exc
@@ -99,7 +216,7 @@ def load_json(path: Path) -> dict[str, Any]:
 def semantic_version_tuple(version: str, field_name: str) -> tuple[int, int, int]:
     """Parse a bounded three-component semantic-version form."""
     if not isinstance(version, str):
-        raise BeaconValidationError(f"Invalid {field_name}: {version!r}")
+        raise BeaconValidationError(f"Invalid {field_name}: {_echo(version)}")
     parts = version.split(".")
     # str.isdigit() is true for non-ASCII decimal digits that int() also
     # accepts, so "١.٠.٠" would otherwise parse as (1, 0, 0). This runs on
@@ -110,11 +227,11 @@ def semantic_version_tuple(version: str, field_name: str) -> tuple[int, int, int
         or any(not (part.isascii() and part.isdigit()) for part in parts)
         or any(len(part) > SEMVER_COMPONENT_MAX_DIGITS for part in parts)
     ):
-        raise BeaconValidationError(f"Invalid {field_name}: {version!r}")
+        raise BeaconValidationError(f"Invalid {field_name}: {_echo(version)}")
     try:
         parsed = tuple(int(part) for part in parts)
     except ValueError as exc:
-        raise BeaconValidationError(f"Invalid {field_name}: {version!r}") from exc
+        raise BeaconValidationError(f"Invalid {field_name}: {_echo(version)}") from exc
     return parsed  # type: ignore[return-value]
 
 
@@ -265,13 +382,13 @@ def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str
     if not isinstance(specification, dict):
         raise BeaconValidationError("Missing specification object")
     if specification.get("name") != SPECIFICATION_NAME:
-        raise BeaconValidationError(f"Unsupported specification name: {specification.get('name')!r}")
+        raise BeaconValidationError(f"Unsupported specification name: {_echo(specification.get('name'))}")
 
     version = specification.get("schema_version")
     semantic_version_tuple(version, "schema version")
     if version != SUPPORTED_SCHEMA_VERSION:
         raise BeaconValidationError(
-            f"Unsupported UTB schema version {version!r}; supported version is {SUPPORTED_SCHEMA_VERSION}"
+            f"Unsupported UTB schema version {_echo(version)}; supported version is {SUPPORTED_SCHEMA_VERSION}"
         )
 
     _validate_schema_contents(schema, version)
@@ -287,6 +404,12 @@ def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str
         location = ".".join(str(part) for part in exc.absolute_path) or "<root>"
         raise BeaconValidationError(f"Schema validation failed at {location}: {exc.message}") from exc
 
+    # jsonschema has now passed, which is necessary but not sufficient: its
+    # `pattern` handling is Python-regex-lenient about a trailing newline, and
+    # its `format` handling is a no-op without rfc3339-validator. See
+    # PATTERNED_FIELDS / FORMATTED_FIELDS.
+    _validate_strict_formats(payload)
+
     compatibility = payload["compatibility"]
     minimum_reader_version = compatibility["minimum_reader_version"]
     if semantic_version_tuple(minimum_reader_version, "minimum reader version") > semantic_version_tuple(
@@ -297,10 +420,14 @@ def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str
         )
     if compatibility["canonicalization"] != CANONICALIZATION:
         raise BeaconValidationError(
-            f"Unsupported canonicalization {compatibility['canonicalization']!r}; expected {CANONICALIZATION!r}"
+            f"Unsupported canonicalization {_echo(compatibility['canonicalization'])}; expected {CANONICALIZATION!r}"
         )
 
-    canonical_json(payload)
+    # Assert the canonical value domain without serialising. This used to call
+    # canonical_json() and discard the string, which meant main() built the same
+    # canonical text twice -- the most expensive step in the reader, done once
+    # for its side effect and once for its value.
+    _validate_canonical_subset(payload)
     return payload
 
 

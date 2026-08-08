@@ -350,3 +350,118 @@ def test_published_digest_in_design_doc_matches_computed_digest(
         "The canonical digest published in UNIVERSAL_THREAD_BEACON_FIELD_OWNERSHIP.md "
         f"does not match the computed digest {computed}."
     )
+
+
+@pytest.mark.unit
+def test_reader_covers_every_schema_pattern_and_format(validator_module, schema: dict) -> None:
+    """Every `pattern` and `format` in the schema must be re-checked by the reader.
+
+    jsonschema under-enforces both: `pattern` is compiled with Python's `re`,
+    whose `$` also matches before a trailing newline, and `format` is inert for
+    `date-time` unless rfc3339-validator happens to be installed. The reader
+    compensates via PATTERNED_FIELDS / FORMATTED_FIELDS, which are hand-written
+    tables. This derives the same set from the schema so a constraint cannot be
+    added without the compensation being added too.
+    """
+    found_patterns: set[str] = set()
+    found_formats: set[str] = set()
+
+    def walk(node, leaf: str | None) -> None:
+        if isinstance(node, dict):
+            if "pattern" in node and leaf:
+                found_patterns.add(leaf)
+            if "format" in node and leaf:
+                found_formats.add(leaf)
+            for key, value in node.items():
+                # Only property names are instance locations; `properties`,
+                # `allOf`, `then` and friends are schema structure.
+                if key == "properties" and isinstance(value, dict):
+                    for prop, sub in value.items():
+                        walk(sub, prop)
+                else:
+                    walk(value, leaf)
+        elif isinstance(node, list):
+            for item in node:
+                walk(item, leaf)
+
+    walk(schema, None)
+
+    covered_patterns = {path[-1] for path, _ in validator_module.PATTERNED_FIELDS}
+    covered_formats = {path[-1] for path, _ in validator_module.FORMATTED_FIELDS}
+
+    assert found_patterns <= covered_patterns, (
+        "Schema declares `pattern` on fields the reader does not strictly re-check: "
+        f"{sorted(found_patterns - covered_patterns)}. Add them to PATTERNED_FIELDS."
+    )
+    assert found_formats <= covered_formats, (
+        "Schema declares `format` on fields the reader does not strictly re-check: "
+        f"{sorted(found_formats - covered_formats)}. Add them to FORMATTED_FIELDS."
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "path,value",
+    [
+        (("integrity", "digest"), "a" * 64 + "\n"),
+        (("manifest_version",), "1.0.0\n"),
+        (("compatibility", "minimum_reader_version"), "1.0.0\n"),
+    ],
+)
+def test_trailing_newline_is_rejected_in_patterned_fields(
+    validator_module, schema: dict, example: dict, path, value
+) -> None:
+    """Python's `re` lets `$` match before a final newline; the reader must not.
+
+    Two of these feed the canonical digest, so accepting both spellings would
+    give one logical value two distinct canonical encodings.
+    """
+    beacon = copy.deepcopy(example)
+    target = beacon
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+
+    # The schema alone still accepts it -- that is the point of the reader check.
+    jsonschema.Draft202012Validator(schema).validate(beacon)
+
+    with pytest.raises(validator_module.BeaconValidationError, match="strict full-string"):
+        validator_module.validate_beacon(beacon, schema)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("bad", ["not-a-date", "2026-08-08", "2026-08-08 12:00:00Z", "2026-13-01T00:00:00Z"])
+def test_invalid_date_time_is_rejected(validator_module, schema: dict, example: dict, bad: str) -> None:
+    """`format: date-time` is inert in jsonschema without rfc3339-validator."""
+    beacon = copy.deepcopy(example)
+    beacon["lifecycle"]["created_at"] = bad
+
+    with pytest.raises(validator_module.BeaconValidationError, match="date-time"):
+        validator_module.validate_beacon(beacon, schema)
+
+
+@pytest.mark.unit
+def test_oversized_beacon_is_refused_before_reading(tmp_path: Path, validator_module) -> None:
+    """A beacon larger than the cap is rejected on stat, not after materialising."""
+    oversized = tmp_path / "big.json"
+    oversized.write_text(
+        json.dumps({"pad": "x" * (validator_module.MAX_BEACON_BYTES + 1024)}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(validator_module.BeaconValidationError, match="exceeds the .* limit"):
+        validator_module.load_json(oversized)
+
+
+@pytest.mark.unit
+def test_error_messages_do_not_echo_oversized_values(validator_module, schema: dict, example: dict) -> None:
+    """Identity fields are compared before any maxLength applies, so echoes must be bounded."""
+    beacon = copy.deepcopy(example)
+    beacon["specification"]["name"] = "x" * 100_000
+
+    with pytest.raises(validator_module.BeaconValidationError) as excinfo:
+        validator_module.validate_beacon(beacon, schema)
+
+    message = str(excinfo.value)
+    assert len(message) < 500, f"error message is {len(message)} chars; it should be truncated"
+    assert "100" in message and "chars total" in message

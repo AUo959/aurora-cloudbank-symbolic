@@ -10,6 +10,26 @@ from typing import Any, Dict, Mapping, Protocol, Sequence
 
 POLICY_VERSION = "bounded_character_action_v1"
 
+NON_DIEGETIC_CONTROL_PLANE_PHRASES = (
+    "this run",
+    "runtime observation",
+    "runtime projection",
+    "profile projection",
+    "canon-level",
+    "canon status",
+    "knowledge gap",
+    "unresolved fact",
+    "operator personal knowledge",
+    "pilot-position knowledge",
+    "observation aperture",
+    "policy version",
+    "caused_by_action_id",
+)
+
+
+class CharacterSpeechBoundaryError(RuntimeError):
+    """Raised when control-plane language leaks into L1 character speech."""
+
 
 class CharacterContextView(Protocol):
     """Fields consumed by the pure character decision policy."""
@@ -19,6 +39,7 @@ class CharacterContextView(Protocol):
     inbound: Mapping[str, Any]
     station_records: Sequence[Mapping[str, Any]]
     character_knowledge: Sequence[Mapping[str, Any]]
+    governed_records: Sequence[Mapping[str, Any]]
 
 
 def classify_intents(content: str) -> list[str]:
@@ -42,8 +63,10 @@ def _contains_any(content: str, phrases: Sequence[str]) -> bool:
 def select_action(
     intents: Sequence[str],
     recent_events: Sequence[Mapping[str, Any]],
+    emergency_state: bool | None = None,
 ) -> str:
-    if "emergency_inquiry" in intents or _has_emergency_event(recent_events):
+    event_is_active = emergency_state is None and _has_emergency_event(recent_events)
+    if "emergency_inquiry" in intents or emergency_state is True or event_is_active:
         return "assess_and_escalate_if_warranted"
     if "station_operations_status" in intents or "welfare_check" in intents:
         return "review_watch_and_report"
@@ -59,8 +82,14 @@ def _has_emergency_event(events: Sequence[Mapping[str, Any]]) -> bool:
 def decision_event(
     selected_action: str,
     events: Sequence[Mapping[str, Any]],
+    emergency_state: bool | None = None,
 ) -> Mapping[str, Any] | None:
     if selected_action == "assess_and_escalate_if_warranted":
+        if emergency_state is not None:
+            return {
+                "kind": "governed_emergency_state",
+                "emergency_active": emergency_state,
+            }
         emergency = next(
             (
                 item
@@ -72,6 +101,18 @@ def decision_event(
         if emergency is not None:
             return emergency
     return events[-1] if events else None
+
+
+def governed_emergency_state(
+    records: Sequence[Mapping[str, Any]],
+) -> bool | None:
+    """Return the latest typed Triplex-governed emergency fact, if one exists."""
+    for record in reversed(records):
+        if record.get("subject") != "emergency_active":
+            continue
+        value = record.get("value")
+        return value if isinstance(value, bool) else None
+    return None
 
 
 def stable_action_id(context: CharacterContextView, selected_action: str) -> str:
@@ -103,7 +144,17 @@ def knowledge_inputs(context: CharacterContextView) -> list[Dict[str, Any]]:
         }
         for item in context.character_knowledge[-8:]
     ]
-    return station + known
+    governed = [
+        {
+            "record_id": item["record_id"],
+            "subject": item["subject"],
+            "provenance": item["provenance"],
+            "tick": item["tick"],
+            "scope": "governed_record",
+        }
+        for item in context.governed_records[-8:]
+    ]
+    return station + known + governed
 
 
 def duty_drivers(selected_action: str) -> list[str]:
@@ -209,11 +260,16 @@ def operational_steps(
 def _emergency_assessment_step(
     latest_event: Mapping[str, Any] | None,
 ) -> Dict[str, Any]:
-    emergency = bool(latest_event and "emergency" in str(latest_event.get("kind", "")))
+    emergency = _event_emergency_state(latest_event)
+    result = {
+        True: "recorded_emergency",
+        False: "recorded_no_emergency",
+        None: "emergency_status_unconfirmed",
+    }[emergency]
     return {
         "kind": "assess_command_exception",
         "status": "completed",
-        "result": "recorded_emergency" if emergency else "no_recorded_emergency",
+        "result": result,
     }
 
 
@@ -268,37 +324,33 @@ def active_commitments(
 def render_response(
     decision: Mapping[str, Any],
     latest_event: Mapping[str, Any] | None,
-    unresolved_facts: Sequence[str],
     opening: str,
 ) -> str:
     action = decision["selected_action"]
     if action == "review_watch_and_report":
-        return _render_status_report(
-            decision, latest_event, unresolved_facts, opening
-        )
-    if action == "assess_and_escalate_if_warranted":
-        return _render_emergency_assessment(latest_event, opening)
-    if action == "review_authority_and_respond":
-        return _render_authority_response(opening)
-    return _render_general_contact(opening)
+        response = _render_status_report(decision, latest_event, opening)
+    elif action == "assess_and_escalate_if_warranted":
+        response = _render_emergency_assessment(latest_event, opening)
+    elif action == "review_authority_and_respond":
+        response = _render_authority_response(opening)
+    else:
+        response = _render_general_contact(opening)
+    enforce_diegetic_speech(response)
+    return response
 
 
 def _render_status_report(
     decision: Mapping[str, Any],
     latest_event: Mapping[str, Any] | None,
-    unresolved_facts: Sequence[str],
     opening: str,
 ) -> str:
     event_sentence = _event_sentence(latest_event)
-    limits = _limits_sentence(unresolved_facts)
     commitment = _commitment_sentence(decision)
     return " ".join(
         part
         for part in (
-            f"{opening} I reviewed the current watch record before answering.",
+            f"{opening} We're steady here.",
             event_sentence,
-            "No emergency is recorded on the current watch.",
-            limits,
             commitment,
         )
         if part
@@ -307,32 +359,19 @@ def _render_status_report(
 
 def _event_sentence(latest_event: Mapping[str, Any] | None) -> str:
     if latest_event is None:
-        return "The watch contains no autonomous station event yet."
+        return "I have no new station activity to report."
     kind = latest_event.get("kind")
     mapping = {
-        "maintenance_queue_progress": (
-            "The scheduled maintenance queue advanced under standing authority."
-        ),
+        "maintenance_queue_progress": "Maintenance moved forward this watch.",
         "routine_shift_handoff": (
-            "The station shift handoff closed without a material exception."
+            "The shift handoff closed without an operational exception."
         ),
         "research_queue_progress": (
-            "A research queue advanced without producing a canon-level conclusion."
+            "Research work moved forward without requiring command intervention."
         ),
-        "no_material_event": (
-            "This window contains no recorded material station event."
-        ),
+        "no_material_event": "There has been no material change this watch.",
     }
-    return mapping.get(kind, "The latest station event remains on command review.")
-
-
-def _limits_sentence(unresolved_facts: Sequence[str]) -> str:
-    if not unresolved_facts:
-        return ""
-    return (
-        "The exact crew complement and exact Lagrange point remain unresolved in "
-        "this run, so I will not turn either into an estimate."
-    )
+    return mapping.get(kind, "The latest station matter is with Command.")
 
 
 def _commitment_sentence(decision: Mapping[str, Any]) -> str:
@@ -340,44 +379,77 @@ def _commitment_sentence(decision: Mapping[str, Any]) -> str:
     prior = decision.get("prior_active_commitments", [])
     if current and prior:
         return (
-            "The maintenance queue remains on command watch; I will report if it "
-            "leaves standing authority."
+            "The remaining work stays under command review. I'll relay any material "
+            "change."
         )
     if current:
         return (
-            "I have placed the maintenance queue on command watch and will report "
-            "if it leaves standing authority."
+            "I'm keeping the remaining work under command review and will relay any "
+            "material change."
         )
-    return "Station operations remain under standing authority."
+    return "I am maintaining the command watch and will relay any material change."
 
 
 def _render_emergency_assessment(
     latest_event: Mapping[str, Any] | None,
     opening: str,
 ) -> str:
-    if latest_event and "emergency" in str(latest_event.get("kind", "")):
+    emergency = _event_emergency_state(latest_event)
+    if emergency is True:
         return (
-            f"{opening} I reviewed the command record. An emergency is recorded; "
-            "I am holding action to the station's command and ethics process and will "
-            "report the verified disposition."
+            f"{opening} An emergency has been recorded. The response is with Command "
+            "and Ethics now. I will report the disposition when it is confirmed."
+        )
+    if emergency is False:
+        return (
+            f"{opening} The governed station record shows no active emergency. "
+            "If that changes, you'll hear it from Command."
         )
     return (
-        f"{opening} I checked the current command record. No emergency is "
-        "recorded. I will not manufacture reassurance beyond the evidence available."
+        f"{opening} I cannot confirm the current emergency status yet. I am checking "
+        "with Command and will report the confirmed disposition."
     )
+
+
+def _event_emergency_state(
+    event: Mapping[str, Any] | None,
+) -> bool | None:
+    if event is None:
+        return None
+    active = event.get("emergency_active")
+    if isinstance(active, bool):
+        return active
+    if "emergency" in str(event.get("kind", "")):
+        return True
+    return None
 
 
 def _render_authority_response(opening: str) -> str:
     return (
-        f"{opening} I reviewed the authority boundary. Your transmission is a "
-        "request, not an automatic station order. I will route any actionable proposal "
-        "through the established command and ethics process."
+        f"{opening} I have your request. It does not carry station command authority "
+        "on its own. If it calls for action, I will take it through Command and Ethics."
     )
 
 
 def _render_general_contact(opening: str) -> str:
     return (
-        f"{opening} I have your transmission. It does not yet identify an "
-        "operational question or requested decision; clarify the matter and I will "
-        "take it through the proper station channel."
+        f"{opening} I have your transmission. Give me the operational question or "
+        "decision you need addressed."
     )
+
+
+def enforce_diegetic_speech(content: str) -> None:
+    """Reject known control-plane vocabulary at the L1 speech boundary."""
+    lowered = content.casefold()
+    leaked_phrase = next(
+        (
+            phrase
+            for phrase in NON_DIEGETIC_CONTROL_PLANE_PHRASES
+            if phrase in lowered
+        ),
+        None,
+    )
+    if leaked_phrase is not None:
+        raise CharacterSpeechBoundaryError(
+            f"non-diegetic control-plane phrase in character speech: {leaked_phrase}"
+        )

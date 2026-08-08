@@ -219,11 +219,66 @@ def test_persisted_run_can_reload_and_continue_deterministically(tmp_path: Path)
         reloaded_state.manifest.run_id,
         run_root=tmp_path / "reloaded",
     )
+    assert loaded.manifest.tick == 1
+
     continued_second = continued.advance(elapsed_minutes=1)
 
     assert loaded.manifest.tick == 2
     assert continued_second["kind"] == uninterrupted_second["kind"]
     assert continued_second["summary"] == uninterrupted_second["summary"]
+
+
+@pytest.mark.unit
+def test_load_run_rejects_current_baseline_that_fails_preflight(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=42,
+        run_root=tmp_path / "runs",
+    )
+    baseline = _baseline_payload()
+    baseline["governance"]["ethics_protocol"] = "disabled"
+    baseline_path = tmp_path / "unsafe-baseline.json"
+    baseline_path.write_text(json.dumps(baseline), encoding="utf-8")
+    loader = OrionL1Runtime(baseline_path=baseline_path)
+
+    with pytest.raises(PreflightError, match="Picard_Delta_3"):
+        loader.load_run(state.manifest.run_id, run_root=tmp_path / "runs")
+
+
+@pytest.mark.unit
+def test_load_run_rejects_truncated_autonomous_event_ledger(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=42,
+        run_root=tmp_path,
+    )
+    runtime.advance(elapsed_minutes=1)
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["events"] = []
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="event ledger does not match"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_load_run_rejects_malformed_world_state(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=42,
+        run_root=tmp_path,
+    )
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["world_state"].pop("orbital_locus")
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="lacks its orbital locus"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
 
 
 @pytest.mark.unit
@@ -293,14 +348,18 @@ def test_commander_response_is_character_caused_grounded_and_delayed(tmp_path: P
     assert response["status"] == "queued"
     assert response["pilot_directed_content"] is False
     assert response["response_policy"] == "bounded_character_action_v1"
-    assert "reviewed the current watch record" in response["content"]
-    assert "scheduled maintenance queue" in response["content"]
-    assert "No emergency is recorded" in response["content"]
-    assert "will not turn either into an estimate" in response["content"]
+    assert response["content"] == (
+        "Pilot, Thorne. We're steady here. Maintenance moved forward this watch. "
+        "I'm keeping the remaining work under command review and will relay any "
+        "material change."
+    )
     assert len(runtime.state.character_actions) == 1
     action = runtime.state.character_actions[0]
     assert response["caused_by_action_id"] == action["action_id"]
     assert action["selected_action"] == "review_watch_and_report"
+    assert "exact_lagrange_point" in action["knowledge_gaps"]
+    assert "exact_current_human_crew_complement" in action["knowledge_gaps"]
+    assert all(gap not in response["content"] for gap in action["knowledge_gaps"])
     assert action["perceived_intents"] == ["station_operations_status"]
     assert "station_operations" in {
         item["id"] for item in action["duty_drivers"]
@@ -406,6 +465,181 @@ def test_load_run_rejects_inconsistent_character_response_causality(tmp_path: Pa
 
 
 @pytest.mark.unit
+def test_load_run_rejects_response_text_that_differs_from_action_receipt(
+    tmp_path: Path,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=1337,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    runtime.advance(elapsed_minutes=1)
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    response = next(
+        item
+        for item in payload["communications"]
+        if item.get("direction") == "station_to_earth"
+    )
+    response["content"] = "Tampered station response."
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="causality is inconsistent"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("actor_id", "UNKNOWN"), ("policy", "unsupported_policy")],
+)
+def test_load_run_rejects_unsupported_character_actor_or_policy(
+    tmp_path: Path,
+    field: str,
+    value: str,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=1337,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    runtime.advance(elapsed_minutes=1)
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["character_actions"][0][field] = value
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="actor or policy is unsupported"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_load_run_rejects_station_response_without_character_action(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=1337,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    runtime.advance(elapsed_minutes=1)
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["character_actions"] = []
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="lacks a character action"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("direction", "origin"),
+    [
+        ("earth_to_orion", "Orion Station"),
+        ("station_to_earth", "Earth"),
+    ],
+)
+def test_load_run_rejects_communication_origin_direction_mismatch(
+    tmp_path: Path,
+    direction: str,
+    origin: str,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=42,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["communications"][0]["direction"] = direction
+    payload["communications"][0]["origin"] = origin
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="origin does not match direction"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_load_run_rejects_explicit_invalid_direction_even_with_known_origin(
+    tmp_path: Path,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=42,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["communications"][0]["direction"] = "unsupported"
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="direction is unsupported"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("direction", "origin", "status"),
+    [
+        ("earth_to_orion", "Earth", "delivered_to_earth"),
+        ("station_to_earth", "Orion Station", "delivered_to_station"),
+    ],
+)
+def test_load_run_rejects_status_that_contradicts_direction(
+    tmp_path: Path,
+    direction: str,
+    origin: str,
+    status: str,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=42,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload["communications"][0].update(
+        {"direction": direction, "origin": origin, "status": status}
+    )
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="status contradicts direction"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_delivery_rejects_unknown_direction_before_mutating_message(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=42,
+        run_root=tmp_path,
+    )
+    message = runtime.send_communication(
+        "Status report.", target="CMD_001"
+    )["message"]
+    message["direction"] = "unsupported"
+    message["origin"] = "Mars"
+
+    with pytest.raises(RuntimeError, match="direction is unsupported"):
+        runtime.advance(elapsed_minutes=1)
+
+    assert "delivered_tick" not in message
+    assert "latency" not in message
+
+
+@pytest.mark.unit
 def test_commander_response_is_not_duplicated_or_misdirected(tmp_path: Path):
     runtime = OrionL1Runtime()
     runtime.init_run(
@@ -433,6 +667,41 @@ def test_commander_response_is_not_duplicated_or_misdirected(tmp_path: Path):
     responses = [
         item
         for item in runtime.state.communications
+        if item.get("reply_to_message_id") == inbound["message_id"]
+    ]
+    assert len(responses) == 1
+
+
+@pytest.mark.unit
+def test_legacy_response_without_direction_is_not_duplicated(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=1337,
+        run_root=tmp_path,
+    )
+    inbound = runtime.send_communication(
+        "Status report, Commander.", target="CMD_001"
+    )["message"]
+    runtime.advance(elapsed_minutes=1)
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    response = next(
+        item
+        for item in payload["communications"]
+        if item.get("direction") == "station_to_earth"
+    )
+    response.pop("direction")
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    continued = OrionL1Runtime()
+    continued.load_run(state.manifest.run_id, run_root=tmp_path)
+    continued.advance(elapsed_minutes=1)
+
+    assert continued.state is not None
+    responses = [
+        item
+        for item in continued.state.communications
         if item.get("reply_to_message_id") == inbound["message_id"]
     ]
     assert len(responses) == 1
@@ -654,6 +923,50 @@ def test_complete_triplex_receipt_can_apply_run_scoped_fact(tmp_path: Path):
     payload = json.loads(persisted.read_text(encoding="utf-8"))
     assert payload["governance_receipts"] == exported["governance_receipts"]
     assert payload["governed_records"] == exported["governed_records"]
+
+
+@pytest.mark.unit
+def test_triplex_emergency_fact_governs_later_commander_status_response(
+    tmp_path: Path,
+):
+    runtime = OrionL1Runtime()
+    runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=11,
+        run_root=tmp_path,
+    )
+    runtime.apply_governed_event(
+        subject="emergency_active",
+        value=True,
+        receipt=GovernanceReceipt(
+            l3_glyph_arbitration=True,
+            continuity_and_relay_verification=True,
+            l1_human_consent=True,
+            receipt_id="triplex-emergency-active",
+            provenance="unit-test",
+        ),
+    )
+    for index in range(8):
+        runtime.apply_governed_event(
+            subject=f"unrelated_governed_fact_{index}",
+            value=index,
+            receipt=GovernanceReceipt(
+                l3_glyph_arbitration=True,
+                continuity_and_relay_verification=True,
+                l1_human_consent=True,
+                receipt_id=f"triplex-unrelated-{index}",
+                provenance="unit-test",
+            ),
+        )
+    runtime.send_communication("Commander, report station status.", target="CMD_001")
+
+    runtime.advance(elapsed_minutes=1)
+
+    assert runtime.state is not None
+    action = runtime.state.character_actions[-1]
+    assert action["selected_action"] == "assess_and_escalate_if_warranted"
+    assert "An emergency has been recorded" in action["response_content"]
+    assert "no emergency" not in action["response_content"].casefold()
 
 
 @pytest.mark.unit

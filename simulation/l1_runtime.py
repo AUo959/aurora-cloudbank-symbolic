@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from l1_character_actor import BoundedCharacterActor, CharacterContext
+from l1_character_actor_policy import POLICY_VERSION
 from l1_fleet import (
     OrdPhysicalMissionAdapter,
     OrdPhysicalMissionProposal,
@@ -134,6 +135,9 @@ class OrionL1Runtime:
         run_root: Optional[Path] = None,
     ) -> L1RunState:
         """Restore a persisted run and its deterministic replay position."""
+        report = self.preflight()
+        if not report["ready"]:
+            raise PreflightError("; ".join(report["blockers"]))
         normalized_run_id = self._validated_run_id(run_id)
         resolved_run_root = self._resolve_run_root(run_root or DEFAULT_RUN_ROOT)
         state_path = resolved_run_root / normalized_run_id / "state.json"
@@ -307,12 +311,14 @@ class OrionL1Runtime:
         for message in state.communications:
             if not self._communication_is_due(message, state.manifest.tick):
                 continue
+            direction = self._communication_direction(message)
+            if direction is None:
+                raise RuntimeError("queued communication direction is unsupported")
             message["delivered_tick"] = state.manifest.tick
             message["latency"] = copy.deepcopy(latency)
-            direction = self._communication_direction(message)
             if direction == "earth_to_orion":
                 self._record_station_delivery(message)
-            elif direction == "station_to_earth":
+            else:
                 self._record_earth_delivery(message)
 
     @staticmethod
@@ -330,8 +336,12 @@ class OrionL1Runtime:
         direction = message.get("direction")
         if direction in {"earth_to_orion", "station_to_earth"}:
             return direction
+        if direction is not None:
+            return None
         if message.get("origin") == "Earth":
             return "earth_to_orion"
+        if message.get("origin") == "Orion Station":
+            return "station_to_earth"
         return None
 
     def _record_station_delivery(self, message: Dict[str, Any]) -> None:
@@ -401,7 +411,7 @@ class OrionL1Runtime:
         replied_to = {
             item.get("reply_to_message_id")
             for item in state.communications
-            if item.get("direction") == "station_to_earth"
+            if self._communication_direction(item) == "station_to_earth"
         }
         for message in tuple(state.communications):
             if not self._commander_response_is_due(message, replied_to):
@@ -440,7 +450,21 @@ class OrionL1Runtime:
                 )
             ),
             unresolved_facts=self._commander_unresolved_facts(),
+            governed_records=self._commander_governed_records(),
         )
+
+    def _commander_governed_records(self) -> tuple[Dict[str, Any], ...]:
+        """Bound actor context while retaining the current emergency fact."""
+        state = self._require_state()
+        latest_by_subject = {
+            record.subject: record for record in state.governed_records
+        }
+        emergency = latest_by_subject.pop("emergency_active", None)
+        limit = 7 if emergency is not None else 8
+        records = list(latest_by_subject.values())[-limit:]
+        if emergency is not None:
+            records.append(emergency)
+        return tuple(asdict(item) for item in records)
 
     def _commander_unresolved_facts(self) -> tuple[str, ...]:
         state = self._require_state()
@@ -532,7 +556,7 @@ class OrionL1Runtime:
             "tick": state.manifest.tick,
             "direction": "station_to_earth",
             "sender_id": "CMD_001",
-            "sender_name": "Commander Alex Thorne",
+            "sender_name": decision["actor_name"],
             "origin": "Orion Station",
             "target": "pilot",
             "content": decision["response_content"],
@@ -858,10 +882,27 @@ class OrionL1Runtime:
         ):
             raise PreflightError("persisted station cycle minute is out of range")
         manifest.population.validate()
+        self._validate_loaded_world_state(state)
         self._validate_loaded_communications(state)
         self._validate_loaded_character_actions(state)
         self._validate_autonomous_event_replay(state)
         self._validate_loaded_fleet(state)
+
+    @staticmethod
+    def _validate_loaded_world_state(state: L1RunState) -> None:
+        world_state = state.world_state
+        locus = world_state.get("orbital_locus")
+        pilot = world_state.get("pilot")
+        if not isinstance(world_state.get("station"), str):
+            raise PreflightError("persisted world state lacks its station identity")
+        if not isinstance(locus, dict) or not isinstance(
+            locus.get("unresolved_parameters"), list
+        ):
+            raise PreflightError("persisted world state lacks its orbital locus")
+        if not isinstance(pilot, dict) or (
+            pilot.get("residency") != "Earth" or pilot.get("l1_entity") is not False
+        ):
+            raise PreflightError("persisted world state violates the Pilot boundary")
 
     def _validate_loaded_character_actions(self, state: L1RunState) -> None:
         action_ids = set()
@@ -879,6 +920,13 @@ class OrionL1Runtime:
             )
             self._require_action_string(action, "selected_action", prefix)
             policy = self._require_action_string(action, "policy", prefix)
+            response_content = self._require_action_string(
+                action, "response_content", prefix
+            )
+            if actor_id != "CMD_001" or policy != POLICY_VERSION:
+                raise PreflightError(
+                    f"{prefix} actor or policy is unsupported"
+                )
             if action_id in action_ids:
                 raise PreflightError("persisted character actions contain duplicate IDs")
             if response_id in response_ids:
@@ -895,6 +943,7 @@ class OrionL1Runtime:
                 policy,
                 trigger_id,
                 response_id,
+                response_content,
                 messages,
             )
             self._validate_character_action_tick(
@@ -902,6 +951,23 @@ class OrionL1Runtime:
             )
             action_ids.add(action_id)
             response_ids.add(response_id)
+        self._validate_character_response_coverage(messages, response_ids)
+
+    def _validate_character_response_coverage(
+        self,
+        messages: Dict[str, Dict[str, Any]],
+        response_ids: set[str],
+    ) -> None:
+        unlinked_responses = {
+            message_id
+            for message_id, message in messages.items()
+            if self._communication_direction(message) == "station_to_earth"
+            and message_id not in response_ids
+        }
+        if unlinked_responses:
+            raise PreflightError(
+                "persisted station-to-Earth communication lacks a character action"
+            )
 
     @staticmethod
     def _validate_character_action_references(
@@ -930,6 +996,7 @@ class OrionL1Runtime:
         policy: str,
         trigger_id: str,
         response_id: str,
+        response_content: str,
         messages: Dict[str, Dict[str, Any]],
     ) -> None:
         trigger = messages[trigger_id]
@@ -941,6 +1008,7 @@ class OrionL1Runtime:
             and response.get("caused_by_action_id") == action_id
             and response.get("sender_id") == actor_id
             and response.get("response_policy") == policy
+            and response.get("content") == response_content
         )
         if not links_match:
             raise PreflightError(f"{prefix} communication causality is inconsistent")
@@ -955,6 +1023,7 @@ class OrionL1Runtime:
         if not isinstance(value, str) or not value:
             raise PreflightError(f"{prefix} {field} must be a non-empty string")
         return value
+
     def _validate_autonomous_event_replay(self, state: L1RunState) -> None:
         autonomous_events = [
             event
@@ -1039,14 +1108,28 @@ class OrionL1Runtime:
         self._require_message_string(message, "origin", prefix)
         if type(message.get("tick")) is not int:
             raise PreflightError(f"{prefix} tick must be an integer")
-        if message.get("status") not in {
+        status = message.get("status")
+        if status not in {
             "queued",
             "delivered_to_station",
             "delivered_to_earth",
         }:
             raise PreflightError(f"{prefix} status is unsupported")
-        if self._communication_direction(message) is None:
+        direction = self._communication_direction(message)
+        if direction is None:
             raise PreflightError(f"{prefix} direction is unsupported")
+        allowed_statuses = {
+            "earth_to_orion": {"queued", "delivered_to_station"},
+            "station_to_earth": {"queued", "delivered_to_earth"},
+        }[direction]
+        if status not in allowed_statuses:
+            raise PreflightError(f"{prefix} status contradicts direction")
+        expected_origin = {
+            "earth_to_orion": "Earth",
+            "station_to_earth": "Orion Station",
+        }[direction]
+        if message["origin"] != expected_origin:
+            raise PreflightError(f"{prefix} origin does not match direction")
 
     @staticmethod
     def _require_message_string(

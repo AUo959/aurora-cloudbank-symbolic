@@ -158,8 +158,18 @@ run state into biography.
 `bounded_character_action_v1` is deterministic and auditable. It does not use
 free-form model improvisation. Different message meanings may select different
 actions, but claims in the rendered response remain limited to the actor's
-available evidence and declared gaps. The current scope does not claim general
-agency for every character.
+available evidence. The current scope does not claim general agency for every
+character.
+
+The character-action receipt and the spoken response have a strict one-way
+boundary. Audit fields such as canon status, profile projection, runtime state,
+knowledge gaps, policy identifiers, and observation bookkeeping may constrain
+what Alex is allowed to claim, but they are not facts in Alex's lived L1 frame
+and MUST NOT be rendered as his dialogue. A missing or unresolved audit fact is
+normally expressed through omission, not by having Alex explain the runtime's
+uncertainty. The response renderer receives only the selected action, relevant
+station event, prior character commitments, and the canon-bounded voice opening.
+Known control-plane phrases fail the L1 speech boundary closed.
 
 Alex's L1 profile uses the authoritative roster projection: Station Commander,
 Command & Ethics, `L4_COMMAND`. Conflicting legacy descriptions of `L5_COMMAND`

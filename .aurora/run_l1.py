@@ -129,6 +129,7 @@ def _await_response(
 ) -> Dict[str, Any]:
     if max_windows < 0:
         raise ValueError("max_windows cannot be negative")
+    _require_response_eligible_message(runtime, message_id)
     events = []
     response = _delivered_response(runtime, message_id)
     while response is None and len(events) < max_windows:
@@ -141,6 +142,32 @@ def _await_response(
         "events": events,
         "response": response,
     }
+
+
+def _require_response_eligible_message(
+    runtime: OrionL1Runtime,
+    message_id: str,
+) -> None:
+    state = runtime.state
+    if state is None:
+        raise RuntimeError("persisted run failed to load")
+    message = next(
+        (
+            item
+            for item in state.communications
+            if item.get("message_id") == message_id
+        ),
+        None,
+    )
+    if message is None or not _response_eligible(message):
+        raise RuntimeError("awaited message is not eligible for a station response")
+
+
+def _response_eligible(message: Dict[str, Any]) -> bool:
+    direction = message.get("direction")
+    if direction is None and message.get("origin") == "Earth":
+        direction = "earth_to_orion"
+    return direction == "earth_to_orion" and message.get("target") == "CMD_001"
 
 
 def _delivered_response(

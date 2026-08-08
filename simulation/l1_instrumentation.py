@@ -52,8 +52,8 @@ def build_sensor_snapshot(state: L1RunState) -> Dict[str, Any]:
             "astronomical",
         ],
         "unavailable_channel_policy": (
-            "unbound physical channels remain unavailable; default sensor values "
-            "are excluded from this live snapshot"
+            "unbound physical channels remain unavailable; provider metadata "
+            "identifies any default-filled metrics in this snapshot"
         ),
     }
 
@@ -173,7 +173,7 @@ def _provider(state: L1RunState):
             ),
             "station_response_count": float(
                 sum(
-                    item.get("direction") == "station_to_earth"
+                    _is_station_response(item)
                     for item in communications
                 )
             ),
@@ -181,6 +181,13 @@ def _provider(state: L1RunState):
         }
 
     return read_state
+
+
+def _is_station_response(message: Dict[str, Any]) -> bool:
+    direction = message.get("direction")
+    return direction == "station_to_earth" or (
+        direction is None and message.get("origin") == "Orion Station"
+    )
 
 
 def _command_endpoint() -> Dict[str, str]:

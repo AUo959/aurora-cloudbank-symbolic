@@ -19,7 +19,7 @@ import {
   WifiOff,
   Zap,
 } from 'lucide-react';
-import { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // Error Boundary Component for resilient rendering
@@ -80,6 +80,24 @@ interface DataFreshnessProps {
 }
 
 function DataFreshnessIndicator({ dataUpdatedAt, isStale, isError, refetch }: DataFreshnessProps) {
+  // The relative age is derived from a clock held in state and ticked by an
+  // effect, rather than read from Date.now() during render. Reading the clock
+  // while rendering is impure — the same render can produce different output —
+  // and it also meant "Updated Xs ago" only changed when the component happened
+  // to re-render for some other reason, so the number shown was usually wrong.
+  const [now, setNow] = useState(() => Date.now());
+
+  // Only the last branch below renders the elapsed time, so the timer runs only
+  // when that branch is the one showing. The hook itself stays unconditional —
+  // the condition lives inside the effect, not around it.
+  const showsElapsedTime = !isError && !isStale && Boolean(dataUpdatedAt);
+
+  useEffect(() => {
+    if (!showsElapsedTime) return;
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [showsElapsedTime]);
+
   if (isError) {
     return (
       <div className="flex items-center space-x-2 text-xs text-red-400" role="status" aria-live="polite">
@@ -107,9 +125,14 @@ function DataFreshnessIndicator({ dataUpdatedAt, isStale, isError, refetch }: Da
   }
 
   if (dataUpdatedAt) {
-    const secondsAgo = Math.floor((Date.now() - dataUpdatedAt) / 1000);
+    const secondsAgo = Math.floor((now - dataUpdatedAt) / 1000);
     return (
-      <div className="flex items-center space-x-1 text-xs text-gray-500" role="status">
+      // No role="status" here, unlike the two branches above. This text now
+      // changes every second, and role="status" is an implicit aria-live
+      // region, so keeping it would make a screen reader announce the elapsed
+      // time once a second. The connection-lost and stale messages keep their
+      // live regions: those change rarely and are worth announcing.
+      <div className="flex items-center space-x-1 text-xs text-gray-500">
         <Clock className="h-3 w-3" aria-hidden="true" />
         <span>Updated {secondsAgo}s ago</span>
       </div>

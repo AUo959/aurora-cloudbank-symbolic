@@ -37,6 +37,30 @@ ZIP_MAX_COMMENT_BYTES = 65_535
 ZIP64_SENTINEL_16 = 0xFFFF
 ZIP64_SENTINEL_32 = 0xFFFFFFFF
 
+# The ZIP64 end-of-central-directory locator sits immediately before the EOCD.
+# zipfile._EndRecData64 honours the ZIP64 record whenever this locator is
+# present, overriding the 32-bit entry count and central-directory size --
+# regardless of whether those 32-bit fields hold sentinels. Checking sentinels
+# alone therefore misses ZIP64 archives that declare small 32-bit values.
+ZIP64_LOCATOR_SIGNATURE = b"PK\x06\x07"
+ZIP64_LOCATOR_STRUCT = struct.Struct("<4sLQL")
+
+# Decompressed bytes pulled per read when materializing an archive member.
+# ZipExtFile.read(n) does not bound the decompressor for non-DEFLATE members,
+# so the budget has to be spent in chunks rather than in one large call.
+ZIP_MEMBER_READ_CHUNK_BYTES = 64 * 1024
+
+# Compression methods whose expansion this tool can actually bound.
+#
+# ZIP_STORED is not compressed. For ZIP_DEFLATED, CPython's
+# ZipExtFile._read1 forwards max_length into decompress(), so a bounded read
+# really is bounded. Every other method -- ZIP_BZIP2, ZIP_LZMA -- ignores
+# max_length, and _read2 reads at least MIN_READ_SIZE of compressed input per
+# call, so a single 4 KB block can still expand to tens of megabytes inside one
+# decompress() call no matter how small the read chunk is. Those members are
+# inventoried from metadata and never materialized.
+BOUNDABLE_COMPRESSION_METHODS = frozenset({zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED})
+
 ARCHIVE_SUFFIXES = {".zip", ".tar", ".tgz", ".gz", ".bz2", ".xz", ".7z"}
 CODE_SUFFIXES = {
     ".py",
@@ -392,6 +416,33 @@ def _archive_error(relative_archive_path: str, size_bytes: int | None, flag: str
     ]
 
 
+def _read_member_bounded(stream: BinaryIO, max_bytes: int) -> bytes:
+    """Read at most ``max_bytes + 1`` decompressed bytes from an archive member.
+
+    ``ZipExtFile.read(n)`` does not bound the decompressor for non-DEFLATE
+    members: CPython's ``ZipExtFile._read1`` forwards ``max_length`` into
+    ``decompress()`` only for ``ZIP_DEFLATED``. Asking for the whole declared
+    ``file_size`` in one call therefore lets a small LZMA or BZIP2 member expand
+    without limit -- a 151 KB ZIP_LZMA archive declaring a 10 MB member drove
+    peak RSS past 2 GB while every configured limit was in force.
+
+    Spending the budget in chunks bounds each ``decompress()`` call to the
+    expansion of one chunk of compressed input, and returns one byte more than
+    the budget so the caller can tell "at the limit" from "over it".
+
+    The budget is applied to bytes actually read, never to the central
+    directory's declared size, because that declaration is attacker-supplied.
+    """
+    budget = max_bytes + 1
+    out = bytearray()
+    while len(out) < budget:
+        chunk = stream.read(min(ZIP_MEMBER_READ_CHUNK_BYTES, budget - len(out)))
+        if not chunk:
+            break
+        out.extend(chunk)
+    return bytes(out)
+
+
 def _zip_preflight(
     raw: BinaryIO,
     size_bytes: int,
@@ -403,7 +454,12 @@ def _zip_preflight(
     if size_bytes < ZIP_EOCD_STRUCT.size:
         return "archive_eocd_invalid"
 
-    tail_size = min(size_bytes, ZIP_EOCD_STRUCT.size + ZIP_MAX_COMMENT_BYTES)
+    # Read the locator's width beyond the comment window so a ZIP64 locator
+    # immediately preceding the EOCD is always inside `tail`.
+    tail_size = min(
+        size_bytes,
+        ZIP_EOCD_STRUCT.size + ZIP_MAX_COMMENT_BYTES + ZIP64_LOCATOR_STRUCT.size,
+    )
     try:
         raw.seek(size_bytes - tail_size)
         tail = raw.read(tail_size)
@@ -413,6 +469,18 @@ def _zip_preflight(
     eocd_index = tail.rfind(ZIP_EOCD_SIGNATURE)
     if eocd_index < 0 or len(tail) - eocd_index < ZIP_EOCD_STRUCT.size:
         return "archive_eocd_invalid"
+
+    # Reject ZIP64 on the locator, not just on sentinel values. zipfile reads
+    # the ZIP64 record whenever the locator is present, so an archive can pass
+    # small non-sentinel 32-bit counts here while zipfile materializes the far
+    # larger ZIP64 counts -- bypassing every limit checked below.
+    locator_index = eocd_index - ZIP64_LOCATOR_STRUCT.size
+    if (
+        locator_index >= 0
+        and tail[locator_index:locator_index + len(ZIP64_LOCATOR_SIGNATURE)]
+        == ZIP64_LOCATOR_SIGNATURE
+    ):
+        return "archive_zip64_unsupported"
 
     try:
         (
@@ -541,6 +609,11 @@ def inspect_zip(
                 if executable:
                     flags.append("archive_executable")
 
+                if info.compress_type not in BOUNDABLE_COMPRESSION_METHODS:
+                    # Expansion cannot be bounded for this method; inventory it
+                    # from metadata rather than decompressing it.
+                    flags.append("archive_unboundable_compression")
+
                 digest: str | None = None
                 sample = b""
                 read_blocked = bool(
@@ -552,14 +625,19 @@ def inspect_zip(
                         "archive_member_too_large",
                         "archive_total_too_large",
                         "archive_compression_ratio",
+                        "archive_unboundable_compression",
                         "nested_archive",
                     }.intersection(flags)
                 )
                 if not read_blocked:
                     try:
                         with archive.open(info, "r") as stream:
-                            data = stream.read(info.file_size + 1)
-                        if len(data) != info.file_size:
+                            data = _read_member_bounded(stream, max_member_bytes)
+                        if len(data) > max_member_bytes:
+                            # The member expanded past the budget regardless of
+                            # what the central directory declared.
+                            flags.append("archive_member_too_large")
+                        elif len(data) != info.file_size:
                             flags.append("archive_size_mismatch")
                         else:
                             digest = hashlib.sha256(data).hexdigest()

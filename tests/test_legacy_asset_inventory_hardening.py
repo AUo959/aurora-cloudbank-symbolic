@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import stat
+import struct
 import warnings
 import zipfile
 from pathlib import Path
@@ -237,3 +238,101 @@ def test_limits_must_be_finite_and_positive(tmp_path: Path, inventory_module) ->
 
     with pytest.raises(inventory_module.InventoryError, match="finite and positive"):
         inventory_module.inventory_tree(root, generated_at=FIXED_TIME, max_compression_ratio=float("nan"))
+
+
+# ---------------------------------------------------------------------------
+# Bounding regressions
+#
+# The two tests below cover bypasses that the pre-existing "before ZipFile
+# construction" and member-size tests did not catch, because both trusted
+# central-directory metadata rather than what the reader actually does.
+# ---------------------------------------------------------------------------
+
+
+def _write_zip64_locator_archive(path: Path, declared_entries: int) -> None:
+    """Build an archive whose 32-bit EOCD is small but which carries a ZIP64 EOCD.
+
+    zipfile._EndRecData64 honours the ZIP64 record whenever the locator is
+    present and overrides the entry count and central-directory size from it.
+    An archive can therefore declare harmless non-sentinel 32-bit values while
+    zipfile materializes the far larger ZIP64 counts.
+    """
+    with zipfile.ZipFile(path, "w") as archive:
+        for index in range(5):
+            archive.writestr(f"f{index}.txt", "x")
+
+    raw = bytearray(path.read_bytes())
+    eocd_offset = raw.rfind(b"PK\x05\x06")
+    eocd = bytes(raw[eocd_offset:])
+    cd_size, cd_offset = struct.unpack_from("<LL", raw, eocd_offset + 12)
+
+    zip64_eocd = struct.pack(
+        "<4sQ2H2L4Q",
+        b"PK\x06\x06", 44, 45, 45, 0, 0,
+        declared_entries, declared_entries, cd_size, cd_offset,
+    )
+    locator = struct.pack("<4sLQL", b"PK\x06\x07", 0, eocd_offset, 1)
+    path.write_bytes(bytes(raw[:eocd_offset]) + zip64_eocd + locator + eocd)
+
+
+def test_zip64_locator_is_rejected_even_with_small_32bit_counts(inventory_module, tmp_path: Path) -> None:
+    """A ZIP64 locator must be rejected regardless of the 32-bit EOCD values.
+
+    Checking only for 0xFFFF/0xFFFFFFFF sentinels misses this: the crafted
+    archive declares 5 entries in the 32-bit record while the ZIP64 record
+    declares 60,000, and zipfile uses the latter.
+    """
+    archive_path = tmp_path / "zip64_locator.zip"
+    _write_zip64_locator_archive(archive_path, declared_entries=60_000)
+
+    with archive_path.open("rb") as handle:
+        verdict = inventory_module._zip_preflight(
+            handle,
+            archive_path.stat().st_size,
+            max_archive_entries=10_000,
+            max_central_directory_bytes=8 * 1024 * 1024,
+        )
+
+    assert verdict == "archive_zip64_unsupported"
+
+
+def test_unboundable_compression_is_not_materialized(inventory_module, tmp_path: Path) -> None:
+    """Members whose expansion cannot be bounded are inventoried, not read.
+
+    ZipExtFile only forwards max_length into decompress() for ZIP_DEFLATED, and
+    _read2 reads at least MIN_READ_SIZE of compressed input per call, so no read
+    chunk size bounds an LZMA member. The central directory here also lies about
+    file_size, so size-based guards alone would let the read proceed.
+    """
+    archive_path = tmp_path / "unboundable.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr(
+            zipfile.ZipInfo("lie.bin"),
+            b"\0" * 20_000_000,
+            compress_type=zipfile.ZIP_LZMA,
+        )
+
+    raw = bytearray(archive_path.read_bytes())
+    struct.pack_into("<L", raw, raw.find(b"PK\x01\x02") + 24, 1000)
+    struct.pack_into("<L", raw, raw.find(b"PK\x03\x04") + 22, 1000)
+    archive_path.write_bytes(bytes(raw))
+
+    artifacts = inventory_module.inspect_zip(archive_path, "unboundable.zip")
+
+    assert len(artifacts) == 1
+    member = artifacts[0]
+    assert "archive_unboundable_compression" in member["security_flags"]
+    assert member["sha256"] is None
+
+
+def test_deflated_members_are_still_read_and_hashed(inventory_module, tmp_path: Path) -> None:
+    """The bounding guard must not stop ordinary DEFLATE members being hashed."""
+    archive_path = tmp_path / "ordinary.zip"
+    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("a.txt", "hello world")
+
+    artifacts = inventory_module.inspect_zip(archive_path, "ordinary.zip")
+
+    assert len(artifacts) == 1
+    assert artifacts[0]["sha256"] is not None
+    assert artifacts[0]["security_flags"] == []

@@ -196,8 +196,8 @@ class FleetEntityProvenance:
             raise ValueError("fleet projection must remain non-authoritative")
         if self.historical_snapshot_role != "provenance_only":
             raise ValueError("historical fleet snapshots must remain provenance only")
-        if self.current_state_source == "historical_2025_snapshot":
-            raise ValueError("historical 2025 fleet snapshots cannot seed current state")
+        if self.current_state_source != "deterministic_l1_run_state":
+            raise ValueError("fleet current state source is unsupported")
 
 
 @dataclass
@@ -352,8 +352,17 @@ class FleetRunState:
         self._validate_bound()
 
     def _validate_unbound(self) -> None:
-        if self.entities:
-            raise ValueError("unbound fleet provider cannot contain entities")
+        consistent = (
+            self.authority_receipt_id is None
+            and self.projection_role == "provider_unbound"
+            and self.process_position == 0
+            and self.elapsed_minutes == 0
+            and not self.entities
+            and not self.transitions
+            and self.migrated_from_contract_version is None
+        )
+        if not consistent:
+            raise ValueError("unbound fleet provider carries bound runtime state")
 
     def _validate_bound(self) -> None:
         if not self.authority_receipt_id:

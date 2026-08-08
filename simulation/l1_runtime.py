@@ -1033,9 +1033,10 @@ class OrionL1Runtime:
         if len(autonomous_events) != state.manifest.tick:
             raise PreflightError(
                 "persisted autonomous event ledger does not match run tick"
-            )
+        )
         for expected_tick, event in enumerate(autonomous_events, start=1):
-            if event.get("tick") != expected_tick:
+            event_tick = event.get("tick")
+            if (type(event_tick), event_tick) != (int, expected_tick):
                 raise PreflightError(
                     "persisted autonomous event ledger is not contiguous"
                 )

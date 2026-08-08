@@ -302,7 +302,9 @@ Contract `1.2.0` accepts persisted `1.1.0` continuation states from PR #1480.
 When their fleet field is absent, the runtime reconstructs it from seed plus the
 contiguous autonomous-event ledger without advancing the tick, station cycle,
 or central replay generator. The upgraded state is persisted only on a later
-explicit mutation such as advancement.
+explicit run mutation, including advancement, governed action, or the normal
+recording of an observation into the run-scoped epistemic ledgers. Loading by
+itself remains non-mutating.
 
 Run persistence is rejected if the requested run root is inside the repository.
 The default is external user state under `~/.aurora/l1-runs`.

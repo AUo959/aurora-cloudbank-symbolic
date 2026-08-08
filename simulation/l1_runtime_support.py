@@ -113,7 +113,12 @@ def _load_fleet_receipt(
         blockers.append("fleet authority receipt is unavailable or invalid")
         return None
     expected_hash = authority.get("receipt_sha256")
-    if expected_hash != sha256_file(receipt_path):
+    try:
+        actual_hash = sha256_file(receipt_path)
+    except OSError:
+        blockers.append("fleet authority receipt is unavailable or invalid")
+        return None
+    if expected_hash != actual_hash:
         blockers.append("fleet authority receipt hash does not match the baseline")
     return receipt
 

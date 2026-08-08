@@ -14,7 +14,9 @@ SIMULATION_PATH = str(SIMULATION_DIR)
 if SIMULATION_PATH not in sys.path:
     sys.path.insert(0, SIMULATION_PATH)
 
+import l1_runtime_support  # noqa: E402
 from l1_fleet import (  # noqa: E402
+    build_initial_fleet_state,
     docking_observation,
     drone_observation,
     fleet_observation,
@@ -73,6 +75,17 @@ def test_fleet_receipt_projects_modular_identities_without_stale_missions():
     assert "AURORA_PRIME" not in serialized
     assert "ORS-SURVEY-128" not in serialized
     assert "2025-" not in serialized
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("entities", ["not-a-list", ["not-an-object"]])
+def test_fleet_receipt_rejects_malformed_entity_collections(entities):
+    runtime = OrionL1Runtime()
+    receipt = json.loads(json.dumps(runtime.fleet_receipt))
+    receipt["entities"] = entities
+
+    with pytest.raises(ValueError, match="list of objects"):
+        build_initial_fleet_state(receipt)
 
 
 @pytest.mark.unit
@@ -143,6 +156,39 @@ def test_unbound_fleet_providers_fail_as_unavailable_not_false_negative():
         assert observation["status"] == "unavailable"
         assert observation["reason"] == "provider_unbound"
         assert observation["records"] == []
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("authority_receipt_id", "unexpected-receipt"),
+        ("projection_role", "runtime_projection_non_authoritative"),
+        ("process_position", 1),
+        ("elapsed_minutes", 1),
+        ("transitions", [{"transition_id": "unexpected"}]),
+        ("migrated_from_contract_version", "1.1.0"),
+    ),
+)
+def test_unbound_fleet_state_rejects_bound_runtime_fields(field, value):
+    fleet = FleetRunState.unbound()
+    setattr(fleet, field, value)
+
+    with pytest.raises(ValueError, match="carries bound runtime state"):
+        fleet.validate()
+
+
+@pytest.mark.unit
+def test_fleet_receipt_hash_read_failure_becomes_preflight_blocker(monkeypatch):
+    def unreadable_receipt(_path):
+        raise OSError("unit-test read failure")
+
+    monkeypatch.setattr(l1_runtime_support, "sha256_file", unreadable_receipt)
+
+    report = OrionL1Runtime().preflight()
+
+    assert report["ready"] is False
+    assert "fleet authority receipt is unavailable or invalid" in report["blockers"]
 
 
 @pytest.mark.unit
@@ -267,6 +313,12 @@ def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(tmp
     assert persisted_after_load["manifest"]["station_cycle_minute"] == 21
     assert "fleet" not in persisted_after_load
 
+    resumed.observe("fleet")
+    persisted_after_observation = json.loads(state_path.read_text(encoding="utf-8"))
+    assert persisted_after_observation["manifest"]["tick"] == 7
+    assert persisted_after_observation["manifest"]["station_cycle_minute"] == 21
+    assert persisted_after_observation["fleet"]["process_position"] == 7
+
 
 @pytest.mark.unit
 def test_persisted_stale_2025_mission_cannot_become_current_run_truth(tmp_path: Path):
@@ -291,6 +343,25 @@ def test_persisted_stale_2025_mission_cannot_become_current_run_truth(tmp_path: 
 
 
 @pytest.mark.unit
+def test_persisted_fleet_rejects_unsupported_current_state_source(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=88,
+        run_root=tmp_path,
+    )
+    state_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(state_path.read_text(encoding="utf-8"))
+    payload["fleet"]["entities"]["ORS-02"]["provenance"][
+        "current_state_source"
+    ] = "unverified_external_state"
+    state_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="persisted L1 run state is unavailable"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
 def test_replay_rejects_truncated_autonomous_event_ledger(tmp_path: Path):
     runtime = OrionL1Runtime()
     state = runtime.init_run(
@@ -306,4 +377,22 @@ def test_replay_rejects_truncated_autonomous_event_ledger(tmp_path: Path):
     state_path.write_text(json.dumps(payload), encoding="utf-8")
 
     with pytest.raises(PreflightError, match="event ledger does not match run tick"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_replay_rejects_boolean_autonomous_event_tick(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=55,
+        run_root=tmp_path,
+    )
+    runtime.advance(elapsed_minutes=1)
+    state_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(state_path.read_text(encoding="utf-8"))
+    payload["events"][0]["tick"] = True
+    state_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="event ledger is not contiguous"):
         OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)

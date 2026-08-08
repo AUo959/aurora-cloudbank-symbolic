@@ -41,7 +41,7 @@ def build_initial_fleet_state(receipt: Dict[str, Any]) -> FleetRunState:
         raise ValueError("fleet receipt does not quarantine historical mission state")
 
     entities: Dict[str, FleetEntityState] = {}
-    for entry in receipt.get("entities", []):
+    for entry in _receipt_entities(receipt):
         entity = _entity_from_receipt(entry, receipt_id, projection["role"])
         if entity.fleet_id in entities:
             raise ValueError(f"duplicate fleet identity: {entity.fleet_id}")
@@ -59,6 +59,15 @@ def build_initial_fleet_state(receipt: Dict[str, Any]) -> FleetRunState:
     )
     fleet.validate()
     return fleet
+
+
+def _receipt_entities(receipt: Dict[str, Any]) -> list[Dict[str, Any]]:
+    entries = receipt.get("entities")
+    if not isinstance(entries, list) or not all(
+        isinstance(entry, dict) for entry in entries
+    ):
+        raise ValueError("fleet receipt entities must be a list of objects")
+    return entries
 
 
 def _entity_from_receipt(

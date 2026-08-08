@@ -16,14 +16,20 @@
     "command": "python3 tools/canon_sync.py --check",
     "verified_at": "2026-07-29"
   },
-  "unreconciled_surfaces": [
+  "resolved_surfaces": [
     {
       "name": "orion_station_staff_registry",
-      "status": "owner_authority_decision_required",
+      "status": "resolved_authority_boundary",
+      "decision_date": "2026-08-08",
+      "authority_repository": "AUo959/CanonRec",
+      "authority_revision": "1fc35f08a2937b10a2a3c15abe4b7ed39245b64e",
       "canonrec_path": "canon/L1/station/ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
       "canonrec_sha256": "4cc8bf4f808f68e1c4e3e505d32c15bf7c92959fd09a9d419e6c6254e848542d",
       "cloudbank_path": "ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
-      "cloudbank_sha256": "0a5c6eff0ab8f45a07257e8e99e4f96fdd4e94b7253be9210d2275f4969348ca"
+      "cloudbank_sha256": "0a5c6eff0ab8f45a07257e8e99e4f96fdd4e94b7253be9210d2275f4969348ca",
+      "cloudbank_role": "runtime_projection_non_authoritative",
+      "conflict_policy": "CanonRec controls canon authority. A differing CloudBank projection must not override CanonRec; CloudBank-only details remain provenance-labeled runtime/reference data until traced or promoted through canon review."
     }
-  ]
+  ],
+  "unreconciled_surfaces": []
 }

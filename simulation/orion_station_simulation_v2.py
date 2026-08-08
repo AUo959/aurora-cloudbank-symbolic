@@ -88,10 +88,8 @@ class Agent:
     assigned_task: Optional[str] = None
 
     def effective_speed(self, is_collaborative_context: bool = False) -> float:
-        """Calculate effective work speed with all modifiers"""
-        # Fatigue penalty (up to -10%)
-        fatigue_penalty = min(0.10, self.fatigue * 0.005)
-        base = self.base_speed * (1.0 - fatigue_penalty)
+        """Calculate work speed without physiological or cognitive-load scoring."""
+        base = self.base_speed
         
         # Collaboration bonus
         if is_collaborative_context:
@@ -111,7 +109,7 @@ class Agent:
         return 1.0
 
     def tick_recovery(self) -> None:
-        """Tiny recovery when idle, fatigue accumulation when working"""
+        """Track a non-evaluative compatibility signal that never affects scoring."""
         if not self.assigned_task:
             self.fatigue = max(0.0, self.fatigue - 0.5)
         else:

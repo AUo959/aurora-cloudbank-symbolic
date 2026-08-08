@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "runtime_contract_version": "1.0.0",
+  "status": "INIT_ELIGIBLE_WHEN_PREFLIGHT_PASSES",
+  "authority": {
+    "canonrec": {
+      "repository": "https://github.com/AUo959/CanonRec",
+      "revision": "1fc35f08a2937b10a2a3c15abe4b7ed39245b64e"
+    },
+    "staff_registry": {
+      "status": "resolved_authority_boundary",
+      "decision_date": "2026-08-08",
+      "authority_repository": "AUo959/CanonRec",
+      "authority_path": "canon/L1/station/ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
+      "cloudbank_projection_path": "ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
+      "cloudbank_projection_role": "runtime_projection_non_authoritative",
+      "conflict_policy": "CanonRec controls canon authority. CloudBank-only staff detail may be used only as a provenance-labeled runtime projection and cannot override CanonRec on conflict."
+    }
+  },
+  "pilot_boundary": {
+    "role": "external_institutional_operator",
+    "residency": "Earth",
+    "l1_entity": false,
+    "implicit_station_command_authority": false,
+    "document": "docs/architecture/AURORA_ARCHITECTURE__ADDENDUM__EARTH_PILOT_L1_BOUNDARY__v1.0__2026-08-07.md"
+  },
+  "population": {
+    "crew_capacity": 250,
+    "crew_capacity_provenance": "historical_v2_state_builder",
+    "current_human_crew_complement": null,
+    "identified_human_records": 35,
+    "persona_resolved_humans": null,
+    "missing_named_human_claim": false,
+    "historical_aggregate_claims": {
+      "current_crew_81": "quarantined_untyped_aggregate_pending_1455",
+      "declared_humans_36": "retired_phase1_off_by_one_per_1454"
+    },
+    "background_crew_policy": "Background institutional crew may exist only as provenance-labeled aggregate/run state; no biography or identity may be fabricated merely to satisfy a count.",
+    "system_entities": {
+      "aurora_core": 1,
+      "l1_relay_agents": 5,
+      "halo_continuity_entity": 1,
+      "l3_frameworks": 6
+    }
+  },
+  "orbital_locus": {
+    "status": "quarantined_conflict",
+    "safe_runtime_description": "Spaceborne and remote from Earth; exact orbital locus is unavailable for causal use pending canon reconciliation.",
+    "conflicting_claims": [
+      "high-inclination synchronous orbit at approximately 38,600 km",
+      "Earth-Moon L4 Lagrange point"
+    ],
+    "prohibited_causal_derivations": [
+      "communications_light_time",
+      "orbital_sunrise_or_sunset",
+      "radiation_environment",
+      "transfer_windows",
+      "earth_visibility",
+      "docking_or_navigation_trajectories",
+      "gravity_or_orbital_mechanics"
+    ]
+  },
+  "legacy_state": {
+    "path": ".aurora/SIMULATION_STATE.json",
+    "status": "historical_project_state",
+    "genesis_authority": false,
+    "policy": "May be consulted for provenance; must not be copied wholesale into a new L1 run."
+  },
+  "benchmark": {
+    "canonical_component": "simulation/orion_station_simulation_v2.py",
+    "class": "OrionSimulationV2",
+    "role": "Deterministic Phase-1 institutional/task benchmark component; not the live L1 world runtime.",
+    "supersedes": "simulation/orion_station_simulation.py"
+  },
+  "governance": {
+    "ethics_protocol": "Picard_Delta_3",
+    "actionable_event_policy": "explicit_triplex_receipt_required",
+    "triplex_steps": [
+      "l3_glyph_arbitration",
+      "continuity_and_relay_verification",
+      "l1_human_consent"
+    ]
+  },
+  "run_defaults": {
+    "station_cycle_length_minutes": 1326,
+    "station_cycle_start_minute": 0
+  }
+}

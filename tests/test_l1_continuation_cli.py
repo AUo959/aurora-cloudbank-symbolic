@@ -101,3 +101,40 @@ def test_await_response_continues_persisted_run_until_delivery(tmp_path: Path):
     assert action["selected_action"] == "review_watch_and_report"
     assert action["response_message_id"] == result["response"]["message_id"]
     assert action["knowledge_inputs"]
+
+
+def test_await_response_rejects_unknown_message_without_advancing(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=1337,
+        run_root=tmp_path,
+    )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(CONTINUATION_CLI),
+            "await-response",
+            "--run-id",
+            state.manifest.run_id,
+            "--run-root",
+            str(tmp_path),
+            "--message-id",
+            "missing-message",
+            "--max-windows",
+            "2",
+        ],
+        cwd=PROJECT_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    assert "not eligible for a station response" in completed.stderr
+    persisted = json.loads(
+        (tmp_path / state.manifest.run_id / "state.json").read_text(encoding="utf-8")
+    )
+    assert persisted["manifest"]["tick"] == 0
+    assert persisted["events"] == []

@@ -162,7 +162,7 @@ def _provider(state: L1RunState):
             ),
             "station_response_count": float(
                 sum(
-                    item.get("direction") == "station_to_earth"
+                    _is_station_response(item)
                     for item in communications
                 )
             ),
@@ -170,6 +170,13 @@ def _provider(state: L1RunState):
         }
 
     return read_state
+
+
+def _is_station_response(message: Dict[str, Any]) -> bool:
+    direction = message.get("direction")
+    return direction == "station_to_earth" or (
+        direction is None and message.get("origin") == "Orion Station"
+    )
 
 
 def _command_endpoint() -> Dict[str, str]:

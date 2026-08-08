@@ -369,7 +369,7 @@ class OrionL1Runtime:
         replied_to = {
             item.get("reply_to_message_id")
             for item in state.communications
-            if item.get("direction") == "station_to_earth"
+            if self._communication_direction(item) == "station_to_earth"
         }
         for message in tuple(state.communications):
             if not self._commander_response_is_due(message, replied_to):
@@ -408,10 +408,21 @@ class OrionL1Runtime:
                 )
             ),
             unresolved_facts=self._commander_unresolved_facts(),
-            governed_records=tuple(
-                asdict(item) for item in state.governed_records[-8:]
-            ),
+            governed_records=self._commander_governed_records(),
         )
+
+    def _commander_governed_records(self) -> tuple[Dict[str, Any], ...]:
+        """Bound actor context while retaining the current emergency fact."""
+        state = self._require_state()
+        latest_by_subject = {
+            record.subject: record for record in state.governed_records
+        }
+        emergency = latest_by_subject.pop("emergency_active", None)
+        limit = 7 if emergency is not None else 8
+        records = list(latest_by_subject.values())[-limit:]
+        if emergency is not None:
+            records.append(emergency)
+        return tuple(asdict(item) for item in records)
 
     def _commander_unresolved_facts(self) -> tuple[str, ...]:
         state = self._require_state()
@@ -821,6 +832,9 @@ class OrionL1Runtime:
             )
             self._require_action_string(action, "selected_action", prefix)
             policy = self._require_action_string(action, "policy", prefix)
+            response_content = self._require_action_string(
+                action, "response_content", prefix
+            )
             if actor_id != "CMD_001" or policy != POLICY_VERSION:
                 raise PreflightError(
                     f"{prefix} actor or policy is unsupported"
@@ -841,6 +855,7 @@ class OrionL1Runtime:
                 policy,
                 trigger_id,
                 response_id,
+                response_content,
                 messages,
             )
             self._validate_character_action_tick(
@@ -893,6 +908,7 @@ class OrionL1Runtime:
         policy: str,
         trigger_id: str,
         response_id: str,
+        response_content: str,
         messages: Dict[str, Dict[str, Any]],
     ) -> None:
         trigger = messages[trigger_id]
@@ -904,6 +920,7 @@ class OrionL1Runtime:
             and response.get("caused_by_action_id") == action_id
             and response.get("sender_id") == actor_id
             and response.get("response_policy") == policy
+            and response.get("content") == response_content
         )
         if not links_match:
             raise PreflightError(f"{prefix} communication causality is inconsistent")

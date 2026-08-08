@@ -465,6 +465,32 @@ def test_load_run_rejects_inconsistent_character_response_causality(tmp_path: Pa
 
 
 @pytest.mark.unit
+def test_load_run_rejects_response_text_that_differs_from_action_receipt(
+    tmp_path: Path,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=1337,
+        run_root=tmp_path,
+    )
+    runtime.send_communication("Status report.", target="CMD_001")
+    runtime.advance(elapsed_minutes=1)
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    response = next(
+        item
+        for item in payload["communications"]
+        if item.get("direction") == "station_to_earth"
+    )
+    response["content"] = "Tampered station response."
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="causality is inconsistent"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ("field", "value"),
     [("actor_id", "UNKNOWN"), ("policy", "unsupported_policy")],
@@ -641,6 +667,41 @@ def test_commander_response_is_not_duplicated_or_misdirected(tmp_path: Path):
     responses = [
         item
         for item in runtime.state.communications
+        if item.get("reply_to_message_id") == inbound["message_id"]
+    ]
+    assert len(responses) == 1
+
+
+@pytest.mark.unit
+def test_legacy_response_without_direction_is_not_duplicated(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=1337,
+        run_root=tmp_path,
+    )
+    inbound = runtime.send_communication(
+        "Status report, Commander.", target="CMD_001"
+    )["message"]
+    runtime.advance(elapsed_minutes=1)
+    payload_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    response = next(
+        item
+        for item in payload["communications"]
+        if item.get("direction") == "station_to_earth"
+    )
+    response.pop("direction")
+    payload_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    continued = OrionL1Runtime()
+    continued.load_run(state.manifest.run_id, run_root=tmp_path)
+    continued.advance(elapsed_minutes=1)
+
+    assert continued.state is not None
+    responses = [
+        item
+        for item in continued.state.communications
         if item.get("reply_to_message_id") == inbound["message_id"]
     ]
     assert len(responses) == 1
@@ -885,6 +946,18 @@ def test_triplex_emergency_fact_governs_later_commander_status_response(
             provenance="unit-test",
         ),
     )
+    for index in range(8):
+        runtime.apply_governed_event(
+            subject=f"unrelated_governed_fact_{index}",
+            value=index,
+            receipt=GovernanceReceipt(
+                l3_glyph_arbitration=True,
+                continuity_and_relay_verification=True,
+                l1_human_consent=True,
+                receipt_id=f"triplex-unrelated-{index}",
+                provenance="unit-test",
+            ),
+        )
     runtime.send_communication("Commander, report station status.", target="CMD_001")
 
     runtime.advance(elapsed_minutes=1)

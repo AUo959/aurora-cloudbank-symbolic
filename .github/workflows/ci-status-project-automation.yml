@@ -1,213 +1,144 @@
 name: CI Status Project Automation
 
-# This workflow manages project board status based on CI/test results
-# - When CI/tests fail: move items to 'In Progress' with warning
-# - When CI passes: move PRs to 'In Review', issues to 'Ready' or 'Done'
-# - Display CI/test status on project cards
+# Maintains the `ci: pending` / `ci: passed` / `ci: failed` label on pull
+# requests.
+#
+# The label used to be written once, at PR-open, and never corrected. Two
+# defects combined to make it actively misleading:
+#
+#   1. The success predicate accepted `conclusion === null`, which is what an
+#      unfinished check reports. At PR-open essentially every check is
+#      unfinished, so "all checks are success, skipped, or null" was true and
+#      the PR was labelled `ci: passed` seconds after opening.
+#   2. The job was gated on `github.event.pull_request`, so the check_run /
+#      check_suite / workflow_run triggers never reached it. Nothing ever
+#      recomputed the label once the checks actually finished.
+#
+# #1441 and #1443 both carried `ci: passed` while a required-in-spirit check
+# was failing. #1441's second matrix leg was `cancelled`, which the old
+# failure test also missed because it only looked for `failure`.
+#
+# This file no longer touches the project board. That work is done properly by
+# project-board-ci-sync.yml; the job here duplicated it, and its only
+# board-facing step referenced `steps.check_status` while the step it meant was
+# `id: check-ci`, so it had never once executed.
 
 on:
-  status:
   check_suite:
-    types: [completed]
-  check_run:
     types: [completed]
   pull_request:
     types: [opened, synchronize, reopened]
-  workflow_run:
-    workflows: ["*"]
-    types: [completed]
 
 permissions:
   contents: read
-  issues: write
+  issues: write        # labels on a PR go through the issues API
   pull-requests: write
-  statuses: read
   checks: read
 
 jobs:
-  update-project-on-ci-status:
-    name: Update Project Based on CI Status
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get PR or Issue Info
-        id: get-info
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
-        with:
-          script: |
-            const context_name = context.eventName;
-            let item_number = null;
-            let item_type = null;
-            let sha = null;
-            
-            // Determine the item (PR or issue) and commit SHA
-            if (context.payload.pull_request) {
-              item_number = context.payload.pull_request.number;
-              item_type = 'pull_request';
-              sha = context.payload.pull_request.head.sha;
-            } else if (context.payload.issue) {
-              item_number = context.payload.issue.number;
-              item_type = 'issue';
-            } else if (context.payload.check_suite) {
-              // Get PRs associated with this check suite
-              const prs = context.payload.check_suite.pull_requests;
-              if (prs && prs.length > 0) {
-                item_number = prs[0].number;
-                item_type = 'pull_request';
-              }
-              sha = context.payload.check_suite.head_sha;
-            } else if (context.payload.check_run) {
-              const prs = context.payload.check_run.pull_requests;
-              if (prs && prs.length > 0) {
-                item_number = prs[0].number;
-                item_type = 'pull_request';
-              }
-              sha = context.payload.check_run.head_sha;
-            } else if (context.payload.workflow_run) {
-              const prs = context.payload.workflow_run.pull_requests;
-              if (prs && prs.length > 0) {
-                item_number = prs[0].number;
-                item_type = 'pull_request';
-              }
-              sha = context.payload.workflow_run.head_sha;
-            }
-            
-            core.setOutput('item_number', item_number);
-            core.setOutput('item_type', item_type);
-            core.setOutput('sha', sha);
-
-      - name: Check CI Status
-        id: check-ci
-        if: steps.get-info.outputs.sha
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
-        with:
-          script: |
-            const sha = '${{ steps.get-info.outputs.sha }}';
-            
-            // Get all check runs for this commit
-            const { data: checkRuns } = await github.rest.checks.listForRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: sha
-            });
-            
-            // Get combined status
-            const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: sha
-            });
-            
-            // Determine overall status
-            let ci_passed = true;
-            let ci_status = 'success';
-            let failed_checks = [];
-            
-            // Check if any required checks failed
-            for (const check of checkRuns.check_runs) {
-              if (check.conclusion === 'failure' || check.conclusion === 'cancelled' || check.conclusion === 'timed_out') {
-                ci_passed = false;
-                ci_status = 'failure';
-                failed_checks.push(check.name);
-              }
-            }
-            
-            // Also check commit statuses
-            if (combinedStatus.state === 'failure' || combinedStatus.state === 'error') {
-              ci_passed = false;
-              ci_status = 'failure';
-            }
-            
-            core.setOutput('ci_passed', ci_passed);
-            core.setOutput('ci_status', ci_status);
-            core.setOutput('failed_checks', failed_checks.join(', '));
-
-      - name: Post CI Status Comment
-        if: steps.check_status.outputs.all_passed == 'true' || steps.check_status.outputs.has_failures == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Create comment body
-          cat > /tmp/ci_status_comment.md << 'EOF'
-          ## ✅ CI Status Update
-          
-          **Status:** ${{ steps.check_status.outputs.all_passed == 'true' && 'All Checks Passed' || 'Some Checks Failed' }}
-          **Last Updated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          
-          ### Check Summary
-          - Total Checks: ${{ steps.check_status.outputs.total_checks }}
-          - Passed: ${{ steps.check_status.outputs.passed_checks }}
-          - Failed: ${{ steps.check_status.outputs.failed_checks }}
-          
-          ${{ steps.check_status.outputs.all_passed == 'true' && '🎉 Project board updated to **In Review**' || '⚠️ Please review failed checks before merging' }}
-          EOF
-          
-          # Use smart comment handler to update existing comment
-          bash .github/scripts/smart-comment.sh ${{ github.event.pull_request.number }} "CI_STATUS_UPDATE" /tmp/ci_status_comment.md
-
-  add-ci-status-to-cards:
+  label-ci-status:
     name: Display CI Status on Project Cards
     runs-on: ubuntu-latest
-    if: github.event.pull_request || github.event.issue
     steps:
-      - name: Add CI Status Label (Silent)
+      - name: Update CI status label
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
-            const item_number = context.payload.pull_request?.number || context.payload.issue?.number;
-            const sha = context.payload.pull_request?.head?.sha;
-            
-            if (!sha) {
-              console.log('No SHA available, skipping');
+            // Jobs belonging to this workflow. They are themselves check runs on
+            // the same SHA and are still in progress while this code executes, so
+            // counting them would pin every PR to `ci: pending` forever.
+            const SELF = new Set(['Display CI Status on Project Cards']);
+
+            const FAILING = new Set([
+              'failure', 'cancelled', 'timed_out', 'action_required',
+            ]);
+            const PASSING = new Set(['success', 'skipped', 'neutral']);
+
+            // Resolve the PR and its head SHA from whichever event fired.
+            let prNumber = null;
+            let sha = null;
+
+            if (context.payload.pull_request) {
+              prNumber = context.payload.pull_request.number;
+              sha = context.payload.pull_request.head.sha;
+            } else if (context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              prNumber = prs.length ? prs[0].number : null;
+              sha = context.payload.check_suite.head_sha;
+            }
+
+            if (!prNumber || !sha) {
+              core.info('No pull request associated with this event; nothing to label.');
               return;
             }
-            
-            // Get CI status
-            const { data: checkRuns } = await github.rest.checks.listForRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: sha
-            });
-            
-            // Determine status label
-            let statusLabel = 'ci: pending';
-            const hasFailures = checkRuns.check_runs.some(c => c.conclusion === 'failure');
-            const allSuccess = checkRuns.check_runs.length > 0 && 
-                              checkRuns.check_runs.every(c => 
-                                c.conclusion === 'success' || 
-                                c.conclusion === 'skipped' ||
-                                c.conclusion === null
-                              );
-            
-            if (hasFailures) {
+
+            // listForRef defaults to 30 per page. Recent PRs here carry 30-40
+            // check runs, so an unpaginated read silently ignored the tail.
+            const checkRuns = await github.paginate(
+              github.rest.checks.listForRef,
+              { owner: context.repo.owner, repo: context.repo.repo, ref: sha, per_page: 100 }
+            );
+
+            const relevant = checkRuns.filter(c => !SELF.has(c.name));
+
+            const failed = relevant.filter(c => FAILING.has(c.conclusion));
+            const unfinished = relevant.filter(
+              c => c.status !== 'completed' || c.conclusion === null
+            );
+
+            // Failure wins over pending: a PR with one red check and three still
+            // running is not "pending", it already needs attention.
+            let statusLabel;
+            if (failed.length > 0) {
               statusLabel = 'ci: failed';
-            } else if (allSuccess) {
+            } else if (relevant.length === 0 || unfinished.length > 0) {
+              statusLabel = 'ci: pending';
+            } else {
               statusLabel = 'ci: passed';
             }
-            
-            // Remove old CI labels silently
-            const labels = ['ci: pending', 'ci: passed', 'ci: failed'];
-            for (const label of labels) {
+
+            core.info(
+              `PR #${prNumber} @ ${sha.slice(0, 7)}: ${relevant.length} checks, ` +
+              `${failed.length} failed, ${unfinished.length} unfinished -> ${statusLabel}`
+            );
+            if (failed.length > 0) {
+              core.info(`Failing: ${failed.map(c => c.name).join(', ')}`);
+            }
+
+            const { data: current } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const currentNames = current.map(l => l.name);
+
+            if (currentNames.includes(statusLabel)) {
+              core.info(`Label already ${statusLabel}; nothing to change.`);
+              return;
+            }
+
+            for (const stale of ['ci: pending', 'ci: passed', 'ci: failed']) {
+              if (stale === statusLabel || !currentNames.includes(stale)) continue;
               try {
                 await github.rest.issues.removeLabel({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  issue_number: item_number,
-                  name: label
+                  issue_number: prNumber,
+                  name: stale,
                 });
-              } catch (e) {
-                // Label doesn't exist, ignore
+              } catch (error) {
+                core.info(`Could not remove ${stale}: ${error.message}`);
               }
             }
-            
-            // Add current status label silently
+
             try {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: item_number,
-                labels: [statusLabel]
+                issue_number: prNumber,
+                labels: [statusLabel],
               });
-              console.log(`✅ Updated CI label to: ${statusLabel}`);
-            } catch (e) {
-              console.log(`⚠️ Could not add label: ${e.message}`);
+              core.info(`Set label to ${statusLabel}`);
+            } catch (error) {
+              core.warning(`Could not add ${statusLabel}: ${error.message}`);
             }

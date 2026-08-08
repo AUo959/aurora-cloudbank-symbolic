@@ -83,6 +83,11 @@ def load_json(path: Path) -> dict[str, Any]:
         )
     except BeaconValidationError:
         raise
+    except RecursionError as exc:
+        # RecursionError is not a ValueError, so deeply nested input would
+        # otherwise escape this handler and reach the caller as a raw traceback
+        # instead of a controlled INVALID result.
+        raise BeaconValidationError(f"Unable to parse JSON from {path}: input nested too deeply") from exc
     except (json.JSONDecodeError, ValueError) as exc:
         raise BeaconValidationError(f"Unable to parse JSON from {path}: {exc}") from exc
 
@@ -96,9 +101,13 @@ def semantic_version_tuple(version: str, field_name: str) -> tuple[int, int, int
     if not isinstance(version, str):
         raise BeaconValidationError(f"Invalid {field_name}: {version!r}")
     parts = version.split(".")
+    # str.isdigit() is true for non-ASCII decimal digits that int() also
+    # accepts, so "١.٠.٠" would otherwise parse as (1, 0, 0). This runs on
+    # specification.schema_version before any schema validation, so the ASCII
+    # restriction has to be explicit here.
     if (
         len(parts) != 3
-        or any(not part.isdigit() for part in parts)
+        or any(not (part.isascii() and part.isdigit()) for part in parts)
         or any(len(part) > SEMVER_COMPONENT_MAX_DIGITS for part in parts)
     ):
         raise BeaconValidationError(f"Invalid {field_name}: {version!r}")

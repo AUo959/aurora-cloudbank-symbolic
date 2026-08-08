@@ -125,7 +125,7 @@ The initial implementation does not:
 Its `utb-json-subset-v1` SHA-256 is:
 
 ```text
-7f2999044964283108b44cd739e40a16309d1d9aea3bcca78f03e5d85f9e6ed9
+d2b5b2c564c969d5bc177d6ebb81f50946f2b6c01f9e7f202b5b24c5e37422b6
 ```
 
 This digest verifies the exact canonical UTF-8 bytes of the fixture under the declared rules. It does not prove signer identity, package preservation, replay, transfer, or restoration.

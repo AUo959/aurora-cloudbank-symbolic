@@ -320,3 +320,33 @@ def test_policy_and_classification_dimensions_remain_explicit(example: dict) -> 
     assert example["classification"]["deployment_status"] == "not_applicable"
     assert example["compatibility"]["canonicalization"] == "utb-json-subset-v1"
     assert example["policy_refs"]["consent_policy_ref"] == "AUo959/Aurora_ORIONCORE_Directory_Main#46"
+
+
+@pytest.mark.unit
+def test_published_digest_in_design_doc_matches_computed_digest(
+    validator_module, schema: dict, example: dict
+) -> None:
+    """The digest published in the design doc must match the real one.
+
+    The canonical SHA-256 appears twice: pinned in this file, and published in
+    UNIVERSAL_THREAD_BEACON_FIELD_OWNERSHIP.md as the value external verifiers
+    check against. Nothing bound the two together, so a change that updated the
+    test pin could leave the published copy stale and silently hand independent
+    verifiers a mismatch. This binds them.
+    """
+    doc = (
+        Path(__file__).resolve().parents[1]
+        / "docs"
+        / "continuity"
+        / "UNIVERSAL_THREAD_BEACON_FIELD_OWNERSHIP.md"
+    ).read_text(encoding="utf-8")
+
+    computed = validator_module.canonical_sha256(
+        validator_module.validate_beacon(example, schema)
+    )
+
+    assert computed == EXPECTED_CANONICAL_SHA256
+    assert computed in doc, (
+        "The canonical digest published in UNIVERSAL_THREAD_BEACON_FIELD_OWNERSHIP.md "
+        f"does not match the computed digest {computed}."
+    )

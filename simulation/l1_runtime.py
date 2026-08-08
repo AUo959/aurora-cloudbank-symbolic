@@ -20,10 +20,10 @@ Core invariants:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
-import random
-import subprocess
+import tempfile
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -33,7 +33,9 @@ from typing import Any, Dict, List, Optional
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_PATH = PROJECT_ROOT / "config" / "l1_runtime_baseline.json"
 CANON_PROVENANCE_PATH = PROJECT_ROOT / "config" / "canon_provenance.json"
-DEFAULT_RUN_ROOT = Path(os.environ.get("AURORA_L1_RUN_ROOT", Path.home() / ".aurora" / "l1-runs"))
+DEFAULT_RUN_ROOT = Path(
+    os.environ.get("AURORA_L1_RUN_ROOT", Path.home() / ".aurora" / "l1-runs")
+)
 
 
 class PreflightError(RuntimeError):
@@ -42,6 +44,25 @@ class PreflightError(RuntimeError):
 
 class GovernanceError(RuntimeError):
     """Raised when an actionable mutation lacks complete Triplex authorization."""
+
+
+class DeterministicReplayRNG:
+    """Small deterministic replay generator for non-security simulation choices.
+
+    This is intentionally hash/counter based rather than ``random.Random`` so a
+    security-sensitive PRNG API is not accidentally reused as an authority or
+    token source. It exists only to make identical L1 seeds replay identically.
+    """
+
+    def __init__(self, seed: int) -> None:
+        self._seed = str(int(seed)).encode("ascii")
+        self._counter = 0
+
+    def random(self) -> float:
+        payload = self._seed + b":" + str(self._counter).encode("ascii")
+        digest = hashlib.sha256(payload).digest()
+        self._counter += 1
+        return int.from_bytes(digest[:8], "big") / float(1 << 64)
 
 
 @dataclass(frozen=True)
@@ -61,11 +82,18 @@ class PopulationSnapshot:
             if self.persona_resolved_humans < 0:
                 raise ValueError("persona_resolved_humans cannot be negative")
             if self.persona_resolved_humans > self.identified_human_records:
-                raise ValueError("persona-resolved humans cannot exceed identified human records")
+                raise ValueError(
+                    "persona-resolved humans cannot exceed identified human records"
+                )
         if self.current_human_crew_complement is not None:
             if self.current_human_crew_complement < self.identified_human_records:
-                raise ValueError("human crew complement cannot be smaller than identified human records")
-            if self.crew_capacity is not None and self.current_human_crew_complement > self.crew_capacity:
+                raise ValueError(
+                    "human crew complement cannot be smaller than identified human records"
+                )
+            if (
+                self.crew_capacity is not None
+                and self.current_human_crew_complement > self.crew_capacity
+            ):
                 raise ValueError("human crew complement cannot exceed crew capacity")
         if any(value < 0 for value in self.system_entities.values()):
             raise ValueError("system entity counts cannot be negative")
@@ -80,7 +108,9 @@ class PopulationSnapshot:
             persona_resolved_humans=payload.get("persona_resolved_humans"),
             missing_named_human_claim=bool(payload["missing_named_human_claim"]),
             system_entities=dict(payload.get("system_entities", {})),
-            historical_aggregate_claims=dict(payload.get("historical_aggregate_claims", {})),
+            historical_aggregate_claims=dict(
+                payload.get("historical_aggregate_claims", {})
+            ),
         )
         snapshot.validate()
         return snapshot
@@ -166,10 +196,10 @@ class OrionL1Runtime:
 
     def __init__(self, baseline_path: Path = BASELINE_PATH) -> None:
         self.baseline_path = baseline_path
-        self.baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+        self.baseline = _read_json(baseline_path)
         self.population = PopulationSnapshot.from_baseline(self.baseline)
         self.state: Optional[L1RunState] = None
-        self._rng: Optional[random.Random] = None
+        self._rng: Optional[DeterministicReplayRNG] = None
         self._run_root: Optional[Path] = None
 
     def preflight(self) -> Dict[str, Any]:
@@ -177,45 +207,12 @@ class OrionL1Runtime:
         blockers: List[str] = []
         warnings: List[str] = []
 
-        authority = self.baseline.get("authority", {})
-        staff = authority.get("staff_registry", {})
-        if staff.get("status") != "resolved_authority_boundary":
-            blockers.append("staff registry authority boundary is unresolved")
-        if staff.get("authority_repository") != "AUo959/CanonRec":
-            blockers.append("CanonRec is not configured as staff canon authority")
-
-        pilot = self.baseline.get("pilot_boundary", {})
-        if pilot.get("residency") != "Earth" or pilot.get("l1_entity") is not False:
-            blockers.append("Pilot boundary would permit L1 embodiment")
-        if pilot.get("implicit_station_command_authority") is not False:
-            blockers.append("Pilot role incorrectly implies station command authority")
-
-        if self.population.missing_named_human_claim:
-            blockers.append("false missing-human claim is active")
-        if self.population.current_human_crew_complement is None:
-            warnings.append("exact current human crew complement is unresolved and quarantined")
-
-        locus = self.baseline.get("orbital_locus", {})
-        if locus.get("status") != "quarantined_conflict":
-            blockers.append("orbital locus conflict is not safely quarantined")
-        if not locus.get("prohibited_causal_derivations"):
-            blockers.append("orbital locus quarantine lacks causal-use restrictions")
-
-        legacy = self.baseline.get("legacy_state", {})
-        if legacy.get("genesis_authority") is not False:
-            blockers.append("legacy SIMULATION_STATE is still eligible as genesis authority")
-
-        benchmark = self.baseline.get("benchmark", {})
-        if benchmark.get("canonical_component") != "simulation/orion_station_simulation_v2.py":
-            blockers.append("canonical benchmark is not wired to Orion simulation v2")
-        if "not the live L1 world runtime" not in benchmark.get("role", ""):
-            blockers.append("historical benchmark is being conflated with the live L1 runtime")
-
-        governance = self.baseline.get("governance", {})
-        if governance.get("ethics_protocol") != "Picard_Delta_3":
-            blockers.append("Picard_Delta_3 governance is not active in the runtime contract")
-        if governance.get("actionable_event_policy") != "explicit_triplex_receipt_required":
-            blockers.append("actionable events do not fail closed on Triplex authorization")
+        self._check_staff_authority(blockers)
+        self._check_pilot_boundary(blockers)
+        self._check_population(blockers, warnings)
+        self._check_locus_quarantine(blockers)
+        self._check_legacy_and_benchmark(blockers)
+        self._check_governance(blockers)
 
         return {
             "ready": not blockers,
@@ -225,6 +222,89 @@ class OrionL1Runtime:
             "run_created": self.state is not None,
             "runtime_contract_version": self.baseline["runtime_contract_version"],
         }
+
+    def _check_staff_authority(self, blockers: List[str]) -> None:
+        authority = self.baseline.get("authority", {})
+        staff = authority.get("staff_registry", {})
+        if staff.get("status") != "resolved_authority_boundary":
+            blockers.append("staff registry authority boundary is unresolved")
+        if staff.get("authority_repository") != "AUo959/CanonRec":
+            blockers.append("CanonRec is not configured as staff canon authority")
+
+        try:
+            provenance = _read_json(CANON_PROVENANCE_PATH)
+        except (OSError, ValueError, json.JSONDecodeError):
+            blockers.append("canon provenance receipt is unavailable or invalid")
+            return
+
+        if provenance.get("unreconciled_surfaces"):
+            blockers.append("canon provenance still reports unreconciled surfaces")
+        staff_receipts = [
+            item
+            for item in provenance.get("resolved_surfaces", [])
+            if item.get("name") == "orion_station_staff_registry"
+        ]
+        if len(staff_receipts) != 1:
+            blockers.append("canon provenance lacks one resolved staff authority receipt")
+            return
+        receipt = staff_receipts[0]
+        if receipt.get("authority_repository") != "AUo959/CanonRec":
+            blockers.append("canon provenance does not assign staff authority to CanonRec")
+        if receipt.get("cloudbank_role") != "runtime_projection_non_authoritative":
+            blockers.append("CloudBank staff registry is not typed as a runtime projection")
+        expected_revision = authority.get("canonrec", {}).get("revision")
+        if receipt.get("authority_revision") != expected_revision:
+            blockers.append("staff authority revision does not match the L1 baseline")
+
+    def _check_pilot_boundary(self, blockers: List[str]) -> None:
+        pilot = self.baseline.get("pilot_boundary", {})
+        if pilot.get("residency") != "Earth" or pilot.get("l1_entity") is not False:
+            blockers.append("Pilot boundary would permit L1 embodiment")
+        if pilot.get("implicit_station_command_authority") is not False:
+            blockers.append("Pilot role incorrectly implies station command authority")
+
+    def _check_population(self, blockers: List[str], warnings: List[str]) -> None:
+        if self.population.missing_named_human_claim:
+            blockers.append("false missing-human claim is active")
+        if self.population.current_human_crew_complement is None:
+            warnings.append(
+                "exact current human crew complement is unresolved and quarantined"
+            )
+
+    def _check_locus_quarantine(self, blockers: List[str]) -> None:
+        locus = self.baseline.get("orbital_locus", {})
+        if locus.get("status") != "quarantined_conflict":
+            blockers.append("orbital locus conflict is not safely quarantined")
+        if not locus.get("prohibited_causal_derivations"):
+            blockers.append("orbital locus quarantine lacks causal-use restrictions")
+
+    def _check_legacy_and_benchmark(self, blockers: List[str]) -> None:
+        legacy = self.baseline.get("legacy_state", {})
+        if legacy.get("genesis_authority") is not False:
+            blockers.append("legacy SIMULATION_STATE is still eligible as genesis authority")
+
+        benchmark = self.baseline.get("benchmark", {})
+        if (
+            benchmark.get("canonical_component")
+            != "simulation/orion_station_simulation_v2.py"
+        ):
+            blockers.append("canonical benchmark is not wired to Orion simulation v2")
+        if "not the live L1 world runtime" not in benchmark.get("role", ""):
+            blockers.append(
+                "historical benchmark is being conflated with the live L1 runtime"
+            )
+
+    def _check_governance(self, blockers: List[str]) -> None:
+        governance = self.baseline.get("governance", {})
+        if governance.get("ethics_protocol") != "Picard_Delta_3":
+            blockers.append("Picard_Delta_3 governance is not active in the runtime contract")
+        if (
+            governance.get("actionable_event_policy")
+            != "explicit_triplex_receipt_required"
+        ):
+            blockers.append(
+                "actionable events do not fail closed on Triplex authorization"
+            )
 
     def init_run(
         self,
@@ -241,8 +321,14 @@ class OrionL1Runtime:
             raise PreflightError("; ".join(report["blockers"]))
         self._validate_revision(cloudbank_revision, "cloudbank_revision")
 
-        canonrec_revision = canonrec_revision or self.baseline["authority"]["canonrec"]["revision"]
+        canonrec_revision = (
+            canonrec_revision or self.baseline["authority"]["canonrec"]["revision"]
+        )
         self._validate_revision(canonrec_revision, "canonrec_revision")
+
+        resolved_run_root = None
+        if persist:
+            resolved_run_root = self._resolve_run_root(run_root or DEFAULT_RUN_ROOT)
 
         defaults = self.baseline["run_defaults"]
         manifest = RunManifest(
@@ -258,11 +344,13 @@ class OrionL1Runtime:
             tick=0,
             status="INITIALIZED",
             canon_status="run_state",
-            active_quarantines=["orion_orbital_locus", "historical_current_crew_81"],
+            active_quarantines=[
+                "orion_orbital_locus",
+                "historical_current_crew_81",
+            ],
             population=self.population,
         )
-
-        self.state = L1RunState(
+        new_state = L1RunState(
             manifest=manifest,
             world_state={
                 "station": "Orion Station",
@@ -274,26 +362,31 @@ class OrionL1Runtime:
                 },
                 "orbital_locus": {
                     "status": self.baseline["orbital_locus"]["status"],
-                    "description": self.baseline["orbital_locus"]["safe_runtime_description"],
+                    "description": self.baseline["orbital_locus"][
+                        "safe_runtime_description"
+                    ],
                 },
                 "population": asdict(self.population),
             },
         )
-        self._rng = random.Random(seed)
+        new_rng = DeterministicReplayRNG(seed)
 
+        self.state = new_state
+        self._rng = new_rng
+        self._run_root = resolved_run_root
         if persist:
-            self._run_root = self._resolve_run_root(run_root or DEFAULT_RUN_ROOT)
             self._persist()
-        return self.state
+        return new_state
 
     def advance(self, elapsed_minutes: int = 15) -> Dict[str, Any]:
         """Advance autonomous station state; observation focus is not consulted."""
         state = self._require_state()
         if elapsed_minutes <= 0 or elapsed_minutes > 1440:
             raise ValueError("elapsed_minutes must be between 1 and 1440")
-        if state.manifest.status != "INITIALIZED" and state.manifest.status != "ACTIVE":
+        if state.manifest.status not in {"INITIALIZED", "ACTIVE"}:
             raise RuntimeError("run is not advancement-capable")
-        assert self._rng is not None
+        if self._rng is None:
+            raise RuntimeError("runtime replay generator is unavailable")
 
         state.manifest.status = "ACTIVE"
         state.manifest.tick += 1
@@ -302,19 +395,7 @@ class OrionL1Runtime:
         ) % state.manifest.station_cycle_length_minutes
 
         roll = self._rng.random()
-        if roll < 0.30:
-            kind = "routine_shift_handoff"
-            summary = "Routine station shift handoff completed without material exception."
-        elif roll < 0.50:
-            kind = "maintenance_queue_progress"
-            summary = "A scheduled maintenance queue advanced within standing-authority limits."
-        elif roll < 0.65:
-            kind = "research_queue_progress"
-            summary = "A research work queue advanced; no canon-level conclusion was generated."
-        else:
-            kind = "no_material_event"
-            summary = "No material station event was recorded for this advancement window."
-
+        kind, summary = _event_for_roll(roll)
         event = {
             "event_id": str(uuid.uuid4()),
             "tick": state.manifest.tick,
@@ -378,24 +459,42 @@ class OrionL1Runtime:
         self._persist_if_configured()
         return payload
 
-    def route_operator_input(self, text: str, explicit_kind: Optional[str] = None) -> Dict[str, Any]:
+    def route_operator_input(
+        self,
+        text: str,
+        explicit_kind: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Route operator input; only explicit communications cross into L1."""
         normalized = text.strip()
         if explicit_kind == "communication":
             return self.send_communication(normalized)
         if explicit_kind not in {None, "control"}:
-            raise ValueError("explicit_kind must be 'control', 'communication', or None")
+            raise ValueError(
+                "explicit_kind must be 'control', 'communication', or None"
+            )
 
         lowered = normalized.lower()
         if lowered in {"continue", "advance", "next"}:
-            return {"kind": "control", "action": "advance", "event": self.advance()}
+            return {
+                "kind": "control",
+                "action": "advance",
+                "event": self.advance(),
+            }
         for prefix in ("observe ", "show "):
             if lowered.startswith(prefix):
-                focus = normalized[len(prefix):].strip() or "station"
-                return {"kind": "control", "action": "observe", "observation": self.observe(focus)}
+                focus = normalized[len(prefix) :].strip() or "station"
+                return {
+                    "kind": "control",
+                    "action": "observe",
+                    "observation": self.observe(focus),
+                }
         if lowered.startswith("stay with"):
-            focus = normalized[len("stay with"):].strip() or "current aperture"
-            return {"kind": "control", "action": "observe", "observation": self.observe(focus)}
+            focus = normalized[len("stay with") :].strip() or "current aperture"
+            return {
+                "kind": "control",
+                "action": "observe",
+                "observation": self.observe(focus),
+            }
 
         return {
             "kind": "control",
@@ -404,8 +503,12 @@ class OrionL1Runtime:
             "reason": "ambiguous operator input defaults to control-plane handling",
         }
 
-    def send_communication(self, content: str, target: Optional[str] = None) -> Dict[str, Any]:
-        """Queue an explicit Earth→Orion communication without auto-executing it."""
+    def send_communication(
+        self,
+        content: str,
+        target: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Queue explicit Earth→Orion communication without auto-executing it."""
         state = self._require_state()
         if not content:
             raise ValueError("communication content cannot be empty")
@@ -455,10 +558,12 @@ class OrionL1Runtime:
         value: Any,
         receipt: GovernanceReceipt,
     ) -> EpistemicRecord:
-        """Apply an exceptional actionable fact only after complete Triplex authorization."""
+        """Apply an exceptional fact only after complete Triplex authorization."""
         state = self._require_state()
         if not receipt.complete:
-            raise GovernanceError("Triplex authorization incomplete; actionable event rejected")
+            raise GovernanceError(
+                "Triplex authorization incomplete; actionable event rejected"
+            )
         record = EpistemicRecord(
             record_id=str(uuid.uuid4()),
             subject=subject,
@@ -482,7 +587,11 @@ class OrionL1Runtime:
         self._persist_if_configured()
         return record
 
-    def nominate_for_canon_review(self, record_id: str, rationale: str) -> Dict[str, Any]:
+    def nominate_for_canon_review(
+        self,
+        record_id: str,
+        rationale: str,
+    ) -> Dict[str, Any]:
         """Mark a run artifact as a candidate only; never mutate repository canon."""
         state = self._require_state()
         candidate = {
@@ -515,7 +624,9 @@ class OrionL1Runtime:
                 for key, records in state.character_knowledge.items()
             },
             "station_records": [asdict(record) for record in state.station_records],
-            "runtime_observations": [asdict(record) for record in state.runtime_observations],
+            "runtime_observations": [
+                asdict(record) for record in state.runtime_observations
+            ],
             "pilot_knowledge": [asdict(record) for record in state.pilot_knowledge],
             "communications": state.communications,
             "events": state.events,
@@ -524,21 +635,43 @@ class OrionL1Runtime:
 
     @staticmethod
     def resolve_cloudbank_revision(project_root: Path = PROJECT_ROOT) -> str:
-        """Resolve the checked-out revision; fail closed if the checkout is not revision-pinned."""
+        """Resolve a checked-out git SHA without executing a subprocess."""
+        git_dir = project_root / ".git"
+        if not git_dir.is_dir():
+            raise PreflightError("unable to pin CloudBank git revision: .git directory missing")
+        head_path = git_dir / "HEAD"
         try:
-            result = subprocess.run(
-                ["git", "rev-parse", "HEAD"],
-                cwd=project_root,
-                check=True,
-                capture_output=True,
-                text=True,
-                timeout=3,
-            )
-        except (OSError, subprocess.SubprocessError) as exc:
-            raise PreflightError("unable to pin CloudBank git revision") from exc
-        revision = result.stdout.strip()
-        OrionL1Runtime._validate_revision(revision, "cloudbank_revision")
-        return revision
+            head = head_path.read_text(encoding="utf-8").strip()
+        except OSError as exc:
+            raise PreflightError("unable to read CloudBank git HEAD") from exc
+
+        if _is_git_sha(head):
+            return head.lower()
+        if not head.startswith("ref: "):
+            raise PreflightError("CloudBank git HEAD has unsupported format")
+
+        ref_name = head.removeprefix("ref: ").strip()
+        if not _safe_git_ref(ref_name):
+            raise PreflightError("CloudBank git HEAD contains an unsafe ref")
+        loose_ref = git_dir / ref_name
+        if loose_ref.is_file():
+            revision = loose_ref.read_text(encoding="utf-8").strip()
+            OrionL1Runtime._validate_revision(revision, "cloudbank_revision")
+            return revision.lower()
+
+        packed_refs = git_dir / "packed-refs"
+        if packed_refs.is_file():
+            for line in packed_refs.read_text(encoding="utf-8").splitlines():
+                if not line or line.startswith(("#", "^")):
+                    continue
+                revision, separator, packed_ref = line.partition(" ")
+                if separator and packed_ref == ref_name:
+                    OrionL1Runtime._validate_revision(
+                        revision,
+                        "cloudbank_revision",
+                    )
+                    return revision.lower()
+        raise PreflightError("unable to resolve CloudBank git HEAD reference")
 
     def _persist_if_configured(self) -> None:
         if self._run_root is not None:
@@ -546,13 +679,32 @@ class OrionL1Runtime:
 
     def _persist(self) -> None:
         state = self._require_state()
-        assert self._run_root is not None
+        if self._run_root is None:
+            raise RuntimeError("run persistence root is not configured")
         run_dir = self._run_root / state.manifest.run_id
-        run_dir.mkdir(parents=True, exist_ok=True)
+        run_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         destination = run_dir / "state.json"
-        temporary = run_dir / ".state.json.tmp"
-        temporary.write_text(json.dumps(self.export_state(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        temporary.replace(destination)
+        payload = json.dumps(self.export_state(), indent=2, sort_keys=True) + "\n"
+        temporary_path: Optional[Path] = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                prefix=".state-",
+                suffix=".tmp",
+                dir=run_dir,
+                delete=False,
+            ) as temporary:
+                os.chmod(temporary.name, 0o600)
+                temporary.write(payload)
+                temporary.flush()
+                os.fsync(temporary.fileno())
+                temporary_path = Path(temporary.name)
+            os.replace(temporary_path, destination)
+            os.chmod(destination, 0o600)
+        finally:
+            if temporary_path is not None and temporary_path.exists():
+                temporary_path.unlink()
 
     @staticmethod
     def _resolve_run_root(path: Path) -> Path:
@@ -560,18 +712,59 @@ class OrionL1Runtime:
         project = PROJECT_ROOT.resolve()
         if resolved == project or project in resolved.parents:
             raise PreflightError("run persistence must remain outside the repository")
-        resolved.mkdir(parents=True, exist_ok=True)
+        resolved.mkdir(mode=0o700, parents=True, exist_ok=True)
         return resolved
 
     @staticmethod
     def _validate_revision(value: str, field_name: str) -> None:
-        if len(value) != 40 or any(char not in "0123456789abcdef" for char in value.lower()):
+        if not _is_git_sha(value):
             raise ValueError(f"{field_name} must be a 40-character git SHA")
 
     def _require_state(self) -> L1RunState:
         if self.state is None:
             raise RuntimeError("INIT has not created an L1 run")
         return self.state
+
+
+def _event_for_roll(roll: float) -> tuple[str, str]:
+    if roll < 0.30:
+        return (
+            "routine_shift_handoff",
+            "Routine station shift handoff completed without material exception.",
+        )
+    if roll < 0.50:
+        return (
+            "maintenance_queue_progress",
+            "A scheduled maintenance queue advanced within standing-authority limits.",
+        )
+    if roll < 0.65:
+        return (
+            "research_queue_progress",
+            "A research work queue advanced; no canon-level conclusion was generated.",
+        )
+    return (
+        "no_material_event",
+        "No material station event was recorded for this advancement window.",
+    )
+
+
+def _read_json(path: Path) -> Dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"expected JSON object in {path}")
+    return payload
+
+
+def _safe_git_ref(ref_name: str) -> bool:
+    if not ref_name.startswith("refs/"):
+        return False
+    if ref_name.startswith("/") or ".." in ref_name or "\\" in ref_name:
+        return False
+    return all(part not in {"", ".", ".."} for part in ref_name.split("/"))
+
+
+def _is_git_sha(value: str) -> bool:
+    return len(value) == 40 and all(char in "0123456789abcdefABCDEF" for char in value)
 
 
 def _utcnow() -> str:

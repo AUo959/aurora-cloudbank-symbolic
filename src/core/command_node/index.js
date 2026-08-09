@@ -124,6 +124,7 @@ export class CommandNode {
     }
 
     try {
+      fs.mkdirSync(path.dirname(this.diagnosticsPath), { recursive: true });
       fs.writeFileSync(
         this.diagnosticsPath,
         JSON.stringify(this.diagnostics, null, 2)

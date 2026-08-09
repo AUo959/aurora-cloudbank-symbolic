@@ -6,6 +6,7 @@
 import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -26,6 +27,10 @@ import CommandNode, {
 
 // Test logs directory
 const TEST_LOGS_DIR = path.join(process.cwd(), 'logs', 'test');
+
+function makeDiagnosticsTempDir() {
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'aurora-command-node-'));
+}
 
 describe('CommandNode - Unified Architecture', () => {
   let commandNode;
@@ -105,21 +110,44 @@ describe('CommandNode - Unified Architecture', () => {
   });
 
   test('can disable diagnostics persistence for non-mutating tests', () => {
-    const diagnosticsPath = path.join(
-      TEST_LOGS_DIR,
-      'disabled-diagnostics.json'
-    );
-    const node = new CommandNode({
-      logsDir: TEST_LOGS_DIR,
-      diagnosticsPath,
-      persistDiagnostics: false,
-    });
+    const tempDir = makeDiagnosticsTempDir();
+    const diagnosticsPath = path.join(tempDir, 'disabled-diagnostics.json');
 
-    node.executeCommand({ name: 'test_action', context: 'TEST' });
+    try {
+      const node = new CommandNode({
+        logsDir: TEST_LOGS_DIR,
+        diagnosticsPath,
+        persistDiagnostics: false,
+      });
 
-    assert.strictEqual(node.diagnostics.commandCount, 1);
-    assert.strictEqual(node.diagnostics.processedCount, 1);
-    assert.strictEqual(fs.existsSync(diagnosticsPath), false);
+      node.executeCommand({ name: 'test_action', context: 'TEST' });
+
+      assert.strictEqual(node.diagnostics.commandCount, 1);
+      assert.strictEqual(node.diagnostics.processedCount, 1);
+      assert.strictEqual(fs.existsSync(diagnosticsPath), false);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  test('creates parent directories for a custom diagnostics path', () => {
+    const tempDir = makeDiagnosticsTempDir();
+    const diagnosticsPath = path.join(tempDir, 'nested', 'diagnostics.json');
+
+    try {
+      const node = new CommandNode({
+        logsDir: TEST_LOGS_DIR,
+        diagnosticsPath,
+      });
+
+      node.executeCommand({ name: 'test_action', context: 'TEST' });
+
+      const saved = JSON.parse(fs.readFileSync(diagnosticsPath, 'utf8'));
+      assert.strictEqual(saved.commandCount, 1);
+      assert.strictEqual(saved.processedCount, 1);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   test('executeCommand throws for forbidden commands', () => {

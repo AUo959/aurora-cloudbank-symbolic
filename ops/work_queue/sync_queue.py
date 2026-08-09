@@ -124,8 +124,7 @@ def _queue_gate_items(data: dict) -> list[dict]:
         for section in ("active", "completed")
         for item in data.get(section, [])
         if "gate" in item.get("tags", [])
-        or item.get("status") in DECISION_GATE_STATES
-        or item.get("state") in DECISION_GATE_STATES
+        or _queue_item_status(item) in DECISION_GATE_STATES
     ]
 
 

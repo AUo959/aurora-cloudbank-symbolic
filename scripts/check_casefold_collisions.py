@@ -3,7 +3,10 @@
 
 from __future__ import annotations
 
-import subprocess
+import shutil
+
+# Fixed Git command; no user-controlled executable or arguments.
+import subprocess  # nosec B404
 from pathlib import Path, PurePosixPath
 
 
@@ -12,8 +15,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def tracked_paths(repo_root: Path = REPO_ROOT) -> list[str]:
     """Return Git-tracked paths without relying on checkout casing."""
-    output = subprocess.check_output(
-        ["git", "ls-files", "-z"], cwd=repo_root, text=True
+    git_executable = shutil.which("git")
+    if git_executable is None:
+        raise RuntimeError("git executable not found")
+    # Absolute executable plus fixed arguments; no shell or user input.
+    output = subprocess.check_output(  # nosec B603
+        [git_executable, "ls-files", "-z"], cwd=repo_root, text=True
     )
     return [path for path in output.split("\0") if path]
 

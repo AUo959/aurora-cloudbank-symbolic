@@ -16,7 +16,7 @@ _Queue review: `2026-07-16T00:36:36Z` · Gate registry updated: `2026-08-03` · 
 ## Open Gates (3)
 
 | Gate | Queue Item | Title | Gate State | Integrity | Queue Status | Decision Owner |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | GATE-001 | Q-0003 | Pentest vendor selection + pre-condition sign-off | `open` | `reconciliation_required` | `missing` | operator |
 | GATE-002 | sim/SENTINEL-phase0 | PROJECT SENTINEL Phase 0 governance constitution | `open` | `active` | `needs-decision` | Commander Thorne + Sorensen + Sato |
 | GATE-003 | feat/QGIA | QGIA integration routing and crew sign-off | `open` | `active` | `needs-decision` | operator / designated crew reviewers |

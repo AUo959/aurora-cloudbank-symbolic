@@ -98,10 +98,10 @@ export class CommandNode {
       };
     }
 
-    const diagnosticsPath = path.join(process.cwd(), 'diagnostics.json');
+    const diagPath = path.join(process.cwd(), 'diagnostics.json');
     try {
-      if (fs.existsSync(diagnosticsPath)) {
-        return JSON.parse(fs.readFileSync(diagnosticsPath, 'utf8'));
+      if (fs.existsSync(diagPath)) {
+        return JSON.parse(fs.readFileSync(diagPath, 'utf8'));
       }
     } catch {
       // Ignore errors
@@ -122,9 +122,9 @@ export class CommandNode {
       return;
     }
 
-    const diagnosticsPath = path.join(process.cwd(), 'diagnostics.json');
+    const diagPath = path.join(process.cwd(), 'diagnostics.json');
     try {
-      fs.writeFileSync(diagnosticsPath, JSON.stringify(this.diagnostics, null, 2));
+      fs.writeFileSync(diagPath, JSON.stringify(this.diagnostics, null, 2));
     } catch {
       // Ignore errors
     }

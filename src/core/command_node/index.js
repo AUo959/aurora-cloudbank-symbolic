@@ -51,8 +51,6 @@ export class CommandNode {
     this.ethicsProtocol = options.ethicsProtocol || getDefaultProtocol();
     this.enableEncryption = options.enableEncryption !== false && isEncryptionAvailable();
     this.persistDiagnostics = options.persistDiagnostics !== false;
-    this.diagnosticsPath =
-      options.diagnosticsPath || path.join(process.cwd(), 'diagnostics.json');
 
     // Initialize router
     this.router = new CommandRouter({
@@ -100,9 +98,10 @@ export class CommandNode {
       };
     }
 
+    const diagnosticsPath = path.join(process.cwd(), 'diagnostics.json');
     try {
-      if (fs.existsSync(this.diagnosticsPath)) {
-        return JSON.parse(fs.readFileSync(this.diagnosticsPath, 'utf8'));
+      if (fs.existsSync(diagnosticsPath)) {
+        return JSON.parse(fs.readFileSync(diagnosticsPath, 'utf8'));
       }
     } catch {
       // Ignore errors
@@ -123,12 +122,9 @@ export class CommandNode {
       return;
     }
 
+    const diagnosticsPath = path.join(process.cwd(), 'diagnostics.json');
     try {
-      fs.mkdirSync(path.dirname(this.diagnosticsPath), { recursive: true });
-      fs.writeFileSync(
-        this.diagnosticsPath,
-        JSON.stringify(this.diagnostics, null, 2)
-      );
+      fs.writeFileSync(diagnosticsPath, JSON.stringify(this.diagnostics, null, 2));
     } catch {
       // Ignore errors
     }

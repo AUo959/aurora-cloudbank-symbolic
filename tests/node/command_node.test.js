@@ -6,7 +6,6 @@
 import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -27,10 +26,6 @@ import CommandNode, {
 
 // Test logs directory
 const TEST_LOGS_DIR = path.join(process.cwd(), 'logs', 'test');
-
-function makeDiagnosticsTempDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'aurora-command-node-'));
-}
 
 describe('CommandNode - Unified Architecture', () => {
   let commandNode;
@@ -110,44 +105,18 @@ describe('CommandNode - Unified Architecture', () => {
   });
 
   test('can disable diagnostics persistence for non-mutating tests', () => {
-    const tempDir = makeDiagnosticsTempDir();
-    const diagnosticsPath = path.join(tempDir, 'disabled-diagnostics.json');
+    const diagnosticsPath = path.join(process.cwd(), 'diagnostics.json');
+    const diagnosticsBefore = fs.readFileSync(diagnosticsPath);
+    const node = new CommandNode({
+      logsDir: TEST_LOGS_DIR,
+      persistDiagnostics: false,
+    });
 
-    try {
-      const node = new CommandNode({
-        logsDir: TEST_LOGS_DIR,
-        diagnosticsPath,
-        persistDiagnostics: false,
-      });
+    node.executeCommand({ name: 'test_action', context: 'TEST' });
 
-      node.executeCommand({ name: 'test_action', context: 'TEST' });
-
-      assert.strictEqual(node.diagnostics.commandCount, 1);
-      assert.strictEqual(node.diagnostics.processedCount, 1);
-      assert.strictEqual(fs.existsSync(diagnosticsPath), false);
-    } finally {
-      fs.rmSync(tempDir, { recursive: true, force: true });
-    }
-  });
-
-  test('creates parent directories for a custom diagnostics path', () => {
-    const tempDir = makeDiagnosticsTempDir();
-    const diagnosticsPath = path.join(tempDir, 'nested', 'diagnostics.json');
-
-    try {
-      const node = new CommandNode({
-        logsDir: TEST_LOGS_DIR,
-        diagnosticsPath,
-      });
-
-      node.executeCommand({ name: 'test_action', context: 'TEST' });
-
-      const saved = JSON.parse(fs.readFileSync(diagnosticsPath, 'utf8'));
-      assert.strictEqual(saved.commandCount, 1);
-      assert.strictEqual(saved.processedCount, 1);
-    } finally {
-      fs.rmSync(tempDir, { recursive: true, force: true });
-    }
+    assert.strictEqual(node.diagnostics.commandCount, 1);
+    assert.strictEqual(node.diagnostics.processedCount, 1);
+    assert.deepStrictEqual(fs.readFileSync(diagnosticsPath), diagnosticsBefore);
   });
 
   test('executeCommand throws for forbidden commands', () => {

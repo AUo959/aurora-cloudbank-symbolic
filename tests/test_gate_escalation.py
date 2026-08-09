@@ -22,6 +22,7 @@ from ops.work_queue.escalate_gates import (
     find_ungated_decisions,
 )
 from ops.work_queue.sync_queue import (
+    check_all,
     find_gate_coherence_errors,
     render_next_up_md,
     render_open_gates_md,
@@ -472,6 +473,17 @@ def test_next_up_renders_state_model_decision_gate():
     assert "| 1 | Q-0900 | Projection test queue item |" in rendered
     assert "_No decision-gated items._" not in rendered
     assert "_No open items._" in rendered
+
+
+def test_check_all_detects_source_timestamp_divergence(tmp_path):
+    generated_view = tmp_path / "NEXT_UP.md"
+    generated_view.write_text(
+        "# Next Up\n\n_Generated: `2026-07-16T00:36:36Z`_\n",
+        encoding="utf-8",
+    )
+    rendered = {generated_view: "# Next Up\n\n_Generated: `2026-08-09T23:40:00Z`_\n"}
+
+    assert check_all(rendered) is False
 
 
 def test_check_mode_returns_nonzero_for_cross_source_divergence(monkeypatch):

@@ -615,17 +615,7 @@ def check_all(rendered: dict[Path, str]) -> bool:
             drift = True
             continue
         existing = path.read_text(encoding="utf-8")
-        # Strip the timestamp line before comparing so clock-skew doesn't cause false positives.
-
-        def strip_ts(text: str) -> str:
-            return "\n".join(
-                line
-                for line in text.splitlines()
-                if not line.startswith("**Generated:**")
-                and not line.startswith("_Generated:")
-            )
-
-        if strip_ts(existing) != strip_ts(new_content):
+        if existing != new_content:
             print(f"STALE:   {path.name}")
             drift = True
         else:

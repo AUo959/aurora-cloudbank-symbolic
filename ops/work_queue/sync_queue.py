@@ -129,10 +129,13 @@ def _queue_gate_items(data: dict) -> list[dict]:
 def _queue_item_status(item: dict | None) -> str:
     if item is None:
         return "missing"
+    status = item.get("status")
     state = item.get("state")
+    if status == "done" or state == "done":
+        return "done"
     if state == "decision_required":
         return state
-    return str(item.get("status") or state or "unknown")
+    return str(status or state or "unknown")
 
 
 def _index_queue_items(data: dict) -> tuple[dict[str, dict], list[str]]:

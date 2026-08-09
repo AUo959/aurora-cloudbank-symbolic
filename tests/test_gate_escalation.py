@@ -335,6 +335,17 @@ def test_state_gate_marker_takes_precedence_for_open_registry_gate():
     assert "`decision_required`" in rendered
 
 
+def test_done_status_takes_precedence_over_stale_decision_state():
+    queue = _projection_queue(
+        _projection_queue_gate(status="done", state="decision_required", tags=[])
+    )
+    registry = _projection_registry(_projection_gate())
+
+    errors = find_gate_coherence_errors(queue, registry)
+
+    assert errors == ["GATE-900 is open while queue item Q-0900 is done"]
+
+
 def test_open_registry_gate_rejects_non_decision_queue_status():
     queue = _projection_queue(_projection_queue_gate(status="open", tags=[]))
     registry = _projection_registry(_projection_gate())

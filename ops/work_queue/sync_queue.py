@@ -118,7 +118,8 @@ def _queue_gate_items(data: dict) -> list[dict]:
     """Return queue items that assert a human-gate role."""
     return [
         item
-        for item in data.get("active", [])
+        for section in ("active", "completed")
+        for item in data.get(section, [])
         if "gate" in item.get("tags", [])
         or item.get("status") in DECISION_GATE_STATES
         or item.get("state") in DECISION_GATE_STATES
@@ -128,7 +129,10 @@ def _queue_gate_items(data: dict) -> list[dict]:
 def _queue_item_status(item: dict | None) -> str:
     if item is None:
         return "missing"
-    return str(item.get("status") or item.get("state") or "unknown")
+    state = item.get("state")
+    if state == "decision_required":
+        return state
+    return str(item.get("status") or state or "unknown")
 
 
 def _index_queue_items(data: dict) -> tuple[dict[str, dict], list[str]]:

@@ -324,6 +324,17 @@ def test_state_gate_marker_is_not_masked_by_legacy_status():
     assert errors == ["queue gate Q-0900 has no canonical gate_registry.json record"]
 
 
+def test_state_gate_marker_takes_precedence_for_open_registry_gate():
+    queue = _projection_queue(
+        _projection_queue_gate(status="open", state="decision_required", tags=[])
+    )
+    registry = _projection_registry(_projection_gate())
+
+    assert find_gate_coherence_errors(queue, registry) == []
+    rendered = render_open_gates_md(queue, registry)
+    assert "`decision_required`" in rendered
+
+
 def test_open_registry_gate_rejects_non_decision_queue_status():
     queue = _projection_queue(_projection_queue_gate(status="open", tags=[]))
     registry = _projection_registry(_projection_gate())
@@ -345,6 +356,14 @@ def test_duplicate_queue_item_id_is_a_coherence_error():
     errors = find_gate_coherence_errors(queue, registry)
 
     assert errors == ["duplicate queue item id Q-0900 appears in active, completed"]
+
+
+def test_completed_queue_gate_without_registry_record_is_a_coherence_error():
+    queue = _projection_queue(completed=[_projection_queue_gate(status="done")])
+
+    errors = find_gate_coherence_errors(queue, _projection_registry())
+
+    assert errors == ["queue gate Q-0900 has no canonical gate_registry.json record"]
 
 
 def test_matching_issue_number_does_not_mask_queue_item_mismatch():

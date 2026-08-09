@@ -11,8 +11,9 @@ Generated files (DO NOT EDIT by hand):
     ops/work_queue/NEXT_UP.md
     ops/work_queue/OPEN_GATES.md
 
-Canonical source:  ops/work_queue/queue.json
-Authority:         Aurora (aurora_authority: true items)
+Canonical task source:  ops/work_queue/queue.json
+Canonical gate source:  ops/work_queue/gate_registry.json
+Authority:              Aurora (aurora_authority: true items)
 Tracked in:        https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1147
 """
 
@@ -28,6 +29,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 QUEUE_JSON = HERE / "queue.json"
+GATE_REGISTRY_JSON = HERE / "gate_registry.json"
 QUEUE_MD = HERE / "QUEUE.md"
 NEXT_UP_MD = HERE / "NEXT_UP.md"
 OPEN_GATES_MD = HERE / "OPEN_GATES.md"
@@ -39,6 +41,14 @@ GENERATED_BANNER = (
     "     Tracked in:      https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1147 -->"
 )
 
+OPEN_GATES_BANNER = (
+    "<!-- !! GENERATED FILE — DO NOT EDIT BY HAND !!\n"
+    "     Task source:      ops/work_queue/queue.json\n"
+    "     Gate source:      ops/work_queue/gate_registry.json\n"
+    "     Regenerate:       python ops/work_queue/sync_queue.py\n"
+    "     Tracked in:       https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1147 -->"
+)
+
 # ---------------------------------------------------------------------------
 # Load
 # ---------------------------------------------------------------------------
@@ -46,6 +56,11 @@ GENERATED_BANNER = (
 
 def load_queue() -> dict:
     with QUEUE_JSON.open(encoding="utf-8") as f:
+        return json.load(f)
+
+
+def load_gate_registry() -> dict:
+    with GATE_REGISTRY_JSON.open(encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -97,9 +112,114 @@ def _ts(data: dict) -> str:
     return str(data.get("_meta", {}).get("last_aurora_review", "unknown"))
 
 
+def _queue_gate_items(data: dict) -> list[dict]:
+    """Return queue items that assert a human-gate role."""
+    return [
+        item
+        for item in data.get("active", [])
+        if "gate" in item.get("tags", []) or item.get("status") == "needs-decision"
+    ]
+
+
+def _queue_item_status(item: dict | None) -> str:
+    if item is None:
+        return "missing"
+    return str(item.get("status", item.get("state", "unknown")))
+
+
+def find_gate_coherence_errors(data: dict, registry: dict) -> list[str]:
+    """Return blocking queue/gate-registry authority contradictions.
+
+    A registry-only gate is allowed only when its integrity status explicitly
+    records a reconciliation hold. That preserves GATE-001 without pretending
+    its missing historical queue item is ordinary or resolved.
+    """
+    errors: list[str] = []
+    queue_items = {
+        item.get("id"): item for item in data.get("active", []) if item.get("id")
+    }
+    gates = registry.get("gates", [])
+
+    gate_ids: set[str] = set()
+    registry_by_queue_item: dict[str, dict] = {}
+
+    for gate in gates:
+        gate_id = str(gate.get("gate_id", "<missing-gate-id>"))
+        if gate_id in gate_ids:
+            errors.append(f"duplicate registry gate id: {gate_id}")
+        gate_ids.add(gate_id)
+
+        queue_item = gate.get("queue_item")
+        if queue_item:
+            queue_item = str(queue_item)
+            if queue_item in registry_by_queue_item:
+                errors.append(
+                    f"multiple registry gates reference queue item {queue_item}"
+                )
+            registry_by_queue_item[queue_item] = gate
+
+        state = gate.get("state")
+        integrity_status = gate.get("integrity_status", "active")
+        item = queue_items.get(queue_item)
+        queue_status = _queue_item_status(item)
+
+        if state == "open":
+            if gate.get("closed") or gate.get("resolved_by"):
+                errors.append(f"{gate_id} is open but carries closed/resolved metadata")
+            if item is None and integrity_status != "reconciliation_required":
+                errors.append(
+                    f"{gate_id} references missing queue item {queue_item} "
+                    "without a reconciliation_required integrity hold"
+                )
+            if queue_status == "done":
+                errors.append(
+                    f"{gate_id} is open while queue item {queue_item} is done"
+                )
+        elif state == "resolved":
+            if not gate.get("closed") or not gate.get("resolved_by"):
+                errors.append(
+                    f"{gate_id} is resolved without closed and resolved_by metadata"
+                )
+            if item is not None and queue_status != "done":
+                errors.append(
+                    f"{gate_id} is resolved while queue item {queue_item} "
+                    f"has status {queue_status}"
+                )
+        else:
+            errors.append(f"{gate_id} has unsupported state {state!r}")
+
+        if (
+            integrity_status == "reconciliation_required"
+            and not str(gate.get("integrity_note", "")).strip()
+        ):
+            errors.append(
+                f"{gate_id} requires reconciliation but has no integrity_note"
+            )
+
+    for item in _queue_gate_items(data):
+        item_id = str(item.get("id", "<missing-queue-id>"))
+        gate = registry_by_queue_item.get(item_id)
+        if gate is None:
+            errors.append(
+                f"queue gate {item_id} has no canonical gate_registry.json record"
+            )
+            continue
+
+        gate_state = gate.get("state")
+        queue_status = _queue_item_status(item)
+        if gate_state == "resolved" and queue_status != "done":
+            errors.append(
+                f"queue gate {item_id} remains {queue_status} while "
+                f"{gate.get('gate_id')} is resolved"
+            )
+
+    return errors
+
+
 # ---------------------------------------------------------------------------
 # QUEUE.md renderer
 # ---------------------------------------------------------------------------
+
 
 def render_queue_md(data: dict) -> str:
     meta = data.get("_meta", {})
@@ -176,6 +296,7 @@ def render_queue_md(data: dict) -> str:
 # NEXT_UP.md renderer
 # ---------------------------------------------------------------------------
 
+
 def render_next_up_md(data: dict) -> str:
     items = data.get("active", [])
     ts = _ts(data)
@@ -206,9 +327,7 @@ def render_next_up_md(data: dict) -> str:
         ]
         for item in open_items:
             lines.append(
-                f"| {item['rank']} | {item['id']} "
-                f"| {item['title']} "
-                f"| {_tags(item)} |"
+                f"| {item['rank']} | {item['id']} | {item['title']} | {_tags(item)} |"
             )
     else:
         lines.append("_No open items._")
@@ -230,9 +349,7 @@ def render_next_up_md(data: dict) -> str:
         ]
         for item in blocked_items:
             lines.append(
-                f"| {item['rank']} | {item['id']} "
-                f"| {item['title']} "
-                f"| {_deps(item)} |"
+                f"| {item['rank']} | {item['id']} | {item['title']} | {_deps(item)} |"
             )
     else:
         lines.append("_No blocked items._")
@@ -253,9 +370,7 @@ def render_next_up_md(data: dict) -> str:
             "|---|---|---|",
         ]
         for item in decision_items:
-            lines.append(
-                f"| {item['rank']} | {item['id']} | {item['title']} |"
-            )
+            lines.append(f"| {item['rank']} | {item['id']} | {item['title']} |")
     else:
         lines.append("_No decision-gated items._")
 
@@ -267,31 +382,37 @@ def render_next_up_md(data: dict) -> str:
 # OPEN_GATES.md renderer
 # ---------------------------------------------------------------------------
 
-def render_open_gates_md(data: dict) -> str:
-    items = data.get("active", [])
-    ts = _ts(data)
 
-    # Items that are themselves gate-holders: tagged 'gate' or status 'needs-decision'
-    gates = [
-        x for x in items
-        if "gate" in x.get("tags", []) or x.get("status") == "needs-decision"
+def render_open_gates_md(data: dict, registry: dict) -> str:
+    items = data.get("active", [])
+    queue_by_id = {item.get("id"): item for item in items}
+    queue_review = _ts(data)
+    registry_updated = str(registry.get("last_updated", "unknown"))
+
+    gates = [gate for gate in registry.get("gates", []) if gate.get("state") == "open"]
+    holds = [
+        gate for gate in gates if gate.get("integrity_status", "active") != "active"
     ]
-    # Items blocked by gate holders
-    gate_ids = {x["id"] for x in gates}
+
+    gate_ids = {gate.get("queue_item") for gate in gates if gate.get("queue_item")}
     waiting = [
-        x for x in items
-        if any(dep in gate_ids for dep in x.get("depends_on", []))
+        item
+        for item in items
+        if any(dep in gate_ids for dep in item.get("depends_on", []))
     ]
 
     lines: list[str] = [
-        GENERATED_BANNER,
+        OPEN_GATES_BANNER,
         "",
         "# Open Gates — Aurora Work Queue",
         "",
-        f"_Generated: `{ts}` — edit `queue.json`, run `sync_queue.py`_",
+        (
+            f"_Queue review: `{queue_review}` · Gate registry updated: "
+            f"`{registry_updated}` · deterministic projection_"
+        ),
         "",
-        "> Gates are items tagged `gate` or carrying `status: needs-decision`.",
-        "> Nothing downstream can advance until the gate closes.",
+        "> Human-gate authority comes from `gate_registry.json`; `queue.json`",
+        "> supplies task status and dependency context. Rendering never resolves a gate.",
         "",
         "---",
         "",
@@ -301,15 +422,50 @@ def render_open_gates_md(data: dict) -> str:
 
     if gates:
         lines += [
-            "| Rank | ID | Title | Status |",
-            "|---|---|---|---|",
+            "| Gate | Queue Item | Title | Gate State | Integrity | Queue Status | Decision Owner |",
+            "|---|---|---|---|---|---|---|",
         ]
-        for g in gates:
+        for gate in gates:
+            queue_item_id = gate.get("queue_item") or "—"
+            queue_status = _queue_item_status(queue_by_id.get(queue_item_id))
             lines.append(
-                f"| {g['rank']} | {g['id']} | {g['title']} | `{g.get('status', '?')}` |"
+                f"| {gate.get('gate_id', '?')} | {queue_item_id} "
+                f"| {gate.get('title', 'Untitled')} "
+                f"| `{gate.get('state', '?')}` "
+                f"| `{gate.get('integrity_status', 'active')}` "
+                f"| `{queue_status}` "
+                f"| {gate.get('decision_owner', '—')} |"
             )
     else:
         lines.append("_No open gates. 🎉_")
+
+    lines += [
+        "",
+        "---",
+        "",
+        f"## Reconciliation Holds ({len(holds)})",
+        "",
+    ]
+
+    if holds:
+        for gate in holds:
+            queue_item_id = gate.get("queue_item") or "—"
+            queue_link = (
+                "present" if queue_item_id in queue_by_id else "missing from queue.json"
+            )
+            github_issue = gate.get("github_issue")
+            issue_text = f"#{github_issue}" if github_issue else "—"
+            lines += [
+                f"### {gate.get('gate_id', '?')} — {gate.get('title', 'Untitled')}",
+                "",
+                f"- **Integrity:** `{gate.get('integrity_status', 'unknown')}`",
+                f"- **Queue item:** `{queue_item_id}` — {queue_link}",
+                f"- **Linked issue:** {issue_text}",
+                f"- **Note:** {gate.get('integrity_note', '_No integrity note._')}",
+                "",
+            ]
+    else:
+        lines.append("_No reconciliation holds._")
 
     lines += [
         "",
@@ -324,10 +480,13 @@ def render_open_gates_md(data: dict) -> str:
             "| Rank | ID | Title | Waiting On |",
             "|---|---|---|---|",
         ]
-        for w in waiting:
-            blocking_gates = [dep for dep in w.get("depends_on", []) if dep in gate_ids]
+        for item in waiting:
+            blocking_gates = [
+                dep for dep in item.get("depends_on", []) if dep in gate_ids
+            ]
             lines.append(
-                f"| {w['rank']} | {w['id']} | {w['title']} | {', '.join(blocking_gates)} |"
+                f"| {item['rank']} | {item['id']} | {item['title']} "
+                f"| {', '.join(blocking_gates)} |"
             )
     else:
         lines.append("_No items waiting on gates._")
@@ -340,11 +499,12 @@ def render_open_gates_md(data: dict) -> str:
 # Write / Check
 # ---------------------------------------------------------------------------
 
-def render_all(data: dict) -> dict[Path, str]:
+
+def render_all(data: dict, registry: dict) -> dict[Path, str]:
     return {
         QUEUE_MD: render_queue_md(data),
         NEXT_UP_MD: render_next_up_md(data),
-        OPEN_GATES_MD: render_open_gates_md(data),
+        OPEN_GATES_MD: render_open_gates_md(data, registry),
     }
 
 
@@ -367,9 +527,12 @@ def check_all(rendered: dict[Path, str]) -> bool:
 
         def strip_ts(text: str) -> str:
             return "\n".join(
-                line for line in text.splitlines()
-                if not line.startswith("**Generated:**") and not line.startswith("_Generated:")
+                line
+                for line in text.splitlines()
+                if not line.startswith("**Generated:**")
+                and not line.startswith("_Generated:")
             )
+
         if strip_ts(existing) != strip_ts(new_content):
             print(f"STALE:   {path.name}")
             drift = True
@@ -382,24 +545,43 @@ def check_all(rendered: dict[Path, str]) -> bool:
 # Entry point
 # ---------------------------------------------------------------------------
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--render", action="store_true", help="Render generated queue views in place (default).")
-    mode.add_argument("--check", action="store_true", help="Exit non-zero when a generated view is stale.")
+    mode.add_argument(
+        "--render",
+        action="store_true",
+        help="Render generated queue views in place (default).",
+    )
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="Exit non-zero when a generated view is stale.",
+    )
     args = parser.parse_args()
 
     data = load_queue()
-    rendered = render_all(data)
+    registry = load_gate_registry()
+    coherence_errors = find_gate_coherence_errors(data, registry)
+    if coherence_errors:
+        print("ERROR: Queue/gate-registry coherence check failed:")
+        for error in coherence_errors:
+            print(f"  - {error}")
+        return 1
+
+    rendered = render_all(data, registry)
 
     if args.check:
         print("Queue drift check...")
         ok = check_all(rendered)
         if not ok:
             print()
-            print("ERROR: Generated queue views are out of sync with queue.json.")
+            print("ERROR: Generated queue views are out of sync with their sources.")
             print("FIX:   python ops/work_queue/sync_queue.py")
-            print("       Then commit the regenerated QUEUE.md, NEXT_UP.md, OPEN_GATES.md.")
+            print(
+                "       Then commit the regenerated QUEUE.md, NEXT_UP.md, OPEN_GATES.md."
+            )
             return 1
         print("All generated views are current.")
         return 0

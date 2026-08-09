@@ -6,8 +6,8 @@ repos:
     hooks:
       - id: tracked-path-casefold
         name: tracked-path-casefold
-        entry: bash -c 'python_cmd="$(command -v python3 || command -v python)"; git ls-files -z | "$python_cmd" scripts/check_casefold_collisions.py'
-        language: system
+        entry: bash -c 'git ls-files -z | python scripts/check_casefold_collisions.py'
+        language: python
         pass_filenames: false
         stages: [pre-commit]
       - id: aurora-pre-commit

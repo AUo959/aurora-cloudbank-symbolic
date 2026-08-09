@@ -127,6 +127,16 @@ def _queue_item_status(item: dict | None) -> str:
     return str(item.get("status", item.get("state", "unknown")))
 
 
+def _queue_items_by_id(data: dict) -> dict[str, dict]:
+    """Index active and completed tasks for lifecycle coherence checks."""
+    return {
+        item["id"]: item
+        for section in ("completed", "active")
+        for item in data.get(section, [])
+        if item.get("id")
+    }
+
+
 def _index_registry_gates(gates: list[dict]) -> tuple[dict[str, dict], list[str]]:
     """Index gates by queue item while reporting duplicate authority records."""
     errors: list[str] = []
@@ -243,9 +253,7 @@ def find_gate_coherence_errors(data: dict, registry: dict) -> list[str]:
     records a reconciliation hold. That preserves GATE-001 without pretending
     its missing historical queue item is ordinary or resolved.
     """
-    queue_items = {
-        item.get("id"): item for item in data.get("active", []) if item.get("id")
-    }
+    queue_items = _queue_items_by_id(data)
     gates = registry.get("gates", [])
     registry_by_queue_item, errors = _index_registry_gates(gates)
 
@@ -490,23 +498,34 @@ def _render_waiting_on_gate(waiting: list[dict], gate_ids: set[str]) -> list[str
     return lines
 
 
+def _open_registry_gates(registry: dict) -> list[dict]:
+    return [gate for gate in registry.get("gates", []) if gate.get("state") == "open"]
+
+
+def _reconciliation_holds(gates: list[dict]) -> list[dict]:
+    return [
+        gate for gate in gates if gate.get("integrity_status", "active") != "active"
+    ]
+
+
+def _waiting_on_gate(items: list[dict], gate_ids: set[str]) -> list[dict]:
+    return [
+        item
+        for item in items
+        if any(dependency in gate_ids for dependency in item.get("depends_on", []))
+    ]
+
+
 def render_open_gates_md(data: dict, registry: dict) -> str:
     items = data.get("active", [])
     queue_by_id = {item.get("id"): item for item in items}
     queue_review = _ts(data)
     registry_updated = str(registry.get("last_updated", "unknown"))
 
-    gates = [gate for gate in registry.get("gates", []) if gate.get("state") == "open"]
-    holds = [
-        gate for gate in gates if gate.get("integrity_status", "active") != "active"
-    ]
-
+    gates = _open_registry_gates(registry)
+    holds = _reconciliation_holds(gates)
     gate_ids = {gate.get("queue_item") for gate in gates if gate.get("queue_item")}
-    waiting = [
-        item
-        for item in items
-        if any(dep in gate_ids for dep in item.get("depends_on", []))
-    ]
+    waiting = _waiting_on_gate(items, gate_ids)
 
     lines: list[str] = [
         OPEN_GATES_BANNER,

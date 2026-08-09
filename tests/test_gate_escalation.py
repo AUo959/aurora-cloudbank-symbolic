@@ -191,10 +191,11 @@ def test_live_registry_and_queue_parse_and_report_cleanly():
         assert gate["integrity_status"] != "active"
 
 
-def _projection_queue(*items):
+def _projection_queue(*items, completed=None):
     return {
         "_meta": {"last_aurora_review": "2026-07-16T00:36:36Z"},
         "active": list(items),
+        "completed": list(completed or []),
     }
 
 
@@ -324,6 +325,28 @@ def test_resolved_gate_with_done_queue_item_is_not_rendered_open():
     assert find_gate_coherence_errors(queue, registry) == []
     rendered = render_open_gates_md(queue, registry)
     assert "GATE-900" not in rendered
+
+
+def test_open_gate_cannot_reference_completed_queue_item():
+    queue = _projection_queue(completed=[_projection_queue_gate(status="done")])
+    registry = _projection_registry(_projection_gate())
+
+    errors = find_gate_coherence_errors(queue, registry)
+
+    assert errors == ["GATE-900 is open while queue item Q-0900 is done"]
+
+
+def test_resolved_gate_can_reference_completed_queue_item():
+    queue = _projection_queue(completed=[_projection_queue_gate(status="done")])
+    registry = _projection_registry(
+        _projection_gate(
+            state="resolved",
+            closed="2026-08-03",
+            resolved_by="operator",
+        )
+    )
+
+    assert find_gate_coherence_errors(queue, registry) == []
 
 
 def test_check_mode_returns_nonzero_for_cross_source_divergence(monkeypatch):

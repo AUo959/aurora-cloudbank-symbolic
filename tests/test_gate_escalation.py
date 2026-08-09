@@ -265,6 +265,20 @@ def test_registry_only_reconciliation_hold_is_visible_and_nonblocking():
     assert "Historical queue item is absent" in rendered
 
 
+def test_reconciliation_hold_requires_an_integrity_note():
+    registry = _projection_registry(
+        _projection_gate(
+            queue_item="Q-missing",
+            integrity_status="reconciliation_required",
+            integrity_note=" ",
+        )
+    )
+
+    errors = find_gate_coherence_errors(_projection_queue(), registry)
+
+    assert errors == ["GATE-900 requires reconciliation but has no integrity_note"]
+
+
 def test_missing_active_registry_queue_item_is_a_coherence_error():
     registry = _projection_registry(_projection_gate(queue_item="Q-missing"))
 
@@ -279,6 +293,58 @@ def test_queue_gate_without_registry_record_is_a_coherence_error():
     errors = find_gate_coherence_errors(queue, _projection_registry())
 
     assert errors == ["queue gate Q-0900 has no canonical gate_registry.json record"]
+
+
+def test_decision_required_state_without_registry_record_is_a_coherence_error():
+    queue = _projection_queue(
+        _projection_queue_gate(status=None, state="decision_required", tags=[])
+    )
+
+    errors = find_gate_coherence_errors(queue, _projection_registry())
+
+    assert errors == ["queue gate Q-0900 has no canonical gate_registry.json record"]
+
+
+def test_decision_required_state_matches_open_registry_gate():
+    queue = _projection_queue(
+        _projection_queue_gate(status=None, state="decision_required", tags=[])
+    )
+    registry = _projection_registry(_projection_gate())
+
+    assert find_gate_coherence_errors(queue, registry) == []
+
+
+def test_state_gate_marker_is_not_masked_by_legacy_status():
+    queue = _projection_queue(
+        _projection_queue_gate(status="open", state="decision_required", tags=[])
+    )
+
+    errors = find_gate_coherence_errors(queue, _projection_registry())
+
+    assert errors == ["queue gate Q-0900 has no canonical gate_registry.json record"]
+
+
+def test_open_registry_gate_rejects_non_decision_queue_status():
+    queue = _projection_queue(_projection_queue_gate(status="open", tags=[]))
+    registry = _projection_registry(_projection_gate())
+
+    errors = find_gate_coherence_errors(queue, registry)
+
+    assert errors == [
+        "GATE-900 is open while queue item Q-0900 has non-decision status open"
+    ]
+
+
+def test_duplicate_queue_item_id_is_a_coherence_error():
+    queue = _projection_queue(
+        _projection_queue_gate(),
+        completed=[_projection_queue_gate(status="done")],
+    )
+    registry = _projection_registry(_projection_gate())
+
+    errors = find_gate_coherence_errors(queue, registry)
+
+    assert errors == ["duplicate queue item id Q-0900 appears in active, completed"]
 
 
 def test_matching_issue_number_does_not_mask_queue_item_mismatch():

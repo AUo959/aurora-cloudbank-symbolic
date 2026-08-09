@@ -76,6 +76,8 @@ STATUS_EMOJI = {
     "done": "✅",
 }
 
+DECISION_GATE_STATES = {"needs-decision", "decision_required"}
+
 
 def _status(item: dict) -> str:
     return STATUS_EMOJI.get(item.get("status", "open"), "⚪")
@@ -117,24 +119,38 @@ def _queue_gate_items(data: dict) -> list[dict]:
     return [
         item
         for item in data.get("active", [])
-        if "gate" in item.get("tags", []) or item.get("status") == "needs-decision"
+        if "gate" in item.get("tags", [])
+        or item.get("status") in DECISION_GATE_STATES
+        or item.get("state") in DECISION_GATE_STATES
     ]
 
 
 def _queue_item_status(item: dict | None) -> str:
     if item is None:
         return "missing"
-    return str(item.get("status", item.get("state", "unknown")))
+    return str(item.get("status") or item.get("state") or "unknown")
 
 
-def _queue_items_by_id(data: dict) -> dict[str, dict]:
-    """Index active and completed tasks for lifecycle coherence checks."""
-    return {
-        item["id"]: item
-        for section in ("completed", "active")
-        for item in data.get(section, [])
-        if item.get("id")
-    }
+def _index_queue_items(data: dict) -> tuple[dict[str, dict], list[str]]:
+    """Index queue items while reporting ambiguous lifecycle identities."""
+    queue_items: dict[str, dict] = {}
+    sections_by_id: dict[str, list[str]] = {}
+
+    for section in ("active", "completed"):
+        for item in data.get(section, []):
+            item_id = item.get("id")
+            if not item_id:
+                continue
+            item_id = str(item_id)
+            sections_by_id.setdefault(item_id, []).append(section)
+            queue_items.setdefault(item_id, item)
+
+    errors = [
+        f"duplicate queue item id {item_id} appears in {', '.join(sections)}"
+        for item_id, sections in sections_by_id.items()
+        if len(sections) > 1
+    ]
+    return queue_items, errors
 
 
 def _index_registry_gates(gates: list[dict]) -> tuple[dict[str, dict], list[str]]:
@@ -177,6 +193,11 @@ def _open_gate_errors(
         )
     if queue_status == "done":
         errors.append(f"{gate_id} is open while queue item {queue_item} is done")
+    elif item is not None and queue_status not in DECISION_GATE_STATES:
+        errors.append(
+            f"{gate_id} is open while queue item {queue_item} "
+            f"has non-decision status {queue_status}"
+        )
 
     return errors
 
@@ -253,9 +274,10 @@ def find_gate_coherence_errors(data: dict, registry: dict) -> list[str]:
     records a reconciliation hold. That preserves GATE-001 without pretending
     its missing historical queue item is ordinary or resolved.
     """
-    queue_items = _queue_items_by_id(data)
+    queue_items, queue_errors = _index_queue_items(data)
     gates = registry.get("gates", [])
     registry_by_queue_item, errors = _index_registry_gates(gates)
+    errors = [*queue_errors, *errors]
 
     for gate in gates:
         errors.extend(_registry_gate_errors(gate, queue_items))

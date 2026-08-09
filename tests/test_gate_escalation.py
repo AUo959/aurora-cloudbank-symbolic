@@ -23,6 +23,7 @@ from ops.work_queue.escalate_gates import (
 )
 from ops.work_queue.sync_queue import (
     find_gate_coherence_errors,
+    render_next_up_md,
     render_open_gates_md,
 )
 
@@ -226,6 +227,7 @@ def _projection_queue_gate(**overrides):
     item = {
         "id": "Q-0900",
         "title": "Projection test queue item",
+        "rank": 1,
         "status": "needs-decision",
         "tags": ["gate"],
         "depends_on": [],
@@ -443,6 +445,33 @@ def test_resolved_gate_can_reference_completed_queue_item():
     )
 
     assert find_gate_coherence_errors(queue, registry) == []
+
+
+def test_resolved_gate_cannot_reference_missing_queue_item():
+    registry = _projection_registry(
+        _projection_gate(
+            queue_item="Q-missing",
+            state="resolved",
+            closed="2026-08-03",
+            resolved_by="operator",
+        )
+    )
+
+    errors = find_gate_coherence_errors(_projection_queue(), registry)
+
+    assert errors == ["GATE-900 is resolved but queue item Q-missing is missing"]
+
+
+def test_next_up_renders_state_model_decision_gate():
+    queue = _projection_queue(
+        _projection_queue_gate(status=None, state="decision_required", tags=[])
+    )
+
+    rendered = render_next_up_md(queue)
+
+    assert "| 1 | Q-0900 | Projection test queue item |" in rendered
+    assert "_No decision-gated items._" not in rendered
+    assert "_No open items._" in rendered
 
 
 def test_check_mode_returns_nonzero_for_cross_source_divergence(monkeypatch):

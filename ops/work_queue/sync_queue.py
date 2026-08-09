@@ -70,9 +70,12 @@ def load_gate_registry() -> dict:
 
 STATUS_EMOJI = {
     "open": "🟢",
+    "ready": "🟢",
     "blocked": "🔴",
     "needs-decision": "🟡",
+    "decision_required": "🟡",
     "in-progress": "🔵",
+    "active": "🔵",
     "done": "✅",
 }
 
@@ -80,7 +83,7 @@ DECISION_GATE_STATES = {"needs-decision", "decision_required"}
 
 
 def _status(item: dict) -> str:
-    return STATUS_EMOJI.get(item.get("status", "open"), "⚪")
+    return STATUS_EMOJI.get(_queue_item_status(item), "⚪")
 
 
 def _tags(item: dict) -> str:
@@ -218,7 +221,9 @@ def _resolved_gate_errors(
 
     if not gate.get("closed") or not gate.get("resolved_by"):
         errors.append(f"{gate_id} is resolved without closed and resolved_by metadata")
-    if item is not None and queue_status != "done":
+    if item is None:
+        errors.append(f"{gate_id} is resolved but queue item {queue_item} is missing")
+    elif queue_status != "done":
         errors.append(
             f"{gate_id} is resolved while queue item {queue_item} "
             f"has status {queue_status}"
@@ -328,7 +333,7 @@ def render_queue_md(data: dict) -> str:
         rank = item.get("rank", "?")
         iid = item.get("id", "?")
         title = item.get("title", "Untitled")
-        status = item.get("status", "open")
+        status = _queue_item_status(item)
         emoji = _status(item)
         owner = item.get("owner") or "_unassigned_"
         tags_str = _tags(item)
@@ -378,9 +383,9 @@ def render_next_up_md(data: dict) -> str:
     items = data.get("active", [])
     ts = _ts(data)
 
-    open_items = [x for x in items if x.get("status") == "open"]
-    blocked_items = [x for x in items if x.get("status") == "blocked"]
-    decision_items = [x for x in items if x.get("status") == "needs-decision"]
+    open_items = [x for x in items if _queue_item_status(x) in {"open", "ready"}]
+    blocked_items = [x for x in items if _queue_item_status(x) == "blocked"]
+    decision_items = [x for x in items if _queue_item_status(x) in DECISION_GATE_STATES]
 
     lines: list[str] = [
         GENERATED_BANNER,
@@ -393,7 +398,7 @@ def render_next_up_md(data: dict) -> str:
         "",
         "## 🟢 Ready to Work",
         "",
-        "Items with `status: open` and all dependencies resolved.",
+        "Items with an `open` or `ready` lifecycle and all dependencies resolved.",
         "",
     ]
 

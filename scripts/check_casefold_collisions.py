@@ -3,26 +3,13 @@
 
 from __future__ import annotations
 
-import shutil
-
-# Fixed Git command; no user-controlled executable or arguments.
-import subprocess  # nosec B404
-from pathlib import Path, PurePosixPath
+import sys
+from pathlib import PurePosixPath
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-
-
-def tracked_paths(repo_root: Path = REPO_ROOT) -> list[str]:
-    """Return Git-tracked paths without relying on checkout casing."""
-    git_executable = shutil.which("git")
-    if git_executable is None:
-        raise RuntimeError("git executable not found")
-    # Absolute executable plus fixed arguments; no shell or user input.
-    output = subprocess.check_output(  # nosec B603
-        [git_executable, "ls-files", "-z"], cwd=repo_root, text=True
-    )
-    return [path for path in output.split("\0") if path]
+def tracked_paths(raw_paths: bytes) -> list[str]:
+    """Parse NUL-delimited paths produced by ``git ls-files -z``."""
+    return [path for path in raw_paths.decode("utf-8").split("\0") if path]
 
 
 def find_casefold_collisions(paths: list[str]) -> dict[str, list[str]]:
@@ -41,8 +28,14 @@ def find_casefold_collisions(paths: list[str]) -> dict[str, list[str]]:
     }
 
 
-def main() -> int:
-    paths = tracked_paths()
+def main(raw_paths: bytes | None = None) -> int:
+    if raw_paths is None:
+        raw_paths = sys.stdin.buffer.read()
+    paths = tracked_paths(raw_paths)
+    if not paths:
+        print("ERROR: no tracked paths received on standard input.")
+        return 2
+
     collisions = find_casefold_collisions(paths)
     if not collisions:
         print(f"OK: {len(paths)} tracked paths have unique case-folded components.")

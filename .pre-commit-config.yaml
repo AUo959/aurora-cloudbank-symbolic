@@ -6,7 +6,7 @@ repos:
     hooks:
       - id: tracked-path-casefold
         name: tracked-path-casefold
-        entry: python3 scripts/check_casefold_collisions.py
+        entry: bash -c 'git ls-files -z | python3 scripts/check_casefold_collisions.py'
         language: system
         pass_filenames: false
         stages: [pre-commit]

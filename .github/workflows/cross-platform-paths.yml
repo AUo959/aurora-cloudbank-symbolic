@@ -69,7 +69,7 @@ jobs:
 
       - name: Reject case-folded tracked-path collisions
         shell: bash
-        run: python scripts/check_casefold_collisions.py
+        run: git ls-files -z | python scripts/check_casefold_collisions.py
 
       # A universal hash-complete lock keeps this security-sensitive matrix
       # reproducible without executing source-distribution build hooks.

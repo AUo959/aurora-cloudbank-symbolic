@@ -5,6 +5,7 @@
 
 import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -34,6 +35,7 @@ describe('CommandNode - Unified Architecture', () => {
     commandNode = new CommandNode({
       logsDir: TEST_LOGS_DIR,
       enableEncryption: false, // Disable encryption for tests (no key in test env)
+      persistDiagnostics: false,
     });
   });
 
@@ -100,6 +102,24 @@ describe('CommandNode - Unified Architecture', () => {
 
     assert.ok(result.includes('executed'));
     assert.ok(result.includes('ANCHOR_TEST_HASH'));
+  });
+
+  test('can disable diagnostics persistence for non-mutating tests', () => {
+    const diagnosticsPath = path.join(
+      TEST_LOGS_DIR,
+      'disabled-diagnostics.json'
+    );
+    const node = new CommandNode({
+      logsDir: TEST_LOGS_DIR,
+      diagnosticsPath,
+      persistDiagnostics: false,
+    });
+
+    node.executeCommand({ name: 'test_action', context: 'TEST' });
+
+    assert.strictEqual(node.diagnostics.commandCount, 1);
+    assert.strictEqual(node.diagnostics.processedCount, 1);
+    assert.strictEqual(fs.existsSync(diagnosticsPath), false);
   });
 
   test('executeCommand throws for forbidden commands', () => {

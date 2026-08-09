@@ -50,6 +50,9 @@ export class CommandNode {
     this.anchorSeed = options.anchorSeed || DEFAULT_ANCHOR_SEED;
     this.ethicsProtocol = options.ethicsProtocol || getDefaultProtocol();
     this.enableEncryption = options.enableEncryption !== false && isEncryptionAvailable();
+    this.persistDiagnostics = options.persistDiagnostics !== false;
+    this.diagnosticsPath =
+      options.diagnosticsPath || path.join(process.cwd(), 'diagnostics.json');
 
     // Initialize router
     this.router = new CommandRouter({
@@ -88,10 +91,18 @@ export class CommandNode {
    * Load diagnostics state
    */
   _loadDiagnostics() {
-    const diagPath = path.join(process.cwd(), 'diagnostics.json');
+    if (!this.persistDiagnostics) {
+      return {
+        commandCount: 0,
+        processedCount: 0,
+        lastCommandAt: null,
+        load: 0,
+      };
+    }
+
     try {
-      if (fs.existsSync(diagPath)) {
-        return JSON.parse(fs.readFileSync(diagPath, 'utf8'));
+      if (fs.existsSync(this.diagnosticsPath)) {
+        return JSON.parse(fs.readFileSync(this.diagnosticsPath, 'utf8'));
       }
     } catch {
       // Ignore errors
@@ -108,9 +119,15 @@ export class CommandNode {
    * Save diagnostics state
    */
   _saveDiagnostics() {
-    const diagPath = path.join(process.cwd(), 'diagnostics.json');
+    if (!this.persistDiagnostics) {
+      return;
+    }
+
     try {
-      fs.writeFileSync(diagPath, JSON.stringify(this.diagnostics, null, 2));
+      fs.writeFileSync(
+        this.diagnosticsPath,
+        JSON.stringify(this.diagnostics, null, 2)
+      );
     } catch {
       // Ignore errors
     }

@@ -2,7 +2,7 @@
   "registry_authority": "Aurora",
   "protocol_version": "1.1.0",
   "description": "Canonical registry of all human-gated decisions in the Aurora work queue. A gate is created when a queue item reaches needs-decision or decision_required state and consumer_fit excludes autonomous agents. Gates persist across sessions and platforms until explicitly resolved. An integrity hold suspends automated escalation without resolving the underlying decision.",
-  "last_updated": "2026-08-03",
+  "last_updated": "2026-08-10",
   "gates": [
     {
       "gate_id": "GATE-001",
@@ -45,7 +45,7 @@
       "integrity_status": "active",
       "decision_owner": "Commander Thorne + Sorensen + Sato",
       "opened": "2026-07-20",
-      "last_surfaced": "2026-08-03",
+      "last_surfaced": "2026-08-10",
       "escalation_tier": 1,
       "blocks_queue_items": [],
       "blocks_gates": [],
@@ -73,7 +73,7 @@
       "integrity_status": "active",
       "decision_owner": "operator / designated crew reviewers",
       "opened": "2026-07-20",
-      "last_surfaced": "2026-08-03",
+      "last_surfaced": "2026-08-10",
       "escalation_tier": 1,
       "blocks_queue_items": [],
       "blocks_gates": [],

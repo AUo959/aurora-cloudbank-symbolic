@@ -1,7 +1,7 @@
 # Universal Thread Beacon Field Ownership
 
-**Status:** Proposed design for issue #1377  
-**Scope:** Bound minimum-profile schema, mapping, and offline validation only
+- **Status:** Proposed design for issue #1377
+- **Scope:** Bound minimum-profile schema, mapping, and offline validation only
 
 ## Purpose
 

@@ -14,7 +14,7 @@ I've built a **production-grade frontend foundation** for the Aurora CloudBank S
 ### What's Been Delivered
 
 ✅ **Complete project setup** with modern tooling
-✅ **Production-ready architecture** with TypeScript, React 18, Vite
+✅ **Production-ready architecture** with TypeScript, React 19, Vite
 ✅ **Custom design system** with Aurora branding
 ✅ **Type-safe API client** integrated with backend
 ✅ **System Dashboard** with real-time metrics
@@ -266,11 +266,15 @@ All methods in `src/lib/api/aurora.ts`:
 
 **Implementation Guide**:
 
-1. **Install** (already in package.json):
+1. **Install** (not in package.json — add it as the first step of this feature):
 ```bash
-npm install
-# three, @react-three/fiber, @react-three/drei already included
+cd frontend   # repo root has its own package.json
+npm install three @react-three/fiber @react-three/drei @react-three/postprocessing
+npm install -D @types/three
 ```
+
+Then add a `three-vendor` group to `manualChunks` in `vite.config.ts` so the
+3D stack is code-split away from the initial bundle.
 
 2. **Create components** in `src/pages/MemoryVisualizer/`:
 
@@ -641,7 +645,15 @@ npm run build
 
 ### 1. Why shadcn/ui Pattern (Not Material-UI or Ant Design)?
 
-**Decision**: Build custom components using Radix UI + Tailwind
+**Decision**: Build custom components using the shadcn/ui pattern — Tailwind for
+styling, `class-variance-authority` for variants, `cn()` for class merging — with
+Radix UI as the accessibility foundation once a component needs behaviour that
+styling alone cannot provide.
+
+**Current state**: `src/components/ui/` implements this with `cva` + `clsx` +
+`tailwind-merge`. No Radix primitive is imported yet, so none is installed;
+`npm install @radix-ui/react-<primitive>` is the first step when one is needed.
+`forwardRef` is already used throughout in anticipation.
 
 **Rationale**:
 - **Full control**: Can match Aurora branding exactly
@@ -687,7 +699,9 @@ npm run build
 
 ### Q: Why use `forwardRef` for components?
 
-**A**: Allows parent components to access DOM nodes. Required for Radix UI components and accessibility features.
+**A**: Allows parent components to access DOM nodes. Needed for accessibility
+features, and required by Radix UI primitives — which the UI components are
+designed to adopt when one is first needed (see Key Design Decisions).
 
 ### Q: Why `cn()` utility function?
 
@@ -745,14 +759,15 @@ cn('text-red-500', 'text-blue-500')  // → 'text-blue-500' (last wins)
 2. **JWT in httpOnly Cookies**: (Backend responsibility)
 3. **CSRF Protection**: Token in request headers
 4. **XSS Prevention**: React escapes by default, no `dangerouslySetInnerHTML`
-5. **Input Validation**: Zod schemas for forms (infrastructure ready)
 
 ### 🚧 TODO
 
-1. **Content Security Policy**: Add CSP headers in production
-2. **Rate Limiting**: Implement client-side rate limiting
-3. **API Key Rotation**: UI for key management
-4. **Session Timeout**: Auto-logout after 30min inactivity
+1. **Input Validation**: Zod schemas for forms. Zod is chosen but not installed —
+   `npm install zod` alongside the first form that validates input.
+2. **Content Security Policy**: Add CSP headers in production
+3. **Rate Limiting**: Implement client-side rate limiting
+4. **API Key Rotation**: UI for key management
+5. **Session Timeout**: Auto-logout after 30min inactivity
 
 ---
 

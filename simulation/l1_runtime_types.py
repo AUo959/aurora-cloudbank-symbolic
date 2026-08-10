@@ -1,0 +1,360 @@
+#!/usr/bin/env python3
+"""Data contracts for the governed Orion L1 runtime."""
+
+from __future__ import annotations
+
+import hashlib
+import copy
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+
+from l1_runtime_support import (
+    int_mapping,
+    optional_int,
+    required_bool,
+    required_int,
+    string_mapping,
+)
+
+
+class DeterministicReplayRNG:
+    """Hash/counter replay generator for non-security simulation choices."""
+
+    def __init__(self, seed: int) -> None:
+        self._seed = str(seed).encode("ascii")
+        self._counter = 0
+
+    def random(self) -> float:
+        payload = self._seed + b":" + str(self._counter).encode("ascii")
+        digest = hashlib.sha256(payload).digest()
+        self._counter += 1
+        return int.from_bytes(digest[:8], "big") / float(1 << 64)
+
+
+@dataclass(frozen=True)
+class PopulationSnapshot:
+    crew_capacity: Optional[int]
+    current_human_crew_complement: Optional[int]
+    identified_human_records: int
+    persona_resolved_humans: Optional[int]
+    missing_named_human_claim: bool
+    system_entities: Dict[str, int]
+    historical_aggregate_claims: Dict[str, str] = field(default_factory=dict)
+
+    def validate(self) -> None:
+        self._validate_base_counts()
+        self._validate_persona_subset()
+        self._validate_human_complement()
+        self._validate_system_entities()
+
+    def _validate_base_counts(self) -> None:
+        if self.crew_capacity is not None and self.crew_capacity < 0:
+            raise ValueError("crew_capacity cannot be negative")
+        if self.identified_human_records < 0:
+            raise ValueError("identified_human_records cannot be negative")
+
+    def _validate_persona_subset(self) -> None:
+        if self.persona_resolved_humans is None:
+            return
+        if self.persona_resolved_humans < 0:
+            raise ValueError("persona_resolved_humans cannot be negative")
+        if self.persona_resolved_humans > self.identified_human_records:
+            raise ValueError(
+                "persona-resolved humans cannot exceed identified human records"
+            )
+
+    def _validate_human_complement(self) -> None:
+        complement = self.current_human_crew_complement
+        if complement is None:
+            return
+        if complement < self.identified_human_records:
+            raise ValueError(
+                "human crew complement cannot be smaller than identified human records"
+            )
+        if self.crew_capacity is not None and complement > self.crew_capacity:
+            raise ValueError("human crew complement cannot exceed crew capacity")
+
+    def _validate_system_entities(self) -> None:
+        if any(value < 0 for value in self.system_entities.values()):
+            raise ValueError("system entity counts cannot be negative")
+
+    @classmethod
+    def from_baseline(cls, baseline: Dict[str, Any]) -> "PopulationSnapshot":
+        payload = baseline.get("population")
+        if not isinstance(payload, dict):
+            raise ValueError("population must be a JSON object")
+
+        snapshot = cls(
+            crew_capacity=optional_int(payload.get("crew_capacity"), "crew_capacity"),
+            current_human_crew_complement=optional_int(
+                payload.get("current_human_crew_complement"),
+                "current_human_crew_complement",
+            ),
+            identified_human_records=required_int(
+                payload.get("identified_human_records"),
+                "identified_human_records",
+            ),
+            persona_resolved_humans=optional_int(
+                payload.get("persona_resolved_humans"),
+                "persona_resolved_humans",
+            ),
+            missing_named_human_claim=required_bool(
+                payload.get("missing_named_human_claim"),
+                "missing_named_human_claim",
+            ),
+            system_entities=int_mapping(
+                payload.get("system_entities"),
+                "system_entities",
+            ),
+            historical_aggregate_claims=string_mapping(
+                payload.get("historical_aggregate_claims", {}),
+                "historical_aggregate_claims",
+            ),
+        )
+        snapshot.validate()
+        return snapshot
+
+
+@dataclass(frozen=True)
+class EpistemicRecord:
+    record_id: str
+    subject: str
+    value: Any
+    epistemic_class: str
+    provenance: str
+    confidence: float
+    tick: int
+    canon_status: str = "run_state"
+
+    def __post_init__(self) -> None:
+        allowed = {
+            "world_fact",
+            "character_belief",
+            "station_record",
+            "runtime_observation",
+            "pilot_knowledge",
+            "testimony",
+            "inference",
+        }
+        if self.epistemic_class not in allowed:
+            raise ValueError(f"unsupported epistemic_class: {self.epistemic_class}")
+        if not 0.0 <= self.confidence <= 1.0:
+            raise ValueError("confidence must be between 0 and 1")
+
+
+@dataclass(frozen=True)
+class GovernanceReceipt:
+    l3_glyph_arbitration: bool
+    continuity_and_relay_verification: bool
+    l1_human_consent: bool
+    receipt_id: str
+    provenance: str
+
+    def __post_init__(self) -> None:
+        stages = (
+            self.l3_glyph_arbitration,
+            self.continuity_and_relay_verification,
+            self.l1_human_consent,
+        )
+        if not all(type(stage) is bool for stage in stages):
+            raise ValueError("Triplex authorization stages must be booleans")
+
+    @property
+    def complete(self) -> bool:
+        return all(
+            (
+                self.l3_glyph_arbitration,
+                self.continuity_and_relay_verification,
+                self.l1_human_consent,
+            )
+        )
+
+
+@dataclass
+class RunManifest:
+    schema_version: int
+    runtime_contract_version: str
+    run_id: str
+    created_at: str
+    cloudbank_revision: str
+    canonrec_revision: str
+    seed: int
+    station_cycle_length_minutes: int
+    station_cycle_minute: int
+    tick: int
+    status: str
+    canon_status: str
+    active_quarantines: List[str]
+    population: PopulationSnapshot
+
+
+@dataclass
+class L1RunState:
+    manifest: RunManifest
+    world_state: Dict[str, Any]
+    character_knowledge: Dict[str, List[EpistemicRecord]] = field(default_factory=dict)
+    character_actions: List[Dict[str, Any]] = field(default_factory=list)
+    station_records: List[EpistemicRecord] = field(default_factory=list)
+    runtime_observations: List[EpistemicRecord] = field(default_factory=list)
+    pilot_knowledge: List[EpistemicRecord] = field(default_factory=list)
+    governance_receipts: List[GovernanceReceipt] = field(default_factory=list)
+    governed_records: List[EpistemicRecord] = field(default_factory=list)
+    communications: List[Dict[str, Any]] = field(default_factory=list)
+    events: List[Dict[str, Any]] = field(default_factory=list)
+    promotion_candidates: List[Dict[str, Any]] = field(default_factory=list)
+
+
+def l1_run_state_from_payload(payload: Dict[str, Any]) -> L1RunState:
+    """Deserialize a persisted run without weakening the runtime type contract."""
+    manifest_payload = _mapping(payload.get("manifest"), "manifest")
+    manifest = _manifest_from_payload(manifest_payload)
+    return L1RunState(
+        manifest=manifest,
+        world_state=copy.deepcopy(_mapping(payload.get("world_state"), "world_state")),
+        character_knowledge=_character_knowledge_from_payload(
+            payload.get("character_knowledge", {})
+        ),
+        character_actions=_mapping_list(
+            payload.get("character_actions", []), "character_actions"
+        ),
+        station_records=_epistemic_records(
+            payload.get("station_records", []), "station_records"
+        ),
+        runtime_observations=_epistemic_records(
+            payload.get("runtime_observations", []), "runtime_observations"
+        ),
+        pilot_knowledge=_epistemic_records(
+            payload.get("pilot_knowledge", []), "pilot_knowledge"
+        ),
+        governance_receipts=_governance_receipts(
+            payload.get("governance_receipts", [])
+        ),
+        governed_records=_epistemic_records(
+            payload.get("governed_records", []), "governed_records"
+        ),
+        communications=_mapping_list(
+            payload.get("communications", []), "communications"
+        ),
+        events=_mapping_list(payload.get("events", []), "events"),
+        promotion_candidates=_mapping_list(
+            payload.get("promotion_candidates", []), "promotion_candidates"
+        ),
+    )
+
+
+def _manifest_from_payload(payload: Dict[str, Any]) -> RunManifest:
+    population = PopulationSnapshot.from_baseline(
+        {"population": _mapping(payload.get("population"), "manifest.population")}
+    )
+    active_quarantines = _string_list(
+        payload.get("active_quarantines"), "manifest.active_quarantines"
+    )
+    return RunManifest(
+        schema_version=required_int(payload.get("schema_version"), "schema_version"),
+        runtime_contract_version=_string(
+            payload.get("runtime_contract_version"), "runtime_contract_version"
+        ),
+        run_id=_string(payload.get("run_id"), "run_id"),
+        created_at=_string(payload.get("created_at"), "created_at"),
+        cloudbank_revision=_string(
+            payload.get("cloudbank_revision"), "cloudbank_revision"
+        ),
+        canonrec_revision=_string(
+            payload.get("canonrec_revision"), "canonrec_revision"
+        ),
+        seed=required_int(payload.get("seed"), "seed"),
+        station_cycle_length_minutes=required_int(
+            payload.get("station_cycle_length_minutes"),
+            "station_cycle_length_minutes",
+        ),
+        station_cycle_minute=required_int(
+            payload.get("station_cycle_minute"), "station_cycle_minute"
+        ),
+        tick=required_int(payload.get("tick"), "tick"),
+        status=_string(payload.get("status"), "status"),
+        canon_status=_string(payload.get("canon_status"), "canon_status"),
+        active_quarantines=active_quarantines,
+        population=population,
+    )
+
+
+def _character_knowledge_from_payload(value: Any) -> Dict[str, List[EpistemicRecord]]:
+    payload = _mapping(value, "character_knowledge")
+    return {
+        _string(character_id, "character_knowledge key"): _epistemic_records(
+            records, f"character_knowledge.{character_id}"
+        )
+        for character_id, records in payload.items()
+    }
+
+
+def _epistemic_records(value: Any, name: str) -> List[EpistemicRecord]:
+    records = _list(value, name)
+    return [
+        _epistemic_record(item, f"{name}[{index}]")
+        for index, item in enumerate(records)
+    ]
+
+
+def _epistemic_record(value: Any, name: str) -> EpistemicRecord:
+    payload = _mapping(value, name)
+    confidence = payload.get("confidence")
+    if isinstance(confidence, bool) or not isinstance(confidence, (int, float)):
+        raise ValueError(f"{name}.confidence must be numeric")
+    return EpistemicRecord(
+        record_id=_string(payload.get("record_id"), f"{name}.record_id"),
+        subject=_string(payload.get("subject"), f"{name}.subject"),
+        value=copy.deepcopy(payload.get("value")),
+        epistemic_class=_string(
+            payload.get("epistemic_class"), f"{name}.epistemic_class"
+        ),
+        provenance=_string(payload.get("provenance"), f"{name}.provenance"),
+        confidence=float(confidence),
+        tick=required_int(payload.get("tick"), f"{name}.tick"),
+        canon_status=_string(
+            payload.get("canon_status", "run_state"), f"{name}.canon_status"
+        ),
+    )
+
+
+def _governance_receipts(value: Any) -> List[GovernanceReceipt]:
+    receipts = _list(value, "governance_receipts")
+    return [
+        GovernanceReceipt(
+            **copy.deepcopy(_mapping(item, f"governance_receipts[{index}]"))
+        )
+        for index, item in enumerate(receipts)
+    ]
+
+
+def _mapping_list(value: Any, name: str) -> List[Dict[str, Any]]:
+    items = _list(value, name)
+    return [
+        copy.deepcopy(_mapping(item, f"{name}[{index}]"))
+        for index, item in enumerate(items)
+    ]
+
+
+def _mapping(value: Any, name: str) -> Dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{name} must be a JSON object")
+    return value
+
+
+def _list(value: Any, name: str) -> List[Any]:
+    if not isinstance(value, list):
+        raise ValueError(f"{name} must be a JSON array")
+    return value
+
+
+def _string_list(value: Any, name: str) -> List[str]:
+    items = _list(value, name)
+    if not all(isinstance(item, str) for item in items):
+        raise ValueError(f"{name} must contain only strings")
+    return list(items)
+
+
+def _string(value: Any, name: str) -> str:
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"{name} must be a non-empty string")
+    return value

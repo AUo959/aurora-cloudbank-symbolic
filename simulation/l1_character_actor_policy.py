@@ -1,0 +1,455 @@
+#!/usr/bin/env python3
+"""Deterministic decision and response policy for the bounded L1 actor."""
+
+from __future__ import annotations
+
+import re
+import uuid
+from typing import Any, Dict, Mapping, Protocol, Sequence
+
+
+POLICY_VERSION = "bounded_character_action_v1"
+
+NON_DIEGETIC_CONTROL_PLANE_PHRASES = (
+    "this run",
+    "runtime observation",
+    "runtime projection",
+    "profile projection",
+    "canon-level",
+    "canon status",
+    "knowledge gap",
+    "unresolved fact",
+    "operator personal knowledge",
+    "pilot-position knowledge",
+    "observation aperture",
+    "policy version",
+    "caused_by_action_id",
+)
+
+
+class CharacterSpeechBoundaryError(RuntimeError):
+    """Raised when control-plane language leaks into L1 character speech."""
+
+
+class CharacterContextView(Protocol):
+    """Fields consumed by the pure character decision policy."""
+
+    run_id: str
+    tick: int
+    inbound: Mapping[str, Any]
+    station_records: Sequence[Mapping[str, Any]]
+    character_knowledge: Sequence[Mapping[str, Any]]
+    governed_records: Sequence[Mapping[str, Any]]
+
+
+def classify_intents(content: str) -> list[str]:
+    normalized = " ".join(re.findall(r"[a-z0-9']+", content.casefold()))
+    intents = []
+    if _contains_any(normalized, ("status", "report", "station operations")):
+        intents.append("station_operations_status")
+    if _contains_any(normalized, ("how is everything", "how are you", "up there")):
+        intents.append("welfare_check")
+    if _contains_any(normalized, ("emergency", "danger", "crisis", "incident")):
+        intents.append("emergency_inquiry")
+    if _contains_any(normalized, ("authorize", "authority", "approve", "ethics")):
+        intents.append("authority_or_governance_request")
+    return intents or ["general_contact"]
+
+
+def _contains_any(content: str, phrases: Sequence[str]) -> bool:
+    return any(phrase in content for phrase in phrases)
+
+
+def select_action(
+    intents: Sequence[str],
+    recent_events: Sequence[Mapping[str, Any]],
+    emergency_state: bool | None = None,
+) -> str:
+    event_is_active = emergency_state is None and _has_emergency_event(recent_events)
+    if "emergency_inquiry" in intents or emergency_state is True or event_is_active:
+        return "assess_and_escalate_if_warranted"
+    if "station_operations_status" in intents or "welfare_check" in intents:
+        return "review_watch_and_report"
+    if "authority_or_governance_request" in intents:
+        return "review_authority_and_respond"
+    return "acknowledge_and_open_channel"
+
+
+def _has_emergency_event(events: Sequence[Mapping[str, Any]]) -> bool:
+    return any("emergency" in str(item.get("kind", "")) for item in events)
+
+
+def decision_event(
+    selected_action: str,
+    events: Sequence[Mapping[str, Any]],
+    emergency_state: bool | None = None,
+) -> Mapping[str, Any] | None:
+    if selected_action == "assess_and_escalate_if_warranted":
+        if emergency_state is not None:
+            return {
+                "kind": "governed_emergency_state",
+                "emergency_active": emergency_state,
+            }
+        emergency = next(
+            (
+                item
+                for item in reversed(events)
+                if "emergency" in str(item.get("kind", ""))
+            ),
+            None,
+        )
+        if emergency is not None:
+            return emergency
+    return events[-1] if events else None
+
+
+def governed_emergency_state(
+    records: Sequence[Mapping[str, Any]],
+) -> bool | None:
+    """Return the latest typed Triplex-governed emergency fact, if one exists."""
+    for record in reversed(records):
+        if record.get("subject") != "emergency_active":
+            continue
+        value = record.get("value")
+        return value if isinstance(value, bool) else None
+    return None
+
+
+def stable_action_id(context: CharacterContextView, selected_action: str) -> str:
+    source = (
+        f"aurora:l1:{context.run_id}:CMD_001:{context.inbound['message_id']}:"
+        f"{context.tick}:{selected_action}:{POLICY_VERSION}"
+    )
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, source))
+
+
+def knowledge_inputs(context: CharacterContextView) -> list[Dict[str, Any]]:
+    station = [
+        {
+            "record_id": item["record_id"],
+            "subject": item["subject"],
+            "provenance": item["provenance"],
+            "tick": item["tick"],
+            "scope": "station_record",
+        }
+        for item in context.station_records[-8:]
+    ]
+    known = [
+        {
+            "record_id": item["record_id"],
+            "subject": item["subject"],
+            "provenance": item["provenance"],
+            "tick": item["tick"],
+            "scope": "character_knowledge",
+        }
+        for item in context.character_knowledge[-8:]
+    ]
+    governed = [
+        {
+            "record_id": item["record_id"],
+            "subject": item["subject"],
+            "provenance": item["provenance"],
+            "tick": item["tick"],
+            "scope": "governed_record",
+        }
+        for item in context.governed_records[-8:]
+    ]
+    return station + known + governed
+
+
+def duty_drivers(selected_action: str) -> list[str]:
+    mapping = {
+        "review_watch_and_report": [
+            "station_operations",
+            "strategic_coordination",
+            "crew_welfare",
+        ],
+        "assess_and_escalate_if_warranted": [
+            "station_operations",
+            "crisis_command",
+            "ethical_transparency",
+        ],
+        "review_authority_and_respond": [
+            "ethical_transparency",
+            "strategic_coordination",
+        ],
+        "acknowledge_and_open_channel": ["strategic_coordination"],
+    }
+    return mapping[selected_action]
+
+
+def principle_drivers(selected_action: str) -> list[str]:
+    drivers = ["quiet_authority", "bounded_claims"]
+    if selected_action != "acknowledge_and_open_channel":
+        drivers.append("operational_follow_through")
+    if selected_action in {
+        "assess_and_escalate_if_warranted",
+        "review_authority_and_respond",
+    }:
+        drivers.append("principle_led_consensus")
+    return drivers
+
+
+def options_considered(selected_action: str) -> list[Dict[str, str]]:
+    candidates = (
+        "acknowledge_and_open_channel",
+        "defer_response",
+        "review_watch_and_report",
+        "assess_and_escalate_if_warranted",
+        "review_authority_and_respond",
+    )
+    return [
+        {
+            "action": candidate,
+            "disposition": "selected" if candidate == selected_action else "not_selected",
+            "reason": _option_reason(candidate, selected_action),
+        }
+        for candidate in candidates
+    ]
+
+
+def _option_reason(candidate: str, selected_action: str) -> str:
+    if candidate == selected_action:
+        return "best fit for the message intent, current records, and command duties"
+    if candidate == "defer_response":
+        return "no competing crisis or unavailable record requires deferral"
+    if candidate == "acknowledge_and_open_channel":
+        return "available operational evidence supports a more useful bounded response"
+    return "the current message and ledger do not activate this command path"
+
+
+def rationale(selected_action: str) -> str:
+    if selected_action == "review_watch_and_report":
+        return (
+            "Station-operations duty and quiet authority favor inspecting the "
+            "available watch record before giving a concise external report."
+        )
+    if selected_action == "assess_and_escalate_if_warranted":
+        return (
+            "Crisis-command duty requires checking recorded evidence before any "
+            "escalation or reassurance."
+        )
+    if selected_action == "review_authority_and_respond":
+        return (
+            "A governance request must be separated from Pilot role assumptions "
+            "and routed through established authority."
+        )
+    return "The message establishes contact but does not support a broader action."
+
+
+def operational_steps(
+    selected_action: str,
+    station_records: Sequence[Mapping[str, Any]],
+    latest_event: Mapping[str, Any] | None,
+) -> list[Dict[str, Any]]:
+    steps = [
+        {
+            "kind": "review_station_records",
+            "status": "completed",
+            "records_reviewed": len(station_records),
+        }
+    ]
+    if selected_action == "assess_and_escalate_if_warranted":
+        steps.append(_emergency_assessment_step(latest_event))
+    if selected_action == "review_watch_and_report":
+        steps.extend(_status_report_steps(latest_event))
+    steps.append({"kind": "transmit_response", "status": "queued"})
+    return steps
+
+
+def _emergency_assessment_step(
+    latest_event: Mapping[str, Any] | None,
+) -> Dict[str, Any]:
+    emergency = _event_emergency_state(latest_event)
+    result = {
+        True: "recorded_emergency",
+        False: "recorded_no_emergency",
+        None: "emergency_status_unconfirmed",
+    }[emergency]
+    return {
+        "kind": "assess_command_exception",
+        "status": "completed",
+        "result": result,
+    }
+
+
+def _status_report_steps(
+    latest_event: Mapping[str, Any] | None,
+) -> list[Dict[str, Any]]:
+    steps = [_emergency_assessment_step(latest_event)]
+    if latest_event and latest_event.get("kind") == "maintenance_queue_progress":
+        steps.append(
+            {
+                "kind": "maintain_command_watch",
+                "status": "active",
+                "subject": "maintenance_queue",
+            }
+        )
+    return steps
+
+
+def commitments(
+    selected_action: str,
+    latest_event: Mapping[str, Any] | None,
+) -> list[Dict[str, str]]:
+    if (
+        selected_action == "review_watch_and_report"
+        and latest_event
+        and latest_event.get("kind") == "maintenance_queue_progress"
+    ):
+        return [
+            {
+                "commitment": "monitor_maintenance_queue",
+                "status": "active",
+                "owner": "CMD_001",
+            }
+        ]
+    return []
+
+
+def active_commitments(
+    actions: Sequence[Mapping[str, Any]],
+) -> list[Dict[str, str]]:
+    active = []
+    for action in actions:
+        commitments_for_action = action.get("commitments", [])
+        active.extend(
+            item
+            for item in commitments_for_action
+            if item.get("status") == "active"
+        )
+    return active[-5:]
+
+
+def render_response(
+    decision: Mapping[str, Any],
+    latest_event: Mapping[str, Any] | None,
+    opening: str,
+) -> str:
+    action = decision["selected_action"]
+    if action == "review_watch_and_report":
+        response = _render_status_report(decision, latest_event, opening)
+    elif action == "assess_and_escalate_if_warranted":
+        response = _render_emergency_assessment(latest_event, opening)
+    elif action == "review_authority_and_respond":
+        response = _render_authority_response(opening)
+    else:
+        response = _render_general_contact(opening)
+    enforce_diegetic_speech(response)
+    return response
+
+
+def _render_status_report(
+    decision: Mapping[str, Any],
+    latest_event: Mapping[str, Any] | None,
+    opening: str,
+) -> str:
+    event_sentence = _event_sentence(latest_event)
+    commitment = _commitment_sentence(decision)
+    return " ".join(
+        part
+        for part in (
+            f"{opening} We're steady here.",
+            event_sentence,
+            commitment,
+        )
+        if part
+    )
+
+
+def _event_sentence(latest_event: Mapping[str, Any] | None) -> str:
+    if latest_event is None:
+        return "I have no new station activity to report."
+    kind = latest_event.get("kind")
+    mapping = {
+        "maintenance_queue_progress": "Maintenance moved forward this watch.",
+        "routine_shift_handoff": (
+            "The shift handoff closed without an operational exception."
+        ),
+        "research_queue_progress": (
+            "Research work moved forward without requiring command intervention."
+        ),
+        "no_material_event": "There has been no material change this watch.",
+    }
+    return mapping.get(kind, "The latest station matter is with Command.")
+
+
+def _commitment_sentence(decision: Mapping[str, Any]) -> str:
+    current = decision.get("commitments", [])
+    prior = decision.get("prior_active_commitments", [])
+    if current and prior:
+        return (
+            "The remaining work stays under command review. I'll relay any material "
+            "change."
+        )
+    if current:
+        return (
+            "I'm keeping the remaining work under command review and will relay any "
+            "material change."
+        )
+    return "I am maintaining the command watch and will relay any material change."
+
+
+def _render_emergency_assessment(
+    latest_event: Mapping[str, Any] | None,
+    opening: str,
+) -> str:
+    emergency = _event_emergency_state(latest_event)
+    if emergency is True:
+        return (
+            f"{opening} An emergency has been recorded. The response is with Command "
+            "and Ethics now. I will report the disposition when it is confirmed."
+        )
+    if emergency is False:
+        return (
+            f"{opening} The governed station record shows no active emergency. "
+            "If that changes, you'll hear it from Command."
+        )
+    return (
+        f"{opening} I cannot confirm the current emergency status yet. I am checking "
+        "with Command and will report the confirmed disposition."
+    )
+
+
+def _event_emergency_state(
+    event: Mapping[str, Any] | None,
+) -> bool | None:
+    if event is None:
+        return None
+    active = event.get("emergency_active")
+    if isinstance(active, bool):
+        return active
+    if "emergency" in str(event.get("kind", "")):
+        return True
+    return None
+
+
+def _render_authority_response(opening: str) -> str:
+    return (
+        f"{opening} I have your request. It does not carry station command authority "
+        "on its own. If it calls for action, I will take it through Command and Ethics."
+    )
+
+
+def _render_general_contact(opening: str) -> str:
+    return (
+        f"{opening} I have your transmission. Give me the operational question or "
+        "decision you need addressed."
+    )
+
+
+def enforce_diegetic_speech(content: str) -> None:
+    """Reject known control-plane vocabulary at the L1 speech boundary."""
+    lowered = content.casefold()
+    leaked_phrase = next(
+        (
+            phrase
+            for phrase in NON_DIEGETIC_CONTROL_PLANE_PHRASES
+            if phrase in lowered
+        ),
+        None,
+    )
+    if leaked_phrase is not None:
+        raise CharacterSpeechBoundaryError(
+            f"non-diegetic control-plane phrase in character speech: {leaked_phrase}"
+        )

@@ -45,16 +45,14 @@ export default defineConfig({
         manualChunks(id: string) {
           if (!id.includes('node_modules')) return undefined;
 
+          // Every group here corresponds to packages the app actually imports,
+          // so every group emits a chunk. When a feature adds a dependency
+          // worth splitting out — see the install steps in ARCHITECTURE.md —
+          // add its group at the same time, so this list never describes
+          // packages that are not installed.
           const groups: Record<string, string[]> = {
             'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-            'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-            'ui-vendor': [
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-select',
-              '@radix-ui/react-tabs',
-            ],
-            'chart-vendor': ['recharts', 'd3'],
+            'editor-vendor': ['@monaco-editor/react', 'monaco-editor'],
           };
 
           const normalised = id.replaceAll('\\', '/');

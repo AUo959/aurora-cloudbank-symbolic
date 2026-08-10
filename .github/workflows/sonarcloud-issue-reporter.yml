@@ -1,99 +1,301 @@
 name: SonarCloud Issue Reporter
 
-# Fetches the exact violations from SonarCloud API and posts them as a PR
-# comment every time the quality gate fails. This gives developers and AI
-# assistants the precise rule/file/line information needed to fix issues
-# without blind guessing.
+# Posts the reason a SonarCloud quality gate failed, as a PR comment.
+#
+# The previous version answered the wrong question and answered it
+# confidently. It queried api/issues/search filtered to
+# types=BUG,VULNERABILITY at severities=BLOCKER,CRITICAL,MAJOR, and when that
+# returned nothing it posted "No open BUG/VULNERABILITY issues returned". Three
+# separate defects made that text actively misleading:
+#
+#   1. A gate most often fails on a *rating* condition, and a Security Rating
+#      downgrade is usually driven by a Security Hotspot. Hotspots live at
+#      api/hotspots/search and are never returned by api/issues/search, so the
+#      reporter was structurally blind to its most common trigger. On #1442 it
+#      reported "no issues" while a hardcoded PBKDF2 salt sat in the diff; the
+#      finding was only isolated by pushing candidate fixes one at a time and
+#      watching the gate flip.
+#
+#   2. `curl -sf ... || echo '{"issues":[]}'` laundered every failure into the
+#      same output as a clean result. An expired SONAR_TOKEN, a 404, and a rate
+#      limit were indistinguishable from "nothing found".
+#
+#   3. The type and severity filters discarded issues that count toward
+#      new-code and maintainability gate conditions.
+#
+# This version asks the gate itself what failed, then enriches with issues and
+# hotspots. It never claims "clean" on a failed query.
+
 on:
   check_run:
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      pull_request_number:
+        description: 'PR number to report on (dry run; posts no comment)'
+        required: true
+        type: string
+
+permissions:
+  pull-requests: write
 
 jobs:
   report-sonar-issues:
     if: |
-      github.event.check_run.name == 'SonarCloud Code Analysis' &&
-      github.event.check_run.conclusion == 'failure' &&
-      github.event.check_run.pull_requests != null &&
-      toJson(github.event.check_run.pull_requests) != '[]'
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.check_run.name == 'SonarCloud Code Analysis' &&
+       github.event.check_run.conclusion == 'failure' &&
+       github.event.check_run.pull_requests != null &&
+       toJson(github.event.check_run.pull_requests) != '[]')
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
 
     steps:
-      - name: Get PR number
+      - name: Resolve PR number
         id: pr
+        # Values reach the shell through env, never through ${{ }} interpolation
+        # into the script body. pull_request_number is a workflow_dispatch string
+        # input, so interpolating it directly would splice caller-supplied text
+        # into the command -- expression injection, executable by anyone able to
+        # trigger the workflow. The numeric check below is a second gate: the
+        # value ends up inside a URL, so it must not carry separators either.
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_PR: ${{ inputs.pull_request_number }}
+          EVENT_PR: ${{ github.event.check_run.pull_requests[0].number }}
         run: |
-          echo "number=${{ github.event.check_run.pull_requests[0].number }}" >> $GITHUB_OUTPUT
+          set -eu
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            number="$DISPATCH_PR"
+            dry_run=true
+          else
+            number="$EVENT_PR"
+            dry_run=false
+          fi
 
-      - name: Fetch SonarCloud violations (curl + python)
+          case "$number" in
+            ''|*[!0-9]*)
+              echo "::error::Refusing to run: PR number '$number' is not a positive integer."
+              exit 1
+              ;;
+          esac
+
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "dry_run=$dry_run" >> "$GITHUB_OUTPUT"
+
+      - name: Build SonarCloud report
         id: fetch
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           PROJECT_KEY: AUo959_aurora-cloudbank-symbolic
+          # Consumed via env, never interpolated into the script body.
+          CHECK_RUN_SUMMARY: ${{ github.event.check_run.output.summary }}
         run: |
-          RESPONSE=$(curl -sf -u "${SONAR_TOKEN}:" \
-            "https://sonarcloud.io/api/issues/search?componentKeys=${PROJECT_KEY}&pullRequest=${PR_NUMBER}&types=BUG,VULNERABILITY&resolved=false&severities=BLOCKER,CRITICAL,MAJOR&ps=50" \
-            || echo '{"issues":[]}')
+          set -uo pipefail
+          BASE="https://sonarcloud.io/api"
 
-          SONAR_RESPONSE="$RESPONSE" python3 <<'PYEOF'
+          # Deliberately no `|| echo <empty>` fallback anywhere below. A failed
+          # query must be reported as a failed query, never as "no issues".
+          fetch() {
+            local url="$1" out="$2"
+            local code
+            code=$(curl -sS -u "${SONAR_TOKEN}:" -o "$out" -w '%{http_code}' "$url" 2>"$out.err" || echo "000")
+            echo "$code"
+          }
+
+          # SonarCloud already states the failing condition in the check run it
+          # publishes, and that arrives with the event -- no API call, no token,
+          # no network. It is therefore the one source that cannot be knocked
+          # out by an expired token or an unreachable host, so it is recorded
+          # first and used verbatim if every query below fails.
+          printf '%s' "${CHECK_RUN_SUMMARY:-}" > check_summary.txt
+
+          GATE_CODE=$(fetch "${BASE}/qualitygates/project_status?projectKey=${PROJECT_KEY}&pullRequest=${PR_NUMBER}" gate.json)
+          ISSUES_CODE=$(fetch "${BASE}/issues/search?componentKeys=${PROJECT_KEY}&pullRequest=${PR_NUMBER}&resolved=false&ps=100" issues.json)
+          HOTSPOTS_CODE=$(fetch "${BASE}/hotspots/search?projectKey=${PROJECT_KEY}&pullRequest=${PR_NUMBER}&status=TO_REVIEW&ps=100" hotspots.json)
+
+          GATE_CODE="$GATE_CODE" ISSUES_CODE="$ISSUES_CODE" HOTSPOTS_CODE="$HOTSPOTS_CODE" python3 <<'PYEOF'
           import json
           import os
 
-          data = json.loads(os.environ["SONAR_RESPONSE"])
-          issues = data.get("issues", [])
-          if not issues:
-              lines = [
-                  "### SonarCloud: No open BUG/VULNERABILITY issues returned",
+          def load(path, code):
+              """Return (data, error_text). Never conflates failure with emptiness."""
+              if code != "200":
+                  detail = {
+                      "000": "request failed (network, DNS, or TLS)",
+                      "401": "unauthorized - SONAR_TOKEN missing, expired, or wrong scope",
+                      "403": "forbidden - token lacks access to this project",
+                      "404": "not found - project key or pull request unknown to SonarCloud",
+                      "429": "rate limited",
+                  }.get(code, f"HTTP {code}")
+                  return None, detail
+              try:
+                  with open(path, encoding="utf-8") as handle:
+                      return json.load(handle), None
+              except (OSError, ValueError) as exc:
+                  return None, f"unreadable response ({exc})"
+
+          gate, gate_err = load("gate.json", os.environ["GATE_CODE"])
+          issues, issues_err = load("issues.json", os.environ["ISSUES_CODE"])
+          hotspots, hotspots_err = load("hotspots.json", os.environ["HOTSPOTS_CODE"])
+
+          try:
+              with open("check_summary.txt", encoding="utf-8") as handle:
+                  check_summary = handle.read().strip()
+          except OSError:
+              check_summary = ""
+
+          lines = []
+
+          # 0. What SonarCloud itself published on the check run. Available
+          #    without any API call, so it survives an expired token or an
+          #    unreachable host.
+          if check_summary:
+              lines += ["### Reported by the SonarCloud check run", "", check_summary, ""]
+
+          # 1. The gate condition. This is the question the reader actually has,
+          #    and the old reporter never asked it.
+          if gate_err:
+              lines += [
+                  "### Could not read the quality gate",
                   "",
-                  "The quality gate may be failing on a rating metric rather than a specific issue.",
-                  "Check the SonarCloud dashboard directly for details.",
+                  f"`api/qualitygates/project_status` {gate_err}.",
+                  "",
+                  "**This is not an all-clear.** The gate is red; this workflow could not "
+                  "determine why. Check the SonarCloud dashboard directly.",
+                  "",
               ]
           else:
-              lines = [f"### ⚠️ SonarCloud Violations ({len(issues)} open)", ""]
-              for issue in issues:
-                  component = issue.get("component", "").split(":")[-1]
-                  line = issue.get("line", "?")
-                  rule = issue.get("rule", "")
-                  severity = issue.get("severity", "")
-                  message = issue.get("message", "")
-                  lines.append(f"- **{severity}** `{component}` line {line} `[{rule}]` {message}")
+              status = gate.get("projectStatus", {})
+              conditions = [
+                  c for c in status.get("conditions", []) if c.get("status") == "ERROR"
+              ]
+              lines.append(f"### Quality gate: {status.get('status', 'UNKNOWN')}")
+              lines.append("")
+              if conditions:
+                  lines.append("| Metric | Actual | Comparator | Threshold |")
+                  lines.append("| --- | --- | --- | --- |")
+                  for cond in conditions:
+                      lines.append(
+                          f"| `{cond.get('metricKey','?')}` | **{cond.get('actualValue','?')}** "
+                          f"| {cond.get('comparator','?')} | {cond.get('errorThreshold','?')} |"
+                      )
+                  lines.append("")
+              else:
+                  lines += [
+                      "The gate reports no failing condition. If the check run is red, the "
+                      "analysis itself may have errored rather than the gate.",
+                      "",
+                  ]
+
+          # 2. Security Hotspots. A Security Rating downgrade is normally driven
+          #    by one of these, and they are absent from api/issues/search.
+          if hotspots_err:
+              lines += [f"> Hotspot query failed: {hotspots_err}", ""]
+          else:
+              found = hotspots.get("hotspots", [])
+              if found:
+                  # Count what is shown, not what was returned. A header that
+                  # says 30 above a list of 25 is the same species of quietly
+                  # wrong output this workflow exists to remove.
+                  shown = found[:25]
+                  suffix = f" — showing {len(shown)} of {len(found)}" if len(shown) < len(found) else ""
+                  lines.append(f"### Security Hotspots to review ({len(found)}){suffix}")
+                  lines.append("")
+                  for hotspot in shown:
+                      component = hotspot.get("component", "").split(":")[-1]
+                      lines.append(
+                          f"- **{hotspot.get('vulnerabilityProbability','?')}** "
+                          f"`{component}` line {hotspot.get('line','?')} "
+                          f"`[{hotspot.get('ruleKey','')}]` {hotspot.get('message','')}"
+                      )
+                  lines.append("")
+
+          # 3. Issues, unfiltered by type or severity: new-code and
+          #    maintainability conditions count things the old filter discarded.
+          if issues_err:
+              lines += [f"> Issue query failed: {issues_err}", ""]
+          else:
+              found = issues.get("issues", [])
+              if found:
+                  shown = found[:40]
+                  suffix = f" — showing {len(shown)} of {len(found)}" if len(shown) < len(found) else ""
+                  lines.append(f"### Open issues ({len(found)}){suffix}")
+                  lines.append("")
+                  for issue in shown:
+                      component = issue.get("component", "").split(":")[-1]
+                      lines.append(
+                          f"- **{issue.get('severity','')}** `{component}` "
+                          f"line {issue.get('line','?')} `[{issue.get('rule','')}]` "
+                          f"{issue.get('message','')}"
+                      )
+                  lines.append("")
+
+          if not lines:
+              lines = ["### No gate detail available", ""]
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
-              output.write("body<<EOF\n")
+              output.write("body<<SONAR_EOF\n")
               output.write("\n".join(lines) + "\n")
-              output.write("EOF\n")
+              output.write("SONAR_EOF\n")
           PYEOF
 
-      - name: Post violations comment
-        uses: actions/github-script@v9
+      - name: Post report
+        if: steps.pr.outputs.dry_run == 'false'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         env:
           SONAR_REPORT_BODY: ${{ steps.fetch.outputs.body }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
         with:
           script: |
-            const prNumber = parseInt('${{ steps.pr.outputs.number }}');
-            const body = `## 🔍 SonarCloud Violation Report\n\n${process.env.SONAR_REPORT_BODY}\n\n_Auto-fetched after quality gate failure. Fix these specific violations to get the gate to pass._`;
+            const MARKER = '<!-- sonarcloud-issue-reporter -->';
+            const prNumber = parseInt(process.env.PR_NUMBER, 10);
+            const body = [
+              MARKER,
+              '## SonarCloud quality gate failed',
+              '',
+              process.env.SONAR_REPORT_BODY,
+              '_Auto-fetched when the gate went red. A failed query is reported as a failed',
+              'query — this comment never says "clean" because it could not ask._',
+            ].join('\n');
 
-            // Delete previous reports from this workflow to avoid clutter
-            const comments = await github.rest.issues.listComments({
+            // listComments defaults to 30 per page; PRs here routinely carry
+            // hundreds, so an unpaginated scan left stale reports behind.
+            const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
+              per_page: 100,
             });
-            for (const comment of comments.data) {
-              if (comment.user.login === 'github-actions[bot]' &&
-                  comment.body.includes('🔍 SonarCloud Violation Report')) {
-                await github.rest.issues.deleteComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: comment.id,
-                });
-              }
+
+            // Update in place rather than delete-and-recreate, so the thread
+            // keeps one stable report instead of churning notifications.
+            const mine = comments.find(
+              (c) => c.user?.login === 'github-actions[bot]' && (c.body || '').includes(MARKER)
+            );
+
+            if (mine) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: mine.id,
+                body,
+              });
+              core.info(`Updated existing report (comment ${mine.id}).`);
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+              core.info('Posted a new report.');
             }
 
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: body,
-            });
+      - name: Dry-run output
+        if: steps.pr.outputs.dry_run == 'true'
+        env:
+          SONAR_REPORT_BODY: ${{ steps.fetch.outputs.body }}
+        run: |
+          echo "::notice::Dry run — the report below was not posted."
+          printf '%s\n' "$SONAR_REPORT_BODY"

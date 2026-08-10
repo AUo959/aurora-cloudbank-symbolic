@@ -1,8 +1,32 @@
 name: Auto-merge Admin PRs
 
+# Queues a PR for merge using GitHub's native auto-merge, which executes only
+# once branch protection is satisfied.
+#
+# The previous version called pulls.merge() directly. It fetched
+# mergeable/mergeable_state into a step output and then never read it, so the
+# merge step ran unconditionally -- no CI gate, no mergeable gate. It also
+# self-approved as the repository owner immediately before merging, which
+# nullified any review requirement. It had not caused damage only because
+# nothing applies the 'auto-merge' label; a single label application would have
+# merged a red PR.
+#
+# Rather than reimplement the gate correctly in JavaScript, this hands the
+# decision to GitHub. enablePullRequestAutoMerge refuses to queue anything that
+# is not blocked on protection, and the merge itself waits for the required
+# checks. The workflow therefore cannot merge past a failing required check
+# even if this file is wrong.
+#
+# IMPORTANT: this is only a real gate if `main` has required status checks
+# configured in branch protection. Without them GitHub reports PRs with failing
+# checks as "unstable" rather than "blocked" and will merge them. If auto-merge
+# cannot be enabled because the PR is already in a clean/unstable state, this
+# workflow fails loudly rather than falling back to a direct merge -- an
+# unprotected branch should surface as a red job, not as a silent merge.
+
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [opened, reopened, labeled]
 
 permissions:
   contents: write
@@ -17,78 +41,70 @@ jobs:
        github.actor == 'AUo959' ||
        contains(github.event.pull_request.title, '#321//.') ||
        contains(github.event.pull_request.title, '⬆️'))
-    
+
     steps:
-      - name: Check PR status
-        id: pr-status
+      - name: Enable native auto-merge
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
-            
-            console.log('PR mergeable state:', pr.data.mergeable_state);
-            console.log('PR mergeable:', pr.data.mergeable);
-            
-            return {
-              mergeable: pr.data.mergeable,
-              state: pr.data.mergeable_state
-            };
-      
-      - name: Auto-approve PR
-        if: github.actor == 'AUo959'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            try {
-              await github.rest.pulls.createReview({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number,
-                event: 'APPROVE',
-                body: '✅ Auto-approved by admin workflow'
-              });
-              console.log('PR approved');
-            } catch (error) {
-              console.log('Approval error (may already be approved):', error.message);
+            const pr = context.payload.pull_request;
+
+            if (pr.draft) {
+              core.notice(`PR #${pr.number} is a draft; not queueing for merge.`);
+              return;
             }
-      
-      - name: Enable auto-merge
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            await github.rest.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-              merge_method: 'squash',
-              commit_title: context.payload.pull_request.title,
-              commit_message: 'Auto-merged by admin workflow'
-            });
-            console.log('PR merged successfully');
-      
-      - name: Delete branch
-        if: success()
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
+
             try {
-              const branch = context.payload.pull_request.head.ref;
-              if (!branch.startsWith('main') && !branch.startsWith('master')) {
-                await github.rest.git.deleteRef({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  ref: `heads/${branch}`
-                });
-                console.log(`Deleted branch: ${branch}`);
-              }
+              await github.graphql(
+                `mutation($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
+                   enablePullRequestAutoMerge(input: {
+                     pullRequestId: $pullRequestId,
+                     mergeMethod: $mergeMethod
+                   }) {
+                     pullRequest { number autoMergeRequest { enabledAt } }
+                   }
+                 }`,
+                { pullRequestId: pr.node_id, mergeMethod: 'SQUASH' }
+              );
+              core.notice(
+                `Auto-merge queued for #${pr.number}. GitHub will merge it once ` +
+                `branch protection is satisfied.`
+              );
+              return;
             } catch (error) {
-              console.log('Branch deletion skipped:', error.message);
+              const message = error.message || String(error);
+
+              // Already queued by a previous run of this workflow.
+              if (/already enabled/i.test(message)) {
+                core.notice(`Auto-merge was already enabled on #${pr.number}.`);
+                return;
+              }
+
+              // GitHub refuses to queue a PR that nothing is blocking. That is
+              // not a success: it means no required status check stands between
+              // this PR and main, so "auto-merge" would be an unconditional
+              // merge. Surface it instead of doing it.
+              if (/clean status|not in a mergeable state|pull request is in/i.test(message)) {
+                core.setFailed(
+                  `Refusing to merge #${pr.number}. GitHub reports nothing is ` +
+                  `blocking it, which means 'main' has no required status checks ` +
+                  `covering this PR -- so there is no gate for auto-merge to wait ` +
+                  `on. Configure required checks in branch protection, or merge ` +
+                  `this PR by hand after reading its CI. Underlying error: ${message}`
+                );
+                return;
+              }
+
+              // Auto-merge not enabled at the repository level.
+              if (/auto[- ]merge is not allowed|allowAutoMerge/i.test(message)) {
+                core.setFailed(
+                  `Auto-merge is disabled for this repository. Enable it in ` +
+                  `Settings > General > Pull Requests, or remove the 'auto-merge' ` +
+                  `label. Underlying error: ${message}`
+                );
+                return;
+              }
+
+              core.setFailed(`Could not enable auto-merge on #${pr.number}: ${message}`);
             }

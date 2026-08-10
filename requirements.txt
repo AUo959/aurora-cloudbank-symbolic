@@ -12,9 +12,9 @@
 # ===================================================================
 # CORE WEB FRAMEWORK
 # ===================================================================
-fastapi>=0.128.8,<1.0.0             # FastAPI web framework (updated for starlette 0.50+ compatibility)
-uvicorn[standard]>=0.24.0,<1.0.0    # ASGI server
-starlette>=1.3.1,<2.0.0            # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
+fastapi>=0.141.1,<1.0.0             # FastAPI web framework (updated for starlette 0.50+ compatibility)
+uvicorn[standard]>=0.52.1,<1.0.0    # ASGI server
+starlette>=1.4.0,<2.0.0            # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
 pydantic>=2.5.0,<3.0.0             # Data validation (cap at next major; V2->V3 would be breaking)
 pydantic-settings>=2.14.2,<3.0.0    # Settings management via environment variables
 python-multipart>=0.0.20,<1.0.0     # File upload handling
@@ -26,7 +26,7 @@ httpx>=0.28.0,<1.0.0                # Async HTTP client (requires httpcore 1.x)
 httpx2>=2.0.0,<3.0.0                # Starlette TestClient transport (replaces deprecated httpx fallback)
 httpcore>=1.0.0,<2.0.0              # HTTP core (requires h11 0.16.0+)
 h11>=0.16.0,<1.0.0                  # HTTP/1.1 implementation (security updates)
-websockets>=11.0.3,<17.0.0          # WebSocket support
+websockets>=17.0.1,<18.0.0          # WebSocket support
 aiofiles>=24.1.0,<26.0.0            # Async file operations
 
 # ===================================================================
@@ -41,9 +41,9 @@ passlib[bcrypt]>=1.7.4,<2.0.0       # Password handling
 # ===================================================================
 # DATA PROCESSING & SCIENTIFIC COMPUTING
 # ===================================================================
-numpy>=1.24.3,<3.0.0                # Numerical computing
-scipy>=1.11.4,<2.0.0                # Scientific computing
-pandas>=2.1.0,<4.0.0                # Data analysis
+numpy>=2.5.1,<3.0.0                # Numerical computing
+scipy>=1.18.0,<2.0.0                # Scientific computing
+pandas>=3.0.5,<4.0.0                # Data analysis
 
 # ===================================================================
 # CONFIGURATION & UTILITIES
@@ -57,31 +57,31 @@ python-json-logger>=4.1.0,<5.0.0    # JSON logging
 # ===================================================================
 # QUANTUM COMPUTING (Nexus)
 # ===================================================================
-qiskit>=1.4.2,<3.0.0                # IBM Quantum SDK
+qiskit>=2.5.1,<3.0.0                # IBM Quantum SDK
 qiskit-aer>=0.13.0,<1.0.0           # Quantum simulators
 
 # ===================================================================
 # VISUALIZATION & MONITORING
 # ===================================================================
-plotly>=5.17.0,<7.0.0               # Interactive visualizations
-prometheus-client>=0.19.0,<1.0.0    # Metrics collection
+plotly>=6.9.0,<7.0.0               # Interactive visualizations
+prometheus-client>=0.26.0,<1.0.0    # Metrics collection
 
 # ===================================================================
 # DATABASE & CACHING
 # ===================================================================
-redis>=5.0.0,<9.0.0                 # Redis client
+redis>=8.1.0,<9.0.0                 # Redis client
 
 # ===================================================================
 # RATE LIMITING & API UTILITIES
 # ===================================================================
 limits>=5.5.0,<6.0.0                # Rate limiting
-slowapi>=0.1.9,<1.0.0               # Rate limiting for FastAPI
+slowapi>=0.1.10,<1.0.0               # Rate limiting for FastAPI
 
 # ===================================================================
 # AI MODEL INTEGRATIONS
 # ===================================================================
-anthropic>=0.40.0,<1.0.0            # Claude 3.5/4.5 integration
-openai>=2.43.0,<3.0.0               # GPT-4/5 integration
+anthropic>=0.120.2,<1.0.0            # Claude 3.5/4.5 integration
+openai>=2.53.0,<3.0.0               # GPT-4/5 integration
 
 # ===================================================================
 # VALIDATION
@@ -93,7 +93,7 @@ jsonschema>=4.17.0,<5.0.0           # JSON Schema validation (MCP tool inputSche
 # ===================================================================
 requests>=2.34.2,<3.0.0             # HTTP library
 urllib3>=2.7.0,<3.0.0               # HTTP connection pooling
-certifi>=2026.5.20                   # SSL certificates
-charset-normalizer>=3.4.7,<4.0.0    # Character encoding detection
+certifi>=2026.7.22                   # SSL certificates
+charset-normalizer>=3.4.9,<4.0.0    # Character encoding detection
 idna>=3.18,<4.0.0                   # Internationalized domain names
 psutil>=7.2.2,<8.0.0                # Process and system monitoring (for R-2 telemetry)

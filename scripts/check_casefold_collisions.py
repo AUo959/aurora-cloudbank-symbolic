@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
-import subprocess
+import shutil
+# This module executes only the fixed, trusted Git command below.
+import subprocess  # nosec B404
 import sys
 from pathlib import PurePosixPath
 
@@ -32,7 +34,13 @@ def find_casefold_collisions(paths: list[str]) -> dict[str, list[str]]:
 
 def git_tracked_paths() -> bytes:
     """Return NUL-delimited tracked paths without relying on a shell pipeline."""
-    return subprocess.check_output(["git", "ls-files", "-z"])
+    git_executable = shutil.which("git")
+    if git_executable is None:
+        raise OSError("git executable is unavailable")
+    # The resolved executable and every argument are fixed, never user-controlled.
+    return subprocess.check_output(  # nosec B603
+        [git_executable, "ls-files", "-z"]
+    )
 
 
 def main(raw_paths: bytes | None = None, *, from_git: bool = False) -> int:

@@ -566,6 +566,14 @@ class TestAIIntegrationErrorHandling:
         assert "MODEL CATALOG ALERT" in caplog.text
         assert AIModel.CLAUDE_OPUS_5.value in caplog.text
 
+    def test_not_found_detection_rejects_unrelated_404_text(self):
+        assert UnifiedAIInterface._is_model_not_found(
+            RuntimeError("processed 404 tokens")
+        ) is False
+        assert UnifiedAIInterface._is_model_not_found(
+            RuntimeError("provider says model_not_found")
+        ) is True
+
     @pytest.mark.asyncio
     async def test_all_models_unavailable(self):
         """Test behavior when all models are unavailable."""

@@ -74,7 +74,7 @@ def test_available_models_are_not_marked_unverified():
     """Provider availability and an unverified source are contradictory."""
     for model, cap in available_entries():
         assert cap.verified_source != "unverified", (
-            f"{model.name} is selectable but its source is 'unverified'. "
+            f"{model.name} claims provider availability but its source is 'unverified'. "
             f"Either verify it against the provider catalog or set available=False."
         )
 

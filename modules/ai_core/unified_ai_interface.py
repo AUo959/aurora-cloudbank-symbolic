@@ -428,8 +428,13 @@ class UnifiedAIInterface:
         status_code = getattr(error, "status_code", None)
         if status_code is None:
             status_code = getattr(getattr(error, "response", None), "status_code", None)
+        if status_code is not None:
+            return status_code == 404
         detail = str(error).lower()
-        return status_code == 404 or "404" in detail or "not_found" in detail
+        return any(
+            marker in detail
+            for marker in ("model_not_found", "model not found", "not_found_error")
+        )
 
     @classmethod
     def _alert_on_model_not_found(

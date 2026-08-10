@@ -4,9 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import shutil
-# This module executes only the fixed, trusted Git command below.
-import subprocess  # nosec B404
 import sys
 from pathlib import PurePosixPath
 
@@ -33,14 +30,12 @@ def find_casefold_collisions(paths: list[str]) -> dict[str, list[str]]:
 
 
 def git_tracked_paths() -> bytes:
-    """Return NUL-delimited tracked paths without relying on a shell pipeline."""
-    git_executable = shutil.which("git")
-    if git_executable is None:
-        raise OSError("git executable is unavailable")
-    # The resolved executable and every argument are fixed, never user-controlled.
-    return subprocess.check_output(  # nosec B603
-        [git_executable, "ls-files", "-z"]
-    )
+    """Return NUL-delimited tracked paths from Git's index without a subprocess."""
+    from git import Repo
+
+    repo = Repo(".", search_parent_directories=True)
+    tracked = sorted(path for path, stage in repo.index.entries if stage == 0)
+    return b"\0".join(path.encode("utf-8") for path in tracked) + b"\0"
 
 
 def main(raw_paths: bytes | None = None, *, from_git: bool = False) -> int:
@@ -48,7 +43,7 @@ def main(raw_paths: bytes | None = None, *, from_git: bool = False) -> int:
         if from_git:
             try:
                 raw_paths = git_tracked_paths()
-            except (OSError, subprocess.CalledProcessError) as exc:
+            except (ImportError, OSError) as exc:
                 print(f"ERROR: could not list tracked paths: {exc}", file=sys.stderr)
                 return 2
         else:

@@ -35,3 +35,25 @@ def test_main_accepts_collision_free_input():
 
 def test_main_rejects_empty_input():
     assert main(b"") == 2
+
+
+def test_main_can_read_tracked_paths_directly_from_git(monkeypatch):
+    monkeypatch.setattr(
+        "scripts.check_casefold_collisions.git_tracked_paths",
+        lambda: b"QGIA_Integration/a.md\0docs/readme.md\0",
+    )
+
+    assert main(from_git=True) == 0
+
+
+def test_main_reports_git_listing_failure(monkeypatch, capsys):
+    def fail_to_list_paths():
+        raise OSError("git is unavailable")
+
+    monkeypatch.setattr(
+        "scripts.check_casefold_collisions.git_tracked_paths",
+        fail_to_list_paths,
+    )
+
+    assert main(from_git=True) == 2
+    assert "could not list tracked paths" in capsys.readouterr().err

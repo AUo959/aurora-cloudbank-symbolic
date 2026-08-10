@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import subprocess
 import sys
 from pathlib import PurePosixPath
 
@@ -28,12 +30,24 @@ def find_casefold_collisions(paths: list[str]) -> dict[str, list[str]]:
     }
 
 
-def main(raw_paths: bytes | None = None) -> int:
+def git_tracked_paths() -> bytes:
+    """Return NUL-delimited tracked paths without relying on a shell pipeline."""
+    return subprocess.check_output(["git", "ls-files", "-z"])
+
+
+def main(raw_paths: bytes | None = None, *, from_git: bool = False) -> int:
     if raw_paths is None:
-        raw_paths = sys.stdin.buffer.read()
+        if from_git:
+            try:
+                raw_paths = git_tracked_paths()
+            except (OSError, subprocess.CalledProcessError) as exc:
+                print(f"ERROR: could not list tracked paths: {exc}", file=sys.stderr)
+                return 2
+        else:
+            raw_paths = sys.stdin.buffer.read()
     paths = tracked_paths(raw_paths)
     if not paths:
-        print("ERROR: no tracked paths received on standard input.")
+        print("ERROR: no tracked paths received on standard input.", file=sys.stderr)
         return 2
 
     collisions = find_casefold_collisions(paths)
@@ -41,11 +55,21 @@ def main(raw_paths: bytes | None = None) -> int:
         print(f"OK: {len(paths)} tracked paths have unique case-folded components.")
         return 0
 
-    print("ERROR: tracked paths contain case-folded component collisions:")
+    print(
+        "ERROR: tracked paths contain case-folded component collisions:",
+        file=sys.stderr,
+    )
     for spellings in collisions.values():
-        print(f"  {' <> '.join(spellings)}")
+        print(f"  {' <> '.join(spellings)}", file=sys.stderr)
     return 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--git-ls-files",
+        action="store_true",
+        help="read tracked paths directly from git instead of standard input",
+    )
+    args = parser.parse_args()
+    raise SystemExit(main(from_git=args.git_ls_files))

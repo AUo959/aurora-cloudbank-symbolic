@@ -67,10 +67,10 @@ def test_absent_remote_fields_are_not_treated_as_mismatch():
     assert findings == []
 
 
-def test_missing_api_key_skips_rather_than_passing_falsely(monkeypatch, capsys):
-    """A missing secret must be visibly SKIPPED, never a silent green."""
+def test_missing_api_key_fails_closed(monkeypatch, capsys):
+    """A live validator that cannot run must not produce a green check."""
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    assert main() == 0
-    out = capsys.readouterr().out
-    assert "SKIPPED" in out
-    assert "not a pass" in out
+    assert main() == 2
+    err = capsys.readouterr().err
+    assert "ERROR" in err
+    assert "could not be checked" in err

@@ -6,7 +6,7 @@
 every Anthropic call 404'd and quietly fell back to GPT-4o. A single
 `client.models.retrieve(...)` would have caught it the day it was written.
 
-This script performs that check for every selectable Anthropic entry in
+This script performs that check for every provider-available Anthropic entry in
 ``UnifiedAIInterface.CAPABILITIES``:
 
 * the identifier resolves (a 404 fails, distinguishing retired from typo);
@@ -22,13 +22,14 @@ What this CANNOT check, and must not be claimed to:
   returns no context window, so OpenAI entries are existence-only.
 * **Bedrock / Vertex / Foundry.** No Models API; not routed through today.
 
-Requires ANTHROPIC_API_KEY. The Models endpoint bills no tokens. Without the
-key the script exits 0 with a SKIPPED notice rather than a false pass — a
-missing secret must not read as a green catalog.
+Requires ANTHROPIC_API_KEY. The Models endpoint bills no tokens. A missing key
+or validator dependency fails closed: a check that did not run must not read as
+a green catalog.
 
 Exit codes:
-    0 - all checked entries agree with the provider catalog (or skipped)
+    0 - all checked entries agree with the provider catalog
     1 - a mismatch or unresolvable identifier was found
+    2 - validation could not run because its key or dependency is missing
 """
 
 from __future__ import annotations
@@ -106,7 +107,7 @@ def compare_entry(
 
 
 def anthropic_entries() -> List[Any]:
-    """Selectable Anthropic entries — the ones live traffic can reach."""
+    """Anthropic entries that claim to exist in the provider catalog."""
     return [
         cap
         for cap in UnifiedAIInterface.CAPABILITIES.values()
@@ -131,17 +132,21 @@ def fetch_remote(client: Any, model_id: str) -> Optional[Dict[str, Any]]:
 def main() -> int:
     if not os.environ.get("ANTHROPIC_API_KEY"):
         print(
-            "SKIPPED: ANTHROPIC_API_KEY is not set, so the catalog was not "
-            "checked against the provider. This is not a pass — wire the "
-            "secret to make this check meaningful (#1329)."
+            "ERROR: ANTHROPIC_API_KEY is not set, so the catalog could not be "
+            "checked against the provider (#1329).",
+            file=sys.stderr,
         )
-        return 0
+        return 2
 
     try:
         from anthropic import Anthropic
     except ImportError:
-        print("SKIPPED: the anthropic package is not installed.")
-        return 0
+        print(
+            "ERROR: the anthropic package is not installed; live catalog "
+            "validation could not run.",
+            file=sys.stderr,
+        )
+        return 2
 
     client = Anthropic()
     entries = anthropic_entries()

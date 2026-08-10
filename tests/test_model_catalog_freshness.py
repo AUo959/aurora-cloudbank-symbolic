@@ -38,6 +38,11 @@ CATALOG = UnifiedAIInterface.CAPABILITIES
 
 
 def selectable_entries():
+    return [(model, cap) for model, cap in CATALOG.items() if cap.routable]
+
+
+def available_entries():
+    """Entries that claim provider existence, independent of routing policy."""
     return [(model, cap) for model, cap in CATALOG.items() if cap.available]
 
 
@@ -59,29 +64,43 @@ def test_selectable_models_carry_a_dated_claim():
     """A model we will actually route to must say when it was last checked."""
     for model, cap in selectable_entries():
         assert cap.verified_on, (
-            f"{model.name} is selectable (available=True) but carries no "
+            f"{model.name} is routable (available=True, enabled=True) but carries no "
             f"verified_on date. An unverifiable claim is what #1329 removed."
         )
         datetime.strptime(cap.verified_on, "%Y-%m-%d")  # raises if malformed
 
 
-def test_selectable_models_are_not_marked_unverified():
-    """available=True and verified_source='unverified' is a contradiction."""
-    for model, cap in selectable_entries():
+def test_available_models_are_not_marked_unverified():
+    """Provider availability and an unverified source are contradictory."""
+    for model, cap in available_entries():
         assert cap.verified_source != "unverified", (
             f"{model.name} is selectable but its source is 'unverified'. "
             f"Either verify it against the provider catalog or set available=False."
         )
 
 
-def test_unverified_models_are_not_selectable():
+def test_unverified_models_are_unavailable_and_disabled():
     """The gate that kept the fabricated ID inert must stay closed."""
     for model, cap in CATALOG.items():
         if cap.verified_source == "unverified" or not cap.verified_on:
             assert not cap.available, (
-                f"{model.name} has no verification claim but is selectable. "
+                f"{model.name} has no verification claim but claims provider availability. "
                 f"This is exactly the state that routed live traffic to a "
                 f"retired model in #1329."
+            )
+            assert not cap.enabled, (
+                f"{model.name} has no verification claim but routing is enabled."
+            )
+
+
+def test_enabled_models_are_provider_available_and_verified():
+    """Routing policy cannot override provider existence or verification."""
+    for model, cap in CATALOG.items():
+        if cap.enabled:
+            assert cap.available, f"{model.name} is enabled but provider-unavailable"
+            assert cap.verified_on, f"{model.name} is enabled without a verification date"
+            assert cap.verified_source != "unverified", (
+                f"{model.name} is enabled with an unverified source"
             )
 
 
@@ -96,7 +115,7 @@ def test_verification_claims_are_not_stale():
     """
     today = date.today()
     stale = []
-    for model, cap in selectable_entries():
+    for model, cap in available_entries():
         age = (today - datetime.strptime(cap.verified_on, "%Y-%m-%d").date()).days
         if age > MAX_CLAIM_AGE_DAYS:
             stale.append(f"{model.name} ({cap.model.value}): {age} days old")

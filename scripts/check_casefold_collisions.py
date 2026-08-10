@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import sys
 from pathlib import PurePosixPath
 
@@ -31,9 +32,8 @@ def find_casefold_collisions(paths: list[str]) -> dict[str, list[str]]:
 
 def git_tracked_paths() -> bytes:
     """Return NUL-delimited tracked paths from Git's index without a subprocess."""
-    from git import Repo
-
-    repo = Repo(".", search_parent_directories=True)
+    git_module = importlib.import_module("git")
+    repo = git_module.Repo(".", search_parent_directories=True)
     tracked = sorted(path for path, stage in repo.index.entries if stage == 0)
     return b"\0".join(path.encode("utf-8") for path in tracked) + b"\0"
 

@@ -9,13 +9,19 @@ import {
 } from '../../src/core/command_node/encryption.js';
 
 const originalEncryptionKey = process.env.AES_KEY_256_HEX;
-process.env.AES_KEY_256_HEX = randomBytes(32).toString('hex');
+const replacedEncryptionKey = !/^[0-9a-f]{64}$/i.test(originalEncryptionKey ?? '');
+
+if (replacedEncryptionKey) {
+  process.env.AES_KEY_256_HEX = randomBytes(32).toString('hex');
+}
 
 after(() => {
-  if (originalEncryptionKey === undefined) {
-    delete process.env.AES_KEY_256_HEX;
-  } else {
-    process.env.AES_KEY_256_HEX = originalEncryptionKey;
+  if (replacedEncryptionKey) {
+    if (originalEncryptionKey === undefined) {
+      delete process.env.AES_KEY_256_HEX;
+    } else {
+      process.env.AES_KEY_256_HEX = originalEncryptionKey;
+    }
   }
 });
 

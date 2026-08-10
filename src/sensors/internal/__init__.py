@@ -2,12 +2,14 @@
 
 from src.sensors.internal.biometrics import BiometricsSensor
 from src.sensors.internal.environmental import EnvironmentalSensor
+from src.sensors.internal.l1_runtime import L1RuntimeSensor
 from src.sensors.internal.operational import OperationalSensor
 from src.sensors.internal.structural import StructuralSensor
 
 __all__ = [
     "BiometricsSensor",
     "EnvironmentalSensor",
+    "L1RuntimeSensor",
     "OperationalSensor",
     "StructuralSensor",
 ]

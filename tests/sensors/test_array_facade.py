@@ -10,8 +10,8 @@ def _array(**kw):
 def test_facade_registers_all_sensor_categories():
     a = _array()
     status = a.health_status()
-    assert status["sensors_registered"] == 17
-    assert status["sensors_enabled"] == 17
+    assert status["sensors_registered"] == 18
+    assert status["sensors_enabled"] == 18
 
 
 def test_category_reads_publish_to_bus():
@@ -19,6 +19,21 @@ def test_category_reads_publish_to_bus():
     r = a.read_category("internal", "environmental")
     assert r is not None and r.alerts == []
     assert len(a.bus) == 1
+
+
+def test_provider_readings_disclose_bound_and_defaulted_metrics():
+    unbound = _array().read_category("internal", "l1_runtime")
+    bound = _array(
+        providers={"l1_runtime": lambda: {"tick": 3, "event_count": 2}}
+    ).read_category("internal", "l1_runtime")
+
+    assert unbound is not None
+    assert unbound.metadata["provider_bound"] is False
+    assert set(unbound.metadata["defaulted_metrics"]) == set(unbound.values)
+    assert bound is not None
+    assert bound.metadata["provider_bound"] is True
+    assert bound.metadata["reported_metrics"] == ["event_count", "tick"]
+    assert "tick" not in bound.metadata["defaulted_metrics"]
 
 
 def test_provider_alert_flows_to_certification():

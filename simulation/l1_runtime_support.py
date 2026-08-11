@@ -616,6 +616,7 @@ def export_run_state(state: Any) -> Dict[str, Any]:
         },
         "world_state": state.world_state,
         "fleet": asdict(state.fleet),
+        "staffing": asdict(state.staffing),
         "character_knowledge": {
             key: [asdict(record) for record in records]
             for key, records in state.character_knowledge.items()

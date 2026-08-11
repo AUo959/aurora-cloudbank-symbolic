@@ -224,6 +224,53 @@ The `PopulationSnapshot` type also permits a future evidence-supported state in
 which, for example, human complement is 81 while identified/persona-resolved
 subsets are smaller.
 
+### Need-driven staffing and progressive personnel resolution
+
+The run-scoped `StaffingRunState` is distinct from both the static bootstrap
+population snapshot and the legacy HR character generator. Staffing demand is
+accepted only as typed institutional evidence: workload over capacity,
+sustained overtime, uncovered shifts, program expansion, a new technical
+capability requirement, attrition/leave, safety or ethics constraints,
+separation-of-duties requirements, or succession and coverage risk. A demand
+with none of those signals produces `no_action`.
+
+Planning is deterministic and uses existing capacity before creating a new
+person. An eligible internal reassignment is preferred, then an acting
+promotion, then a transfer to Orion, and only then an external hire or
+contractor/visitor assignment. Applying the plan requires a complete Triplex
+receipt and records the demand provenance, rationale, before/after operational
+state, receipt identity, and run tick. The target role/seat is created as an
+explicit run-scoped seat record when first needed. An outbound transfer keeps
+the personnel identity and prior observations but marks the assignment
+departed; a now-vacant seat may then be retired under a separate provenance-rich
+Triplex action. Occupied seats cannot be retired, and a retired seat cannot be
+silently reused.
+
+A newly instantiated person begins as a minimal operational record containing
+only a run-derived personnel ID, employment/assignment status, department,
+role/seat, clearance envelope, shift/workload state, capabilities needed for
+the assignment, and arrival provenance. The runtime does not invent a name,
+biography, appearance, personality, family, hobbies, intimate history, or
+narrative arc merely because the institution needs a worker.
+
+Progressive resolution accepts only provenance-linked observations in a small
+operational allowlist (demonstrated skill, collaboration pattern,
+communication style, and operational preference). Observation first produces
+`partially_observed`; a separate Triplex-reviewed action may later mark a
+persona `persona_resolved_run_state`. That state remains run-local and is not
+canon promotion. A persistently important person may only be nominated through
+the normal candidate-promotion workflow, followed by independent canon review,
+identity-conflict checks, and owner authorization.
+
+The staffing projection keeps `human_complement_delta`,
+`persona_resolved_delta`, and active/retired seat counts independent. Hiring or
+transferring a human to Orion increments the complement delta; transferring a
+human from Orion decrements it without erasing the personnel record.
+Contractors do not inflate the human complement, and observation alone does not
+count as a resolved persona. Persisted staffing actions fail closed unless
+their complete Triplex receipt, matching audit event, and projected counters
+remain present and coherent.
+
 ## Fleet state and observation providers
 
 `L1RunState.fleet` carries typed state for each projected asset:

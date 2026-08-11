@@ -20,7 +20,8 @@ EXPECTED_CANONICAL_SHA256 = "d2b5b2c564c969d5bc177d6ebb81f50946f2b6c01f9e7f202b5
 
 def _load_validator_module():
     spec = importlib.util.spec_from_file_location("validate_beacon", VALIDATOR_PATH)
-    assert spec is not None and spec.loader is not None
+    assert spec is not None
+    assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -106,6 +107,17 @@ def test_strict_loader_rejects_oversized_integer_without_traceback(tmp_path: Pat
 
     with pytest.raises(validator_module.BeaconValidationError, match="safe canonical range"):
         validator_module.load_json(candidate)
+
+
+@pytest.mark.unit
+def test_loader_confines_cli_paths_to_allowed_root(tmp_path: Path, validator_module) -> None:
+    allowed_root = tmp_path / "allowed"
+    allowed_root.mkdir()
+    outside = tmp_path / "outside.json"
+    outside.write_text("{}", encoding="utf-8")
+
+    with pytest.raises(validator_module.BeaconValidationError, match="outside the allowed root"):
+        validator_module.load_json(outside, allowed_root=allowed_root)
 
 
 @pytest.mark.unit
@@ -464,4 +476,5 @@ def test_error_messages_do_not_echo_oversized_values(validator_module, schema: d
 
     message = str(excinfo.value)
     assert len(message) < 500, f"error message is {len(message)} chars; it should be truncated"
-    assert "100" in message and "chars total" in message
+    assert "100" in message
+    assert "chars total" in message

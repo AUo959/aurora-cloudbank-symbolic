@@ -10,7 +10,7 @@ The Universal Thread Beacon is a neutral entry-point view over an existing conti
 ## Ownership map
 
 | Beacon surface | Authoritative owner |
-|---|---|
+| --- | --- |
 | Continuity object identity and relationships | #1368 |
 | Deliverable bytes, inventory, integrity, checkpoints, restore staging, reconciliation, rollback | #1374 |
 | Legacy package inventory and migration custody | #1375 |

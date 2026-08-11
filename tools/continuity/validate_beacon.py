@@ -113,6 +113,11 @@ def _validate_strict_formats(payload: dict[str, Any]) -> None:
 
     See PATTERNED_FIELDS / FORMATTED_FIELDS for why each is needed.
     """
+    _validate_patterned_fields(payload)
+    _validate_formatted_fields(payload)
+
+
+def _validate_patterned_fields(payload: dict[str, Any]) -> None:
     for path, pattern in PATTERNED_FIELDS:
         value = _resolve(payload, path)
         if value is None or not isinstance(value, str):
@@ -123,22 +128,32 @@ def _validate_strict_formats(payload: dict[str, Any]) -> None:
                 f"under strict full-string matching"
             )
 
+
+
+def _validate_formatted_fields(payload: dict[str, Any]) -> None:
     for path, fmt in FORMATTED_FIELDS:
         value = _resolve(payload, path)
         if value is None or not isinstance(value, str):
             continue
         if fmt != "date-time":
-            raise BeaconValidationError(f"Reader cannot enforce format {fmt!r} at {'.'.join(path)}")
-        if _RFC3339_RE.fullmatch(value) is None:
             raise BeaconValidationError(
-                f"Invalid {'.'.join(path)}: {_echo(value)} is not an RFC 3339 date-time"
+                f"Reader cannot enforce format {fmt!r} at {'.'.join(path)}"
             )
-        try:
-            datetime.fromisoformat(value.replace("Z", "+00:00").replace("z", "+00:00"))
-        except ValueError as exc:
-            raise BeaconValidationError(
-                f"Invalid {'.'.join(path)}: {_echo(value)} is not a real date-time ({exc})"
-            ) from exc
+        _validate_date_time(value, path)
+
+
+def _validate_date_time(value: str, path: tuple[str, ...]) -> None:
+    location = ".".join(path)
+    if _RFC3339_RE.fullmatch(value) is None:
+        raise BeaconValidationError(
+            f"Invalid {location}: {_echo(value)} is not an RFC 3339 date-time"
+        )
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00").replace("z", "+00:00"))
+    except ValueError as exc:
+        raise BeaconValidationError(
+            f"Invalid {location}: {_echo(value)} is not a real date-time ({exc})"
+        ) from exc
 
 
 def _reject_nonfinite(value: str) -> None:
@@ -173,22 +188,44 @@ def _object_without_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
-def load_json(path: Path) -> dict[str, Any]:
-    """Load one strict UTF-8 JSON object from disk."""
+def _resolved_file(path: Path, allowed_root: Path | None) -> Path:
+    """Resolve a regular file and optionally confine it to an explicit root."""
     try:
-        size = path.stat().st_size
+        resolved = path.resolve(strict=True)
     except OSError as exc:
-        raise BeaconValidationError(f"Unable to stat {path}: {exc}") from exc
+        raise BeaconValidationError(f"Unable to resolve {path}: {exc}") from exc
+    if allowed_root is not None:
+        try:
+            root = allowed_root.resolve(strict=True)
+            resolved.relative_to(root)
+        except (OSError, ValueError) as exc:
+            raise BeaconValidationError(
+                f"Input path {path} is outside the allowed root {allowed_root}"
+            ) from exc
+    if not resolved.is_file():
+        raise BeaconValidationError(f"Input path is not a regular file: {resolved}")
+    return resolved
+
+
+def load_json(path: Path, *, allowed_root: Path | None = None) -> dict[str, Any]:
+    """Load one strict UTF-8 JSON object from disk."""
+    safe_path = _resolved_file(path, allowed_root)
+    try:
+        size = safe_path.stat().st_size
+    except OSError as exc:
+        raise BeaconValidationError(f"Unable to stat {safe_path}: {exc}") from exc
     if size > MAX_BEACON_BYTES:
         raise BeaconValidationError(
-            f"Refusing to read {path}: {size} bytes exceeds the {MAX_BEACON_BYTES}-byte "
+            f"Refusing to read {safe_path}: {size} bytes exceeds the {MAX_BEACON_BYTES}-byte "
             f"limit for a minimum-profile beacon"
         )
 
     try:
-        text = path.read_text(encoding="utf-8")
+        text = safe_path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
-        raise BeaconValidationError(f"Unable to read UTF-8 JSON from {path}: {exc}") from exc
+        raise BeaconValidationError(
+            f"Unable to read UTF-8 JSON from {safe_path}: {exc}"
+        ) from exc
 
     try:
         payload = json.loads(
@@ -204,12 +241,16 @@ def load_json(path: Path) -> dict[str, Any]:
         # RecursionError is not a ValueError, so deeply nested input would
         # otherwise escape this handler and reach the caller as a raw traceback
         # instead of a controlled INVALID result.
-        raise BeaconValidationError(f"Unable to parse JSON from {path}: input nested too deeply") from exc
-    except (json.JSONDecodeError, ValueError) as exc:
-        raise BeaconValidationError(f"Unable to parse JSON from {path}: {exc}") from exc
+        raise BeaconValidationError(
+            f"Unable to parse JSON from {safe_path}: input nested too deeply"
+        ) from exc
+    except ValueError as exc:
+        raise BeaconValidationError(
+            f"Unable to parse JSON from {safe_path}: {exc}"
+        ) from exc
 
     if not isinstance(payload, dict):
-        raise BeaconValidationError(f"Expected a JSON object in {path}")
+        raise BeaconValidationError(f"Expected a JSON object in {safe_path}")
     return payload
 
 
@@ -218,21 +259,21 @@ def semantic_version_tuple(version: str, field_name: str) -> tuple[int, int, int
     if not isinstance(version, str):
         raise BeaconValidationError(f"Invalid {field_name}: {_echo(version)}")
     parts = version.split(".")
-    # str.isdigit() is true for non-ASCII decimal digits that int() also
-    # accepts, so "١.٠.٠" would otherwise parse as (1, 0, 0). This runs on
-    # specification.schema_version before any schema validation, so the ASCII
-    # restriction has to be explicit here.
+    if len(parts) != 3:
+        raise BeaconValidationError(f"Invalid {field_name}: {_echo(version)}")
+    parsed = tuple(_semantic_version_component(part, version, field_name) for part in parts)
+    return parsed  # type: ignore[return-value]
+
+
+def _semantic_version_component(part: str, version: str, field_name: str) -> int:
+    # str.isdigit() accepts non-ASCII decimal digits, so ASCII is explicit.
     if (
-        len(parts) != 3
-        or any(not (part.isascii() and part.isdigit()) for part in parts)
-        or any(len(part) > SEMVER_COMPONENT_MAX_DIGITS for part in parts)
+        not part.isascii()
+        or not part.isdigit()
+        or len(part) > SEMVER_COMPONENT_MAX_DIGITS
     ):
         raise BeaconValidationError(f"Invalid {field_name}: {_echo(version)}")
-    try:
-        parsed = tuple(int(part) for part in parts)
-    except ValueError as exc:
-        raise BeaconValidationError(f"Invalid {field_name}: {_echo(version)}") from exc
-    return parsed  # type: ignore[return-value]
+    return int(part)
 
 
 def _validate_schema_contents(schema: dict[str, Any], payload_version: str) -> None:
@@ -262,12 +303,24 @@ def _validate_schema_contents(schema: dict[str, Any], payload_version: str) -> N
 
 def _validate_canonical_subset(value: Any, path: str = "$") -> None:
     """Enforce the value domain used by the UTB canonical byte encoding."""
-    if value is None or isinstance(value, bool):
+    if _validate_canonical_scalar(value, path):
         return
+    if isinstance(value, list):
+        _validate_canonical_sequence(value, path)
+        return
+    if isinstance(value, dict):
+        _validate_canonical_mapping(value, path)
+        return
+    raise BeaconValidationError(f"Unsupported JSON value at {path}: {type(value).__name__}")
+
+
+def _validate_canonical_scalar(value: Any, path: str) -> bool:
+    if value is None or isinstance(value, bool):
+        return True
     if isinstance(value, int):
         if abs(value) > MAX_SAFE_INTEGER:
             raise BeaconValidationError(f"Integer outside canonical range at {path}: {value}")
-        return
+        return True
     if isinstance(value, float):
         raise BeaconValidationError(f"Floating-point value is not allowed at {path}")
     if isinstance(value, str):
@@ -275,20 +328,30 @@ def _validate_canonical_subset(value: Any, path: str = "$") -> None:
             value.encode("utf-8", errors="strict")
         except UnicodeError as exc:
             raise BeaconValidationError(f"Invalid Unicode scalar value at {path}: {exc}") from exc
-        return
-    if isinstance(value, list):
-        for index, item in enumerate(value):
-            _validate_canonical_subset(item, f"{path}[{index}]")
-        return
-    if isinstance(value, dict):
-        for key, item in value.items():
-            if not isinstance(key, str):
-                raise BeaconValidationError(f"Non-string object key at {path}: {key!r}")
-            if not key.isascii() or any(ord(character) < 0x20 or ord(character) > 0x7E for character in key):
-                raise BeaconValidationError(f"Object key is outside printable ASCII at {path}: {key!r}")
-            _validate_canonical_subset(item, f"{path}.{key}")
-        return
-    raise BeaconValidationError(f"Unsupported JSON value at {path}: {type(value).__name__}")
+        return True
+    return False
+
+
+def _validate_canonical_sequence(value: list[Any], path: str) -> None:
+    for index, item in enumerate(value):
+        _validate_canonical_subset(item, f"{path}[{index}]")
+
+
+def _validate_canonical_mapping(value: dict[Any, Any], path: str) -> None:
+    for key, item in value.items():
+        _validate_object_key(key, path)
+        _validate_canonical_subset(item, f"{path}.{key}")
+
+
+def _validate_object_key(key: Any, path: str) -> None:
+    if not isinstance(key, str):
+        raise BeaconValidationError(f"Non-string object key at {path}: {key!r}")
+    if not key.isascii() or any(
+        ord(character) < 0x20 or ord(character) > 0x7E for character in key
+    ):
+        raise BeaconValidationError(
+            f"Object key is outside printable ASCII at {path}: {key!r}"
+        )
 
 
 _SHORT_ESCAPES = {
@@ -300,6 +363,7 @@ _SHORT_ESCAPES = {
     "\f": "\\f",
     "\r": "\\r",
 }
+_UNHANDLED = object()
 
 
 def _canonical_string(value: str) -> str:
@@ -323,39 +387,55 @@ def _canonical_string(value: str) -> str:
 
 
 def _canonical_serialize(value: Any, path: str = "$") -> str:
+    scalar = _canonical_serialize_scalar(value, path)
+    if scalar is not _UNHANDLED:
+        return scalar
+    if isinstance(value, list):
+        return _canonical_serialize_sequence(value, path)
+    if isinstance(value, dict):
+        return _canonical_serialize_mapping(value, path)
+    raise BeaconValidationError(f"Unsupported JSON value at {path}: {type(value).__name__}")
+
+
+def _canonical_serialize_scalar(value: Any, path: str) -> Any:
     if value is None:
         return "null"
     if value is True:
         return "true"
     if value is False:
         return "false"
-    if isinstance(value, int) and not isinstance(value, bool):
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return _canonical_serialize_number(value, path)
+    if isinstance(value, str):
+        return _canonical_string(value)
+    return _UNHANDLED
+
+
+def _canonical_serialize_number(value: int | float, path: str) -> str:
+    if isinstance(value, int):
         if abs(value) > MAX_SAFE_INTEGER:
             raise BeaconValidationError(f"Integer outside canonical range at {path}: {value}")
         return str(value)
-    if isinstance(value, float):
-        raise BeaconValidationError(f"Floating-point value is not allowed at {path}")
-    if isinstance(value, str):
-        return _canonical_string(value)
-    if isinstance(value, list):
-        return "[" + ",".join(
-            _canonical_serialize(item, f"{path}[{index}]")
-            for index, item in enumerate(value)
-        ) + "]"
-    if isinstance(value, dict):
-        items: list[str] = []
-        for key in sorted(value):
-            if not isinstance(key, str):
-                raise BeaconValidationError(f"Non-string object key at {path}: {key!r}")
-            if not key.isascii() or any(ord(character) < 0x20 or ord(character) > 0x7E for character in key):
-                raise BeaconValidationError(f"Object key is outside printable ASCII at {path}: {key!r}")
-            items.append(
-                _canonical_string(key)
-                + ":"
-                + _canonical_serialize(value[key], f"{path}.{key}")
-            )
-        return "{" + ",".join(items) + "}"
-    raise BeaconValidationError(f"Unsupported JSON value at {path}: {type(value).__name__}")
+    raise BeaconValidationError(f"Floating-point value is not allowed at {path}")
+
+
+def _canonical_serialize_sequence(value: list[Any], path: str) -> str:
+    return "[" + ",".join(
+        _canonical_serialize(item, f"{path}[{index}]")
+        for index, item in enumerate(value)
+    ) + "]"
+
+
+def _canonical_serialize_mapping(value: dict[Any, Any], path: str) -> str:
+    items: list[str] = []
+    for key in sorted(value):
+        _validate_object_key(key, path)
+        items.append(
+            _canonical_string(key)
+            + ":"
+            + _canonical_serialize(value[key], f"{path}.{key}")
+        )
+    return "{" + ",".join(items) + "}"
 
 
 def canonical_json(payload: dict[str, Any]) -> str:
@@ -378,6 +458,16 @@ def canonical_sha256(payload: dict[str, Any]) -> str:
 
 def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
     """Validate one beacon and return it unchanged."""
+    version = _validate_specification(payload)
+    _validate_schema_contents(schema, version)
+    _validate_against_schema(payload, schema)
+    _validate_strict_formats(payload)
+    _validate_compatibility(payload)
+    _validate_canonical_subset(payload)
+    return payload
+
+
+def _validate_specification(payload: dict[str, Any]) -> str:
     specification = payload.get("specification")
     if not isinstance(specification, dict):
         raise BeaconValidationError("Missing specification object")
@@ -391,8 +481,13 @@ def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str
             f"Unsupported UTB schema version {_echo(version)}; supported version is {SUPPORTED_SCHEMA_VERSION}"
         )
 
-    _validate_schema_contents(schema, version)
+    return version
 
+
+def _validate_against_schema(
+    payload: dict[str, Any],
+    schema: dict[str, Any],
+) -> None:
     try:
         jsonschema.Draft202012Validator.check_schema(schema)
         validator = jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
@@ -404,12 +499,8 @@ def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str
         location = ".".join(str(part) for part in exc.absolute_path) or "<root>"
         raise BeaconValidationError(f"Schema validation failed at {location}: {exc.message}") from exc
 
-    # jsonschema has now passed, which is necessary but not sufficient: its
-    # `pattern` handling is Python-regex-lenient about a trailing newline, and
-    # its `format` handling is a no-op without rfc3339-validator. See
-    # PATTERNED_FIELDS / FORMATTED_FIELDS.
-    _validate_strict_formats(payload)
 
+def _validate_compatibility(payload: dict[str, Any]) -> None:
     compatibility = payload["compatibility"]
     minimum_reader_version = compatibility["minimum_reader_version"]
     if semantic_version_tuple(minimum_reader_version, "minimum reader version") > semantic_version_tuple(
@@ -423,14 +514,6 @@ def validate_beacon(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str
             f"Unsupported canonicalization {_echo(compatibility['canonicalization'])}; expected {CANONICALIZATION!r}"
         )
 
-    # Assert the canonical value domain without serialising. This used to call
-    # canonical_json() and discard the string, which meant main() built the same
-    # canonical text twice -- the most expensive step in the reader, done once
-    # for its side effect and once for its value.
-    _validate_canonical_subset(payload)
-    return payload
-
-
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Validate a Universal Thread Beacon profile offline")
     parser.add_argument("beacon", type=Path, help="Path to the beacon JSON file")
@@ -442,7 +525,7 @@ def main() -> int:
     args = build_parser().parse_args()
     try:
         schema = load_json(DEFAULT_SCHEMA_PATH)
-        beacon = load_json(args.beacon)
+        beacon = load_json(args.beacon, allowed_root=Path.cwd())
         validated = validate_beacon(beacon, schema)
         canonical = canonical_json(validated)
         digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()

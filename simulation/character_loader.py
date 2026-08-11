@@ -24,6 +24,10 @@ from typing import Dict, List, Optional, Set
 import re
 import logging
 
+from character_identity import (
+    CharacterIdentityRegistry,
+)
+
 
 @dataclass
 class CharacterProfile:
@@ -59,15 +63,27 @@ class CharacterProfile:
     # Metadata
     alignment: Optional[str] = None
     version_added: str = "1.0"
+    stable_entity_key: Optional[str] = None
+    source_character_id: Optional[str] = None
+    historical_identifiers: List[str] = field(default_factory=list)
+    identity_confidence: Optional[str] = None
 
 
 class CharacterLoader:
     """Loads and manages L1 Canon characters for simulation"""
     
-    def __init__(self, roster_path: Optional[Path] = None, logger: Optional[logging.Logger] = None):
+    def __init__(
+        self,
+        roster_path: Optional[Path] = None,
+        logger: Optional[logging.Logger] = None,
+        identity_registry_path: Optional[Path] = None,
+    ):
         self.logger = logger or logging.getLogger(__name__)
         self.roster_path = roster_path or Path(__file__).parent / "L1_CANON_CHARACTER_ROSTER.md"
+        self.identity_registry = CharacterIdentityRegistry(identity_registry_path)
         self.characters: Dict[str, CharacterProfile] = {}
+        self._loaded_profiles: List[CharacterProfile] = []
+        self._reference_index: Dict[str, CharacterProfile] = {}
         self.version: str = "unknown"
         self._load_roster()
     
@@ -97,7 +113,9 @@ class CharacterLoader:
             try:
                 char = self._parse_character_section(name, section)
                 if char:
+                    self._loaded_profiles.append(char)
                     self.characters[char.name] = char
+                    self._index_character(char)
                     self.logger.debug(f"Loaded character: {char.name} ({char.character_id})")
             except Exception as e:
                 self.logger.error(f"Failed to parse character {name}: {e}")
@@ -129,7 +147,13 @@ class CharacterLoader:
         
         # Extract identifiers
         clearance = extract_field(r"\*\*Clearance:\*\*\s*(.+?)$", re.MULTILINE) or "L2_STANDARD"
-        character_id = extract_field(r"\*\*ID:\*\*\s*(.+?)$", re.MULTILINE) or "UNKNOWN"
+        source_character_id = extract_field(r"\*\*ID:\*\*\s*(.+?)$", re.MULTILINE) or "UNKNOWN"
+        identity = self.identity_registry.resolve(source_character_id)
+        if identity is None:
+            identity = self.identity_registry.resolve(name)
+        character_id = (
+            identity.current_identifier if identity is not None else source_character_id
+        )
         default_contact = f"{name.lower().replace(' ', '.')}@orion.station"
         contact = extract_field(r"\*\*Contact:\*\*\s*(.+?)$", re.MULTILINE) or default_contact
         symbolic_tag = extract_field(r"\*\*Symbolic Tag:\*\*\s*`(.+?)`", re.MULTILINE) or "s.tag::unknown"
@@ -173,8 +197,28 @@ class CharacterLoader:
             phase1_role=phase1_role,
             phase1_responsibilities=phase1_responsibilities,
             alignment=alignment,
-            version_added=self.version
+            version_added=self.version,
+            stable_entity_key=(identity.entity_key if identity is not None else None),
+            source_character_id=source_character_id,
+            historical_identifiers=(
+                list(identity.historical_identifiers) if identity is not None else []
+            ),
+            identity_confidence=(
+                identity.identity_confidence if identity is not None else None
+            ),
         )
+
+    def _index_character(self, character: CharacterProfile) -> None:
+        references = {
+            character.name,
+            character.character_id,
+            character.source_character_id,
+            character.stable_entity_key,
+            *character.historical_identifiers,
+        }
+        for reference in references:
+            if reference:
+                self._reference_index[self._normalize_reference(reference)] = character
     
     def _extract_float(self, text: str, pattern: str, default: float) -> float:
         """Extract float value from text using regex pattern"""
@@ -186,9 +230,22 @@ class CharacterLoader:
                 pass
         return default
     
-    def get_character(self, name: str) -> Optional[CharacterProfile]:
-        """Get character profile by name"""
-        return self.characters.get(name)
+    def get_character(self, reference: str) -> Optional[CharacterProfile]:
+        """Get one person by name, stable key, current ID, or historical ID."""
+        normalized = self._normalize_reference(reference)
+        profile = self._reference_index.get(normalized)
+        if profile is not None:
+            return profile
+        identity = self.identity_registry.resolve(reference)
+        if identity is None:
+            return None
+        return self._reference_index.get(
+            self._normalize_reference(identity.entity_key)
+        )
+
+    @staticmethod
+    def _normalize_reference(reference: str) -> str:
+        return " ".join(reference.strip().casefold().split())
     
     def get_all_characters(self) -> List[CharacterProfile]:
         """Get all loaded characters"""
@@ -252,29 +309,45 @@ class CharacterLoader:
     
     def validate_roster(self) -> List[str]:
         """Validate roster data integrity and return list of issues"""
-        issues = []
-        
-        # Check for duplicate IDs
-        ids = [c.character_id for c in self.characters.values()]
+        issues = self._duplicate_identity_issues()
+        for character in self._loaded_profiles:
+            issues.extend(self._character_stat_issues(character))
+        return issues
+
+    def _duplicate_identity_issues(self) -> List[str]:
+        issues: List[str] = []
+        ids = [c.character_id for c in self._loaded_profiles]
         if len(ids) != len(set(ids)):
             issues.append("Duplicate character IDs detected")
-        
-        # Check for duplicate symbolic tags
-        tags = [c.symbolic_tag for c in self.characters.values()]
+        entity_keys = [
+            character.stable_entity_key
+            for character in self._loaded_profiles
+            if character.stable_entity_key is not None
+        ]
+        if len(entity_keys) != len(set(entity_keys)):
+            issues.append(
+                "Duplicate person detected through historical/current ID migration"
+            )
+        tags = [c.symbolic_tag for c in self._loaded_profiles]
         if len(tags) != len(set(tags)):
             issues.append("Duplicate symbolic tags detected")
-        
-        # Validate stats
-        for char in self.characters.values():
-            if char.base_speed < 0.0 or char.base_speed > 2.0:
-                issues.append(f"{char.name}: base_speed out of range (0.0-2.0)")
-            
-            if char.specialization_multiplier < 1.0 or char.specialization_multiplier > 2.0:
-                issues.append(f"{char.name}: specialization_multiplier out of range (1.0-2.0)")
-            
-            if char.collaboration_bonus < 0.0 or char.collaboration_bonus > 0.50:
-                issues.append(f"{char.name}: collaboration_bonus out of range (0.0-0.50)")
-        
+        return issues
+
+    @staticmethod
+    def _character_stat_issues(character: CharacterProfile) -> List[str]:
+        issues = []
+        if not 0.0 <= character.base_speed <= 2.0:
+            issues.append(
+                f"{character.name}: base_speed out of range (0.0-2.0)"
+            )
+        if not 1.0 <= character.specialization_multiplier <= 2.0:
+            issues.append(
+                f"{character.name}: specialization_multiplier out of range (1.0-2.0)"
+            )
+        if not 0.0 <= character.collaboration_bonus <= 0.50:
+            issues.append(
+                f"{character.name}: collaboration_bonus out of range (0.0-0.50)"
+            )
         return issues
 
 
@@ -293,7 +366,7 @@ def demo_load():
     print("\n--- Summary ---")
     print(f"Total characters: {summary['total_characters']}")
     print(f"Phase 1 ready: {summary['phase1_ready']}")
-    print(f"\nBy Division:")
+    print("\nBy Division:")
     for div, count in summary['by_division'].items():
         print(f"  {div}: {count}")
     
@@ -305,7 +378,7 @@ def demo_load():
         for issue in issues:
             print(f"  ⚠️  {issue}")
     else:
-        logger.info("All validation checks passed")
+        loader.logger.info("All validation checks passed")
     
     # Show character examples
     print("\n--- Character Examples ---")
@@ -322,14 +395,14 @@ def demo_load():
     print("\n--- Tobias Qin Check ---")
     tobias = loader.get_character("Tobias Qin")
     if tobias:
-        logger.info("Tobias Qin loaded successfully")
+        loader.logger.info("Tobias Qin loaded successfully")
         print(f"  ID: {tobias.character_id}")
         print(f"  Role: {tobias.role}")
         print(f"  Primary Systems: {', '.join(tobias.primary_systems[:2])}")
         print(f"  Base Speed: {tobias.base_speed}")
         print(f"  Specialization: {tobias.specialization_multiplier}x")
     else:
-        logger.error("Tobias Qin not found in roster")
+        loader.logger.error("Tobias Qin not found in roster")
 
 
 if __name__ == "__main__":

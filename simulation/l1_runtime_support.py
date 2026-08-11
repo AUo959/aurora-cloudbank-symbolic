@@ -349,11 +349,39 @@ def _check_locus_resolution(
         blockers.append("orbital siting class is not marked as canonical")
     if locus.get("siting_class") != "lagrange_point":
         blockers.append("orbital siting class is not Lagrange point")
+    _check_historical_locus_dispositions(locus, blockers)
     unresolved = locus.get("unresolved_parameters", [])
     if "exact_lagrange_point" not in unresolved:
         blockers.append("exact Lagrange-point uncertainty is not preserved")
     if not locus.get("prohibited_causal_derivations"):
         blockers.append("exact orbital uncertainty lacks causal-use restrictions")
+
+
+def _check_historical_locus_dispositions(
+    locus: Dict[str, Any],
+    blockers: List[str],
+) -> None:
+    expected_description = (
+        "Orion Station is stationed at a Lagrange point in real space; "
+        "the exact libration point and primary-body system remain unresolved."
+    )
+    if locus.get("safe_runtime_description") != expected_description:
+        blockers.append("runtime orbital description exceeds the resolved locus claim")
+    historical = locus.get("historical_claims")
+    expected = {
+        "high_inclination_synchronous_orbit_38600_km": (
+            "staging_not_current_siting_authority"
+        ),
+        "earth_moon_l4": "historical_named_candidate_not_exact_current_canon",
+    }
+    if not isinstance(historical, dict):
+        blockers.append("historical orbital claims lack typed dispositions")
+        return
+    for claim, disposition in expected.items():
+        if historical.get(claim) != disposition:
+            blockers.append(
+                f"historical orbital claim {claim} is active or lacks its safe disposition"
+            )
 
 
 def _check_locus_latency(

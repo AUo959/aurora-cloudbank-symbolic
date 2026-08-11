@@ -635,9 +635,8 @@ class TacticalBattle:
 
 
 def load_baseline(path: str | Path) -> tuple[dict[str, Any], str]:
-    baseline_path = Path(path)
-    raw = baseline_path.read_bytes()
-    return json.loads(raw.decode("utf-8")), hashlib.sha256(raw).hexdigest()
+    baseline = json.loads(Path(path).read_text(encoding="utf-8"))
+    return baseline, _canonical_sha256(baseline)
 
 
 def run_baseline(path: str | Path) -> dict[str, Any]:

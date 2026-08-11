@@ -36,6 +36,7 @@ def test_baseline_is_materially_symmetric() -> None:
     assert battle.initial_power["loyalist"] == battle.initial_power["rebel"] == 89.7
     assert baseline["conflict"]["reinforcements"] is False
     assert baseline["conflict"]["third_party_intervention"] is False
+    assert digest == "2e9cbe1cc47c27a95c15c9c0dda7ae9ed03979087095f9c8e33762a39fcb87f3"
 
 
 def test_initial_geometry_is_occulted_by_planetoid() -> None:
@@ -55,6 +56,31 @@ def test_same_baseline_and_seed_replay_identically() -> None:
     assert first == second
     assert first["final_state_sha256"] == second["final_state_sha256"]
     assert first["historical_canon_status"] == "non_canon_simulation_instance"
+
+
+def test_reference_run_outcome_is_frozen() -> None:
+    module = _load_resolver()
+    result = module.run_baseline(BASELINE)
+
+    assert result["termination"] == "mutual_disengagement"
+    assert result["operational_outcome"] == "rebel_breakout"
+    assert result["winner"] == "rebel"
+    assert result["elapsed_s"] == 6900
+    assert result["separation_km"] == 16992.4
+    assert result["sides"]["loyalist"]["remaining_power_fraction"] == 0.9051
+    assert result["sides"]["rebel"]["remaining_power_fraction"] == 0.9367
+    assert result["sides"]["loyalist"]["states_count"] == {
+        "undamaged": 11,
+        "damaged": 4,
+        "destroyed": 2,
+        "mission_kill": 2,
+    }
+    assert result["sides"]["rebel"]["states_count"] == {
+        "undamaged": 13,
+        "mission_kill": 2,
+        "damaged": 4,
+    }
+    assert result["final_state_sha256"] == "fb07f135b9bcc39a933c971b4612de8d9b979a7a3dec621271626d477c3d5c98"
 
 
 def test_baseline_resolves_without_forced_annihilation() -> None:

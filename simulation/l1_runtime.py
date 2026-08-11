@@ -23,6 +23,8 @@ Core invariants:
 from __future__ import annotations
 
 import copy
+import hashlib
+import json
 import os
 import uuid
 from dataclasses import asdict
@@ -101,16 +103,37 @@ class OrionL1Runtime:
         )
         if report["ready"]:
             try:
-                receipt = read_json(FLEET_AUTHORITY_RECEIPT_PATH)
-                if not isinstance(receipt, dict):
-                    raise ValueError("fleet receipt must be an object")
-                self.fleet_receipt = receipt
-            except (OSError, ValueError, TypeError):
-                report["blockers"].append(
-                    "fleet authority receipt became unavailable after preflight"
-                )
+                self.fleet_receipt = self._load_verified_fleet_receipt()
+            except PreflightError as exc:
+                report["blockers"].append(str(exc))
                 report["ready"] = False
         return report
+
+    def _load_verified_fleet_receipt(self) -> Dict[str, Any]:
+        """Read, hash, and parse the exact receipt bytes retained by the runtime."""
+        expected_hash = self.baseline.get("authority", {}).get("fleet", {}).get(
+            "receipt_sha256"
+        )
+        try:
+            raw = FLEET_AUTHORITY_RECEIPT_PATH.read_bytes()
+        except OSError as exc:
+            raise PreflightError(
+                "fleet authority receipt became unavailable after preflight"
+            ) from exc
+        actual_hash = hashlib.sha256(raw).hexdigest()
+        if actual_hash != expected_hash:
+            raise PreflightError(
+                "fleet authority receipt hash changed after preflight"
+            )
+        try:
+            receipt = json.loads(raw)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise PreflightError(
+                "fleet authority receipt became invalid after preflight"
+            ) from exc
+        if not isinstance(receipt, dict):
+            raise PreflightError("fleet authority receipt must remain a JSON object")
+        return receipt
 
     def init_run(
         self,
@@ -430,9 +453,7 @@ class OrionL1Runtime:
         for message in tuple(state.communications):
             if not self._commander_response_is_due(message, replied_to):
                 continue
-            decision = self._commander_actor.decide(
-                self._commander_context(message)
-            )
+            decision = self._commander_actor.decide(self._commander_context(message))
             response = self._build_commander_action_response(message, decision)
             decision["response_message_id"] = response["message_id"]
             decision["operational_steps"][-1]["message_id"] = response["message_id"]
@@ -446,9 +467,7 @@ class OrionL1Runtime:
             run_id=state.manifest.run_id,
             tick=state.manifest.tick,
             inbound=copy.deepcopy(inbound),
-            station_records=tuple(
-                asdict(item) for item in state.station_records[-8:]
-            ),
+            station_records=tuple(asdict(item) for item in state.station_records[-8:]),
             character_knowledge=tuple(
                 asdict(item)
                 for item in state.character_knowledge.get("CMD_001", [])[-8:]
@@ -937,9 +956,7 @@ class OrionL1Runtime:
             policy = self._require_action_string(action, "policy", prefix)
             self._require_action_string(action, "response_content", prefix)
             if actor_id != "CMD_001" or policy != POLICY_VERSION:
-                raise PreflightError(
-                    f"{prefix} actor or policy is unsupported"
-                )
+                raise PreflightError(f"{prefix} actor or policy is unsupported")
             if action_id in action_ids:
                 raise PreflightError("persisted character actions contain duplicate IDs")
             if response_id in response_ids:
@@ -949,11 +966,7 @@ class OrionL1Runtime:
             self._validate_character_action_references(
                 prefix, trigger_id, response_id, messages
             )
-            self._validate_character_action_links(
-                prefix,
-                action,
-                messages,
-            )
+            self._validate_character_action_links(prefix, action, messages)
             self._validate_character_action_tick(
                 prefix, action.get("tick"), state.manifest.tick
             )

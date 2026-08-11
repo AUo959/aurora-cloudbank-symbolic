@@ -93,6 +93,10 @@ def test_fleet_receipt_projects_modular_identities_without_stale_missions():
     assert runtime.preflight()["ready"] is True
     assert state.fleet.provider_status == "bound"
     assert state.fleet.projection_role == "runtime_projection_non_authoritative"
+    assert (
+        state.manifest.fleet_authority_receipt_sha256
+        == runtime.baseline["authority"]["fleet"]["receipt_sha256"]
+    )
     assert set(state.fleet.entities) == EXPECTED_FLEET_IDS
     assert all(
         entity.status == "identity_projected"
@@ -357,6 +361,78 @@ def test_ord_policy_requires_explicit_adapter_and_triplex_before_physical_flight
 
 
 @pytest.mark.unit
+def test_persisted_ord_adapter_state_requires_complete_linked_evidence(
+    tmp_path: Path,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=7,
+        run_root=tmp_path,
+    )
+    proposal = runtime.propose_ord_physical_mission(
+        _supported_dispatch_order(),
+        physical_mission_class="physical_reconnaissance",
+        docking_location_class="station_proximity",
+    )
+    runtime.activate_ord_physical_mission(
+        proposal,
+        receipt=_complete_receipt(),
+    )
+    state_path = tmp_path / state.manifest.run_id / "state.json"
+    persisted = json.loads(state_path.read_text(encoding="utf-8"))
+
+    loaded = OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+    assert loaded.fleet.entities["ORD-2"].mission_id == proposal.proposal_id
+
+    tamper_cases = (
+        ("governance_receipts", []),
+        ("events", []),
+        ("fleet.transitions", []),
+    )
+    for field, value in tamper_cases:
+        payload = json.loads(json.dumps(persisted))
+        if field == "fleet.transitions":
+            payload["fleet"]["transitions"] = value
+        else:
+            payload[field] = value
+        state_path.write_text(json.dumps(payload), encoding="utf-8")
+        with pytest.raises(PreflightError, match="persisted ORD adapter"):
+            OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_forged_persisted_adapter_state_without_evidence_is_rejected(
+    tmp_path: Path,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=7,
+        run_root=tmp_path,
+    )
+    state_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(state_path.read_text(encoding="utf-8"))
+    entity = payload["fleet"]["entities"]["ORD-2"]
+    entity.update(
+        {
+            "status": "operating",
+            "mission_state_class": "active_explicit_adapter",
+            "docking_location_class": "station_proximity",
+            "mission_id": "ord-physical-forged",
+            "mission_class": "physical_reconnaissance",
+        }
+    )
+    state_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(
+        PreflightError,
+        match="lacks an exact activation transition",
+    ):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ("field", "value", "match"),
     (
@@ -471,6 +547,30 @@ def test_bound_persisted_fleet_requires_receipt_identity_metadata(tmp_path: Path
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("digest", [None, "0" * 64])
+def test_persisted_run_requires_exact_fleet_receipt_digest(
+    tmp_path: Path,
+    digest: str | None,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=99,
+        run_root=tmp_path,
+    )
+    state_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(state_path.read_text(encoding="utf-8"))
+    if digest is None:
+        payload["manifest"].pop("fleet_authority_receipt_sha256")
+    else:
+        payload["manifest"]["fleet_authority_receipt_sha256"] = digest
+    state_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="receipt digest does not match"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
 def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(
     tmp_path: Path,
 ):
@@ -486,6 +586,7 @@ def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(
     state_path = tmp_path / state.manifest.run_id / "state.json"
     legacy_payload = json.loads(state_path.read_text(encoding="utf-8"))
     legacy_payload["manifest"]["runtime_contract_version"] = "1.1.0"
+    legacy_payload["manifest"].pop("fleet_authority_receipt_sha256")
     legacy_payload.pop("fleet")
     state_path.write_text(json.dumps(legacy_payload), encoding="utf-8")
 
@@ -495,6 +596,10 @@ def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(
     assert loaded.manifest.tick == 7
     assert loaded.manifest.station_cycle_minute == 21
     assert loaded.manifest.runtime_contract_version == "1.2.0"
+    assert (
+        loaded.manifest.fleet_authority_receipt_sha256
+        == resumed.baseline["authority"]["fleet"]["receipt_sha256"]
+    )
     assert loaded.fleet.process_position == 7
     assert loaded.fleet.migrated_from_contract_version == "1.1.0"
     reconstructed = asdict(loaded.fleet)
@@ -509,7 +614,34 @@ def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(
     persisted_after_observation = json.loads(state_path.read_text(encoding="utf-8"))
     assert persisted_after_observation["manifest"]["tick"] == 7
     assert persisted_after_observation["manifest"]["station_cycle_minute"] == 21
+    assert (
+        persisted_after_observation["manifest"]["fleet_authority_receipt_sha256"]
+        == resumed.baseline["authority"]["fleet"]["receipt_sha256"]
+    )
     assert persisted_after_observation["fleet"]["process_position"] == 7
+
+
+@pytest.mark.unit
+def test_contract_v1_1_rejects_injected_bound_fleet_before_migration(
+    tmp_path: Path,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=314159,
+        run_root=tmp_path,
+    )
+    state_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(state_path.read_text(encoding="utf-8"))
+    payload["manifest"]["runtime_contract_version"] = "1.1.0"
+    payload["manifest"].pop("fleet_authority_receipt_sha256")
+    state_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(
+        PreflightError,
+        match="persisted L1 run state is unavailable or invalid",
+    ):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
 
 
 @pytest.mark.unit

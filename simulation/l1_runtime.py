@@ -58,6 +58,7 @@ from l1_runtime_support import (
 from l1_runtime_types import (
     DeterministicReplayRNG,
     EpistemicRecord,
+    FleetEntityState,
     GovernanceReceipt,
     L1RunState,
     PopulationSnapshot,
@@ -84,6 +85,7 @@ class OrionL1Runtime:
         self.baseline_path = baseline_path
         self.baseline = read_json(baseline_path)
         self.fleet_receipt: Optional[Dict[str, Any]] = None
+        self.fleet_receipt_sha256: Optional[str] = None
         self.population = PopulationSnapshot.from_baseline(self.baseline)
         self.state: Optional[L1RunState] = None
         self._rng: Optional[DeterministicReplayRNG] = None
@@ -94,6 +96,7 @@ class OrionL1Runtime:
     def preflight(self) -> Dict[str, Any]:
         """Validate bootstrap invariants without creating or advancing a run."""
         self.fleet_receipt = None
+        self.fleet_receipt_sha256 = None
         report = evaluate_preflight(
             self.baseline,
             self.population,
@@ -133,6 +136,7 @@ class OrionL1Runtime:
             ) from exc
         if not isinstance(receipt, dict):
             raise PreflightError("fleet authority receipt must remain a JSON object")
+        self.fleet_receipt_sha256 = actual_hash
         return receipt
 
     def init_run(
@@ -225,6 +229,7 @@ class OrionL1Runtime:
             created_at=utcnow(),
             cloudbank_revision=cloudbank_revision,
             canonrec_revision=canonrec_revision,
+            fleet_authority_receipt_sha256=self._require_fleet_receipt_sha256(),
             seed=seed,
             station_cycle_length_minutes=int(defaults["station_cycle_length_minutes"]),
             station_cycle_minute=int(defaults["station_cycle_start_minute"]),
@@ -907,6 +912,7 @@ class OrionL1Runtime:
             )
         self._validate_revision(manifest.cloudbank_revision, "cloudbank_revision")
         self._validate_revision(manifest.canonrec_revision, "canonrec_revision")
+        self._validate_loaded_fleet_receipt_digest(state)
         if manifest.tick < 0:
             raise PreflightError("persisted run tick cannot be negative")
         if (
@@ -1094,6 +1100,150 @@ class OrionL1Runtime:
             and state.fleet.process_position != state.manifest.tick
         ):
             raise PreflightError("persisted fleet replay position does not match run tick")
+        self._validate_loaded_ord_adapter_evidence(state)
+
+    def _validate_loaded_fleet_receipt_digest(self, state: L1RunState) -> None:
+        manifest = state.manifest
+        digest = manifest.fleet_authority_receipt_sha256
+        if manifest.runtime_contract_version == "1.1.0":
+            if digest is not None:
+                raise PreflightError(
+                    "persisted contract 1.1.0 cannot claim a fleet receipt digest"
+                )
+            return
+        if digest != self._require_fleet_receipt_sha256():
+            raise PreflightError(
+                "persisted fleet authority receipt digest does not match runtime"
+            )
+
+    def _validate_loaded_ord_adapter_evidence(self, state: L1RunState) -> None:
+        active_entities = [
+            entity
+            for entity in state.fleet.entities.values()
+            if entity.mission_state_class == "active_explicit_adapter"
+        ]
+        for entity in active_entities:
+            transition = self._loaded_adapter_transition(state, entity)
+            receipt_id = transition.get("governance_receipt_id")
+            self._require_loaded_triplex_receipt(state, receipt_id)
+            self._require_loaded_adapter_event(state, entity, transition, receipt_id)
+
+    @staticmethod
+    def _loaded_adapter_transition(
+        state: L1RunState,
+        entity: FleetEntityState,
+    ) -> Dict[str, Any]:
+        candidates = [
+            item
+            for item in state.fleet.transitions
+            if OrionL1Runtime._is_adapter_transition_for_entity(item, entity)
+        ]
+        if len(candidates) != 1:
+            raise PreflightError(
+                "persisted ORD adapter state lacks an exact activation transition"
+            )
+        transition = candidates[0]
+        if not OrionL1Runtime._adapter_transition_matches_entity(
+            transition,
+            entity,
+        ):
+            raise PreflightError(
+                "persisted ORD adapter transition does not match active fleet state"
+            )
+        transition_id = transition.get("transition_id")
+        if not isinstance(transition_id, str) or not transition_id:
+            raise PreflightError(
+                "persisted ORD adapter transition lacks transition identity"
+            )
+        return transition
+
+    @staticmethod
+    def _is_adapter_transition_for_entity(
+        transition: Dict[str, Any],
+        entity: FleetEntityState,
+    ) -> bool:
+        return (
+            transition.get("fleet_id") == entity.fleet_id
+            and transition.get("tick") == entity.last_transition_tick
+            and transition.get("cause") == "explicit_ord_physical_mission_adapter"
+        )
+
+    @staticmethod
+    def _adapter_transition_matches_entity(
+        transition: Dict[str, Any],
+        entity: FleetEntityState,
+    ) -> bool:
+        after = transition.get("after")
+        expected = {
+            "status": entity.status,
+            "mission_state_class": entity.mission_state_class,
+            "docking_location_class": entity.docking_location_class,
+            "mission_id": entity.mission_id,
+            "mission_class": entity.mission_class,
+        }
+        return isinstance(after, dict) and all(
+            after.get(field) == value for field, value in expected.items()
+        )
+
+    @staticmethod
+    def _require_loaded_triplex_receipt(
+        state: L1RunState,
+        receipt_id: Any,
+    ) -> None:
+        if not isinstance(receipt_id, str) or not receipt_id:
+            raise PreflightError(
+                "persisted ORD adapter transition lacks Triplex receipt identity"
+            )
+        if not any(
+            receipt.receipt_id == receipt_id and receipt.complete
+            for receipt in state.governance_receipts
+        ):
+            raise PreflightError(
+                "persisted ORD adapter transition lacks complete Triplex evidence"
+            )
+
+    @staticmethod
+    def _require_loaded_adapter_event(
+        state: L1RunState,
+        entity: FleetEntityState,
+        transition: Dict[str, Any],
+        receipt_id: str,
+    ) -> None:
+        transition_id = transition["transition_id"]
+        matching_events = [
+            event
+            for event in state.events
+            if OrionL1Runtime._is_loaded_adapter_event(
+                event,
+                entity,
+                transition,
+                receipt_id,
+                transition_id,
+            )
+        ]
+        if len(matching_events) != 1:
+            raise PreflightError(
+                "persisted ORD adapter transition lacks a governed activation event"
+            )
+
+    @staticmethod
+    def _is_loaded_adapter_event(
+        event: Dict[str, Any],
+        entity: FleetEntityState,
+        transition: Dict[str, Any],
+        receipt_id: str,
+        transition_id: str,
+    ) -> bool:
+        transition_ids = event.get("transition_ids")
+        return (
+            event.get("kind") == "governed_ord_physical_mission_activation"
+            and event.get("cause") == "explicit_ord_physical_mission_adapter"
+            and event.get("tick") == transition.get("tick")
+            and event.get("proposal_id") == entity.mission_id
+            and event.get("receipt_id") == receipt_id
+            and isinstance(transition_ids, list)
+            and transition_id in transition_ids
+        )
 
     def _upgrade_loaded_fleet(
         self,
@@ -1117,6 +1267,9 @@ class OrionL1Runtime:
                     elapsed_minutes=event["elapsed_minutes"],
                 )
             state.fleet.migrated_from_contract_version = source_contract_version
+            state.manifest.fleet_authority_receipt_sha256 = (
+                self._require_fleet_receipt_sha256()
+            )
         if state.fleet.authority_receipt_id != receipt.get("receipt_id"):
             raise PreflightError("persisted fleet authority receipt does not match runtime")
         try:
@@ -1211,6 +1364,13 @@ class OrionL1Runtime:
         if self.fleet_receipt is None:
             raise PreflightError("fleet authority receipt is unavailable after preflight")
         return self.fleet_receipt
+
+    def _require_fleet_receipt_sha256(self) -> str:
+        if self.fleet_receipt_sha256 is None:
+            raise PreflightError(
+                "fleet authority receipt digest is unavailable after preflight"
+            )
+        return self.fleet_receipt_sha256
 
     def _require_state(self) -> L1RunState:
         if self.state is None:

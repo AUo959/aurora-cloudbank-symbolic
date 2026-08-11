@@ -248,6 +248,13 @@ explicit ORD-to-L1 adapter first creates a non-executing proposal; physical
 drone mission state changes only after a separate call supplies a complete
 Triplex governance receipt.
 
+Restoration applies the same boundary to persisted state. Every active
+`active_explicit_adapter` entity must match one exact fleet transition, a
+complete Triplex receipt named by that transition, and the corresponding
+governed activation event. A syntactically valid ORD mission state without
+that linked evidence is rejected rather than exposed as resumed physical
+state.
+
 ## Lagrange-point authority and remaining uncertainty
 
 CanonRec's owner ruling establishes the current siting class:
@@ -291,6 +298,7 @@ INIT records at minimum:
 - pinned CanonRec revision;
 - deterministic seed;
 - runtime-contract version;
+- exact SHA-256 of the fleet authority receipt bytes retained at INIT;
 - station-cycle position;
 - active quarantines;
 - typed population snapshot;
@@ -301,10 +309,17 @@ INIT records at minimum:
 Contract `1.2.0` accepts persisted `1.1.0` continuation states from PR #1480.
 When their fleet field is absent, the runtime reconstructs it from seed plus the
 contiguous autonomous-event ledger without advancing the tick, station cycle,
-or central replay generator. The upgraded state is persisted only on a later
-explicit run mutation, including advancement, governed action, or the normal
-recording of an observation into the run-scoped epistemic ledgers. Loading by
-itself remains non-mutating.
+or central replay generator. The verified current fleet-receipt digest is
+attached to that in-memory upgrade. The upgraded state is persisted only on a
+later explicit run mutation, including advancement, governed action, or the
+normal recording of an observation into the run-scoped epistemic ledgers.
+Loading by itself remains non-mutating.
+
+Current-contract persisted runs must carry the exact fleet-receipt digest and
+must match the receipt bytes verified by preflight. A current-contract state
+created before that digest was recorded is blocked rather than silently rebound
+to a later receipt; compatibility requires separate evidence and an explicit
+migration decision.
 
 Run persistence is rejected if the requested run root is inside the repository.
 The default is external user state under `~/.aurora/l1-runs`.

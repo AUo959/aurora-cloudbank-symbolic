@@ -434,6 +434,8 @@ def l1_run_state_from_payload(payload: Dict[str, Any]) -> L1RunState:
     """Deserialize a persisted run without weakening the runtime type contract."""
     manifest_payload = _mapping(payload.get("manifest"), "manifest")
     manifest = _manifest_from_payload(manifest_payload)
+    if manifest.runtime_contract_version == "1.1.0" and "fleet" in payload:
+        raise ValueError("contract 1.1.0 persisted runs cannot supply fleet state")
     return L1RunState(
         manifest=manifest,
         world_state=copy.deepcopy(_mapping(payload.get("world_state"), "world_state")),

@@ -37,6 +37,7 @@ from l1_fleet import (
     advance_fleet_world_process,
     build_initial_fleet_state,
     observation_for_focus,
+    validate_fleet_identity_projection,
 )
 from l1_runtime_support import (
     GovernanceError,
@@ -80,7 +81,7 @@ class OrionL1Runtime:
     def __init__(self, baseline_path: Path = BASELINE_PATH) -> None:
         self.baseline_path = baseline_path
         self.baseline = read_json(baseline_path)
-        self.fleet_receipt = read_json(FLEET_AUTHORITY_RECEIPT_PATH)
+        self.fleet_receipt: Optional[Dict[str, Any]] = None
         self.population = PopulationSnapshot.from_baseline(self.baseline)
         self.state: Optional[L1RunState] = None
         self._rng: Optional[DeterministicReplayRNG] = None
@@ -90,13 +91,26 @@ class OrionL1Runtime:
 
     def preflight(self) -> Dict[str, Any]:
         """Validate bootstrap invariants without creating or advancing a run."""
-        return evaluate_preflight(
+        self.fleet_receipt = None
+        report = evaluate_preflight(
             self.baseline,
             self.population,
             CANON_PROVENANCE_PATH,
             FLEET_AUTHORITY_RECEIPT_PATH,
             run_created=self.state is not None,
         )
+        if report["ready"]:
+            try:
+                receipt = read_json(FLEET_AUTHORITY_RECEIPT_PATH)
+                if not isinstance(receipt, dict):
+                    raise ValueError("fleet receipt must be an object")
+                self.fleet_receipt = receipt
+            except (OSError, ValueError, TypeError):
+                report["blockers"].append(
+                    "fleet authority receipt became unavailable after preflight"
+                )
+                report["ready"] = False
+        return report
 
     def init_run(
         self,
@@ -204,7 +218,7 @@ class OrionL1Runtime:
     def _build_initial_state(self, manifest: RunManifest) -> L1RunState:
         return L1RunState(
             manifest=manifest,
-            fleet=build_initial_fleet_state(self.fleet_receipt),
+            fleet=build_initial_fleet_state(self._require_fleet_receipt()),
             world_state={
                 "station": "Orion Station",
                 "l1_status": "initialized",
@@ -1033,7 +1047,7 @@ class OrionL1Runtime:
         if len(autonomous_events) != state.manifest.tick:
             raise PreflightError(
                 "persisted autonomous event ledger does not match run tick"
-        )
+            )
         for expected_tick, event in enumerate(autonomous_events, start=1):
             event_tick = event.get("tick")
             if (type(event_tick), event_tick) != (int, expected_tick):
@@ -1049,6 +1063,11 @@ class OrionL1Runtime:
     def _validate_loaded_fleet(self, state: L1RunState) -> None:
         try:
             state.fleet.validate()
+            if state.fleet.provider_status == "bound":
+                validate_fleet_identity_projection(
+                    state.fleet,
+                    self._require_fleet_receipt(),
+                )
         except ValueError as exc:
             raise PreflightError("persisted fleet state is invalid") from exc
         current_version = self.baseline["runtime_contract_version"]
@@ -1069,8 +1088,9 @@ class OrionL1Runtime:
         source_contract_version: str,
     ) -> None:
         current_version = self.baseline["runtime_contract_version"]
+        receipt = self._require_fleet_receipt()
         if state.fleet.provider_status == "unbound":
-            state.fleet = build_initial_fleet_state(self.fleet_receipt)
+            state.fleet = build_initial_fleet_state(receipt)
             autonomous_events = [
                 event
                 for event in state.events
@@ -1084,8 +1104,14 @@ class OrionL1Runtime:
                     elapsed_minutes=event["elapsed_minutes"],
                 )
             state.fleet.migrated_from_contract_version = source_contract_version
-        if state.fleet.authority_receipt_id != self.fleet_receipt.get("receipt_id"):
+        if state.fleet.authority_receipt_id != receipt.get("receipt_id"):
             raise PreflightError("persisted fleet authority receipt does not match runtime")
+        try:
+            validate_fleet_identity_projection(state.fleet, receipt)
+        except ValueError as exc:
+            raise PreflightError(
+                "persisted fleet identities do not match runtime authority receipt"
+            ) from exc
         state.manifest.runtime_contract_version = current_version
 
     def _validate_loaded_communications(self, state: L1RunState) -> None:
@@ -1167,6 +1193,11 @@ class OrionL1Runtime:
     @staticmethod
     def _validate_revision(value: str, field_name: str) -> None:
         validate_revision(value, field_name)
+
+    def _require_fleet_receipt(self) -> Dict[str, Any]:
+        if self.fleet_receipt is None:
+            raise PreflightError("fleet authority receipt is unavailable after preflight")
+        return self.fleet_receipt
 
     def _require_state(self) -> L1RunState:
         if self.state is None:

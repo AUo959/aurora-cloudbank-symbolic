@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import pytest
@@ -14,6 +14,7 @@ SIMULATION_PATH = str(SIMULATION_DIR)
 if SIMULATION_PATH not in sys.path:
     sys.path.insert(0, SIMULATION_PATH)
 
+import l1_runtime  # noqa: E402
 import l1_runtime_support  # noqa: E402
 from l1_fleet import (  # noqa: E402
     build_initial_fleet_state,
@@ -25,7 +26,12 @@ from l1_fleet import (  # noqa: E402
 from l1_runtime import OrionL1Runtime, PreflightError  # noqa: E402
 from l1_runtime_support import GovernanceError  # noqa: E402
 from l1_runtime_types import FleetRunState, GovernanceReceipt  # noqa: E402
-from modules.ord import MissionBrief, OrdPolicyEngine  # noqa: E402
+from modules.ord import (  # noqa: E402
+    DispatchOrder,
+    DroneType,
+    MissionBrief,
+    OrdPolicyEngine,
+)
 
 
 CLOUDBANK_SHA = "f572b8e8204a8fd48f3c8a55d3b1c3cec6603579"
@@ -55,6 +61,29 @@ def _init(seed: int = 1337) -> OrionL1Runtime:
     return runtime
 
 
+def _supported_dispatch_order() -> DispatchOrder:
+    return DispatchOrder(
+        mission_id="supported-physical-policy",
+        drones_required=[DroneType.DELTA_SCOUT],
+        deployment_phase={
+            "pre_flight": [DroneType.DELTA_SCOUT],
+            "post_flight": [],
+        },
+        priority=3,
+        transport_requirement=None,
+    )
+
+
+def _complete_receipt(receipt_id: str = "ord-complete") -> GovernanceReceipt:
+    return GovernanceReceipt(
+        l3_glyph_arbitration=True,
+        continuity_and_relay_verification=True,
+        l1_human_consent=True,
+        receipt_id=receipt_id,
+        provenance="unit-test",
+    )
+
+
 @pytest.mark.unit
 def test_fleet_receipt_projects_modular_identities_without_stale_missions():
     runtime = _init()
@@ -65,11 +94,20 @@ def test_fleet_receipt_projects_modular_identities_without_stale_missions():
     assert state.fleet.provider_status == "bound"
     assert state.fleet.projection_role == "runtime_projection_non_authoritative"
     assert set(state.fleet.entities) == EXPECTED_FLEET_IDS
-    assert all(entity.status == "identity_projected" for entity in state.fleet.entities.values())
-    assert all(entity.mission_state_class == "unassigned" for entity in state.fleet.entities.values())
+    assert all(
+        entity.status == "identity_projected"
+        for entity in state.fleet.entities.values()
+    )
+    assert all(
+        entity.mission_state_class == "unassigned"
+        for entity in state.fleet.entities.values()
+    )
     assert all(entity.mission_id is None for entity in state.fleet.entities.values())
     assert all(entity.mission_class is None for entity in state.fleet.entities.values())
-    assert all(entity.docking_location_class == "unresolved" for entity in state.fleet.entities.values())
+    assert all(
+        entity.docking_location_class == "unresolved"
+        for entity in state.fleet.entities.values()
+    )
 
     serialized = json.dumps(runtime.export_state()["fleet"], sort_keys=True)
     assert "AURORA_PRIME" not in serialized
@@ -81,11 +119,37 @@ def test_fleet_receipt_projects_modular_identities_without_stale_missions():
 @pytest.mark.parametrize("entities", ["not-a-list", ["not-an-object"]])
 def test_fleet_receipt_rejects_malformed_entity_collections(entities):
     runtime = OrionL1Runtime()
+    assert runtime.preflight()["ready"] is True
     receipt = json.loads(json.dumps(runtime.fleet_receipt))
     receipt["entities"] = entities
 
     with pytest.raises(ValueError, match="list of objects"):
         build_initial_fleet_state(receipt)
+
+
+@pytest.mark.unit
+def test_constructor_survives_missing_or_malformed_fleet_receipt(
+    tmp_path: Path,
+    monkeypatch,
+):
+    missing_path = tmp_path / "missing-fleet-receipt.json"
+    monkeypatch.setattr(l1_runtime, "FLEET_AUTHORITY_RECEIPT_PATH", missing_path)
+
+    runtime = OrionL1Runtime()
+    missing_report = runtime.preflight()
+
+    assert missing_report["ready"] is False
+    assert "fleet authority receipt is unavailable or invalid" in missing_report["blockers"]
+
+    malformed_path = tmp_path / "malformed-fleet-receipt.json"
+    malformed_path.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(l1_runtime, "FLEET_AUTHORITY_RECEIPT_PATH", malformed_path)
+
+    malformed_runtime = OrionL1Runtime()
+    malformed_report = malformed_runtime.preflight()
+
+    assert malformed_report["ready"] is False
+    assert "fleet authority receipt is unavailable or invalid" in malformed_report["blockers"]
 
 
 @pytest.mark.unit
@@ -113,6 +177,27 @@ def test_fleet_world_process_is_deterministic_and_observation_non_central():
 
 
 @pytest.mark.unit
+def test_shadowfax_is_observable_but_never_routine_activated():
+    runtime = _init(seed=1337)
+    state = runtime.state
+    assert state is not None
+
+    before = asdict(state.fleet.entities["ORD-3"])
+    runtime.advance(elapsed_minutes=1)
+    after = asdict(state.fleet.entities["ORD-3"])
+    shadowfax_record = next(
+        record for record in runtime.observe("drones")["records"]
+        if record["fleet_id"] == "ORD-3"
+    )
+
+    assert after == before
+    assert shadowfax_record["physical_activation_authorized"] is False
+    assert not any(
+        transition["fleet_id"] == "ORD-3" for transition in state.fleet.transitions
+    )
+
+
+@pytest.mark.unit
 def test_bound_fleet_proximity_docking_and_drone_providers_are_explicit():
     runtime = _init()
     state = runtime.state
@@ -127,7 +212,9 @@ def test_bound_fleet_proximity_docking_and_drone_providers_are_explicit():
     assert fleet["provider"] == "l1_run_fleet_state"
     assert len(fleet["records"]) == 12
     assert proximity["status"] == "available"
-    assert all(record["exact_range_available"] is False for record in proximity["records"])
+    assert all(
+        record["exact_range_available"] is False for record in proximity["records"]
+    )
     assert docking["status"] == "available"
     assert all(record["trajectory_available"] is False for record in docking["records"])
     assert drones["status"] == "available"
@@ -136,6 +223,16 @@ def test_bound_fleet_proximity_docking_and_drone_providers_are_explicit():
         record["mcp_policy_dispatch_implies_flight"] is False
         for record in drones["records"]
     )
+    activation = {
+        record["fleet_id"]: record["physical_activation_authorized"]
+        for record in drones["records"]
+    }
+    assert activation == {
+        "ORD-1": True,
+        "ORD-2": True,
+        "ORD-3": False,
+        "ORD-4": True,
+    }
     assert state.manifest.tick == 0
 
 
@@ -192,24 +289,38 @@ def test_fleet_receipt_hash_read_failure_becomes_preflight_blocker(monkeypatch):
 
 
 @pytest.mark.unit
-def test_ord_policy_requires_explicit_adapter_and_triplex_before_physical_flight():
+def test_shadowfax_policy_cannot_be_promoted_to_physical_flight():
     runtime = _init(seed=7)
     state = runtime.state
     assert state is not None
     before = asdict(state.fleet)
     order = OrdPolicyEngine().create_dispatch_order(
         MissionBrief(
-            mission_id="mcp-policy-test",
+            mission_id="shadowfax-policy-test",
             tool_name="create_branch",
             risk_level=0.8,
             destination="https://github.com/AUo959/example",
         )
     )
 
-    assert order.drones_required
+    assert DroneType.SHADOWFAX in order.drones_required
+    with pytest.raises(GovernanceError, match="SHADOWFAX custody/promotion gates"):
+        runtime.propose_ord_physical_mission(
+            order,
+            physical_mission_class="physical_reconnaissance",
+            docking_location_class="station_proximity",
+        )
     assert asdict(state.fleet) == before
+
+
+@pytest.mark.unit
+def test_ord_policy_requires_explicit_adapter_and_triplex_before_physical_flight():
+    runtime = _init(seed=7)
+    state = runtime.state
+    assert state is not None
+    before = asdict(state.fleet)
     proposal = runtime.propose_ord_physical_mission(
-        order,
+        _supported_dispatch_order(),
         physical_mission_class="physical_reconnaissance",
         docking_location_class="station_proximity",
     )
@@ -228,14 +339,10 @@ def test_ord_policy_requires_explicit_adapter_and_triplex_before_physical_flight
         runtime.activate_ord_physical_mission(proposal, receipt=incomplete)
     assert asdict(state.fleet) == before
 
-    complete = GovernanceReceipt(
-        l3_glyph_arbitration=True,
-        continuity_and_relay_verification=True,
-        l1_human_consent=True,
-        receipt_id="ord-complete",
-        provenance="unit-test",
+    event = runtime.activate_ord_physical_mission(
+        proposal,
+        receipt=_complete_receipt(),
     )
-    event = runtime.activate_ord_physical_mission(proposal, receipt=complete)
 
     assert state.manifest.tick == 0
     assert event["cause"] == "explicit_ord_physical_mission_adapter"
@@ -246,6 +353,38 @@ def test_ord_policy_requires_explicit_adapter_and_triplex_before_physical_flight
         assert entity.mission_state_class == "active_explicit_adapter"
         assert entity.mission_id == proposal.proposal_id
         assert entity.mission_class == "physical_reconnaissance"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("field", "value", "match"),
+    (
+        ("physical_mission_class", "not_physical", "mission class"),
+        ("docking_location_class", "unresolved", "location class"),
+        ("policy_domain", "untrusted", "provenance"),
+        ("adapter", "other-adapter", "provenance"),
+        ("proposal_id", "ord-physical-tampered", "integrity"),
+        ("drone_ids", ["ORD-3"], "unpromoted or unsupported"),
+    ),
+)
+def test_ord_activation_revalidates_deserialized_proposal(field, value, match):
+    runtime = _init(seed=7)
+    state = runtime.state
+    assert state is not None
+    proposal = runtime.propose_ord_physical_mission(
+        _supported_dispatch_order(),
+        physical_mission_class="physical_reconnaissance",
+        docking_location_class="station_proximity",
+    )
+    tampered = replace(proposal, **{field: value})
+    before = asdict(state.fleet)
+
+    with pytest.raises((ValueError, GovernanceError), match=match):
+        runtime.activate_ord_physical_mission(
+            tampered,
+            receipt=_complete_receipt("ord-tampered"),
+        )
+    assert asdict(state.fleet) == before
 
 
 @pytest.mark.unit
@@ -281,7 +420,26 @@ def test_persisted_fleet_replay_continues_at_same_position(tmp_path: Path):
 
 
 @pytest.mark.unit
-def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(tmp_path: Path):
+def test_bound_persisted_fleet_requires_exact_authority_identity_set(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=99,
+        run_root=tmp_path,
+    )
+    state_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(state_path.read_text(encoding="utf-8"))
+    payload["fleet"]["entities"].pop("ORD-4")
+    state_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(PreflightError, match="persisted fleet state is invalid"):
+        OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(
+    tmp_path: Path,
+):
     source = OrionL1Runtime()
     state = source.init_run(
         cloudbank_revision=CLOUDBANK_SHA,
@@ -338,7 +496,10 @@ def test_persisted_stale_2025_mission_cannot_become_current_run_truth(tmp_path: 
     liora["mission_class"] = "research_survey"
     state_path.write_text(json.dumps(payload), encoding="utf-8")
 
-    with pytest.raises(PreflightError, match="persisted L1 run state is unavailable or invalid"):
+    with pytest.raises(
+        PreflightError,
+        match="persisted L1 run state is unavailable or invalid",
+    ):
         OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
 
 

@@ -2,7 +2,7 @@
 # Keep this surface narrower than the Aurora monolith requirements.
 fastapi>=0.141.1,<1.0.0
 uvicorn[standard]>=0.52.1
-starlette>=1.4.0,<2.0.0
+starlette>=1.4.1,<2.0.0
 pydantic>=2.5.0,<3.0.0
 numpy>=2.5.1
 pyyaml>=6.0.3

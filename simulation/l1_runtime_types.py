@@ -594,6 +594,17 @@ def l1_run_state_from_payload(payload: Dict[str, Any]) -> L1RunState:
         raise ValueError("contract 1.1.0 persisted runs cannot supply fleet state")
     if manifest.runtime_contract_version in {"1.1.0", "1.2.0"} and "embodiments" in payload:
         raise ValueError("pre-1.3.0 persisted runs cannot supply embodiment state")
+    if (
+        manifest.runtime_contract_version not in {"1.1.0", "1.2.0"}
+        and "embodiments" not in payload
+    ):
+        # The mirror of the guard above. A pre-1.3.0 run legitimately has no
+        # embodiment state and is migrated on load; a CURRENT-contract run that
+        # is missing it has been truncated or tampered with, and must be
+        # rejected at parse time rather than silently rebuilt from the registry
+        # -- rebuilding would mask the loss and hand back a run whose projection
+        # no longer reflects what was persisted.
+        raise ValueError("current-contract persisted runs must supply embodiment state")
     return L1RunState(
         manifest=manifest,
         world_state=copy.deepcopy(_mapping(payload.get("world_state"), "world_state")),

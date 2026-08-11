@@ -644,6 +644,12 @@ def export_run_state(state: Any) -> Dict[str, Any]:
         },
         "world_state": state.world_state,
         "fleet": asdict(state.fleet),
+        # Embodiment state is persisted alongside fleet state. Without this the
+        # projection was rebuilt from the registry on every load and never
+        # round-tripped, so a persisted run carried no "embodiments" key at all
+        # and the 1.1.0/1.2.0 migration path could not tell a pre-embodiment run
+        # from a current one.
+        "embodiments": asdict(state.embodiments),
         "character_knowledge": {
             key: [asdict(record) for record in records]
             for key, records in state.character_knowledge.items()

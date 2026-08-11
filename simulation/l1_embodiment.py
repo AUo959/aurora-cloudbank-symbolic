@@ -130,14 +130,64 @@ def assess_embodiment_readiness(registry: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+#: Focus terms this provider owns outright, independent of registry state.
+#:
+#: The unbound branch below MUST consult these. It previously returned an
+#: "unavailable" payload for ANY focus, which made the embodiment provider
+#: shadow every other channel whenever the registry was not bound -- observe(
+#: "fleet") answered with provider "l1_embodiment_registry_projection" instead
+#: of "l1_run_fleet_state". The bound branch was always correct: it returns None
+#: for a focus it does not own, deferring to the next provider. The unbound
+#: branch simply skipped that check.
+EMBODIMENT_FOCUS_ALIASES = frozenset(
+    {
+        "architecture",
+        "embodiment",
+        "embodiments",
+        "station architecture",
+        "station systems",
+        "relay",
+        "relays",
+        "relay constellation",
+    }
+)
+
+
+#: Channels owned by OTHER providers. The embodiment provider must never claim
+#: these, however well they match a record.
+#:
+#: Without this guard, focus "fleet" substring-matched the component of
+#: L1-EMB-FLEET-DOCKING, so the embodiment provider answered observe("fleet")
+#: and the fleet provider never ran. A shared word is not evidence that this
+#: provider owns the channel -- the same fragment-matching trap that has bitten
+#: entity resolution elsewhere in Aurora.
+RESERVED_FOCI = frozenset(
+    {"fleet", "proximity", "docking", "drone", "drones", "station"}
+)
+
+
+def normalize_focus(focus: str) -> str:
+    return " ".join(focus.strip().lower().replace("_", " ").split())
+
+
 def embodiment_observation(
     state: L1RunState,
     focus: str,
 ) -> Optional[Dict[str, Any]]:
-    """Expose embodiment/provider state without advancing or fabricating it."""
+    """Expose embodiment/provider state without advancing or fabricating it.
+
+    Returns None for a focus this provider does not own, so observe() falls
+    through to the fleet/station providers. That contract holds whether or not
+    the registry is bound: an unbound registry means "I own this focus and
+    cannot answer it", never "I answer everything".
+    """
+    normalized = normalize_focus(focus)
+    if normalized in RESERVED_FOCI:
+        return None
     if state.embodiments.registry_status != "bound":
-        return _unavailable_observation(state, focus)
-    normalized = " ".join(focus.strip().lower().replace("_", " ").split())
+        if normalized in EMBODIMENT_FOCUS_ALIASES:
+            return _unavailable_observation(state, focus)
+        return None
     records = _records_for_focus(state.embodiments.entities.values(), normalized)
     if records is None:
         return None
@@ -182,20 +232,22 @@ def _provider_readiness(records: Iterable[EmbodimentState]) -> str:
     )
 
 
+_ALL_EMBODIMENT_FOCI = frozenset(
+    {"architecture", "embodiment", "embodiments", "station architecture", "station systems"}
+)
+_RELAY_FOCI = frozenset({"relay", "relays", "relay constellation"})
+assert _ALL_EMBODIMENT_FOCI | _RELAY_FOCI == EMBODIMENT_FOCUS_ALIASES
+assert not (EMBODIMENT_FOCUS_ALIASES & RESERVED_FOCI)
+
+
 def _records_for_focus(
     records: Iterable[EmbodimentState],
     normalized: str,
 ) -> Optional[list[EmbodimentState]]:
     records = list(records)
-    if normalized in {
-        "architecture",
-        "embodiment",
-        "embodiments",
-        "station architecture",
-        "station systems",
-    }:
+    if normalized in _ALL_EMBODIMENT_FOCI:
         return records
-    if normalized in {"relay", "relays", "relay constellation"}:
+    if normalized in _RELAY_FOCI:
         return [
             record
             for record in records

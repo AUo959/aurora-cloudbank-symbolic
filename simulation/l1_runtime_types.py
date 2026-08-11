@@ -307,6 +307,10 @@ class FleetEntityState:
             and not self.mission_id.startswith(f"L1-{self.fleet_id}-")
         ):
             raise ValueError("routine fleet mission_id has the wrong lineage")
+        if self.mission_state_class == "active_explicit_adapter" and not self.fleet_id.startswith(
+            "ORD-"
+        ):
+            raise ValueError("explicit ORD adapter state is only valid for ORD assets")
         if (
             self.mission_state_class == "active_explicit_adapter"
             and self.mission_id is not None

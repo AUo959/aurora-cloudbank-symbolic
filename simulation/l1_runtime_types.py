@@ -3,8 +3,8 @@
 
 from __future__ import annotations
 
-import hashlib
 import copy
+import hashlib
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -226,6 +226,7 @@ class FleetEntityState:
         self._validate_locations()
         self._validate_mission()
         self._validate_counters()
+        self._validate_custody_boundary()
         self.provenance.validate()
 
     def _validate_identity(self) -> None:
@@ -317,6 +318,23 @@ class FleetEntityState:
         if self.mission_elapsed_minutes < 0 or self.last_transition_tick < 0:
             raise ValueError("fleet mission counters cannot be negative")
 
+    def _validate_custody_boundary(self) -> None:
+        if self.fleet_id != "ORD-3":
+            return
+        identity_only = (
+            self.status == "identity_projected"
+            and self.mission_state_class == "unassigned"
+            and self.docking_location_class == "unresolved"
+            and self.mission_id is None
+            and self.mission_class is None
+            and self.mission_elapsed_minutes == 0
+            and self.last_transition_tick == 0
+        )
+        if not identity_only:
+            raise ValueError(
+                "ORD-3 Shadowfax is identity/provenance only until custody gates clear"
+            )
+
 
 @dataclass
 class FleetRunState:
@@ -373,6 +391,8 @@ class FleetRunState:
             if fleet_id != entity.fleet_id:
                 raise ValueError("fleet entity mapping key does not match identity")
             entity.validate()
+        if any(item.get("fleet_id") == "ORD-3" for item in self.transitions):
+            raise ValueError("ORD-3 Shadowfax cannot carry physical runtime transitions")
 
 
 @dataclass

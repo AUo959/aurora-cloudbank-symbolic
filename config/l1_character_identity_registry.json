@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "registry_status": "runtime_projection_non_authoritative",
+  "authority_boundary": {
+    "authority_repository": "AUo959/CanonRec",
+    "authority_revision": "1fc35f08a2937b10a2a3c15abe4b7ed39245b64e",
+    "cloudbank_provenance_path": "config/canon_provenance.json",
+    "policy": "CanonRec controls character identity authority. This CloudBank overlay resolves runtime references and preserves history; it cannot promote or replace CanonRec canon."
+  },
+  "entities": [
+    {
+      "entity_key": "ORION.ENTITY.0039",
+      "entity_type": "human",
+      "preferred_name": "Tobias Qin",
+      "name_aliases": [
+        "Tobias Qin"
+      ],
+      "current_identifier": "SIM_002",
+      "identity_confidence": "HIGH",
+      "identity_authority": {
+        "repository": "AUo959/CanonRec",
+        "path": "canon/L1/characters/ORION.ENTITY.0039__tobias-qin.md",
+        "claim": "Stable person identity and current preferred name",
+        "confidence": "HIGH"
+      },
+      "identifiers": [
+        {
+          "identifier": "ENG_010",
+          "status": "historical",
+          "sequence": 1,
+          "effective_date": "2025-11-09",
+          "roster_version": "1.1",
+          "role": "Principal Engineer, Narrative Logic Interface",
+          "division": "Operations Staff",
+          "clearance": "L3_RESEARCH",
+          "sources": [
+            {
+              "repository": "AUo959/aurora-cloudbank-symbolic",
+              "path": "simulation/TOBIAS_QIN_CHARACTER_PROFILE.md",
+              "claim": "Historical ENG_010 identifier, title, and L3_RESEARCH clearance",
+              "confidence": "HIGH"
+            },
+            {
+              "repository": "AUo959/aurora-cloudbank-symbolic",
+              "path": "simulation/L1_CANON_CHARACTER_ROSTER.md",
+              "claim": "Roster v1.4 history records relocation from Operations Staff into Simulation and Cognitive Systems",
+              "confidence": "HIGH"
+            }
+          ],
+          "superseded_by": "SIM_002"
+        },
+        {
+          "identifier": "SIM_002",
+          "status": "current",
+          "sequence": 2,
+          "effective_date": "2025-11-09",
+          "roster_version": "1.4",
+          "role": "Code/Narrative Systems Engineer",
+          "division": "Simulation & Cognitive Systems",
+          "clearance": "L3_TECHNICAL",
+          "sources": [
+            {
+              "repository": "AUo959/aurora-cloudbank-symbolic",
+              "path": "simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json",
+              "claim": "Current SIM_002 assignment, relocation, title, division, and clearance",
+              "confidence": "HIGH"
+            },
+            {
+              "repository": "AUo959/aurora-cloudbank-symbolic",
+              "path": "ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
+              "claim": "Current CloudBank runtime staff projection uses SIM_002",
+              "confidence": "HIGH"
+            }
+          ],
+          "superseded_by": null
+        }
+      ]
+    },
+    {
+      "entity_key": "ORION.ENTITY.0010",
+      "entity_type": "human",
+      "preferred_name": "Prof. Elena Sorensen",
+      "name_aliases": [
+        "Prof. Elena Sorensen",
+        "Elena Sorensen"
+      ],
+      "current_identifier": "ETH_003",
+      "identity_confidence": "HIGH",
+      "identity_authority": {
+        "repository": "AUo959/CanonRec",
+        "path": "canon/L1/characters/ORION.ENTITY.0010__elena-sorensen.md",
+        "claim": "Stable person identity and preferred name",
+        "confidence": "HIGH"
+      },
+      "identifiers": [
+        {
+          "identifier": "ETH_003",
+          "status": "current",
+          "sequence": 1,
+          "effective_date": "2025-11-09",
+          "roster_version": "1.2",
+          "role": "Cognitive Ethicist",
+          "division": "Command & Ethics (Advisor)",
+          "clearance": "L3_RESEARCH",
+          "sources": [
+            {
+              "repository": "AUo959/aurora-cloudbank-symbolic",
+              "path": "simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json",
+              "claim": "Current ETH_003 assignment, role, division, and clearance",
+              "confidence": "HIGH"
+            }
+          ],
+          "superseded_by": null
+        }
+      ]
+    }
+  ],
+  "quarantined_references": [
+    {
+      "reference": "Prof. Karl Sorensen",
+      "normalized_reference": "prof. karl sorensen",
+      "status": "quarantined_unresolved_reference",
+      "must_not_instantiate": true,
+      "reason": "Phase-3 collaborator prose names Karl, but no independent person record was found. CanonRec and Command & Ethics sources identify Elena Sorensen; the mismatch is not sufficient authority to create or alias a person.",
+      "possible_referent": "ORION.ENTITY.0010",
+      "sources": [
+        {
+          "repository": "AUo959/aurora-cloudbank-symbolic",
+          "path": "simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json",
+          "claim": "Conflicting Karl Sorensen collaborator reference",
+          "confidence": "LOW"
+        },
+        {
+          "repository": "AUo959/CanonRec",
+          "path": "canon/L1/characters/ORION.ENTITY.0010__elena-sorensen.md",
+          "claim": "Authoritative Elena Sorensen identity and Tobias collaboration context",
+          "confidence": "HIGH"
+        }
+      ]
+    }
+  ]
+}

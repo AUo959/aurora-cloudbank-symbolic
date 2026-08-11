@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 
 
@@ -16,9 +17,11 @@ RESOLVER = REPO_ROOT / "simulation" / "gumas" / "tactical_battle.py"
 
 
 def _load_resolver():
-    spec = importlib.util.spec_from_file_location("gumas_tactical_battle", RESOLVER)
+    module_name = "gumas_tactical_battle"
+    spec = importlib.util.spec_from_file_location(module_name, RESOLVER)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
     spec.loader.exec_module(module)
     return module
 

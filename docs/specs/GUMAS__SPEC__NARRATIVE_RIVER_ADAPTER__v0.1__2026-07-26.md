@@ -19,8 +19,10 @@ related_artifacts:
 
 ### Complete Specification v0.1.0
 
-**Target environment:** Aurora CloudBank Symbolic / GUMAS L2 narrative workflow  
-**Primary function:** Translate persistent RiverCycle state into scene-level causal constraints for prose generation and revision.  
+**Target environment:** Aurora CloudBank Symbolic / GUMAS L2 narrative workflow
+
+**Primary function:** Translate persistent RiverCycle state into scene-level causal constraints for prose generation and revision.
+
 **Design signature:** Built for consistency, clarity, and care.
 
 ## 0. Executive Summary

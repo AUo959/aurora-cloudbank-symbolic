@@ -361,6 +361,12 @@ def _check_historical_locus_dispositions(
     locus: Dict[str, Any],
     blockers: List[str],
 ) -> None:
+    expected_description = (
+        "Orion Station is stationed at a Lagrange point in real space; "
+        "the exact libration point and primary-body system remain unresolved."
+    )
+    if locus.get("safe_runtime_description") != expected_description:
+        blockers.append("runtime orbital description exceeds the resolved locus claim")
     historical = locus.get("historical_claims")
     expected = {
         "high_inclination_synchronous_orbit_38600_km": (

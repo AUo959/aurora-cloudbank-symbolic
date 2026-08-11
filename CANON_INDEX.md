@@ -19,6 +19,7 @@ canon; it does not make CloudBank the sole authority repository.
 | CanonRec source revision, mirror hashes, staff projection authority, and sync boundary | `docs/CANON_PROVENANCE.md` |
 | Machine-readable provenance receipt | `config/canon_provenance.json` |
 | L1 machine-readable preflight/runtime baseline | `config/l1_runtime_baseline.json` |
+| L1 fleet authority/projection boundary and source hashes | `config/l1_fleet_authority_receipt.json` |
 | CloudBank runtime canon consistency gate | `tests/test_canon_consistency.py` |
 
 **Staff authority ruling (2026-08-08):** CanonRec controls staff canon authority.
@@ -51,6 +52,9 @@ projection conflict must not override CanonRec canon.
 | GUMAS 9-node orbital network | `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` |
 | Halo Array, relay-crew pairings | `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` |
 | Ethics governance, Picard_Delta_3 | `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` |
+| Fleet identity/class/autonomy runtime projection | `config/l1_fleet_authority_receipt.json` + `src/entities/fleet/` |
+| Historical fleet design and 2025 mission snapshots | `simulation/fleet/` (provenance only for current-run mission/location state) |
+| Legacy Dark Matter fleet aggregate | `.aurora/canonical/fleet.json` (provenance only; not L1 genesis authority) |
 
 ## Characters
 
@@ -66,6 +70,7 @@ projection conflict must not override CanonRec canon.
 | ------- | ---------------------- |
 | L1 preflight and INIT protocol | `.aurora/SIMULATION_INIT_PROTOCOL.md` |
 | Live L1 runtime implementation | `simulation/l1_runtime.py` |
+| Deterministic fleet world process and observation providers | `simulation/l1_fleet.py` |
 | Canonical historical Phase-1 benchmark | `simulation/orion_station_simulation_v2.py` + `simulation/ORION_SIMULATION_PROTOCOL.md` |
 | Historical `.aurora/SIMULATION_STATE.json` | provenance/reference only; not L1 genesis authority |
 | GUMAS Galactic Simulation Environment | `docs/architecture/LAYER_ARCHITECTURE.md` |

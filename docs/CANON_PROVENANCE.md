@@ -120,6 +120,39 @@ the first live L1 run. It records:
 
 This baseline does not promote CloudBank runtime facts into CanonRec.
 
+## Fleet projection authority decision — 2026-08-08
+
+CloudBank contains three distinct fleet lineages and they do not carry equal
+current-run authority:
+
+- `src/entities/fleet/` is the active ORF/ORS/ORP/ORD implementation and
+  identity registry;
+- `simulation/fleet/` supplies detailed design provenance, but its dated
+  `current_mission` and `current_deployment_status` fields are 2025 snapshots;
+- `.aurora/canonical/fleet.json` is a conflicting Dark Matter-era aggregate and
+  remains legacy provenance only.
+- `src/integrations/fleet_bridge.py` is a legacy API consumer with synthetic
+  class, dimension, fuel, and `DOCKED` defaults; it is not an L1 state provider
+  or authority source.
+
+The machine-readable reconciliation is
+`config/l1_fleet_authority_receipt.json`, referenced and hash-pinned by
+`config/l1_runtime_baseline.json`. It authorizes a
+`runtime_projection_non_authoritative` of twelve ORF/ORS/ORP/ORD identities,
+classes, and autonomy classes. It does not assert that CanonRec currently
+contains an authoritative fleet registry and does not promote CloudBank fleet
+material into CanonRec.
+
+Current mission, status, proximity, and docking classes are generated only as
+run-scoped deterministic L1 state. No 2025 status, coordinate, crew assignment,
+or mission counter becomes 2026 run truth. Exact navigation trajectories remain
+quarantined by the orbital-locus boundary.
+
+`modules/ord/` remains an MCP validation policy library. A policy
+`DispatchOrder` does not imply physical drone flight. Physical ORD missions
+require the explicit `simulation/l1_fleet.py` adapter plus a complete Triplex
+governance receipt.
+
 ## Refresh procedure
 
 From the canonical Aurora root workspace:

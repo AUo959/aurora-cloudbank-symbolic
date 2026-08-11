@@ -18,9 +18,10 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SIMULATION_DIR = PROJECT_ROOT / "simulation"
-SIMULATION_PATH = str(SIMULATION_DIR)
-if SIMULATION_PATH not in sys.path:
-    sys.path.insert(0, SIMULATION_PATH)
+for import_path in (PROJECT_ROOT, SIMULATION_DIR):
+    value = str(import_path)
+    if value not in sys.path:
+        sys.path.insert(0, value)
 
 from l1_runtime import OrionL1Runtime, PreflightError  # noqa: E402
 

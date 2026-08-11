@@ -8,7 +8,9 @@
 #   - queue.json validates against queue_schema.json
 #     (blocking here; the same tests run non-blocking in the full-suite pass
 #     of Aurora CI (Minimal) — see tests/test_work_queue_schema.py).
-#   - QUEUE.md, NEXT_UP.md, and OPEN_GATES.md are in sync with queue.json.
+#   - QUEUE.md and NEXT_UP.md are in sync with queue.json.
+#   - OPEN_GATES.md is in sync with queue.json + gate_registry.json, and the
+#     two canonical sources do not contain an unacknowledged contradiction.
 #
 # If drift is detected the job fails with a clear remediation message.
 # Fix: run  python ops/work_queue/sync_queue.py  and push the result.
@@ -82,7 +84,7 @@ jobs:
         run: |
           pytest --noconftest tests/test_work_queue_schema.py tests/test_queue_issue_ingestion.py tests/test_gate_escalation.py -q --no-header
 
-      - name: Check generated views are in sync with queue.json
+      - name: Check generated views and gate authority are coherent
         id: drift_check
         run: |
           python ops/work_queue/sync_queue.py --check
@@ -95,7 +97,7 @@ jobs:
           echo "  QUEUE VIEW DRIFT DETECTED"
           echo "========================================"
           echo ""
-          echo "  One or more generated queue views are out of sync with queue.json."
+          echo "  A generated view is stale or queue/gate-registry authority diverges."
           echo ""
           echo "  To fix:"
           echo "    python ops/work_queue/sync_queue.py"
@@ -104,7 +106,8 @@ jobs:
           echo "    git push"
           echo ""
           echo "  DO NOT edit QUEUE.md, NEXT_UP.md, or OPEN_GATES.md by hand."
-          echo "  They are generated artifacts. The source of truth is queue.json."
+          echo "  They are generated artifacts. Canonical task state is queue.json;"
+          echo "  canonical human-gate state is gate_registry.json."
           echo ""
           echo "  See: https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1147"
           echo "========================================"

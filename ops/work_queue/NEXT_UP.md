@@ -11,7 +11,7 @@ _Generated: `2026-07-16T00:36:36Z` — edit `queue.json`, run `sync_queue.py`_
 
 ## 🟢 Ready to Work
 
-Items with `status: open` and all dependencies resolved.
+Items with an `open` or `ready` lifecycle and all dependencies resolved.
 
 | Rank | ID | Title | Tags |
 |---|---|---|---|

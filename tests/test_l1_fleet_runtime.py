@@ -615,7 +615,7 @@ def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(
 
     assert loaded.manifest.tick == 7
     assert loaded.manifest.station_cycle_minute == 21
-    assert loaded.manifest.runtime_contract_version == "1.2.0"
+    assert loaded.manifest.runtime_contract_version == "1.3.0"
     assert (
         loaded.manifest.fleet_authority_receipt_sha256
         == resumed.baseline["authority"]["fleet"]["receipt_sha256"]

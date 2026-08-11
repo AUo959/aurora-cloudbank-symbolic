@@ -721,6 +721,34 @@ def test_locus_preflight_rejects_broad_unknown_status(tmp_path: Path):
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "historical_claim",
+    [
+        "high_inclination_synchronous_orbit_38600_km",
+        "earth_moon_l4",
+    ],
+)
+def test_locus_preflight_rejects_reactivated_historical_claim(
+    tmp_path: Path,
+    historical_claim: str,
+):
+    baseline = _baseline_payload()
+    baseline["orbital_locus"]["historical_claims"][historical_claim] = (
+        "active_current_canon"
+    )
+    path = tmp_path / "conflicting-locus-baseline.json"
+    path.write_text(json.dumps(baseline), encoding="utf-8")
+
+    report = OrionL1Runtime(baseline_path=path).preflight()
+
+    assert report["ready"] is False
+    assert (
+        f"historical orbital claim {historical_claim} is active or lacks its safe disposition"
+        in report["blockers"]
+    )
+
+
+@pytest.mark.unit
 def test_locus_preflight_rejects_zero_latency_model(tmp_path: Path):
     baseline = _baseline_payload()
     baseline["orbital_locus"]["communications_latency"][

@@ -186,7 +186,8 @@ def test_shadowfax_is_observable_but_never_routine_activated():
     runtime.advance(elapsed_minutes=1)
     after = asdict(state.fleet.entities["ORD-3"])
     shadowfax_record = next(
-        record for record in runtime.observe("drones")["records"]
+        record
+        for record in runtime.observe("drones")["records"]
         if record["fleet_id"] == "ORD-3"
     )
 
@@ -434,6 +435,39 @@ def test_bound_persisted_fleet_requires_exact_authority_identity_set(tmp_path: P
 
     with pytest.raises(PreflightError, match="persisted fleet state is invalid"):
         OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_bound_persisted_fleet_requires_receipt_identity_metadata(tmp_path: Path):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=99,
+        run_root=tmp_path,
+    )
+    state_path = tmp_path / state.manifest.run_id / "state.json"
+    baseline_payload = json.loads(state_path.read_text(encoding="utf-8"))
+    tamper_cases = (
+        ("display_name", "Tampered Liora"),
+        ("asset_class", "tampered_asset_class"),
+        ("autonomy_class", "swarm_autonomous"),
+        ("routine_mission_class", "tampered_routine"),
+        ("operating_location_class", "station_proximity"),
+        ("standby_location_class", "orion_hangar"),
+        ("provenance.identity_source_path", "tampered/identity.py"),
+        ("provenance.design_source_path", "tampered/design.json"),
+    )
+
+    for field, value in tamper_cases:
+        payload = json.loads(json.dumps(baseline_payload))
+        liora = payload["fleet"]["entities"]["ORS-02"]
+        if field.startswith("provenance."):
+            liora["provenance"][field.split(".", 1)[1]] = value
+        else:
+            liora[field] = value
+        state_path.write_text(json.dumps(payload), encoding="utf-8")
+        with pytest.raises(PreflightError, match="persisted fleet state is invalid"):
+            OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
 
 
 @pytest.mark.unit

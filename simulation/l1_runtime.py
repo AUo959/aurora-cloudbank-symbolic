@@ -1111,6 +1111,8 @@ class OrionL1Runtime:
                     "persisted contract 1.1.0 cannot claim a fleet receipt digest"
                 )
             return
+        if manifest.runtime_contract_version == "1.2.0" and digest is None:
+            return
         if digest != self._require_fleet_receipt_sha256():
             raise PreflightError(
                 "persisted fleet authority receipt digest does not match runtime"
@@ -1278,6 +1280,10 @@ class OrionL1Runtime:
             raise PreflightError(
                 "persisted fleet identities do not match runtime authority receipt"
             ) from exc
+        if state.manifest.fleet_authority_receipt_sha256 is None:
+            state.manifest.fleet_authority_receipt_sha256 = (
+                self._require_fleet_receipt_sha256()
+            )
         state.manifest.runtime_contract_version = current_version
 
     def _validate_loaded_communications(self, state: L1RunState) -> None:

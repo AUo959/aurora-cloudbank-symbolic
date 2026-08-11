@@ -547,10 +547,8 @@ def test_bound_persisted_fleet_requires_receipt_identity_metadata(tmp_path: Path
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("digest", [None, "0" * 64])
-def test_persisted_run_requires_exact_fleet_receipt_digest(
+def test_persisted_run_rejects_mismatched_fleet_receipt_digest(
     tmp_path: Path,
-    digest: str | None,
 ):
     runtime = OrionL1Runtime()
     state = runtime.init_run(
@@ -560,14 +558,36 @@ def test_persisted_run_requires_exact_fleet_receipt_digest(
     )
     state_path = tmp_path / state.manifest.run_id / "state.json"
     payload = json.loads(state_path.read_text(encoding="utf-8"))
-    if digest is None:
-        payload["manifest"].pop("fleet_authority_receipt_sha256")
-    else:
-        payload["manifest"]["fleet_authority_receipt_sha256"] = digest
+    payload["manifest"]["fleet_authority_receipt_sha256"] = "0" * 64
     state_path.write_text(json.dumps(payload), encoding="utf-8")
 
     with pytest.raises(PreflightError, match="receipt digest does not match"):
         OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+
+@pytest.mark.unit
+def test_pre_digest_v1_2_run_binds_digest_after_full_fleet_validation(
+    tmp_path: Path,
+):
+    runtime = OrionL1Runtime()
+    state = runtime.init_run(
+        cloudbank_revision=CLOUDBANK_SHA,
+        seed=99,
+        run_root=tmp_path,
+    )
+    state_path = tmp_path / state.manifest.run_id / "state.json"
+    payload = json.loads(state_path.read_text(encoding="utf-8"))
+    payload["manifest"].pop("fleet_authority_receipt_sha256")
+    state_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    loaded = OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
+
+    assert (
+        loaded.manifest.fleet_authority_receipt_sha256
+        == runtime.baseline["authority"]["fleet"]["receipt_sha256"]
+    )
+    persisted = json.loads(state_path.read_text(encoding="utf-8"))
+    assert "fleet_authority_receipt_sha256" not in persisted["manifest"]
 
 
 @pytest.mark.unit

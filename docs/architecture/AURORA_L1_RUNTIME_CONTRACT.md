@@ -315,11 +315,12 @@ later explicit run mutation, including advancement, governed action, or the
 normal recording of an observation into the run-scoped epistemic ledgers.
 Loading by itself remains non-mutating.
 
-Current-contract persisted runs must carry the exact fleet-receipt digest and
-must match the receipt bytes verified by preflight. A current-contract state
-created before that digest was recorded is blocked rather than silently rebound
-to a later receipt; compatibility requires separate evidence and an explicit
-migration decision.
+Current-contract persisted runs with a fleet-receipt digest must match the
+receipt bytes verified by preflight. A `1.2.0` state created before the digest
+field was introduced may bind the verified digest in memory only after its
+complete bound fleet projection and governed ORD adapter evidence pass current
+validation. Loading remains non-mutating; the digest is persisted only by a
+later explicit run mutation. A present but mismatched digest is always rejected.
 
 Run persistence is rejected if the requested run root is inside the repository.
 The default is external user state under `~/.aurora/l1-runs`.

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -193,7 +194,7 @@ def normalize_reference(reference: str) -> str:
 
 
 def _validate_authority_revision(value: Any) -> None:
-    if not isinstance(value, str) or len(value) != 40:
+    if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{40}", value) is None:
         raise CharacterIdentityError("identity authority revision must be a git SHA")
     provenance = _read_mapping(CANON_PROVENANCE_PATH, "canon provenance")
     surfaces = _list(provenance.get("resolved_surfaces"), "resolved_surfaces")

@@ -135,7 +135,8 @@
           }
         },
         "superseded_by": {
-          "type": ["string", "null"]
+          "type": ["string", "null"],
+          "minLength": 1
         }
       }
     },
@@ -223,7 +224,8 @@
           "minLength": 1
         },
         "possible_referent": {
-          "type": ["string", "null"]
+          "type": ["string", "null"],
+          "minLength": 1
         },
         "sources": {
           "type": "array",

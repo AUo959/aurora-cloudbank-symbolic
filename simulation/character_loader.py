@@ -24,16 +24,26 @@ from typing import Dict, List, Optional, Set
 import re
 import logging
 
-from character_identity import (
-    CharacterIdentityRegistry,
-)
+try:
+    from .character_identity import (
+        CharacterIdentity,
+        CharacterIdentityError,
+        CharacterIdentityRegistry,
+    )
+except ImportError:  # Direct-script compatibility.
+    from character_identity import (
+        CharacterIdentity,
+        CharacterIdentityError,
+        CharacterIdentityRegistry,
+    )
 
 
 @dataclass
 class CharacterProfile:
     """Structured character data from L1 Canon Roster"""
     # Core Identity
-    character_id: str  # e.g., "ENG_010"
+    # Current assignment identifier after identity-continuity resolution.
+    character_id: str  # e.g., "SIM_002"
     name: str
     role: str
     title: str
@@ -63,7 +73,9 @@ class CharacterProfile:
     # Metadata
     alignment: Optional[str] = None
     version_added: str = "1.0"
+    # Stable CanonRec identity; unlike assignment IDs, it does not change.
     stable_entity_key: Optional[str] = None
+    # Identifier written in the source roster section before resolution.
     source_character_id: Optional[str] = None
     historical_identifiers: List[str] = field(default_factory=list)
     identity_confidence: Optional[str] = None
@@ -113,14 +125,18 @@ class CharacterLoader:
             try:
                 char = self._parse_character_section(name, section)
                 if char:
-                    self._loaded_profiles.append(char)
-                    self.characters[char.name] = char
-                    self._index_character(char)
+                    self._retain_profile(char)
                     self.logger.debug(f"Loaded character: {char.name} ({char.character_id})")
             except Exception as e:
                 self.logger.error(f"Failed to parse character {name}: {e}")
                 continue
         
+        self.characters = {
+            character.name: character for character in self._loaded_profiles
+        }
+        self._reference_index.clear()
+        for character in self._loaded_profiles:
+            self._index_character(character)
         self.logger.info(f"Loaded {len(self.characters)} characters from roster")
     
     def _parse_character_section(self, name: str, section: str) -> Optional[CharacterProfile]:
@@ -148,12 +164,11 @@ class CharacterLoader:
         # Extract identifiers
         clearance = extract_field(r"\*\*Clearance:\*\*\s*(.+?)$", re.MULTILINE) or "L2_STANDARD"
         source_character_id = extract_field(r"\*\*ID:\*\*\s*(.+?)$", re.MULTILINE) or "UNKNOWN"
-        identity = self.identity_registry.resolve(source_character_id)
-        if identity is None:
-            identity = self.identity_registry.resolve(name)
+        identity = self._resolve_roster_identity(name, source_character_id)
         character_id = (
             identity.current_identifier if identity is not None else source_character_id
         )
+
         default_contact = f"{name.lower().replace(' ', '.')}@orion.station"
         contact = extract_field(r"\*\*Contact:\*\*\s*(.+?)$", re.MULTILINE) or default_contact
         symbolic_tag = extract_field(r"\*\*Symbolic Tag:\*\*\s*`(.+?)`", re.MULTILINE) or "s.tag::unknown"
@@ -181,7 +196,7 @@ class CharacterLoader:
         
         return CharacterProfile(
             character_id=character_id,
-            name=name,
+            name=(identity.preferred_name if identity is not None else name),
             role=role,
             title=title,
             division=division,
@@ -207,6 +222,43 @@ class CharacterLoader:
                 identity.identity_confidence if identity is not None else None
             ),
         )
+
+    def _resolve_roster_identity(
+        self,
+        name: str,
+        source_character_id: str,
+    ) -> Optional[CharacterIdentity]:
+        identifier_identity = self.identity_registry.resolve(source_character_id)
+        name_identity = self.identity_registry.resolve(name)
+        if (
+            identifier_identity is not None
+            and name_identity is not None
+            and identifier_identity.entity_key != name_identity.entity_key
+        ):
+            raise CharacterIdentityError(
+                "character roster name and identifier resolve to different people"
+            )
+        return identifier_identity or name_identity
+
+    def _retain_profile(self, character: CharacterProfile) -> None:
+        """Keep at most one profile for each stable person identity."""
+        if character.stable_entity_key is None:
+            self._loaded_profiles.append(character)
+            return
+        for index, existing in enumerate(self._loaded_profiles):
+            if existing.stable_entity_key != character.stable_entity_key:
+                continue
+            if (
+                character.source_character_id == character.character_id
+                and existing.source_character_id != existing.character_id
+            ):
+                self._loaded_profiles[index] = character
+            self.logger.warning(
+                "Collapsed duplicate roster sections for stable identity %s",
+                character.stable_entity_key,
+            )
+            return
+        self._loaded_profiles.append(character)
 
     def _index_character(self, character: CharacterProfile) -> None:
         references = {

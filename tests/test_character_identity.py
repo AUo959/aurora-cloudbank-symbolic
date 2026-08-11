@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import importlib
 import json
 import sys
 from pathlib import Path
@@ -109,7 +110,7 @@ def test_character_loader_resolves_historical_id_without_losing_source_id(
 
 
 @pytest.mark.unit
-def test_loader_validation_detects_duplicate_person_after_id_migration(
+def test_loader_collapses_duplicate_person_before_simulation_consumers(
     tmp_path: Path,
 ):
     roster = tmp_path / "duplicate-migration-roster.md"
@@ -122,10 +123,12 @@ def test_loader_validation_detects_duplicate_person_after_id_migration(
 
     loader = CharacterLoader(roster_path=roster)
 
-    assert (
-        "Duplicate person detected through historical/current ID migration"
-        in loader.validate_roster()
-    )
+    assert len(loader.get_all_characters()) == 1
+    profile = loader.get_all_characters()[0]
+    assert profile.name == "Tobias Qin"
+    assert profile.source_character_id == "SIM_002"
+    assert profile.stable_entity_key == "ORION.ENTITY.0039"
+    assert loader.validate_roster() == []
 
 
 @pytest.mark.unit
@@ -147,6 +150,14 @@ def test_karl_sorensen_reference_is_quarantined_not_aliased_or_instantiated(
     assert loader.get_all_characters() == []
     with pytest.raises(QuarantinedIdentityReference):
         loader.get_character("Prof. Karl Sorensen")
+
+    roster.write_text(
+        "# Conflicted roster\n\n**Version:** 1.4\n"
+        + _roster_section("Prof. Karl Sorensen", "ETH_003"),
+        encoding="utf-8",
+    )
+    loader = CharacterLoader(roster_path=roster)
+    assert loader.get_all_characters() == []
 
 
 @pytest.mark.unit
@@ -176,6 +187,22 @@ def test_identity_registry_revision_must_match_staff_provenance(tmp_path: Path):
         match="does not match staff provenance",
     ):
         CharacterIdentityRegistry(_write_registry(tmp_path, payload))
+
+
+@pytest.mark.unit
+def test_identity_registry_revision_must_be_lowercase_hex(tmp_path: Path):
+    payload = _registry_payload()
+    payload["authority_boundary"]["authority_revision"] = "g" * 40
+
+    with pytest.raises(CharacterIdentityError, match="must be a git SHA"):
+        CharacterIdentityRegistry(_write_registry(tmp_path, payload))
+
+
+@pytest.mark.unit
+def test_character_loader_supports_package_import():
+    module = importlib.import_module("simulation.character_loader")
+
+    assert module.CharacterLoader is not None
 
 
 @pytest.mark.unit

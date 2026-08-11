@@ -4,6 +4,13 @@
 repos:
   - repo: local
     hooks:
+      - id: tracked-path-casefold
+        name: tracked-path-casefold
+        entry: python scripts/check_casefold_collisions.py --git-ls-files
+        language: python
+        additional_dependencies: ['GitPython==3.1.45']
+        pass_filenames: false
+        stages: [pre-commit]
       - id: aurora-pre-commit
         name: aurora-pre-commit
         entry: bash scripts/run_pre_commit.sh

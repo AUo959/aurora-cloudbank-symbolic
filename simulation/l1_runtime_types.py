@@ -408,6 +408,7 @@ class RunManifest:
     created_at: str
     cloudbank_revision: str
     canonrec_revision: str
+    fleet_authority_receipt_sha256: Optional[str]
     seed: int
     station_cycle_length_minutes: int
     station_cycle_minute: int
@@ -606,6 +607,10 @@ def _manifest_from_payload(payload: Dict[str, Any]) -> RunManifest:
         ),
         canonrec_revision=_string(
             payload.get("canonrec_revision"), "canonrec_revision"
+        ),
+        fleet_authority_receipt_sha256=_optional_string(
+            payload.get("fleet_authority_receipt_sha256"),
+            "fleet_authority_receipt_sha256",
         ),
         seed=required_int(payload.get("seed"), "seed"),
         station_cycle_length_minutes=required_int(

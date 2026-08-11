@@ -50,6 +50,7 @@ export class CommandNode {
     this.anchorSeed = options.anchorSeed || DEFAULT_ANCHOR_SEED;
     this.ethicsProtocol = options.ethicsProtocol || getDefaultProtocol();
     this.enableEncryption = options.enableEncryption !== false && isEncryptionAvailable();
+    this.persistDiagnostics = options.persistDiagnostics !== false;
 
     // Initialize router
     this.router = new CommandRouter({
@@ -88,6 +89,15 @@ export class CommandNode {
    * Load diagnostics state
    */
   _loadDiagnostics() {
+    if (!this.persistDiagnostics) {
+      return {
+        commandCount: 0,
+        processedCount: 0,
+        lastCommandAt: null,
+        load: 0,
+      };
+    }
+
     const diagPath = path.join(process.cwd(), 'diagnostics.json');
     try {
       if (fs.existsSync(diagPath)) {
@@ -108,6 +118,10 @@ export class CommandNode {
    * Save diagnostics state
    */
   _saveDiagnostics() {
+    if (!this.persistDiagnostics) {
+      return;
+    }
+
     const diagPath = path.join(process.cwd(), 'diagnostics.json');
     try {
       fs.writeFileSync(diagPath, JSON.stringify(this.diagnostics, null, 2));

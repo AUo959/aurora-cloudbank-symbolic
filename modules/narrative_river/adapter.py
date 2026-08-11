@@ -42,7 +42,13 @@ class NarrativeRiverAdapter:
         )
         payload["canon_snapshot"] = snapshot
         payload.setdefault("schema_version", SUPPORTED_SCHEMA_VERSION)
-        payload.setdefault("frame_id", self.deterministic_frame_id(payload["scene_id"], payload["schema_version"]))
+        scene_id = payload.get("scene_id")
+        if not isinstance(scene_id, str) or not scene_id.strip():
+            raise ValueError("scene_request must include a non-empty scene_id")
+        payload.setdefault(
+            "frame_id",
+            self.deterministic_frame_id(scene_id, payload["schema_version"]),
+        )
 
         if prior_delta is not None:
             delta = prior_delta if isinstance(prior_delta, SceneRiverDelta) else SceneRiverDelta.model_validate(prior_delta)

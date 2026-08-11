@@ -150,6 +150,21 @@ def test_unsupported_schema_versions_fail_closed() -> None:
         SceneRiverDelta.model_validate({"schema_version": "99.0.0", "scene_id": "S"})
 
 
+@pytest.mark.parametrize("scene_id", [None, "", "   ", 7])
+def test_build_frame_rejects_missing_or_invalid_scene_id(scene_id: object) -> None:
+    payload = frame_payload()
+    if scene_id is None:
+        payload.pop("scene_id")
+    else:
+        payload["scene_id"] = scene_id
+
+    with pytest.raises(ValueError, match="non-empty scene_id"):
+        NarrativeRiverAdapter().build_frame(
+            scene_request=payload,
+            canon_snapshot=canon_snapshot(),
+        )
+
+
 def test_build_frame_does_not_mutate_inputs_and_carries_delta() -> None:
     adapter = NarrativeRiverAdapter()
     request = frame_payload()

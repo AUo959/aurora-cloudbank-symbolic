@@ -20,15 +20,19 @@ from l1_runtime_types import l1_run_state_from_payload  # noqa: E402
 CLOUDBANK_SHA = "f572b8e8204a8fd48f3c8a55d3b1c3cec6603579"
 
 
-@pytest.mark.unit
-def test_contract_v11_payload_cannot_supply_fleet_state() -> None:
+def _runtime_payload() -> dict:
     runtime = OrionL1Runtime()
     runtime.init_run(
         cloudbank_revision=CLOUDBANK_SHA,
         seed=1337,
         persist=False,
     )
-    payload = runtime.export_state()
+    return runtime.export_state()
+
+
+@pytest.mark.unit
+def test_contract_v11_payload_cannot_supply_fleet_state() -> None:
+    payload = _runtime_payload()
     payload["manifest"]["runtime_contract_version"] = "1.1.0"
 
     with pytest.raises(
@@ -40,13 +44,7 @@ def test_contract_v11_payload_cannot_supply_fleet_state() -> None:
 
 @pytest.mark.unit
 def test_contract_v11_payload_without_fleet_still_migrates_from_unbound_state() -> None:
-    runtime = OrionL1Runtime()
-    runtime.init_run(
-        cloudbank_revision=CLOUDBANK_SHA,
-        seed=1337,
-        persist=False,
-    )
-    payload = runtime.export_state()
+    payload = _runtime_payload()
     payload["manifest"]["runtime_contract_version"] = "1.1.0"
     payload.pop("fleet")
 
@@ -55,3 +53,24 @@ def test_contract_v11_payload_without_fleet_still_migrates_from_unbound_state() 
     assert restored.manifest.runtime_contract_version == "1.1.0"
     assert restored.fleet.provider_status == "unbound"
     assert restored.fleet.entities == {}
+
+
+@pytest.mark.unit
+def test_non_ord_asset_cannot_deserialize_as_explicit_ord_adapter_state() -> None:
+    payload = _runtime_payload()
+    vessel = payload["fleet"]["entities"]["ORS-02"]
+    vessel.update(
+        {
+            "status": "operating",
+            "mission_state_class": "active_explicit_adapter",
+            "docking_location_class": "station_proximity",
+            "mission_id": "ord-physical-forged",
+            "mission_class": "physical_reconnaissance",
+        }
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="explicit ORD adapter state is only valid for ORD assets",
+    ):
+        l1_run_state_from_payload(payload)

@@ -342,41 +342,9 @@ class StaffingRunState:
 
     @classmethod
     def from_payload(cls, value: Any) -> "StaffingRunState":
-        if value is None:
-            return cls()
-        payload = _mapping(value, "staffing")
-        personnel_payload = _mapping(payload.get("personnel", {}), "staffing.personnel")
-        state = cls(
-            personnel={
-                _string(
-                    personnel_id, "staffing personnel key"
-                ): _personnel_from_payload(
-                    record,
-                    f"staffing.personnel.{personnel_id}",
-                )
-                for personnel_id, record in personnel_payload.items()
-            },
-            seats={
-                _string(staffing_seat, "staffing seat key"): _seat_from_payload(
-                    record,
-                    f"staffing.seats.{staffing_seat}",
-                )
-                for staffing_seat, record in _mapping(
-                    payload.get("seats", {}), "staffing.seats"
-                ).items()
-            },
-            actions=_mapping_list(payload.get("actions", []), "staffing.actions"),
-            human_complement_delta=_integer(
-                payload.get("human_complement_delta", 0),
-                "staffing.human_complement_delta",
-            ),
-            persona_resolved_delta=_integer(
-                payload.get("persona_resolved_delta", 0),
-                "staffing.persona_resolved_delta",
-            ),
-        )
-        state.validate()
-        return state
+        from l1_staffing_serialization import staffing_run_state_from_payload
+
+        return staffing_run_state_from_payload(value)
 
 
 def plan_staffing_action(
@@ -394,6 +362,16 @@ def plan_staffing_action(
             personnel_id=None,
             rationale="No evidence-backed staffing threshold is met.",
             reasons=(),
+        )
+        decision.validate()
+        return decision
+    if _seat_is_occupied(staffing, demand.staffing_seat):
+        decision = StaffingDecision(
+            demand_id=demand.demand_id,
+            action_type="no_action",
+            personnel_id=None,
+            rationale="The requested staffing seat is already occupied.",
+            reasons=reasons,
         )
         decision.validate()
         return decision
@@ -482,8 +460,10 @@ def transfer_personnel_from_orion(
         raise ValueError("outbound transfer references unknown personnel")
     if personnel.employment_status in {"departed", "off_station"}:
         raise ValueError("personnel is already off Orion")
-    if personnel.employment_status == "contractor":
-        raise ValueError("contractor departure does not change human crew complement")
+    if personnel.employment_status in {"contractor", "visitor"}:
+        raise ValueError(
+            "non-complement personnel departure cannot change human crew complement"
+        )
     before = asdict(personnel)
     personnel.employment_status = "departed"
     personnel.shift_status = "transferred_off_station"
@@ -559,7 +539,8 @@ def record_personnel_observation(
     record.observed_traits.update(copy.deepcopy(observations))
     if provenance not in record.observation_provenance:
         record.observation_provenance.append(provenance)
-    record.persona_resolution = "partially_observed"
+    if record.persona_resolution == "minimal":
+        record.persona_resolution = "partially_observed"
     record.validate()
     staffing.validate()
     return copy.deepcopy(record)
@@ -794,7 +775,17 @@ def _ensure_active_seat(
         raise ValueError("retired staffing seat cannot receive personnel")
     if seat.department != demand.department or seat.role != demand.role:
         raise ValueError("staffing demand conflicts with the existing seat definition")
+    if _seat_is_occupied(staffing, demand.staffing_seat):
+        raise ValueError("occupied staffing seat cannot receive another person")
     return seat
+
+
+def _seat_is_occupied(staffing: StaffingRunState, staffing_seat: str) -> bool:
+    return any(
+        record.staffing_seat == staffing_seat
+        and record.employment_status not in {"departed", "off_station"}
+        for record in staffing.personnel.values()
+    )
 
 
 def _minimal_personnel_record(
@@ -892,116 +883,6 @@ def _lifecycle_action(
 def _stable_id(prefix: str, *parts: str) -> str:
     digest = hashlib.sha256(":".join(parts).encode("utf-8")).hexdigest()[:16]
     return f"{prefix}-{digest}"
-
-
-def _personnel_from_payload(value: Any, name: str) -> PersonnelRecord:
-    payload = _mapping(value, name)
-    observed = _mapping(payload.get("observed_traits", {}), f"{name}.observed_traits")
-    record = PersonnelRecord(
-        personnel_id=_string(payload.get("personnel_id"), f"{name}.personnel_id"),
-        employment_status=_string(
-            payload.get("employment_status"),
-            f"{name}.employment_status",
-        ),
-        department=_string(payload.get("department"), f"{name}.department"),
-        role=_string(payload.get("role"), f"{name}.role"),
-        staffing_seat=_string(payload.get("staffing_seat"), f"{name}.staffing_seat"),
-        clearance_envelope=_string_list(
-            payload.get("clearance_envelope", []),
-            f"{name}.clearance_envelope",
-        ),
-        shift_status=_string(payload.get("shift_status"), f"{name}.shift_status"),
-        workload_status=_string(
-            payload.get("workload_status"),
-            f"{name}.workload_status",
-        ),
-        arrival_provenance=_string(
-            payload.get("arrival_provenance"),
-            f"{name}.arrival_provenance",
-        ),
-        capabilities=_string_list(
-            payload.get("capabilities", []),
-            f"{name}.capabilities",
-        ),
-        persona_resolution=_string(
-            payload.get("persona_resolution", "minimal"),
-            f"{name}.persona_resolution",
-        ),
-        observed_traits={
-            _string(key, f"{name}.observed_traits key"): _string(
-                item,
-                f"{name}.observed_traits.{key}",
-            )
-            for key, item in observed.items()
-        },
-        observation_provenance=_string_list(
-            payload.get("observation_provenance", []),
-            f"{name}.observation_provenance",
-        ),
-    )
-    record.validate()
-    return record
-
-
-def _seat_from_payload(value: Any, name: str) -> StaffingSeatRecord:
-    payload = _mapping(value, name)
-    record = StaffingSeatRecord(
-        staffing_seat=_string(payload.get("staffing_seat"), f"{name}.staffing_seat"),
-        department=_string(payload.get("department"), f"{name}.department"),
-        role=_string(payload.get("role"), f"{name}.role"),
-        status=_string(payload.get("status"), f"{name}.status"),
-        creation_provenance=_string(
-            payload.get("creation_provenance"),
-            f"{name}.creation_provenance",
-        ),
-        retirement_provenance=_optional_string(
-            payload.get("retirement_provenance"),
-            f"{name}.retirement_provenance",
-        ),
-    )
-    record.validate()
-    return record
-
-
-def _mapping_list(value: Any, name: str) -> List[Dict[str, Any]]:
-    if not isinstance(value, list):
-        raise ValueError(f"{name} must be a JSON array")
-    return [
-        copy.deepcopy(_mapping(item, f"{name}[{index}]"))
-        for index, item in enumerate(value)
-    ]
-
-
-def _mapping(value: Any, name: str) -> Dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{name} must be a JSON object")
-    return value
-
-
-def _string_list(value: Any, name: str) -> List[str]:
-    if not isinstance(value, list) or not all(
-        isinstance(item, str) and item for item in value
-    ):
-        raise ValueError(f"{name} must be an array of non-empty strings")
-    return list(value)
-
-
-def _string(value: Any, name: str) -> str:
-    if not isinstance(value, str) or not value:
-        raise ValueError(f"{name} must be a non-empty string")
-    return value
-
-
-def _optional_string(value: Any, name: str) -> Optional[str]:
-    if value is None:
-        return None
-    return _string(value, name)
-
-
-def _integer(value: Any, name: str) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"{name} must be an integer")
-    return value
 
 
 __all__ = [

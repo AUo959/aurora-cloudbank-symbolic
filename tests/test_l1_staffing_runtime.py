@@ -208,6 +208,24 @@ def test_contractor_assignment_does_not_change_human_complement():
 
 
 @pytest.mark.unit
+def test_occupied_seat_turns_repeated_demand_into_no_action():
+    runtime = _runtime()
+    demand = _demand()
+    first_decision = runtime.plan_staffing(demand)
+    runtime.apply_staffing(demand, first_decision, receipt=_receipt())
+
+    repeated = runtime.plan_staffing(
+        _demand(demand_id="staffing-demand-engineering-repeated")
+    )
+
+    assert repeated.action_type == "no_action"
+    assert repeated.rationale == "The requested staffing seat is already occupied."
+    assert runtime.state is not None
+    assert len(runtime.state.staffing.personnel) == 1
+    assert runtime.state.staffing.human_complement_delta == 1
+
+
+@pytest.mark.unit
 def test_new_capability_gap_and_visitor_assignment_are_explicit_need_signals():
     runtime = _runtime()
     demand = _demand(
@@ -228,6 +246,38 @@ def test_new_capability_gap_and_visitor_assignment_are_explicit_need_signals():
         == "visitor"
     )
     assert runtime.state.staffing.human_complement_delta == 0
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("engagement_class", ["contractor", "visitor"])
+def test_non_complement_departure_cannot_decrement_crew(
+    engagement_class: str,
+):
+    runtime = _runtime()
+    demand = _demand(
+        demand_id=f"staffing-demand-{engagement_class}-departure",
+        engagement_class=engagement_class,
+    )
+    action = runtime.apply_staffing(
+        demand,
+        runtime.plan_staffing(demand),
+        receipt=_receipt(),
+    )
+
+    with pytest.raises(ValueError, match="non-complement personnel departure"):
+        runtime.transfer_personnel_off_station(
+            action["personnel_id"],
+            provenance="hr:departure-order:tick-0",
+            rationale="End the temporary Orion assignment.",
+            receipt=_receipt("triplex-temporary-departure"),
+        )
+
+    assert runtime.state is not None
+    assert runtime.state.staffing.human_complement_delta == 0
+    assert (
+        runtime.state.staffing.personnel[action["personnel_id"]].employment_status
+        == engagement_class
+    )
 
 
 @pytest.mark.unit
@@ -331,6 +381,14 @@ def test_progressive_resolution_requires_observation_and_separate_authority():
     assert resolved["canon_status"] == "run_state_not_canon_promotion"
     assert runtime.state.staffing.persona_resolved_delta == 1
     assert runtime.state.staffing.human_complement_delta == 1
+
+    observed_again = runtime.observe_personnel(
+        personnel_id,
+        {"operational_preference": "documents rollback points before changes"},
+        provenance="runtime-observation:incident-8",
+    )
+    assert observed_again.persona_resolution == "persona_resolved_run_state"
+    assert runtime.state.staffing.persona_resolved_delta == 1
 
 
 @pytest.mark.unit

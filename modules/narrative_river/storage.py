@@ -17,6 +17,33 @@ _MANIFEST_SCHEMA_VERSION = "0.1.0"
 _SAFE_NAME = re.compile(r"[^A-Za-z0-9._-]+")
 
 
+def _resolved_input_file(
+    path: str | Path,
+    *,
+    allowed_root: str | Path | None = None,
+) -> Path:
+    """Resolve a regular input file beneath an explicit filesystem root."""
+    root = Path.cwd() if allowed_root is None else Path(allowed_root)
+    try:
+        resolved_root = root.expanduser().resolve(strict=True)
+        resolved = Path(path).expanduser().resolve(strict=True)
+        resolved.relative_to(resolved_root)
+    except (OSError, ValueError) as exc:
+        raise ValueError(f"input path {path} is outside allowed root {root}") from exc
+    if not resolved.is_file():
+        raise ValueError(f"input path is not a regular file: {resolved}")
+    return resolved
+
+
+def _read_input_text(
+    path: str | Path,
+    *,
+    allowed_root: str | Path | None = None,
+) -> tuple[Path, str]:
+    source = _resolved_input_file(path, allowed_root=allowed_root)
+    return source, source.read_text(encoding="utf-8")
+
+
 class NarrativeRiverStore:
     """Store frames and deltas durably without touching simulation or canon repositories."""
 
@@ -175,7 +202,7 @@ class NarrativeRiverStore:
         except (KeyError, TypeError) as exc:
             raise FileNotFoundError(f"no {key} recorded for scene {scene_id}") from exc
         path = self._contained(self.root / relative)
-        text = path.read_text(encoding="utf-8")
+        _source, text = _read_input_text(path, allowed_root=self.root)
         if self._digest(text) != expected_digest:
             raise ValueError(f"stored {key} for scene {scene_id} failed integrity verification")
         return text
@@ -191,13 +218,23 @@ class NarrativeRiverStore:
         return None if not latest else self.load_delta_for_scene(str(latest))
 
 
-def load_frame_file(path: str | Path) -> NarrativeRiverFrame:
-    source = Path(path)
-    text = source.read_text(encoding="utf-8")
-    return loads_json(NarrativeRiverFrame, text) if source.suffix.lower() == ".json" else loads_yaml(NarrativeRiverFrame, text)
+def load_frame_file(
+    path: str | Path,
+    *,
+    allowed_root: str | Path | None = None,
+) -> NarrativeRiverFrame:
+    source, text = _read_input_text(path, allowed_root=allowed_root)
+    if source.suffix.lower() == ".json":
+        return loads_json(NarrativeRiverFrame, text)
+    return loads_yaml(NarrativeRiverFrame, text)
 
 
-def load_delta_file(path: str | Path) -> SceneRiverDelta:
-    source = Path(path)
-    text = source.read_text(encoding="utf-8")
-    return loads_json(SceneRiverDelta, text) if source.suffix.lower() == ".json" else loads_yaml(SceneRiverDelta, text)
+def load_delta_file(
+    path: str | Path,
+    *,
+    allowed_root: str | Path | None = None,
+) -> SceneRiverDelta:
+    source, text = _read_input_text(path, allowed_root=allowed_root)
+    if source.suffix.lower() == ".json":
+        return loads_json(SceneRiverDelta, text)
+    return loads_yaml(SceneRiverDelta, text)

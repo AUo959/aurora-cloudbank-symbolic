@@ -3,12 +3,27 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from .adapter import NarrativeRiverAdapter
 from .models import NarrativeRiverFrame, SceneRiverDelta, ValidationReport
 from .storage import NarrativeRiverStore
+
+
+@dataclass(frozen=True)
+class SceneRunRequest:
+    """Inputs for one explicitly triggered scene lifecycle."""
+
+    scene_request: dict[str, Any]
+    canon_snapshot: dict[str, Any]
+    draft_text: str
+    delta_payload: dict[str, Any]
+    axioms_text: str = ""
+    prior_delta: SceneRiverDelta | dict[str, Any] | None = None
+    auto_prior: bool = True
+    fail_on_error: bool = False
 
 
 class NarrativeRiverWorkflow:
@@ -86,26 +101,18 @@ class NarrativeRiverWorkflow:
         delta = self.adapter.create_delta(payload)
         return delta, self.store.save_delta(delta)
 
-    def run_scene(
-        self,
-        *,
-        scene_request: dict[str, Any],
-        canon_snapshot: dict[str, Any],
-        draft_text: str,
-        delta_payload: dict[str, Any],
-        axioms_text: str = "",
-        prior_delta: SceneRiverDelta | dict[str, Any] | None = None,
-        auto_prior: bool = True,
-        fail_on_error: bool = False,
-    ) -> dict[str, Any]:
+    def run_scene(self, request: SceneRunRequest) -> dict[str, Any]:
         frame, frame_path = self.build_and_store_frame(
-            scene_request=scene_request,
-            canon_snapshot=canon_snapshot,
-            prior_delta=prior_delta,
-            auto_prior=auto_prior,
+            scene_request=request.scene_request,
+            canon_snapshot=request.canon_snapshot,
+            prior_delta=request.prior_delta,
+            auto_prior=request.auto_prior,
         )
-        _prompt, prompt_path = self.render_and_store_prompt(frame, axioms_text=axioms_text)
-        report, report_path = self.validate_and_store_draft(frame, draft_text)
+        _prompt, prompt_path = self.render_and_store_prompt(
+            frame,
+            axioms_text=request.axioms_text,
+        )
+        report, report_path = self.validate_and_store_draft(frame, request.draft_text)
         result: dict[str, Any] = {
             "scene_id": frame.scene_id,
             "frame_id": frame.frame_id,
@@ -118,9 +125,12 @@ class NarrativeRiverWorkflow:
             "scene_closed": False,
             "closed_scene_id": None,
         }
-        if fail_on_error and report.has_errors:
+        if request.fail_on_error and report.has_errors:
             return result
-        delta, delta_path = self.close_scene(frame=frame, delta_payload=delta_payload)
+        delta, delta_path = self.close_scene(
+            frame=frame,
+            delta_payload=request.delta_payload,
+        )
         result.update(
             {
                 "delta_path": str(delta_path),

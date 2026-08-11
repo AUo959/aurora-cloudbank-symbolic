@@ -15,9 +15,9 @@ related_artifacts:
   - Aurora RiverCycle + RiverThread808 + GUMAS Social Pressure Regulator v0.5.0-alpha
 ---
 
-# Narrative River Adapter
+## Narrative River Adapter
 
-## Complete Specification v0.1.0
+### Complete Specification v0.1.0
 
 **Target environment:** Aurora CloudBank Symbolic / GUMAS L2 narrative workflow  
 **Primary function:** Translate persistent RiverCycle state into scene-level causal constraints for prose generation and revision.  
@@ -63,7 +63,7 @@ Until code, tests, and storage are added:
 - scene continuity still depends on human/assistant discipline;
 - no software guarantee exists that pressure, sediment, or consequence will persist between scenes.
 
-# 1. Goals
+## 1. Goals
 
 ## 1.1 Primary goals
 
@@ -99,7 +99,7 @@ The adapter must not:
 - claim persistent memory unless frames are stored and reloaded;
 - allow an L3 metaphor to become a literal L2 event without an explicit translation step.
 
-# 2. System Position
+## 2. System Position
 
 ```text
 CanonRec / Git
@@ -135,7 +135,7 @@ RiverCycle State ─────────────┤
 - **Symbolic boundary:** RiverCycle terms are internal abstractions and must be translated into concrete L2 conditions.
 - **Memory boundary:** A frame persists only when stored in a durable location and reloaded later.
 
-# 3. Core Concepts
+## 3. Core Concepts
 
 ## 3.1 Flow
 
@@ -216,7 +216,7 @@ A salmon return is a downstream result that changes the originating system:
 - a translation error changes future translation standards;
 - a field refit changes later ship design.
 
-# 4. Narrative River Frame
+## 4. Narrative River Frame
 
 ## 4.1 Required top-level fields
 
@@ -267,7 +267,7 @@ narrative_river_frame:
   axiom_checks: {}
 ```
 
-# 5. Persistence Model
+## 5. Persistence Model
 
 The adapter recognizes four persistence classes.
 
@@ -302,7 +302,7 @@ A frame may claim persistence only if:
 
 The adapter must not claim that something is remembered, permanent, or automatically active in future prose unless durable storage and reload behavior prove it.
 
-# 6. Scene Lifecycle
+## 6. Scene Lifecycle
 
 ## 6.1 Pre-scene phase
 
@@ -365,7 +365,7 @@ scene_river_delta:
   next_scene_requirements: []
 ```
 
-# 7. Prose Integration Contract
+## 7. Prose Integration Contract
 
 ## 7.1 Compact prompt contract
 
@@ -397,7 +397,7 @@ Do not use RiverCycle metaphors unless the in-world speaker would naturally do s
 ## 7.2 Surface-language firewall
 
 Internal term | Expected prose translation
----|---
+--- | ---
 pressure | deadline, scrutiny, shield loss, fear, legal exposure
 sediment | unresolved distrust, grievance, conflicting testimony
 reservoir | court order, command discipline, reserve capacity, ritual
@@ -406,7 +406,7 @@ flow | transfer, report, order, supply route, rumor, evidence chain
 nutrient | doctrine learned, trust earned, technical method, legal precedent
 salmon return | later policy or doctrine changed by downstream events
 
-# 8. Eleven-Axiom Validation
+## 8. Eleven-Axiom Validation
 
 Each draft receives `PASS`, `WARN`, `FAIL`, or `NOT_APPLICABLE`, with exact passages cited.
 
@@ -454,7 +454,7 @@ Warn when three-word answers dominate, setup/reversal dialogue repeats, “not X
 
 Fail when scarce assets are spent casually, new capability appears without precedent, an opponent behaves irrationally only to lose, or success arrives without material or institutional cost.
 
-# 9. Additional Validation Rules
+## 9. Additional Validation Rules
 
 ## 9.1 Anti-exposition
 
@@ -480,7 +480,7 @@ Every consequential claim should resolve to direct observation, instrument outpu
 
 Track munitions, fuel, fatigue, Sentinel availability, damage, political capital, time, evidence access, and trust.
 
-# 10. Character Interpretation Profiles
+## 10. Character Interpretation Profiles
 
 The adapter should not reduce characters to personality labels.
 
@@ -530,7 +530,7 @@ character_interpretation_profile:
 - Stress speech: specific about capability and limits.
 - Superior register: frames concerns as operational conditions.
 
-# 11. Institutional Profiles
+## 11. Institutional Profiles
 
 ```yaml
 institution_profile:
@@ -568,7 +568,7 @@ narrative_signals:
     meaning: no single institution can erase the record
 ```
 
-# 12. Implementation Data Models
+## 12. Implementation Data Models
 
 ```python
 from __future__ import annotations
@@ -728,7 +728,7 @@ class NarrativeRiverAdapter:
         raise NotImplementedError
 ```
 
-# 13. Determinism
+## 13. Determinism
 
 Given the same canon snapshot, prior delta, scene request, actor profiles, and configuration, the adapter should produce the same frame ordering, IDs, and computed pressure values.
 
@@ -743,7 +743,7 @@ Some fields remain qualitative and should not be generated solely by formula:
 
 Numeric scores are advisory. They rank attention and expose imbalance; they do not claim psychological precision.
 
-# 14. Storage Layout
+## 14. Storage Layout
 
 ```text
 narrative/
@@ -784,7 +784,7 @@ tests/
   test_dark_star_quiet_lane_frame.py
 ```
 
-# 15. Phase Plan
+## 15. Phase Plan
 
 ## Phase 1 — Passive planning artifact
 
@@ -806,7 +806,7 @@ Add simulation-state import, equipment and scarcity import, RiverCycle pressure 
 
 Add canon-reference validation, canon-candidate extraction, conflict reporting, and optional PR-ready packaging. No automatic promotion.
 
-# 16. Test Plan
+## 16. Test Plan
 
 ## Model tests
 
@@ -852,7 +852,7 @@ A compliant Quiet Lane draft must:
 - avoid RiverCycle terminology in prose;
 - end on a material state change.
 
-# 17. Failure Modes
+## 17. Failure Modes
 
 ## Frame becomes an outline
 
@@ -882,7 +882,7 @@ Contain by labeling evidence status and separating canon-candidate extraction.
 
 Contain by starting with warnings, citing passages, and preserving human override.
 
-# 18. Worked Dark Star Frame — Quiet Lane
+## 18. Worked Dark Star Frame — Quiet Lane
 
 ```yaml
 frame_id: NRF-DARKSTAR-CH05-S02-001
@@ -1042,7 +1042,7 @@ exit_conditions:
   - At least one evidentiary lead is preserved.
 ```
 
-# 19. Worked Post-Scene Delta — Quiet Lane
+## 19. Worked Post-Scene Delta — Quiet Lane
 
 ```yaml
 scene_river_delta:
@@ -1117,7 +1117,7 @@ scene_river_delta:
     - Iven's concealment remains active in crew interaction.
 ```
 
-# 20. Acceptance Criteria for v0.1 Implementation
+## 20. Acceptance Criteria for v0.1 Implementation
 
 ## Models
 
@@ -1145,7 +1145,7 @@ scene_river_delta:
 - Quiet Lane has a complete example frame and post-scene delta.
 - The example includes pressure, sediment, reservoirs, evidence, relationships, scarcity, and exit conditions.
 
-# 21. Operational Use Before Code Exists
+## 21. Operational Use Before Code Exists
 
 For each scene:
 
@@ -1167,7 +1167,7 @@ For each scene:
 
 Manual use is genuine use of the framework, but it is not persistent automation unless frames and deltas are saved.
 
-# 22. Final Design Principle
+## 22. Final Design Principle
 
 The Narrative River Adapter should not make prose sound like RiverCycle.
 

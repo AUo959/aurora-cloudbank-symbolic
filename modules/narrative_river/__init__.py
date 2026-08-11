@@ -37,7 +37,7 @@ from .prompt_contract import render_prompt_contract
 from .serialization import dumps_json, dumps_yaml, loads_json, loads_yaml
 from .storage import NarrativeRiverStore, load_delta_file, load_frame_file
 from .validator import validate_draft
-from .workflow import NarrativeRiverWorkflow
+from .workflow import NarrativeRiverWorkflow, SceneRunRequest
 
 __all__ = [
     "SUPPORTED_SCHEMA_VERSION",
@@ -55,6 +55,7 @@ __all__ = [
     "NarrativeRiverFrame",
     "NarrativeRiverStore",
     "NarrativeRiverWorkflow",
+    "SceneRunRequest",
     "NarrativeSediment",
     "NarrativeState",
     "NarrativeStatus",

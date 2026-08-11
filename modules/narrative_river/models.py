@@ -220,18 +220,23 @@ class NarrativeRiverFrame(StrictModel):
 
     @model_validator(mode="after")
     def validate_collection_ids(self) -> "NarrativeRiverFrame":
-        collections = {
-            "incoming_flows": [item.flow_id for item in self.incoming_flows],
-            "sediment": [item.sediment_id for item in self.sediment],
-            "reservoirs": [item.reservoir_id for item in self.reservoirs],
-            "channel_conditions": [item.channel_id for item in self.channel_conditions],
-            "evidence_state": [item.claim_id for item in self.evidence_state],
-            "actor_interpretations": [item.actor_id for item in self.actor_interpretations],
-            "relationship_state": [item.relation_id for item in self.relationship_state],
-            "institutional_constraints": [item.constraint_id for item in self.institutional_constraints],
-            "equipment_state": [item.asset_id for item in self.equipment_state],
-        }
-        for name, identifiers in collections.items():
+        collections = (
+            ("incoming_flows", self.incoming_flows, "flow_id"),
+            ("sediment", self.sediment, "sediment_id"),
+            ("reservoirs", self.reservoirs, "reservoir_id"),
+            ("channel_conditions", self.channel_conditions, "channel_id"),
+            ("evidence_state", self.evidence_state, "claim_id"),
+            ("actor_interpretations", self.actor_interpretations, "actor_id"),
+            ("relationship_state", self.relationship_state, "relation_id"),
+            (
+                "institutional_constraints",
+                self.institutional_constraints,
+                "constraint_id",
+            ),
+            ("equipment_state", self.equipment_state, "asset_id"),
+        )
+        for name, items, attribute in collections:
+            identifiers = [getattr(item, attribute) for item in items]
             if len(identifiers) != len(set(identifiers)):
                 raise ValueError(f"{name} contains duplicate identifiers")
         return self

@@ -14,6 +14,7 @@ from modules.narrative_river import (
     NarrativeRiverFrame,
     NarrativeRiverStore,
     NarrativeRiverWorkflow,
+    SceneRunRequest,
     SceneRiverDelta,
     dumps_json,
     dumps_yaml,
@@ -144,14 +145,17 @@ def test_unsupported_schema_versions_fail_closed() -> None:
     adapter = NarrativeRiverAdapter()
     payload = frame_payload()
     payload["schema_version"] = "99.0.0"
+    snapshot = canon_snapshot()
     with pytest.raises(ValidationError):
-        adapter.build_frame(scene_request=payload, canon_snapshot=canon_snapshot())
+        adapter.build_frame(scene_request=payload, canon_snapshot=snapshot)
     with pytest.raises(ValidationError):
         SceneRiverDelta.model_validate({"schema_version": "99.0.0", "scene_id": "S"})
 
 
 @pytest.mark.parametrize("scene_id", [None, "", "   ", 7])
 def test_build_frame_rejects_missing_or_invalid_scene_id(scene_id: object) -> None:
+    adapter = NarrativeRiverAdapter()
+    snapshot = canon_snapshot()
     payload = frame_payload()
     if scene_id is None:
         payload.pop("scene_id")
@@ -159,9 +163,9 @@ def test_build_frame_rejects_missing_or_invalid_scene_id(scene_id: object) -> No
         payload["scene_id"] = scene_id
 
     with pytest.raises(ValueError, match="non-empty scene_id"):
-        NarrativeRiverAdapter().build_frame(
+        adapter.build_frame(
             scene_request=payload,
-            canon_snapshot=canon_snapshot(),
+            canon_snapshot=snapshot,
         )
 
 
@@ -180,21 +184,25 @@ def test_build_frame_does_not_mutate_inputs_and_carries_delta() -> None:
 
 
 def test_persistent_frame_requires_storage_receipt() -> None:
+    adapter = NarrativeRiverAdapter()
+    snapshot = canon_snapshot()
     payload = frame_payload()
     payload["narrative_status"].pop("storage_receipt")
     with pytest.raises(ValidationError):
-        NarrativeRiverAdapter().build_frame(scene_request=payload, canon_snapshot=canon_snapshot())
+        adapter.build_frame(scene_request=payload, canon_snapshot=snapshot)
 
 
 def test_ranges_and_duplicate_ids_fail_closed() -> None:
+    adapter = NarrativeRiverAdapter()
+    snapshot = canon_snapshot()
     payload = frame_payload()
     payload["active_pressures"]["tactical"] = 1.2
     with pytest.raises(ValidationError):
-        NarrativeRiverAdapter().build_frame(scene_request=payload, canon_snapshot=canon_snapshot())
+        adapter.build_frame(scene_request=payload, canon_snapshot=snapshot)
     duplicate = frame_payload()
     duplicate["evidence_state"].append(deepcopy(duplicate["evidence_state"][0]))
     with pytest.raises(ValidationError):
-        NarrativeRiverAdapter().build_frame(scene_request=duplicate, canon_snapshot=canon_snapshot())
+        adapter.build_frame(scene_request=duplicate, canon_snapshot=snapshot)
 
 
 def test_advisory_validator_cites_known_failure_patterns() -> None:
@@ -234,11 +242,16 @@ def test_end_to_end_scene_cycle_persists_all_artifacts(tmp_path: Path) -> None:
     store = NarrativeRiverStore(tmp_path / "river")
     workflow = NarrativeRiverWorkflow(store)
     result = workflow.run_scene(
-        scene_request=frame_payload(),
-        canon_snapshot=canon_snapshot(),
-        draft_text="Tessa altered the route after Iven identified the false traffic picture. " * 8,
-        delta_payload=delta_payload(),
-        axioms_text="Write as though the world exists independently of the prose.",
+        SceneRunRequest(
+            scene_request=frame_payload(),
+            canon_snapshot=canon_snapshot(),
+            draft_text=(
+                "Tessa altered the route after Iven identified the false traffic "
+                "picture. " * 8
+            ),
+            delta_payload=delta_payload(),
+            axioms_text="Write as though the world exists independently of the prose.",
+        )
     )
     for key in ("frame_path", "prompt_path", "validation_report_path", "delta_path"):
         assert Path(result[key]).exists()
@@ -276,6 +289,33 @@ def test_manifest_integrity_check_rejects_tampered_delta(tmp_path: Path) -> None
         store.load_latest_delta()
 
 
+def test_manifest_record_cannot_escape_workspace(tmp_path: Path) -> None:
+    store = NarrativeRiverStore(tmp_path / "river")
+    store.root.mkdir(parents=True)
+    outside = tmp_path / "outside.yaml"
+    outside.write_text("scene_id: ESCAPE\n", encoding="utf-8")
+    store.manifest_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "0.1.0",
+                "latest_closed_scene_id": None,
+                "scenes": {
+                    "ESCAPE": {
+                        "frame": {
+                            "path": "../outside.yaml",
+                            "sha256": "0" * 64,
+                        }
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="escapes"):
+        store.load_frame_for_scene("ESCAPE")
+
+
 def test_cli_run_scene_is_a_real_trigger(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     inputs = tmp_path / "inputs"
     inputs.mkdir()
@@ -294,6 +334,8 @@ def test_cli_run_scene_is_a_real_trigger(tmp_path: Path, capsys: pytest.CaptureF
             "run-scene",
             "--workspace",
             str(workspace),
+            "--allowed-root",
+            str(tmp_path),
             "--scene-request",
             str(scene_path),
             "--canon-snapshot",
@@ -322,6 +364,8 @@ def test_cli_fail_on_error_returns_nonzero(tmp_path: Path, capsys: pytest.Captur
             "validate-draft",
             "--workspace",
             str(store.root),
+            "--allowed-root",
+            str(tmp_path),
             "--frame",
             str(frame_path),
             "--draft",
@@ -332,6 +376,31 @@ def test_cli_fail_on_error_returns_nonzero(tmp_path: Path, capsys: pytest.Captur
     assert exit_code == 3
     assert json.loads(capsys.readouterr().out)["has_errors"] is True
     assert frame.scene_id in store.load_manifest()["scenes"]
+
+
+def test_cli_rejects_input_outside_allowed_root(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    allowed_root = tmp_path / "allowed"
+    allowed_root.mkdir()
+    outside = tmp_path / "outside.json"
+    outside.write_text("{}", encoding="utf-8")
+
+    exit_code = main(
+        [
+            "build-frame",
+            "--allowed-root",
+            str(allowed_root),
+            "--scene-request",
+            str(outside),
+            "--canon-snapshot",
+            str(outside),
+        ]
+    )
+
+    assert exit_code == 2
+    assert "outside allowed root" in capsys.readouterr().err
 
 
 def test_safe_scene_names_do_not_collide_after_truncation(tmp_path: Path) -> None:
@@ -347,11 +416,13 @@ def test_run_scene_fail_on_error_does_not_close_or_advance_chain(tmp_path: Path)
     store = NarrativeRiverStore(tmp_path / "river")
     workflow = NarrativeRiverWorkflow(store)
     result = workflow.run_scene(
-        scene_request=frame_payload(),
-        canon_snapshot=canon_snapshot(),
-        draft_text="Neither of them turned it into banter.",
-        delta_payload=delta_payload(),
-        fail_on_error=True,
+        SceneRunRequest(
+            scene_request=frame_payload(),
+            canon_snapshot=canon_snapshot(),
+            draft_text="Neither of them turned it into banter.",
+            delta_payload=delta_payload(),
+            fail_on_error=True,
+        )
     )
     assert result["validation_has_errors"] is True
     assert result["scene_closed"] is False

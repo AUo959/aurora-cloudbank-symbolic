@@ -61,6 +61,7 @@ projection conflict must not override CanonRec canon.
 | Topic | Authoritative Document |
 | ------- | ---------------------- |
 | Canon character roster, roles, IDs | `simulation/L1_CANON_CHARACTER_ROSTER.md` |
+| Stable person keys, historical/current assignment IDs, identity migrations, and quarantined name conflicts | `docs/architecture/CHARACTER_IDENTITY_CONTINUITY.md` + `config/l1_character_identity_registry.json` |
 | Live-run named-human count correction (do not fabricate a 36th named person) | `config/l1_runtime_baseline.json` |
 | Individual character profiles | `config/mesh/memory/` |
 

@@ -21,14 +21,25 @@ from modules.ord.ord_policy_engine import DispatchOrder, DroneType
 DRONE_ID_BY_POLICY_TYPE = {
     DroneType.GAMMA_SWARM: "ORD-1",
     DroneType.DELTA_SCOUT: "ORD-2",
-    DroneType.SHADOWFAX: "ORD-3",
     DroneType.WISP: "ORD-4",
+}
+SHADOWFAX_FLEET_ID = "ORD-3"
+ORD_ADAPTER_ID = "ord_to_l1_physical_mission_v1"
+ORD_POLICY_DOMAIN = "mcp_validation"
+ORD_PHYSICAL_LOCATIONS = {
+    "station_proximity",
+    "external_operating_area",
+    "assigned_host_vessel",
 }
 
 
 def build_initial_fleet_state(receipt: Dict[str, Any]) -> FleetRunState:
     """Build identity-only genesis state without importing dated mission truth."""
-    projection = receipt.get("cloudbank_projection", {})
+    if not isinstance(receipt, dict):
+        raise ValueError("fleet receipt must be an object")
+    projection = receipt.get("cloudbank_projection")
+    if not isinstance(projection, dict):
+        raise ValueError("fleet receipt projection must be an object")
     receipt_id = receipt.get("receipt_id")
     if projection.get("role") != "runtime_projection_non_authoritative":
         raise ValueError("fleet receipt does not define a non-authoritative projection")
@@ -58,6 +69,7 @@ def build_initial_fleet_state(receipt: Dict[str, Any]) -> FleetRunState:
         entities=entities,
     )
     fleet.validate()
+    validate_fleet_identity_projection(fleet, receipt)
     return fleet
 
 
@@ -70,11 +82,44 @@ def _receipt_entities(receipt: Dict[str, Any]) -> list[Dict[str, Any]]:
     return entries
 
 
+def expected_fleet_ids(receipt: Dict[str, Any]) -> frozenset[str]:
+    """Return the exact identity set projected by the authority receipt."""
+    identifiers = []
+    for entry in _receipt_entities(receipt):
+        fleet_id = entry.get("fleet_id")
+        if not isinstance(fleet_id, str) or not fleet_id:
+            raise ValueError("fleet receipt identity must be a non-empty string")
+        identifiers.append(fleet_id)
+    if len(identifiers) != len(set(identifiers)):
+        raise ValueError("fleet receipt identities are duplicated")
+    return frozenset(identifiers)
+
+
+def validate_fleet_identity_projection(
+    fleet: FleetRunState,
+    receipt: Dict[str, Any],
+) -> None:
+    """Fail closed if bound run state omits or invents projected fleet identities."""
+    if fleet.provider_status != "bound":
+        raise ValueError("fleet identity projection requires a bound provider")
+    expected = expected_fleet_ids(receipt)
+    actual = frozenset(fleet.entities)
+    if actual != expected:
+        missing = sorted(expected - actual)
+        extra = sorted(actual - expected)
+        raise ValueError(
+            "bound fleet identities do not match authority receipt "
+            f"(missing={missing}, extra={extra})"
+        )
+
+
 def _entity_from_receipt(
     entry: Dict[str, Any],
     receipt_id: str,
     projection_role: str,
 ) -> FleetEntityState:
+    if not isinstance(entry, dict):
+        raise ValueError("fleet receipt entity must be an object")
     required = (
         "fleet_id",
         "display_name",
@@ -86,7 +131,10 @@ def _entity_from_receipt(
         "operating_location_class",
         "standby_location_class",
     )
-    if any(not isinstance(entry.get(field), str) or not entry[field] for field in required):
+    if any(
+        not isinstance(entry.get(field), str) or not entry[field]
+        for field in required
+    ):
         raise ValueError("fleet receipt entity fields must be non-empty strings")
     entity = FleetEntityState(
         fleet_id=entry["fleet_id"],
@@ -147,6 +195,11 @@ def _advance_entity(
     tick: int,
     elapsed_minutes: int,
 ) -> Dict[str, Any] | None:
+    if entity.fleet_id == SHADOWFAX_FLEET_ID:
+        # Custody/promotion gates are incomplete. Keep ORD-3 observable as a
+        # projected identity, but grant it no physical runtime authority.
+        return None
+
     roll = _deterministic_roll(seed, entity.fleet_id, tick, "fleet-world-process")
     if entity.mission_state_class in {"active_routine", "active_explicit_adapter"}:
         entity.mission_elapsed_minutes += elapsed_minutes
@@ -321,6 +374,7 @@ def drone_observation(state: L1RunState) -> Dict[str, Any]:
             **_entity_observation(entity),
             "physical_state_source": "l1_run_fleet_state",
             "mcp_policy_dispatch_implies_flight": False,
+            "physical_activation_authorized": entity.fleet_id != SHADOWFAX_FLEET_ID,
         }
         for entity in _entities(state)
         if entity.fleet_id.startswith("ORD-")
@@ -410,8 +464,8 @@ class OrdPhysicalMissionProposal:
     docking_location_class: str
     status: str = "proposal_only"
     physical_execution: bool = False
-    policy_domain: str = "mcp_validation"
-    adapter: str = "ord_to_l1_physical_mission_v1"
+    policy_domain: str = ORD_POLICY_DOMAIN
+    adapter: str = ORD_ADAPTER_ID
 
 
 class OrdPhysicalMissionAdapter:
@@ -424,21 +478,29 @@ class OrdPhysicalMissionAdapter:
         physical_mission_class: str,
         docking_location_class: str,
     ) -> OrdPhysicalMissionProposal:
-        if not physical_mission_class.startswith("physical_"):
-            raise ValueError("ORD physical mission class must start with 'physical_'")
-        if docking_location_class not in {
-            "station_proximity",
-            "external_operating_area",
-            "assigned_host_vessel",
-        }:
-            raise ValueError("ORD physical mission location class is unsupported")
-        drone_ids = [DRONE_ID_BY_POLICY_TYPE[item] for item in order.drones_required]
+        self._validate_mission_fields(
+            physical_mission_class,
+            docking_location_class,
+        )
+        drone_ids = []
+        for item in order.drones_required:
+            drone_id = DRONE_ID_BY_POLICY_TYPE.get(item)
+            if drone_id is None:
+                if item == DroneType.SHADOWFAX:
+                    raise GovernanceError(
+                        "SHADOWFAX custody/promotion gates are incomplete; "
+                        "physical activation rejected"
+                    )
+                raise ValueError(f"ORD policy drone type is unsupported: {item}")
+            drone_ids.append(drone_id)
         if not drone_ids:
             raise ValueError("ORD policy order contains no drone requirements")
-        proposal_payload = ":".join(
-            [order.mission_id, physical_mission_class, docking_location_class, *drone_ids]
+        proposal_id = self._proposal_id(
+            order.mission_id,
+            physical_mission_class,
+            docking_location_class,
+            drone_ids,
         )
-        proposal_id = f"ord-physical-{hashlib.sha256(proposal_payload.encode('utf-8')).hexdigest()[:16]}"
         return OrdPhysicalMissionProposal(
             proposal_id=proposal_id,
             policy_mission_id=order.mission_id,
@@ -464,8 +526,9 @@ class OrdPhysicalMissionAdapter:
         fleet.validate()
         return transitions
 
-    @staticmethod
+    @classmethod
     def _validate_activation(
+        cls,
         fleet: FleetRunState,
         proposal: OrdPhysicalMissionProposal,
         receipt: GovernanceReceipt,
@@ -475,14 +538,75 @@ class OrdPhysicalMissionAdapter:
             raise GovernanceError(
                 "Triplex authorization incomplete; ORD physical mission rejected"
             )
-        if proposal.status != "proposal_only" or proposal.physical_execution:
-            raise ValueError("ORD adapter accepts proposal-only policy bridges")
+        cls._validate_proposal(proposal)
         if fleet.provider_status != "bound":
             raise RuntimeError("fleet physical-state provider is unbound")
         if tick != fleet.process_position:
             raise RuntimeError("ORD activation tick does not match fleet replay position")
+
+    @classmethod
+    def _validate_proposal(cls, proposal: OrdPhysicalMissionProposal) -> None:
+        if not isinstance(proposal, OrdPhysicalMissionProposal):
+            raise ValueError("ORD physical mission proposal type is unsupported")
+        if proposal.status != "proposal_only" or proposal.physical_execution:
+            raise ValueError("ORD adapter accepts proposal-only policy bridges")
+        if proposal.policy_domain != ORD_POLICY_DOMAIN or proposal.adapter != ORD_ADAPTER_ID:
+            raise ValueError("ORD physical mission proposal provenance is unsupported")
+        if not isinstance(proposal.policy_mission_id, str) or not proposal.policy_mission_id:
+            raise ValueError("ORD policy mission ID must be a non-empty string")
+        cls._validate_mission_fields(
+            proposal.physical_mission_class,
+            proposal.docking_location_class,
+        )
+        if not proposal.drone_ids or not all(
+            isinstance(drone_id, str) and drone_id for drone_id in proposal.drone_ids
+        ):
+            raise ValueError("ORD physical mission proposal requires drone identities")
         if len(set(proposal.drone_ids)) != len(proposal.drone_ids):
             raise ValueError("ORD physical mission proposal contains duplicate drones")
+        allowed_ids = frozenset(DRONE_ID_BY_POLICY_TYPE.values())
+        if any(drone_id not in allowed_ids for drone_id in proposal.drone_ids):
+            raise GovernanceError(
+                "ORD physical mission proposal contains an unpromoted or unsupported drone"
+            )
+        expected_id = cls._proposal_id(
+            proposal.policy_mission_id,
+            proposal.physical_mission_class,
+            proposal.docking_location_class,
+            proposal.drone_ids,
+        )
+        if proposal.proposal_id != expected_id:
+            raise ValueError("ORD physical mission proposal integrity check failed")
+
+    @staticmethod
+    def _validate_mission_fields(
+        physical_mission_class: str,
+        docking_location_class: str,
+    ) -> None:
+        if not isinstance(physical_mission_class, str) or not physical_mission_class.startswith(
+            "physical_"
+        ):
+            raise ValueError("ORD physical mission class must start with 'physical_'")
+        if docking_location_class not in ORD_PHYSICAL_LOCATIONS:
+            raise ValueError("ORD physical mission location class is unsupported")
+
+    @staticmethod
+    def _proposal_id(
+        policy_mission_id: str,
+        physical_mission_class: str,
+        docking_location_class: str,
+        drone_ids: List[str],
+    ) -> str:
+        payload = ":".join(
+            [
+                policy_mission_id,
+                physical_mission_class,
+                docking_location_class,
+                *drone_ids,
+            ]
+        )
+        digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+        return f"ord-physical-{digest}"
 
     @staticmethod
     def _resolve_entities(
@@ -494,6 +618,11 @@ class OrdPhysicalMissionAdapter:
             entity = fleet.entities.get(drone_id)
             if entity is None or not drone_id.startswith("ORD-"):
                 raise ValueError(f"ORD physical entity is not projected: {drone_id}")
+            if drone_id == SHADOWFAX_FLEET_ID:
+                raise GovernanceError(
+                    "SHADOWFAX custody/promotion gates are incomplete; "
+                    "physical activation rejected"
+                )
             entities.append(entity)
         return entities
 
@@ -531,7 +660,9 @@ __all__ = [
     "build_initial_fleet_state",
     "docking_observation",
     "drone_observation",
+    "expected_fleet_ids",
     "fleet_observation",
     "observation_for_focus",
     "proximity_observation",
+    "validate_fleet_identity_projection",
 ]

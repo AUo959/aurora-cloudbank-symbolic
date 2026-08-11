@@ -2,27 +2,40 @@
   "schema": "aurora://simulation/gumas/tactical_battle_baseline/v1.0",
   "baseline_id": "SIM-L2-FR-P17-EQUAL-001",
   "version": "1.0",
+  "integration_revision": "1.1",
   "created_date": "2026-08-11",
   "layer": "L2",
   "anchor_seed": "EOS_SEED_ORION",
   "ethics_protocol": "Picard_Delta_3",
-  "simulation_purpose": "Deterministic, repeatable, physically bounded tactical fleet engagement baseline.",
+  "simulation_purpose": "Deterministic, repeatable, physically bounded tactical fleet engagement fixture executed under GUMAS simulation authority.",
   "canon_boundary": {
     "fixture_status": "canonical_test_fixture",
     "historical_event_status": "non_canon_simulation_instance",
     "scenario_local_entities": true,
     "canonrec_promotion_requires_explicit_review": true,
-    "note": "The committed baseline definition may be reused as infrastructure. Officers, scenario-local vessels, and battle outcomes do not become L2 history merely because the fixture is version-controlled."
+    "note": "The committed baseline definition may be reused as infrastructure. Officers, scenario-local vessels, numerical coefficients, tactical decisions, and battle outcomes do not become L2 history merely because the fixture is version-controlled."
+  },
+  "engine_binding": {
+    "simulation_authority": "GUMASEngine",
+    "state_authority": "GUMASState",
+    "core_source_authority": "AUo959/CanonRec:canon/L1/station/operational_library_v2_2/ORION__L2_GUMAS_ENGINE__SOURCE_BUNDLE__v1.1__NAMING_INTEGRATED__2026-02-09.md",
+    "core_api_authority": "AUo959/CanonRec:canon/L1/station/operational_library_v2_2/L2_GUMAS_ENGINE__API_REFERENCE__v1.0.md",
+    "tactical_extension_target": "validated GUMAS fleet movement / FLEET_BATTLE / CombatResolver extension surface",
+    "standalone_resolver_allowed": false,
+    "adapter_policy": "If an active checkout requires an adapter between the core GUMASState contract and the later fleet/combat state model, the adapter remains integration plumbing and may not become a second simulation authority.",
+    "fail_closed_rule": "If the GUMAS fleet/combat extension cannot be bound for this run, execution stops as an integration failure rather than substituting an independent tactical resolver."
   },
   "determinism": {
     "seed_material": "AURORA::L2::FLASH_REBELLION::PLANETOID_P17::EQUAL_FLEETS::BASELINE_v1.0",
     "seed_u64": 1593560554842931876,
-    "rng": "python_random.Random",
+    "rng_root": "GUMASEngine seeded RNG",
+    "child_rng_policy": "labeled SHA-256-derived streams only if required by the GUMAS tactical extension",
     "stable_entity_order": "lexicographic ship_id",
     "wall_clock_inputs": false,
     "external_inputs_during_run": false,
     "checksum": "sha256(canonical-json-output)",
-    "rule": "Same resolver version + baseline file + seed must produce byte-equivalent normalized event results."
+    "run_identity": ["engine_version", "tactical_extension_version", "scenario_adapter_version", "baseline_sha256", "seed_u64"],
+    "rule": "Identical run identity must produce equivalent normalized GUMAS event/state output and final-state checksum."
   },
   "conflict": {
     "type": "flash_rebellion",
@@ -124,12 +137,12 @@
       ]
     }
   },
-  "resolver_contract": {
-    "resolver_id": "GUMAS_TACTICAL_BATTLE_RESOLVER_v1",
+  "engine_extension_contract": {
+    "authority": "GUMAS fleet/combat extension",
     "movement": "bounded Newtonian translation with class acceleration caps and point-mass planetoid gravity",
-    "combat": "discrete deterministic engagement windows using class combat proxies, range, geometry, command skill, EW state, and seeded damage allocation",
+    "combat": "GUMAS combat resolution using fleet strength, range, geometry, command skill, EW state, supply/morale state, damage, and seeded allocation",
     "damage_states": ["undamaged", "damaged", "mission_kill", "destroyed", "surrendered"],
-    "repair": "Reliant and carrier repair drones may restore limited damage; cannot resurrect destroyed systems or ships.",
+    "repair": "Reliant and carrier repair drones may restore limited recoverable damage; cannot resurrect destroyed systems or ships.",
     "retreat": "A force can terminate combat by crossing the withdrawal boundary with a viable command chain.",
     "ceasefire": "May occur only from combatant command decisions; no narrator or external rescue.",
     "surrender": "Permitted when combat power, mobility, and escape options make continued resistance irrational.",
@@ -143,15 +156,31 @@
       "21600 s hard time limit"
     ]
   },
+  "validation_gate": {
+    "configuration_only_until_bound": true,
+    "required_before_control_run": [
+      "existing GUMAS core seed-reproducibility check passes",
+      "scenario adapter binds to GUMAS engine authority",
+      "fleet/combat extension is available without standalone fallback",
+      "same seed and baseline reproduce normalized event/state checksum twice",
+      "T0 fleet material symmetry is verified",
+      "occlusion, acceleration, protected-target, withdrawal, and no-reinforcement constraints pass"
+    ],
+    "control_run_claimed": false
+  },
   "source_authorities": [
+    {"repo":"AUo959/CanonRec","path":"canon/L1/station/operational_library_v2_2/L2_GUMAS_ENGINE__API_REFERENCE__v1.0.md","use":"public GUMASEngine and GUMASState contract"},
+    {"repo":"AUo959/CanonRec","path":"canon/L1/station/operational_library_v2_2/ORION__L2_GUMAS_ENGINE__SOURCE_BUNDLE__v1.1__NAMING_INTEGRATED__2026-02-09.md","use":"primary GUMAS core source and seed-reproducibility lineage"},
     {"repo":"AUo959/CanonRec","path":"canon/L2/entities/ship_classes/cls_judicator.json","use":"canonical class identity/role"},
     {"repo":"AUo959/CanonRec","path":"canon/L2/fleet/L2_GUMAS_SHIP_REGISTRY__v1.0.md","use":"Galactic Union class roles/features"},
     {"repo":"AUo959/aurora-cloudbank-symbolic","path":"modules/gumas/naming.py","use":"deterministic scenario-local person naming"},
-    {"repo":"AUo959/CanonRec","path":"canon/L2/registries/L2_NAMING_ADMISSION_POLICY__v1.0__2026-07-22.md","use":"promotion boundary for names"},
-    {"repo":"AUo959/CanonRec","path":"canon/L1/station/operational_library_v2_2/ORION__L2_GUMAS_ENGINE__SOURCE_BUNDLE__v1.1__NAMING_INTEGRATED__2026-02-09.md","use":"GUMAS seed-reproducibility and audit lineage"}
+    {"repo":"AUo959/CanonRec","path":"canon/L2/registries/L2_NAMING_ADMISSION_POLICY__v1.0__2026-07-22.md","use":"promotion boundary for names"}
   ],
-  "known_gap": {
-    "current_aurora_main_missing": "modules/gumas/engine.py",
-    "handling": "This baseline does not claim the full GUMAS engine is currently executable from main. The tactical resolver is versioned separately and should remain additive until the engine-source drift is reconciled."
+  "integration_status": {
+    "engine_exists": true,
+    "engine_authority_preserved": true,
+    "active_checkout_binding_must_be_verified": true,
+    "standalone_tactical_resolver_retired": true,
+    "handling": "Differences between the validated GUMAS package and an active CloudBank checkout are integration/versioning questions. They must not be represented as absence of the GUMAS engine, and they must not be hidden by creating a competing simulation authority."
   }
 }

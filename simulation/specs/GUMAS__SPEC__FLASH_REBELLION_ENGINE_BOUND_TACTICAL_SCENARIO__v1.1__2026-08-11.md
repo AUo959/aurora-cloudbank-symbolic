@@ -49,15 +49,17 @@ A run identity is:
 
 `(engine_version, tactical_extension_version, scenario_adapter_version, baseline_sha256, seed_u64)`
 
+`baseline_sha256` is defined as SHA-256 over the UTF-8 encoding of the parsed baseline rendered as canonical JSON with object keys sorted recursively, separators exactly `,` and `:` with no added whitespace, and `ensure_ascii=false`. Source-file indentation, newline style, and other formatting-only differences are therefore excluded from simulation identity.
+
 Requirements:
 
 1. The GUMAS seed is the root of all stochastic-looking behavior.
 2. Child RNG streams, if required by the tactical extension, are derived deterministically from labeled SHA-256 material.
-3. Entity iteration order is stable and explicit.
+3. Entity iteration order is stable and explicit. Vessel IDs follow `{SIDE3}-{CLASS_TOKEN}-{NN}` where `SIDE3` is `LOY` or `REB`, `CLASS_TOKEN` is extracted from `CLASS-{TOKEN}-01`, and `NN` is a one-based two-digit instance index assigned from the shared fleet-template composition. The tactical extension sorts the instantiated vessel set lexicographically by complete `ship_id` before resolution.
 4. Python process-randomized `hash()` is forbidden for simulation decisions.
 5. Wall-clock time, network state, external APIs, and unrecorded human choices cannot affect resolution.
 6. Every material mutation emits an ordered event/state-change record.
-7. Normalized output uses canonical JSON with sorted keys and SHA-256 checksums.
+7. Normalized output uses the same canonical-JSON convention with SHA-256 checksums.
 8. Two executions with identical run identity must produce equivalent normalized event sequences and final-state checksums.
 
 ## Physical model
@@ -89,7 +91,7 @@ The fixture instantiates two materially identical 19-vessel Galactic Union task 
 - 6 Peregrine
 - 1 Reliant
 
-Stable vessel IDs are generated deterministically. Carrier fighters, bombers, repair drones, and embedded craft remain parent capabilities unless separately enumerated at T0; they cannot become implicit reinforcements.
+Stable vessel IDs use the deterministic scheme defined in the determinism contract. Carrier fighters, bombers, repair drones, and embedded craft remain parent capabilities unless separately enumerated at T0; they cannot become implicit reinforcements.
 
 ## Command model
 
@@ -135,7 +137,7 @@ Damage proceeds through explicit vessel state. The fixture uses:
 
 `undamaged → damaged → mission_kill → destroyed`
 
-Surrender is a separate protected state. Reliant support and carrier repair capabilities may recover only bounded recoverable damage; destroyed ships or catastrophic system losses cannot be restored.
+Surrender is a separate non-damage protected disposition. Reliant support and carrier repair capabilities may recover only bounded recoverable damage; destroyed ships or catastrophic system losses cannot be restored.
 
 ## Morale and termination
 

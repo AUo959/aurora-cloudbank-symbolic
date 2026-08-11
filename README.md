@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/aurora-ci-minimal.yml/badge.svg?branch=main)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/aurora-ci-minimal.yml)
 [![CodeQL](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml/badge.svg?branch=main)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml)
-[![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A FastAPI platform for keeping machine-generated knowledge coherent over long
@@ -58,7 +58,7 @@ and both are load-bearing.
 
 ## Quick Start
 
-**Requirements:** Python 3.11+, pip
+**Requirements:** Python 3.12+, pip
 
 ```bash
 git clone https://github.com/AUo959/aurora-cloudbank-symbolic.git

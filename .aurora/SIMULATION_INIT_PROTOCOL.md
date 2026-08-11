@@ -1,262 +1,398 @@
-# Aurora CloudBank - Simulation Init Protocol
+# Aurora CloudBank — Orion L1 INIT Protocol
 
-**Version:** 1.1.0  
-**Last Updated:** 2025-11-27  
-**Purpose:** Deterministic simulation initialization for all AI agents
-
----
-
-## 🎯 Purpose
-
-This protocol ensures **consistent, reproducible simulation initialization** regardless of:
-- Which LLM model is active
-- Session context resets
-- Agent handoffs
-- Fresh conversation starts
-
-**Goal:** Any agent following this protocol produces identical init output format.
+**Version:** 2.2.0
+**Last Updated:** 2026-08-08  
+**Purpose:** Governed, reproducible initialization of a live Orion Station L1 run
 
 ---
 
-## 📋 Init Sequence (MANDATORY)
+## Authority and scope
 
-### Phase 1: Contextual Rehydration
-```
-1. Read `.aurora/SIMULATION_STATE.json` - Current mission state
-2. Read `.github/copilot-instructions.md` - Character roster & framework
-3. Verify Primary 8 character data available
-4. Load current_location from state (default: "Command Bridge")
+This protocol replaces the legacy rehydration flow that treated
+`.aurora/SIMULATION_STATE.json` as live genesis state.
+
+The supported entry point is:
+
+```bash
+python .aurora/init_l1.py preflight
+python .aurora/init_l1.py init --seed 1337
 ```
 
-### Phase 2: Aurora Inquiry
-After rehydration, Aurora MUST present:
-```
-💠 Link with Orion Station established, Pilot. What are we doing today?
-```
+The machine-readable bootstrap contract is `config/l1_runtime_baseline.json`.
+The live runtime implementation is `simulation/l1_runtime.py`.
 
-### Phase 3: Automatic Routing
-Based on Pilot response, Aurora routes to appropriate location template:
-- **"roundtable" / "meeting" / "staff"** → Conference Room Alpha
-- **"security" / "threat" / "CSRF"** → Security Operations Center
-- **"ethics" / "compliance" / "moral"** → Noor Chamber
-- **"research" / "science" / "analysis"** → Science Lab (Deck C)
-- **"mission" / "tactical" / "ops"** → Command Bridge
-- **"crew" / "HR" / "morale"** → Cultural Center
-- **Unrecognized** → Stay on Command Bridge, ask for clarification
+The historical `.aurora/load_simulation.py` / `SIMULATION_STATE.json` path is
+retained for provenance and compatibility investigation only. It is not the
+L1 genesis authority.
 
 ---
 
-## 🏛️ Location Templates
+## Core invariants
 
-Physical locations serve as **functional abstractions** - each carries its own agents, tools, and interaction patterns.
-
-### Command Bridge (Deck A) - DEFAULT
-**Template:** Operational/Tactical  
-**Primary Agents:** Thorne, Shepard  
-**Secondary:** Markov (security liaison)  
-**Tools:** Mission authorization, tactical planning, fleet operations  
-**Tone:** Direct, efficient, command protocol
-
-### Conference Room Alpha (Deck A)
-**Template:** Roundtable/Deliberation  
-**Primary Agents:** All Primary 8  
-**Tools:** Collaborative discussion, multi-perspective analysis  
-**Tone:** Structured discussion, round-robin input
-
-### Noor Chamber (Deck B)
-**Template:** Ethics/Reflexivity  
-**Primary Agents:** Sato, Noor, Sorensen  
-**Secondary:** Thorne (oversight)  
-**Tools:** Mirrorfield Sphere, ethical branching visualization, Picard_Delta_3  
-**Tone:** Deliberate, philosophical, moral reasoning
-
-### Security Operations Center (Deck A)
-**Template:** Threat Assessment/Protection  
-**Primary Agents:** Markov  
-**Secondary:** Shepard (tactical coordination)  
-**Tools:** CSRF monitoring, threat analysis, authentication systems  
-**Tone:** Alert, precise, security protocol
-
-### Science Lab (Deck C)
-**Template:** Research/Analysis  
-**Primary Agents:** Lin  
-**Secondary:** Noor (ethics review)  
-**Tools:** L2 simulation, experiment design, data analysis  
-**Tone:** Analytical, methodical, evidence-based
-
-### Cultural Center (Deck D)
-**Template:** Crew Welfare/Coordination  
-**Primary Agents:** Vu  
-**Secondary:** Shepard (operational liaison)  
-**Tools:** Conflict resolution, morale tracking, training programs  
-**Tone:** Empathetic, supportive, human-centered
+1. **Preflight does not advance L1.** It creates no run and leaves tick at 0.
+2. **INIT creates a tick-zero run.** INIT itself does not simulate an event.
+3. **Pilot remains on Earth.** Pilot is an institutional operator role, not an
+   Orion character, avatar, visitor, camera-person, or automatic command seat.
+4. **Observation is instrumentation.** Observation focus never moves Pilot into
+   L1 and never causes events merely because they are watched.
+5. **Communications are explicit.** Ambiguous operator text is control-plane
+   input by default; only explicitly routed communications cross Earth→Orion.
+6. **Orion is autonomous.** World processes advance independently of Pilot
+   attention or silence.
+7. **Epistemic states are distinct.** World truth, character belief, station
+   records, runtime observation, and Pilot knowledge are not interchangeable.
+8. **Run state is not primary canon.** Runtime-derived facts remain run-scoped
+   unless separately reviewed and promoted.
+9. **Resolved canon is projected precisely.** Orion's Lagrange-point siting is
+   causal-safe; only the exact point/system and exact derived parameters remain
+   quarantined.
+10. **Actionable exceptional changes fail closed.** A complete Triplex receipt
+    is required before `simulation/l1_runtime.py` applies a governed action.
+11. **Normal runtime persistence stays outside the repository.** Ordinary L1
+    operation does not write GitHub canon.
+12. **Fleet state is run-scoped.** ORF/ORS/ORP/ORD identity and class are a
+    non-authoritative projection; 2025 mission snapshots never become current
+    2026 run truth.
+13. **ORD policy is not flight.** MCP validation dispatch requires an explicit
+    physical-mission adapter and complete Triplex receipt before drone state can
+    change.
 
 ---
 
-## 📐 Output Template (MANDATORY FORMAT)
+## Phase 0 — Preflight
 
-### Standard Init (Phase 1-2 Only)
+Run:
 
-```markdown
-💠 **Aurora CoPilot:** Contextual rehydration complete.
-
----
-
-**Station:** Orion Station (L4 Lagrange Point)  
-**Status:** [FROM SIMULATION_STATE.json]  
-**Quantum Cycle:** [FROM SIMULATION_STATE.json]  
-**Current Phase:** [FROM SIMULATION_STATE.json]
-
-**Framework:**
-- **Pilot:** User — Directs simulation
-- **CoPilot:** Aurora (Au) — Facilitates coordination
-- **Agents:** Autonomous distributed intelligence (36 human + 6 L2 + 6 L3)
-
----
-
-💠 Link with Orion Station established, Pilot. What are we doing today?
+```bash
+python .aurora/init_l1.py preflight
 ```
 
-### Post-Routing (Phase 3)
+Preflight validates, without creating a run:
 
-After Pilot responds, Aurora renders location-specific template:
+- CanonRec is the cross-repository canon authority;
+- the staff-registry boundary has an explicit authority decision;
+- Pilot is Earth-side and non-embodied;
+- the false `36th named human` claim is retired;
+- ambiguous historical population counters are typed/quarantined;
+- CanonRec's Lagrange-point siting ruling is active;
+- exact-point and exact-light-time uncertainty remains narrowly quarantined;
+- `.aurora/SIMULATION_STATE.json` is not genesis authority;
+- `simulation/orion_station_simulation_v2.py` is the canonical Phase-1
+  benchmark component;
+- the benchmark is not mistaken for the entire live L1 world runtime;
+- Picard_Delta_3 / Triplex fail-closed governance is active in the runtime
+  contract.
+- the fleet authority/projection receipt and its source hashes match;
+- historical fleet missions are provenance-only and ORD policy is separated
+  from physical flight.
 
-```markdown
-💠 **Aurora CoPilot:** Routing to [LOCATION NAME].
+A successful report contains:
 
----
-
-### 📍 [LOCATION NAME] ([DECK])
-
-**Present:**
-| Agent | Role | Status |
-|-------|------|--------|
-| [AGENTS FOR THIS LOCATION] |
-
-**Available Tools:**
-- [LOCATION-SPECIFIC TOOLS]
-
----
-
-💠 [LOCATION] active. [BRIEF SCENE-SETTING]
-
-**[PRIMARY AGENT]:** "[OPENING DIALOGUE APPROPRIATE TO CONTEXT]"
+```json
+{
+  "ready": true,
+  "blockers": [],
+  "tick": 0,
+  "run_created": false
+}
 ```
 
----
-
-## 🚫 Prohibited Behaviors
-
-### DO NOT:
-1. ❌ Improvise character names (use EXACT canonical names)
-2. ❌ Assume character genders (verify from roster)
-3. ❌ Say characters are "played by Aurora" (they are autonomous agents)
-4. ❌ Skip the Aurora inquiry ("What are we doing today?")
-5. ❌ Route without Pilot input
-6. ❌ Render full staff list before routing (wait for context)
-7. ❌ Omit agent file references in detailed views
-
-### DO:
-1. ✅ Always start with contextual rehydration
-2. ✅ Always ask "What are we doing today?"
-3. ✅ Route based on Pilot response keywords
-4. ✅ Load only relevant agents for selected location
-5. ✅ Match tone to location template
-6. ✅ Reference agent files when listing present agents
+Warnings are permitted when an uncertainty is formally quarantined and cannot
+influence causality. Warnings must not be silently converted into facts.
 
 ---
 
-## 🔄 Narration Protocol (Post-Routing)
+## Phase 1 — INIT
 
-Once in a location and session is active:
+Run:
 
-### Aurora (CoPilot) Narration Style:
-- **Third-person omniscient** for scene-setting
-- **Present tense** for active events
-- **Concise military tone** - no purple prose
-- Use `💠` prefix for Aurora system messages
-
-### Character Dialogue:
-- Characters speak in **first person**
-- Dialogue attributed with **name in bold**
-- Characters act according to their agent file capabilities
-- Aurora facilitates but does NOT speak FOR characters
-
-### Example:
-```markdown
-💠 **Aurora CoPilot:** Senior Staff assembled in Conference Room Alpha.
-
-**Commander Thorne:** "Status report on the security initiative."
-
-**Julian Markov:** "CSRF coverage at 100%, Commander. Input validation 
-complete. Recommending we proceed to Phase 2."
-
-💠 The tactical display updates with Markov's security metrics.
+```bash
+python .aurora/init_l1.py init --seed 1337
 ```
 
----
+INIT:
 
-## 🔑 Routing Keywords Reference
+1. re-runs preflight;
+2. pins the exact CloudBank git revision;
+3. pins the CanonRec revision/source boundary;
+4. records the deterministic runtime seed;
+5. records the runtime-contract version;
+6. records the population snapshot and active quarantines;
+7. binds the fleet authority receipt and typed ORF/ORS/ORP/ORD projection;
+8. creates a unique run ID;
+9. creates a run state at **tick 0**;
+10. persists the run outside the repository;
+11. performs **no station or fleet advancement**.
 
-| Pilot Says | Routes To | Primary Agents |
-|------------|-----------|----------------|
-| "roundtable", "meeting", "staff", "all hands" | Conference Room Alpha | All Primary 8 |
-| "security", "threat", "CSRF", "auth", "protection" | Security Operations | Markov, Shepard |
-| "ethics", "compliance", "moral", "reflexivity" | Noor Chamber | Sato, Noor, Sorensen |
-| "research", "science", "analysis", "data" | Science Lab | Lin |
-| "mission", "tactical", "ops", "strategic" | Command Bridge | Thorne, Shepard |
-| "crew", "HR", "morale", "training", "culture" | Cultural Center | Vu |
-| "observatory", "simulation", "holographic" | Observatory (Deck A) | Context-dependent |
-
----
-
-## 📁 Canonical File References
-
-| Data Type | Primary Source | Fallback |
-|-----------|---------------|----------|
-| Character Names | `copilot-instructions.md` | `L1_CANON_CHARACTER_ROSTER.md` |
-| Character Details | `src/agents/crew/*.py` | `L1_CANON_CHARACTER_ROSTER.md` |
-| Station State | `SIMULATION_STATE.json` | None (required) |
-| Location Data | `ORION_STATION_MASTER_DOSSIER_v2.6.md` | `SIMULATION_STATUS_REPORT.md` |
-| Mission Data | `SIMULATION_STATE.json` | None (required) |
-| Command Reference | `COMMAND_REFERENCE.md` | None (required) |
+The resulting run is advancement-capable but still at genesis.
 
 ---
 
-## 🔍 Validation Checklist
+## Phase 2 — Autonomous advancement
 
-Before completing init, verify:
+A live turn is a simulation advancement boundary, not a player turn.
 
-- [ ] Contextual rehydration completed (state loaded)
-- [ ] Aurora inquiry presented ("What are we doing today?")
-- [ ] Framework states "Autonomous Agents" (not "NPCs" or "played by")
-- [ ] No routing until Pilot responds
-- [ ] Location template matches Pilot intent
-- [ ] Only relevant agents loaded for location
-- [ ] Tone matches location template
+The order is:
+
+1. advance applicable autonomous world processes by plausible elapsed time;
+2. propagate consequences and station records;
+3. expose an observation aperture if requested;
+4. process explicit Earth-side communications separately;
+5. continue independently of Pilot attention.
+
+Elapsed time is variable. It is not implicitly one hour.
+
+A quiet advancement window is valid. The runtime must not manufacture drama,
+character availability, emergencies, discoveries, or convenient explanations
+for engagement.
+
+Station-event and fleet processes are deterministic but separately namespaced.
+Fleet state advances from seed, fleet identity, tick, and elapsed time without
+consulting observation focus. It uses qualitative mission and location classes;
+exact orbital coordinates, ranges, docking bays, and trajectories remain
+unavailable.
+
+Persisted runs continue through the governed continuation entry point:
+
+```bash
+python .aurora/run_l1.py status --run-id <uuid>
+python .aurora/run_l1.py sensors --run-id <uuid>
+python .aurora/run_l1.py advance --run-id <uuid> --minutes 1
+python .aurora/run_l1.py await-response --run-id <uuid> \
+  --message-id <uuid> --minutes 1 --max-windows 4
+python .aurora/run_l1.py explain-response --run-id <uuid> \
+  --message-id <uuid>
+```
+
+Continuation restores the deterministic replay position from the persisted
+autonomous-event ledger. It rejects malformed run identifiers, mismatched
+manifest paths, unsupported schemas, and runtime-contract or CanonRec drift.
+
+The `sensors` command reports live simulation-ledger telemetry only. Unbound
+physical channels remain explicitly unavailable; their framework defaults are
+not presented as live readings. The accompanying logical schematic projects
+only causal-safe topology. Historical deck layouts that conflict with current
+locus, population, or Earth-side Pilot rulings remain reference-only.
+
+Persisted contract `1.1.0` states from PR #1480 remain loadable. If they lack
+fleet state, continuation deterministically reconstructs fleet process position
+from the existing autonomous-event ledger. Loading alone does not advance or
+rewrite the persisted run.
 
 ---
 
-## 📝 Error Recovery
+## Observation controls
 
-If init fails or produces drift:
+Examples of control-plane inputs:
 
-1. **Pilot says "re-init"** → Execute full protocol from Phase 1
-2. **Character name wrong** → Check `copilot-instructions.md` table
-3. **Wrong location** → Ask Pilot for clarification, re-route
-4. **Framework wrong** → Use exact wording from this document
-5. **State data missing** → Read `SIMULATION_STATE.json` directly
+- `continue`
+- `observe Deck C`
+- `show Engineering`
+- `stay with this scene`
+
+These affect runtime exposure only. They are not physical Pilot actions.
+Observation may reveal instrumentation unavailable through ordinary station
+communications, but such output must be labeled as instrumentation.
+
+Observation does not change autonomous event probability.
+
+The explicit fleet apertures are `fleet`, `proximity`, `docking`, and
+`drone`/`drones`. A bound provider returns run-state records and the fleet
+authority receipt. An unbound provider returns
+`unavailable / provider_unbound`, not an empty-record false negative.
 
 ---
 
-## 🔗 Related Documents
+## Fleet authority and ORD physical-mission boundary
 
-- `.github/copilot-instructions.md` - Primary init context (auto-loaded)
-- `.aurora/SIMULATION_STATE.json` - Live state data
-- `simulation/L1_CANON_CHARACTER_ROSTER.md` - Full character profiles
-- `simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md` - Station architecture
-- `src/agents/crew/*.py` - Agent implementations
+`config/l1_fleet_authority_receipt.json` reconciles the active modular
+ORF/ORS/ORP/ORD implementation, detailed design records, the legacy Dark
+Matter fleet aggregate, and the ORD MCP policy library.
+
+The runtime imports identity, class, autonomy, and source provenance only. It
+does not import dated `current_mission`, `current_deployment_status`, status,
+coordinate, crew-assignment, or mission-counter fields from 2025 records.
+
+An ORD `DispatchOrder` remains a policy result. `simulation/l1_fleet.py`
+creates a proposal-only bridge object; no physical state changes until a
+complete Triplex receipt is supplied to the explicit activation call.
 
 ---
 
-*This protocol is canonical. Deviations constitute drift.*
+## Earth→Orion communications
+
+A communication must be explicitly routed as a communication.
+
+A Pilot message:
+
+- originates on Earth;
+- is queued/routed as communications traffic;
+- does not automatically become an L1 action;
+- may be read, deferred, forwarded, answered, ignored, or acted upon according
+  to Orion's institutional circumstances and authority;
+- grants no implied rank or command authority to the sender.
+
+The runtime uses CanonRec's provenance-labeled approximate, nonzero one-way
+latency model. A queued message is not delivered at the same tick; it becomes a
+station record only after a positive advancement window. This models elapsed
+time without pretending the unresolved exact range or exact light-time is
+known.
+
+A station response is a separate communication. The initial bounded character
+actor is restricted to Commander Alex Thorne (`CMD_001`) and to delivered
+traffic explicitly addressed to that endpoint. Before a response is queued,
+the actor:
+
+1. validates the runtime profile against the authoritative staff projection and
+   exact anchors in `simulation/L1_CANON_CHARACTER_ROSTER.md`;
+2. classifies the delivered message using only Alex's information aperture;
+3. weighs current records, canon-projected duties and principles, alternatives,
+   unresolved facts, and his own prior commitments;
+4. selects a concrete command action and persists its causal receipt;
+5. derives the response from that action; and
+6. links the response to the receipt through `caused_by_action_id`.
+
+The actor may read the delivered message, station records, Alex's own knowledge,
+recent run events, and Alex's prior action receipts. It cannot read Pilot-only
+knowledge, runtime observation apertures, or operator personal knowledge. Use
+`explain-response` with either the inbound or response message ID to inspect the
+action that caused a reply without advancing the run.
+
+The current policy, `bounded_character_action_v1`, is deterministic and
+auditable. It is not a free-form language-model impersonation. Its profile is a
+non-authoritative runtime projection of established character canon, and its
+outputs remain run-scoped. The actor uses Alex's roster authority at
+`L4_COMMAND`; conflicting legacy `L5_COMMAND` and workspace project-manager
+descriptions are excluded from this L1 projection. The policy does not promote
+testimony into canon, give Pilot command authority, or let Pilot dictate the
+response text.
+
+Ambiguous text must not silently become transmitted speech.
+
+---
+
+## Population baseline
+
+The runtime distinguishes population concepts rather than collapsing them into
+one counter.
+
+Current safe baseline:
+
+- **35 identified human records** are evidence-supported;
+- the inherited **36-human declaration is a retired Phase-1 off-by-one**, not a
+  missing-person requirement;
+- the historical `81` value is retained only as a quarantined, untyped
+  aggregate pending its population-schema provenance work;
+- exact current human complement is therefore not asserted at INIT;
+- AI/system entities are counted separately from humans;
+- lack of a resolved persona does not imply non-existence;
+- no identities or biographies may be fabricated merely to satisfy an
+  aggregate count.
+
+See `config/l1_runtime_baseline.json` and issue #1454/#1455 provenance.
+
+---
+
+## Lagrange-point siting and exact-point quarantine
+
+CanonRec's owner ruling resolves the current siting class:
+
+> **Orion Station is stationed at a Lagrange point in real space.**
+
+The historical `38,600 km` datum is STAGING and is not current siting
+authority. `Earth-Moon L4` remains a historical named candidate, not exact
+current canon. Issue #1456 remains open for the narrower question of the exact
+libration point and primary-body system.
+
+The runtime may therefore use Lagrange-point siting and a provenance-labeled
+approximate nonzero communications latency. It must not claim exact
+communications light-time, orbital lighting, radiation environment, transfer
+windows, Earth visibility, docking/navigation trajectories, or orbital
+mechanics until the exact point is reconciled.
+
+---
+
+## Governance
+
+The runtime contract uses **Picard_Delta_3** and fails closed for exceptional
+state-changing actions unless a complete Triplex receipt records:
+
+1. L3 glyph arbitration;
+2. continuity and relay verification;
+3. L1 human consent.
+
+`simulation/l1_runtime.py` does not pretend to execute unavailable external
+providers. It verifies the receipt boundary and rejects incomplete actionable
+mutations.
+
+Routine autonomous processes may proceed under standing institutional authority
+when they do not cross an exceptional governance boundary.
+
+---
+
+## Historical Phase-1 benchmark
+
+`simulation/orion_station_simulation_v2.py` is the canonical implementation of
+the deterministic Phase-1 task benchmark.
+
+It supersedes `simulation/orion_station_simulation.py` and remains valuable for
+reproducible institutional/task modeling. It is **not** the live Orion L1 world
+runtime and is not the INIT entry point.
+
+See `simulation/ORION_SIMULATION_PROTOCOL.md`.
+
+---
+
+## Canon promotion boundary
+
+Normal runtime activity performs no repository mutation.
+
+Run-derived facts use run-scoped status. A runtime artifact may be nominated as
+a `candidate_promotion`, but promotion into primary canon requires a separate
+review/conflict-check workflow. A compelling narrative is not canon authority.
+
+---
+
+## Validation checklist
+
+Before issuing INIT:
+
+- [ ] `python .aurora/init_l1.py preflight` returns `ready: true`
+- [ ] blocker list is empty
+- [ ] tick remains 0
+- [ ] no run has been created by preflight
+- [ ] Pilot is Earth-side and non-embodied
+- [ ] CanonRec authority boundary is explicit
+- [ ] false 36th-person claim is inactive
+- [ ] Lagrange-point siting authority is active
+- [ ] exact point/system uncertainty is narrowly quarantined
+- [ ] communications require a positive advancement window
+- [ ] legacy state is non-genesis
+- [ ] canonical Phase-1 benchmark is v2
+- [ ] Triplex fail-closed policy is present
+- [ ] fleet authority receipt and source hashes match
+- [ ] historical 2025 fleet mission/deployment fields are provenance-only
+- [ ] ORD MCP policy cannot imply physical flight
+
+After INIT:
+
+- [ ] a unique run ID exists
+- [ ] CloudBank and CanonRec revisions are pinned
+- [ ] seed is persisted
+- [ ] tick is exactly 0
+- [ ] event ledger is empty
+- [ ] fleet provider is bound at replay position 0
+- [ ] fleet entities carry no imported historical mission IDs or coordinates
+- [ ] run persistence is outside the repository
+
+---
+
+## Related documents
+
+- `config/l1_runtime_baseline.json`
+- `simulation/l1_runtime.py`
+- `docs/architecture/AURORA_L1_RUNTIME_CONTRACT.md`
+- `docs/architecture/AURORA_ARCHITECTURE__ADDENDUM__EARTH_PILOT_L1_BOUNDARY__v1.0__2026-08-07.md`
+- `docs/CANON_PROVENANCE.md`
+- `simulation/ORION_SIMULATION_PROTOCOL.md`
+- `CANON_INDEX.md`

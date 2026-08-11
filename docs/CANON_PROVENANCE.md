@@ -3,27 +3,26 @@
 ## Authority chain
 
 CanonRec is the authority repository for Aurora / ORIONCORE canon. CloudBank is
-the runtime repository and carries checked-in mirrors so that a standalone
-application checkout remains reproducible.
+the runtime repository and carries checked-in mirrors and runtime projections so
+that a standalone application checkout remains reproducible.
 
 ```text
 AUo959/CanonRec
-  canon/L3/canonical_validation.yaml
        |
-       | Aurora root tools/canon_sync.py
+       | canon authority
+       v
+Aurora root propagation / integration gates
+       |
        v
 AUo959/aurora-cloudbank-symbolic
-  config/canonical_validation.yaml
-       |
-       v
-  runtime and tests/test_canon_consistency.py
+  checked-in mirrors + non-authoritative runtime projections
 ```
 
-The Aurora root also generates managed files under `config/mesh/memory/` from
-its newest L1 entity ledger. Those generated memories are a separate payload
-family; they are not direct copies of CanonRec files.
+CloudBank material may be operationally richer or shaped differently for
+runtime use. That does not make a differing CloudBank projection an independent
+canon authority.
 
-## Current verified snapshot
+## Current verified canonical-validation mirror
 
 | Field | Value |
 | --- | --- |
@@ -41,29 +40,118 @@ source/destination comparison is enforced from the Aurora root workspace.
 ## Runtime requirement
 
 A CanonRec checkout is not a package, import, mount, or startup dependency for
-the base CloudBank FastAPI application. The checked-in mirror is sufficient for
-startup and local consistency tests.
+the base CloudBank application. Checked-in mirrors/projections permit local
+runtime startup.
 
 CanonRec is required when:
 
 - authoritative canon is reviewed, promoted, or reconciled;
-- a mirror is refreshed;
-- the Aurora root runs its complete CloudBank + CanonRec L1 integration suite;
+- a managed mirror is refreshed;
+- the Aurora root runs its complete CloudBank + CanonRec integration suite;
 - a reviewer needs to trace a CloudBank canon claim to its authority source.
 
-## Unreconciled staff registry
+## Staff-registry authority decision — 2026-08-08
 
-The following files are materially different and are not currently part of the
-managed propagation contract:
+The prior state correctly observed that these files are materially different:
 
 - CanonRec: `canon/L1/station/ORION_STATION_CANONICAL_STAFF_REGISTRY.json`
 - CloudBank: `ORION_STATION_CANONICAL_STAFF_REGISTRY.json`
 
-Their current hashes are recorded in `config/canon_provenance.json`. The
-CloudBank file identifies itself as a reconstructed registry, while the
-CanonRec file is an older v2.4.1 manifest. Selecting one, or defining a
-deterministic merge, requires an owner authority decision. Until then, neither
-file should be presented as the sole machine-readable staff SSOT.
+The unresolved question was **authority**, not byte equality. The owner decision
+for L1 preflight is now:
+
+> **CanonRec controls staff canon authority. The CloudBank registry is a
+> provenance-bound runtime projection and is not an independent staff SSOT.**
+
+This resolves the authority blocker without pretending the two files are
+identical or mechanically merging them.
+
+Machine-readable status lives in `config/canon_provenance.json` under
+`resolved_surfaces`.
+
+## Orbital-locus authority decision — 2026-06-13
+
+CanonRec's owner ruling in
+`canon/L1/station/STATION_PURPOSE_DEFINITION.md` establishes that Orion Station
+is stationed at a Lagrange point in real space. CloudBank projects that ruling
+into `config/l1_runtime_baseline.json` as
+`resolved_siting_class_exact_point_unresolved`.
+
+This resolves the broad siting conflict without overclaiming precision:
+
+- `38,600 km` remains a STAGING datum and is not current siting authority;
+- `Earth-Moon L4` remains a historical named candidate, not exact current canon;
+- the exact point/system, range, and exact one-way light-time remain unresolved;
+- CanonRec's approximate nonzero latency model is usable only with `APPROX`
+  certainty and a positive advancement window.
+
+The authority and projection hashes are recorded under the
+`orion_station_orbital_locus` resolved surface in
+`config/canon_provenance.json`.
+
+### Conflict behavior
+
+If the CanonRec authority record and the CloudBank runtime projection disagree:
+
+1. do not silently choose the CloudBank value as canon;
+2. preserve the CloudBank value as provenance-labeled runtime/reference data if
+   it remains operationally useful;
+3. quarantine the conflicting field from canon-sensitive causality where
+   necessary;
+4. reconcile/promote through the normal canon workflow;
+5. do not fabricate a third value merely to make the files agree.
+
+The authority decision therefore removes the previous
+`owner_authority_decision_required` startup blocker while preserving evidence.
+
+## L1 runtime baseline
+
+`config/l1_runtime_baseline.json` is the machine-readable preflight contract for
+the first live L1 run. It records:
+
+- CanonRec authority;
+- the staff projection boundary;
+- the Earth-side Pilot boundary;
+- typed population uncertainty;
+- canonical Lagrange-point siting with exact-point uncertainty;
+- historical `SIMULATION_STATE.json` as non-genesis provenance;
+- canonical Phase-1 benchmark v2;
+- Picard_Delta_3 / Triplex fail-closed requirements.
+
+This baseline does not promote CloudBank runtime facts into CanonRec.
+
+## Fleet projection authority decision — 2026-08-08
+
+CloudBank contains three distinct fleet lineages and they do not carry equal
+current-run authority:
+
+- `src/entities/fleet/` is the active ORF/ORS/ORP/ORD implementation and
+  identity registry;
+- `simulation/fleet/` supplies detailed design provenance, but its dated
+  `current_mission` and `current_deployment_status` fields are 2025 snapshots;
+- `.aurora/canonical/fleet.json` is a conflicting Dark Matter-era aggregate and
+  remains legacy provenance only.
+- `src/integrations/fleet_bridge.py` is a legacy API consumer with synthetic
+  class, dimension, fuel, and `DOCKED` defaults; it is not an L1 state provider
+  or authority source.
+
+The machine-readable reconciliation is
+`config/l1_fleet_authority_receipt.json`, referenced and hash-pinned by
+`config/l1_runtime_baseline.json`. It authorizes a
+`runtime_projection_non_authoritative` of twelve ORF/ORS/ORP/ORD identities,
+classes, and autonomy classes. It does not assert that CanonRec currently
+contains an authoritative fleet registry and does not promote CloudBank fleet
+material into CanonRec.
+
+Current mission, status, proximity, and docking classes are generated only as
+run-scoped deterministic L1 state. No 2025 status, coordinate, crew assignment,
+or mission counter becomes 2026 run truth. Exact navigation trajectories remain
+quarantined by the orbital-locus boundary.
+
+`modules/ord/` remains an MCP validation policy library. A policy
+`DispatchOrder` does not imply physical drone flight. Physical ORD missions
+require the explicit `simulation/l1_fleet.py` adapter plus a complete Triplex
+governance receipt.
 
 ## Refresh procedure
 
@@ -74,6 +162,6 @@ python3 tools/canon_sync.py --check
 ```
 
 When CanonRec legitimately changes, use the root propagation workflow to stage
-the CloudBank update, refresh `config/canon_provenance.json`, run the CloudBank
+CloudBank mirror/projection updates, refresh `config/canon_provenance.json`, run
 canon/provenance tests, and carry the result through normal branch and CI
 review. Do not copy authority files manually without updating provenance.

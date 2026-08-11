@@ -1,0 +1,59 @@
+{
+  "imports": [
+    {
+      "import": "src.entities.fleet",
+      "inside_defining_package": false,
+      "line": 14,
+      "path": "src/integrations/fleet_bridge.py"
+    },
+    {
+      "import": "modules.ord.ord_inspection_policy",
+      "inside_defining_package": true,
+      "line": 18,
+      "path": "modules/ord/__init__.py"
+    },
+    {
+      "import": "modules.ord.ord_policy_engine",
+      "inside_defining_package": true,
+      "line": 25,
+      "path": "modules/ord/__init__.py"
+    },
+    {
+      "import": "modules.ord.ord_receipts",
+      "inside_defining_package": true,
+      "line": 34,
+      "path": "modules/ord/__init__.py"
+    },
+    {
+      "import": "modules.ord.ord_threshold_registry",
+      "inside_defining_package": true,
+      "line": 35,
+      "path": "modules/ord/__init__.py"
+    },
+    {
+      "import": "modules.ord.ord_threshold_registry",
+      "inside_defining_package": true,
+      "line": 17,
+      "path": "modules/ord/ord_inspection_policy.py"
+    },
+    {
+      "import": "modules.ord.ord_threshold_registry",
+      "inside_defining_package": true,
+      "line": 19,
+      "path": "modules/ord/ord_policy_engine.py"
+    },
+    {
+      "import": "src.entities.fleet",
+      "inside_defining_package": false,
+      "line": 38,
+      "path": "api/aurora_gui_cloudhub_fastapi.py"
+    },
+    {
+      "import": "src.entities.fleet.types",
+      "inside_defining_package": false,
+      "line": 1434,
+      "path": "api/aurora_gui_cloudhub_fastapi.py"
+    }
+  ],
+  "parse_errors": []
+}

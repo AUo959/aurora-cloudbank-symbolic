@@ -1,0 +1,32 @@
+{
+  "artifact_digests": {
+    "baseline_commit.txt": "4969704e276a6c0fb54a74f696272c833ebc712ec92a2936a20750b0d1c26760",
+    "grep_version.txt": "b5ea30b848da719fd282e97d686886f80095659d959c66438e54f1a0b642504a",
+    "python_version.txt": "5b3e43dc38ca01e3f5a7854ba50d4330864b0c1e0f646650b2c78cf072acc366",
+    "step2.canonical.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "step2.deterministic.txt": "4209f934eb97c8d5d559c4c584e4fb931c748f88e639f3c225aacebd3d5a3abf",
+    "step2.exit_code.txt": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "step3.canonical.txt": "ea9784abc0ba590b134affe8c769a32953b217c6ab81c751cc74e17975c168d4",
+    "step3.deterministic.txt": "c8472404565b9efef3bfb2fe1ee569371e4a154477e72fb5372a26cbe25946ef",
+    "step3.exit_code.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "baseline_commit": "3142aa47afac0b8e63cc5bc46f9fa8ae40592354",
+  "event_id": "AURORA-GATE-001A-RECOVERED-PROTOCOL-WIRING-001",
+  "executed_at": "2026-07-27T14:34:03Z",
+  "run_id": "AURORA-GATE-001A-RUN-001-3142AA47",
+  "runner": "GitHub Actions 1008088800",
+  "schema": "aurora.gate001a.deterministic_replay_receipt/v1",
+  "seed": "AURORA-GATE-001A-RUN-001-3142AA47",
+  "step2": {
+    "canonical_exit_code": 1,
+    "canonical_match_count": 0,
+    "deterministic_match_count": 0,
+    "set_equivalent": true
+  },
+  "step3": {
+    "canonical_exit_code": 0,
+    "canonical_match_count": 38,
+    "deterministic_match_count": 38,
+    "set_equivalent": true
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "clean_scope_observations": [
+    {
+      "evidence": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__RESULT__GATE_001A_STEP_2__v1.0__2026-07-27.txt",
+      "result": "No matches",
+      "scope": "Step 2 ethics-enforcement surfaces"
+    },
+    {
+      "evidence": "docs/security/assurance_runs/gate-001a/2026-07-27-run-001-recovered-protocol-wiring/AURORA_SECURITY__EVIDENCE__GATE_001A_ORD_IMPORT_GRAPH__v1.0__2026-07-27.json",
+      "result": "No external production import found; package-local imports and tests only.",
+      "scope": "Direct production imports of modules.ord"
+    }
+  ],
+  "event_id": "AURORA-GATE-001A-RECOVERED-PROTOCOL-WIRING-001",
+  "findings": [
+    {
+      "confidence": {
+        "active_autonomous_enforcement": "NOT_ESTABLISHED",
+        "identity_and_custody_ambiguity": "HIGH",
+        "shared_lineage_with_recovered_protocol": "UNDETERMINED"
+      },
+      "derived": [
+        "The repository cannot prove whether ORD-3 Shadowfax is independent from or derived from the custody-blocked recovered protocol.",
+        "This ambiguity prevents truthful automated classification of the runtime references and weakens the recovered-protocol promotion boundary."
+      ],
+      "finding_id": "GATE001A-001-F001",
+      "instances": [
+        {
+          "lines": "13-25, 239-293",
+          "path": "docs/ethics/recovered_protocols/recovered_protocol_manifest.json"
+        },
+        {
+          "lines": "3-17",
+          "path": "modules/ord/__init__.py"
+        },
+        {
+          "lines": "24-28, 89-126",
+          "path": "modules/ord/ord_policy_engine.py"
+        },
+        {
+          "lines": "71-92",
+          "path": "src/entities/fleet/registry_drones.py"
+        },
+        {
+          "lines": "92-116",
+          "path": "src/entities/fleet/__init__.py"
+        },
+        {
+          "lines": "56-60",
+          "path": "src/core/quantum_bayesian_manifest.yaml"
+        }
+      ],
+      "not_claimed": [
+        "This run does not claim that a real external assessor discovered the finding.",
+        "This run does not claim that recovered SHADOWFAX currently executes autonomous enforcement.",
+        "This run does not infer lineage from the shared name alone."
+      ],
+      "observed": [
+        "The custody manifest classifies recovered SHADOWFAX as a missing dependency and hard-blocks wiring decisions.",
+        "Runtime namespaces define ORD-3 Shadowfax fleet accessors and a policy identity.",
+        "The ORD policy library assigns Shadowfax to post-flight inspection with ethics-scan, structure-validation, and quarantine instructions.",
+        "The broader fleet package is imported by production API surfaces and re-exports Shadowfax accessors.",
+        "The deterministic import graph found no production importer of modules.ord outside its own package; direct policy consumers were tests.",
+        "The quantum Bayesian manifest contains tribunal_integration: SHADOWFAX, with no loader reachability established by this run."
+      ],
+      "required_resolution": [
+        "Record an architecture decision proving shared or independent lineage.",
+        "If independent, rename or namespace ORD-3 to prevent confusion with the blocked protocol.",
+        "If related, quarantine runtime-facing definitions until custody and promotion gates pass.",
+        "Resolve the tribunal_integration reference with attributable provenance and loader evidence.",
+        "Add a regression gate and execute revision-2 retest after remediation."
+      ],
+      "severity": "HIGH",
+      "status": "OPEN",
+      "title": "SHADOWFAX identity and custody ambiguity across ORD runtime surfaces",
+      "tracking_issue": 1361
+    }
+  ],
+  "run_id": "AURORA-GATE-001A-RUN-001-3142AA47",
+  "schema": "aurora.gate001a.finding_register/v1",
+  "severity_method": {
+    "interpretation": "Severity is procedure-driven governance/security severity, not proof of exploitability.",
+    "rule": "Any match outside docs is a finding; severity HIGH under pentest_scope_v2.md Section 3.5.",
+    "source": "docs/security/recovered_protocol_wiring_verification.md"
+  },
+  "verdict": "FINDING"
+}

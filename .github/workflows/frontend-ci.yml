@@ -66,12 +66,13 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Advisory: ESLint currently parses .ts/.tsx with the default parser and
-      # reports "The keyword 'interface' is reserved" and "Unexpected token <"
-      # across the codebase. That is the lint setup, not the source. Tracked in
-      # #1340; promote this to blocking once the baseline is truthful.
-      - name: Lint (advisory; tracked in #1340)
-        continue-on-error: true
+      # Blocking as of the flat-config migration (#1340). ESLint 10 dropped
+      # .eslintrc support outright, so the old .eslintrc.cjs was ignored and
+      # every .ts/.tsx file failed to parse with the default parser — the
+      # "interface is reserved" noise this step used to tolerate. eslint.config.js
+      # restores the intended parser, plugins and rules, and the baseline is
+      # clean, so a lint failure here is now a real finding.
+      - name: Lint
         run: npm run lint
 
       # Blocking, but currently vacuous: no *.test.* or *.spec.* files exist yet.

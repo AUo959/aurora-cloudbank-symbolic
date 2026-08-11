@@ -46,6 +46,9 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
+      - name: Reject case-folded tracked-path collisions
+        run: git ls-files -z | python scripts/check_casefold_collisions.py
+
       # Hash-checked install. requirements-ci-hashed.txt is compiled from BOTH
       # requirements.txt and requirements-test.txt, so it carries pytest and
       # every transitive dependency with a sha256 — pip's hash-checking mode

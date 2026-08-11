@@ -33,6 +33,13 @@ from typing import Any, Dict, Optional
 
 from l1_character_actor import BoundedCharacterActor, CharacterContext
 from l1_character_actor_policy import POLICY_VERSION
+from l1_embodiment import (
+    assess_embodiment_readiness,
+    build_initial_embodiment_state,
+    embodiment_observation,
+    validate_embodiment_projection,
+    validate_embodiment_registry,
+)
 from l1_fleet import (
     OrdPhysicalMissionAdapter,
     OrdPhysicalMissionProposal,
@@ -73,6 +80,7 @@ CANON_PROVENANCE_PATH = PROJECT_ROOT / "config" / "canon_provenance.json"
 FLEET_AUTHORITY_RECEIPT_PATH = (
     PROJECT_ROOT / "config" / "l1_fleet_authority_receipt.json"
 )
+EMBODIMENT_REGISTRY_PATH = PROJECT_ROOT / "config" / "l1_embodiment_registry.json"
 DEFAULT_RUN_ROOT = Path(
     os.environ.get("AURORA_L1_RUN_ROOT", Path.home() / ".aurora" / "l1-runs")
 )
@@ -86,6 +94,8 @@ class OrionL1Runtime:
         self.baseline = read_json(baseline_path)
         self.fleet_receipt: Optional[Dict[str, Any]] = None
         self.fleet_receipt_sha256: Optional[str] = None
+        self.embodiment_registry: Optional[Dict[str, Any]] = None
+        self.embodiment_registry_sha256: Optional[str] = None
         self.population = PopulationSnapshot.from_baseline(self.baseline)
         self.state: Optional[L1RunState] = None
         self._rng: Optional[DeterministicReplayRNG] = None
@@ -97,6 +107,8 @@ class OrionL1Runtime:
         """Validate bootstrap invariants without creating or advancing a run."""
         self.fleet_receipt = None
         self.fleet_receipt_sha256 = None
+        self.embodiment_registry = None
+        self.embodiment_registry_sha256 = None
         report = evaluate_preflight(
             self.baseline,
             self.population,
@@ -110,6 +122,29 @@ class OrionL1Runtime:
             except PreflightError as exc:
                 report["blockers"].append(str(exc))
                 report["ready"] = False
+        try:
+            self.embodiment_registry = self._load_verified_embodiment_registry()
+        except PreflightError as exc:
+            report["blockers"].append(str(exc))
+            report["ready"] = False
+        if self.embodiment_registry is None:
+            report["embodiment"] = {
+                "registry_status": "unavailable",
+                "ready": False,
+                "resume_blockers": [
+                    {
+                        "embodiment_id": "L1-EMB-REGISTRY",
+                        "component": "L1 embodiment registry",
+                        "provider_status": "unbound",
+                        "blockers": ["registry_unavailable_or_invalid"],
+                    }
+                ],
+            }
+        else:
+            report["embodiment"] = assess_embodiment_readiness(
+                self.embodiment_registry
+            )
+        report["resume_ready"] = report["ready"] and report["embodiment"]["ready"]
         return report
 
     def _load_verified_fleet_receipt(self) -> Dict[str, Any]:
@@ -138,6 +173,43 @@ class OrionL1Runtime:
             raise PreflightError("fleet authority receipt must remain a JSON object")
         self.fleet_receipt_sha256 = actual_hash
         return receipt
+
+    def _load_verified_embodiment_registry(self) -> Dict[str, Any]:
+        """Bind exact non-activating registry bytes retained by this runtime."""
+        authority = self.baseline.get("authority", {}).get(
+            "embodiment_registry", {}
+        )
+        if (
+            authority.get("status")
+            != "verified_recovery_projection_activation_blocked"
+        ):
+            raise PreflightError("embodiment registry authority status is unsupported")
+        if authority.get("projection_role") != "runtime_projection_non_authoritative":
+            raise PreflightError("embodiment registry projection role is unsupported")
+        if authority.get("activation_authority") is not False:
+            raise PreflightError("embodiment registry cannot grant activation authority")
+        if authority.get("registry_path") != "config/l1_embodiment_registry.json":
+            raise PreflightError("embodiment registry path is unsupported")
+        expected_hash = authority.get("registry_sha256")
+        try:
+            raw = EMBODIMENT_REGISTRY_PATH.read_bytes()
+        except OSError as exc:
+            raise PreflightError("embodiment registry is unavailable") from exc
+        actual_hash = hashlib.sha256(raw).hexdigest()
+        if actual_hash != expected_hash:
+            raise PreflightError("embodiment registry hash does not match baseline")
+        try:
+            registry = json.loads(raw)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise PreflightError("embodiment registry is invalid") from exc
+        if not isinstance(registry, dict):
+            raise PreflightError("embodiment registry must be a JSON object")
+        try:
+            validate_embodiment_registry(registry)
+        except ValueError as exc:
+            raise PreflightError("embodiment registry contract is invalid") from exc
+        self.embodiment_registry_sha256 = actual_hash
+        return registry
 
     def init_run(
         self,
@@ -192,6 +264,7 @@ class OrionL1Runtime:
         source_contract_version = restored.manifest.runtime_contract_version
         self._validate_loaded_state(restored, normalized_run_id)
         self._upgrade_loaded_fleet(restored, source_contract_version)
+        self._upgrade_loaded_embodiments(restored, source_contract_version)
         self.state = restored
         self._run_root = resolved_run_root
         self._restore_replay_generator(restored)
@@ -230,6 +303,7 @@ class OrionL1Runtime:
             cloudbank_revision=cloudbank_revision,
             canonrec_revision=canonrec_revision,
             fleet_authority_receipt_sha256=self._require_fleet_receipt_sha256(),
+            embodiment_registry_sha256=self._require_embodiment_registry_sha256(),
             seed=seed,
             station_cycle_length_minutes=int(defaults["station_cycle_length_minutes"]),
             station_cycle_minute=int(defaults["station_cycle_start_minute"]),
@@ -247,6 +321,10 @@ class OrionL1Runtime:
         return L1RunState(
             manifest=manifest,
             fleet=build_initial_fleet_state(self._require_fleet_receipt()),
+            embodiments=build_initial_embodiment_state(
+                self._require_embodiment_registry(),
+                self._require_embodiment_registry_sha256(),
+            ),
             world_state={
                 "station": "Orion Station",
                 "l1_status": "initialized",
@@ -614,7 +692,9 @@ class OrionL1Runtime:
     def observe(self, focus: str = "station") -> Dict[str, Any]:
         """Expose instrumentation without advancing or rearranging L1."""
         state = self._require_state()
-        provider_payload = observation_for_focus(state, focus)
+        provider_payload = embodiment_observation(state, focus)
+        if provider_payload is None:
+            provider_payload = observation_for_focus(state, focus)
         recent = [asdict(item) for item in state.station_records[-5:]]
         payload = {
             "observation_id": str(uuid.uuid4()),
@@ -913,6 +993,7 @@ class OrionL1Runtime:
         self._validate_revision(manifest.cloudbank_revision, "cloudbank_revision")
         self._validate_revision(manifest.canonrec_revision, "canonrec_revision")
         self._validate_loaded_fleet_receipt_digest(state)
+        self._validate_loaded_embodiment_registry_digest(state)
         if manifest.tick < 0:
             raise PreflightError("persisted run tick cannot be negative")
         if (
@@ -927,6 +1008,7 @@ class OrionL1Runtime:
         self._validate_loaded_character_actions(state)
         self._validate_autonomous_event_replay(state)
         self._validate_loaded_fleet(state)
+        self._validate_loaded_embodiments(state)
 
     @staticmethod
     def _validate_loaded_world_state(state: L1RunState) -> None:
@@ -1118,6 +1200,40 @@ class OrionL1Runtime:
                 "persisted fleet authority receipt digest does not match runtime"
             )
 
+    def _validate_loaded_embodiment_registry_digest(self, state: L1RunState) -> None:
+        manifest = state.manifest
+        digest = manifest.embodiment_registry_sha256
+        if manifest.runtime_contract_version in {"1.1.0", "1.2.0"}:
+            if digest is not None:
+                raise PreflightError(
+                    "persisted pre-1.3.0 contract cannot claim an embodiment digest"
+                )
+            return
+        if digest != self._require_embodiment_registry_sha256():
+            raise PreflightError(
+                "persisted embodiment registry digest does not match runtime"
+            )
+
+    def _validate_loaded_embodiments(self, state: L1RunState) -> None:
+        try:
+            state.embodiments.validate()
+            if state.embodiments.registry_status == "bound":
+                validate_embodiment_projection(
+                    state.embodiments,
+                    self._require_embodiment_registry(),
+                    self._require_embodiment_registry_sha256(),
+                )
+        except ValueError as exc:
+            raise PreflightError("persisted embodiment state is invalid") from exc
+        current_version = self.baseline["runtime_contract_version"]
+        if (
+            state.manifest.runtime_contract_version == current_version
+            and state.embodiments.registry_status != "bound"
+        ):
+            raise PreflightError(
+                "persisted current-contract embodiment registry is unbound"
+            )
+
     def _validate_loaded_ord_adapter_evidence(self, state: L1RunState) -> None:
         active_entities = [
             entity
@@ -1286,6 +1402,27 @@ class OrionL1Runtime:
             )
         state.manifest.runtime_contract_version = current_version
 
+    def _upgrade_loaded_embodiments(
+        self,
+        state: L1RunState,
+        source_contract_version: str,
+    ) -> None:
+        registry = self._require_embodiment_registry()
+        digest = self._require_embodiment_registry_sha256()
+        if state.embodiments.registry_status == "unbound":
+            state.embodiments = build_initial_embodiment_state(registry, digest)
+            state.embodiments.migrated_from_contract_version = source_contract_version
+        try:
+            validate_embodiment_projection(state.embodiments, registry, digest)
+        except ValueError as exc:
+            raise PreflightError(
+                "persisted embodiment projection does not match runtime registry"
+            ) from exc
+        state.manifest.embodiment_registry_sha256 = digest
+        state.manifest.runtime_contract_version = self.baseline[
+            "runtime_contract_version"
+        ]
+
     def _validate_loaded_communications(self, state: L1RunState) -> None:
         message_ids = set()
         for index, message in enumerate(state.communications):
@@ -1377,6 +1514,18 @@ class OrionL1Runtime:
                 "fleet authority receipt digest is unavailable after preflight"
             )
         return self.fleet_receipt_sha256
+
+    def _require_embodiment_registry(self) -> Dict[str, Any]:
+        if self.embodiment_registry is None:
+            raise PreflightError("embodiment registry is unavailable after preflight")
+        return self.embodiment_registry
+
+    def _require_embodiment_registry_sha256(self) -> str:
+        if self.embodiment_registry_sha256 is None:
+            raise PreflightError(
+                "embodiment registry digest is unavailable after preflight"
+            )
+        return self.embodiment_registry_sha256
 
     def _require_state(self) -> L1RunState:
         if self.state is None:

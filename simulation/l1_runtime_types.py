@@ -399,6 +399,155 @@ class FleetRunState:
             raise ValueError("ORD-3 Shadowfax cannot carry physical runtime transitions")
 
 
+@dataclass(frozen=True)
+class EmbodimentState:
+    """One evidence-classified architectural component embodied in Orion L1."""
+
+    embodiment_id: str
+    component: str
+    l1_kind: str
+    location: str
+    location_certainty: str
+    l2_control_surfaces: List[str]
+    l3_interfaces: List[str]
+    authority_class: str
+    evidence_class: str
+    source_refs: List[str]
+    provider_status: str
+    required_for_resume: bool
+    causal_use_permitted: bool
+    causal_scope: str
+    blockers: List[str]
+
+    def validate(self) -> None:
+        strings = (
+            self.embodiment_id,
+            self.component,
+            self.l1_kind,
+            self.location,
+            self.authority_class,
+            self.causal_scope,
+        )
+        if not all(isinstance(value, str) and value for value in strings):
+            raise ValueError("embodiment identity and role fields must be non-empty")
+        if self.location_certainty not in {"CANON", "STAGING", "UNCONFIRMED"}:
+            raise ValueError("embodiment location certainty is unsupported")
+        if self.evidence_class not in {
+            "explicit_canon",
+            "current_implementation",
+            "recoverable_historical_implementation",
+            "staging",
+            "bounded_inference",
+            "unresolved",
+        }:
+            raise ValueError("embodiment evidence class is unsupported")
+        if self.provider_status not in {"bound", "partial", "unbound", "blocked"}:
+            raise ValueError("embodiment provider status is unsupported")
+        if type(self.required_for_resume) is not bool:
+            raise ValueError("embodiment resume requirement must be boolean")
+        if type(self.causal_use_permitted) is not bool:
+            raise ValueError("embodiment causal-use flag must be boolean")
+        self._validate_string_lists()
+        self._validate_causal_boundary()
+
+    def _validate_string_lists(self) -> None:
+        values = (
+            self.l2_control_surfaces,
+            self.l3_interfaces,
+            self.source_refs,
+            self.blockers,
+        )
+        if any(
+            not isinstance(items, list)
+            or not all(isinstance(item, str) and item for item in items)
+            for items in values
+        ):
+            raise ValueError("embodiment list fields must contain non-empty strings")
+        if not self.source_refs:
+            raise ValueError("embodiment projection requires provenance references")
+
+    def _validate_causal_boundary(self) -> None:
+        if self.causal_use_permitted:
+            if self.provider_status not in {"bound", "partial"}:
+                raise ValueError("unavailable embodiment provider cannot be causal")
+            if self.causal_scope == "none":
+                raise ValueError("causal embodiment provider requires a bounded scope")
+            return
+        if self.causal_scope != "none":
+            raise ValueError("non-causal embodiment provider must use scope 'none'")
+
+
+@dataclass
+class EmbodimentRunState:
+    """Run-scoped projection of architecture into physical L1 embodiments."""
+
+    registry_status: str
+    registry_id: Optional[str]
+    registry_sha256: Optional[str]
+    projection_role: str
+    provider_readiness_status: str
+    entities: Dict[str, EmbodimentState] = field(default_factory=dict)
+    migrated_from_contract_version: Optional[str] = None
+
+    @classmethod
+    def unbound(cls) -> "EmbodimentRunState":
+        return cls(
+            registry_status="unbound",
+            registry_id=None,
+            registry_sha256=None,
+            projection_role="provider_unbound",
+            provider_readiness_status="unavailable",
+        )
+
+    def validate(self) -> None:
+        if self.registry_status not in {"bound", "unbound"}:
+            raise ValueError("embodiment registry status is unsupported")
+        if self.registry_status == "unbound":
+            self._validate_unbound()
+            return
+        self._validate_bound()
+
+    def _validate_unbound(self) -> None:
+        consistent = (
+            self.registry_id is None
+            and self.registry_sha256 is None
+            and self.projection_role == "provider_unbound"
+            and self.provider_readiness_status == "unavailable"
+            and not self.entities
+            and self.migrated_from_contract_version is None
+        )
+        if not consistent:
+            raise ValueError("unbound embodiment registry carries bound state")
+
+    def _validate_bound(self) -> None:
+        if not self.registry_id:
+            raise ValueError("bound embodiment registry requires identity")
+        if (
+            not isinstance(self.registry_sha256, str)
+            or len(self.registry_sha256) != 64
+            or any(char not in "0123456789abcdef" for char in self.registry_sha256)
+        ):
+            raise ValueError("bound embodiment registry requires a SHA-256 digest")
+        if self.projection_role != "runtime_projection_non_authoritative":
+            raise ValueError("bound embodiment state must remain non-authoritative")
+        if self.provider_readiness_status not in {"ready", "incomplete"}:
+            raise ValueError("embodiment provider readiness is unsupported")
+        for embodiment_id, entity in self.entities.items():
+            if embodiment_id != entity.embodiment_id:
+                raise ValueError("embodiment mapping key does not match identity")
+            entity.validate()
+        expected_readiness = (
+            "ready"
+            if all(
+                not entity.required_for_resume or entity.provider_status == "bound"
+                for entity in self.entities.values()
+            )
+            else "incomplete"
+        )
+        if self.provider_readiness_status != expected_readiness:
+            raise ValueError("embodiment provider readiness is internally inconsistent")
+
+
 @dataclass
 class RunManifest:
     schema_version: int
@@ -408,6 +557,7 @@ class RunManifest:
     cloudbank_revision: str
     canonrec_revision: str
     fleet_authority_receipt_sha256: Optional[str]
+    embodiment_registry_sha256: Optional[str]
     seed: int
     station_cycle_length_minutes: int
     station_cycle_minute: int
@@ -423,6 +573,7 @@ class L1RunState:
     manifest: RunManifest
     world_state: Dict[str, Any]
     fleet: FleetRunState = field(default_factory=FleetRunState.unbound)
+    embodiments: EmbodimentRunState = field(default_factory=EmbodimentRunState.unbound)
     character_knowledge: Dict[str, List[EpistemicRecord]] = field(default_factory=dict)
     character_actions: List[Dict[str, Any]] = field(default_factory=list)
     station_records: List[EpistemicRecord] = field(default_factory=list)
@@ -441,10 +592,24 @@ def l1_run_state_from_payload(payload: Dict[str, Any]) -> L1RunState:
     manifest = _manifest_from_payload(manifest_payload)
     if manifest.runtime_contract_version == "1.1.0" and "fleet" in payload:
         raise ValueError("contract 1.1.0 persisted runs cannot supply fleet state")
+    if manifest.runtime_contract_version in {"1.1.0", "1.2.0"} and "embodiments" in payload:
+        raise ValueError("pre-1.3.0 persisted runs cannot supply embodiment state")
+    if (
+        manifest.runtime_contract_version not in {"1.1.0", "1.2.0"}
+        and "embodiments" not in payload
+    ):
+        # The mirror of the guard above. A pre-1.3.0 run legitimately has no
+        # embodiment state and is migrated on load; a CURRENT-contract run that
+        # is missing it has been truncated or tampered with, and must be
+        # rejected at parse time rather than silently rebuilt from the registry
+        # -- rebuilding would mask the loss and hand back a run whose projection
+        # no longer reflects what was persisted.
+        raise ValueError("current-contract persisted runs must supply embodiment state")
     return L1RunState(
         manifest=manifest,
         world_state=copy.deepcopy(_mapping(payload.get("world_state"), "world_state")),
         fleet=_fleet_state_from_payload(payload.get("fleet")),
+        embodiments=_embodiment_state_from_payload(payload.get("embodiments")),
         character_knowledge=_character_knowledge_from_payload(
             payload.get("character_knowledge", {})
         ),
@@ -474,6 +639,54 @@ def l1_run_state_from_payload(payload: Dict[str, Any]) -> L1RunState:
             payload.get("promotion_candidates", []), "promotion_candidates"
         ),
     )
+
+
+def _embodiment_state_from_payload(value: Any) -> EmbodimentRunState:
+    if value is None:
+        return EmbodimentRunState.unbound()
+    payload = _mapping(value, "embodiments")
+    entities_payload = _mapping(payload.get("entities", {}), "embodiments.entities")
+    state = EmbodimentRunState(
+        registry_status=_string(
+            payload.get("registry_status"), "embodiments.registry_status"
+        ),
+        registry_id=_optional_string(
+            payload.get("registry_id"), "embodiments.registry_id"
+        ),
+        registry_sha256=_optional_string(
+            payload.get("registry_sha256"), "embodiments.registry_sha256"
+        ),
+        projection_role=_string(
+            payload.get("projection_role"), "embodiments.projection_role"
+        ),
+        provider_readiness_status=_string(
+            payload.get("provider_readiness_status"),
+            "embodiments.provider_readiness_status",
+        ),
+        entities={
+            _string(embodiment_id, "embodiment entity key"): _embodiment_entity_from_payload(
+                entity,
+                f"embodiments.entities.{embodiment_id}",
+            )
+            for embodiment_id, entity in entities_payload.items()
+        },
+        migrated_from_contract_version=_optional_string(
+            payload.get("migrated_from_contract_version"),
+            "embodiments.migrated_from_contract_version",
+        ),
+    )
+    state.validate()
+    return state
+
+
+def _embodiment_entity_from_payload(value: Any, name: str) -> EmbodimentState:
+    payload = copy.deepcopy(_mapping(value, name))
+    try:
+        entity = EmbodimentState(**payload)
+    except TypeError as exc:
+        raise ValueError(f"{name} has invalid fields") from exc
+    entity.validate()
+    return entity
 
 
 def _fleet_state_from_payload(value: Any) -> FleetRunState:
@@ -608,6 +821,10 @@ def _manifest_from_payload(payload: Dict[str, Any]) -> RunManifest:
         fleet_authority_receipt_sha256=_optional_string(
             payload.get("fleet_authority_receipt_sha256"),
             "fleet_authority_receipt_sha256",
+        ),
+        embodiment_registry_sha256=_optional_string(
+            payload.get("embodiment_registry_sha256"),
+            "embodiment_registry_sha256",
         ),
         seed=required_int(payload.get("seed"), "seed"),
         station_cycle_length_minutes=required_int(

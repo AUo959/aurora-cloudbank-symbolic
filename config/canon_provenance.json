@@ -41,7 +41,7 @@
       "supporting_canonrec_path": "canon/L1/station/POWERED_WATCH_AND_GROUND_SEGMENT.md",
       "supporting_canonrec_sha256": "710eceefc5c09f17864ea845469d7d6725d19ed4cf560108dcb542e4a2d1bc4c",
       "cloudbank_path": "config/l1_runtime_baseline.json",
-      "cloudbank_sha256": "272cc6d52c501a75d129dec6811fe80732e3e9584374beff94b6411dab3af12b",
+      "cloudbank_sha256": "645cad2c6d68fca45bc78960ddb5168e2a62ab10f8a7df9993ef219681f721b4",
       "cloudbank_role": "runtime_projection_non_authoritative",
       "resolved_claim": "Orion Station is stationed at a Lagrange point in real space.",
       "remaining_uncertainty": "Exact libration point, primary-body system, range, and exact one-way light-time remain unresolved."

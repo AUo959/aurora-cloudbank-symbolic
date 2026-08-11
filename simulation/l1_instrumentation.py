@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict
 
@@ -45,6 +46,7 @@ def build_sensor_snapshot(state: L1RunState) -> Dict[str, Any]:
             "docking": docking_observation(state),
             "drone": drone_observation(state),
         },
+        "embodiment_registry": _embodiment_summary(state),
         "unavailable_physical_channels": [
             "environmental",
             "structural_hull",
@@ -75,8 +77,10 @@ def build_logical_schematic(
         },
         "pilot": state.world_state["pilot"],
         "command_endpoint": command_endpoint,
+        "embodiment_registry": _embodiment_summary(state),
         "topology": {
-            "nodes": _schematic_nodes(command_endpoint, latency),
+            "nodes": _schematic_nodes(command_endpoint, latency)
+            + _embodiment_nodes(state),
             "links": _schematic_links(command_endpoint, latency),
         },
         "physical_deck_layout": {
@@ -88,6 +92,46 @@ def build_logical_schematic(
             "causal_use_permitted": False,
         },
     }
+
+
+def _embodiment_summary(state: L1RunState) -> Dict[str, Any]:
+    embodiments = state.embodiments
+    counts = {
+        status: sum(
+            entity.provider_status == status
+            for entity in embodiments.entities.values()
+        )
+        for status in ("bound", "partial", "unbound", "blocked")
+    }
+    return {
+        "registry_status": embodiments.registry_status,
+        "registry_id": embodiments.registry_id,
+        "projection_role": embodiments.projection_role,
+        "provider_readiness_status": embodiments.provider_readiness_status,
+        "provider_counts": counts,
+        "causal_effect": False,
+    }
+
+
+def _embodiment_nodes(state: L1RunState) -> list[Dict[str, Any]]:
+    if state.embodiments.registry_status != "bound":
+        return []
+    return [
+        {
+            "id": entity.embodiment_id,
+            "type": entity.l1_kind,
+            "component": entity.component,
+            "location": entity.location,
+            "location_certainty": entity.location_certainty,
+            "provider_status": entity.provider_status,
+            "causal_use_permitted": entity.causal_use_permitted,
+            "causal_scope": entity.causal_scope,
+            "l2_control_surfaces": list(entity.l2_control_surfaces),
+            "l3_interfaces": list(entity.l3_interfaces),
+            "provenance": asdict(entity)["source_refs"],
+        }
+        for entity in state.embodiments.entities.values()
+    ]
 
 
 def _schematic_nodes(

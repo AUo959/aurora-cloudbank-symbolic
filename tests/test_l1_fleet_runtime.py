@@ -577,7 +577,14 @@ def test_pre_digest_v1_2_run_binds_digest_after_full_fleet_validation(
     )
     state_path = tmp_path / state.manifest.run_id / "state.json"
     payload = json.loads(state_path.read_text(encoding="utf-8"))
+    # Pin the contract this case is about. The test previously relied on the
+    # runtime baseline happening to BE 1.2.0; once the baseline moved to 1.3.0
+    # the "1.2.0 may omit the fleet digest" tolerance no longer applied and the
+    # fixture stopped describing a v1.2 run at all.
+    payload["manifest"]["runtime_contract_version"] = "1.2.0"
     payload["manifest"].pop("fleet_authority_receipt_sha256")
+    payload["manifest"]["embodiment_registry_sha256"] = None
+    payload.pop("embodiments")
     state_path.write_text(json.dumps(payload), encoding="utf-8")
 
     loaded = OrionL1Runtime().load_run(state.manifest.run_id, run_root=tmp_path)
@@ -607,7 +614,11 @@ def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(
     legacy_payload = json.loads(state_path.read_text(encoding="utf-8"))
     legacy_payload["manifest"]["runtime_contract_version"] = "1.1.0"
     legacy_payload["manifest"].pop("fleet_authority_receipt_sha256")
+    legacy_payload["manifest"]["embodiment_registry_sha256"] = None
     legacy_payload.pop("fleet")
+    # Embodiment state is persisted now, so a genuine 1.1.0 payload must not
+    # carry it -- matching test_tick7_v1_1_migration_binds_embodiments_without_advancing.
+    legacy_payload.pop("embodiments")
     state_path.write_text(json.dumps(legacy_payload), encoding="utf-8")
 
     resumed = OrionL1Runtime()
@@ -615,7 +626,7 @@ def test_pr1480_contract_run_migrates_at_paused_tick_seven_without_advancing(
 
     assert loaded.manifest.tick == 7
     assert loaded.manifest.station_cycle_minute == 21
-    assert loaded.manifest.runtime_contract_version == "1.2.0"
+    assert loaded.manifest.runtime_contract_version == "1.3.0"
     assert (
         loaded.manifest.fleet_authority_receipt_sha256
         == resumed.baseline["authority"]["fleet"]["receipt_sha256"]

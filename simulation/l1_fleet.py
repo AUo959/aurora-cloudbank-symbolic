@@ -35,13 +35,30 @@ ORD_PHYSICAL_LOCATIONS = {
 
 def build_initial_fleet_state(receipt: Dict[str, Any]) -> FleetRunState:
     """Build identity-only genesis state without importing dated mission truth."""
+    receipt_id, projection_role = _receipt_context(receipt)
+    entities = _projected_entities(receipt, receipt_id, projection_role)
+    fleet = FleetRunState(
+        provider_status="bound",
+        authority_receipt_id=receipt_id,
+        projection_role=projection_role,
+        process_position=0,
+        elapsed_minutes=0,
+        entities=entities,
+    )
+    fleet.validate()
+    validate_fleet_identity_projection(fleet, receipt)
+    return fleet
+
+
+def _receipt_context(receipt: Dict[str, Any]) -> tuple[str, str]:
     if not isinstance(receipt, dict):
         raise ValueError("fleet receipt must be an object")
     projection = receipt.get("cloudbank_projection")
     if not isinstance(projection, dict):
         raise ValueError("fleet receipt projection must be an object")
+    projection_role = projection.get("role")
     receipt_id = receipt.get("receipt_id")
-    if projection.get("role") != "runtime_projection_non_authoritative":
+    if projection_role != "runtime_projection_non_authoritative":
         raise ValueError("fleet receipt does not define a non-authoritative projection")
     if not isinstance(receipt_id, str) or not receipt_id:
         raise ValueError("fleet receipt_id must be a non-empty string")
@@ -50,27 +67,7 @@ def build_initial_fleet_state(receipt: Dict[str, Any]) -> FleetRunState:
         != "provenance_only_never_current_run_truth"
     ):
         raise ValueError("fleet receipt does not quarantine historical mission state")
-
-    entities: Dict[str, FleetEntityState] = {}
-    for entry in _receipt_entities(receipt):
-        entity = _entity_from_receipt(entry, receipt_id, projection["role"])
-        if entity.fleet_id in entities:
-            raise ValueError(f"duplicate fleet identity: {entity.fleet_id}")
-        entities[entity.fleet_id] = entity
-    if not entities:
-        raise ValueError("fleet receipt contains no projected entities")
-
-    fleet = FleetRunState(
-        provider_status="bound",
-        authority_receipt_id=receipt_id,
-        projection_role=projection["role"],
-        process_position=0,
-        elapsed_minutes=0,
-        entities=entities,
-    )
-    fleet.validate()
-    validate_fleet_identity_projection(fleet, receipt)
-    return fleet
+    return receipt_id, projection_role
 
 
 def _receipt_entities(receipt: Dict[str, Any]) -> list[Dict[str, Any]]:
@@ -82,35 +79,65 @@ def _receipt_entities(receipt: Dict[str, Any]) -> list[Dict[str, Any]]:
     return entries
 
 
+def _projected_entities(
+    receipt: Dict[str, Any],
+    receipt_id: str,
+    projection_role: str,
+) -> Dict[str, FleetEntityState]:
+    entities: Dict[str, FleetEntityState] = {}
+    for entry in _receipt_entities(receipt):
+        entity = _entity_from_receipt(entry, receipt_id, projection_role)
+        if entity.fleet_id in entities:
+            raise ValueError(f"duplicate fleet identity: {entity.fleet_id}")
+        entities[entity.fleet_id] = entity
+    if not entities:
+        raise ValueError("fleet receipt contains no projected entities")
+    return entities
+
+
 def expected_fleet_ids(receipt: Dict[str, Any]) -> frozenset[str]:
     """Return the exact identity set projected by the authority receipt."""
-    identifiers = []
-    for entry in _receipt_entities(receipt):
-        fleet_id = entry.get("fleet_id")
-        if not isinstance(fleet_id, str) or not fleet_id:
-            raise ValueError("fleet receipt identity must be a non-empty string")
-        identifiers.append(fleet_id)
-    if len(identifiers) != len(set(identifiers)):
-        raise ValueError("fleet receipt identities are duplicated")
-    return frozenset(identifiers)
+    receipt_id, projection_role = _receipt_context(receipt)
+    return frozenset(_projected_entities(receipt, receipt_id, projection_role))
 
 
 def validate_fleet_identity_projection(
     fleet: FleetRunState,
     receipt: Dict[str, Any],
 ) -> None:
-    """Fail closed if bound run state omits or invents projected fleet identities."""
+    """Require exact IDs and immutable metadata from the pinned fleet receipt."""
     if fleet.provider_status != "bound":
         raise ValueError("fleet identity projection requires a bound provider")
-    expected = expected_fleet_ids(receipt)
-    actual = frozenset(fleet.entities)
-    if actual != expected:
-        missing = sorted(expected - actual)
-        extra = sorted(actual - expected)
+    receipt_id, projection_role = _receipt_context(receipt)
+    expected_entities = _projected_entities(receipt, receipt_id, projection_role)
+    expected_ids = frozenset(expected_entities)
+    actual_ids = frozenset(fleet.entities)
+    if actual_ids != expected_ids:
+        missing = sorted(expected_ids - actual_ids)
+        extra = sorted(actual_ids - expected_ids)
         raise ValueError(
             "bound fleet identities do not match authority receipt "
             f"(missing={missing}, extra={extra})"
         )
+    for fleet_id, expected in expected_entities.items():
+        actual = fleet.entities[fleet_id]
+        if _identity_projection(actual) != _identity_projection(expected):
+            raise ValueError(
+                f"bound fleet identity metadata does not match authority receipt: {fleet_id}"
+            )
+
+
+def _identity_projection(entity: FleetEntityState) -> Dict[str, Any]:
+    return {
+        "fleet_id": entity.fleet_id,
+        "display_name": entity.display_name,
+        "asset_class": entity.asset_class,
+        "autonomy_class": entity.autonomy_class,
+        "routine_mission_class": entity.routine_mission_class,
+        "operating_location_class": entity.operating_location_class,
+        "standby_location_class": entity.standby_location_class,
+        "provenance": asdict(entity.provenance),
+    }
 
 
 def _entity_from_receipt(

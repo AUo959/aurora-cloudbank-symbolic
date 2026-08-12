@@ -1,8 +1,8 @@
 # Aurora Work Queue — Contributor Guide
 
-**Version:** 1.3.0
+**Version:** 1.4.0
 **Owner:** Aurora (contextual authority) + Orion Station operators  
-**Last updated:** 2026-07-13
+**Last updated:** 2026-08-12
 **Source of truth:** `ops/work_queue/queue.json`
 
 ---
@@ -15,15 +15,33 @@ This is not a replacement for GitHub issues. GitHub issues remain the discussion
 
 This is also not a replacement for the ORIONCORE control-plane coordination layer. For cross-platform mutation safety, handoff, and claims, see [`CROSS_PLATFORM_COORDINATION.md`](./CROSS_PLATFORM_COORDINATION.md).
 
+For substantial implementation work, this queue also does not replace the **Durable Task Execution Record (DTER)**. The queue selects and prioritizes work; the DTER defines the committed execution contract. See [`../task_records/AURORA__SOP__DURABLE_TASK_EXECUTION_RECORDS__v1.0__2026-08-12.md`](../task_records/AURORA__SOP__DURABLE_TASK_EXECUTION_RECORDS__v1.0__2026-08-12.md).
+
 ---
 
 ## Coordination spine
 
 The intended operating rule is:
 
-> The CloudBank queue chooses the next work; the control-plane coordination layer safely routes and claims it; GitHub records the canonical result.
+> The CloudBank queue chooses the next work; the control-plane coordination layer safely routes and claims it; the DTER anchors substantial execution; GitHub records the canonical result.
 
-Use the queue to decide what should be considered next. Use the control-plane session state, session claims, and CloudBank issue broker to decide whether the work can be safely mutated by the current platform.
+The durable reference chain for substantial work is:
+
+```text
+Queue / GitHub Issue
+        ↓
+Durable Task Execution Record
+        ↓
+Plans / Specs / ADRs / Recovery Records
+        ↓
+Implementation Commits + Tests + Receipts
+        ↓
+Pull Request / Review
+        ↓
+Handoff / Session Continuation
+```
+
+Use the queue to decide what should be considered next. Use the control-plane session state, session claims, and CloudBank issue broker to decide whether the work can be safely mutated by the current platform. Use the DTER to preserve the task's objective, authority, scope, invariants, execution gates, validation, decisions, and cold-start continuation state.
 
 ### Standard session-start loop
 
@@ -33,10 +51,12 @@ Use the queue to decide what should be considered next. Use the control-plane se
 4. Select the highest actionable item whose blockers are resolved.
 5. Refresh the linked issue/PR and check for overlapping PRs or branches.
 6. Before mutation, use the control-plane issue broker or session-claim workflow.
-7. Work on a scoped branch and open a PR with queue id, issue id, changed files, validation, and rollback notes.
-8. On pause or completion, update queue state and durable handoff state as appropriate.
+7. Determine whether the task requires a DTER under the durable-task SOP.
+8. For DTER-required work, create and commit the DTER before substantive implementation mutation, then link it from the issue/PR/queue context.
+9. Work on a scoped branch and open a PR with queue id, issue id, DTER reference where applicable, changed files, validation, and rollback notes.
+10. On pause or completion, update queue state, the DTER's current-status section, and durable handoff state as appropriate.
 
-Queue priority is not a mutation lock. Session claims are short-lived leases, not durable canon. GitHub issues, PRs, commits, and reviews remain implementation canon.
+Queue priority is not a mutation lock. Session claims are short-lived leases, not durable canon. Handoffs preserve continuity but do not replace a DTER. GitHub issues, PRs, commits, tests, reviews, and merge history remain implementation canon.
 
 ---
 
@@ -44,9 +64,9 @@ Queue priority is not a mutation lock. Session claims are short-lived leases, no
 
 | Consumer | How to use this queue |
 |---|---|
-| **Aurora** | Holds contextual authority. May rerank items, rewrite `context_pack` entries, add `aurora_notes`, and declare `decision_required`. Always check queue before starting a session to load current state. |
-| **LLM / agents** | Read `queue.json`. Pick the highest-ranked item where `state == "ready"` and your role is in `consumer_fit`. Consume all files in `context_pack` before starting. Never start `blocked` or `decision_required` items. Before mutation, route through the control-plane claim/broker loop. |
-| **Human contributors** | Read `NEXT_UP.md` for a quick-start view. Full detail in `queue.json`. When starting a task, update `state` to `active` and set `active_worker` to your GitHub username. Use the control-plane handoff layer when work crosses platforms or pauses mid-flight. |
+| **Aurora** | Holds contextual authority. May rerank items, rewrite `context_pack` entries, add `aurora_notes`, and declare `decision_required`. Always check queue before starting a session to load current state. For substantial work, ensure the DTER requirement is satisfied before implementation begins. |
+| **LLM / agents** | Read `queue.json`. Pick the highest-ranked item where `state == "ready"` and your role is in `consumer_fit`. Consume all files in `context_pack` before starting. Never start `blocked` or `decision_required` items. Before mutation, route through the control-plane claim/broker loop and create/read the task's DTER when required. |
+| **Human contributors** | Read `NEXT_UP.md` for a quick-start view. Full detail in `queue.json`. When starting a task, update `state` to `active` and set `active_worker` to your GitHub username. For substantial work, commit the DTER before implementation. Use the control-plane handoff layer when work crosses platforms or pauses mid-flight. |
 
 ---
 
@@ -56,10 +76,10 @@ Queue priority is not a mutation lock. Session claims are short-lived leases, no
 |---|---|
 | `ready` | No blockers. Safe to consider after live GitHub refresh and claim preflight. |
 | `blocked` | Depends on another item. Do not start. |
-| `active` | Someone is working on it now. Check branch, PR, claim, and latest head SHA. |
-| `waiting_review` | Work done, PR open, awaiting review. Check CI, review threads, and review class. |
+| `active` | Someone is working on it now. Check branch, PR, claim, DTER if required, and latest head SHA. |
+| `waiting_review` | Work done, PR open, awaiting review. Check CI, review threads, DTER acceptance gates, and review class. |
 | `decision_required` | Needs explicit operator or Aurora decision before any work proceeds. |
-| `done` | Merged or resolved. Move only after GitHub evidence confirms closure. |
+| `done` | Merged or resolved. Move only after GitHub evidence confirms closure and the DTER completion record is reconciled when applicable. |
 
 _Current compatibility note: the live renderer still uses the legacy `status` values (`open`, `blocked`, `needs-decision`, `in-progress`, `done`). A later schema migration should reconcile `state` and `status` without breaking generated views._
 
@@ -93,6 +113,23 @@ For **ethics tasks**: always includes the recovered-protocol manifest and releva
 
 For **coordination tasks**: include this guide, `CROSS_PLATFORM_COORDINATION.md`, and any linked control-plane workflow documents.
 
+For an **active DTER-governed task**: add the controlling DTER to `context_pack` when practical so a cold-start worker receives the execution contract automatically.
+
+---
+
+## Durable Task Execution Records
+
+The DTER standard is defined in:
+
+- `ops/task_records/AURORA__SOP__DURABLE_TASK_EXECUTION_RECORDS__v1.0__2026-08-12.md`
+- `ops/task_records/AURORA__TEMPLATE__TASK_EXECUTION_RECORD__v1.0__2026-08-12.md`
+
+A DTER is required before substantive implementation mutation for non-trivial architecture, runtime, migration, recovery, restoration, integration, destructive, canon-sensitive, deterministic, cross-repository, cross-platform, or multi-session work.
+
+A handoff is not a substitute. Handoffs for DTER-governed tasks must point to the controlling DTER version and commit/PR head.
+
+If the queue schema later gains a dedicated `task_record` field, use it in addition to `context_pack`; until then, `context_pack`, issue/PR links, and the DTER itself provide the durable reference chain.
+
 ---
 
 ## Aurora notes
@@ -111,7 +148,7 @@ Aurora may add an `aurora_notes` field to any item at any time. This is Aurora's
 
 Items may declare a `parallel_group` when several tasks are independently actionable simultaneously. Items in the same group do not block each other unless explicitly listed in each other's `depends_on`. Use this to parallelize agent swarms or pre-engagement prep batches.
 
-Parallel work still requires non-overlapping claim paths before mutation. The queue may identify parallel candidates; the control-plane claim layer decides whether simultaneous mutation is safe.
+Parallel work still requires non-overlapping claim paths before mutation. The queue may identify parallel candidates; the control-plane claim layer decides whether simultaneous mutation is safe. DTERs for parallel work must identify shared authority surfaces and mutation boundaries so independently claimed tasks do not silently diverge.
 
 ---
 
@@ -155,6 +192,7 @@ Use these fields to help future automation convert a queue item into a safe brok
 5. If the task blocks others, update both `blocks` on the new item and `depends_on` on the blocked items.
 6. If the task is a decision only Aurora or the operator can make, set `decision_required: true` and `consumer_fit: ["aurora", "human"]`.
 7. If the task may mutate files, add bridge metadata for claim/broker preflight.
+8. When the task becomes active, determine whether it requires a DTER. If yes, commit the DTER before substantive implementation and add it to the active context set.
 
 ---
 
@@ -178,7 +216,7 @@ Use these fields to help future automation convert a queue item into a safe brok
 "last_updated": "YYYY-MM-DD"
 ```
 
-When work pauses or crosses platforms, also update the durable control-plane handoff surface with enough context for a cold start.
+When work pauses or crosses platforms, also update the durable control-plane handoff surface with enough context for a cold start. For DTER-governed tasks, update the DTER current-status/next-action section first or in the same change and make the handoff point to it.
 
 ---
 
@@ -191,6 +229,7 @@ When work pauses or crosses platforms, also update the durable control-plane han
 | ET-03 | New GitHub issue with labels `security` or `blocking` | Auto-add to queue with score ≥ 30 and `state: decision_required` |
 | ET-04 | Queue item selected for mutation without claim/broker preflight | Block mutation and request coordination preflight |
 | ET-05 | Queue status disagrees with live GitHub issue/PR state | Flag queue drift and update via `aurora(queue):` commit |
+| ET-06 | DTER-required task reaches substantive mutation without a committed DTER | Block further implementation; commit the execution record first |
 
 ---
 
@@ -204,6 +243,8 @@ When work pauses or crosses platforms, also update the durable control-plane han
 | `QUEUE_GUIDE.md` | This file — workflow and field definitions |
 | `CROSS_PLATFORM_COORDINATION.md` | Queue/control-plane coordination contract |
 | `BRIDGE_FIELDS.md` | Optional queue-to-control-plane metadata reference |
+| `../task_records/AURORA__SOP__DURABLE_TASK_EXECUTION_RECORDS__v1.0__2026-08-12.md` | Repo-wide SOP for committed execution records before substantial implementation |
+| `../task_records/AURORA__TEMPLATE__TASK_EXECUTION_RECORD__v1.0__2026-08-12.md` | Standard DTER template |
 | `collect_coordination_metrics.py` | Read-only metrics collector and tracked-report verifier |
 | `COORDINATION_METRICS.md` | Generated local coordination metrics report |
 | `NEXT_UP.md` | Quick-start view for human contributors and agents |

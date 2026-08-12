@@ -6,15 +6,25 @@
 **Ethics:** `Picard_Delta_3`  
 **Status:** historical tactical source recovered; restoration and control integration pending
 
-> **Lineage supersession note (2026-08-12):** The recovered v2.0 package is treated as the complete surviving historical tactical implementation. The previous hypothesis of a missing later 2026-02-16 tactical core trio is retired unless contrary executable source is recovered. `GUMAS_SIM_2.5` is not tactical authority. See `simulation/recovery/GUMAS__RECOVERY__V2_TACTICAL_SOURCE_VERIFICATION__v1.1__2026-08-12.md` and `simulation/recovery/GUMAS__LINEAGE__V1_V2_V25_V3_REATTRIBUTION__v1.0__2026-08-12.md`.
-
 ## Purpose
 
 Define the controlled path from the recovered historical GUMAS v2.0 tactical source to a deterministic, physically bounded Galactic Union fleet-engagement control run.
 
-This specification does not create a second simulation authority. Historical implementation identity is pinned to `GUMAS-PACKAGE-V2` and recovered `modules/gumas` tree SHA-256 `a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9`. Generic `GUMASEngine` / `GUMASState` symbols alone are insufficient lineage identifiers. Because the recovered implementation contains combat-integration defects, the archival source must remain immutable and any executable restoration must be separately versioned, source-digested, tested, and bound to the flash-rebellion fixture through an explicit adapter.
+This specification does not create a second simulation authority. The recovered v2.0 package identified by anchor `GUMAS-PACKAGE-V2` and recovered `modules/gumas` tree SHA-256 `a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9` is the historical tactical restoration base. Because the recovered source contains combat-integration defects, the archival source must remain immutable and any executable restoration must be separately versioned, source-digested, tested, and bound to the flash-rebellion fixture through an explicit adapter.
 
 The previously created standalone `GUMAS_TACTICAL_BATTLE_RESOLVER_v1`, its regression test, and its frozen battle receipt remain retired and non-authoritative.
+
+## CanonRec input-resolution invariant
+
+This control fixture is a control case, not a hardcoded one-off battle engine.
+
+Canonical roster and polity/organization data must resolve through:
+
+`simulation/specs/GUMAS__SPEC__CANONREC_TACTICAL_INPUT_RESOLUTION__v1.0__2026-08-12.md`
+
+The Run-0 prompt and roster remain unchanged. The resolver contract establishes that a future valid CanonRec class/polity roster can replace the control roster without changing GUMAS combat code. CanonRec defines canonical identity and scoped capabilities; versioned derivation rules convert qualitative canon into numerical simulation parameters where needed; scenario-local values are explicit fallbacks only.
+
+The complete run identity must therefore pin the CanonRec commit/snapshot, material CanonRec source hashes, resolver version/source digest, and resolved tactical-input manifest SHA-256 in addition to engine/restoration/adapter/baseline identity.
 
 ## Recovery status
 
@@ -42,9 +52,7 @@ Recovered tactical interfaces include:
 - Phase 8 fleet movement
 - Phase 9 combat resolution
 
-The corrected local forensic sweep reports no second tactical implementation and no alternate recovered `combat.py` / `topology.py` revision. The anomalous later documentation LOC rows are treated as documentation drift rather than proof of a missing build unless contrary source evidence is later produced.
-
-See `simulation/recovery/GUMAS__RECOVERY__V2_TACTICAL_SOURCE_VERIFICATION__v1.1__2026-08-12.md` for the current hash, search-coverage, and defect record.
+The previous hypothesis of a separate missing later tactical core trio is retired unless contrary executable evidence appears. The corrected forensic search found no second tactical implementation. See the recovery verification and lineage records for the evidence boundary between independently re-hashed artifacts and local forensic findings.
 
 ## Archival defects
 
@@ -58,7 +66,7 @@ Recovered `GUMASEngine._combat_resolution_tick()` calls:
 
 Recovered `CombatResolver.resolve_battle()` immediately requires `combat.condition` for terrain modifiers and later requires `combat.location` to generate battle events.
 
-Therefore a real contested-location automatic combat phase in this recovered implementation is not executable as written.
+Therefore a real contested-location automatic combat phase in this authoring revision is not executable as written.
 
 ### Defect B — explicit FLEET_BATTLE handler calls a missing method
 
@@ -66,24 +74,17 @@ Recovered `GUMASEngine._handle_fleet_battle()` calls `CombatResolver.resolve_com
 
 Recovered `CombatResolver` defines `resolve_battle()` and does not define `resolve_combat()`.
 
-Static method/call inventory confirms this is the only missing `CombatResolver` method referenced by the engine.
-
-### Defect C — historical combat API contract disagreement
-
-The corrected local forensic sweep reports a contemporaneous corrected deep-dive document specifying:
-
-`resolve_battle(attackers, defenders, location) -> BattleResult`
-
-That differs from both recovered `combat.py` and the recovered explicit `FLEET_BATTLE` caller. Restoration must therefore select and document an intended compatibility contract rather than simply rename one missing method.
+A contemporaneous corrected deep-dive found by the local forensic sweep reportedly documents a third API contract, `resolve_battle(attackers, defenders, location) -> BattleResult`. Restoration must therefore deliberately select and document the compatibility contract rather than perform a casual method rename.
 
 ## Authority boundary
 
-1. **Archival authority:** recovered v2.0 source tree SHA-256 `a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9` and its two witness archives are immutable historical evidence.
-2. **Historical implementation identity:** `GUMAS-PACKAGE-V2` identifies the recovered tactical implementation; generic class names do not.
-3. **Restoration authority:** an executable restoration must be a new version, never an in-place mutation of the recovered archive.
-4. **Adapter authority:** the scenario adapter translates the control fixture into restored GUMAS tactical state; it does not resolve combat itself.
-5. **Canon authority:** CanonRec governs ship-class identity and any later promotion of simulation observations.
-6. **Run authority:** no tactical result is authoritative until the complete run identity is pinned and replay validation passes.
+1. **Archival authority:** the recovered v2.0 source and two witness archives are immutable historical evidence.
+2. **Historical tactical restoration base:** `GUMAS-PACKAGE-V2`, recovered tree digest `a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9`.
+3. **Executable simulation authority:** a separately versioned restoration derived from that recovered package.
+4. **Canon authority:** CanonRec governs ship/polity identity, scoped technology/doctrine, and any later promotion of simulation observations.
+5. **Canon resolver authority:** the deterministic CanonRec resolver translates pinned canonical sources into a resolved tactical-input manifest; it does not resolve combat.
+6. **Scenario adapter authority:** the adapter translates the control fixture and resolved CanonRec manifest into restored GUMAS tactical state; it does not resolve combat.
+7. **Run authority:** no tactical result is authoritative until the complete run identity is pinned and replay validation passes.
 
 ## Restoration scope
 
@@ -93,12 +94,12 @@ At minimum, restoration work must decide and document:
 
 1. how a `CombatState` is created for co-located opposing fleets;
 2. how battlefield condition is derived or supplied deterministically;
-3. which historical resolver contract becomes the compatibility target and why;
-4. how the explicit `FLEET_BATTLE` handler maps into that contract;
-5. how battle events are recorded into the existing GUMAS audit/event lifecycle;
-6. how deterministic ordering is enforced for fleets and combat pairs;
-7. how historical RNG behavior is preserved or explicitly versioned;
-8. how the recovered aggregate fleet model is extended or adapted for the physically bounded per-vessel control fixture without allowing a second resolver to emerge.
+3. the intended compatibility contract among the three historical combat API signatures;
+4. how battle events are recorded into the existing GUMAS audit/event lifecycle;
+5. how deterministic ordering is enforced for fleets and combat pairs;
+6. how historical RNG behavior is preserved or explicitly versioned;
+7. how the recovered aggregate fleet model is extended or adapted for the physically bounded per-vessel control fixture without allowing a second resolver to emerge;
+8. how the CanonRec resolved-input manifest maps canonical/derived class properties into aggregate and per-vessel tactical state.
 
 Any behavior not present in the historical tactical engine but required by the physical control fixture must be identified as an explicit restoration/extension, not retroactively attributed to GUMAS v2.0.
 
@@ -106,18 +107,19 @@ Any behavior not present in the historical tactical engine but required by the p
 
 A complete Run-0 identity must include:
 
-`(engine_version, engine_source_digest, tactical_version, tactical_source_digest, scenario_adapter_version, scenario_adapter_source_digest, baseline_sha256, seed_u64)`
+`(engine_version, engine_source_digest, tactical_version, tactical_source_digest, canonrec_commit, canon_resolver_version, canon_resolver_source_digest, canon_resolution_manifest_sha256, scenario_adapter_version, scenario_adapter_source_digest, baseline_sha256, seed_u64)`
 
 Requirements:
 
 1. the scenario seed is the root of all stochastic-looking behavior;
 2. process-randomized `hash()` is forbidden for simulation decisions;
 3. child RNG streams, if introduced, use labeled cryptographic derivation;
-4. vessel, fleet, combat-pair, and event iteration order is explicit and stable;
-5. wall clock, network state, external APIs, and unrecorded human choices cannot affect resolution;
+4. vessel, fleet, combat-pair, source-resolution, and event iteration order is explicit and stable;
+5. wall clock, network state, moving branch heads, external APIs, and unrecorded human choices cannot affect resolution;
 6. raw audit timestamps may exist but are excluded from normalized deterministic state hashing;
 7. every material tactical mutation is represented in ordered state/event output;
-8. two runs with identical complete identity must produce equivalent normalized output and final checksum.
+8. every resolved tactical input records provenance as direct canon, scoped canon doctrine, deterministic derivation, or scenario-local fallback;
+9. two runs with identical complete identity must produce equivalent normalized output and final checksum.
 
 ## Physical control fixture
 
@@ -137,6 +139,8 @@ No reinforcements, third-party intervention, or narrator-driven rescue may enter
 The battle volume remains physically bounded. The triaxial planetoid is a real collision/occlusion object rather than narrative terrain flavor.
 
 Before execution the fixture still requires either explicit per-vessel T0 state vectors or a versioned deterministic formation-instantiation algorithm, plus complete planetoid rotational reference state if body rotation affects collision or occultation.
+
+The currently recorded numerical class coefficients are provisional simulation values. Before Run 0, the CanonRec resolver must classify each as `CANON_DIRECT`, `CANON_SCOPED_DOCTRINE`, `DERIVED_FROM_CANON`, or `SCENARIO_LOCAL`, and produce a deterministic resolved-input manifest. This classification step does not change the frozen roster or prompt.
 
 ## Historical model versus control extension
 
@@ -182,25 +186,44 @@ Permitted termination classes remain:
 
 Disabled or surrendered vessels are protected from deliberate targeting.
 
+## Canonical substitution validation
+
+The resolver/adapter boundary must prove that future roster changes are data changes, not engine changes.
+
+Before Run 0 or before declaring the architecture substitution-capable, validation must demonstrate:
+
+1. all eight current Galactic Union control class refs resolve through CanonRec;
+2. Galactic Union organization identity resolves through CanonRec;
+3. Marshal-specific doctrine does not leak onto generic Galactic Union vessels unless explicitly inherited;
+4. at least one alternate canonical class (for example Bastion or Dreadraider) can replace a control class without modifying combat-engine code;
+5. at least one different canonical organization/polity can traverse the same resolver/adapter interface where sufficient canon exists;
+6. direct CANON class/entity records override superseded staging/registry prose;
+7. qualitative canon maps deterministically through a pinned derivation rule when a numeric simulation parameter is required;
+8. missing required data fails closed unless an explicit scenario-local fallback exists;
+9. changing the CanonRec snapshot changes the resolved-manifest/run identity;
+10. identical CanonRec snapshot + roster + resolver version produces byte-equivalent canonical resolved manifests.
+
 ## Validation gates before Run 0
 
 All of the following must pass:
 
 1. recovered archival source and witnesses remain hash-identical and untouched;
 2. restoration code is separately versioned and source-digested;
-3. all three combat-contract defects/disagreements have explicit regression or compatibility tests;
+3. both recovered combat-integration defects and the selected compatibility contract have explicit regression tests;
 4. aggregate historical combat formulas are characterized before any physical extension modifies their inputs;
-5. fixture adapter produces deterministic T0 tactical state;
-6. planetoid collision and occlusion tests pass;
-7. acceleration and withdrawal bounds pass;
-8. protected-target rules pass;
-9. no reinforcement can appear after T0;
-10. command attributes produce deterministic decisions;
-11. ceasefire, withdrawal, surrender, disengagement, incapacity, and annihilation are all reachable from valid state without hard-coded outcomes;
-12. mirrored T0 material symmetry is verified;
-13. same complete run identity produces identical normalized event/state output and final checksum twice;
-14. a changed seed changes only stochastic allocations and not frozen T0 material conditions;
-15. no result from the retired standalone resolver is used as validation evidence.
+5. CanonRec snapshot, resolver, source hashes, and resolved tactical-input manifest are pinned;
+6. fixture adapter produces deterministic T0 tactical state;
+7. planetoid collision and occlusion tests pass;
+8. acceleration and withdrawal bounds pass;
+9. protected-target rules pass;
+10. no reinforcement can appear after T0;
+11. command attributes produce deterministic decisions;
+12. ceasefire, withdrawal, surrender, disengagement, incapacity, and annihilation are all reachable from valid state without hard-coded outcomes;
+13. mirrored T0 material symmetry is verified;
+14. same complete run identity produces identical normalized event/state output and final checksum twice;
+15. a changed seed changes only stochastic allocations and not frozen T0 material conditions;
+16. no result from the retired standalone resolver is used as validation evidence;
+17. canonical roster substitution succeeds through the same resolver/adapter contract without engine modification.
 
 ## Output contract
 
@@ -208,6 +231,10 @@ A completed control run must record:
 
 - archival source witness hashes;
 - restored engine/tactical source versions and digests;
+- CanonRec commit SHA and material source hashes;
+- CanonRec resolver version/source digest;
+- resolved tactical-input manifest and SHA-256;
+- provenance class and derivation rule for each resolved tactical value;
 - adapter version and source digest;
 - baseline ID and canonical SHA-256;
 - seed;
@@ -227,6 +254,6 @@ A completed control run must record:
 
 ## Current status
 
-`BLOCKED_PENDING_TACTICAL_RESTORATION_AND_FIXTURE_INTEGRATION`
+`BLOCKED_PENDING_TACTICAL_RESTORATION_CANON_RESOLUTION_AND_FIXTURE_INTEGRATION`
 
-The blocker is no longer source provenance. The blocker is now controlled restoration plus deterministic physical integration.
+The blocker is no longer source provenance. The blockers are controlled restoration, deterministic CanonRec input resolution, and deterministic physical integration.

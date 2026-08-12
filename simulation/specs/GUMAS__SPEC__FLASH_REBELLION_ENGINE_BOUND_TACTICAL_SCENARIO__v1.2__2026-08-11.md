@@ -1,120 +1,116 @@
-# GUMAS Flash-Rebellion Engine-Bound Tactical Scenario v1.2
+# GUMAS Flash-Rebellion Tactical Restoration and Control Scenario v1.2
 
-**Scenario contract ID:** `GUMAS_FLASH_REBELLION_ENGINE_BOUND_v1_2`  
+**Scenario contract ID:** `GUMAS_FLASH_REBELLION_TACTICAL_RESTORATION_v1_2`  
 **Layer:** L2  
 **Anchor:** `EOS_SEED_ORION`  
 **Ethics:** `Picard_Delta_3`  
-**Status:** source-lineage-gated control specification; no historical canon promotion
+**Status:** historical tactical source recovered; restoration and control integration pending
 
 ## Purpose
 
-Define a deterministic, physically bounded Galactic Union fleet-engagement control fixture without introducing a second simulation authority.
+Define the controlled path from the recovered historical GUMAS v2.0 tactical authoring source to a deterministic, physically bounded Galactic Union fleet-engagement control run.
 
-The verified simulation authority is the existing `GUMASEngine` / `GUMASState` core. The historical GUMAS v2 documentation describes a later fleet/combat design containing `FleetState`, `CombatState`, `CombatResolver`, `FLEET_MOVEMENT`, `FLEET_BATTLE`, terrain/topology logic, and an expanded lifecycle. The source-lineage recovery pass performed for this scenario did **not** recover executable source for those tactical modules.
+This specification does not create a second simulation authority. `GUMASEngine` / `GUMASState` remain the enclosing L2 authority. The recovered v2.0 tactical package supplies the historical fleet/combat design and implementation evidence. Because the recovered authoring revision contains combat-integration defects, the archival source must remain immutable and any executable restoration must be separately versioned, source-digested, tested, and bound to the flash-rebellion fixture through an explicit adapter.
 
-Accordingly, this revision treats the v2 tactical material as **documented design evidence**, not verified executable implementation. The fixture remains blocked from control-run execution until the actual tactical source is recovered and cryptographically identified, or the owner explicitly authorizes a new versioned GUMAS tactical implementation.
+The previously created standalone `GUMAS_TACTICAL_BATTLE_RESOLVER_v1`, its regression test, and its frozen battle receipt remain retired and non-authoritative.
 
-The previously created standalone `GUMAS_TACTICAL_BATTLE_RESOLVER_v1`, its regression test, and its frozen battle receipt are retired and are not authoritative evidence for any future run.
+## Recovery status
 
-## Source-recovery finding
+The source-recovery blocker is closed.
 
-The supplied artifact `GUMAS_SIM_2.5.zip` was inspected directly.
+Independent verification established:
 
-- archive SHA-256: `6d91d36104b2da89d66e37f6b9b97691470762d4793763784988fb8db84db8c5`
-- executable Python files present: `engine.py`, `models.py`, `formulas.py`, `scenarios.py`
-- those files match the separately supplied core source set
-- documented tactical files such as `combat.py` and `topology.py` are absent from the supplied archive
-- the archive documentation nevertheless describes a larger v2 implementation with `CombatResolver`, `FLEET_BATTLE`, additional formulas, and an expanded tick lifecycle
+- Witness A SHA-256: `1f9dae31d916e8d3815ca465177007f5359544bf9ade6e23a5bd8a123ff7ed23`
+- Witness B SHA-256: `606314440661ed9ddd17d0dc1b794595e9c2bdaccd12c4bbe61899a8a4d0166f`
+- Reunified recovery ZIP SHA-256: `039c0f48341aa9847b8400e45a29e41fef734a2b2e80b78bfe3de1abc165ec07`
+- Recovered `modules/gumas` tree digest: `a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9`
 
-Recovery searches also found no executable tactical module artifact in the uploaded File Library, current indexed CloudBank or CanonRec source, indexed branches, PRs, or unique-symbol commit history. Historical records do show local `GUMAS_SIM_2.0` / `GUMAS_SIM_2.5` project trees existed outside the live repository, but path references alone are not implementation evidence.
+All recovered module hashes agree across both historical witnesses. The package identifies itself as `GUMAS L2 Multi-Agent Galactic Simulation Package v2.0`, anchor `GUMAS-PACKAGE-V2`.
 
-**Classification:** `partial_implementation_core_verified_tactical_source_missing`.
+Recovered tactical interfaces include:
 
-This classification follows the Aurora/GUMAS salvage rule that operational claims require verifiable implementation evidence; unsupported runtime claims remain quarantined rather than silently reconstructed.
+- `GUMASEngine`
+- `FleetState`
+- `CombatState`
+- `CombatResolver`
+- `TopologyManager`
+- `EventType.FLEET_MOVEMENT`
+- `EventType.FLEET_BATTLE`
+- `calc_combat_outcome`
+- Phase 8 fleet movement
+- Phase 9 combat resolution
 
-## Authority and implementation boundary
+The exact later 2026-02-16 validated `engine.py` / `models.py` / `scenarios.py` revision remains unverified because the recovered authoring revision has different LOC counts for those three files. This does not negate recovery of the historical tactical subsystem; it limits claims about the later validation run.
 
-1. **Simulation authority:** `GUMASEngine` owns the deterministic RNG root, enclosing state lifecycle, event ordering, ethics callback, and audit history.
-2. **Core state authority:** the verified `GUMASState` is the enclosing L2 state model.
-3. **Scenario fixture:** the flash-rebellion baseline is currently control input, not yet a native tactical `GUMASState`.
-4. **Tactical source:** the documented v2 fleet/combat surface is non-executable evidence until its source is recovered or superseded by an explicitly approved new GUMAS version.
-5. **Adapter:** any future adapter is integration plumbing only; it must not become a parallel battle engine.
-6. **Fail closed:** if verified tactical source and adapter are unavailable, no battle executes.
-7. **Canon authority:** CanonRec governs ship-class identity, role, naming admission, and any later promotion of simulation results.
-8. **Runtime observations:** officers, vessel instances, tactical choices, damage, surrender, withdrawal, and outcomes remain `non_canon_simulation_instance` unless explicitly reconciled and promoted.
+See `simulation/recovery/GUMAS__RECOVERY__V2_TACTICAL_SOURCE_VERIFICATION__v1.0__2026-08-12.md` for the independent hash and defect record.
 
-## Canon boundary
+## Archival defects
 
-The baseline is a **versioned control fixture**, not a canonical historical battle.
+The historical source is evidence and must not be repaired in place.
 
-Scenario-local officers, vessel IDs, numerical coefficients, tactical decisions, and outcomes do not become L2 history merely because they are version-controlled. Scenario-local names generated under `GUMAS_NAMING_PROTOCOL_v0.1` must be checked against a pinned CanonRec snapshot before any canon-admission request.
+### Defect A — automatic combat phase lacks a CombatState
 
-## Verified core binding
+Recovered `GUMASEngine._combat_resolution_tick()` calls:
 
-The verified core supports the following binding contract:
+`CombatResolver.resolve_battle(combat=None, ...)`
 
-- `GUMASEngine(seed=...)` establishes the stochastic root;
-- `init_scenario(state=...)` accepts an explicit `GUMASState`;
-- significant mutations remain ethics-checkable through the existing callback / Picard_Delta_3 boundary;
-- ordered state changes remain auditable through GUMAS tick history;
-- raw audit output may contain non-causal wall-clock timestamps and must not be confused with the deterministic simulation projection used for replay checksums.
+Recovered `CombatResolver.resolve_battle()` immediately requires `combat.condition` for terrain modifiers and later requires `combat.location` to generate battle events.
 
-The core seeded-reproducibility smoke test was executed twice for 12 turns using the fixture seed. After removing wall-clock timestamp fields, normalized state matched with SHA-256:
+Therefore a real contested-location automatic combat phase in this authoring revision is not executable as written.
 
-`2821c009fae89bc3a77ed2e4551e002d3df565e07d20ad039e007423ccbcfbe8`
+### Defect B — explicit FLEET_BATTLE handler calls a missing method
 
-This validates the verified **core** RNG/state invariant only. It does not validate tactical combat, fleet movement, the planetoid fixture, or the command teams.
+Recovered `GUMASEngine._handle_fleet_battle()` calls `CombatResolver.resolve_combat(...)`.
 
-## Tactical binding gate
+Recovered `CombatResolver` defines `resolve_battle()` and does not define `resolve_combat()`.
 
-A tactical run may begin only when one of these paths is satisfied:
+Static method/call inventory confirms this is the only missing `CombatResolver` method referenced by the engine.
 
-- **Recovery path:** the historical tactical source is recovered, reviewed, cryptographically identified, and shown to implement the documented fleet/combat contract; or
-- **New-version path:** the owner explicitly authorizes a new versioned GUMAS tactical implementation derived from verified requirements and clearly distinguished from recovered historical code.
+## Authority boundary
 
-Neither path may silently reuse the retired standalone resolver.
+1. **Archival authority:** the recovered v2.0 source and two witness archives are immutable historical evidence.
+2. **Simulation authority:** `GUMASEngine` remains the enclosing L2 engine authority.
+3. **Restoration authority:** an executable restoration must be a new version, never an in-place mutation of the recovered archive.
+4. **Adapter authority:** the scenario adapter translates the control fixture into restored GUMAS tactical state; it does not resolve combat itself.
+5. **Canon authority:** CanonRec governs ship-class identity and any later promotion of simulation observations.
+6. **Run authority:** no tactical result is authoritative until the complete run identity is pinned and replay validation passes.
+
+## Restoration scope
+
+The smallest acceptable restoration should preserve historical formulas and semantics wherever possible while correcting only the integration defects necessary to make the tactical path coherent and testable.
+
+At minimum, restoration work must decide and document:
+
+1. how a `CombatState` is created for co-located opposing fleets;
+2. how battlefield condition is derived or supplied deterministically;
+3. whether the explicit `FLEET_BATTLE` handler is redirected to `resolve_battle()` or receives a compatibility wrapper;
+4. how battle events are recorded into the existing GUMAS audit/event lifecycle;
+5. how deterministic ordering is enforced for fleets and combat pairs;
+6. how historical RNG behavior is preserved or explicitly versioned;
+7. how the recovered aggregate fleet model is extended or adapted for the physically bounded per-vessel control fixture without allowing a second resolver to emerge.
+
+Any behavior not present in the historical tactical engine but required by the physical control fixture must be identified as an explicit restoration/extension, not retroactively attributed to GUMAS v2.0.
 
 ## Determinism contract
 
-A valid control-run identity must pin:
+A complete Run-0 identity must include:
 
 `(engine_version, engine_source_digest, tactical_version, tactical_source_digest, scenario_adapter_version, scenario_adapter_source_digest, baseline_sha256, seed_u64)`
 
-`baseline_sha256` is SHA-256 over the UTF-8 encoding of parsed baseline data rendered as canonical JSON with recursively sorted object keys, separators exactly `,` and `:`, no added whitespace, and `ensure_ascii=false`.
-
 Requirements:
 
-1. The GUMAS seed is the root of all stochastic-looking behavior.
-2. Child RNG streams, if any, are deterministically derived from labeled SHA-256 material.
-3. Vessel IDs follow `{SIDE3}-{CLASS_TOKEN}-{NN}` and instantiated vessels resolve in lexicographic `ship_id` order.
-4. Python process-randomized `hash()` is forbidden for simulation decisions.
-5. Wall-clock time, network state, external APIs, and unrecorded human choices cannot affect causal resolution.
-6. Every material mutation emits an ordered event/state record.
-7. Raw audit output and deterministic normalized output are separate artifacts.
-8. Two executions with identical complete run identity must produce equivalent normalized event sequences and final-state checksums.
-9. A run is invalid while any required source digest is unavailable.
+1. the scenario seed is the root of all stochastic-looking behavior;
+2. process-randomized `hash()` is forbidden for simulation decisions;
+3. child RNG streams, if introduced, use labeled cryptographic derivation;
+4. vessel, fleet, combat-pair, and event iteration order is explicit and stable;
+5. wall clock, network state, external APIs, and unrecorded human choices cannot affect resolution;
+6. raw audit timestamps may exist but are excluded from normalized deterministic state hashing;
+7. every material tactical mutation is represented in ordered state/event output;
+8. two runs with identical complete identity must produce equivalent normalized output and final checksum.
 
-## Physical model requirements
+## Physical control fixture
 
-The battle volume is centered on an irregular planetoid represented for collision and occultation by a triaxial ellipsoid with point-mass gravity.
-
-The frozen fixture currently provides:
-
-- semiaxes `190 × 135 × 90 km`;
-- density `3100 kg/m³`;
-- mass and gravitational parameter derived consistently from those dimensions;
-- 20,000 km combat / withdrawal boundary;
-- 10 s requested integration step;
-- 21,600 s maximum duration;
-- FTL disabled inside the battle volume.
-
-Before a control run, the rotating-body model must also pin the spin-axis reference frame, spin-axis vector, and rotational phase at T0 if rotation affects collision or occultation. Otherwise the ellipsoid must explicitly be declared fixed in the simulation frame.
-
-Geometry is binding: narrative preference cannot override collision, occultation, range, acceleration, or withdrawal constraints.
-
-## T0 force instantiation
-
-Each side uses the same 19-vessel template:
+The control remains two materially identical 19-vessel Galactic Union task forces around Planetoid P17:
 
 - 1 Judicator
 - 3 Aegis
@@ -125,18 +121,28 @@ Each side uses the same 19-vessel template:
 - 6 Peregrine
 - 1 Reliant
 
-Both sides begin with the same scenario-local nominal combat-power proxy of `89.7`, readiness `1.0`, supply `1.0`, and no initial damage.
+No reinforcements, third-party intervention, or narrator-driven rescue may enter after T0.
 
-The present fixture freezes fleet centroids, centroid velocities, formation radius, composition, and deterministic vessel IDs. It does **not yet** freeze each vessel's complete T0 state. Before control execution, either:
+The battle volume remains physically bounded. The triaxial planetoid is a real collision/occlusion object rather than narrative terrain flavor.
 
-- every vessel must receive explicit position, velocity, and any required attitude/orientation state; or
-- a versioned deterministic formation-instantiation algorithm must derive those per-vessel states from the frozen centroids and template.
+Before execution the fixture still requires either explicit per-vessel T0 state vectors or a versioned deterministic formation-instantiation algorithm, plus complete planetoid rotational reference state if body rotation affects collision or occultation.
 
-Carrier fighters, bombers, repair drones, and other embedded craft remain parent capabilities unless separately enumerated at T0; they cannot become implicit reinforcements.
+## Historical model versus control extension
+
+Recovered GUMAS v2.0 is an aggregate fleet-at-node tactical model:
+
+- `FleetState` contains aggregate strength, technology, morale, location node, movement target/ETA, supply, and experience;
+- Phase 8 moves fleets between topology nodes;
+- `CombatResolver` computes aggregate fleet outcome from strength, tactical skill, technology/AI proxy, terrain, supply, and morale;
+- losses are applied as aggregate fractional reductions to fleet strength and morale.
+
+The requested flash-rebellion control is more physically explicit: per-vessel position, velocity, geometry, occlusion, acceleration limits, targeting eligibility, damage/disposition, withdrawal boundary, and commander/lieutenant decision effects.
+
+Therefore the restoration must not pretend those per-vessel mechanics already existed in historical GUMAS. They are a **bounded tactical extension of GUMAS authority**, derived from and subordinate to the recovered engine rather than a replacement engine.
 
 ## Command model
 
-Each side has one commander and six lieutenant roles:
+Each side retains one commander plus six lieutenant roles:
 
 - tactical
 - navigation
@@ -145,110 +151,71 @@ Each side has one commander and six lieutenant roles:
 - engineering/damage control
 - logistics/support
 
-The fixture records bounded attributes and descriptive characteristics for every officer. These values are currently **input data, not executable behavior**.
+Recorded attributes must feed a deterministic executable policy. Character prose is explanatory only.
 
-Before the control run, a versioned deterministic command-policy contract must map recorded attributes plus current tactical state into allowed actions, including maneuver, fire control, risk acceptance, repair priorities, withdrawal, surrender, and ceasefire decisions. Prose descriptions remain explanatory only and cannot override computed state.
+The command-policy layer must expose and version the equations/thresholds mapping attributes plus current tactical state to actions such as maneuver posture, target priority, EW allocation, repair priority, withdrawal, surrender, ceasefire proposal, and ceasefire acceptance.
 
-## Tactical behavior requirements
+## Combat and termination
 
-The recovered or newly approved GUMAS tactical implementation must enforce at minimum:
+The restored/extended GUMAS tactical path must preserve realistic non-annihilation outcomes.
 
-- physically bounded movement with class acceleration caps;
-- planetoid collision and line-of-sight occultation;
-- sensor/track state rather than omniscient targeting;
-- target-range and line-of-fire checks;
-- exclusion of destroyed, surrendered, and otherwise protected units from deliberate targeting;
-- explicit vessel damage state: `undamaged → damaged → mission_kill → destroyed`;
-- surrender as a separate protected disposition;
-- bounded repair that cannot resurrect destroyed vessels or catastrophic systems;
-- supply, morale, command cohesion, EW, geometry, range, and surviving strength as combat inputs;
-- deterministic seeded allocation/noise;
-- no reinforcements, external rescue, narrator intervention, or third-party mediation.
-
-## Resolution modes
-
-The battle may terminate through any state-valid result, including:
+Permitted termination classes remain:
 
 1. mutual ceasefire / stand-down;
-2. withdrawal beyond the battle boundary when effective interception cannot be sustained;
+2. successful withdrawal beyond the control boundary;
 3. surrender;
-4. mutual disengagement with effective fire ceased and separation increasing;
+4. mutual disengagement;
 5. combat incapacity;
-6. hard-time-limit stalemate/disengagement;
-7. annihilation, if the deterministic state actually reaches it.
+6. hard time limit / stalemate;
+7. annihilation if it emerges from valid state, without being privileged.
 
-Annihilation is neither required nor rewarded. A hard time limit never manufactures a victor.
+Disabled or surrendered vessels are protected from deliberate targeting.
+
+## Validation gates before Run 0
+
+All of the following must pass:
+
+1. recovered archival source and witnesses remain hash-identical and untouched;
+2. restoration code is separately versioned and source-digested;
+3. both recovered combat-integration defects have explicit regression tests;
+4. aggregate historical combat formulas are characterized before any physical extension modifies their inputs;
+5. fixture adapter produces deterministic T0 tactical state;
+6. planetoid collision and occlusion tests pass;
+7. acceleration and withdrawal bounds pass;
+8. protected-target rules pass;
+9. no reinforcement can appear after T0;
+10. command attributes produce deterministic decisions;
+11. ceasefire, withdrawal, surrender, disengagement, incapacity, and annihilation are all reachable from valid state without hard-coded outcomes;
+12. mirrored T0 material symmetry is verified;
+13. same complete run identity produces identical normalized event/state output and final checksum twice;
+14. a changed seed changes only stochastic allocations and not frozen T0 material conditions;
+15. no result from the retired standalone resolver is used as validation evidence.
 
 ## Output contract
 
-A completed control run records:
+A completed control run must record:
 
-- engine version and exact source digest;
-- tactical version and exact source digest;
-- adapter version and exact source digest;
-- baseline ID and SHA-256;
+- archival source witness hashes;
+- restored engine/tactical source versions and digests;
+- adapter version and source digest;
+- baseline ID and canonical SHA-256;
 - seed;
-- initial material-equivalence check;
-- T0 per-vessel states;
-- ordered GUMAS causal event/state-change log;
-- raw audit log, including non-causal audit timestamps if emitted;
-- deterministic normalized projection excluding non-causal fields;
+- complete T0 state checksum;
+- material-symmetry receipt;
+- ordered normalized event/state log;
 - per-vessel final state;
+- aggregate fleet final state;
 - remaining combat power by side;
-- losses by class;
+- losses and dispositions by class;
 - elapsed simulated time;
 - termination mode;
-- victor only when the termination rule establishes one;
+- victor only when implied by the termination rule;
 - unresolved objectives;
-- normalized final-state SHA-256;
+- final normalized SHA-256;
 - `historical_canon_status: non_canon_simulation_instance`.
 
-## Validation gate
+## Current status
 
-Before the fixture becomes an executable control, all of the following must pass:
+`BLOCKED_PENDING_TACTICAL_RESTORATION_AND_FIXTURE_INTEGRATION`
 
-- verified GUMAS core seed reproducibility remains green;
-- tactical executable source is recovered and identified, or an owner-approved new GUMAS version exists;
-- scenario adapter binds to GUMAS without parallel-engine fallback;
-- all engine/tactical/adapter/baseline source digests are pinned;
-- per-vessel T0 state is explicit or deterministically derived;
-- planetoid rotational state/reference frame is complete;
-- command attributes are mapped through a deterministic versioned policy;
-- same complete run identity reproduces normalized events and final-state checksum twice;
-- changed seed changes stochastic allocations without changing frozen T0 material conditions;
-- mirrored fleets are materially equal at T0;
-- occultation blocks illegal fire;
-- acceleration and withdrawal bounds are enforced;
-- protected units are not targeted;
-- no reinforcement appears after T0;
-- ceasefire, withdrawal, surrender, disengagement, incapacity, and annihilation are reachable through valid state transitions rather than hard-coded outcomes;
-- no result is hard-coded to faction, commander, or narrative intent.
-
-## Source lineage
-
-Verified implementation authorities:
-
-- CanonRec `L2_GUMAS_ENGINE__API_REFERENCE__v1.0.md` — public core `GUMASEngine` / `GUMASState` contract.
-- CanonRec `ORION__L2_GUMAS_ENGINE__SOURCE_BUNDLE__v1.1__NAMING_INTEGRATED__2026-02-09.md` — embedded verified core source lineage.
-- supplied `GUMAS_SIM_2.5.zip` — directly inspected archive; contains only the four executable core Python modules listed above plus documentation/validation material.
-- CloudBank `modules/gumas/naming.py` — deterministic scenario-local naming implementation.
-
-Canon authorities:
-
-- CanonRec individual CANON ship-class records for Judicator, Aegis, Palisade, Sentinel, Obsidian, Vanguard, Peregrine, and Reliant.
-- CanonRec `L2_NAMING_ADMISSION_POLICY__v1.0__2026-07-22.md` for name promotion boundaries.
-- the older aggregate `L2_GUMAS_SHIP_REGISTRY__v1.0.md` is retained as historical provenance where individual CANON records now govern.
-
-Documented-but-unverified tactical evidence:
-
-- `GUMAS_ENGINE_ARCHITECTURE_SUMMARY.md`
-- `COMPREHENSIVE_ENGINE_AUDIT.md`
-- associated validation/checklist material describing the larger v2 tactical architecture
-
-Those documents support the existence of a **design/claim set**. Without the corresponding executable files, they do not establish an operational `CombatResolver`.
-
-## Recovery disposition
-
-The source-lineage pass found no recoverable executable tactical module in the currently accessible project surfaces. The appropriate disposition is therefore:
-
-**Preserve the verified GUMAS core. Preserve the documented tactical requirements. Quarantine claims of an already-operational v2 combat engine until source is recovered. Do not invent a replacement silently. Keep PR #1506 draft and the battle control run blocked.**
+The blocker is no longer source provenance. The blocker is now controlled restoration plus deterministic physical integration.

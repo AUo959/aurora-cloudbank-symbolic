@@ -6,7 +6,7 @@
   "layer": "L2",
   "anchor_seed": "EOS_SEED_ORION",
   "ethics_protocol": "Picard_Delta_3",
-  "simulation_purpose": "Deterministic, repeatable, physically bounded tactical fleet engagement control fixture reserved for execution under a verified GUMAS tactical implementation.",
+  "simulation_purpose": "Deterministic, repeatable, physically bounded tactical fleet engagement control fixture reserved for execution under a verified and restored GUMAS tactical implementation.",
   "canon_boundary": {
     "fixture_status": "versioned_control_fixture",
     "historical_event_status": "non_canon_simulation_instance",
@@ -19,37 +19,47 @@
     "state_authority": "GUMASState",
     "core_source_authority": "AUo959/CanonRec:canon/L1/station/operational_library_v2_2/ORION__L2_GUMAS_ENGINE__SOURCE_BUNDLE__v1.1__NAMING_INTEGRATED__2026-02-09.md",
     "core_api_authority": "AUo959/CanonRec:canon/L1/station/operational_library_v2_2/L2_GUMAS_ENGINE__API_REFERENCE__v1.0.md",
-    "tactical_extension_status": "documented_design_executable_source_unverified",
-    "tactical_extension_target": "Documented GUMAS v2 fleet movement / FLEET_BATTLE / CombatResolver surface. Executable tactical source must be recovered and cryptographically identified, or an explicitly owner-approved new GUMAS version must be implemented, before this fixture may execute.",
+    "tactical_extension_status": "historical_v2_0_authoring_source_recovered_restoration_required",
+    "tactical_extension_target": "Recovered GUMAS v2.0 fleet movement / FLEET_BATTLE / CombatResolver authoring revision. The source identity is verified, but the recovered combat integration paths contain archival defects and require a separately versioned restoration before control execution.",
     "standalone_resolver_allowed": false,
-    "adapter_policy": "A future adapter between this fixture and a verified GUMAS tactical state model is integration plumbing only and may not become a second simulation authority.",
-    "fail_closed_rule": "If verified GUMAS tactical source and its adapter are unavailable, execution stops. No independent tactical resolver, prose arbitration, or frozen outcome may substitute for them."
+    "adapter_policy": "A future adapter between this fixture and the restored GUMAS tactical state model is integration plumbing only and may not become a second simulation authority.",
+    "archival_source_mutation_allowed": false,
+    "fail_closed_rule": "If the restored GUMAS tactical source, fixture adapter, and deterministic run identity are unavailable or validation fails, execution stops. No independent tactical resolver, prose arbitration, or frozen outcome may substitute for them."
   },
   "source_recovery": {
-    "classification": "partial_implementation_core_verified_tactical_source_missing",
+    "classification": "historical_v2_0_tactical_authoring_source_recovered_later_validated_core_revision_unverified",
     "core_executable_verified": true,
     "documented_v2_tactical_design_verified": true,
-    "v2_tactical_executable_source_verified": false,
-    "supplied_archive_name": "GUMAS_SIM_2.5.zip",
-    "supplied_archive_sha256": "6d91d36104b2da89d66e37f6b9b97691470762d4793763784988fb8db84db8c5",
-    "supplied_archive_python_modules": ["engine.py", "models.py", "formulas.py", "scenarios.py"],
-    "documented_but_not_recovered_modules": ["topology.py", "combat.py", "economics.py", "media.py", "precursors.py", "doctrine.py", "sentinels.py", "forecaster.py"],
-    "documented_but_not_recovered_symbols": ["FleetState", "CombatState", "CombatResolver", "FLEET_MOVEMENT", "FLEET_BATTLE", "calc_combat_outcome"],
-    "search_scope": ["supplied GUMAS_SIM_2.5 archive", "uploaded File Library", "AUo959/aurora-cloudbank-symbolic current indexed source", "AUo959/CanonRec current indexed source", "indexed branches", "pull requests", "commit-symbol history"],
-    "result": "No executable tactical module artifact was recovered from the searched surfaces. Historical references show local GUMAS_SIM_2.0/GUMAS_SIM_2.5 project trees existed, but those path references do not prove that the documented tactical modules survived or were committed.",
+    "v2_tactical_authoring_source_verified": true,
+    "later_validated_core_trio_verified": false,
+    "recovery_package_name": "GUMAS_V2_TACTICAL_RECOVERY__2026-08-12.zip",
+    "recovery_package_sha256": "039c0f48341aa9847b8400e45a29e41fef734a2b2e80b78bfe3de1abc165ec07",
+    "recovery_manifest_sha256": "566ef508641b1fb3c43c47bc85ae7dbf881f756476b8199a77f795561ae37b86",
+    "recovered_gumas_tree_digest": "a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9",
+    "witness_a_sha256": "1f9dae31d916e8d3815ca465177007f5359544bf9ade6e23a5bd8a123ff7ed23",
+    "witness_b_sha256": "606314440661ed9ddd17d0dc1b794595e9c2bdaccd12c4bbe61899a8a4d0166f",
+    "recovered_python_modules": ["engine.py", "models.py", "formulas.py", "scenarios.py", "topology.py", "combat.py", "economics.py", "media.py", "precursors.py", "doctrine.py", "sentinels.py", "forecaster.py", "__init__.py"],
+    "recovered_symbols": ["FleetState", "CombatState", "CombatResolver", "FLEET_MOVEMENT", "FLEET_BATTLE", "calc_combat_outcome", "TopologyManager"],
+    "witness_agreement": "All recovered module SHA-256 values match the corresponding files in both historical archive witnesses.",
+    "archival_defects": [
+      "engine._combat_resolution_tick passes combat=None to CombatResolver.resolve_battle, while resolve_battle dereferences combat.condition and combat.location",
+      "engine._handle_fleet_battle calls CombatResolver.resolve_combat, but the recovered CombatResolver defines resolve_battle and no resolve_combat method"
+    ],
+    "result": "The provenance blocker is closed. The historical GUMAS v2.0 tactical authoring source is recovered and independently verified. The exact later validated core-trio revision remains unverified, and the recovered authoring revision requires a separately versioned restoration before tactical execution.",
+    "source_recovery_blocked": false,
     "control_run_blocked": true
   },
   "determinism": {
     "seed_material": "AURORA::L2::FLASH_REBELLION::PLANETOID_P17::EQUAL_FLEETS::BASELINE_v1.0",
     "seed_u64": 1593560554842931876,
-    "seed_note": "The seed is intentionally preserved from the original fixture; v1.1 changes provenance and gating metadata, not the frozen stochastic root.",
+    "seed_note": "The seed is intentionally preserved from the original fixture; source-recovery metadata changes do not alter the frozen stochastic root.",
     "rng_root": "GUMASEngine seeded RNG",
-    "child_rng_policy": "Any future tactical child RNG streams must be derived deterministically from labeled SHA-256 material.",
+    "child_rng_policy": "Any restored tactical child RNG streams must be derived deterministically from labeled SHA-256 material.",
     "stable_entity_order": "lexicographic ship_id",
     "ship_id_scheme": "{SIDE3}-{CLASS_TOKEN}-{NN}",
     "side_prefixes": {"loyalist": "LOY", "rebel": "REB"},
     "class_token_rule": "CLASS-{TOKEN}-01 -> {TOKEN}",
-    "class_instance_index": "1-based, zero-padded width 2, assigned in fleet_template.composition order per side; a verified tactical implementation must sort instantiated vessels lexicographically by complete ship_id before resolution",
+    "class_instance_index": "1-based, zero-padded width 2, assigned in fleet_template.composition order per side; a restored tactical implementation must sort instantiated vessels lexicographically by complete ship_id before resolution",
     "wall_clock_inputs": false,
     "external_inputs_during_run": false,
     "baseline_fingerprint": "SHA-256 of UTF-8 canonical JSON produced with sorted object keys, separators ',' and ':', and ensure_ascii=false; whitespace and source-file formatting are excluded",
@@ -167,9 +177,9 @@
     }
   },
   "tactical_requirements_contract": {
-    "authority": "requirements_only_until_executable_gumas_tactical_source_is_verified",
+    "authority": "requirements_for_restored_gumas_tactical_implementation",
     "movement": "bounded Newtonian translation with class acceleration caps and point-mass planetoid gravity",
-    "combat": "A verified GUMAS tactical implementation must resolve combat from fleet strength, range, geometry, command skill, EW state, supply/morale state, damage, and deterministic seeded allocation/noise.",
+    "combat": "The restored GUMAS tactical implementation must resolve combat from fleet strength, range, geometry, command skill, EW state, supply/morale state, damage, and deterministic seeded allocation/noise.",
     "damage_states": ["undamaged", "damaged", "mission_kill", "destroyed"],
     "non_damage_dispositions": ["surrendered"],
     "repair": "Reliant and carrier repair drones may restore limited recoverable damage; cannot resurrect destroyed systems or ships.",
@@ -182,10 +192,10 @@
   "validation_gate": {
     "configuration_only_until_bound": true,
     "required_before_control_run": [
-      "existing GUMAS core seed-reproducibility smoke test passes",
-      "executable GUMAS tactical source is recovered and cryptographically identified, or an explicitly owner-approved new GUMAS tactical version is implemented",
+      "recovered GUMAS v2.0 tactical source is preserved byte-for-byte with witness and manifest hashes",
+      "historical combat integration defects are resolved only in a separately versioned restoration, not in archival source",
       "scenario adapter binds this fixture to GUMAS simulation authority without a standalone fallback",
-      "engine, tactical, adapter, and baseline source digests are pinned in run identity",
+      "engine, restored tactical, adapter, and baseline source digests are pinned in run identity",
       "per-vessel T0 state is explicit or derived by a versioned deterministic formation algorithm",
       "planetoid spin axis, reference frame, and T0 rotational phase are pinned if rotation affects collision or occultation",
       "command attributes are mapped through a versioned deterministic decision policy",
@@ -196,6 +206,7 @@
     "control_run_claimed": false
   },
   "source_authorities": [
+    {"repo":"AUo959/aurora-cloudbank-symbolic","path":"simulation/recovery/GUMAS__RECOVERY__V2_TACTICAL_SOURCE_VERIFICATION__v1.0__2026-08-12.md","use":"independent recovery/witness verification and archival defect record"},
     {"repo":"AUo959/CanonRec","path":"canon/L1/station/operational_library_v2_2/L2_GUMAS_ENGINE__API_REFERENCE__v1.0.md","use":"public GUMASEngine and GUMASState contract"},
     {"repo":"AUo959/CanonRec","path":"canon/L1/station/operational_library_v2_2/ORION__L2_GUMAS_ENGINE__SOURCE_BUNDLE__v1.1__NAMING_INTEGRATED__2026-02-09.md","use":"primary GUMAS core source and seed-reproducibility lineage"},
     {"repo":"AUo959/CanonRec","path":"canon/L2/entities/ship_classes/cls_judicator.json","use":"CANON class identity and role"},
@@ -213,11 +224,12 @@
   "integration_status": {
     "core_engine_executable_verified": true,
     "core_seed_reproducibility_smoke_test_verified": true,
-    "documented_v2_tactical_design_verified": true,
-    "v2_tactical_executable_source_verified": false,
-    "source_recovery_required": true,
+    "historical_v2_tactical_authoring_source_verified": true,
+    "later_validated_core_trio_verified": false,
+    "source_recovery_required": false,
+    "tactical_restoration_required": true,
     "standalone_tactical_resolver_retired": true,
     "control_run_blocked": true,
-    "handling": "The verified core and the documented tactical design must remain distinct evidence classes. No tactical result is authoritative until an executable GUMAS tactical source lineage is recovered or an explicitly approved new GUMAS version is implemented and validated."
+    "handling": "The historical v2.0 tactical authoring source is verified and preserved as evidence. It contains at least two combat integration defects and must not be modified in place. Any executable restoration must be separately versioned, source-digested, validated, and bound to this fixture before Run 0."
   }
 }

@@ -30,7 +30,11 @@ Record the corrected relationship among the pre-tactical GUMAS core, the recover
            - historical combat integration defects unresolved
 ```
 
-## Independently verified v2.0 authority candidate
+## Evidence hierarchy
+
+Two evidence classes are intentionally separated.
+
+### Independently verified in this workstream
 
 The recovered v2.0 source tree is independently hash-verified against two historical archive witnesses.
 
@@ -40,11 +44,27 @@ The recovered v2.0 source tree is independently hash-verified against two histor
 - canonical recovered `modules/gumas` tree digest: `a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9`
 - package anchor: `GUMAS-PACKAGE-V2`
 
-Authority references should therefore identify this exact package/digest rather than rely only on the ambiguous class names `GUMASEngine` or `GUMASState`, which occur across multiple lineages.
+All 13 recovered module hashes agree across both witnesses and all recovered Python modules parse successfully.
+
+### Local forensic evidence supplied by Claude
+
+The re-attribution of v1.0.0, `GUMAS_SIM_2.5`, v3.0 wiring, the corrected 188,824-file search census, the DuelSim classification, and the third historical combat API signature come from a local-device forensic sweep. Their underlying local artifacts have not all been separately imported into this workstream.
+
+They are therefore accepted as strong recovery evidence but remain distinguishable from the independently re-hashed witness package above.
+
+## Authority candidate
+
+Authority references should identify the recovered v2.0 package and source digest rather than rely only on ambiguous symbols such as `GUMASEngine` or `GUMASState`, which occur across multiple lineages.
+
+Current recovered tactical authority candidate:
+
+`GUMAS v2.0 / GUMAS-PACKAGE-V2 / modules-gumas tree SHA-256 a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9`
+
+This identifies the historical implementation. Executable authority for Run 0 will be the separately versioned restoration derived from it, with its own source digest.
 
 ## `GUMAS_SIM_2.5` re-attribution
 
-The local-device forensic addenda report that `GUMAS_SIM_2.5.zip` (SHA-256 `6d91d36104b2da89d66e37f6b9b97691470762d4793763784988fb8db84db8c5`) is a direct derivative of `L2_GUMAS_ENGINE v1.0.0` rather than a successor to recovered v2.0:
+The local forensic addenda report that `GUMAS_SIM_2.5.zip` (SHA-256 `6d91d36104b2da89d66e37f6b9b97691470762d4793763784988fb8db84db8c5`) is a direct derivative of `L2_GUMAS_ENGINE v1.0.0`, not a successor to recovered v2.0:
 
 - `models.py` reported byte-identical to v1.0.0
 - `formulas.py` reported byte-identical to v1.0.0
@@ -53,8 +73,6 @@ The local-device forensic addenda report that `GUMAS_SIM_2.5.zip` (SHA-256 `6d91
 - payload lacks `combat.py`, `topology.py`, `FleetState`, `CombatState`, `FLEET_MOVEMENT`, and `FLEET_BATTLE`
 
 The `2.5` label must therefore not be used as evidence of v2 tactical validation. The historical deterministic replay associated with that payload remains useful as a pre-tactical core reproducibility smoke test only.
-
-This byte-comparison against the v1.0.0 archive is currently recorded from the local forensic report; the v1.0.0 witness itself has not yet been independently imported into this GitHub/ChatGPT workstream.
 
 ## v2.0 completeness
 
@@ -88,11 +106,39 @@ In addition, recovered Phase 9 passes `combat=None` into a resolver that derefer
 
 The combined evidence supports **mid-integration abandonment**, not a completed tactical engine later lost. Restoration must therefore define the intended compatibility contract explicitly and test it; no archival file may be silently edited to manufacture consistency.
 
-## Search-completeness note
+## Corrected search-completeness record
 
-The corrected local-device sweep reports coverage of 188,824 indexed files, 749 ZIP archives, 1,479 nested archives, 149 Office documents, 700 PDFs, 41 notebooks, 15,757 bytecode files, six Git repositories, AI-session archives, and ChatGPT exports. It found no second GUMAS L2 tactical implementation.
+The original recovery sweep is superseded by the corrected local forensic method. Reported completed coverage:
 
-Remaining inaccessible/low-value surfaces reported by the sweep are `~/Documents`, `~/.Trash`, Time Machine/APFS snapshots, and network-only GitHub branch/PR enumeration.
+- master index: 188,824 files
+- filename search uses substring rather than prefix-only globs
+- 13 combat/topology/fleet/battle symbol variants searched case-insensitively
+- 749/749 ZIP archives opened and content-searched
+- 1,479/1,479 nested archives recursively inspected
+- 149/149 Office documents text-extracted and searched
+- 700/700 PDFs text-extracted and searched
+- 41 notebooks searched
+- 15,757 bytecode files inventoried; no Aurora-context orphan tactical bytecode found without adjacent source
+- all six local Git repositories scanned at object level, including unreachable objects where available
+- Codex sessions and ChatGPT export corpus searched
+
+The corrected sweep found no second GUMAS L2 tactical implementation and no `resolve_combat` definition on any searched surface.
+
+Remaining inaccessible or separately gated surfaces were reported as `~/Documents`, `~/.Trash`, Time Machine/APFS snapshots, and network-only GitHub branch/PR enumeration.
+
+## Newly surfaced but non-authoritative artifacts
+
+### DuelSim
+
+Approximately 15,000 LOC of combat-oriented code under `GUMAS_SIM_2.5/DuelSim/` was surfaced by the corrected search. It is a historical fencing-duel simulator using weapon/style/fencer abstractions and has no GUMAS L2 anchors. Classification: unrelated sibling project, Category F.
+
+### GUMAS v2 DOCX trilogy
+
+Three 2026-02-06 DOCX files reportedly contain document-embedded executable source for a pre-tactical GUMAS branch. They contain core political/treaty/coalition/forecasting structures but no combat/topology/fleet classes. Classification: Category C historical source evidence for pre-tactical lineage, not an alternate tactical engine.
+
+### Corrected architecture archive
+
+`Aurora_Archive_2.0.zip` reportedly contains corrected architecture documents, including a third resolver signature. Classification: documentation evidence. It strengthens the mid-integration-abandonment conclusion but does not replace executable source.
 
 ## Operational consequence
 
@@ -103,4 +149,5 @@ For the deterministic flash-rebellion control project:
 - `GUMAS_SIM_2.5` is not tactical authority;
 - v3.0 is not evidence that v2 combat ever executed;
 - combat contract restoration is required before Run 0;
+- restoration must be separately versioned and source-digested;
 - the physical per-vessel planetoid layer remains a separately versioned bounded extension subordinate to restored v2.0 authority.

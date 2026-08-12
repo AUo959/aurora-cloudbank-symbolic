@@ -50,6 +50,8 @@ Every recovered GUMAS module SHA-256 matches the corresponding module in both hi
 The following conclusions come from the corrected local recovery sweep and are recorded as external forensic evidence. Their underlying local artifacts have not all been independently imported into this workstream.
 
 - master file index: 188,824 files
+- filename sweep corrected from prefix matching to substring matching
+- 13 combat/topology/fleet/battle symbol variants searched case-insensitively
 - 749 ZIP archives opened and content-searched
 - 1,479 nested archives recursively inspected
 - 149 Office documents extracted/searched
@@ -62,6 +64,8 @@ The following conclusions come from the corrected local recovery sweep and are r
 - `~/Documents`, `~/.Trash`, Time Machine/APFS snapshots, and network-only GitHub enumeration remain outside that local sandbox's completed coverage
 
 The corrected sweep reported exactly one GUMAS L2 tactical implementation: the recovered 13-module package. No alternate `combat.py`, `topology.py`, `CombatResolver`, `resolve_combat`, or second tactical revision was found.
+
+This corrected sweep **supersedes all earlier search-coverage counts and negative-result claims** in the recovery workstream.
 
 ## Recovered module identity
 

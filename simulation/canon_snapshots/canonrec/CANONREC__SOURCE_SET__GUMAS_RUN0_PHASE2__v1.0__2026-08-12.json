@@ -1,0 +1,39 @@
+{
+  "artifact": "GUMAS Run-0 CanonRec tactical source set",
+  "version": "1.0",
+  "date": "2026-08-12",
+  "canonrec_repo": "AUo959/CanonRec",
+  "canonrec_commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+  "execution_rule": "Resolve from a clean local checkout at exactly canonrec_commit before T0. No network access is permitted during battle execution.",
+  "sources": [
+    {"kind": "organization", "path": "canon/L2/entities/organizations/org_galactic_union.json"},
+    {"kind": "polity", "path": "canon/L2/entities/polities/polity_prime_construct.json"},
+    {"kind": "ship_class", "path": "canon/L2/entities/ship_classes/cls_judicator.json"},
+    {"kind": "ship_class", "path": "canon/L2/entities/ship_classes/cls_aegis.json"},
+    {"kind": "ship_class", "path": "canon/L2/entities/ship_classes/cls_palisade.json"},
+    {"kind": "ship_class", "path": "canon/L2/entities/ship_classes/cls_sentinel.json"},
+    {"kind": "ship_class", "path": "canon/L2/entities/ship_classes/cls_obsidian.json"},
+    {"kind": "ship_class", "path": "canon/L2/entities/ship_classes/cls_vanguard.json"},
+    {"kind": "ship_class", "path": "canon/L2/entities/ship_classes/cls_peregrine.json"},
+    {"kind": "ship_class", "path": "canon/L2/entities/ship_classes/cls_reliant.json"},
+    {"kind": "ship_class", "path": "canon/L2/entities/ship_classes/cls_bastion.json"},
+    {"kind": "scoped_doctrine", "scope": ["marshal", "sentinel"], "path": "canon/L2/marshals_sentinels/Ship-to-Ship_Combat_Dynamics.csv"},
+    {"kind": "scoped_doctrine", "scope": ["marshal", "sentinel"], "path": "canon/L2/marshals_sentinels/Shielding___Propulsion_Systems.csv"}
+  ],
+  "control_roster": [
+    {"class_id": "cls_judicator", "count": 1},
+    {"class_id": "cls_aegis", "count": 3},
+    {"class_id": "cls_palisade", "count": 1},
+    {"class_id": "cls_sentinel", "count": 2},
+    {"class_id": "cls_obsidian", "count": 1},
+    {"class_id": "cls_vanguard", "count": 4},
+    {"class_id": "cls_peregrine", "count": 6},
+    {"class_id": "cls_reliant", "count": 1}
+  ],
+  "substitution_witness": {
+    "description": "Replace one Peregrine with one Bastion while holding total vessel count at 19.",
+    "remove": {"class_id": "cls_peregrine", "count": 1},
+    "add": {"class_id": "cls_bastion", "count": 1}
+  },
+  "authority_witnesses": ["org_galactic_union", "polity_prime_construct"]
+}

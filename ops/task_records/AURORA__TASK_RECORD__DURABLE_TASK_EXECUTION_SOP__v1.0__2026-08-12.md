@@ -9,9 +9,9 @@
 **Branch:** `docs/durable-task-execution-sop`  
 **Queue ID:** `none`  
 **Issue:** `none`  
-**PR:** `pending at record creation`  
-**Creation commit:** `pending at record creation`  
-**Controlling revision:** `this file v1.0 + branch head`
+**PR:** `#1508`  
+**Creation commit:** `2ce943547d6d7c7e35f86ced55baf9700dfef97a`  
+**Controlling revision:** `this file v1.0 on PR #1508`
 
 ---
 
@@ -132,14 +132,14 @@ Gate to exit:
 ### Phase 3 — Review and adoption
 
 Actions:
-- open draft PR;
-- review CI and comments;
+- review draft PR #1508;
+- inspect CI and comments;
 - merge only after operator/reviewer approval.
 
 Gate to exit:
 - review accepts the operating doctrine.
 
-**Status:** pending.
+**Status:** active.
 
 ## 8. Invariants and non-negotiables
 
@@ -159,7 +159,7 @@ Gate to exit:
 | `V-01` | SOP file exists on scoped branch | present | branch diff |
 | `V-02` | Template file exists on scoped branch | present | branch diff |
 | `V-03` | Queue guide references SOP/template and session-start rule | present | branch diff |
-| `V-04` | Draft PR contains only operating-doctrine changes | expected | PR changed-file list |
+| `V-04` | Draft PR contains only operating-doctrine changes | four intended files | PR #1508 |
 | `V-05` | CI/document checks | green or understood | pending |
 
 ## 10. Stop conditions and owner decisions
@@ -179,7 +179,7 @@ Stop and request owner/authority input if:
 
 ### Rollback procedure
 
-1. close the draft PR without merge; or
+1. close draft PR #1508 without merge; or
 2. revert the documentation commits if already merged.
 
 No runtime or data migration occurs in this task.
@@ -191,7 +191,7 @@ No runtime or data migration occurs in this task.
 | `2026-08-12` | Create a repo-wide execution-record layer rather than expanding handoff payloads | Handoffs do not provide a stable structured execution reference | Operator | New DTER SOP + template |
 | `2026-08-12` | Keep DTER separate from queue and control-plane claims | Existing queue guide already assigns those roles clearly | Existing repo doctrine | Additive coordination layer, not replacement |
 | `2026-08-12` | Bootstrap exception: first SOP/template commits precede this task record | DTER mechanism did not exist before those commits | Transparent procedural necessity | Record exception explicitly; future DTER-required tasks follow pre-implementation rule |
-| `2026-08-12` | Separate this governance change from PR #1506 | Repo-wide SOP should not be buried inside a simulation PR | Aurora operational judgment | Dedicated branch/PR |
+| `2026-08-12` | Separate this governance change from PR #1506 | Repo-wide SOP should not be buried inside a simulation PR | Aurora operational judgment | Dedicated branch/PR #1508 |
 
 ## 13. Evidence and receipts
 
@@ -200,18 +200,19 @@ No runtime or data migration occurs in this task.
 - `13910272a3ece6ecff2828523a0ae4d84c7551cf` — add DTER SOP
 - `b737ae51d1ae5ab4c7fe80e50543a9fff5672a6e` — add DTER template
 - `76fe98cdd23e9d8124a405347b28dea54a7781cc` — bind work queue to DTER operating rule
+- `2ce943547d6d7c7e35f86ced55baf9700dfef97a` — add bootstrap DTER example
 
 ### CI / tests / replay / audit
 
-- pending draft-PR CI.
+- draft PR #1508 opened; CI pending.
 
 ## 14. Current status and next action
 
 **Current phase:** `Phase 3 — Review and adoption`  
-**Completed gates:** `existing-process review; SOP/template definition; queue integration`  
-**Open blockers:** `none before draft PR creation`  
+**Completed gates:** `existing-process review; SOP/template definition; queue integration; draft PR creation`  
+**Open blockers:** `CI/review not yet complete`  
 **Owner decision required:** `yes before merge/adoption`  
-**Exact next action:** `open a dedicated draft PR from docs/durable-task-execution-sop to main and inspect the resulting changed-file/CI state.`
+**Exact next action:** `inspect PR #1508 changed-file and CI state, address any review conflict, and merge only after approval.`
 
 ## 15. Handoff anchor
 
@@ -219,7 +220,7 @@ Any handoff for this task must reference:
 
 - task record: `ops/task_records/AURORA__TASK_RECORD__DURABLE_TASK_EXECUTION_SOP__v1.0__2026-08-12.md`
 - task record version: `v1.0`
-- controlling commit / PR head: `<latest branch head>`
+- controlling PR: `#1508`
 - current phase: `Phase 3 — Review and adoption`
 - exact next action: `review draft PR and CI; merge only with approval`
 - unresolved blocker / decision: `operator/reviewer adoption approval`
@@ -227,7 +228,7 @@ Any handoff for this task must reference:
 ## 16. Completion record
 
 **Final status:** `pending`  
-**Merge / closing PR:** `pending`  
+**Merge / closing PR:** `#1508 (draft)`  
 **Final controlling commit:** `pending`  
 **Validation result:** `pending`  
 **Residual risks / follow-ups:** `possible future queue-schema task_record field and CI enforcement`  

@@ -1,28 +1,50 @@
 """Minimal compatibility restoration of the recovered GUMAS v2.0 combat boundary.
 
-The historical package is imported directly from the untouched recovery ZIP via
-Python's zip importer. No recovered source file is rewritten or unpacked into a
-maintained runtime copy. This module subclasses the historical engine and
-repairs only the inconsistent combat integration boundary.
+The historical package is imported from the untouched recovery ZIP without
+leaving that ZIP at the front of ``sys.path`` or leaving historical
+``modules.gumas`` entries installed in ``sys.modules``. Recovered source files
+are never rewritten or unpacked into a maintained runtime copy.
 """
 from __future__ import annotations
 
+import _imp
 import base64
 import hashlib
+import importlib
+import os
 import sys
 import tempfile
 from collections import defaultdict
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 RECOVERY_PACKAGE_SHA256 = (
     "039c0f48341aa9847b8400e45a29e41fef734a2b2e80b78bfe3de1abc165ec07"
 )
 RECOVERY_B64_DIR = Path(__file__).resolve().parent / "vendor" / "recovery_b64"
+RESTORATION_VERSION = "2.0.1-restored.2"
+RESTORATION_BASE_TREE_SHA256 = (
+    "a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9"
+)
+RESTORATION_CONTRACT = (
+    "CombatResolver.resolve_battle(CombatState, attacker_fleets, "
+    "defender_fleets, topology_manager)"
+)
+_HISTORICAL_ROOT = "modules"
+_HISTORICAL_PREFIX = "modules.gumas"
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _materialize_verified_recovery_zip() -> Path:
-    """Reconstruct the historical ZIP losslessly and verify it before import."""
+    """Reconstruct the historical ZIP atomically and verify it before import."""
     parts = sorted(RECOVERY_B64_DIR.glob("part-*.b64"))
     if not parts:
         raise RuntimeError("GUMAS recovery witness segments are missing")
@@ -36,39 +58,97 @@ def _materialize_verified_recovery_zip() -> Path:
         raise RuntimeError(
             f"GUMAS recovery witness hash mismatch: {digest} != {RECOVERY_PACKAGE_SHA256}"
         )
+
     target = Path(tempfile.gettempdir()) / f"gumas-v2-{digest}.zip"
-    if not target.exists() or hashlib.sha256(target.read_bytes()).hexdigest() != digest:
-        target.write_bytes(payload)
+    if target.exists() and _sha256_file(target) == digest:
+        return target
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(
+        prefix=f".{target.name}.", suffix=".tmp", dir=str(target.parent)
+    )
+    temp_path = Path(temp_name)
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        if _sha256_file(temp_path) != digest:
+            raise RuntimeError("Materialized GUMAS recovery ZIP failed verification")
+        os.replace(temp_path, target)
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
+
+    if _sha256_file(target) != digest:
+        raise RuntimeError("Published GUMAS recovery ZIP failed verification")
     return target
 
 
+@contextmanager
+def _historical_import_scope(recovery_zip: Path) -> Iterator[None]:
+    """Temporarily expose historical modules while holding Python's import lock.
+
+    The historical package necessarily uses its original ``modules.gumas``
+    package name internally. We therefore expose that namespace only for the
+    duration of import, then restore every pre-existing module and path entry.
+    The loaded class objects remain referenced locally by this restoration
+    module, but future imports resolve against the live repository normally.
+    """
+    _imp.acquire_lock()
+    original_path = list(sys.path)
+    saved_modules = {
+        name: module
+        for name, module in sys.modules.items()
+        if name == _HISTORICAL_ROOT
+        or name == _HISTORICAL_PREFIX
+        or name.startswith(f"{_HISTORICAL_PREFIX}.")
+    }
+    try:
+        for name in list(sys.modules):
+            if (
+                name == _HISTORICAL_ROOT
+                or name == _HISTORICAL_PREFIX
+                or name.startswith(f"{_HISTORICAL_PREFIX}.")
+            ):
+                sys.modules.pop(name, None)
+        sys.path.insert(0, str(recovery_zip))
+        importlib.invalidate_caches()
+        yield
+    finally:
+        for name in list(sys.modules):
+            if (
+                name == _HISTORICAL_ROOT
+                or name == _HISTORICAL_PREFIX
+                or name.startswith(f"{_HISTORICAL_PREFIX}.")
+            ):
+                sys.modules.pop(name, None)
+        sys.modules.update(saved_modules)
+        sys.path[:] = original_path
+        importlib.invalidate_caches()
+        _imp.release_lock()
+
+
 RECOVERY_ZIP = _materialize_verified_recovery_zip()
-if str(RECOVERY_ZIP) not in sys.path:
-    sys.path.insert(0, str(RECOVERY_ZIP))
-
-from modules.gumas.engine import GUMASEngine as HistoricalGUMASEngine  # noqa: E402
-from modules.gumas.models import (  # noqa: E402
-    BattlefieldCondition,
-    CombatState,
-    FleetState,
-    SimulationEvent,
-    TickResult,
-)
-
-RESTORATION_VERSION = "2.0.1-restored.1"
-RESTORATION_BASE_TREE_SHA256 = (
-    "a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9"
-)
-RESTORATION_CONTRACT = (
-    "CombatResolver.resolve_battle(CombatState, attacker_fleets, "
-    "defender_fleets, topology_manager)"
-)
+with _historical_import_scope(RECOVERY_ZIP):
+    from modules.gumas.engine import GUMASEngine as HistoricalGUMASEngine
+    from modules.gumas.models import (
+        BattlefieldCondition,
+        CombatState,
+        EventType,
+        FleetState,
+        GUMASState,
+        SimulationEvent,
+        TickResult,
+    )
 
 
 class GUMASEngine(HistoricalGUMASEngine):
     """Recovered v2.0 engine with the smallest coherent combat-call restoration."""
 
-    def _battlefield_condition_for_location(self, location: str) -> BattlefieldCondition:
+    def _battlefield_condition_for_location(
+        self, location: str
+    ) -> BattlefieldCondition:
         """Resolve an aggregate battlefield condition deterministically."""
         if self._topology_manager and self._state.topology:
             node = self._state.topology.nodes.get(location)
@@ -100,7 +180,8 @@ class GUMASEngine(HistoricalGUMASEngine):
                 location=location,
                 attacker_fleets=sorted(f.fleet_id for f in fleets_a),
                 defender_fleets=sorted(f.fleet_id for f in fleets_b),
-                condition=condition or self._battlefield_condition_for_location(location),
+                condition=condition
+                or self._battlefield_condition_for_location(location),
             )
             self._state.combat_zones[combat_id] = combat
         else:
@@ -121,7 +202,9 @@ class GUMASEngine(HistoricalGUMASEngine):
         """Resolve one aggregate engagement through the shipped v2 resolver contract."""
         fleets_a = sorted(fleets_a, key=lambda fleet: fleet.fleet_id)
         fleets_b = sorted(fleets_b, key=lambda fleet: fleet.fleet_id)
-        combat = self._prepare_combat_state(location, fid_a, fleets_a, fid_b, fleets_b)
+        combat = self._prepare_combat_state(
+            location, fid_a, fleets_a, fid_b, fleets_b
+        )
         outcome = self._combat_resolver.resolve_battle(
             combat=combat,
             attacker_fleets=fleets_a,
@@ -164,7 +247,9 @@ class GUMASEngine(HistoricalGUMASEngine):
                         f"winner={outcome.get('winner')}",
                     )
 
-    def _handle_fleet_battle(self, event: SimulationEvent, result: TickResult) -> None:
+    def _handle_fleet_battle(
+        self, event: SimulationEvent, result: TickResult
+    ) -> None:
         """Prepare explicit battle context; Phase 9 performs the single resolution."""
         location = event.parameters.get("location")
         if not location:
@@ -194,11 +279,13 @@ class GUMASEngine(HistoricalGUMASEngine):
                     location,
                     fid_a,
                     sorted(
-                        fleets_at_location[fid_a], key=lambda fleet: fleet.fleet_id
+                        fleets_at_location[fid_a],
+                        key=lambda fleet: fleet.fleet_id,
                     ),
                     fid_b,
                     sorted(
-                        fleets_at_location[fid_b], key=lambda fleet: fleet.fleet_id
+                        fleets_at_location[fid_b],
+                        key=lambda fleet: fleet.fleet_id,
                     ),
                     condition=condition,
                 )

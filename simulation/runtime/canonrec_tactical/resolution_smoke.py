@@ -55,6 +55,7 @@ def main() -> None:
     peregrine = resolver.resolve_class("cls_peregrine", "org_galactic_union")
     judicator = resolver.resolve_class("cls_judicator", "org_galactic_union")
     aegis = resolver.resolve_class("cls_aegis", "org_galactic_union")
+    sentinel = resolver.resolve_class("cls_sentinel", "org_galactic_union")
 
     assert control == replay
     assert control["total_vessels"] == 19
@@ -65,8 +66,14 @@ def main() -> None:
         != changed["aggregate_capability_vector"]["values"]
     )
     assert gu["doctrine_vector"]["values"] != prime["doctrine_vector"]["values"]
+
+    # Organization/suborganization doctrine must be scope-safe. The two pinned
+    # doctrine CSVs are Marshal/Sentinel scoped: Sentinel receives them; generic
+    # Union classes must not inherit them merely because they share a polity.
+    assert sentinel["scoped_doctrine_sources"]
     assert peregrine["scoped_doctrine_sources"] == []
-    assert judicator["scoped_doctrine_sources"] or aegis["scoped_doctrine_sources"]
+    assert judicator["scoped_doctrine_sources"] == []
+    assert aegis["scoped_doctrine_sources"] == []
 
     receipt = {
         "status": "ok",
@@ -79,6 +86,9 @@ def main() -> None:
         "substitution_manifest_sha256": changed["manifest_sha256"],
         "gu_authority_sha256": gu["resolution_sha256"],
         "prime_construct_authority_sha256": prime["resolution_sha256"],
+        "sentinel_scoped_doctrine_source_count": len(
+            sentinel["scoped_doctrine_sources"]
+        ),
         "control_aggregate": control["aggregate_capability_vector"]["values"],
         "substitution_aggregate": changed["aggregate_capability_vector"]["values"],
     }

@@ -66,6 +66,8 @@ def main() -> None:
         output[side] = {
             "decision_sha256": first["decision_sha256"],
             "policy_source_sha256": first["policy_source_sha256"],
+            "policy_module_sha256": first["policy_module_sha256"],
+            "coefficient_table_sha256": first["coefficient_table_sha256"],
             "command_team_numeric_sha256": first[
                 "command_team_numeric_sha256"
             ],
@@ -84,6 +86,14 @@ def main() -> None:
         == "POSITIONAL_MANEUVER"
     )
     assert output["rebel"]["orders"]["strategic_posture"] == "PRESS"
+    assert (
+        output["loyalist"]["policy_source_sha256"]
+        == output["rebel"]["policy_source_sha256"]
+    )
+    assert (
+        output["loyalist"]["coefficient_table_sha256"]
+        == output["rebel"]["coefficient_table_sha256"]
+    )
     print(
         json.dumps(
             {

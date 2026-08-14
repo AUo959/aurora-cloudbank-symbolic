@@ -7,6 +7,7 @@ on:
       - 'simulation/specs/GUMAS__SPEC__DETERMINISTIC_COMMAND_TEAM_POLICY__v1.0__2026-08-13.md'
       - 'simulation/baselines/gumas/GUMAS__BASELINE__FLASH_REBELLION_PLANETOID_EQUAL_FLEETS__v1.2__2026-08-11.json'
       - 'tests/test_gumas_command_policy.py'
+      - 'tests/test_gumas_command_policy_provenance.py'
       - '.github/workflows/gumas-command-policy.yml'
   workflow_dispatch:
 
@@ -30,7 +31,11 @@ jobs:
           python -m pip install --only-binary=:all: pytest==9.0.3
 
       - name: Run deterministic command-policy tests
-        run: pytest --noconftest tests/test_gumas_command_policy.py -q --no-header
+        run: >-
+          pytest --noconftest
+          tests/test_gumas_command_policy.py
+          tests/test_gumas_command_policy_provenance.py
+          -q --no-header
 
       - name: Run frozen-team command-policy smoke
         env:

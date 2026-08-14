@@ -297,8 +297,23 @@ def score_specialist(
     }
 
 
-def _source_sha256() -> str:
-    return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+def _source_identity() -> dict[str, str]:
+    policy_path = Path(__file__)
+    coefficients_path = policy_path.with_name("coefficients.py")
+    policy_bytes = policy_path.read_bytes()
+    coefficients_bytes = coefficients_path.read_bytes()
+    policy_sha256 = hashlib.sha256(policy_bytes).hexdigest()
+    coefficient_sha256 = hashlib.sha256(coefficients_bytes).hexdigest()
+    bundle = hashlib.sha256()
+    bundle.update(b"policy.py\0")
+    bundle.update(policy_bytes)
+    bundle.update(b"\0coefficients.py\0")
+    bundle.update(coefficients_bytes)
+    return {
+        "policy_module_sha256": policy_sha256,
+        "coefficient_table_sha256": coefficient_sha256,
+        "bundle_sha256": bundle.hexdigest(),
+    }
 
 
 def decide(
@@ -333,11 +348,16 @@ def decide(
             strategic["selected"],
         )
 
+    source_identity = _source_identity()
     receipt: dict[str, Any] = {
         "schema": "aurora://simulation/gumas/command_decision_receipt/v1.0",
         "policy_id": POLICY_ID,
         "policy_version": POLICY_VERSION,
-        "policy_source_sha256": _source_sha256(),
+        "policy_source_sha256": source_identity["bundle_sha256"],
+        "policy_module_sha256": source_identity["policy_module_sha256"],
+        "coefficient_table_sha256": source_identity[
+            "coefficient_table_sha256"
+        ],
         "canonical_json_profile": CANONICAL_JSON_PROFILE,
         "baseline_identity": dict(sorted(baseline_identity.items())),
         "side_id": side_id,

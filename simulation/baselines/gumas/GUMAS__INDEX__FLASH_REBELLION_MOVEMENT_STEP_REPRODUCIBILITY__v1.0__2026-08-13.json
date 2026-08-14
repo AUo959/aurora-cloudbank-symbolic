@@ -1,0 +1,30 @@
+{
+  "index_id": "GUMAS-FLASH-REBELLION-PHASE5-MOVEMENT-REPRODUCIBILITY-2026-08-13",
+  "task_id": "TASK-20260812-gumas-deterministic-battle-runtime",
+  "baseline_id": "SIM-L2-FR-P17-EQUAL-001",
+  "accepted_code_head": "9d89f64866ed6d884c9830574c1cd60b76b121f9",
+  "phase5_receipt_path": "simulation/receipts/GUMAS__RECEIPT__MOVEMENT_GEOMETRY_PHASE5__v1.0__2026-08-13.json",
+  "source_t0_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec",
+  "command_policy_bundle_sha256": "8c9ba9d413945404e7648c8f427b660576b0e85887c7639a0944f56b38585b3f",
+  "movement_source_bundle_sha256": "565ef76f94cef320a4e4e8a0cbf75a301270eeef4326975b4cf41681d46bab57",
+  "initial_movement_state_sha256": "6b5e6b195aa8f7f839d69c1ba8e89f4a9b74db7946035f11a4a9c2e79581548d",
+  "accepted_next_movement_state_sha256": "c947b95b3e6a38c6676c4a197c5351f017734aebd56ecdf48ab0324311dd1c74",
+  "accepted_movement_receipt_sha256": "5977f48a5d32a19cf87a6c3caa8d11f26c83c1021957df0474adb982cd0444e0",
+  "evidence": {
+    "focused_workflow_run_id": 31765543911,
+    "focused_artifact_id": 9206158953,
+    "focused_artifact_sha256": "40deba6ac343cc6b670470b1be42831b49d3c185abcf69a6dbc59521770ea4cd",
+    "focused_log_sha256": "df9ce864fbcabe2f9008aae0b0eedc652c0b2e51528248529097548e4e02d95d",
+    "repository_workflow_run_id": 31765543826,
+    "repository_pytest_artifact_id": 9206312934,
+    "repository_pytest_artifact_sha256": "b61f94fb4baf2c8518f430aecdfe84ee622117535ea5bb4d7f7ca97e31de7655"
+  },
+  "replay_contract": {
+    "one_step_exact": true,
+    "hundred_macrosteps_exact": true,
+    "authoritative_rng": false,
+    "authoritative_floating_point": false,
+    "canonical_json_profile": "aurora-canonical-json-v1"
+  },
+  "note": "This index freezes reproducibility identities for the accepted Phase-5 movement/geometry witness. It is not a battle result and does not authorize Run 0."
+}

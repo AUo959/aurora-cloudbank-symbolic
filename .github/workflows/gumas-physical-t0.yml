@@ -1,0 +1,60 @@
+name: GUMAS Physical T0
+
+on:
+  pull_request:
+    paths:
+      - 'simulation/runtime/gumas_physical_t0/**'
+      - 'simulation/calibration/gumas/**'
+      - 'simulation/specs/GUMAS__SPEC__DETERMINISTIC_T0_PHYSICAL_INSTANTIATION__v1.0__2026-08-13.md'
+      - 'simulation/baselines/gumas/GUMAS__BASELINE__FLASH_REBELLION_PLANETOID_EQUAL_FLEETS__v1.2__2026-08-11.json'
+      - 'simulation/runtime/canonrec_tactical/**'
+      - 'simulation/canon_snapshots/canonrec/CANONREC__SOURCE_SET__GUMAS_RUN0_PHASE2__v1.0__2026-08-12.json'
+      - 'tests/test_gumas_physical_t0.py'
+      - '.github/workflows/gumas-physical-t0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic-t0:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CloudBank
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Checkout pinned CanonRec
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: AUo959/CanonRec
+          ref: dc629a566b2f42fa1c652140b9eef72a4fb0d58a
+          path: canonrec
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+
+      - name: Install focused test dependency
+        run: >-
+          python -m pip install --only-binary=:all: pytest==9.0.3
+
+      - name: Run deterministic T0 unit tests
+        run: pytest --noconftest tests/test_gumas_physical_t0.py -q --no-header
+
+      - name: Run real-source T0 replay and symmetry smoke
+        env:
+          PYTHONHASHSEED: '0'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -o pipefail
+          python simulation/runtime/gumas_physical_t0/t0_smoke.py --canonrec-root canonrec 2>&1 | tee gumas-physical-t0.log
+
+      - name: Upload T0 acceptance log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: gumas-physical-t0-log
+          path: gumas-physical-t0.log
+          retention-days: 30
+          if-no-files-found: error

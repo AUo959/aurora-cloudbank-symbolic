@@ -18,7 +18,7 @@ from simulation.runtime.gumas_sensing_weapons.kernel import (
 )
 
 from .constants import (
-    ARMOR_ABSORPTION_EFFICIENCIENCY_Q1000 if False else ARMOR_ABSORPTION_EFFICIENCY_Q1000,
+    ARMOR_ABSORPTION_EFFICIENCY_Q1000,
     CANONICAL_JSON_PROFILE,
     DAMAGE_CONTROL_MAX_MITIGATION_Q1000,
     PHASE7_CONTRACT_ID,
@@ -44,15 +44,17 @@ def canonical_json_bytes(value: Any) -> bytes:
 
 
 def _hash_without_field(value: Mapping[str, Any], field: str) -> str:
-    payload = {key: item for key, item in value.items() if key != field}
-    return hashlib.sha256(canonical_json_bytes(payload)).hexdigest()
+    return hashlib.sha256(
+        canonical_json_bytes({key: item for key, item in value.items() if key != field})
+    ).hexdigest()
 
 
 def _source_identity() -> dict[str, Any]:
     directory = Path(__file__).resolve().parent
+    names = ("constants.py", "kernel.py")
     modules: dict[str, str] = {}
     bundle = hashlib.sha256()
-    for name in ("constants.py", "kernel.py"):
+    for name in names:
         data = (directory / name).read_bytes()
         modules[name] = hashlib.sha256(data).hexdigest()
         bundle.update(name.encode("ascii"))
@@ -87,24 +89,12 @@ def _ceil_fraction(numerator: int, denominator: int) -> int:
 def _fraction_q1000(current: int, maximum: int, label: str) -> int:
     if maximum <= 0 or current < 0 or current > maximum:
         raise Phase7Error(f"invalid capacity state for {label}: {current}/{maximum}")
-    value = round_half_even_fraction(current * 1000, maximum)
-    return max(0, min(1000, value))
-
-
-def _semantic_phase6_receipt_sha256(receipt: Mapping[str, Any]) -> str:
-    """Hash Phase-6 semantics after normalizing list ordering that carries no causal meaning."""
-    normalized = copy.deepcopy(dict(receipt))
-    normalized.pop("phase6_receipt_sha256", None)
-    for field in ("contacts", "selections", "weapon_attempts", "effect_descriptors"):
-        value = normalized.get(field)
-        if isinstance(value, list):
-            normalized[field] = sorted(value, key=canonical_json_bytes)
-    return hashlib.sha256(canonical_json_bytes(normalized)).hexdigest()
+    return max(0, min(1000, round_half_even_fraction(current * 1000, maximum)))
 
 
 def _verify_phase6_inputs(
     state: Mapping[str, Any], phase6_receipt: Mapping[str, Any]
-) -> str:
+) -> None:
     recorded_state = str(state.get("state_sha256") or "")
     actual_state = _movement_hash_without_field(state, "state_sha256")
     if not recorded_state or recorded_state != actual_state:
@@ -116,6 +106,7 @@ def _verify_phase6_inputs(
     )
     if not recorded_receipt or recorded_receipt != actual_receipt:
         raise Phase7Error("Phase-6 receipt hash mismatch")
+
     if str(phase6_receipt.get("next_state_sha256") or "") != recorded_state:
         raise Phase7Error("Phase-6 receipt does not bind supplied current state")
 
@@ -128,7 +119,6 @@ def _verify_phase6_inputs(
         raise Phase7Error("Phase-6 receipt unexpectedly claims damage application")
     if not str(phase6_receipt.get("fire_control_state_sha256") or ""):
         raise Phase7Error("Phase-6 receipt missing fire-control identity")
-    return _semantic_phase6_receipt_sha256(phase6_receipt)
 
 
 def _vessel_lookup(state: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
@@ -152,12 +142,36 @@ def _validate_material(vessel: Mapping[str, Any]) -> dict[str, int]:
     if not isinstance(physical, Mapping):
         raise Phase7Error(f"{ship_id}.physical missing")
     values = {
-        "shield_max": _require_int(physical.get("shield_capacity_milliunits"), f"{ship_id}.shield_capacity", minimum=1),
-        "shield_current": _require_int(physical.get("shield_current_milliunits"), f"{ship_id}.shield_current", minimum=0),
-        "armor_max": _require_int(physical.get("armor_integrity_milliunits"), f"{ship_id}.armor_integrity", minimum=1),
-        "armor_current": _require_int(physical.get("armor_current_milliunits"), f"{ship_id}.armor_current", minimum=0),
-        "hull_max": _require_int(physical.get("hull_integrity_milliunits"), f"{ship_id}.hull_integrity", minimum=1),
-        "hull_current": _require_int(physical.get("hull_current_milliunits"), f"{ship_id}.hull_current", minimum=0),
+        "shield_max": _require_int(
+            physical.get("shield_capacity_milliunits"),
+            f"{ship_id}.shield_capacity",
+            minimum=1,
+        ),
+        "shield_current": _require_int(
+            physical.get("shield_current_milliunits"),
+            f"{ship_id}.shield_current",
+            minimum=0,
+        ),
+        "armor_max": _require_int(
+            physical.get("armor_integrity_milliunits"),
+            f"{ship_id}.armor_integrity",
+            minimum=1,
+        ),
+        "armor_current": _require_int(
+            physical.get("armor_current_milliunits"),
+            f"{ship_id}.armor_current",
+            minimum=0,
+        ),
+        "hull_max": _require_int(
+            physical.get("hull_integrity_milliunits"),
+            f"{ship_id}.hull_integrity",
+            minimum=1,
+        ),
+        "hull_current": _require_int(
+            physical.get("hull_current_milliunits"),
+            f"{ship_id}.hull_current",
+            minimum=0,
+        ),
     }
     for layer in ("shield", "armor", "hull"):
         if values[f"{layer}_current"] > values[f"{layer}_max"]:
@@ -203,12 +217,21 @@ def _validate_effects(
             raise Phase7Error(f"effect target absent from current state: {target_id}")
         if str(vessels[target_id].get("disposition") or "") in PROTECTED_PRIOR_DISPOSITIONS:
             raise Phase7Error(f"effect targets already destroyed vessel: {target_id}")
-        delivered = _require_int(effect.get("delivered_effect_milliunits"), f"{effect_id}.delivered_effect_milliunits", minimum=1)
-        _require_q1000(effect.get("impact_quality_q1000"), f"{effect_id}.impact_quality_q1000")
+        delivered = _require_int(
+            effect.get("delivered_effect_milliunits"),
+            f"{effect_id}.delivered_effect_milliunits",
+            minimum=1,
+        )
+        _require_q1000(
+            effect.get("impact_quality_q1000"), f"{effect_id}.impact_quality_q1000"
+        )
         if str(effect.get("source_state_sha256") or "") != prior_state_sha:
             raise Phase7Error(f"effect source-state mismatch: {effect_id}")
         expected_effect_id = sha256_canonical(
-            {"attempt_id": attempt_id, "delivered_effect_milliunits": delivered}
+            {
+                "attempt_id": attempt_id,
+                "delivered_effect_milliunits": delivered,
+            }
         )
         if effect_id != expected_effect_id:
             raise Phase7Error(f"effect identity mismatch: {effect_id}")
@@ -217,7 +240,8 @@ def _validate_effects(
 
 
 def _classify_damage(
-    *,    shield_current: int,
+    *,
+    shield_current: int,
     shield_max: int,
     armor_current: int,
     armor_max: int,
@@ -246,12 +270,26 @@ def _classify_disposition(
     readiness: Mapping[str, Any],
 ) -> str:
     hull_fraction = _fraction_q1000(hull_current, hull_max, "hull")
-    ready = {field: _require_q1000(readiness.get(field), f"readiness.{field}") for field in READINESS_FIELDS}
+    ready = {
+        field: _require_q1000(readiness.get(field), f"readiness.{field}")
+        for field in READINESS_FIELDS
+    }
     if hull_current == 0:
         return "destroyed"
-    if hull_fraction <= 150 or ready["overall"] < 150 or (ready["propulsion"] < 150 and ready["weapons"] < 150):
+    if (
+        hull_fraction <= 150
+        or ready["overall"] < 150
+        or (ready["propulsion"] < 150 and ready["weapons"] < 150)
+    ):
         return "disabled"
-    if hull_fraction < 600 or any(ready[field] < 500 for field in ("propulsion", "weapons", "sensors", "ew", "damage_control")):
+    if (
+        hull_fraction < 600
+        or ready["propulsion"] < 500
+        or ready["weapons"] < 500
+        or ready["sensors"] < 500
+        or ready["ew"] < 500
+        or ready["damage_control"] < 500
+    ):
         return "degraded"
     return "combat_capable"
 
@@ -260,9 +298,13 @@ def _readiness_after_hull_loss(
     prior: Mapping[str, Any],
     new_hull_loss_q1000: int,
 ) -> tuple[dict[str, int], dict[str, int], int]:
-    prior_ready = {field: _require_q1000(prior.get(field), f"readiness.{field}") for field in READINESS_FIELDS}
+    prior_ready = {
+        field: _require_q1000(prior.get(field), f"readiness.{field}")
+        for field in READINESS_FIELDS
+    }
     mitigation = round_half_even_fraction(
-        prior_ready["damage_control"] * DAMAGE_CONTROL_MAX_MITIGATION_Q1000, 1000
+        prior_ready["damage_control"] * DAMAGE_CONTROL_MAX_MITIGATION_Q1000,
+        1000,
     )
     effective_shock = round_half_even_fraction(
         new_hull_loss_q1000 * (1000 - mitigation), 1000
@@ -270,7 +312,9 @@ def _readiness_after_hull_loss(
     delta: dict[str, int] = {}
     after: dict[str, int] = {}
     for field in READINESS_FIELDS:
-        loss = round_half_even_fraction(effective_shock * READINESS_SHOCK_WEIGHTS_Q1000[field], 1000)
+        loss = round_half_even_fraction(
+            effective_shock * READINESS_SHOCK_WEIGHTS_Q1000[field], 1000
+        )
         delta[field] = -loss
         after[field] = max(0, prior_ready[field] - loss)
     return after, delta, effective_shock
@@ -294,7 +338,9 @@ def _apply_target_damage(
     armor_absorbed = min(residual, armor_effect_capacity)
     armor_integrity_loss = min(
         material["armor_current"],
-        _ceil_fraction(armor_absorbed * 1000, ARMOR_ABSORPTION_EFFICIENCY_Q1000)
+        _ceil_fraction(
+            armor_absorbed * 1000, ARMOR_ABSORPTION_EFFICIENCY_Q1000
+        )
         if armor_absorbed
         else 0,
     )
@@ -304,7 +350,9 @@ def _apply_target_damage(
     hull_loss = min(residual_after_armor, material["hull_current"])
     hull_after = material["hull_current"] - hull_loss
     overkill = residual_after_armor - hull_loss
-    new_hull_loss_q1000 = round_half_even_fraction(hull_loss * 1000, material["hull_max"])
+    new_hull_loss_q1000 = round_half_even_fraction(
+        hull_loss * 1000, material["hull_max"]
+    )
 
     readiness_before = copy.deepcopy(dict(before["readiness_q1000"]))
     if hull_loss:
@@ -329,7 +377,10 @@ def _apply_target_damage(
         hull_current=hull_after,
         hull_max=material["hull_max"],
     )
-    after["disposition"] = _classify_disposition(hull_after, material["hull_max"], after["readiness_q1000"])
+    after["disposition"] = _classify_disposition(
+        hull_after, material["hull_max"], after["readiness_q1000"]
+    )
+
     if after["morale_q1000"] != before["morale_q1000"]:
         raise Phase7Error("Phase 7 mutated morale")
     if after["cohesion_q1000"] != before["cohesion_q1000"]:
@@ -343,8 +394,12 @@ def _apply_target_damage(
             "before": material["shield_current"],
             "absorbed": shield_absorbed,
             "after": shield_after,
-            "fraction_before_q1000": _fraction_q1000(material["shield_current"], material["shield_max"], "shield"),
-            "fraction_after_q1000": _fraction_q1000(shield_after, material["shield_max"], "shield"),
+            "fraction_before_q1000": _fraction_q1000(
+                material["shield_current"], material["shield_max"], "shield"
+            ),
+            "fraction_after_q1000": _fraction_q1000(
+                shield_after, material["shield_max"], "shield"
+            ),
         },
         "armor": {
             "before": material["armor_current"],
@@ -352,8 +407,12 @@ def _apply_target_damage(
             "effect_absorbed": armor_absorbed,
             "integrity_lost": armor_integrity_loss,
             "after": armor_after,
-            "fraction_before_q1000": _fraction_q1000(material["armor_current"], material["armor_max"], "armor"),
-            "fraction_after_q1000": _fraction_q1000(armor_after, material["armor_max"], "armor"),
+            "fraction_before_q1000": _fraction_q1000(
+                material["armor_current"], material["armor_max"], "armor"
+            ),
+            "fraction_after_q1000": _fraction_q1000(
+                armor_after, material["armor_max"], "armor"
+            ),
         },
         "hull": {
             "before": material["hull_current"],
@@ -361,8 +420,12 @@ def _apply_target_damage(
             "after": hull_after,
             "overkill": overkill,
             "new_hull_loss_q1000": new_hull_loss_q1000,
-            "fraction_before_q1000": _fraction_q1000(material["hull_current"], material["hull_max"], "hull"),
-            "fraction_after_q1000": _fraction_q1000(hull_after, material["hull_max"], "hull"),
+            "fraction_before_q1000": _fraction_q1000(
+                material["hull_current"], material["hull_max"], "hull"
+            ),
+            "fraction_after_q1000": _fraction_q1000(
+                hull_after, material["hull_max"], "hull"
+            ),
         },
         "readiness": {
             "before": dict(sorted(readiness_before.items())),
@@ -370,12 +433,28 @@ def _apply_target_damage(
             "after": dict(sorted(readiness_after.items())),
             "effective_shock_q1000": effective_shock,
         },
-        "damage_state": {"before": str(before.get("damage_state") or ""), "after": str(after["damage_state"])},
-        "physical_disposition": {"before": str(before.get("disposition") or ""), "after": str(after["disposition"])},
-        "morale_q1000": {"before": int(before["morale_q1000"]), "after": int(after["morale_q1000"]), "unchanged": True},
-        "cohesion_q1000": {"before": int(before["cohesion_q1000"]), "after": int(after["cohesion_q1000"]), "unchanged": True},
+        "damage_state": {
+            "before": str(before.get("damage_state") or ""),
+            "after": str(after["damage_state"]),
+        },
+        "physical_disposition": {
+            "before": str(before.get("disposition") or ""),
+            "after": str(after["disposition"]),
+        },
+        "morale_q1000": {
+            "before": int(before["morale_q1000"]),
+            "after": int(after["morale_q1000"]),
+            "unchanged": True,
+        },
+        "cohesion_q1000": {
+            "before": int(before["cohesion_q1000"]),
+            "after": int(after["cohesion_q1000"]),
+            "unchanged": True,
+        },
     }
-    receipt["target_damage_receipt_sha256"] = _hash_without_field(receipt, "target_damage_receipt_sha256")
+    receipt["target_damage_receipt_sha256"] = _hash_without_field(
+        receipt, "target_damage_receipt_sha256"
+    )
     return after, receipt
 
 
@@ -384,7 +463,7 @@ def step_phase7_state(
     phase6_receipt: Mapping[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Apply one deterministic Phase-7 damage transition."""
-    phase6_semantic_sha = _verify_phase6_inputs(state, phase6_receipt)
+    _verify_phase6_inputs(state, phase6_receipt)
     vessels_by_id = _vessel_lookup(state)
     for vessel in vessels_by_id.values():
         _validate_material(vessel)
@@ -399,11 +478,15 @@ def step_phase7_state(
     next_state = copy.deepcopy(dict(state))
     next_state.pop("state_sha256", None)
     next_state["parent_state_sha256"] = str(state["state_sha256"])
-    next_vessels = {str(item["ship_id"]): copy.deepcopy(item) for item in next_state["vessels"]}
+    next_vessels = {
+        str(item["ship_id"]): copy.deepcopy(item) for item in next_state["vessels"]
+    }
 
     target_receipts: list[dict[str, Any]] = []
     for target_id in sorted(grouped):
-        updated, target_receipt = _apply_target_damage(next_vessels[target_id], grouped[target_id])
+        updated, target_receipt = _apply_target_damage(
+            next_vessels[target_id], grouped[target_id]
+        )
         next_vessels[target_id] = updated
         target_receipts.append(target_receipt)
 
@@ -415,16 +498,22 @@ def step_phase7_state(
         "phase7_version": PHASE7_VERSION,
         "phase7_source_identity": source_identity,
         "prior_state_sha256": str(state["state_sha256"]),
-        "phase6_semantic_receipt_sha256": phase6_semantic_sha,
+        "phase6_receipt_sha256": str(phase6_receipt["phase6_receipt_sha256"]),
         "fire_control_state_sha256": str(phase6_receipt["fire_control_state_sha256"]),
         "target_damage_receipts": target_receipts,
     }
-    damage_ledger["damage_ledger_sha256"] = _hash_without_field(damage_ledger, "damage_ledger_sha256")
+    damage_ledger["damage_ledger_sha256"] = _hash_without_field(
+        damage_ledger, "damage_ledger_sha256"
+    )
 
     next_state["phase7_source_identity"] = source_identity
-    next_state["last_phase6_semantic_receipt_sha256"] = phase6_semantic_sha
+    next_state["last_phase6_receipt_sha256"] = str(
+        phase6_receipt["phase6_receipt_sha256"]
+    )
     next_state["last_damage_ledger_sha256"] = damage_ledger["damage_ledger_sha256"]
-    next_state["state_sha256"] = _movement_hash_without_field(next_state, "state_sha256")
+    next_state["state_sha256"] = _movement_hash_without_field(
+        next_state, "state_sha256"
+    )
 
     receipt: dict[str, Any] = {
         "schema": "aurora://simulation/gumas/phase7_step_receipt/v1.0",
@@ -433,8 +522,7 @@ def step_phase7_state(
         "phase7_source_identity": source_identity,
         "canonical_json_profile": CANONICAL_JSON_PROFILE,
         "prior_state_sha256": str(state["state_sha256"]),
-        "phase6_semantic_receipt_sha256": phase6_semantic_sha,
-        "phase6_raw_receipt_validated": True,
+        "phase6_receipt_sha256": str(phase6_receipt["phase6_receipt_sha256"]),
         "fire_control_state_sha256": str(phase6_receipt["fire_control_state_sha256"]),
         "next_state_sha256": str(next_state["state_sha256"]),
         "macrostep_index": int(state["macrostep_index"]),
@@ -449,5 +537,7 @@ def step_phase7_state(
         "ambient_rng_used": False,
         "floating_authority_used": False,
     }
-    receipt["phase7_receipt_sha256"] = _hash_without_field(receipt, "phase7_receipt_sha256")
+    receipt["phase7_receipt_sha256"] = _hash_without_field(
+        receipt, "phase7_receipt_sha256"
+    )
     return next_state, receipt

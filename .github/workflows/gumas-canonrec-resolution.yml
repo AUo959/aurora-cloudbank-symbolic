@@ -39,4 +39,15 @@ jobs:
         run: pytest --noconftest tests/test_canonrec_tactical_resolution.py -q --no-header
 
       - name: Run real CanonRec control and substitution smoke
-        run: python simulation/runtime/canonrec_tactical/resolution_smoke.py --canonrec-root canonrec
+        run: |
+          set -o pipefail
+          python simulation/runtime/canonrec_tactical/resolution_smoke.py --canonrec-root canonrec 2>&1 | tee canonrec-resolution-smoke.log
+
+      - name: Upload CanonRec smoke log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: gumas-canonrec-resolution-smoke-log
+          path: canonrec-resolution-smoke.log
+          retention-days: 30
+          if-no-files-found: error

@@ -89,6 +89,57 @@ def _require_q1000(value: Any, label: str) -> int:
     return int(value)
 
 
+def _capability_q1000(vessel: Mapping[str, Any], name: str) -> int:
+    """Read a Phase-3 capability without requiring a richer post-T0 schema.
+
+    Phase 3 intentionally preserves direct capability fields under their
+    calibrated output names and folds sensors/mobility into invertible physical
+    calibration fields. Synthetic tests may provide the original short names.
+    """
+    capabilities = vessel.get("capability_q1000", {}) or {}
+    if name in capabilities:
+        return _require_q1000(
+            capabilities[name], f"{vessel['ship_id']}.{name}"
+        )
+
+    aliases = {
+        "electronic_warfare": "electronic_warfare_q1000",
+        "stealth": "stealth_q1000",
+    }
+    alias = aliases.get(name)
+    if alias and alias in capabilities:
+        return _require_q1000(
+            capabilities[alias], f"{vessel['ship_id']}.{alias}"
+        )
+
+    physical = vessel.get("physical", {}) or {}
+    if name == "sensors":
+        sensor_range_m = int(physical.get("sensor_range_m", -1))
+        if sensor_range_m < 3_000_000:
+            raise Phase6Error(
+                f"{vessel['ship_id']}.sensor_range_m outside Phase-3 calibration"
+            )
+        return _clamp(
+            round_half_even_fraction(
+                (sensor_range_m - 3_000_000) * 1000,
+                15_000_000,
+            )
+        )
+    if name == "mobility":
+        max_accel_mm_s2 = int(physical.get("max_accel_mm_s2", -1))
+        if max_accel_mm_s2 < 5_000:
+            raise Phase6Error(
+                f"{vessel['ship_id']}.max_accel_mm_s2 outside Phase-3 calibration"
+            )
+        return _clamp(
+            round_half_even_fraction(
+                (max_accel_mm_s2 - 5_000) * 1000,
+                115_000,
+            )
+        )
+    raise Phase6Error(f"required Phase-6 capability missing: {vessel['ship_id']}.{name}")
+
+
 def _verify_command_receipt(receipt: Mapping[str, Any]) -> None:
     recorded = str(receipt.get("decision_sha256") or "")
     actual = _hash_without_field(receipt, "decision_sha256")
@@ -150,10 +201,7 @@ def _vessel_lookup(state: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
 
 
 def _ew_strength(vessel: Mapping[str, Any]) -> int:
-    capability = _require_q1000(
-        vessel.get("capability_q1000", {}).get("electronic_warfare"),
-        f"{vessel['ship_id']}.electronic_warfare",
-    )
+    capability = _capability_q1000(vessel, "electronic_warfare")
     readiness = _require_q1000(
         vessel.get("readiness_q1000", {}).get("ew"),
         f"{vessel['ship_id']}.readiness.ew",
@@ -173,18 +221,12 @@ def _sensor_candidate(
     if occulted_by_p17(observer["position_um"], target["position_um"], elapsed_ms):
         return None
     range_quality = _range_quality_q1000(distance_um, sensor_range_um)
-    sensors = _require_q1000(
-        observer.get("capability_q1000", {}).get("sensors"),
-        f"{observer['ship_id']}.sensors",
-    )
+    sensors = _capability_q1000(observer, "sensors")
     readiness = _require_q1000(
         observer.get("readiness_q1000", {}).get("sensors"),
         f"{observer['ship_id']}.readiness.sensors",
     )
-    stealth = _require_q1000(
-        target.get("capability_q1000", {}).get("stealth"),
-        f"{target['ship_id']}.stealth",
-    )
+    stealth = _capability_q1000(target, "stealth")
     raw = _clamp(
         round_half_even_fraction(
             4 * sensors + 3 * range_quality + 3 * readiness - 5 * stealth,
@@ -500,10 +542,7 @@ def step_phase6_state(
                 }
             )
             continue
-        target_evasion = _require_q1000(
-            target.get("capability_q1000", {}).get("mobility"),
-            f"{target_id}.mobility",
-        )
+        target_evasion = _capability_q1000(target, "mobility")
         target_nav = commands[str(target["fleet_id"])]["navigation"]
         if target_nav == "EVASIVE_VECTOR":
             target_evasion = _clamp(target_evasion + 150)

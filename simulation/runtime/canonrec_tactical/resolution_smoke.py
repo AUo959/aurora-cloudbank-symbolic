@@ -4,12 +4,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
-from simulation.runtime.canonrec_tactical.resolver import CanonRecTacticalResolver
-
 ROOT = Path(__file__).resolve().parents[3]
-SOURCE_SET = ROOT / "simulation/canon_snapshots/canonrec/CANONREC__SOURCE_SET__GUMAS_RUN0_PHASE2__v1.0__2026-08-12.json"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from simulation.runtime.canonrec_tactical.resolver import (  # noqa: E402
+    CanonRecTacticalResolver,
+)
+
+SOURCE_SET = (
+    ROOT
+    / "simulation/canon_snapshots/canonrec/"
+    "CANONREC__SOURCE_SET__GUMAS_RUN0_PHASE2__v1.0__2026-08-12.json"
+)
 CONTROL = [
     {"class_id": "cls_judicator", "count": 1},
     {"class_id": "cls_aegis", "count": 3},
@@ -29,7 +39,9 @@ def main() -> None:
 
     resolver = CanonRecTacticalResolver.from_files(args.canonrec_root, SOURCE_SET)
     control = resolver.resolve_roster("org_galactic_union", CONTROL)
-    replay = resolver.resolve_roster("org_galactic_union", list(reversed(CONTROL)))
+    replay = resolver.resolve_roster(
+        "org_galactic_union", list(reversed(CONTROL))
+    )
 
     substitution = [dict(item) for item in CONTROL]
     for item in substitution:
@@ -48,7 +60,10 @@ def main() -> None:
     assert control["total_vessels"] == 19
     assert changed["total_vessels"] == 19
     assert control["manifest_sha256"] != changed["manifest_sha256"]
-    assert control["aggregate_capability_vector"]["values"] != changed["aggregate_capability_vector"]["values"]
+    assert (
+        control["aggregate_capability_vector"]["values"]
+        != changed["aggregate_capability_vector"]["values"]
+    )
     assert gu["doctrine_vector"]["values"] != prime["doctrine_vector"]["values"]
     assert peregrine["scoped_doctrine_sources"] == []
     assert judicator["scoped_doctrine_sources"] or aegis["scoped_doctrine_sources"]
@@ -56,6 +71,9 @@ def main() -> None:
     receipt = {
         "status": "ok",
         "canonrec_commit": resolver.expected_commit,
+        "resolver_version": control["resolver_version"],
+        "derivation_version": control["derivation_version"],
+        "canonical_json_profile": control["canonical_json_profile"],
         "material_source_set_sha256": resolver.source_set_sha256,
         "control_manifest_sha256": control["manifest_sha256"],
         "substitution_manifest_sha256": changed["manifest_sha256"],

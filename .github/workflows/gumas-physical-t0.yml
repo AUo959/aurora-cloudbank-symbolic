@@ -6,6 +6,7 @@ on:
       - 'simulation/runtime/gumas_physical_t0/**'
       - 'simulation/calibration/gumas/**'
       - 'simulation/specs/GUMAS__SPEC__DETERMINISTIC_T0_PHYSICAL_INSTANTIATION__v1.0__2026-08-13.md'
+      - 'simulation/snapshots/gumas/**'
       - 'simulation/baselines/gumas/GUMAS__BASELINE__FLASH_REBELLION_PLANETOID_EQUAL_FLEETS__v1.2__2026-08-11.json'
       - 'simulation/runtime/canonrec_tactical/**'
       - 'simulation/canon_snapshots/canonrec/CANONREC__SOURCE_SET__GUMAS_RUN0_PHASE2__v1.0__2026-08-12.json'
@@ -48,13 +49,18 @@ jobs:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
           set -o pipefail
-          python simulation/runtime/gumas_physical_t0/t0_smoke.py --canonrec-root canonrec 2>&1 | tee gumas-physical-t0.log
+          python simulation/runtime/gumas_physical_t0/t0_smoke.py \
+            --canonrec-root canonrec \
+            --snapshot-out gumas-t0-snapshot.json \
+            2>&1 | tee gumas-physical-t0.log
 
-      - name: Upload T0 acceptance log
+      - name: Upload T0 acceptance evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: gumas-physical-t0-log
-          path: gumas-physical-t0.log
+          name: gumas-physical-t0-evidence
+          path: |
+            gumas-physical-t0.log
+            gumas-t0-snapshot.json
           retention-days: 30
           if-no-files-found: error

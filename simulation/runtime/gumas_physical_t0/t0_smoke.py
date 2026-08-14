@@ -14,12 +14,17 @@ if str(ROOT) not in sys.path:
 
 from simulation.runtime.canonrec_tactical.resolver import (  # noqa: E402
     CanonRecTacticalResolver,
+    canonical_json_bytes,
 )
 from simulation.runtime.gumas_physical_t0.constructor import (  # noqa: E402
     CONSTRUCTOR_VERSION,
     construct_t0_state,
 )
 
+EXPECTED_T0_SHA256 = "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec"
+EXPECTED_CONSTRUCTOR_SOURCE_SHA256 = (
+    "01dd9f1ed08ebc1822e42c28d038e2fff742fe8d0421c342198fbebf56208f6f"
+)
 BASELINE = (
     ROOT
     / "simulation/baselines/gumas/"
@@ -68,6 +73,8 @@ def _material_payload(snapshot):
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--canonrec-root", required=True, type=Path)
+    parser.add_argument("--snapshot-out", type=Path)
+    parser.add_argument("--expected-snapshot", type=Path)
     args = parser.parse_args()
 
     baseline = _load(BASELINE)
@@ -81,7 +88,11 @@ def main() -> None:
     first = construct_t0_state(baseline, calibration, manifest)
     replay = construct_t0_state(baseline, calibration, manifest)
     assert first == replay
-    assert first["t0_sha256"] == replay["t0_sha256"]
+    assert first["t0_sha256"] == EXPECTED_T0_SHA256
+    assert (
+        first["run_identity"]["t0_constructor_source_sha256"]
+        == EXPECTED_CONSTRUCTOR_SOURCE_SHA256
+    )
     assert len(first["vessels"]) == 38
     assert first["symmetry"]["material_symmetry_verified"] is True
     assert first["symmetry"]["position_sign_inversion_verified"] is True
@@ -95,6 +106,13 @@ def main() -> None:
     mutated = construct_t0_state(proxy_mutation, calibration, manifest)
     assert _material_payload(first) == _material_payload(mutated)
     assert first["t0_sha256"] != mutated["t0_sha256"]
+
+    snapshot_bytes = canonical_json_bytes(first)
+    if args.expected_snapshot is not None:
+        assert args.expected_snapshot.read_bytes() == snapshot_bytes
+    if args.snapshot_out is not None:
+        args.snapshot_out.parent.mkdir(parents=True, exist_ok=True)
+        args.snapshot_out.write_bytes(snapshot_bytes)
 
     class_physical = {}
     for vessel in first["vessels"]:
@@ -124,6 +142,7 @@ def main() -> None:
         "position_sign_inversion_verified": True,
         "formation_centroid_preserved": True,
         "baseline_proxy_coefficients_non_authoritative": True,
+        "committed_snapshot_match": args.expected_snapshot is not None,
         "planetoid_rotation": first["planetoid"]["rotation"],
         "class_physical": class_physical,
     }

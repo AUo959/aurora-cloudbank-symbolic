@@ -106,6 +106,7 @@ def main() -> None:
     assert _morale_view(phase8_a) == _morale_view(phase7_state)
     assert resolution_a["terminal_outcome"]["termination_mode"] == "ongoing"
     assert receipt_a["physical_state_mutated"] is False
+    assert receipt_a["phase8_public_boundary_validated"] is True
     assert receipt_a["ambient_rng_used"] is False
     assert receipt_a["floating_authority_used"] is False
     assert receipt_a["prose_inputs_used"] is False
@@ -123,8 +124,12 @@ def main() -> None:
         "phase8_resolution_state_sha256": resolution_a["resolution_state_sha256"],
         "phase8_receipt_sha256": receipt_a["phase8_receipt_sha256"],
         "phase8_source_identity": receipt_a["phase8_source_identity"],
+        "phase8_boundary_source_identity": receipt_a["phase8_boundary_source_identity"],
+        "phase8_composite_source_sha256": receipt_a["phase8_composite_source_sha256"],
+        "phase8_public_boundary_validated": receipt_a["phase8_public_boundary_validated"],
         "strategic_posture_by_side": {side: decisions[baseline["sides"][side]["fleet_id"]]["orders"]["strategic_posture"] for side in ("loyalist", "rebel")},
         "battle_shock_by_side": {side: resolution_a["shock_by_side"][side]["battle_shock_q1000"] for side in ("loyalist", "rebel")},
+        "negotiation_signal_q1000_by_side": resolution_a["negotiation_signal_q1000_by_side"],
         "morale_cohesion_unchanged": True,
         "termination_mode": resolution_a["terminal_outcome"]["termination_mode"],
         "terminated": resolution_a["terminal_outcome"]["terminated"],

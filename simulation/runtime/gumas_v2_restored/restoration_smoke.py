@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Focused deterministic smoke test for the GUMAS v2.0.1-restored.1 contract."""
+"""Focused deterministic smoke test for the GUMAS v2.0.1-restored.2 contract."""
 from __future__ import annotations
 
 import hashlib
@@ -8,18 +8,27 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO_ROOT = HERE.parents[2]
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
-from restored_engine import GUMASEngine, RESTORATION_VERSION  # noqa: E402
-from modules.gumas.models import (  # noqa: E402
+from restored_engine import (  # noqa: E402
+    RECOVERY_ZIP,
+    RESTORATION_VERSION,
     BattlefieldCondition,
     EventType,
     FleetState,
+    GUMASEngine,
     GUMASState,
     SimulationEvent,
 )
+
+
+def _assert_import_isolation() -> None:
+    assert str(RECOVERY_ZIP) not in sys.path
+    assert not any(
+        name == "modules.gumas" or name.startswith("modules.gumas.")
+        for name in sys.modules
+    )
 
 
 def _state(reverse: bool = False) -> GUMASState:
@@ -92,6 +101,8 @@ def _run(*, explicit: bool = False, reverse: bool = False):
 
 
 def main() -> None:
+    _assert_import_isolation()
+
     engine, result, snapshot = _run()
     combat = next(iter(engine.get_state().combat_zones.values()))
     assert combat.turns_active == 1
@@ -101,21 +112,28 @@ def main() -> None:
     assert sum("combat[" in str(change) for change in result.state_changes) == 1
 
     explicit_engine, explicit_result, _ = _run(explicit=True)
-    explicit_combat = next(iter(explicit_engine.get_state().combat_zones.values()))
+    explicit_combat = next(
+        iter(explicit_engine.get_state().combat_zones.values())
+    )
     assert explicit_combat.turns_active == 1
     assert explicit_combat.condition == BattlefieldCondition.CHOKEPOINT
     assert any(
         "fleet_battle_prepared" in str(change)
         for change in explicit_result.state_changes
     )
-    assert sum("combat[" in str(change) for change in explicit_result.state_changes) == 1
+    assert sum(
+        "combat[" in str(change) for change in explicit_result.state_changes
+    ) == 1
 
     _, _, replay = _run()
     _, _, reverse = _run(reverse=True)
     assert snapshot == replay
     assert snapshot == reverse
+    _assert_import_isolation()
 
-    canonical = json.dumps(snapshot, sort_keys=True, separators=(",", ":")).encode()
+    canonical = json.dumps(
+        snapshot, sort_keys=True, separators=(",", ":")
+    ).encode()
     digest = hashlib.sha256(canonical).hexdigest()
     print(
         json.dumps(
@@ -127,6 +145,7 @@ def main() -> None:
                 "automatic_condition": combat.condition.value,
                 "explicit_condition": explicit_combat.condition.value,
                 "combat_turns": combat.turns_active,
+                "historical_import_isolated": True,
             },
             sort_keys=True,
         )

@@ -21,6 +21,11 @@ CONSTRUCTOR_VERSION = "1.0.0"
 SCHEMA_VERSION = "1.0"
 CANONICAL_JSON_PROFILE = "aurora-canonical-json-v1"
 ATTITUDE_SCALE = 1_000_000_000_000
+HISTORICAL_SOURCE_TREE_SHA256 = (
+    "a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9"
+)
+RESTORATION_SOURCE_GIT_BLOB_SHA1 = "371c2025773b47904a7a2a0c16a69ba1bea76414"
+CANONREC_RESOLVER_SOURCE_GIT_BLOB_SHA1 = "9eebd574ab1669331227bf854396acb1cffe56b5"
 
 
 class T0ConstructionError(RuntimeError):
@@ -130,6 +135,14 @@ def _load_json(source: str | Path | Mapping[str, Any]) -> Dict[str, Any]:
     if isinstance(source, Mapping):
         return dict(source)
     return json.loads(Path(source).read_text(encoding="utf-8"))
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _manifest_payload_for_hash(manifest: Mapping[str, Any]) -> Dict[str, Any]:
@@ -591,6 +604,7 @@ def construct_t0_state(
 
     baseline_sha = sha256_json(baseline)
     calibration_sha = sha256_json(calibration)
+    constructor_source_sha256 = _sha256_file(Path(__file__).resolve())
     snapshot: Dict[str, Any] = {
         "schema": "aurora://simulation/gumas/deterministic_t0_physical_state/v1.0",
         "schema_version": SCHEMA_VERSION,
@@ -601,14 +615,24 @@ def construct_t0_state(
             "baseline_version": str(baseline["version"]),
             "baseline_sha256": baseline_sha,
             "seed_u64": normalize_seed64(baseline["determinism"]["seed_u64"]),
+            "historical_source_tree_sha256": HISTORICAL_SOURCE_TREE_SHA256,
             "restoration_version": "2.0.1-restored.2",
+            "restoration_source_identity": {
+                "digest_type": "git_blob_sha1",
+                "digest": RESTORATION_SOURCE_GIT_BLOB_SHA1,
+            },
             "canonrec_commit": manifest["canonrec_commit"],
+            "canonrec_resolver_source_identity": {
+                "digest_type": "git_blob_sha1",
+                "digest": CANONREC_RESOLVER_SOURCE_GIT_BLOB_SHA1,
+            },
             "canonrec_resolver_version": manifest["resolver_version"],
             "canonrec_derivation_version": manifest["derivation_version"],
             "resolved_manifest_sha256": manifest["manifest_sha256"],
             "physical_calibration_version": str(calibration["version"]),
             "physical_calibration_sha256": calibration_sha,
             "t0_constructor_version": CONSTRUCTOR_VERSION,
+            "t0_constructor_source_sha256": constructor_source_sha256,
         },
         "numeric_policy": dict(calibration["numeric_policy"]),
         "planetoid": {

@@ -87,9 +87,6 @@ def main() -> None:
     assert first["symmetry"]["position_sign_inversion_verified"] is True
     assert first["symmetry"]["formation_centroid_preserved"] is True
 
-    # Historical baseline class coefficients are intentionally non-authoritative
-    # proxies. Mutating them must not change generated physical/material state,
-    # although it does change baseline/run identity and therefore the T0 hash.
     proxy_mutation = copy.deepcopy(baseline)
     for values in proxy_mutation["fleet_template"]["class_coefficients"].values():
         for key in list(values):
@@ -111,6 +108,15 @@ def main() -> None:
         "baseline_sha256": first["run_identity"]["baseline_sha256"],
         "calibration_sha256": first["run_identity"]["physical_calibration_sha256"],
         "resolved_manifest_sha256": first["run_identity"]["resolved_manifest_sha256"],
+        "t0_constructor_source_sha256": first["run_identity"][
+            "t0_constructor_source_sha256"
+        ],
+        "restoration_source_identity": first["run_identity"][
+            "restoration_source_identity"
+        ],
+        "canonrec_resolver_source_identity": first["run_identity"][
+            "canonrec_resolver_source_identity"
+        ],
         "seed_u64": first["run_identity"]["seed_u64"],
         "vessels_total": len(first["vessels"]),
         "vessels_per_side": first["symmetry"]["vessels_per_side"],

@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
 from simulation.runtime.canonrec_tactical.resolver import CanonRecTacticalResolver  # noqa:E402
 from simulation.runtime.gumas_command_policy.policy import decide  # noqa:E402
 from simulation.runtime.gumas_damage_disposition import step_phase7_state  # noqa:E402
+from simulation.runtime.gumas_damage_disposition.normalization import normalize_phase6_receipt  # noqa:E402
 from simulation.runtime.gumas_movement_geometry.geometry import mean_vector_round_half_even  # noqa:E402
 from simulation.runtime.gumas_movement_geometry.kernel import (  # noqa:E402
     initialize_motion_state,
@@ -141,6 +142,7 @@ def main() -> None:
     seed_u64 = int(baseline["determinism"]["seed_u64"])
     phase6_state, phase6_receipt = step_phase6_state(moved, decisions, seed_u64)
     assert len(phase6_receipt["effect_descriptors"]) == 0
+    normalized_phase6 = normalize_phase6_receipt(phase6_receipt)
 
     phase7_a, damage_a = step_phase7_state(phase6_state, phase6_receipt)
     phase7_b, damage_b = step_phase7_state(phase6_state, phase6_receipt)
@@ -159,7 +161,7 @@ def main() -> None:
         "movement_receipt_sha256": movement_receipt["movement_receipt_sha256"],
         "phase6_state_sha256": phase6_state["state_sha256"],
         "phase6_raw_receipt_sha256": phase6_receipt["phase6_receipt_sha256"],
-        "phase7_bound_phase6_receipt_sha256": damage_a["phase6_receipt_sha256"],
+        "phase7_bound_phase6_receipt_sha256": normalized_phase6["phase6_receipt_sha256"],
         "phase6_raw_receipt_validated_before_normalization": damage_a[
             "phase6_raw_receipt_validated_before_normalization"
         ],

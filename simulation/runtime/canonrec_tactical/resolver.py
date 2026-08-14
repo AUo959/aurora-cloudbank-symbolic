@@ -1,7 +1,7 @@
 """Deterministic CanonRec tactical input resolution for GUMAS.
 
 A resolver instance reads only a clean local CanonRec checkout pinned to an exact
-commit.  No network or language-model judgment is part of runtime resolution.
+commit. No network or language-model judgment is part of runtime resolution.
 Qualitative canon is translated through explicit, versioned integer tables.
 """
 from __future__ import annotations
@@ -9,12 +9,15 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import re
 import subprocess
+import unicodedata
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence, Tuple
 
-RESOLVER_VERSION = "1.0.0"
-DERIVATION_VERSION = "canonrec-tactical-derivation-v1"
+RESOLVER_VERSION = "1.0.1"
+DERIVATION_VERSION = "canonrec-tactical-derivation-v1.1"
+CANONICAL_JSON_PROFILE = "aurora-canonical-json-v1"
 
 CAPABILITY_KEYS: Tuple[str, ...] = (
     "firepower", "defense", "mobility", "sensors", "stealth",
@@ -46,32 +49,32 @@ ROLE_RULES: Tuple[Tuple[Tuple[str, ...], str], ...] = (
     (("dreadnought",), "dreadnought"),
     (("carrier",), "carrier"),
     (("special operations", "marshal", "operative"), "special_operations"),
-    (("stealth", "infiltration", "recon"), "stealth_combatant"),
-    (("interceptor", "patrol", "pursuit"), "interceptor_patrol"),
+    (("stealth", "infiltration", "recon", "reconnaissance"), "stealth_combatant"),
+    (("interceptor", "patrol", "pursuit", "skirmishing"), "interceptor_patrol"),
     (("frigate", "escort"), "frigate_escort"),
     (("logistics", "support", "repair", "medical"), "logistics_support"),
-    (("cruiser", "destroyer", "combatant", "battleship"), "heavy_combatant"),
+    (("cruiser", "battlecruiser", "destroyer", "combatant", "battleship"), "heavy_combatant"),
 )
 
 FEATURE_RULES: Tuple[Tuple[Tuple[str, ...], Mapping[str, int]], ...] = (
-    (("rail", "heavy weapon", "plasma", "heavy cannon"), {"firepower": 90, "range": 55}),
-    (("missile", "torpedo"), {"firepower": 65, "range": 75}),
-    (("point defense", "point-defense"), {"defense": 75, "sensors": 30}),
-    (("adaptive shield",), {"defense": 105, "endurance": 35}),
-    (("shield",), {"defense": 55}),
-    (("armor", "armour"), {"defense": 60, "endurance": 35, "mobility": -20}),
-    (("stealth", "cloak", "signature suppression"), {"stealth": 120, "sensors": 25}),
-    (("sensor", "recon", "surveillance", "tracking"), {"sensors": 90, "range": 25}),
-    (("ai-resistant", "ai resistant"), {"command": 55, "electronic_warfare": 60}),
-    (("ai-assisted", "ai assisted", "artificial intelligence"), {"sensors": 35, "command": 35}),
-    (("fighter", "drone bay", "hangar", "carrier capacity"), {"carrier_projection": 110, "range": 35}),
+    (("rail", "railgun", "railguns", "rail cannon", "rail cannons", "heavy weapon", "plasma", "heavy cannon"), {"firepower": 90, "range": 55}),
+    (("missile", "missiles", "torpedo", "torpedoes"), {"firepower": 65, "range": 75}),
+    (("point defense", "point defenses"), {"defense": 75, "sensors": 30}),
+    (("adaptive shield", "adaptive shielding"), {"defense": 105, "endurance": 35}),
+    (("shield", "shields", "shielding"), {"defense": 55}),
+    (("armor", "armour", "armored", "armoured"), {"defense": 60, "endurance": 35, "mobility": -20}),
+    (("stealth", "cloak", "cloaking", "signature suppression"), {"stealth": 120, "sensors": 25}),
+    (("sensor", "sensors", "recon", "reconnaissance", "surveillance", "tracking"), {"sensors": 90, "range": 25}),
+    (("ai resistant",), {"command": 55, "electronic_warfare": 60}),
+    (("ai assisted", "artificial intelligence"), {"sensors": 35, "command": 35}),
+    (("fighter", "fighters", "drone bay", "drone bays", "hangar", "hangars", "carrier capacity"), {"carrier_projection": 110, "range": 35}),
     (("repair", "medical", "logistics", "resupply"), {"support": 115, "endurance": 75}),
-    (("boarding", "marine", "sabotage"), {"boarding": 130, "stealth": 20}),
-    (("gravitic", "high-speed", "high speed", "pursuit", "maneuver"), {"mobility": 85}),
-    (("hyperdrive", "long-range", "long range"), {"range": 90, "endurance": 35}),
+    (("boarding", "marine", "marines", "sabotage"), {"boarding": 130, "stealth": 20}),
+    (("gravitic", "high speed", "pursuit", "maneuver", "maneuverability", "manoeuvre", "manoeuvrability"), {"mobility": 85}),
+    (("hyperdrive", "hyperdrives", "long range"), {"range": 90, "endurance": 35}),
     (("command", "coordination"), {"command": 80, "sensors": 20}),
-    (("electronic warfare", "jamming", "interdiction", "cyber"), {"electronic_warfare": 110, "sensors": 30}),
-    (("reactor-linked", "reactor linked"), {"defense": 45, "endurance": 50}),
+    (("electronic warfare", "jamming", "interdiction", "cyber", "cyberwarfare"), {"electronic_warfare": 110, "sensors": 30}),
+    (("reactor linked",), {"defense": 45, "endurance": 50}),
 )
 
 DOCTRINE_RULES: Tuple[Tuple[Tuple[str, ...], Mapping[str, int]], ...] = (
@@ -93,11 +96,37 @@ class CanonRecResolutionError(RuntimeError):
 
 
 def canonical_json_bytes(value: Any) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    """Encode the v1 Aurora canonical JSON profile used for deterministic hashes."""
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
 
 
 def sha256_json(value: Any) -> str:
     return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+
+
+def normalize_seed64(value: int | str) -> str:
+    """Return an unsigned 64-bit seed as a lossless fixed-width hexadecimal string."""
+    if isinstance(value, bool):
+        raise CanonRecResolutionError("Boolean values are not valid seeds")
+    if isinstance(value, int):
+        seed = value
+    elif isinstance(value, str):
+        raw = value.strip().lower()
+        try:
+            seed = int(raw, 16) if raw.startswith("0x") else int(raw, 10)
+        except ValueError as exc:
+            raise CanonRecResolutionError(f"Invalid 64-bit seed: {value!r}") from exc
+    else:
+        raise CanonRecResolutionError(f"Invalid seed type: {type(value).__name__}")
+    if not 0 <= seed <= 0xFFFFFFFFFFFFFFFF:
+        raise CanonRecResolutionError(f"Seed outside unsigned 64-bit range: {seed}")
+    return f"0x{seed:016x}"
 
 
 def clamp(value: int) -> int:
@@ -120,25 +149,47 @@ def flatten_text(value: Any) -> List[str]:
 def record_text(record: Mapping[str, Any]) -> str:
     fields = (
         "name", "role", "division", "description", "key_features", "tags",
-        "recovered_profile", "government_type", "governance", "military_doctrine",
-        "strategic_doctrine", "principles", "traits", "capabilities", "notes",
+        "recovered_profile", "government_type", "governance", "government",
+        "military_doctrine", "strategic_doctrine", "principles", "traits",
+        "capabilities", "notes", "org_type", "nature", "political_evolution",
+        "legal_status",
     )
-    return " ".join(flatten_text([record.get(key) for key in fields if key in record])).lower()
+    return " ".join(flatten_text([record.get(key) for key in fields if key in record]))
+
+
+def normalize_match_text(value: str) -> str:
+    """Normalize punctuation/case so semantic rules match whole token phrases only."""
+    normalized = unicodedata.normalize("NFKC", value).casefold()
+    return " ".join(re.findall(r"[a-z0-9]+", normalized))
+
+
+def term_matches(text: str, term: str) -> bool:
+    """Match a normalized term on token boundaries, never as an arbitrary substring."""
+    haystack = normalize_match_text(text)
+    needle = normalize_match_text(term)
+    if not haystack or not needle:
+        return False
+    return f" {needle} " in f" {haystack} "
 
 
 def choose_role_profile(text: str) -> str:
-    lowered = text.lower()
     for needles, profile in ROLE_RULES:
-        if any(needle in lowered for needle in needles):
+        if any(term_matches(text, needle) for needle in needles):
             return profile
-    raise CanonRecResolutionError(f"No deterministic role profile for canonical text: {text[:160]!r}")
+    raise CanonRecResolutionError(
+        f"No deterministic role profile for canonical text: {text[:160]!r}"
+    )
 
 
-def apply_rules(base: Mapping[str, int], text: str, rules) -> Tuple[Dict[str, int], List[Dict[str, Any]]]:
+def apply_rules(
+    base: Mapping[str, int],
+    text: str,
+    rules: Sequence[Tuple[Tuple[str, ...], Mapping[str, int]]],
+) -> Tuple[Dict[str, int], List[Dict[str, Any]]]:
     values = dict(base)
     fired: List[Dict[str, Any]] = []
     for needles, deltas in rules:
-        matches = sorted({needle for needle in needles if needle in text})
+        matches = sorted({needle for needle in needles if term_matches(text, needle)})
         if not matches:
             continue
         applied: Dict[str, int] = {}
@@ -152,7 +203,9 @@ def apply_rules(base: Mapping[str, int], text: str, rules) -> Tuple[Dict[str, in
     return values, fired
 
 
-def derive_capability(record: Mapping[str, Any], scoped_doctrine_text: str = "") -> Dict[str, Any]:
+def derive_capability(
+    record: Mapping[str, Any], scoped_doctrine_text: str = ""
+) -> Dict[str, Any]:
     text = f"{record_text(record)} {scoped_doctrine_text}".strip()
     role_profile = choose_role_profile(text)
     values, fired = apply_rules(ROLE_PROFILES[role_profile], text, FEATURE_RULES)
@@ -176,6 +229,22 @@ def derive_doctrine(record: Mapping[str, Any]) -> Dict[str, Any]:
     }
 
 
+def canonical_certainty(record: Mapping[str, Any]) -> str:
+    """Return canonical certainty without confusing lifecycle status with canon status."""
+    for key in ("certainty", "canonical_status"):
+        value = str(record.get(key) or "").strip().upper()
+        if value:
+            return value
+    legacy = str(record.get("status") or "").strip().upper()
+    if legacy in {"CANON", "STAGING", "NONCANON", "NON_CANON", "REJECTED"}:
+        return legacy
+    return ""
+
+
+def canonical_record_id(record: Mapping[str, Any]) -> str:
+    return str(record.get("entity_id") or record.get("id") or "").strip()
+
+
 class CanonRecTacticalResolver:
     """Resolve tactical manifests from a clean, exact CanonRec checkout."""
 
@@ -185,7 +254,9 @@ class CanonRecTacticalResolver:
         self.expected_commit = str(self.source_set["canonrec_commit"])
         actual = self._git("rev-parse", "HEAD")
         if actual != self.expected_commit:
-            raise CanonRecResolutionError(f"CanonRec HEAD {actual} != pinned {self.expected_commit}")
+            raise CanonRecResolutionError(
+                f"CanonRec HEAD {actual} != pinned {self.expected_commit}"
+            )
         if self._git("status", "--porcelain", "--untracked-files=no"):
             raise CanonRecResolutionError("CanonRec checkout must be clean")
         self._records: Dict[str, Dict[str, Any]] = {}
@@ -195,17 +266,28 @@ class CanonRecTacticalResolver:
         self.source_set_sha256 = sha256_json(self._source_refs)
 
     @classmethod
-    def from_files(cls, canonrec_root: str | Path, source_set_path: str | Path) -> "CanonRecTacticalResolver":
-        return cls(canonrec_root, json.loads(Path(source_set_path).read_text(encoding="utf-8")))
+    def from_files(
+        cls, canonrec_root: str | Path, source_set_path: str | Path
+    ) -> "CanonRecTacticalResolver":
+        return cls(
+            canonrec_root,
+            json.loads(Path(source_set_path).read_text(encoding="utf-8")),
+        )
 
     def _git(self, *args: str) -> str:
         try:
-            return subprocess.check_output(["git", "-C", str(self.root), *args], text=True).strip()
+            return subprocess.check_output(
+                ["git", "-C", str(self.root), *args], text=True
+            ).strip()
         except subprocess.CalledProcessError as exc:
-            raise CanonRecResolutionError(f"Git verification failed: {' '.join(args)}") from exc
+            raise CanonRecResolutionError(
+                f"Git verification failed: {' '.join(args)}"
+            ) from exc
 
     def _load_sources(self) -> None:
-        for entry in sorted(self.source_set.get("sources", []), key=lambda item: item["path"]):
+        for entry in sorted(
+            self.source_set.get("sources", []), key=lambda item: item["path"]
+        ):
             rel = str(entry["path"])
             path = self.root / rel
             if not path.is_file():
@@ -223,59 +305,137 @@ class CanonRecTacticalResolver:
             elif rel.endswith(".csv"):
                 data = list(csv.DictReader(raw.decode("utf-8-sig").splitlines()))
             else:
-                raise CanonRecResolutionError(f"Unsupported CanonRec source type: {rel}")
+                raise CanonRecResolutionError(
+                    f"Unsupported CanonRec source type: {rel}"
+                )
             if kind in {"organization", "polity", "ship_class"}:
-                record_id = str(data.get("id") or "")
+                if not isinstance(data, Mapping):
+                    raise CanonRecResolutionError(
+                        f"Canonical record is not an object: {rel}"
+                    )
+                record_id = canonical_record_id(data)
                 if not record_id:
                     raise CanonRecResolutionError(f"Canonical record has no id: {rel}")
-                self._records[record_id] = {"record": data, "source": ref, "kind": kind}
+                expected_id = str(entry.get("id") or "").strip()
+                if expected_id and record_id != expected_id:
+                    raise CanonRecResolutionError(
+                        f"Canonical record id mismatch in {rel}: {record_id} != {expected_id}"
+                    )
+                if record_id in self._records:
+                    raise CanonRecResolutionError(
+                        f"Duplicate canonical record id in pinned source set: {record_id}"
+                    )
+                self._records[record_id] = {
+                    "record": dict(data),
+                    "source": ref,
+                    "kind": kind,
+                }
             elif kind == "scoped_doctrine":
-                self._doctrine_sources.append({"data": data, "source": ref, "scope": tuple(sorted(str(v).lower() for v in entry.get("scope", [])))})
+                self._doctrine_sources.append(
+                    {
+                        "data": data,
+                        "source": ref,
+                        "scope": tuple(
+                            sorted(
+                                normalize_match_text(str(value))
+                                for value in entry.get("scope", [])
+                                if normalize_match_text(str(value))
+                            )
+                        ),
+                    }
+                )
 
     @staticmethod
     def _status(record: Mapping[str, Any]) -> str:
-        return str(record.get("canonical_status") or record.get("status") or "").upper()
+        return canonical_certainty(record)
 
     def _record(self, record_id: str) -> Dict[str, Any]:
         try:
             return self._records[record_id]
         except KeyError as exc:
-            raise CanonRecResolutionError(f"Record not present in pinned source set: {record_id}") from exc
+            raise CanonRecResolutionError(
+                f"Record not present in pinned source set: {record_id}"
+            ) from exc
 
     @staticmethod
-    def _binding_matches(class_record: Mapping[str, Any], authority_record: Mapping[str, Any]) -> bool:
-        bindings = [str(value).lower() for value in class_record.get("faction_bindings", [])]
+    def _binding_matches(
+        class_record: Mapping[str, Any], authority_record: Mapping[str, Any]
+    ) -> bool:
+        bindings = {
+            normalize_match_text(str(value))
+            for value in class_record.get("faction_bindings", [])
+            if normalize_match_text(str(value))
+        }
         if not bindings:
             return True
-        authority_tokens = {str(authority_record.get("id", "")).lower(), str(authority_record.get("name", "")).lower()}
+        authority_tokens = {
+            normalize_match_text(str(authority_record.get("entity_id", ""))),
+            normalize_match_text(str(authority_record.get("id", ""))),
+            normalize_match_text(str(authority_record.get("name", ""))),
+            *(
+                normalize_match_text(str(value))
+                for value in authority_record.get("faction_bindings", [])
+            ),
+        }
         authority_tokens.discard("")
-        return any(binding == token or binding in token or token in binding for binding in bindings for token in authority_tokens)
+        for binding in bindings:
+            if binding in authority_tokens:
+                return True
+            if any(
+                term_matches(token, binding) or term_matches(binding, token)
+                for token in authority_tokens
+            ):
+                return True
+        return False
 
-    def _scoped_doctrine(self, class_record: Mapping[str, Any], authority_record: Mapping[str, Any]) -> Tuple[List[Dict[str, str]], str]:
-        scope_text = " ".join((str(class_record.get("division", "")), str(class_record.get("role", "")), str(authority_record.get("id", "")), str(authority_record.get("name", "")))).lower()
+    def _scoped_doctrine(
+        self,
+        class_record: Mapping[str, Any],
+        authority_record: Mapping[str, Any],
+    ) -> Tuple[List[Dict[str, str]], str]:
+        scope_text = " ".join(
+            (
+                str(class_record.get("division", "")),
+                str(class_record.get("role", "")),
+                str(class_record.get("name", "")),
+                str(class_record.get("recovered_profile", "")),
+                str(authority_record.get("entity_id", "")),
+                str(authority_record.get("id", "")),
+                str(authority_record.get("name", "")),
+            )
+        )
         refs: List[Dict[str, str]] = []
         text: List[str] = []
         for source in self._doctrine_sources:
-            if not any(token in scope_text for token in source["scope"]):
+            if not any(term_matches(scope_text, token) for token in source["scope"]):
                 continue
             refs.append(dict(source["source"]))
             text.extend(flatten_text(source["data"]))
-        return refs, " ".join(text).lower()
+        return refs, " ".join(text)
 
     def resolve_authority(self, authority_id: str) -> Dict[str, Any]:
         holder = self._record(authority_id)
         record = holder["record"]
         status = self._status(record)
         if status and status != "CANON":
-            raise CanonRecResolutionError(f"Authority {authority_id} is not CANON: {status}")
-        direct_numeric = {key: value for key, value in sorted(record.items()) if isinstance(value, (int, float)) and not isinstance(value, bool)}
+            raise CanonRecResolutionError(
+                f"Authority {authority_id} is not CANON: {status}"
+            )
+        direct_numeric = {
+            key: value
+            for key, value in sorted(record.items())
+            if isinstance(value, (int, float)) and not isinstance(value, bool)
+        }
         payload = {
             "authority_id": authority_id,
             "name": record.get("name"),
             "canonical_status": status or None,
             "source": dict(holder["source"]),
             "identity_provenance": "CANON_DIRECT",
-            "direct_numeric_profile": {"values": direct_numeric, "provenance": "CANON_DIRECT"},
+            "direct_numeric_profile": {
+                "values": direct_numeric,
+                "provenance": "CANON_DIRECT",
+            },
             "doctrine_vector": derive_doctrine(record),
         }
         payload["resolution_sha256"] = sha256_json(payload)
@@ -288,28 +448,38 @@ class CanonRecTacticalResolver:
         authority = authority_holder["record"]
         status = self._status(record)
         if status and status != "CANON":
-            raise CanonRecResolutionError(f"Ship class {class_id} is not CANON: {status}")
+            raise CanonRecResolutionError(
+                f"Ship class {class_id} is not CANON: {status}"
+            )
         if not self._binding_matches(record, authority):
-            raise CanonRecResolutionError(f"Ship class {class_id} is not bound to authority {authority_id}")
+            raise CanonRecResolutionError(
+                f"Ship class {class_id} is not bound to authority {authority_id}"
+            )
         doctrine_refs, doctrine_text = self._scoped_doctrine(record, authority)
         payload = {
             "class_id": class_id,
             "name": record.get("name"),
             "role": record.get("role"),
             "division": record.get("division"),
-            "faction_bindings": sorted(str(v) for v in record.get("faction_bindings", [])),
+            "faction_bindings": sorted(
+                str(value) for value in record.get("faction_bindings", [])
+            ),
             "canonical_status": status or None,
             "source": dict(holder["source"]),
             "authority_source": dict(authority_holder["source"]),
             "identity_provenance": "CANON_DIRECT",
             "capability_vector": derive_capability(record, doctrine_text),
             "scoped_doctrine_sources": doctrine_refs,
-            "scoped_doctrine_provenance": "CANON_SCOPED_DOCTRINE" if doctrine_refs else None,
+            "scoped_doctrine_provenance": (
+                "CANON_SCOPED_DOCTRINE" if doctrine_refs else None
+            ),
         }
         payload["resolution_sha256"] = sha256_json(payload)
         return payload
 
-    def resolve_roster(self, authority_id: str, roster: Iterable[Mapping[str, Any]]) -> Dict[str, Any]:
+    def resolve_roster(
+        self, authority_id: str, roster: Iterable[Mapping[str, Any]]
+    ) -> Dict[str, Any]:
         authority = self.resolve_authority(authority_id)
         normalized: List[Dict[str, Any]] = []
         weighted = {key: 0 for key in CAPABILITY_KEYS}
@@ -318,26 +488,36 @@ class CanonRecTacticalResolver:
             class_id = str(entry["class_id"])
             count = int(entry["count"])
             if count <= 0:
-                raise CanonRecResolutionError(f"Invalid vessel count for {class_id}: {count}")
+                raise CanonRecResolutionError(
+                    f"Invalid vessel count for {class_id}: {count}"
+                )
             resolved = self.resolve_class(class_id, authority_id)
-            normalized.append({"class_id": class_id, "count": count, "resolved": resolved})
+            normalized.append(
+                {"class_id": class_id, "count": count, "resolved": resolved}
+            )
             total += count
             for key in CAPABILITY_KEYS:
-                weighted[key] += count * int(resolved["capability_vector"]["values"][key])
+                weighted[key] += count * int(
+                    resolved["capability_vector"]["values"][key]
+                )
         if total <= 0:
             raise CanonRecResolutionError("Roster is empty")
         aggregate = {key: weighted[key] // total for key in CAPABILITY_KEYS}
         payload = {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "resolver_version": RESOLVER_VERSION,
             "derivation_version": DERIVATION_VERSION,
+            "canonical_json_profile": CANONICAL_JSON_PROFILE,
             "canonrec_repo": self.source_set["canonrec_repo"],
             "canonrec_commit": self.expected_commit,
             "material_source_set_sha256": self.source_set_sha256,
             "authority": authority,
             "roster": normalized,
             "total_vessels": total,
-            "aggregate_capability_vector": {"values": aggregate, "provenance": "DERIVED_FROM_CANON"},
+            "aggregate_capability_vector": {
+                "values": aggregate,
+                "provenance": "DERIVED_FROM_CANON",
+            },
         }
         payload["manifest_sha256"] = sha256_json(payload)
         return payload

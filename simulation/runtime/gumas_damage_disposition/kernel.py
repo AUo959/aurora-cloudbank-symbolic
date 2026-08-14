@@ -121,6 +121,28 @@ def _verify_phase6_inputs(
         raise Phase7Error("Phase-6 receipt missing fire-control identity")
 
 
+def _phase6_semantic_receipt_sha256(
+    phase6_receipt: Mapping[str, Any],
+) -> str:
+    """Hash validated Phase-6 semantics independent of effect-list insertion order.
+
+    The raw Phase-6 receipt hash is still verified before this helper is used.
+    Phase 7 consumes the effect descriptors as a simultaneous set, so carrying
+    the raw serialization-sensitive receipt hash into Phase-7 state would make
+    equivalent effect sets produce different authoritative state hashes.
+    """
+    normalized = copy.deepcopy(dict(phase6_receipt))
+    normalized.pop("phase6_receipt_sha256", None)
+    effects = normalized.get("effect_descriptors")
+    if not isinstance(effects, Sequence) or isinstance(effects, (str, bytes)):
+        raise Phase7Error("Phase-6 effect_descriptors must be a sequence")
+    normalized["effect_descriptors"] = sorted(
+        (dict(item) for item in effects),
+        key=lambda item: str(item.get("effect_id") or ""),
+    )
+    return sha256_canonical(normalized)
+
+
 def _vessel_lookup(state: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
     vessels = state.get("vessels")
     if not isinstance(vessels, Sequence) or isinstance(vessels, (str, bytes)):
@@ -468,6 +490,7 @@ def step_phase7_state(
     for vessel in vessels_by_id.values():
         _validate_material(vessel)
     effects = _validate_effects(phase6_receipt, vessels_by_id)
+    phase6_semantic_receipt_sha256 = _phase6_semantic_receipt_sha256(phase6_receipt)
 
     grouped: dict[str, list[dict[str, Any]]] = {}
     for effect in effects:
@@ -498,7 +521,7 @@ def step_phase7_state(
         "phase7_version": PHASE7_VERSION,
         "phase7_source_identity": source_identity,
         "prior_state_sha256": str(state["state_sha256"]),
-        "phase6_receipt_sha256": str(phase6_receipt["phase6_receipt_sha256"]),
+        "phase6_semantic_receipt_sha256": phase6_semantic_receipt_sha256,
         "fire_control_state_sha256": str(phase6_receipt["fire_control_state_sha256"]),
         "target_damage_receipts": target_receipts,
     }
@@ -507,9 +530,7 @@ def step_phase7_state(
     )
 
     next_state["phase7_source_identity"] = source_identity
-    next_state["last_phase6_receipt_sha256"] = str(
-        phase6_receipt["phase6_receipt_sha256"]
-    )
+    next_state["last_phase6_semantic_receipt_sha256"] = phase6_semantic_receipt_sha256
     next_state["last_damage_ledger_sha256"] = damage_ledger["damage_ledger_sha256"]
     next_state["state_sha256"] = _movement_hash_without_field(
         next_state, "state_sha256"
@@ -522,7 +543,8 @@ def step_phase7_state(
         "phase7_source_identity": source_identity,
         "canonical_json_profile": CANONICAL_JSON_PROFILE,
         "prior_state_sha256": str(state["state_sha256"]),
-        "phase6_receipt_sha256": str(phase6_receipt["phase6_receipt_sha256"]),
+        "phase6_semantic_receipt_sha256": phase6_semantic_receipt_sha256,
+        "phase6_raw_receipt_validated": True,
         "fire_control_state_sha256": str(phase6_receipt["fire_control_state_sha256"]),
         "next_state_sha256": str(next_state["state_sha256"]),
         "macrostep_index": int(state["macrostep_index"]),

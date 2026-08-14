@@ -44,7 +44,10 @@ jobs:
           python -m pip install --only-binary=:all: pytest==9.0.3
 
       - name: Run deterministic damage/disposition tests
-        run: pytest --noconftest tests/test_gumas_damage_disposition.py -q --no-header
+        run: |
+          set -o pipefail
+          pytest --noconftest tests/test_gumas_damage_disposition.py -q --no-header \
+            2>&1 | tee gumas-damage-disposition.log
 
       - name: Run real-source damage/disposition smoke
         env:
@@ -54,7 +57,7 @@ jobs:
           set -o pipefail
           python simulation/runtime/gumas_damage_disposition/damage_smoke.py \
             --canonrec-root canonrec \
-            2>&1 | tee gumas-damage-disposition.log
+            2>&1 | tee -a gumas-damage-disposition.log
 
       - name: Upload damage/disposition acceptance evidence
         if: always()

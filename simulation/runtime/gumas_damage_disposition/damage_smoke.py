@@ -13,7 +13,7 @@ if str(ROOT) not in sys.path:
 
 from simulation.runtime.canonrec_tactical.resolver import CanonRecTacticalResolver  # noqa:E402
 from simulation.runtime.gumas_command_policy.policy import decide  # noqa:E402
-from simulation.runtime.gumas_damage_disposition.kernel import step_phase7_state  # noqa:E402
+from simulation.runtime.gumas_damage_disposition import step_phase7_state  # noqa:E402
 from simulation.runtime.gumas_movement_geometry.geometry import mean_vector_round_half_even  # noqa:E402
 from simulation.runtime.gumas_movement_geometry.kernel import (  # noqa:E402
     initialize_motion_state,
@@ -150,6 +150,7 @@ def main() -> None:
     assert damage_a["affected_target_count"] == 0
     assert _material_view(phase7_a) == _material_view(phase6_state)
     assert damage_a["termination_decision_made"] is False
+    assert damage_a["phase6_raw_receipt_validated_before_normalization"] is True
 
     output = {
         "status": "ok",
@@ -157,12 +158,22 @@ def main() -> None:
         "movement_state_sha256": moved["state_sha256"],
         "movement_receipt_sha256": movement_receipt["movement_receipt_sha256"],
         "phase6_state_sha256": phase6_state["state_sha256"],
-        "phase6_receipt_sha256": phase6_receipt["phase6_receipt_sha256"],
+        "phase6_raw_receipt_sha256": phase6_receipt["phase6_receipt_sha256"],
+        "phase7_bound_phase6_receipt_sha256": damage_a["phase6_receipt_sha256"],
+        "phase6_raw_receipt_validated_before_normalization": damage_a[
+            "phase6_raw_receipt_validated_before_normalization"
+        ],
         "phase6_effect_descriptors": len(phase6_receipt["effect_descriptors"]),
         "phase7_next_state_sha256": phase7_a["state_sha256"],
         "phase7_receipt_sha256": damage_a["phase7_receipt_sha256"],
         "damage_ledger_sha256": damage_a["damage_ledger_sha256"],
         "phase7_source_identity": damage_a["phase7_source_identity"],
+        "phase7_semantic_normalizer_source_identity": damage_a[
+            "phase7_semantic_normalizer_source_identity"
+        ],
+        "phase7_composite_source_sha256": damage_a[
+            "phase7_composite_source_sha256"
+        ],
         "affected_targets": damage_a["affected_target_count"],
         "material_state_unchanged": True,
         "morale_mutated": damage_a["morale_mutated"],

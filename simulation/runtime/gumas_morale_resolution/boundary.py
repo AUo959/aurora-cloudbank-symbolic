@@ -17,8 +17,7 @@ from simulation.runtime.gumas_movement_geometry.kernel import (
 )
 
 from . import kernel as _kernel
-from .constants import HARD_LIMIT_MS, PHYSICAL_DISPOSITIONS if False else HARD_LIMIT_MS
-from .constants import WITHDRAWAL_BOUNDARY_UM
+from .constants import HARD_LIMIT_MS, WITHDRAWAL_BOUNDARY_UM
 
 Phase8Error = _kernel.Phase8Error
 _raw_step_phase8_state = _kernel.step_phase8_state

@@ -33,7 +33,7 @@ def test_ceasefire_offer_persists_press_rescinds_and_mutual_terminates():
     assert r1["active_ceasefire_offer_by_side"]["loyalist"] and not r1["terminal_outcome"]["terminated"]
     s2=state(macrostep=6); _,r2,_=run(s2,phase7_receipt(s2),commands(),r1); assert r2["active_ceasefire_offer_by_side"]["loyalist"]
     s3=state(macrostep=7); _,r3,_=run(s3,phase7_receipt(s3),commands(lp="PRESS"),r2); assert not r3["active_ceasefire_offer_by_side"]["loyalist"]
-    _,rm,_=run(commands=commands(lp="CEASEFIRE_PROBE",rp="CEASEFIRE_PROBE"))
+    _,rm,_=run(c=commands(lp="CEASEFIRE_PROBE",rp="CEASEFIRE_PROBE"))
     assert rm["terminal_outcome"]["termination_mode"]=="mutual_ceasefire" and rm["terminal_outcome"]["victor_side_id"] is None
     assert len(rm["protected_ship_ids"])==4
 

@@ -15,7 +15,7 @@
 # no permission step, only a registration step.
 #
 # Generated from the tracked root at the time of the gate's introduction
-# (141 root objects, 9 declared dependency files).
+# (142 root objects, 9 declared dependency files).
 version: 1
 root_objects:
   - ".aurora"
@@ -56,6 +56,7 @@ root_objects:
   - "activate_aurora.sh"
   - "agents"
   - "AGENTS.md"
+  - "AI_AUTHORS.md"
   - "api"
   - "ARCHITECTURE_QUICKMAP.md"
   - "AU_CORE_MASTER_TREE.yaml"

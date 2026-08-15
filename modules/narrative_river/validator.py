@@ -27,6 +27,16 @@ _TRAILER_PATTERNS = (
 
 _INTERNAL_TERMS = ("sediment", "reservoir", "nutrient", "salmon return", "rivercycle")
 
+_UNCERTAINTY_PATTERN = re.compile(
+    r"\b(?:alleged|appears?|believes?|could|hypothes(?:is|ized)|inferred?|"
+    r"may|might|possibly|probably|seems?|suspects?|unconfirmed)\b",
+    re.IGNORECASE,
+)
+_SCARCE_ASSET_USE_PATTERN = re.compile(
+    r"\b(?:consumed|deployed|expended|fired|launched|spent|used)\b",
+    re.IGNORECASE,
+)
+
 
 def _dialogue_word_count(line: str) -> int | None:
     match = re.search(r"[\"“](.+?)[\"”]", line)
@@ -161,6 +171,9 @@ def _whole_draft_findings(
     draft_text: str,
 ) -> list[ValidationFinding]:
     findings: list[ValidationFinding] = []
+    findings.extend(_evidence_layer_findings(frame, draft_text))
+    findings.extend(_hierarchy_findings(frame, draft_text))
+    findings.extend(_scarcity_findings(frame, draft_text))
     leaked_terms = [
         term
         for term in _INTERNAL_TERMS
@@ -170,6 +183,86 @@ def _whole_draft_findings(
         findings.append(_symbolic_bleed_finding(leaked_terms))
     if frame.required_downstream_effects and len(draft_text.strip()) < 200:
         findings.append(_coverage_finding())
+    return findings
+
+
+def _evidence_layer_findings(
+    frame: NarrativeRiverFrame,
+    draft_text: str,
+) -> list[ValidationFinding]:
+    findings: list[ValidationFinding] = []
+    for line_number, line in enumerate(draft_text.splitlines(), start=1):
+        lowered = line.casefold()
+        for claim in frame.evidence_state:
+            if claim.status != "hypothesis":
+                continue
+            if claim.claim.casefold() not in lowered or _UNCERTAINTY_PATTERN.search(line):
+                continue
+            findings.append(
+                _finding(
+                    rule_id="AXIOM_7_EVIDENCE_LAYER_COLLAPSE",
+                    severity=ValidationSeverity.ERROR,
+                    message="A hypothesis is narrated as confirmed without uncertainty.",
+                    line=line,
+                    line_number=line_number,
+                )
+            )
+    return findings
+
+
+def _hierarchy_findings(
+    frame: NarrativeRiverFrame,
+    draft_text: str,
+) -> list[ValidationFinding]:
+    findings: list[ValidationFinding] = []
+    for line_number, line in enumerate(draft_text.splitlines(), start=1):
+        lowered = line.casefold()
+        for constraint in frame.institutional_constraints:
+            if not any(
+                prohibited.casefold() in lowered
+                for prohibited in constraint.must_not_appear_as
+            ):
+                continue
+            findings.append(
+                _finding(
+                    rule_id="AXIOM_5_HIERARCHY_DRIFT",
+                    severity=ValidationSeverity.ERROR,
+                    message=(
+                        "Prose violates an explicit institutional or hierarchy "
+                        "representation constraint."
+                    ),
+                    line=line,
+                    line_number=line_number,
+                )
+            )
+    return findings
+
+
+def _scarcity_findings(
+    frame: NarrativeRiverFrame,
+    draft_text: str,
+) -> list[ValidationFinding]:
+    findings: list[ValidationFinding] = []
+    unavailable_assets = {
+        item.scarce_asset.casefold()
+        for item in frame.scarcity_state
+        if item.current_quantity == 0
+    }
+    for line_number, line in enumerate(draft_text.splitlines(), start=1):
+        lowered = line.casefold()
+        if not _SCARCE_ASSET_USE_PATTERN.search(line):
+            continue
+        if not any(asset in lowered for asset in unavailable_assets):
+            continue
+        findings.append(
+            _finding(
+                rule_id="AXIOM_11_SCARCITY_VIOLATION",
+                severity=ValidationSeverity.ERROR,
+                message="Prose consumes an asset whose recorded quantity is zero.",
+                line=line,
+                line_number=line_number,
+            )
+        )
     return findings
 
 

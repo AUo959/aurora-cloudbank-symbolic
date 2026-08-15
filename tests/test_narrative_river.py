@@ -245,6 +245,68 @@ def test_advisory_validator_cites_known_failure_patterns() -> None:
     assert report.has_errors
 
 
+@pytest.mark.parametrize(
+    ("failure_kind", "expected_rule", "draft"),
+    [
+        (
+            "evidence",
+            "AXIOM_7_EVIDENCE_LAYER_COLLAPSE",
+            "The approach corridor is prepared as an ambush.",
+        ),
+        (
+            "hierarchy",
+            "AXIOM_5_HIERARCHY_DRIFT",
+            "The junior officer negotiated casually with supreme authority.",
+        ),
+        (
+            "scarcity",
+            "AXIOM_11_SCARCITY_VIOLATION",
+            "The crew fired the Javelin munitions to clear the approach.",
+        ),
+    ],
+)
+def test_fail_on_error_blocks_specified_validation_failures(
+    tmp_path: Path,
+    failure_kind: str,
+    expected_rule: str,
+    draft: str,
+) -> None:
+    request = frame_payload()
+    if failure_kind == "hierarchy":
+        request["institutional_constraints"] = [
+            {
+                "constraint_id": "INST-COMMAND-REGISTER",
+                "authority": "SUPREME_COMMAND",
+                "effect": "Junior officers use a formal command register.",
+                "must_not_appear_as": [
+                    "junior officer negotiated casually with supreme authority"
+                ],
+            }
+        ]
+    elif failure_kind == "scarcity":
+        request["scarcity_state"][0]["current_quantity"] = 0
+
+    store = NarrativeRiverStore(tmp_path / "river")
+    result = NarrativeRiverWorkflow(store).run_scene(
+        SceneRunRequest(
+            scene_request=request,
+            canon_snapshot=canon_snapshot(),
+            draft_text=draft,
+            delta_payload=delta_payload(),
+            fail_on_error=True,
+        )
+    )
+
+    report = json.loads(
+        Path(result["validation_report_path"]).read_text(encoding="utf-8")
+    )
+    assert expected_rule in {finding["rule_id"] for finding in report["findings"]}
+    assert result["validation_has_errors"] is True
+    assert result["scene_closed"] is False
+    assert result["delta_path"] is None
+    assert store.load_manifest()["latest_closed_scene_id"] is None
+
+
 def test_storage_paths_are_contained_and_manifested(tmp_path: Path) -> None:
     store = NarrativeRiverStore(tmp_path / "river")
     workflow = NarrativeRiverWorkflow(store)

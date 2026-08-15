@@ -6,7 +6,7 @@
 
 # Open Gates — Aurora Work Queue
 
-_Queue review: `2026-07-16T00:36:36Z` · Gate registry updated: `2026-08-03` · deterministic projection_
+_Queue review: `2026-07-16T00:36:36Z` · Gate registry updated: `2026-08-10` · deterministic projection_
 
 > Human-gate authority comes from `gate_registry.json`; `queue.json`
 > supplies task status and dependency context. Rendering never resolves a gate.

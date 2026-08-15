@@ -250,6 +250,7 @@ Allowed fact types and sources are:
 | Fact type | Phase | Source | Basis |
 |---|---|---|---|
 | `macrostep_boundary` | phase9 | ledger entry | committed field |
+| `command_observation` | phase4 | live-observation receipt `observation` | committed field |
 | `command_order` | phase4 | decision receipt `orders` | committed field |
 | `movement_vessel` | phase5 | movement `per_vessel` | committed field |
 | `movement_aggregate` | phase5 | fixed counts over `per_vessel` | deterministic aggregation |
@@ -270,18 +271,19 @@ No free-form event type, motive, dialogue, tactical explanation, winner label, m
 For each macrostep, events are ordered by:
 
 1. `macrostep_boundary`;
-2. `command_order`, sorted by `fleet_id`;
-3. `movement_vessel`, sorted by `ship_id`;
-4. `movement_aggregate`;
-5. `sensor_contact`, sorted by `(observer_ship_id, target_ship_id)`;
-6. `target_selection`, sorted by `shooter_ship_id`;
-7. `weapon_attempt`, sorted by `(shooter_ship_id, target_ship_id or "")`;
-8. `delivered_effect`, sorted by `effect_id`;
-9. `sensing_fire_aggregate`;
-10. `target_damage`, sorted by `target_ship_id`;
-11. `damage_aggregate`;
-12. `side_resolution`, sorted by `side_id`;
-13. `terminal_outcome`.
+2. `command_observation`, sorted by `side_id`;
+3. `command_order`, sorted by `fleet_id`;
+4. `movement_vessel`, sorted by `ship_id`;
+5. `movement_aggregate`;
+6. `sensor_contact`, sorted by `(observer_ship_id, target_ship_id)`;
+7. `target_selection`, sorted by `shooter_ship_id`;
+8. `weapon_attempt`, sorted by `(shooter_ship_id, target_ship_id or "")`;
+9. `delivered_effect`, sorted by `effect_id`;
+10. `sensing_fire_aggregate`;
+11. `target_damage`, sorted by `target_ship_id`;
+12. `damage_aggregate`;
+13. `side_resolution`, sorted by `side_id`;
+14. `terminal_outcome`.
 
 Input mapping insertion order and semantically unordered receipt-array order are inert. The reporter validates receipt hashes first, then orders copies for projection without altering the input artifact identity.
 

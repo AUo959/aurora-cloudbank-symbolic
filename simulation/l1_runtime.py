@@ -1160,6 +1160,10 @@ class OrionL1Runtime:
             raise PreflightError(
                 "persisted staffing action lacks matching audit event"
             )
+        OrionL1Runtime._validate_loaded_staffing_projection(state)
+
+    @staticmethod
+    def _validate_loaded_staffing_projection(state: L1RunState) -> None:
         population = state.world_state.get("population")
         if not isinstance(population, dict):
             raise PreflightError("persisted population projection must be an object")

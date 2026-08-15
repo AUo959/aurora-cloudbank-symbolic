@@ -55,6 +55,20 @@ def test_licensed_variant_requires_license_ref(schema, example):
     jsonschema.validate(doc, schema)
 
 
+def test_neutral_variant_rejects_license_ref(schema, example):
+    doc = copy.deepcopy(example)
+    doc["canon_license"]["license_ref"] = "urn:aurora:license:unexpected"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(doc, schema)
+
+
+def test_extracted_from_requires_extraction_tool(schema, example):
+    doc = copy.deepcopy(example)
+    del doc["shipment"]["extracted_from"]["extraction_tool"]
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(doc, schema)
+
+
 def test_execution_default_off_is_const(schema, example):
     doc = copy.deepcopy(example)
     doc["ethics"]["execution_default_off"] = False

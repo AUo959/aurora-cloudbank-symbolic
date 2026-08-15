@@ -39,7 +39,8 @@
           "required": [
             "source_repo",
             "source_ref",
-            "extraction_date"
+            "extraction_date",
+            "extraction_tool"
           ],
           "additionalProperties": false,
           "properties": {
@@ -177,6 +178,13 @@
         "required": [
           "license_ref"
         ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "license_ref"
+          ]
+        }
       }
     }
   }

@@ -1,0 +1,59 @@
+scene_id: DARKSTAR.EXAMPLE.QUIET_LANE
+chapter_id: DARKSTAR.EXAMPLE
+narrative_status:
+  current_state: draft
+  persistence_class: draft_persistent
+viewpoint:
+  mode: close_third
+  focal_character_ids:
+    - TESSA_KORR
+  prohibited_omniscience: true
+scene_objective:
+  operational_goal: Reach Kallis Foundry before its archive purge completes.
+  dramatic_goal: Test whether Iven's caution changes the crew's approach without resolving their underlying disagreement.
+  required_state_change: The crew confirms that the approach is hostile and preserves a viable lead.
+incoming_flows:
+  - flow_id: FLOW-KALLIS-PURGE
+    flow_type: evidence_loss
+    source_id: KALLIS_FOUNDRY
+    target_id: THIRD_MEASURE_CREW
+    carrier: live_archive_telemetry
+    strength: 0.86
+    confidence: 0.91
+active_pressures:
+  tactical: 0.77
+  evidentiary: 0.91
+sediment:
+  - sediment_id: SED-LETHAN-WITHDRAWAL
+    source_event_id: DARK_STAR_BOARDING
+    description: The withdrawal disagreement remains unresolved.
+    affected_actor_ids:
+      - TESSA_KORR
+      - IVEN_RAAL
+      - MAELIN_SAYE
+    current_effect: Each officer interprets uncertainty through a different responsibility.
+evidence_state:
+  - claim_id: CLAIM-AMBUSH
+    claim: The direct approach has been prepared as an ambush.
+    status: hypothesis
+    support:
+      - The traffic picture is unusually clean.
+    confidence: 0.58
+actor_interpretations:
+  - actor_id: IVEN_RAAL
+    interpretation: The clean traffic picture may itself be evidence of deliberate preparation.
+    preferred_response: Expose the likely trap through an independent decoy.
+    blind_spot: He may withhold preparation until he considers it sufficiently verified.
+scarcity_state:
+  - scarce_asset: Javelin munitions
+    current_quantity: 3
+    consequence: Firing them during approach reduces later breaching and defense options.
+required_downstream_effects:
+  - Iven's warning is validated only partially.
+prohibited_shortcuts:
+  - The recovered administrative credential solves the entire encounter.
+unresolved_questions:
+  - Who initiated the purge?
+exit_conditions:
+  - The layered ambush is exposed.
+generated_at_utc: "2026-07-27T06:00:00Z"

@@ -139,6 +139,7 @@ and `DOCUMENT_PACKAGE_ONLY`; links here do not implement runtime activation.
 | [specs/CLI_TECHNICAL_SPEC.md](specs/CLI_TECHNICAL_SPEC.md) | CLI technical specification |
 | [specs/PYTHON_SDK_TECHNICAL_SPEC.md](specs/PYTHON_SDK_TECHNICAL_SPEC.md) | Python SDK technical specification |
 | [specs/AUMEMMANAGER_PROMOTION_STARTER_SPEC.md](specs/AUMEMMANAGER_PROMOTION_STARTER_SPEC.md) | AuMemManager promotion specification |
+| [specs/GUMAS__SPEC__NARRATIVE_RIVER_ADAPTER__v0.1__2026-07-26.md](specs/GUMAS__SPEC__NARRATIVE_RIVER_ADAPTER__v0.1__2026-07-26.md) | Narrative River Adapter specification — scene-state persistence, prose constraints, axiom validation, and RiverCycle-to-narrative integration |
 
 ## Operations
 

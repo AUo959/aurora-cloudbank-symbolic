@@ -344,7 +344,7 @@ COMMAND side=<SIDE> fleet=<FLEET> posture=<POSTURE> intents=<ROLE=VALUE,...>
 MOVEMENT vessels=<N> collisions=<N> boundary_crossings=<N>
 SENSING contacts=<N> selections=<N> attempts=<N> effects=<N>
 DAMAGE effects=<N> targets=<N>
-RESOLUTION side=<SIDE> combat_capable=<N> degraded=<N> disabled=<N> destroyed=<N> morale_q1000=<N> cohesion_q1000=<N>
+RESOLUTION side=<SIDE> surviving=<N> mobile=<N> combat_effective=<N> disabled=<N> destroyed=<N> morale_q1000=<N> cohesion_q1000=<N>
 TERMINAL terminated=<true|false> mode=<PHASE8_VALUE> fields=<CANONICAL_JSON>
 ```
 

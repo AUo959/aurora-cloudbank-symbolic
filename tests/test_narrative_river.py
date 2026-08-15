@@ -347,6 +347,26 @@ def test_manifest_record_cannot_escape_workspace(tmp_path: Path) -> None:
         store.load_frame_for_scene("ESCAPE")
 
 
+def test_manifest_symlink_cannot_escape_workspace(tmp_path: Path) -> None:
+    store = NarrativeRiverStore(tmp_path / "river")
+    store.root.mkdir(parents=True)
+    outside = tmp_path / "outside-manifest.json"
+    outside.write_text(
+        json.dumps(
+            {
+                "schema_version": "0.1.0",
+                "latest_closed_scene_id": None,
+                "scenes": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    store.manifest_path.symlink_to(outside)
+
+    with pytest.raises(ValueError, match="escapes"):
+        store.load_manifest()
+
+
 def test_cli_run_scene_is_a_real_trigger(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     inputs = tmp_path / "inputs"
     inputs.mkdir()

@@ -130,9 +130,10 @@ class NarrativeRiverStore:
         }
 
     def load_manifest(self) -> dict[str, Any]:
-        if not self.manifest_path.exists():
+        manifest_path = self._contained(self.manifest_path)
+        if not manifest_path.exists():
             return self._empty_manifest()
-        payload = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict) or payload.get("schema_version") != _MANIFEST_SCHEMA_VERSION:
             raise ValueError("unsupported or malformed Narrative River manifest")
         if not isinstance(payload.get("scenes"), dict):

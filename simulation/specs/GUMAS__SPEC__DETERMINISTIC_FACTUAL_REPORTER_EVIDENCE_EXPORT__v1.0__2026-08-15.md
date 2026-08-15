@@ -197,6 +197,8 @@ phase8.next_state_sha256
 
 Receipt hashes, resolution hash, observation hashes, observation-receipt hashes, and decision hashes must equal their ledger references. Phase-8 terminal outcome must be byte-for-byte equivalent in the resolution state, Phase-8 receipt, and ledger entry.
 
+Phase 7 consumes the accepted semantic normalization of the raw Phase-6 receipt. The reporter must first validate the raw Phase-6 receipt and its ledger hash, then reproduce the accepted normalization by sorting `contacts`, `selections`, `weapon_attempts`, and `effect_descriptors` by canonical JSON bytes. The Phase-7 parent receipt hash must equal that normalized hash. Raw and normalized identities remain distinct and neither may be substituted for the other.
+
 No caller may repair, normalize, or rehash a mutated input inside the reporter.
 
 ## 9. Projection profiles

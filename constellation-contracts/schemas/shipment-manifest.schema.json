@@ -1,0 +1,191 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aurora.constellation/schemas/shipment-manifest.json",
+  "title": "OPAL2 Shipment Manifest",
+  "description": "Declaration of a neutral extraction shipped from the Aurora constellation: what it contains, what it was cut from, and what it guarantees. Neutral products ship with canon_license.includes_canon=false — the method, not the lore. See issue #1510.",
+  "type": "object",
+  "required": [
+    "shipment",
+    "capabilities",
+    "provenance",
+    "ethics",
+    "canon_license"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "shipment": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "extracted_from"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "Neutral product name (kebab-case). Must not reference constellation-internal names."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "extracted_from": {
+          "type": "object",
+          "required": [
+            "source_repo",
+            "source_ref",
+            "extraction_date",
+            "extraction_tool"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "source_repo": {
+              "type": "string",
+              "description": "e.g. AUo959/aurora-cloudbank-symbolic"
+            },
+            "source_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$",
+              "description": "Full commit SHA the extraction was cut from."
+            },
+            "extraction_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "extraction_tool": {
+              "type": "string",
+              "description": "e.g. modules/opal2/tool_package.py"
+            }
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "description": "What ships: code, contracts, SDK surfaces.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "paths"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "code",
+              "contract",
+              "sdk",
+              "schema",
+              "documentation",
+              "tool"
+            ]
+          },
+          "paths": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "build_receipt_sha256"
+      ],
+      "additionalProperties": false,
+      "description": "Receipts, productized. Verification must not require constellation access.",
+      "properties": {
+        "build_receipt_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 over the shipped artifact bundle."
+        },
+        "source_attestation": {
+          "type": "string",
+          "description": "Reference to the constellation authority-chain attestation (URI or path)."
+        },
+        "continuity_capsule": {
+          "type": "string",
+          "description": "Optional Universal Thread Beacon profile reference (#1381), enabling customer-side agent continuity without constellation dependency."
+        }
+      }
+    },
+    "ethics": {
+      "type": "object",
+      "required": [
+        "execution_default_off"
+      ],
+      "additionalProperties": false,
+      "description": "The ethics layer, compiled in. Content per #1380 / ORIONCORE #46 when resolved.",
+      "properties": {
+        "execution_default_off": {
+          "type": "boolean",
+          "const": true,
+          "description": "Hard requirement: shipped capabilities must not self-execute."
+        },
+        "audit_log_included": {
+          "type": "boolean"
+        },
+        "consent_model": {
+          "type": "string",
+          "description": "Reference to the governing consent/trust policy."
+        }
+      }
+    },
+    "canon_license": {
+      "type": "object",
+      "required": [
+        "includes_canon"
+      ],
+      "additionalProperties": false,
+      "description": "The boundary, made explicit. Neutral products ship the method, not the lore.",
+      "properties": {
+        "includes_canon": {
+          "type": "boolean",
+          "description": "MUST be false for neutral products. true only for licensed-world variants."
+        },
+        "license_ref": {
+          "type": "string",
+          "description": "Licensing pointer; required when includes_canon is true."
+        }
+      },
+      "if": {
+        "properties": {
+          "includes_canon": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "license_ref"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "license_ref"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -167,7 +167,10 @@ jobs:
           print(f'Hub version: {hub_version}')
 
           errors = 0
-          for path in sorted(glob.glob('constellation-contracts/manifests/*.json')):
+          # Only spoke manifests participate in constellation-version locking.
+          # Other JSON documents in this directory (for example neutral shipment
+          # manifests) are still syntax/schema validated by their dedicated jobs.
+          for path in sorted(glob.glob('constellation-contracts/manifests/*.manifest.json')):
               with open(path) as f:
                   spoke = json.load(f)
               sv = spoke.get('constellation_version', 'MISSING')

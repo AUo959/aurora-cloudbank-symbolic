@@ -48,6 +48,17 @@ from l1_fleet import (
     observation_for_focus,
     validate_fleet_identity_projection,
 )
+from l1_staffing import (
+    PersonnelRecord,
+    StaffingDecision,
+    StaffingDemand,
+    apply_staffing_decision,
+    mark_persona_resolved,
+    plan_staffing_action,
+    record_personnel_observation,
+    retire_staffing_seat,
+    transfer_personnel_from_orion,
+)
 from l1_runtime_support import (
     GovernanceError,
     PreflightError,
@@ -352,6 +363,129 @@ class OrionL1Runtime:
                 "population": asdict(self.population),
             },
         )
+
+    def plan_staffing(self, demand: StaffingDemand) -> StaffingDecision:
+        """Plan from institutional evidence without mutating personnel state."""
+        state = self._require_state()
+        return plan_staffing_action(state.staffing, demand)
+
+    def apply_staffing(
+        self,
+        demand: StaffingDemand,
+        decision: StaffingDecision,
+        *,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Apply a deterministic HR decision under complete Triplex authority."""
+        state = self._require_state()
+        self._require_complete_staffing_receipt(receipt)
+        action = apply_staffing_decision(
+            state.staffing,
+            demand,
+            decision,
+            receipt_id=receipt.receipt_id,
+            tick=state.manifest.tick,
+        )
+        state.governance_receipts.append(receipt)
+        state.events.append(self._staffing_event(action))
+        self._project_staffing_counters(state)
+        self._persist_if_configured()
+        return action
+
+    def observe_personnel(
+        self,
+        personnel_id: str,
+        observations: Dict[str, str],
+        *,
+        provenance: str,
+    ) -> PersonnelRecord:
+        """Resolve only observed operational traits, never a generated biography."""
+        state = self._require_state()
+        record = record_personnel_observation(
+            state.staffing,
+            personnel_id,
+            observations,
+            provenance=provenance,
+        )
+        state.events.append(
+            {
+                "event_id": str(uuid.uuid4()),
+                "tick": state.manifest.tick,
+                "kind": "staffing_personnel_observation",
+                "personnel_id": personnel_id,
+                "observation_fields": sorted(observations),
+                "provenance": provenance,
+                "canon_status": "run_state",
+            }
+        )
+        self._project_staffing_counters(state)
+        self._persist_if_configured()
+        return record
+
+    def resolve_personnel_persona(
+        self,
+        personnel_id: str,
+        *,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Resolve an observed run persona without promoting repository canon."""
+        state = self._require_state()
+        self._require_complete_staffing_receipt(receipt)
+        action = mark_persona_resolved(
+            state.staffing,
+            personnel_id,
+            receipt_id=receipt.receipt_id,
+            tick=state.manifest.tick,
+        )
+        state.governance_receipts.append(receipt)
+        state.events.append(self._staffing_event(action))
+        self._project_staffing_counters(state)
+        self._persist_if_configured()
+        return action
+
+    def transfer_personnel_off_station(
+        self,
+        personnel_id: str,
+        *,
+        provenance: str,
+        rationale: str,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Transfer an assigned human from Orion without deleting identity."""
+        state = self._require_state()
+        self._require_complete_staffing_receipt(receipt)
+        action = transfer_personnel_from_orion(
+            state.staffing,
+            personnel_id,
+            provenance=provenance,
+            rationale=rationale,
+            receipt_id=receipt.receipt_id,
+            tick=state.manifest.tick,
+        )
+        self._record_staffing_action(state, action, receipt)
+        return action
+
+    def retire_staffing_seat(
+        self,
+        staffing_seat: str,
+        *,
+        provenance: str,
+        rationale: str,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Retire a vacant run-scoped role/seat under complete authority."""
+        state = self._require_state()
+        self._require_complete_staffing_receipt(receipt)
+        action = retire_staffing_seat(
+            state.staffing,
+            staffing_seat,
+            provenance=provenance,
+            rationale=rationale,
+            receipt_id=receipt.receipt_id,
+            tick=state.manifest.tick,
+        )
+        self._record_staffing_action(state, action, receipt)
+        return action
 
     def advance(self, elapsed_minutes: int = 15) -> Dict[str, Any]:
         """Advance autonomous station state; observation focus is not consulted."""
@@ -1008,7 +1142,93 @@ class OrionL1Runtime:
         self._validate_loaded_character_actions(state)
         self._validate_autonomous_event_replay(state)
         self._validate_loaded_fleet(state)
+        self._validate_loaded_staffing(state)
         self._validate_loaded_embodiments(state)
+
+    @staticmethod
+    def _validate_loaded_staffing(state: L1RunState) -> None:
+        try:
+            state.staffing.validate()
+        except ValueError as exc:
+            raise PreflightError("persisted staffing state is invalid") from exc
+        receipts = OrionL1Runtime._complete_receipt_ids(state)
+        if not OrionL1Runtime._staffing_receipts_are_complete(state, receipts):
+            raise PreflightError(
+                "persisted staffing action lacks complete Triplex evidence"
+            )
+        if not OrionL1Runtime._staffing_actions_match_events(state):
+            raise PreflightError(
+                "persisted staffing action lacks matching audit event"
+            )
+        OrionL1Runtime._validate_loaded_staffing_projection(state)
+
+    @staticmethod
+    def _validate_loaded_staffing_projection(state: L1RunState) -> None:
+        population = state.world_state.get("population")
+        if not isinstance(population, dict):
+            raise PreflightError("persisted population projection must be an object")
+        projection = population.get("run_staffing")
+        if not state.staffing.actions and projection is None:
+            if state.staffing.personnel or state.staffing.seats:
+                raise PreflightError(
+                    "persisted staffing ledger requires a population projection"
+                )
+            return
+        expected = OrionL1Runtime._staffing_counter_payload(state)
+        if projection != expected:
+            raise PreflightError(
+                "persisted staffing counters do not match personnel state"
+            )
+
+    @staticmethod
+    def _complete_receipt_ids(state: L1RunState) -> set[str]:
+        return {
+            receipt.receipt_id
+            for receipt in state.governance_receipts
+            if receipt.complete
+        }
+
+    @staticmethod
+    def _staffing_receipts_are_complete(
+        state: L1RunState,
+        receipts: set[str],
+    ) -> bool:
+        return all(
+            action.get("receipt_id") in receipts
+            for action in state.staffing.actions
+        )
+
+    @staticmethod
+    def _staffing_actions_match_events(state: L1RunState) -> bool:
+        actions = {
+            action["action_id"]: action for action in state.staffing.actions
+        }
+        events = [
+            event
+            for event in state.events
+            if event.get("kind") == "governed_staffing_action"
+        ]
+        if len(events) != len(actions):
+            return False
+        for event in events:
+            action = actions.get(event.get("staffing_action_id"))
+            if action is None:
+                return False
+            expected = (
+                action.get("receipt_id"),
+                action.get("personnel_id"),
+                action.get("staffing_seat"),
+                action.get("tick"),
+            )
+            actual = (
+                event.get("receipt_id"),
+                event.get("personnel_id"),
+                event.get("staffing_seat"),
+                event.get("tick"),
+            )
+            if actual != expected:
+                return False
+        return True
 
     @staticmethod
     def _validate_loaded_world_state(state: L1RunState) -> None:
@@ -1507,6 +1727,58 @@ class OrionL1Runtime:
         if self.fleet_receipt is None:
             raise PreflightError("fleet authority receipt is unavailable after preflight")
         return self.fleet_receipt
+
+    @staticmethod
+    def _require_complete_staffing_receipt(receipt: GovernanceReceipt) -> None:
+        if not receipt.complete:
+            raise GovernanceError(
+                "Triplex authorization incomplete; staffing action rejected"
+            )
+
+    @staticmethod
+    def _staffing_event(action: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "event_id": str(uuid.uuid4()),
+            "tick": action["tick"],
+            "kind": "governed_staffing_action",
+            "staffing_action_id": action["action_id"],
+            "personnel_id": action.get("personnel_id"),
+            "staffing_seat": action.get("staffing_seat"),
+            "receipt_id": action["receipt_id"],
+            "canon_status": action["canon_status"],
+        }
+
+    @staticmethod
+    def _staffing_counter_payload(state: L1RunState) -> Dict[str, int]:
+        return {
+            "operational_personnel_records": len(state.staffing.personnel),
+            "human_complement_delta": state.staffing.human_complement_delta,
+            "persona_resolved_delta": state.staffing.persona_resolved_delta,
+            "active_staffing_seats": sum(
+                seat.status == "active" for seat in state.staffing.seats.values()
+            ),
+            "retired_staffing_seats": sum(
+                seat.status == "retired" for seat in state.staffing.seats.values()
+            ),
+        }
+
+    def _record_staffing_action(
+        self,
+        state: L1RunState,
+        action: Dict[str, Any],
+        receipt: GovernanceReceipt,
+    ) -> None:
+        state.governance_receipts.append(receipt)
+        state.events.append(self._staffing_event(action))
+        self._project_staffing_counters(state)
+        self._persist_if_configured()
+
+    @staticmethod
+    def _project_staffing_counters(state: L1RunState) -> None:
+        population = state.world_state.setdefault("population", {})
+        if not isinstance(population, dict):
+            raise PreflightError("runtime population projection must be a JSON object")
+        population["run_staffing"] = OrionL1Runtime._staffing_counter_payload(state)
 
     def _require_fleet_receipt_sha256(self) -> str:
         if self.fleet_receipt_sha256 is None:

@@ -644,6 +644,7 @@ def export_run_state(state: Any) -> Dict[str, Any]:
         },
         "world_state": state.world_state,
         "fleet": asdict(state.fleet),
+        "staffing": asdict(state.staffing),
         # Embodiment state is persisted alongside fleet state. Without this the
         # projection was rebuilt from the registry on every load and never
         # round-tripped, so a persisted run carried no "embodiments" key at all

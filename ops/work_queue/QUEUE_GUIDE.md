@@ -54,7 +54,7 @@ Use the queue to decide what should be considered next. Use the control-plane se
 7. Determine whether the task requires a DTER under the durable-task SOP.
 8. For DTER-required work, create and commit the DTER before substantive implementation mutation, then link it from the issue/PR/queue context.
 9. Work on a scoped branch and open a PR with queue id, issue id, DTER reference where applicable, changed files, validation, and rollback notes.
-10. On pause or completion, update queue state, the DTER's current-status section, and durable handoff state as appropriate.
+10. On pause or completion, update queue state, the DTER's **Current status and next action** section, and durable handoff state as appropriate.
 
 Queue priority is not a mutation lock. Session claims are short-lived leases, not durable canon. Handoffs preserve continuity but do not replace a DTER. GitHub issues, PRs, commits, tests, reviews, and merge history remain implementation canon.
 
@@ -216,7 +216,7 @@ Use these fields to help future automation convert a queue item into a safe brok
 "last_updated": "YYYY-MM-DD"
 ```
 
-When work pauses or crosses platforms, also update the durable control-plane handoff surface with enough context for a cold start. For DTER-governed tasks, update the DTER current-status/next-action section first or in the same change and make the handoff point to it.
+When work pauses or crosses platforms, also update the durable control-plane handoff surface with enough context for a cold start. For DTER-governed tasks, update the DTER's **Current status and next action** section first or in the same change and make the handoff point to it.
 
 ---
 

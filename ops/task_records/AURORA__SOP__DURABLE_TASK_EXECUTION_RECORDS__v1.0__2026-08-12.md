@@ -95,7 +95,7 @@ Recommended task identifier inside the record:
 
 Every DTER MUST contain the following sections.
 
-### 1. Identity and links
+### Header: identity and links
 
 - task id;
 - status;
@@ -105,15 +105,15 @@ Every DTER MUST contain the following sections.
 - creation commit once known;
 - latest controlling revision.
 
-### 2. Objective
+### 1. Objective
 
 State the intended outcome in testable terms. Avoid implementation detail unless it is itself part of the requirement.
 
-### 3. Acceptance statement
+### 2. Acceptance statement
 
 A concise statement of what must be true before the task can be called complete.
 
-### 4. Authority and source inputs
+### 3. Authority and source inputs
 
 List the files, commits, canon sources, specifications, owner decisions, recovery artifacts, external evidence, or runtime observations that are authoritative for the task.
 
@@ -124,7 +124,7 @@ Distinguish:
 - assumptions;
 - derived decisions.
 
-### 5. Scope
+### 4. Scope
 
 Explicitly list:
 
@@ -132,23 +132,23 @@ Explicitly list:
 - out of scope;
 - protected or immutable surfaces.
 
-### 6. Current state and known gaps
+### 5. Current state and known gaps
 
 Record what exists before mutation, including blockers, contradictions, missing source, technical debt, and unresolved assumptions.
 
-### 7. Planned mutations
+### 6. Planned mutations
 
 Describe expected code/data/doc mutations at a useful path or subsystem level.
 
 This is an intent map, not a promise that every predicted path must change. Unexpected mutations must be recorded later as plan deltas.
 
-### 8. Execution sequence and gates
+### 7. Execution sequence and gates
 
 Define the ordered phases of work and the condition required to leave each phase.
 
 No later phase should begin when an earlier blocking gate is unsatisfied unless the record is explicitly revised.
 
-### 9. Invariants and non-negotiables
+### 8. Invariants and non-negotiables
 
 List properties that must remain true throughout execution, such as:
 
@@ -159,13 +159,13 @@ List properties that must remain true throughout execution, such as:
 - adapters may translate but may not become authority;
 - safety or ethics constraints remain binding.
 
-### 10. Validation and acceptance tests
+### 9. Validation and acceptance tests
 
 Define the tests, replay checks, CI, audits, receipts, manual inspections, or comparison criteria required to prove completion.
 
 A task is not complete because the implementation "looks right" if objective validation is available.
 
-### 11. Stop conditions and owner decisions
+### 10. Stop conditions and owner decisions
 
 Identify conditions that require the worker to stop rather than improvise, including:
 
@@ -176,13 +176,13 @@ Identify conditions that require the worker to stop rather than improvise, inclu
 - materially different architecture than planned;
 - owner-level choices.
 
-### 12. Rollback and recovery
+### 11. Rollback and recovery
 
 Describe how to return to the pre-task state or otherwise recover safely if the implementation fails.
 
 For destructive or preservation-sensitive tasks, record backups, hashes, witness artifacts, or restore points before mutation.
 
-### 13. Decision and plan-delta log
+### 12. Decision and plan-delta log
 
 Maintain a chronological record of material changes to the plan.
 
@@ -196,7 +196,7 @@ Each entry should include:
 
 Do not silently rewrite prior decisions after implementation has depended on them.
 
-### 14. Evidence and receipts
+### 13. Evidence and receipts
 
 As work proceeds, record:
 
@@ -208,7 +208,7 @@ As work proceeds, record:
 - review findings;
 - superseded artifacts.
 
-### 15. Current status and next action
+### 14. Current status and next action
 
 Maintain a compact cold-start state:
 
@@ -219,6 +219,18 @@ Maintain a compact cold-start state:
 - whether owner input is required.
 
 This is the section handoffs should point to first.
+
+### 15. Handoff anchor
+
+When work pauses or crosses workers or platforms, record the durable cold-start anchor:
+
+- task record path and version;
+- controlling commit or PR head;
+- current phase;
+- exact next action;
+- unresolved gate or owner decision, if any.
+
+The handoff MUST point to the current DTER rather than duplicating its full history.
 
 ### 16. Completion record
 

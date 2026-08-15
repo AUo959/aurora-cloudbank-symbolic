@@ -1,0 +1,138 @@
+{
+  "receipt_id": "GUMAS-PHASE9-LIVE-OBSERVATION-ORCHESTRATOR-LEDGER-ACCEPTANCE-2026-08-15",
+  "task_id": "TASK-20260812-gumas-deterministic-battle-runtime",
+  "phase": 9,
+  "phase_name": "live command observation, authoritative macrostep orchestration, and immutable ledger",
+  "status": "PASS",
+  "accepted_branch_head": "689eb440114c3be9463a2e1228117d0e0af0aacb",
+  "repository_ci_merge_sha": "5d13e942845c416d090749c994926d1baa9d3cce",
+  "historical_canon_status": "non_canon_simulation_instance",
+  "run0_executed": false,
+  "run0_remains_blocked": true,
+  "contract": {
+    "contract_id": "GUMAS_LIVE_OBSERVATION_ORCHESTRATOR_LEDGER_v1_0",
+    "version": "1.0.0",
+    "normative_spec_path": "simulation/specs/GUMAS__SPEC__DETERMINISTIC_LIVE_OBSERVATION_ORCHESTRATOR_LEDGER__v1.0__2026-08-15.md",
+    "normative_spec_sha256": "652a4ff2b7a494f103e47ad6cacd9815374daed10e26b53ab4dec3d9946bcb0b",
+    "runtime_path": "simulation/runtime/gumas_battle_orchestrator/",
+    "canonical_json_profile": "aurora-canonical-json-v1",
+    "arithmetic": "integer_fixed_point",
+    "ambient_rng_used": false,
+    "floating_authority_used": false,
+    "prose_inputs_used": false,
+    "synthetic_control_observation_used": false,
+    "reporter_invoked": false
+  },
+  "source_identity": {
+    "phase9_bundle_sha256": "836eb5759b06f86fbe624158d799d2c5efc4cdb7c110cde8a76e7ea880292431",
+    "module_sha256": {
+      "__init__.py": "2207b79d826f5b13af3a899e868c158e4c697489548351dc32e89b9864691355",
+      "constants.py": "8ff4fb53b060af592c76317f06141f6508a7bc8543216ad6005ac204242b1bb6",
+      "identity.py": "c1ccec77e984c4ffbe341d2dacd9e364c274c22e057e13527cedeadeba8b1674",
+      "live_observation.py": "edd8a151da5f096427cb7c20ca005132d035dad44f6f30370940e7e319cf792b",
+      "orchestrator.py": "1b37bb36d597a7361da45189e79dae179a1f5188397c615107dd6c2a75ca1e4d"
+    },
+    "smoke_module_sha256": "8720f3a42addd671f495f93bc1795e5ba5e7e6bb05d6dbdd90131d0851525162",
+    "workflow_sha256": "c6ff33f2dd75a301be5161352d05f1e042ceda4fc9d87f361e51175b7ed3326f",
+    "focused_test_sha256": "6ee56ee01c57ec907acacbcd116ed8bac5315dbc938ffdc2cac5d277daabd6be",
+    "contract_test_sha256": "5dd9ee9140a081fb9d4635b3b9168d6a45bdb24c99880f92c9bccf5c2f840032"
+  },
+  "accepted_upstream_source_identity": {
+    "phase4_command_policy_bundle_sha256": "8c9ba9d413945404e7648c8f427b660576b0e85887c7639a0944f56b38585b3f",
+    "phase5_movement_geometry_bundle_sha256": "565ef76f94cef320a4e4e8a0cbf75a301270eeef4326975b4cf41681d46bab57",
+    "phase6_sensing_weapons_bundle_sha256": "05e65b2ee5744809f22eeb1dd6cf5cbf637690d1fa16c177c3bbeedca74427e7",
+    "phase7_damage_disposition_composite_sha256": "bbe6d1663ddf32b651db957434f6b1c6e86d56456c9bd93cffd8b8ecf972ed5a",
+    "phase8_morale_resolution_composite_sha256": "a848e798414d98b0840a5d2dc46b88f2d0a9cc4d76028d25a47beb207990277a"
+  },
+  "canonrec": {
+    "repository": "AUo959/CanonRec",
+    "commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+    "source_set_path": "simulation/canon_snapshots/canonrec/CANONREC__SOURCE_SET__GUMAS_RUN0_PHASE2__v1.0__2026-08-12.json",
+    "network_access_during_battle_execution_permitted": false
+  },
+  "accepted_one_step_witness": {
+    "macrosteps_executed": 1,
+    "source_t0_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec",
+    "t0_roster_sha256": "11d22e6de49e18768a94b4a0f43170b70ae6b0fd901dafa6d610f7f1e180ff85",
+    "run_identity_sha256": "5173f288268c7d430621f493cd22dd843a740d0026952800c4e507a19ef33528",
+    "observation_sha256_by_side": {
+      "loyalist": "573089580874357bf3fb52daea524af9fbc728de07436cd67ad7bea6adcdb45a",
+      "rebel": "573089580874357bf3fb52daea524af9fbc728de07436cd67ad7bea6adcdb45a"
+    },
+    "decision_sha256_by_fleet": {
+      "TF-LOYALIST-P17": "1b0234469ddca0ce98b1cdbe8f22075b4c3777c376401deea7b4260db80ba1d9",
+      "TF-REBEL-P17": "b2dec01a9bdd15a255bfbd3fb85ee33878784cccb812043e9496480475cebb18"
+    },
+    "phase5_state_sha256": "4bc4281e0fe50bc08fca049d1ce7c249377f705d1348f05248372368a8e3270d",
+    "phase6_state_sha256": "a3c633f717328bcce03e39c2ce6b09e2b9540f8e1eeb2b0287108de75c51824b",
+    "phase7_state_sha256": "b8c0182f68395ad7a9f896d7f8eee3cad0b9d2dd85aba0b5d2be27284c781cf7",
+    "phase8_state_sha256": "9935723555db5f82cc8392027caec5c1bd60853e30f15b42240857bcc8ced276",
+    "phase8_resolution_state_sha256": "dc05058141b700b32b0d8ea30eb7410a91b655f3c065ac755c63b3952b8d43cf",
+    "ledger_entry_sha256": "e5fbf15363efe8786171229a8ee7bca99972ac24db44c013158f0835c0d9122a",
+    "termination_mode": "ongoing",
+    "can_continue": true,
+    "replay_exact": true,
+    "reporter_invoked": false,
+    "run0_executed": false,
+    "interpretation": "This accepted witness proves one integrated macrostep and immutable ledger commit from the real pinned T0 source. It is not an executed battle, does not claim a result, and does not authorize continuation into Run 0."
+  },
+  "verified_invariants": {
+    "live_observations_replace_synthetic_control_fixture": true,
+    "own_state_metrics_are_causal": true,
+    "unseen_enemy_material_does_not_leak": true,
+    "contact_and_attributable_damage_memory_are_side_local": true,
+    "closing_pressure_uses_observed_distance_history": true,
+    "all_command_fields_are_integer_q1000": true,
+    "same_checkpoint_replay_exact": true,
+    "side_and_fleet_mapping_order_inert": true,
+    "t0_roster_frozen": true,
+    "reinforcement_and_third_party_rejected": true,
+    "state_receipt_ledger_and_source_mutations_fail_closed": true,
+    "terminal_prior_checkpoint_rejected_before_command": true,
+    "current_terminal_step_committed_once": true,
+    "phase_order_4_through_8_exact": true,
+    "reporter_absent_from_transition_path": true,
+    "class_polity_side_name_and_prose_branches_absent": true,
+    "ambient_rng_absent": true,
+    "floating_point_authority_absent": true
+  },
+  "validation": {
+    "focused_workflow": {
+      "name": "GUMAS Battle Orchestrator",
+      "run_id": 31869097342,
+      "job_id": 94974796484,
+      "head_sha": "689eb440114c3be9463a2e1228117d0e0af0aacb",
+      "conclusion": "success",
+      "focused_tests": "10 passed",
+      "real_pinned_canonrec_one_step_smoke": "success",
+      "artifact_id": 9242896720,
+      "artifact_name": "gumas-battle-orchestrator-evidence",
+      "artifact_sha256": "93f225dea7db9ec48038732bcf00cb52e9ee88f63b4face196fcc3395bae97e8"
+    },
+    "local_cross_phase": {
+      "python": "3.12.13",
+      "tests": "63 passed",
+      "phases": "Phase 4 through Phase 9",
+      "real_pinned_canonrec_one_step_smoke": "success"
+    },
+    "local_repository_suite_context": {
+      "result": "3632 passed with 4 unrelated managed-sandbox failures",
+      "failure_scope": "macOS psutil sysctl process-list denial and shared-memory/subprocess restriction in pre-existing resource/thread-transfer tests",
+      "gumas_failures": 0,
+      "acceptance_authority": "GitHub Aurora CI (Minimal) unrestricted runner"
+    },
+    "repository_workflow": {
+      "name": "Aurora CI (Minimal)",
+      "run_id": 31869097319,
+      "job_id": 94974822969,
+      "head_sha": "689eb440114c3be9463a2e1228117d0e0af0aacb",
+      "tested_merge_sha": "5d13e942845c416d090749c994926d1baa9d3cce",
+      "conclusion": "success",
+      "full_test_suite": "3704 passed, 113 skipped, 9 xfailed, 2 xpassed, 101 subtests passed",
+      "pytest_log_artifact_id": 9242997583,
+      "pytest_log_artifact_sha256": "d8c1c12339939d18422c5d5977b2ea70e25e0b54a8e38a812c622bfed0be691a"
+    },
+    "other_required_checks": "GUMAS restoration, CanonRec resolution, Physical T0, Command Policy, Movement Geometry, Sensing/EW/Weapons, Damage/Disposition, Morale/Resolution, CodeQL, Code Quality, Constellation CI, PR Evaluation, Safety Commit Guard, Branch Protection, Catastrophe Prevention, PR Selective Integration, and CI Status Project Automation succeeded on the accepted head; Codacy was skipped rather than failed."
+  },
+  "decision": "Phase 9 is accepted. Phase 10 may begin only through a committed contract for deterministic factual reporting from validated immutable ledger/checkpoint artifacts. Control A/B/C, any multi-step battle execution, and Run 0 remain blocked."
+}

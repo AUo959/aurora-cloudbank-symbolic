@@ -98,13 +98,20 @@ def _merged_questions(
     payload: dict[str, Any],
     delta: SceneRiverDelta,
 ) -> list[str]:
-    closed = set(delta.closed_questions)
-    questions = [
-        question
-        for question in payload.setdefault("unresolved_questions", [])
-        if question not in closed
-    ]
-    _append_unique(questions, [item for item in delta.new_questions if item not in closed])
+    closed = {_normalized_string(item) for item in delta.closed_questions}
+    questions: list[str] = []
+    for question in payload.setdefault("unresolved_questions", []):
+        normalized = _normalized_string(question)
+        if normalized not in closed and normalized not in questions:
+            questions.append(normalized)
+    _append_unique(
+        questions,
+        [
+            _normalized_string(item)
+            for item in delta.new_questions
+            if _normalized_string(item) not in closed
+        ],
+    )
     return questions
 
 
@@ -112,7 +119,7 @@ def _merged_sediment(
     payload: dict[str, Any],
     delta: SceneRiverDelta,
 ) -> list[Any]:
-    resolved = set(delta.resolved_sediment_ids)
+    resolved = {_normalized_string(item) for item in delta.resolved_sediment_ids}
     sediment: list[Any] = []
     existing_ids: set[str] = set()
     for item in payload.setdefault("sediment", []):
@@ -136,7 +143,12 @@ def _append_sediment(
     sediment_id = (
         item.sediment_id if hasattr(item, "sediment_id") else item.get("sediment_id")
     )
-    if not sediment_id or sediment_id in resolved or sediment_id in existing_ids:
+    normalized_id = _normalized_string(sediment_id)
+    if not normalized_id or normalized_id in resolved or normalized_id in existing_ids:
         return
     sediment.append(item)
-    existing_ids.add(sediment_id)
+    existing_ids.add(normalized_id)
+
+
+def _normalized_string(value: Any) -> Any:
+    return value.strip() if isinstance(value, str) else value

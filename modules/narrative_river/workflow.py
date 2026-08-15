@@ -44,10 +44,7 @@ class NarrativeRiverWorkflow:
             return prior_delta
         previous_scene_id = scene_request.get("narrative_status", {}).get("previous_scene_id")
         if previous_scene_id:
-            try:
-                return self.store.load_delta_for_scene(previous_scene_id)
-            except FileNotFoundError:
-                return None
+            return self.store.load_delta_for_scene(previous_scene_id)
         return self.store.load_latest_delta()
 
     def build_and_store_frame(

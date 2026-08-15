@@ -183,6 +183,24 @@ def test_build_frame_does_not_mutate_inputs_and_carries_delta() -> None:
     assert any(item.sediment_id == "SED-IVEN-CREDENTIAL" for item in frame.sediment)
 
 
+def test_prior_delta_filters_normalized_questions_and_sediment_ids() -> None:
+    adapter = NarrativeRiverAdapter()
+    request = frame_payload()
+    request["unresolved_questions"] = ["Who initiated the purge? "]
+    request["sediment"][0]["sediment_id"] = "SED-LETHAN-WITHDRAWAL "
+
+    frame = adapter.build_frame(
+        scene_request=request,
+        canon_snapshot=canon_snapshot(),
+        prior_delta=delta_payload(),
+    )
+
+    assert "Who initiated the purge?" not in frame.unresolved_questions
+    assert not any(
+        item.sediment_id == "SED-LETHAN-WITHDRAWAL" for item in frame.sediment
+    )
+
+
 def test_persistent_frame_requires_storage_receipt() -> None:
     adapter = NarrativeRiverAdapter()
     snapshot = canon_snapshot()
@@ -277,6 +295,19 @@ def test_next_scene_automatically_imports_latest_approved_delta(tmp_path: Path) 
     assert "Why was the credential left active?" in second_frame.unresolved_questions
     assert not any(item.sediment_id == "SED-LETHAN-WITHDRAWAL" for item in second_frame.sediment)
     assert any(item.sediment_id == "SED-IVEN-CREDENTIAL" for item in second_frame.sediment)
+
+
+def test_explicit_previous_scene_requires_its_approved_delta(tmp_path: Path) -> None:
+    store = NarrativeRiverStore(tmp_path / "river")
+    workflow = NarrativeRiverWorkflow(store)
+    request = frame_payload("DARKSTAR.CH06.NEXT")
+    request["narrative_status"]["previous_scene_id"] = "DARKSTAR.CH05.MISSING"
+
+    with pytest.raises(FileNotFoundError, match="no delta recorded"):
+        workflow.build_and_store_frame(
+            scene_request=request,
+            canon_snapshot=canon_snapshot(),
+        )
 
 
 def test_manifest_integrity_check_rejects_tampered_delta(tmp_path: Path) -> None:

@@ -9,7 +9,7 @@ anchor_seed: EOS_SEED_ORION
 ethics_protocol: Picard_Delta_3
 canon_authority: Git
 authoring_authority: Human-led, AI-assisted
-persistent_behavior_status: not_implemented
+persistent_behavior_status: implemented_explicit_operator_triggered
 related_artifacts:
   - The Eleven Governing Narrative Axioms
   - Aurora RiverCycle + RiverThread808 + GUMAS Social Pressure Regulator v0.5.0-alpha
@@ -56,14 +56,9 @@ Git = final canon authority
 
 ### Current implementation truth
 
-This specification defines intended behavior. It does not establish that the adapter is currently implemented, automatically invoked, or persistently connected to prose generation.
+The repository now includes an explicit, operator-triggered implementation under `modules/narrative_river/`. Its CLI validates versioned frames and deltas, renders prompt contracts, emits advisory validation reports, and durably stores a manifest-backed scene chain with integrity checks. Focused tests cover serialization, containment, integrity, continuity import, validation, and the committed Dark Star example.
 
-Until code, tests, and storage are added:
-
-- RiverCycle may influence prose through deliberate reasoning;
-- the Eleven Axioms may guide revision through project context;
-- scene continuity still depends on human/assistant discipline;
-- no software guarantee exists that pressure, sediment, or consequence will persist between scenes.
+This implementation is not automatically invoked by prose generation, does not mutate simulation state, and does not promote canon. An operator must deliberately run the workflow, review its artifacts, and use the existing CanonRec and Git reconciliation boundaries for any authority decision.
 
 ## 1. Goals
 

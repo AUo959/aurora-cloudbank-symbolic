@@ -471,3 +471,42 @@ def test_pre_staffing_contract_state_loads_without_new_staffing_projection(
     )
     assert loaded.staffing.personnel == {}
     assert loaded.staffing.seats == {}
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("ledger_key", ["personnel", "seats"])
+def test_pre_staffing_contract_rejects_injected_ledger_without_projection(
+    tmp_path: Path,
+    ledger_key: str,
+):
+    runtime = _runtime(run_root=tmp_path)
+    assert runtime.state is not None
+    state_path = tmp_path / runtime.state.manifest.run_id / "state.json"
+    payload = json.loads(state_path.read_text(encoding="utf-8"))
+    payload["world_state"]["population"].pop("run_staffing", None)
+    if ledger_key == "personnel":
+        personnel_id = "PERSONNEL-INJECTED"
+        payload["staffing"]["personnel"][personnel_id] = vars(
+            _operational_record(
+                personnel_id,
+                department="Engineering",
+                role="Injected Reliability Engineer",
+            )
+        )
+    else:
+        staffing_seat = "ENG-INJECTED-01"
+        payload["staffing"]["seats"][staffing_seat] = {
+            "staffing_seat": staffing_seat,
+            "department": "Engineering",
+            "role": "Injected Reliability Engineer",
+            "status": "active",
+            "creation_provenance": "injected:test",
+            "retirement_provenance": None,
+        }
+    state_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(
+        PreflightError,
+        match="persisted staffing ledger requires a population projection",
+    ):
+        OrionL1Runtime().load_run(runtime.state.manifest.run_id, run_root=tmp_path)

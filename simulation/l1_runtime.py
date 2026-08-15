@@ -1165,6 +1165,10 @@ class OrionL1Runtime:
             raise PreflightError("persisted population projection must be an object")
         projection = population.get("run_staffing")
         if not state.staffing.actions and projection is None:
+            if state.staffing.personnel or state.staffing.seats:
+                raise PreflightError(
+                    "persisted staffing ledger requires a population projection"
+                )
             return
         expected = OrionL1Runtime._staffing_counter_payload(state)
         if projection != expected:

@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from simulation.runtime.gumas_physical_t0.constructor import (
     _calibrate_physical,
     _inside_triaxial_ellipsoid,
@@ -10,6 +12,7 @@ from simulation.runtime.gumas_physical_t0.constructor import (
     _round_half_even_fraction,
     _slot_offset_m,
 )
+from simulation.runtime.gumas_physical_t0.t0_smoke import _resolve_snapshot_output
 
 ROOT = Path(__file__).resolve().parents[1]
 CALIBRATION = (
@@ -92,3 +95,31 @@ def test_q12_attitude_normalization_is_repeatable() -> None:
     second = _normalize_q12([13_000_000, 3_200_000, -1_000_000])
     assert first == second
     assert any(first)
+
+
+def test_snapshot_output_resolves_beneath_allowed_root(tmp_path: Path) -> None:
+    allowed_root = tmp_path / "repo"
+    allowed_root.mkdir()
+
+    assert _resolve_snapshot_output(
+        Path("evidence/t0.json"),
+        root=allowed_root,
+    ) == allowed_root / "evidence/t0.json"
+    assert _resolve_snapshot_output(
+        allowed_root / "direct.json",
+        root=allowed_root,
+    ) == allowed_root / "direct.json"
+
+
+def test_snapshot_output_rejects_parent_and_symlink_escapes(tmp_path: Path) -> None:
+    allowed_root = tmp_path / "repo"
+    allowed_root.mkdir()
+
+    with pytest.raises(ValueError, match="outside allowed root"):
+        _resolve_snapshot_output(Path("../outside.json"), root=allowed_root)
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (allowed_root / "escape").symlink_to(outside, target_is_directory=True)
+    with pytest.raises(ValueError, match="outside allowed root"):
+        _resolve_snapshot_output(Path("escape/t0.json"), root=allowed_root)

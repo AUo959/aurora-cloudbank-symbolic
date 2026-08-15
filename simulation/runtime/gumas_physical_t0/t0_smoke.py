@@ -70,12 +70,38 @@ def _material_payload(snapshot):
     ]
 
 
+def _resolve_snapshot_output(path: Path, *, root: Path = ROOT) -> Path:
+    """Resolve a snapshot output beneath the repository root."""
+
+    allowed_root = root.expanduser().resolve(strict=True)
+    candidate = path.expanduser()
+    resolved = (
+        candidate.resolve()
+        if candidate.is_absolute()
+        else (allowed_root / candidate).resolve()
+    )
+    try:
+        resolved.relative_to(allowed_root)
+    except ValueError as exc:
+        raise ValueError(
+            f"snapshot output {path} is outside allowed root {allowed_root}"
+        ) from exc
+    return resolved
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--canonrec-root", required=True, type=Path)
     parser.add_argument("--snapshot-out", type=Path)
     parser.add_argument("--expected-snapshot", type=Path)
     args = parser.parse_args()
+
+    snapshot_out = None
+    if args.snapshot_out is not None:
+        try:
+            snapshot_out = _resolve_snapshot_output(args.snapshot_out)
+        except ValueError as exc:
+            parser.error(str(exc))
 
     baseline = _load(BASELINE)
     calibration = _load(CALIBRATION)
@@ -110,9 +136,9 @@ def main() -> None:
     snapshot_bytes = canonical_json_bytes(first)
     if args.expected_snapshot is not None:
         assert args.expected_snapshot.read_bytes() == snapshot_bytes
-    if args.snapshot_out is not None:
-        args.snapshot_out.parent.mkdir(parents=True, exist_ok=True)
-        args.snapshot_out.write_bytes(snapshot_bytes)
+    if snapshot_out is not None:
+        snapshot_out.parent.mkdir(parents=True, exist_ok=True)
+        snapshot_out.write_bytes(snapshot_bytes)
 
     class_physical = {}
     for vessel in first["vessels"]:

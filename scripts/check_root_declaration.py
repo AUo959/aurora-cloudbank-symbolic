@@ -20,6 +20,7 @@ Reads NUL-separated tracked paths on stdin (portable, no GitPython):
 Exits 0 when the declared set matches the tracked set, 1 with a diff-style
 report otherwise. Modeled on scripts/check_casefold_collisions.py (#1488).
 """
+
 from __future__ import annotations
 
 import re
@@ -28,24 +29,23 @@ from pathlib import Path
 
 REGISTRY_PATH = Path("config/root_registry.yaml")
 DEPENDENCY_FILE_RE = re.compile(r"requirements[^/]*\.(?:txt|lock)")
+REGISTRY_SECTIONS = ("root_objects", "dependency_files")
 
 
-def load_registry(path: Path) -> dict[str, set[str]]:
-    """Load the registry. Prefers PyYAML; falls back to a strict mini-parser
-    for the flat 'section: / - "entry"' shape so CI needs no extra deps."""
-    text = path.read_text(encoding="utf-8")
+def _load_with_pyyaml(text: str) -> dict[str, set[str]] | None:
+    """Return parsed registry data, or ``None`` when PyYAML is unavailable."""
     try:
         import yaml  # type: ignore
-
-        data = yaml.safe_load(text)
-        return {
-            section: set(data.get(section) or [])
-            for section in ("root_objects", "dependency_files")
-        }
     except ImportError:
-        pass
+        return None
 
-    sections: dict[str, set[str]] = {"root_objects": set(), "dependency_files": set()}
+    data = yaml.safe_load(text)
+    return {section: set(data.get(section) or []) for section in REGISTRY_SECTIONS}
+
+
+def _load_with_mini_parser(text: str) -> dict[str, set[str]]:
+    """Parse the registry's flat ``section:`` and ``- entry`` shape."""
+    sections: dict[str, set[str]] = {section: set() for section in REGISTRY_SECTIONS}
     current: str | None = None
     for line in text.splitlines():
         if not line.strip() or line.lstrip().startswith("#"):
@@ -58,6 +58,12 @@ def load_registry(path: Path) -> dict[str, set[str]]:
         if entry_match and current in sections:
             sections[current].add(entry_match.group(1))
     return sections
+
+
+def load_registry(path: Path) -> dict[str, set[str]]:
+    """Load the registry with PyYAML, falling back to the dependency-free parser."""
+    text = path.read_text(encoding="utf-8")
+    return _load_with_pyyaml(text) or _load_with_mini_parser(text)
 
 
 def root_objects_of(tracked_paths: list[str]) -> set[str]:
@@ -85,7 +91,8 @@ def check(tracked_paths: list[str], registry: dict[str, set[str]]) -> list[str]:
     if stale:
         violations.append(
             "STALE declarations (registry lists objects no longer tracked; "
-            "remove the declaration or restore the object):\n  - " + "\n  - ".join(stale)
+            "remove the declaration or restore the object):\n  - "
+            + "\n  - ".join(stale)
         )
 
     actual_deps = dependency_files_of(actual_roots)

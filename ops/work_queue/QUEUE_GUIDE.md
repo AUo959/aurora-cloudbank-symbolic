@@ -63,7 +63,7 @@ Queue priority is not a mutation lock. Session claims are short-lived leases, no
 ## Who uses this
 
 | Consumer | How to use this queue |
-|---|---|
+| --- | --- |
 | **Aurora** | Holds contextual authority. May rerank items, rewrite `context_pack` entries, add `aurora_notes`, and declare `decision_required`. Always check queue before starting a session to load current state. For substantial work, ensure the DTER requirement is satisfied before implementation begins. |
 | **LLM / agents** | Read `queue.json`. Pick the highest-ranked item where `state == "ready"` and your role is in `consumer_fit`. Consume all files in `context_pack` before starting. Never start `blocked` or `decision_required` items. Before mutation, route through the control-plane claim/broker loop and create/read the task's DTER when required. |
 | **Human contributors** | Read `NEXT_UP.md` for a quick-start view. Full detail in `queue.json`. When starting a task, update `state` to `active` and set `active_worker` to your GitHub username. For substantial work, commit the DTER before implementation. Use the control-plane handoff layer when work crosses platforms or pauses mid-flight. |
@@ -73,7 +73,7 @@ Queue priority is not a mutation lock. Session claims are short-lived leases, no
 ## Task states
 
 | State | Meaning |
-|---|---|
+| --- | --- |
 | `ready` | No blockers. Safe to consider after live GitHub refresh and claim preflight. |
 | `blocked` | Depends on another item. Do not start. |
 | `active` | Someone is working on it now. Check branch, PR, claim, DTER if required, and latest head SHA. |
@@ -90,7 +90,7 @@ _Current compatibility note: the live renderer still uses the legacy `status` va
 The `priority_score` is computed from `triage_rules.json` — not assigned by hand. Factors:
 
 | Rule | Delta | Condition |
-|---|---|---|
+| --- | --- | --- |
 | TR-01 | +40 | `labels` includes `blocking` |
 | TR-02 | +30 | `labels` includes `security` or `pentest` |
 | TR-03 | +25 | `area == architecture` or `labels` includes `architecture` |
@@ -223,7 +223,7 @@ When work pauses or crosses platforms, also update the durable control-plane han
 ## Escalation triggers
 
 | ID | Condition | Action |
-|---|---|---|
+| --- | --- | --- |
 | ET-01 | `state == blocked` for > 7 days (via `last_updated`) | Escalate to Aurora on session open |
 | ET-02 | `decision_required == true` and no activity for > 3 days (via `last_updated`) | Hail operator via PAT |
 | ET-03 | New GitHub issue with labels `security` or `blocking` | Auto-add to queue with score ≥ 30 and `state: decision_required` |
@@ -236,7 +236,7 @@ When work pauses or crosses platforms, also update the durable control-plane han
 ## File map
 
 | File | Purpose |
-|---|---|
+| --- | --- |
 | `queue.json` | Live task registry — source of truth |
 | `queue_schema.json` | JSON schema for validating `queue.json` entries |
 | `triage_rules.json` | Scoring weights and escalation triggers |

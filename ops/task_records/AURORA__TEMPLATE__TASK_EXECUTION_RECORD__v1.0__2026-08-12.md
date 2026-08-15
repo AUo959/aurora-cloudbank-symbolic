@@ -17,66 +17,66 @@
 
 ## 1. Objective
 
-<What outcome are we trying to achieve?>
+`<What outcome are we trying to achieve?>`
 
 ## 2. Acceptance statement
 
 This task is complete when:
 
-- <testable completion condition>
-- <testable completion condition>
+- `<testable completion condition>`
+- `<testable completion condition>`
 
 ## 3. Authority and source inputs
 
 ### Independently verified
 
-- `<path / commit / source / artifact>` — <why authoritative>
+- `<path / commit / source / artifact>` — `<why authoritative>`
 
 ### Externally supplied evidence
 
-- `<source>` — <status and verification boundary>
+- `<source>` — `<status and verification boundary>`
 
 ### Owner decisions
 
-- `<decision>` — <date/context>
+- `<decision>` — `<date/context>`
 
 ### Assumptions
 
-- `<assumption>` — <how it will be verified or contained>
+- `<assumption>` — `<how it will be verified or contained>`
 
 ## 4. Scope
 
 ### In scope
 
-- <item>
+- `<item>`
 
 ### Out of scope
 
-- <item>
+- `<item>`
 
 ### Protected / immutable surfaces
 
-- <item>
+- `<item>`
 
 ## 5. Current state and known gaps
 
 ### Current state
 
-- <fact>
+- `<fact>`
 
 ### Known gaps / blockers
 
-- <gap>
+- `<gap>`
 
 ### Contradictions / drift to resolve
 
-- <item>
+- `<item>`
 
 ## 6. Planned mutations
 
 | Surface / path | Intended change | Authority / rationale | Risk |
-|---|---|---|---|
-| `<path>` | <change> | <why> | `<low/medium/high>` |
+| --- | --- | --- | --- |
+| `<path>` | `<change>` | `<why>` | `<low/medium/high>` |
 
 Unexpected mutation surfaces discovered later must be recorded in the plan-delta log before or with the corresponding implementation commit.
 
@@ -85,44 +85,44 @@ Unexpected mutation surfaces discovered later must be recorded in the plan-delta
 ### Phase 0 — Preflight
 
 Actions:
-- <action>
+- `<action>`
 
 Gate to exit:
-- <condition>
+- `<condition>`
 
-### Phase 1 — <name>
+### Phase 1 — `<name>`
 
 Actions:
-- <action>
+- `<action>`
 
 Gate to exit:
-- <condition>
+- `<condition>`
 
-### Phase 2 — <name>
+### Phase 2 — `<name>`
 
 Actions:
-- <action>
+- `<action>`
 
 Gate to exit:
-- <condition>
+- `<condition>`
 
 ## 8. Invariants and non-negotiables
 
-- <property that must remain true>
-- <property that must remain true>
+- `<property that must remain true>`
+- `<property that must remain true>`
 
 ## 9. Validation and acceptance tests
 
 | ID | Validation | Expected result | Evidence / receipt |
-|---|---|---|---|
-| `V-01` | <test/check> | <expected> | `<pending>` |
+| --- | --- | --- | --- |
+| `V-01` | `<test/check>` | `<expected>` | `<pending>` |
 
 ## 10. Stop conditions and owner decisions
 
 Stop and request owner/authority input if:
 
-- <condition>
-- <condition>
+- `<condition>`
+- `<condition>`
 
 Do not improvise across these boundaries.
 
@@ -130,18 +130,18 @@ Do not improvise across these boundaries.
 
 ### Pre-mutation recovery points
 
-- <backup/hash/commit/witness>
+- `<backup/hash/commit/witness>`
 
 ### Rollback procedure
 
-1. <step>
-2. <step>
+1. `<step>`
+2. `<step>`
 
 ## 12. Decision and plan-delta log
 
 | Date / commit | Decision or delta | Evidence / reason | Authority | Consequence |
-|---|---|---|---|---|
-| `YYYY-MM-DD` | Initial plan committed | <reason> | <authority> | Implementation may begin after preflight gate |
+| --- | --- | --- | --- | --- |
+| `YYYY-MM-DD` | Initial plan committed | `<reason>` | `<authority>` | Implementation may begin after preflight gate |
 
 Do not delete earlier material decisions after work has depended on them. Major changes require a new task-record version.
 
@@ -149,19 +149,19 @@ Do not delete earlier material decisions after work has depended on them. Major 
 
 ### Commits
 
-- `<sha>` — <purpose>
+- `<sha>` — `<purpose>`
 
 ### Source / artifact hashes
 
-- `<sha256>` — <artifact>
+- `<sha256>` — `<artifact>`
 
 ### CI / tests / replay / audit
 
-- <result>
+- `<result>`
 
 ### Superseded artifacts
 
-- <artifact> — superseded by <artifact>, retained for lineage
+- `<artifact>` — superseded by `<artifact>`, retained for lineage
 
 ## 14. Current status and next action
 

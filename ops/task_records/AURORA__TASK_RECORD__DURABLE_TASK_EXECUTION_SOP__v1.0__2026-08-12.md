@@ -87,7 +87,7 @@ Before this change, CloudBank had strong queue, claim, handoff, PR, CI, and revi
 ## 6. Planned mutations
 
 | Surface / path | Intended change | Authority / rationale | Risk |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `ops/task_records/AURORA__SOP__DURABLE_TASK_EXECUTION_RECORDS__v1.0__2026-08-12.md` | Add repo-wide DTER operating doctrine | Operator decision + observed continuity gap | low |
 | `ops/task_records/AURORA__TEMPLATE__TASK_EXECUTION_RECORD__v1.0__2026-08-12.md` | Add reusable task-record structure | Required for repeatability | low |
 | `ops/work_queue/QUEUE_GUIDE.md` | Bind queue workflow to DTER requirement | Preserve coherent coordination chain | low |
@@ -155,7 +155,7 @@ Gate to exit:
 ## 9. Validation and acceptance tests
 
 | ID | Validation | Expected result | Evidence / receipt |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `V-01` | SOP file exists on scoped branch | present | branch diff |
 | `V-02` | Template file exists on scoped branch | present | branch diff |
 | `V-03` | Queue guide references SOP/template and session-start rule | present | branch diff |
@@ -187,7 +187,7 @@ No runtime or data migration occurs in this task.
 ## 12. Decision and plan-delta log
 
 | Date / commit | Decision or delta | Evidence / reason | Authority | Consequence |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `2026-08-12` | Create a repo-wide execution-record layer rather than expanding handoff payloads | Handoffs do not provide a stable structured execution reference | Operator | New DTER SOP + template |
 | `2026-08-12` | Keep DTER separate from queue and control-plane claims | Existing queue guide already assigns those roles clearly | Existing repo doctrine | Additive coordination layer, not replacement |
 | `2026-08-12` | Bootstrap exception: first SOP/template commits precede this task record | DTER mechanism did not exist before those commits | Transparent procedural necessity | Record exception explicitly; future DTER-required tasks follow pre-implementation rule |

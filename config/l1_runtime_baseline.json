@@ -1,9 +1,10 @@
 {
   "schema_version": 1,
-  "runtime_contract_version": "1.2.0",
+  "runtime_contract_version": "1.3.0",
   "compatible_persisted_contract_versions": [
     "1.1.0",
-    "1.2.0"
+    "1.2.0",
+    "1.3.0"
   ],
   "status": "INIT_ELIGIBLE_WHEN_PREFLIGHT_PASSES",
   "authority": {
@@ -42,6 +43,15 @@
       "historical_mission_policy": "provenance_only_never_current_run_truth",
       "canonrec_authority_status": "not_verified_in_current_canonrec_projection",
       "ord_policy_boundary": "mcp_validation_policy_requires_explicit_physical_mission_adapter"
+    },
+    "embodiment_registry": {
+      "status": "verified_recovery_projection_activation_blocked",
+      "registry_path": "config/l1_embodiment_registry.json",
+      "registry_sha256": "e0342abf519e979c440409cbd893a432038feb80ac716818801be078c49262e9",
+      "projection_role": "runtime_projection_non_authoritative",
+      "activation_authority": false,
+      "resume_policy": "all_required_components_provider_bound_and_authority_gates_satisfied",
+      "unresolved_geometry_policy": "recordable_but_noncausal"
     }
   },
   "pilot_boundary": {

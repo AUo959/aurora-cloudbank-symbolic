@@ -47,6 +47,11 @@ def test_contract_v11_payload_without_fleet_still_migrates_from_unbound_state() 
     payload = _runtime_payload()
     payload["manifest"]["runtime_contract_version"] = "1.1.0"
     payload.pop("fleet")
+    # A genuine 1.1.0 payload predates BOTH fleet and embodiment state.
+    # This fixture is built from a CURRENT export, so relabelling the
+    # version without dropping embodiments produces a payload no real
+    # 1.1.0 run could have.
+    payload.pop("embodiments")
 
     restored = l1_run_state_from_payload(payload)
 

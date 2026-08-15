@@ -39,7 +39,12 @@ def _load_with_pyyaml(text: str) -> dict[str, set[str]] | None:
     except ImportError:
         return None
 
-    data = yaml.safe_load(text)
+    try:
+        data = yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        raise ValueError(f"invalid registry YAML: {exc}") from exc
+    if not isinstance(data, dict):
+        raise ValueError("registry document root must be a mapping")
     return {section: set(data.get(section) or []) for section in REGISTRY_SECTIONS}
 
 
@@ -114,10 +119,22 @@ def check(tracked_paths: list[str], registry: dict[str, set[str]]) -> list[str]:
     return violations
 
 
-def main() -> int:
-    raw = sys.stdin.buffer.read()
+def main(
+    raw: bytes | None = None,
+    *,
+    registry_path: Path = REGISTRY_PATH,
+) -> int:
+    if raw is None:
+        raw = sys.stdin.buffer.read()
     tracked = [p.decode("utf-8", "surrogateescape") for p in raw.split(b"\0") if p]
-    registry = load_registry(REGISTRY_PATH)
+    if not tracked:
+        print("ERROR: no tracked paths received on standard input.", file=sys.stderr)
+        return 2
+    try:
+        registry = load_registry(registry_path)
+    except (OSError, ValueError) as exc:
+        print(f"ERROR: could not load root registry: {exc}", file=sys.stderr)
+        return 2
     violations = check(tracked, registry)
     if not violations:
         print(
@@ -126,12 +143,13 @@ def main() -> int:
             f"{len(registry['dependency_files'])} declared dependency files)"
         )
         return 0
-    print("root declaration gate: FAILED\n")
+    print("root declaration gate: FAILED\n", file=sys.stderr)
     for report in violations:
-        print(report + "\n")
+        print(report + "\n", file=sys.stderr)
     print(
         "Complexity is the substrate; declaration is the contract. "
-        "Register new root objects in config/root_registry.yaml."
+        "Register new root objects in config/root_registry.yaml.",
+        file=sys.stderr,
     )
     return 1
 

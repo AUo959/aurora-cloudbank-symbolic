@@ -1,4 +1,5 @@
 """Tests for the root declaration gate (scripts/check_root_declaration.py)."""
+
 from __future__ import annotations
 
 import textwrap
@@ -7,6 +8,7 @@ from scripts.check_root_declaration import (
     check,
     dependency_files_of,
     load_registry,
+    main,
     root_objects_of,
 )
 
@@ -53,7 +55,10 @@ def test_stale_declaration_fails(tmp_path):
 def test_new_dependency_file_fails(tmp_path):
     tracked = ["src/x.py", "docs/a.md", "requirements.txt", "requirements-nexus.txt"]
     violations = check(tracked, registry_set(tmp_path))
-    assert any("UNDECLARED dependency files" in v and "requirements-nexus.txt" in v for v in violations)
+    assert any(
+        "UNDECLARED dependency files" in v and "requirements-nexus.txt" in v
+        for v in violations
+    )
 
 
 def test_removed_dependency_file_fails(tmp_path):
@@ -63,7 +68,9 @@ def test_removed_dependency_file_fails(tmp_path):
 
 
 def test_lock_files_count_as_dependency_files():
-    assert dependency_files_of({"requirements-opal2.lock", "requirements.txt", "setup.py"}) == {
+    assert dependency_files_of(
+        {"requirements-opal2.lock", "requirements.txt", "setup.py"}
+    ) == {
         "requirements-opal2.lock",
         "requirements.txt",
     }
@@ -90,3 +97,35 @@ def test_mini_parser_handles_registry_without_pyyaml(tmp_path, monkeypatch):
     registry = load_registry(write_registry(tmp_path))
     assert registry["root_objects"] == {"src", "docs", "requirements.txt"}
     assert registry["dependency_files"] == {"requirements.txt"}
+
+
+def test_main_rejects_empty_stdin(tmp_path, capsys):
+    assert main(b"", registry_path=write_registry(tmp_path)) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "no tracked paths received" in captured.err
+
+
+def test_main_reports_registry_load_failure_to_stderr(tmp_path, capsys):
+    missing = tmp_path / "missing.yaml"
+    assert main(b"src/x.py\0", registry_path=missing) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "could not load root registry" in captured.err
+
+
+def test_main_reports_registry_parse_failure_to_stderr(tmp_path, capsys):
+    malformed = write_registry(tmp_path, "root_objects: [\n")
+    assert main(b"src/x.py\0", registry_path=malformed) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "invalid registry YAML" in captured.err
+
+
+def test_main_reports_declaration_failures_to_stderr(tmp_path, capsys):
+    raw = b"src/x.py\0docs/a.md\0requirements.txt\0scratchpad/notes.md\0"
+    assert main(raw, registry_path=write_registry(tmp_path)) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "UNDECLARED root objects" in captured.err
+    assert "scratchpad" in captured.err

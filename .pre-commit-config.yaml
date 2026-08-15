@@ -11,6 +11,12 @@ repos:
         additional_dependencies: ['GitPython==3.1.45']
         pass_filenames: false
         stages: [pre-commit]
+      - id: root-declaration
+        name: root-declaration
+        entry: bash -c 'git ls-files -z | python3 scripts/check_root_declaration.py'
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
       - id: aurora-pre-commit
         name: aurora-pre-commit
         entry: bash scripts/run_pre_commit.sh

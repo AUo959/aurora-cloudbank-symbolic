@@ -32,7 +32,7 @@ mccabe==0.7.0
 mcp==1.29.0
 narwhals==2.24.0
 numpy==2.5.1
-openai==2.53.0
+openai==3.0.0
 packaging==26.3
 pandas==3.0.5
 passlib==1.7.4

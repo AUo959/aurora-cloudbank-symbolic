@@ -40,7 +40,7 @@
     {
       "rank": 3,
       "id": "sim/SENTINEL-phase0",
-      "title": "PROJECT SENTINEL — Phase 0: Ethics review board constitution",
+      "title": "PROJECT SENTINEL \u2014 Phase 0: Ethics review board constitution",
       "status": "needs-decision",
       "owner": null,
       "depends_on": [],
@@ -57,7 +57,7 @@
     {
       "rank": 4,
       "id": "ops/QGIA-doctrine-store",
-      "title": "QGIA analytical framework — store in ops/analytical_frameworks/QGIA/",
+      "title": "QGIA analytical framework \u2014 store in ops/analytical_frameworks/QGIA/",
       "status": "open",
       "owner": null,
       "depends_on": [],
@@ -102,13 +102,82 @@
       ],
       "aurora_note": "Doctrine now available (QGIA Runtime One-Pager v4.2.1 + Axiom Doctrine Narrative v1.0, reviewed 2026-06-22). Two-layer discipline maps cleanly to Triplex Handshake. ops/QGIA-doctrine-store must land first, then PAT routing decision. Crew sign-off required before any QGIA axiom becomes operationally binding.",
       "aurora_authority": true
+    },
+    {
+      "rank": 7,
+      "id": "#1329",
+      "title": "Prevent AI model catalog drift: validate model IDs and capabilities against provider catalogs",
+      "status": "open",
+      "owner": null,
+      "depends_on": [],
+      "tags": [
+        "blocking",
+        "ci",
+        "needs info",
+        "owner-decision"
+      ],
+      "github_issue": 1329,
+      "priority_score": 40,
+      "priority_rules_applied": [
+        "TR-01"
+      ],
+      "ingested": "2026-08-17",
+      "aurora_note": "auto-ingested from GitHub labels \u2014 awaiting Aurora triage; priority_score is advisory, rank is tail placement only",
+      "aurora_authority": false
+    },
+    {
+      "rank": 8,
+      "id": "#1233",
+      "title": "Ethics documentation follow-ups (consolidated)",
+      "status": "open",
+      "owner": null,
+      "depends_on": [],
+      "tags": [
+        "backlog",
+        "documentation",
+        "ethics",
+        "implementation-needed",
+        "needs info",
+        "security"
+      ],
+      "github_issue": 1233,
+      "priority_score": 30,
+      "priority_rules_applied": [
+        "TR-02"
+      ],
+      "ingested": "2026-08-17",
+      "aurora_note": "auto-ingested from GitHub labels \u2014 awaiting Aurora triage; priority_score is advisory, rank is tail placement only",
+      "aurora_authority": false
+    },
+    {
+      "rank": 9,
+      "id": "#1361",
+      "title": "security: resolve SHADOWFAX identity and custody ambiguity across ORD runtime surfaces",
+      "status": "open",
+      "owner": null,
+      "depends_on": [],
+      "tags": [
+        "audit-integrity",
+        "high-priority",
+        "needs info",
+        "owner-decision",
+        "security"
+      ],
+      "github_issue": 1361,
+      "priority_score": 30,
+      "priority_rules_applied": [
+        "TR-02"
+      ],
+      "ingested": "2026-08-17",
+      "aurora_note": "auto-ingested from GitHub labels \u2014 awaiting Aurora triage; priority_score is advisory, rank is tail placement only",
+      "aurora_authority": false
     }
   ],
   "completed": [
     {
       "id": "#1126",
       "github_issue": 1126,
-      "title": "docs/specs/AUMEMMANAGER_PROMOTION_STARTER_SPEC.md — confirm promotion status and link to recovered_protocols/",
+      "title": "docs/specs/AUMEMMANAGER_PROMOTION_STARTER_SPEC.md \u2014 confirm promotion status and link to recovered_protocols/",
       "closed": "2026-06-24",
       "status": "done"
     },
@@ -120,26 +189,26 @@
     },
     {
       "id": "#1148",
-      "title": "Protocol custody inventory — machine-readable manifest of recovered package/file hashes and blockers",
+      "title": "Protocol custody inventory \u2014 machine-readable manifest of recovered package/file hashes and blockers",
       "closed": "2026-06-24",
       "status": "done"
     },
     {
       "id": "#1149",
-      "title": "Protocol JSON schemas — add schema files and validation tests for Sherlock, Watson, Moriarty, Tribunal, SHADOWFAX",
+      "title": "Protocol JSON schemas \u2014 add schema files and validation tests for Sherlock, Watson, Moriarty, Tribunal, SHADOWFAX",
       "closed": "2026-06-24",
       "status": "done"
     },
     {
       "id": "#1150",
-      "title": "Protocol fixture intake — add sanitized canonical examples for Sherlock, Watson, Moriarty, Tribunal, SHADOWFAX",
+      "title": "Protocol fixture intake \u2014 add sanitized canonical examples for Sherlock, Watson, Moriarty, Tribunal, SHADOWFAX",
       "closed": "2026-06-24",
       "status": "done"
     },
     {
       "id": "#1151",
       "github_issue": 1151,
-      "title": "Runtime mapping design — decide how protocol decisions map to EthicsEngine, ethics_gate, compliance monitor, and geometric ethics",
+      "title": "Runtime mapping design \u2014 decide how protocol decisions map to EthicsEngine, ethics_gate, compliance monitor, and geometric ethics",
       "closed": "2026-07-13",
       "status": "done",
       "pr": 1157
@@ -147,7 +216,7 @@
     {
       "id": "#1152",
       "github_issue": 1152,
-      "title": "Moriarty containment tests — test anomaly quarantine/review-only/rollback rules without enabling active L2-to-L1 behavior",
+      "title": "Moriarty containment tests \u2014 test anomaly quarantine/review-only/rollback rules without enabling active L2-to-L1 behavior",
       "closed": "2026-07-13",
       "status": "done",
       "pr": 1158
@@ -155,7 +224,7 @@
     {
       "id": "#1153",
       "github_issue": 1153,
-      "title": "Tribunal appeal tests — test dispute/appeal record requirements without runtime enforcement",
+      "title": "Tribunal appeal tests \u2014 test dispute/appeal record requirements without runtime enforcement",
       "closed": "2026-07-13",
       "status": "done",
       "pr": 1159
@@ -163,91 +232,91 @@
     {
       "id": "#1130",
       "github_issue": 1130,
-      "title": "SECURITY — pentest scope is stale against the current API surface",
+      "title": "SECURITY \u2014 pentest scope is stale against the current API surface",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1139",
       "github_issue": 1139,
-      "title": "docs/ethics — create top-level README and navigation index",
+      "title": "docs/ethics \u2014 create top-level README and navigation index",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1140",
       "github_issue": 1140,
-      "title": "docs/architecture — fix RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md contradiction re: mesh/agents routes and QGIA",
+      "title": "docs/architecture \u2014 fix RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md contradiction re: mesh/agents routes and QGIA",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1137",
       "github_issue": 1137,
-      "title": "docs/ethics — geometric curvature v2 supplemental warning layer has no follow-up implementation issue",
+      "title": "docs/ethics \u2014 geometric curvature v2 supplemental warning layer has no follow-up implementation issue",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1138",
       "github_issue": 1138,
-      "title": "docs/ethics/recovered_protocols — all five custody records PENDING; custody inventory work not started",
+      "title": "docs/ethics/recovered_protocols \u2014 all five custody records PENDING; custody inventory work not started",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1142",
       "github_issue": 1142,
-      "title": "docs/architecture — RUNTIME_PATH_DRIFT_LEDGER.md: two unresolved items with no tracking issue",
+      "title": "docs/architecture \u2014 RUNTIME_PATH_DRIFT_LEDGER.md: two unresolved items with no tracking issue",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1141",
       "github_issue": 1141,
-      "title": "docs/architecture — QGIA_L1_NODE_REGISTRATION.md: agent registry pending 102 days, no exchange router defined",
+      "title": "docs/architecture \u2014 QGIA_L1_NODE_REGISTRATION.md: agent registry pending 102 days, no exchange router defined",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1144",
       "github_issue": 1144,
-      "title": "docs/api — api_surface_inventory.json missing four surfaces",
+      "title": "docs/api \u2014 api_surface_inventory.json missing four surfaces",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1143",
       "github_issue": 1143,
-      "title": "docs/architecture — scaling_plan.md has no issue coverage and no relationship to current runtime topology",
+      "title": "docs/architecture \u2014 scaling_plan.md has no issue coverage and no relationship to current runtime topology",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1145",
       "github_issue": 1145,
-      "title": "docs/api — RD_API_REFERENCE.md version 1.0.0 (2025-11-12, 7 months stale); three gaps",
+      "title": "docs/api \u2014 RD_API_REFERENCE.md version 1.0.0 (2025-11-12, 7 months stale); three gaps",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1146",
       "github_issue": 1146,
-      "title": "docs/api — API_CATALOG_GOVERNANCE.md: three governance rules currently violated",
+      "title": "docs/api \u2014 API_CATALOG_GOVERNANCE.md: three governance rules currently violated",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1135",
       "github_issue": 1135,
-      "title": "simulation/ — L1_CANON_CHARACTER_ROSTER.md (165 KB) has no validation against QGIA or Orion registries",
+      "title": "simulation/ \u2014 L1_CANON_CHARACTER_ROSTER.md (165 KB) has no validation against QGIA or Orion registries",
       "closed": "2026-07-13",
       "status": "done"
     },
     {
       "id": "#1136",
       "github_issue": 1136,
-      "title": "simulation/ — ORION_STATION_ENHANCEMENT_PROPOSAL.md (38 KB) has no implementation tracking",
+      "title": "simulation/ \u2014 ORION_STATION_ENHANCEMENT_PROPOSAL.md (38 KB) has no implementation tracking",
       "closed": "2026-07-13",
       "status": "done"
     }

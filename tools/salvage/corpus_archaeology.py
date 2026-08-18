@@ -24,9 +24,11 @@ if _REPO_ROOT not in sys.path:
 from tools.salvage.corpus_archaeology_core import (  # noqa: E402
     RANKING_WEIGHTS,
     SCHEMA_VERSION,
-    CorpusArchaeologyError,
     analyze_validated_corpus,
     render_markdown,
+)
+from tools.salvage.corpus_archaeology_shared import (  # noqa: E402
+    CorpusArchaeologyError,
 )
 
 INPUT_SCHEMA_PATH = (

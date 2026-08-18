@@ -1,0 +1,328 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/salvage/corpus_archaeology_report.schema.json",
+  "title": "Corpus Archaeology Report",
+  "description": "Read-only provenance-aware report for deterministic prepared-corpus archaeology.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_id",
+    "generated_at",
+    "corpus_id",
+    "source_inventory_ref",
+    "read_only",
+    "mutation_performed",
+    "analysis_profile",
+    "ranking_model",
+    "sources",
+    "claims",
+    "relationships",
+    "candidates",
+    "unkeyed_claim_ids"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "report_id": {"type": "string", "pattern": "^corpus-report:[a-f0-9]{64}$"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "corpus_id": {"type": "string", "minLength": 1},
+    "source_inventory_ref": {"type": ["string", "null"]},
+    "read_only": {"const": true},
+    "mutation_performed": {"const": false},
+    "analysis_profile": {"const": "explicit_markers_v1"},
+    "ranking_model": {"$ref": "#/$defs/ranking_model"},
+    "sources": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/source"}},
+    "claims": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+    "relationships": {"type": "array", "items": {"$ref": "#/$defs/relationship"}},
+    "candidates": {"type": "array", "items": {"$ref": "#/$defs/candidate"}},
+    "unkeyed_claim_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^claim:[a-f0-9]{24}$"}
+    }
+  },
+  "$defs": {
+    "unit_interval": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_ref",
+        "source_id",
+        "title",
+        "source_type",
+        "platform",
+        "creator_type",
+        "authority_status",
+        "confidence",
+        "artifact_id",
+        "inventory_report_id",
+        "content_access",
+        "sha256"
+      ],
+      "properties": {
+        "source_ref": {"type": "string", "minLength": 1},
+        "source_id": {"type": "string", "pattern": "^source:[a-f0-9]{24}$"},
+        "title": {"type": "string", "minLength": 1},
+        "source_type": {
+          "enum": [
+            "chat",
+            "document",
+            "issue",
+            "pull_request",
+            "commit",
+            "code",
+            "test",
+            "artifact",
+            "report",
+            "unknown"
+          ]
+        },
+        "platform": {"type": ["string", "null"]},
+        "creator_type": {"enum": ["human", "assistant", "model", "system", "mixed", "unknown"]},
+        "authority_status": {"enum": ["current", "historical", "reference", "draft", "unknown"]},
+        "confidence": {"$ref": "#/$defs/unit_interval"},
+        "artifact_id": {"type": ["string", "null"]},
+        "inventory_report_id": {"type": ["string", "null"]},
+        "content_access": {"enum": ["released", "metadata_only"]},
+        "sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "source_ref", "line_start", "line_end", "text_sha256", "excerpt"],
+      "properties": {
+        "source_id": {"type": "string", "pattern": "^source:[a-f0-9]{24}$"},
+        "source_ref": {"type": "string", "minLength": 1},
+        "line_start": {"type": "integer", "minimum": 1},
+        "line_end": {"type": "integer", "minimum": 1},
+        "text_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "excerpt": {"type": "string", "minLength": 1}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "claim_type",
+        "intent_key",
+        "claim",
+        "evidence_kind",
+        "authority_status",
+        "confidence",
+        "span"
+      ],
+      "properties": {
+        "claim_id": {"type": "string", "pattern": "^claim:[a-f0-9]{24}$"},
+        "claim_type": {
+          "enum": [
+            "decision",
+            "approval",
+            "rejection",
+            "requirement",
+            "constraint",
+            "unresolved_question",
+            "todo",
+            "proposed_patch",
+            "rationale",
+            "implementation_evidence",
+            "partial_implementation_evidence"
+          ]
+        },
+        "intent_key": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9_.:/-]+$"},
+        "claim": {"type": "string", "minLength": 1},
+        "evidence_kind": {
+          "enum": [
+            "human_statement",
+            "model_statement",
+            "system_record",
+            "mixed_source",
+            "implementation_artifact",
+            "test_result",
+            "unknown"
+          ]
+        },
+        "authority_status": {"enum": ["current", "historical", "reference", "draft", "unknown"]},
+        "confidence": {"$ref": "#/$defs/unit_interval"},
+        "span": {"$ref": "#/$defs/span"}
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relationship_id",
+        "left_intent_key",
+        "right_intent_key",
+        "relationship",
+        "rationale",
+        "evidence_source_refs"
+      ],
+      "properties": {
+        "relationship_id": {"type": "string", "pattern": "^relationship:[a-f0-9]{24}$"},
+        "left_intent_key": {"type": "string", "minLength": 1},
+        "right_intent_key": {"type": "string", "minLength": 1},
+        "relationship": {
+          "enum": [
+            "convergent",
+            "successor",
+            "parallel",
+            "merged",
+            "divergent",
+            "superseded",
+            "dormant",
+            "lost_in_transition",
+            "orphaned",
+            "uncertain"
+          ]
+        },
+        "rationale": {"type": "string", "minLength": 1},
+        "evidence_source_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "historical_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "explicit_rejection",
+        "implementation_evidence_present",
+        "partial_implementation_evidence_present"
+      ],
+      "properties": {
+        "status": {"enum": ["proposed", "approved", "implemented", "partial", "rejected"]},
+        "explicit_rejection": {"type": "boolean"},
+        "implementation_evidence_present": {"type": "boolean"},
+        "partial_implementation_evidence_present": {"type": "boolean"}
+      }
+    },
+    "preservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["implementation_preserved", "capability_preserved", "intent_preserved", "intent_delta"],
+      "properties": {
+        "implementation_preserved": {"type": ["boolean", "null"]},
+        "capability_preserved": {"type": ["boolean", "null"]},
+        "intent_preserved": {"type": ["boolean", "null"]},
+        "intent_delta": {"type": ["number", "null"], "minimum": 0.0, "maximum": 1.0}
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["disposition", "rationale", "confidence", "dependencies"],
+      "properties": {
+        "disposition": {
+          "enum": ["restore", "integrate", "evolve", "merge", "preserve", "investigate", "reject_with_evidence"]
+        },
+        "rationale": {"type": "string", "minLength": 1},
+        "confidence": {"$ref": "#/$defs/unit_interval"},
+        "dependencies": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "relevance_components": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "explicit_decision",
+        "requirement_strength",
+        "unresolved_commitment",
+        "implementation_gap",
+        "recurrence",
+        "evidence_confidence"
+      ],
+      "properties": {
+        "explicit_decision": {"$ref": "#/$defs/unit_interval"},
+        "requirement_strength": {"$ref": "#/$defs/unit_interval"},
+        "unresolved_commitment": {"$ref": "#/$defs/unit_interval"},
+        "implementation_gap": {"$ref": "#/$defs/unit_interval"},
+        "recurrence": {"$ref": "#/$defs/unit_interval"},
+        "evidence_confidence": {"$ref": "#/$defs/unit_interval"}
+      }
+    },
+    "ranking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relevance_score", "components"],
+      "properties": {
+        "relevance_score": {"$ref": "#/$defs/unit_interval"},
+        "components": {"$ref": "#/$defs/relevance_components"}
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "intent_key",
+        "source_refs",
+        "source_ids",
+        "claim_ids",
+        "historical_state",
+        "preservation",
+        "recovery",
+        "ranking"
+      ],
+      "properties": {
+        "candidate_id": {"type": "string", "pattern": "^candidate:[a-f0-9]{24}$"},
+        "intent_key": {"type": "string", "pattern": "^[A-Za-z0-9_.:/-]+$"},
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^source:[a-f0-9]{24}$"}
+        },
+        "claim_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^claim:[a-f0-9]{24}$"}
+        },
+        "historical_state": {"$ref": "#/$defs/historical_state"},
+        "preservation": {"$ref": "#/$defs/preservation"},
+        "recovery": {"$ref": "#/$defs/recovery"},
+        "ranking": {"$ref": "#/$defs/ranking"}
+      }
+    },
+    "ranking_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "weights"],
+      "properties": {
+        "name": {"const": "explainable_relevance_v1"},
+        "weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "explicit_decision",
+            "requirement_strength",
+            "unresolved_commitment",
+            "implementation_gap",
+            "recurrence",
+            "evidence_confidence"
+          ],
+          "properties": {
+            "explicit_decision": {"const": 0.25},
+            "requirement_strength": {"const": 0.20},
+            "unresolved_commitment": {"const": 0.20},
+            "implementation_gap": {"const": 0.20},
+            "recurrence": {"const": 0.10},
+            "evidence_confidence": {"const": 0.05}
+          }
+        }
+      }
+    }
+  }
+}

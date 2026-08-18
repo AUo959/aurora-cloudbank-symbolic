@@ -46,12 +46,12 @@ def test_runtime_rejects_unknown_top_level_and_source_fields() -> None:
 
     top_level = _corpus()
     top_level["unexpected"] = "must fail"
-    with pytest.raises(archaeology.CorpusArchaeologyError, match="additionalProperties"):
+    with pytest.raises(archaeology.CorpusArchaeologyError, match="Additional properties"):
         archaeology.analyze_corpus(top_level, generated_at=FIXED_TIME)
 
     source = _source()
     source["unexpected"] = "must fail"
-    with pytest.raises(archaeology.CorpusArchaeologyError, match="additionalProperties"):
+    with pytest.raises(archaeology.CorpusArchaeologyError, match="Additional properties"):
         archaeology.analyze_corpus(_corpus(source), generated_at=FIXED_TIME)
 
 

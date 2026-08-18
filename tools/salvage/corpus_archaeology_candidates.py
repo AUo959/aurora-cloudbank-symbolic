@@ -1,10 +1,26 @@
-"""Pure candidate-state and relevance logic for Phase-1 corpus archaeology."""
+"""Candidate relevance and report projection for Phase-1 corpus archaeology."""
 
 from __future__ import annotations
 
 from typing import Any
 
-IMPLEMENTATION_EVIDENCE_KINDS = {"implementation_artifact", "test_result"}
+try:
+    from tools.salvage.corpus_archaeology_candidate_state import (
+        candidate_flags,
+        candidate_state,
+        implementation_preserved,
+    )
+    from tools.salvage.corpus_archaeology_shared import make_id
+except ModuleNotFoundError as exc:
+    if exc.name not in {"tools", "tools.salvage"}:
+        raise
+    from corpus_archaeology_candidate_state import (
+        candidate_flags,
+        candidate_state,
+        implementation_preserved,
+    )
+    from corpus_archaeology_shared import make_id
+
 RANKING_WEIGHTS = {
     "explicit_decision": 0.25,
     "requirement_strength": 0.20,
@@ -26,103 +42,6 @@ def _canonical_claims(claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
     )
 
 
-def _human_claim_types(claims: list[dict[str, Any]]) -> set[str]:
-    return {
-        item["claim_type"]
-        for item in claims
-        if item["evidence_kind"] == "human_statement"
-    }
-
-
-def _is_implementation_claim(
-    item: dict[str, Any], claim_type: str, authority: str | None
-) -> bool:
-    type_matches = item["claim_type"] == claim_type
-    evidence_matches = item["evidence_kind"] in IMPLEMENTATION_EVIDENCE_KINDS
-    authority_matches = authority is None or item["authority_status"] == authority
-    return type_matches and evidence_matches and authority_matches
-
-
-def _has_implementation_claim(
-    claims: list[dict[str, Any]], claim_type: str, authority: str | None = None
-) -> bool:
-    return any(
-        _is_implementation_claim(item, claim_type, authority) for item in claims
-    )
-
-
-def _candidate_flags(claims: list[dict[str, Any]]) -> dict[str, bool]:
-    human_types = _human_claim_types(claims)
-    commitment_types = {
-        "approval",
-        "decision",
-        "requirement",
-        "constraint",
-        "todo",
-        "unresolved_question",
-        "proposed_patch",
-    }
-    return {
-        "rejected": "rejection" in human_types,
-        "implemented": _has_implementation_claim(claims, "implementation_evidence"),
-        "partial": _has_implementation_claim(
-            claims, "partial_implementation_evidence"
-        ),
-        "current_implemented": _has_implementation_claim(
-            claims, "implementation_evidence", "current"
-        ),
-        "current_partial": _has_implementation_claim(
-            claims, "partial_implementation_evidence", "current"
-        ),
-        "decision": bool({"approval", "decision"} & human_types),
-        "requirement": bool({"requirement", "constraint"} & human_types),
-        "unresolved": bool(
-            {"todo", "unresolved_question", "proposed_patch"} & human_types
-        ),
-        "commitment": bool(commitment_types & human_types),
-    }
-
-
-def _candidate_state(flags: dict[str, bool]) -> tuple[str, str, str]:
-    if flags["rejected"] and (flags["implemented"] or flags["partial"]):
-        return (
-            "unknown",
-            "investigate",
-            "Explicit human rejection and implementation evidence coexist; preserve both "
-            "histories and investigate chronology, scope, and authority.",
-        )
-    if flags["rejected"]:
-        return (
-            "rejected",
-            "reject_with_evidence",
-            "Explicit human rejection evidence is present; preserve the record and do not "
-            "restore automatically.",
-        )
-    if flags["implemented"]:
-        return (
-            "implemented",
-            "preserve",
-            "Implementation evidence is present; preserve the implementation record and "
-            "verify whether a current successor remains.",
-        )
-    if flags["partial"]:
-        return (
-            "partial",
-            "investigate",
-            "Only partial implementation evidence is present; investigate intent and "
-            "capability preservation.",
-        )
-    status = "approved" if flags["decision"] else "proposed"
-    rationale = (
-        "An explicit human commitment is present without implementation or rejection "
-        "evidence; preserve for investigation."
-        if flags["commitment"]
-        else "No authoritative commitment, implementation, or rejection evidence is "
-        "established; retain as an uncertain recovery candidate."
-    )
-    return status, "investigate", rationale
-
-
 def _implementation_gap(flags: dict[str, bool]) -> float:
     has_resolution = flags["implemented"] or flags["partial"] or flags["rejected"]
     return float(flags["commitment"] and not has_resolution)
@@ -141,30 +60,21 @@ def _components(
     }
 
 
-def _implementation_preserved(flags: dict[str, bool]) -> bool | None:
-    if flags["current_implemented"]:
-        return True
-    if flags["current_partial"]:
-        return False
-    return None
+def _relevance_score(components: dict[str, float]) -> float:
+    weighted = (
+        components[name] * weight for name, weight in RANKING_WEIGHTS.items()
+    )
+    return round(sum(weighted), 6)
 
 
-def build_candidate(
-    intent: str,
-    claims: list[dict[str, Any]],
-    make_id,
-) -> dict[str, Any]:
+def build_candidate(intent: str, claims: list[dict[str, Any]]) -> dict[str, Any]:
     """Build one deterministic recovery candidate from keyed claims."""
     claims = _canonical_claims(claims)
-    flags = _candidate_flags(claims)
-    status, disposition, rationale = _candidate_state(flags)
+    flags = candidate_flags(claims)
+    status, disposition, rationale = candidate_state(flags)
     source_refs = sorted({item["span"]["source_ref"] for item in claims})
     source_ids = sorted({item["span"]["source_id"] for item in claims})
     components = _components(flags, source_refs, claims)
-    score = round(
-        sum(components[name] * weight for name, weight in RANKING_WEIGHTS.items()),
-        6,
-    )
     claim_ids = [item["claim_id"] for item in claims]
     candidate_id = make_id(
         "candidate",
@@ -187,7 +97,7 @@ def build_candidate(
             "partial_implementation_evidence_present": flags["partial"],
         },
         "preservation": {
-            "implementation_preserved": _implementation_preserved(flags),
+            "implementation_preserved": implementation_preserved(flags),
             "capability_preserved": None,
             "intent_preserved": None,
             "intent_delta": None,
@@ -199,7 +109,7 @@ def build_candidate(
             "dependencies": [],
         },
         "ranking": {
-            "relevance_score": score,
+            "relevance_score": _relevance_score(components),
             "components": {
                 name: round(value, 6) for name, value in components.items()
             },

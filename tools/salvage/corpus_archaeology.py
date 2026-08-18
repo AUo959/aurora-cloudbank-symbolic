@@ -11,29 +11,23 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
 import jsonschema
 
-try:
-    from tools.salvage.corpus_archaeology_core import (
-        RANKING_WEIGHTS,
-        SCHEMA_VERSION,
-        CorpusArchaeologyError,
-        analyze_validated_corpus,
-        render_markdown,
-    )
-except ModuleNotFoundError as exc:
-    if exc.name not in {"tools", "tools.salvage"}:
-        raise
-    from corpus_archaeology_core import (
-        RANKING_WEIGHTS,
-        SCHEMA_VERSION,
-        CorpusArchaeologyError,
-        analyze_validated_corpus,
-        render_markdown,
-    )
+_REPO_ROOT = str(Path(__file__).resolve().parents[2])
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
+from tools.salvage.corpus_archaeology_core import (  # noqa: E402
+    RANKING_WEIGHTS,
+    SCHEMA_VERSION,
+    CorpusArchaeologyError,
+    analyze_validated_corpus,
+    render_markdown,
+)
 
 INPUT_SCHEMA_PATH = (
     Path(__file__).resolve().parents[2]

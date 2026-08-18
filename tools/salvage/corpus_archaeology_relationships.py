@@ -4,15 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-try:
-    from tools.salvage.corpus_archaeology_shared import (
-        CorpusArchaeologyError,
-        make_id,
-    )
-except ModuleNotFoundError as exc:
-    if exc.name not in {"tools", "tools.salvage"}:
-        raise
-    from corpus_archaeology_shared import CorpusArchaeologyError, make_id
+from tools.salvage.corpus_archaeology_shared import CorpusArchaeologyError, make_id
 
 
 def _known_intents(

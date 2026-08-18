@@ -13,7 +13,6 @@ from tools.salvage.corpus_archaeology_claims import claims_by_intent, sorted_cla
 from tools.salvage.corpus_archaeology_relationships import build_relationships
 from tools.salvage.corpus_archaeology_shared import (
     SCHEMA_VERSION,
-    CorpusArchaeologyError,
     canonical_bytes,
     normalize_timestamp,
     semantic_string,

@@ -196,7 +196,7 @@
         "partial_implementation_evidence_present"
       ],
       "properties": {
-        "status": {"enum": ["proposed", "approved", "implemented", "partial", "rejected"]},
+        "status": {"enum": ["proposed", "approved", "implemented", "partial", "rejected", "unknown"]},
         "explicit_rejection": {"type": "boolean"},
         "implementation_evidence_present": {"type": "boolean"},
         "partial_implementation_evidence_present": {"type": "boolean"}

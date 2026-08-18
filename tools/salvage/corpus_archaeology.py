@@ -180,7 +180,8 @@ def _evidence_kind(source: dict[str, Any], claim_type: str) -> str:
     if claim_type in {"implementation_evidence", "partial_implementation_evidence"}:
         if source["source_type"] == "test":
             return "test_result"
-        return "implementation_artifact"
+        if source["source_type"] in {"code", "commit", "pull_request", "artifact"}:
+            return "implementation_artifact"
     return {
         "human": "human_statement",
         "assistant": "model_statement",
@@ -235,8 +236,16 @@ def _claims(source: dict[str, Any]) -> list[dict[str, Any]]:
 def _candidate(intent: str, claims: list[dict[str, Any]]) -> dict[str, Any]:
     types = {item["claim_type"] for item in claims}
     rejected = "rejection" in types
-    implemented = "implementation_evidence" in types
-    partial = "partial_implementation_evidence" in types
+    implemented = any(
+        item["claim_type"] == "implementation_evidence"
+        and item["evidence_kind"] in {"implementation_artifact", "test_result"}
+        for item in claims
+    )
+    partial = any(
+        item["claim_type"] == "partial_implementation_evidence"
+        and item["evidence_kind"] in {"implementation_artifact", "test_result"}
+        for item in claims
+    )
     decision = bool({"approval", "decision"} & types)
     requirement = bool({"requirement", "constraint"} & types)
     unresolved = bool({"todo", "unresolved_question", "proposed_patch"} & types)

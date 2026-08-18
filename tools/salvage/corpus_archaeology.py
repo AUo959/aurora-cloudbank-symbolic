@@ -17,7 +17,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import jsonschema
+
 SCHEMA_VERSION = "0.1.0"
+INPUT_SCHEMA_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "schemas"
+    / "salvage"
+    / "corpus_archaeology_input.schema.json"
+)
 
 CLAIM_RE = re.compile(
     r"^\s*(?P<label>DECISION|APPROVED|REJECTED|REQUIREMENT|CONSTRAINT|QUESTION|"
@@ -80,6 +88,38 @@ RANKING_WEIGHTS = {
 
 class CorpusArchaeologyError(ValueError):
     """Prepared corpus is invalid or violates a Phase-1 safety boundary."""
+
+
+def _validate_input_contract(corpus: dict[str, Any]) -> None:
+    """Bind runtime validation to the committed prepared-corpus JSON Schema."""
+    try:
+        schema = json.loads(INPUT_SCHEMA_PATH.read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator.check_schema(schema)
+        validator = jsonschema.Draft202012Validator(
+            schema,
+            format_checker=jsonschema.FormatChecker(),
+        )
+    except (OSError, json.JSONDecodeError, jsonschema.SchemaError) as exc:
+        raise CorpusArchaeologyError(
+            "committed prepared-corpus input schema is unavailable or invalid"
+        ) from exc
+
+    errors = sorted(
+        validator.iter_errors(corpus),
+        key=lambda error: tuple(str(part) for part in error.absolute_path),
+    )
+    if not errors:
+        return
+
+    error = errors[0]
+    path = ".".join(str(part) for part in error.absolute_path) or "<root>"
+    if error.validator in {"required", "additionalProperties"}:
+        detail = error.message
+    else:
+        detail = f"violates {error.validator}"
+    raise CorpusArchaeologyError(
+        f"input schema validation failed at {path}: {detail}"
+    )
 
 
 def _canonical_bytes(value: Any) -> bytes:
@@ -506,6 +546,7 @@ def analyze_corpus(
     """Analyze a prepared corpus without mutating source or external state."""
     if not isinstance(corpus, dict):
         raise CorpusArchaeologyError("corpus input must be an object")
+    _validate_input_contract(corpus)
     if corpus.get("schema_version") != SCHEMA_VERSION:
         raise CorpusArchaeologyError(
             f"unsupported corpus schema_version: {corpus.get('schema_version')!r}"

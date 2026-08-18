@@ -5,12 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-try:
-    from tools.salvage.corpus_archaeology_shared import make_id, sha256_text
-except ModuleNotFoundError as exc:
-    if exc.name not in {"tools", "tools.salvage"}:
-        raise
-    from corpus_archaeology_shared import make_id, sha256_text
+from tools.salvage.corpus_archaeology_shared import make_id, sha256_text
 
 CLAIM_RE = re.compile(
     r"^\s*(?P<label>DECISION|APPROVED|REJECTED|REQUIREMENT|CONSTRAINT|QUESTION|"

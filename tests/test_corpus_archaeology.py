@@ -267,7 +267,7 @@ def test_metadata_only_source_rejects_supplied_content(archaeology_module) -> No
 
     with pytest.raises(
         archaeology_module.CorpusArchaeologyError,
-        match="metadata_only",
+        match=r"sources\.0\.content",
     ):
         archaeology_module.analyze_corpus(corpus, generated_at=FIXED_TIME)
 

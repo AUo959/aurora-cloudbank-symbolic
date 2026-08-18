@@ -4,22 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-try:
-    from tools.salvage.corpus_archaeology_shared import (
-        CorpusArchaeologyError,
-        make_id,
-        semantic_string,
-        sha256_text,
-    )
-except ModuleNotFoundError as exc:
-    if exc.name not in {"tools", "tools.salvage"}:
-        raise
-    from corpus_archaeology_shared import (
-        CorpusArchaeologyError,
-        make_id,
-        semantic_string,
-        sha256_text,
-    )
+from tools.salvage.corpus_archaeology_shared import (
+    CorpusArchaeologyError,
+    make_id,
+    semantic_string,
+    sha256_text,
+)
 
 
 def _validate_optional_strings(source_ref: str, raw: dict[str, Any]) -> None:

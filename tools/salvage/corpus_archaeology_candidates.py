@@ -4,22 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-try:
-    from tools.salvage.corpus_archaeology_candidate_state import (
-        candidate_flags,
-        candidate_state,
-        implementation_preserved,
-    )
-    from tools.salvage.corpus_archaeology_shared import make_id
-except ModuleNotFoundError as exc:
-    if exc.name not in {"tools", "tools.salvage"}:
-        raise
-    from corpus_archaeology_candidate_state import (
-        candidate_flags,
-        candidate_state,
-        implementation_preserved,
-    )
-    from corpus_archaeology_shared import make_id
+from tools.salvage.corpus_archaeology_candidate_state import (
+    candidate_flags,
+    candidate_state,
+    implementation_preserved,
+)
+from tools.salvage.corpus_archaeology_shared import make_id
 
 RANKING_WEIGHTS = {
     "explicit_decision": 0.25,

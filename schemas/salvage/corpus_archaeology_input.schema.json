@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/salvage/corpus_archaeology_input.schema.json",
+  "title": "Prepared Corpus Archaeology Input",
+  "description": "Domain-neutral custody-cleared source envelope for deterministic Phase-1 corpus archaeology.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "corpus_id", "sources"],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "corpus_id": {"type": "string", "minLength": 1},
+    "source_inventory_ref": {"type": ["string", "null"], "minLength": 1},
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "relationship_hints": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/relationship_hint"}
+    }
+  },
+  "$defs": {
+    "unit_interval": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_ref",
+        "title",
+        "source_type",
+        "creator_type",
+        "authority_status",
+        "content_access"
+      ],
+      "properties": {
+        "source_ref": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "source_type": {
+          "enum": [
+            "chat",
+            "document",
+            "issue",
+            "pull_request",
+            "commit",
+            "code",
+            "test",
+            "artifact",
+            "report",
+            "unknown"
+          ]
+        },
+        "platform": {"type": ["string", "null"], "minLength": 1},
+        "creator_type": {
+          "enum": ["human", "assistant", "model", "system", "mixed", "unknown"]
+        },
+        "authority_status": {
+          "enum": ["current", "historical", "reference", "draft", "unknown"]
+        },
+        "confidence": {"$ref": "#/$defs/unit_interval"},
+        "artifact_id": {"type": ["string", "null"], "minLength": 1},
+        "inventory_report_id": {"type": ["string", "null"], "minLength": 1},
+        "content_access": {"enum": ["released", "metadata_only"]},
+        "content": {"type": ["string", "null"]},
+        "sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"content_access": {"const": "released"}},
+            "required": ["content_access"]
+          },
+          "then": {
+            "required": ["content"],
+            "properties": {"content": {"type": "string"}}
+          }
+        },
+        {
+          "if": {
+            "properties": {"content_access": {"const": "metadata_only"}},
+            "required": ["content_access"]
+          },
+          "then": {
+            "properties": {
+              "content": {
+                "anyOf": [
+                  {"type": "null"},
+                  {"type": "string", "maxLength": 0}
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "relationship_hint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "left_intent_key",
+        "right_intent_key",
+        "relationship",
+        "rationale",
+        "evidence_source_refs"
+      ],
+      "properties": {
+        "left_intent_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:/-]+$"
+        },
+        "right_intent_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:/-]+$"
+        },
+        "relationship": {
+          "enum": [
+            "convergent",
+            "successor",
+            "parallel",
+            "merged",
+            "divergent",
+            "superseded",
+            "dormant",
+            "lost_in_transition",
+            "orphaned",
+            "uncertain"
+          ]
+        },
+        "rationale": {"type": "string", "minLength": 1},
+        "evidence_source_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

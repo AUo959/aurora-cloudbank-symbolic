@@ -29,6 +29,7 @@ def _source(
     *,
     source_type: str = "document",
     creator_type: str = "human",
+    authority_status: str = "historical",
 ) -> dict:
     return {
         "source_ref": source_ref,
@@ -36,7 +37,7 @@ def _source(
         "source_type": source_type,
         "platform": "fixture",
         "creator_type": creator_type,
-        "authority_status": "historical",
+        "authority_status": authority_status,
         "confidence": 1.0,
         "artifact_id": None,
         "inventory_report_id": None,
@@ -74,7 +75,7 @@ def test_top_level_inventory_reference_changes_report_identity() -> None:
 
 
 @pytest.mark.unit
-def test_rejection_and_implementation_coexist_as_unknown_investigation_state() -> None:
+def test_rejection_and_historical_implementation_preserve_conflict_without_claiming_current_state() -> None:
     archaeology = _load_module()
     corpus = {
         "schema_version": "0.1.0",
@@ -86,8 +87,8 @@ def test_rejection_and_implementation_coexist_as_unknown_investigation_state() -
                 source_type="issue",
             ),
             _source(
-                "code:later-artifact",
-                "IMPLEMENTED[feature.conflict]: A concrete implementation exists.\n",
+                "code:historical-artifact",
+                "IMPLEMENTED[feature.conflict]: A concrete implementation existed.\n",
                 source_type="code",
                 creator_type="system",
             ),
@@ -105,7 +106,7 @@ def test_rejection_and_implementation_coexist_as_unknown_investigation_state() -
     }
     assert candidate["recovery"]["disposition"] == "investigate"
     assert "coexist" in candidate["recovery"]["rationale"]
-    assert candidate["preservation"]["implementation_preserved"] is True
+    assert candidate["preservation"]["implementation_preserved"] is None
     assert candidate["preservation"]["capability_preserved"] is None
     assert candidate["preservation"]["intent_preserved"] is None
 
@@ -114,3 +115,33 @@ def test_rejection_and_implementation_coexist_as_unknown_investigation_state() -
         schema,
         format_checker=jsonschema.FormatChecker(),
     ).validate(report)
+
+
+@pytest.mark.unit
+def test_current_implementation_artifact_can_establish_implementation_preserved() -> None:
+    archaeology = _load_module()
+    corpus = {
+        "schema_version": "0.1.0",
+        "corpus_id": "fixture:current-implementation",
+        "sources": [
+            _source(
+                "doc:requirement",
+                "REQUIREMENT[feature.current]: Preserve the current implementation.\n",
+            ),
+            _source(
+                "code:current-artifact",
+                "IMPLEMENTED[feature.current]: Current code implements the capability.\n",
+                source_type="code",
+                creator_type="system",
+                authority_status="current",
+            ),
+        ],
+    }
+
+    report = archaeology.analyze_corpus(corpus, generated_at=FIXED_TIME)
+    candidate = report["candidates"][0]
+
+    assert candidate["historical_state"]["status"] == "implemented"
+    assert candidate["preservation"]["implementation_preserved"] is True
+    assert candidate["preservation"]["capability_preserved"] is None
+    assert candidate["preservation"]["intent_preserved"] is None

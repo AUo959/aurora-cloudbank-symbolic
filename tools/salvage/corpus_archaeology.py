@@ -235,7 +235,9 @@ def _claims(source: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _candidate(intent: str, claims: list[dict[str, Any]]) -> dict[str, Any]:
     types = {item["claim_type"] for item in claims}
-    rejected = "rejection" in types
+    human_claims = [item for item in claims if item["evidence_kind"] == "human_statement"]
+    human_types = {item["claim_type"] for item in human_claims}
+    rejected = "rejection" in human_types
     implemented = any(
         item["claim_type"] == "implementation_evidence"
         and item["evidence_kind"] in {"implementation_artifact", "test_result"}
@@ -246,12 +248,12 @@ def _candidate(intent: str, claims: list[dict[str, Any]]) -> dict[str, Any]:
         and item["evidence_kind"] in {"implementation_artifact", "test_result"}
         for item in claims
     )
-    decision = bool({"approval", "decision"} & types)
-    requirement = bool({"requirement", "constraint"} & types)
-    unresolved = bool({"todo", "unresolved_question", "proposed_patch"} & types)
+    decision = bool({"approval", "decision"} & human_types)
+    requirement = bool({"requirement", "constraint"} & human_types)
+    unresolved = bool({"todo", "unresolved_question", "proposed_patch"} & human_types)
     commitment = bool(
         {"approval", "decision", "requirement", "constraint", "todo",
-         "unresolved_question", "proposed_patch"} & types
+         "unresolved_question", "proposed_patch"} & human_types
     )
 
     if rejected:

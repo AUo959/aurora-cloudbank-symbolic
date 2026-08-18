@@ -5,35 +5,20 @@ from __future__ import annotations
 import hashlib
 from typing import Any
 
-try:
-    from tools.salvage.corpus_archaeology_candidates import (
-        RANKING_WEIGHTS,
-        build_candidate,
-    )
-    from tools.salvage.corpus_archaeology_claims import claims_by_intent, sorted_claims
-    from tools.salvage.corpus_archaeology_relationships import build_relationships
-    from tools.salvage.corpus_archaeology_shared import (
-        SCHEMA_VERSION,
-        CorpusArchaeologyError,
-        canonical_bytes,
-        normalize_timestamp,
-        semantic_string,
-    )
-    from tools.salvage.corpus_archaeology_sources import normalize_sources, public_sources
-except ModuleNotFoundError as exc:
-    if exc.name not in {"tools", "tools.salvage"}:
-        raise
-    from corpus_archaeology_candidates import RANKING_WEIGHTS, build_candidate
-    from corpus_archaeology_claims import claims_by_intent, sorted_claims
-    from corpus_archaeology_relationships import build_relationships
-    from corpus_archaeology_shared import (
-        SCHEMA_VERSION,
-        CorpusArchaeologyError,
-        canonical_bytes,
-        normalize_timestamp,
-        semantic_string,
-    )
-    from corpus_archaeology_sources import normalize_sources, public_sources
+from tools.salvage.corpus_archaeology_candidates import (
+    RANKING_WEIGHTS,
+    build_candidate,
+)
+from tools.salvage.corpus_archaeology_claims import claims_by_intent, sorted_claims
+from tools.salvage.corpus_archaeology_relationships import build_relationships
+from tools.salvage.corpus_archaeology_shared import (
+    SCHEMA_VERSION,
+    CorpusArchaeologyError,
+    canonical_bytes,
+    normalize_timestamp,
+    semantic_string,
+)
+from tools.salvage.corpus_archaeology_sources import normalize_sources, public_sources
 
 
 def _stable_material(

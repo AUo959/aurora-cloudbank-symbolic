@@ -294,6 +294,18 @@ def _candidate(intent: str, claims: list[dict[str, Any]]) -> dict[str, Any]:
         and item["evidence_kind"] in {"implementation_artifact", "test_result"}
         for item in claims
     )
+    current_implemented = any(
+        item["claim_type"] == "implementation_evidence"
+        and item["evidence_kind"] in {"implementation_artifact", "test_result"}
+        and item["authority_status"] == "current"
+        for item in claims
+    )
+    current_partial = any(
+        item["claim_type"] == "partial_implementation_evidence"
+        and item["evidence_kind"] in {"implementation_artifact", "test_result"}
+        and item["authority_status"] == "current"
+        for item in claims
+    )
     decision = bool({"approval", "decision"} & human_types)
     requirement = bool({"requirement", "constraint"} & human_types)
     unresolved = bool({"todo", "unresolved_question", "proposed_patch"} & human_types)
@@ -325,8 +337,8 @@ def _candidate(intent: str, claims: list[dict[str, Any]]) -> dict[str, Any]:
     elif implemented:
         status, disposition = "implemented", "preserve"
         rationale = (
-            "Explicit implementation evidence is present; preserve and verify the "
-            "current successor."
+            "Implementation evidence is present; preserve the implementation record "
+            "and verify whether a current successor remains."
         )
     elif partial:
         status, disposition = "partial", "investigate"
@@ -388,7 +400,9 @@ def _candidate(intent: str, claims: list[dict[str, Any]]) -> dict[str, Any]:
         },
         "preservation": {
             "implementation_preserved": (
-                True if implemented else (False if partial else None)
+                True
+                if current_implemented
+                else (False if current_partial else None)
             ),
             "capability_preserved": None,
             "intent_preserved": None,

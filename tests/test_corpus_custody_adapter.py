@@ -89,7 +89,7 @@ def test_exact_verbatim_release_projects_released_source_without_epistemic_upgra
     assert source["content_access"] == "released"
     assert source["content"] == content
     assert source["sha256"] == artifact["sha256"]
-    assert source["source_type"] == "document"
+    assert source["source_type"] == "unknown"
     assert source["platform"] == "legacy_inventory"
     assert source["creator_type"] == "unknown"
     assert source["authority_status"] == "unknown"
@@ -132,6 +132,7 @@ def test_disposition_never_self_authorizes_release(disposition: str) -> None:
     source = prepared["sources"][0]
     assert source["content_access"] == "metadata_only"
     assert source["content"] is None
+    assert source["source_type"] == "unknown"
     assert source["creator_type"] == "unknown"
     assert source["authority_status"] == "unknown"
 
@@ -228,7 +229,10 @@ def test_projection_records_cannot_be_semantically_released(source_kind: str) ->
     )
     inventory = _inventory([artifact])
 
-    with pytest.raises(CustodyAdapterError, match="projection record cannot be semantically released"):
+    with pytest.raises(
+        CustodyAdapterError,
+        match="projection record cannot be semantically released",
+    ):
         prepare_corpus(inventory, _release(inventory, [_entry(artifact, content)]))
 
 
@@ -246,10 +250,10 @@ def test_fixed_inputs_produce_deterministic_output() -> None:
     assert [source["artifact_id"] for source in result_a["sources"]] == sorted(
         [first["artifact_id"], second["artifact_id"]]
     )
-    code_source = next(source for source in result_a["sources"] if source["artifact_id"] == first["artifact_id"])
-    assert code_source["source_type"] == "code"
-    assert code_source["creator_type"] == "unknown"
-    assert code_source["authority_status"] == "unknown"
+    for source in result_a["sources"]:
+        assert source["source_type"] == "unknown"
+        assert source["creator_type"] == "unknown"
+        assert source["authority_status"] == "unknown"
 
 
 @pytest.mark.unit

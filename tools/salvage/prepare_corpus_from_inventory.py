@@ -4,6 +4,9 @@
 This adapter deliberately does not open legacy source artifacts. It accepts only the
 #1382 inventory report and a separate custody-issued release manifest, verifies
 identity/digest boundaries, and emits a deterministic #1533 prepared corpus record.
+
+Custody release authorizes exact bytes only. It does not grant creator identity,
+epistemic authority, or implementation-evidence classification.
 """
 
 from __future__ import annotations
@@ -131,7 +134,7 @@ def _verify_release(artifact: dict[str, Any], entry: dict[str, Any]) -> None:
         )
 
 
-def _metadata_source(artifact: dict[str, Any], report_id: str) -> dict[str, Any]:
+def _base_source(artifact: dict[str, Any], report_id: str) -> dict[str, Any]:
     source: dict[str, Any] = {
         "source_ref": f"custody:{artifact['artifact_id']}",
         "title": artifact["relative_path"],
@@ -153,19 +156,11 @@ def _released_source(
     artifact: dict[str, Any], entry: dict[str, Any], report_id: str
 ) -> dict[str, Any]:
     _verify_release(artifact, entry)
-    return {
-        "source_ref": f"custody:{artifact['artifact_id']}",
-        "title": entry.get("title") or artifact["relative_path"],
-        "source_type": entry["source_type"],
-        "platform": entry.get("platform"),
-        "creator_type": entry["creator_type"],
-        "authority_status": entry["authority_status"],
-        "artifact_id": artifact["artifact_id"],
-        "inventory_report_id": report_id,
-        "content_access": "released",
-        "content": entry["content"],
-        "sha256": entry["sha256"],
-    }
+    source = _base_source(artifact, report_id)
+    source["content_access"] = "released"
+    source["content"] = entry["content"]
+    source["sha256"] = entry["sha256"]
+    return source
 
 
 def prepare_corpus(
@@ -191,7 +186,7 @@ def prepare_corpus(
         source = (
             _released_source(artifact, entry, report_id)
             if entry is not None
-            else _metadata_source(artifact, report_id)
+            else _base_source(artifact, report_id)
         )
         sources.append(source)
 

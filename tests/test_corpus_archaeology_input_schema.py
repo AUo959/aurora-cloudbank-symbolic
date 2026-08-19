@@ -117,3 +117,32 @@ def test_relationship_hint_contract_is_domain_neutral(input_schema: dict) -> Non
     }
 
     _validator(input_schema).validate(payload)
+
+
+@pytest.mark.unit
+def test_relationship_hint_requires_at_least_one_evidence_source(input_schema: dict) -> None:
+    payload = {
+        "schema_version": "0.1.0",
+        "corpus_id": "fixture:unsourced-relationship",
+        "sources": [
+            _source(
+                access="released",
+                content=(
+                    "REQUIREMENT[history.a]: Preserve A.\n"
+                    "REQUIREMENT[history.b]: Preserve B.\n"
+                ),
+            )
+        ],
+        "relationship_hints": [
+            {
+                "left_intent_key": "history.a",
+                "right_intent_key": "history.b",
+                "relationship": "parallel",
+                "rationale": "This relationship must not be accepted without evidence.",
+                "evidence_source_refs": [],
+            }
+        ],
+    }
+
+    with pytest.raises(jsonschema.ValidationError):
+        _validator(input_schema).validate(payload)

@@ -29,9 +29,15 @@ from tools.salvage.corpus_archaeology_shared import (  # noqa: E402
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INVENTORY_SCHEMA_PATH = REPO_ROOT / "schemas" / "salvage" / "legacy_asset_inventory.schema.json"
-RELEASE_SCHEMA_PATH = REPO_ROOT / "schemas" / "salvage" / "corpus_custody_release.schema.json"
-CORPUS_SCHEMA_PATH = REPO_ROOT / "schemas" / "salvage" / "corpus_archaeology_input.schema.json"
+INVENTORY_SCHEMA_PATH = (
+    REPO_ROOT / "schemas" / "salvage" / "legacy_asset_inventory.schema.json"
+)
+RELEASE_SCHEMA_PATH = (
+    REPO_ROOT / "schemas" / "salvage" / "corpus_custody_release.schema.json"
+)
+CORPUS_SCHEMA_PATH = (
+    REPO_ROOT / "schemas" / "salvage" / "corpus_archaeology_input.schema.json"
+)
 MAX_MANIFEST_BYTES = 64 * 1024 * 1024
 
 _CATEGORY_SOURCE_TYPE = {
@@ -55,8 +61,13 @@ def _load_validator(path: Path) -> jsonschema.Draft202012Validator:
         schema = json.loads(path.read_text(encoding="utf-8"))
         jsonschema.Draft202012Validator.check_schema(schema)
     except (OSError, json.JSONDecodeError, jsonschema.SchemaError) as exc:
-        raise CustodyAdapterError(f"committed schema unavailable or invalid: {path.name}") from exc
-    return jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
+        raise CustodyAdapterError(
+            f"committed schema unavailable or invalid: {path.name}"
+        ) from exc
+    return jsonschema.Draft202012Validator(
+        schema,
+        format_checker=jsonschema.FormatChecker(),
+    )
 
 
 def _validate(value: Any, path: Path, label: str) -> None:
@@ -68,11 +79,21 @@ def _validate(value: Any, path: Path, label: str) -> None:
         return
     error = errors[0]
     location = ".".join(str(part) for part in error.absolute_path) or "<root>"
-    raise CustodyAdapterError(f"{label} schema validation failed at {location}: {error.message}")
+    raise CustodyAdapterError(
+        f"{label} schema validation failed at {location}: {error.message}"
+    )
 
 
 def _index_artifacts(inventory: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    return {artifact["artifact_id"]: artifact for artifact in inventory["artifacts"]}
+    indexed: dict[str, dict[str, Any]] = {}
+    for artifact in inventory["artifacts"]:
+        artifact_id = artifact["artifact_id"]
+        if artifact_id in indexed:
+            raise CustodyAdapterError(
+                f"inventory contains duplicate artifact ID: {artifact_id}"
+            )
+        indexed[artifact_id] = artifact
+    return indexed
 
 
 def _index_releases(
@@ -89,19 +110,25 @@ def _index_releases(
     return indexed
 
 
-def _verify_release(
-    artifact: dict[str, Any], entry: dict[str, Any]
-) -> None:
+def _verify_release(artifact: dict[str, Any], entry: dict[str, Any]) -> None:
     artifact_id = artifact["artifact_id"]
     if artifact["source_kind"] in {"archive_notice", "archive_error"}:
-        raise CustodyAdapterError(f"projection record cannot be semantically released: {artifact_id}")
+        raise CustodyAdapterError(
+            f"projection record cannot be semantically released: {artifact_id}"
+        )
     inventory_digest = artifact.get("sha256")
     if inventory_digest is None:
-        raise CustodyAdapterError(f"released artifact has no custody SHA-256: {artifact_id}")
+        raise CustodyAdapterError(
+            f"released artifact has no custody SHA-256: {artifact_id}"
+        )
     if entry["sha256"] != inventory_digest:
-        raise CustodyAdapterError(f"release digest does not match inventory: {artifact_id}")
+        raise CustodyAdapterError(
+            f"release digest does not match inventory: {artifact_id}"
+        )
     if sha256_text(entry["content"]) != inventory_digest:
-        raise CustodyAdapterError(f"released content is not verbatim custody bytes: {artifact_id}")
+        raise CustodyAdapterError(
+            f"released content is not verbatim custody bytes: {artifact_id}"
+        )
 
 
 def _metadata_source(artifact: dict[str, Any], report_id: str) -> dict[str, Any]:
@@ -171,6 +198,7 @@ def prepare_corpus(
     identity_material = {
         "inventory_report_id": report_id,
         "release_id": release["release_id"],
+        "release_authority_ref": release["release_authority_ref"],
         "sources": sources,
     }
     prepared = {
@@ -185,6 +213,8 @@ def prepare_corpus(
 
 
 def _read_json(path: Path) -> dict[str, Any]:
+    if path.is_symlink():
+        raise CustodyAdapterError(f"input manifest must not be a symlink: {path}")
     flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
     try:
         fd = os.open(path, flags)
@@ -205,7 +235,9 @@ def _read_json(path: Path) -> dict[str, Any]:
         if fd >= 0:
             os.close(fd)
     if not isinstance(value, dict):
-        raise CustodyAdapterError(f"input manifest must contain a JSON object: {path}")
+        raise CustodyAdapterError(
+            f"input manifest must contain a JSON object: {path}"
+        )
     return value
 
 
@@ -216,7 +248,9 @@ def _write_new(path: Path, payload: str) -> None:
     try:
         fd = os.open(path, flags, 0o600)
     except OSError as exc:
-        raise CustodyAdapterError(f"output path must be new and writable: {path}") from exc
+        raise CustodyAdapterError(
+            f"output path must be new and writable: {path}"
+        ) from exc
     with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
         stream.write(payload)
         stream.flush()
@@ -225,7 +259,9 @@ def _write_new(path: Path, payload: str) -> None:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Project a custody inventory + verbatim release manifest into corpus input"
+        description=(
+            "Project a custody inventory + verbatim release manifest into corpus input"
+        )
     )
     parser.add_argument("inventory", type=Path)
     parser.add_argument("release", type=Path)
@@ -239,7 +275,12 @@ def main() -> int:
         inventory = _read_json(args.inventory)
         release = _read_json(args.release)
         prepared = prepare_corpus(inventory, release)
-        payload = json.dumps(prepared, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+        payload = json.dumps(
+            prepared,
+            indent=2,
+            sort_keys=True,
+            ensure_ascii=False,
+        ) + "\n"
         if args.output is None:
             print(payload, end="")
         else:
@@ -247,7 +288,9 @@ def main() -> int:
                 args.inventory.resolve(strict=False),
                 args.release.resolve(strict=False),
             }:
-                raise CustodyAdapterError("output path must not replace an input manifest")
+                raise CustodyAdapterError(
+                    "output path must not replace an input manifest"
+                )
             _write_new(args.output, payload)
     except CustodyAdapterError as exc:
         print(f"INVALID: {exc}")

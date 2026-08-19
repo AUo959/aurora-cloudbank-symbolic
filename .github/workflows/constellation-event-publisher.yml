@@ -2,6 +2,18 @@ name: "Constellation Event Publisher"
 
 # Reusable workflow for spoke repos to publish events to the hub event router.
 # Ref: Aurora Constellation Architecture Proposal v1.0.0 — Gap 3
+#
+# CONNECTIVITY PASS 2026-08-19:
+#   - The envelope step never wrote `envelope` to $GITHUB_OUTPUT, so
+#     `steps.envelope.outputs.envelope || inputs.payload` always fell through to
+#     the raw caller payload. Every event published through this workflow was
+#     therefore missing event_type / source_node / timestamp / payload and was
+#     rejected by constellation-event-router.yml's schema validation.
+#   - `source_node` is now a required input; the schema's `source_node` enum is
+#     a hard requirement of constellation-event.schema.json and no caller was
+#     supplying it.
+#   - Caller-controlled strings are passed through `env:` instead of being
+#     interpolated directly into `run:` bodies (script injection).
 
 on:
   workflow_call:
@@ -10,8 +22,12 @@ on:
         description: "Constellation event type (e.g. qgia.forecast.completed)"
         required: true
         type: string
+      source_node:
+        description: "Emitting node designation (must match constellation-event.schema.json source_node enum)"
+        required: true
+        type: string
       payload:
-        description: "Event payload as JSON string"
+        description: "Event payload as a JSON object string. Nested under `payload` in the envelope."
         required: true
         type: string
     secrets:
@@ -24,47 +40,79 @@ jobs:
     name: Publish Event to Constellation Hub
     runs-on: ubuntu-latest
     steps:
-      - name: Validate event type
+      - name: Checkout hub contracts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          repository: AUo959/aurora-cloudbank-symbolic
+          path: .constellation-hub
+          sparse-checkout: constellation-contracts/schemas
+
+      - name: Validate event type and source node against the published schema
+        env:
+          EVENT_TYPE: ${{ inputs.event_type }}
+          SOURCE_NODE: ${{ inputs.source_node }}
         run: |
-          VALID_TYPES=(
-            "qgia.forecast.completed"
-            "qgia.forecast.requested"
-            "zipwiz.archive.processed"
-            "aurora.drift.detected"
-            "qgia.knowledge.updated"
-            "constellation.health.check"
-            "constellation.health.response"
-            "constellation.manifest.drift"
-          )
-          EVENT_TYPE="${{ inputs.event_type }}"
-          FOUND=false
-          for t in "${VALID_TYPES[@]}"; do
-            if [ "$t" = "$EVENT_TYPE" ]; then
-              FOUND=true
-              break
-            fi
-          done
-          if [ "$FOUND" = "false" ]; then
-            echo "::error::Invalid event type: $EVENT_TYPE"
+          SCHEMA=.constellation-hub/constellation-contracts/schemas/constellation-event.schema.json
+          if ! jq -e --arg v "$EVENT_TYPE" '.properties.event_type.enum | index($v)' "$SCHEMA" >/dev/null; then
+            echo "::error::Invalid event_type: $EVENT_TYPE"
+            jq -r '.properties.event_type.enum[]' "$SCHEMA" | sed 's/^/  allowed: /'
             exit 1
           fi
-          echo "Event type '$EVENT_TYPE' is valid"
+          if ! jq -e --arg v "$SOURCE_NODE" '.properties.source_node.enum | index($v)' "$SCHEMA" >/dev/null; then
+            echo "::error::Invalid source_node: $SOURCE_NODE"
+            jq -r '.properties.source_node.enum[]' "$SCHEMA" | sed 's/^/  allowed: /'
+            exit 1
+          fi
+          echo "event_type='$EVENT_TYPE' source_node='$SOURCE_NODE' are valid"
 
       - name: Build event envelope
         id: envelope
+        env:
+          EVENT_TYPE: ${{ inputs.event_type }}
+          SOURCE_NODE: ${{ inputs.source_node }}
+          RAW_PAYLOAD: ${{ inputs.payload }}
         run: |
-          CORRELATION_ID=$(uuidgen || python3 -c "import uuid; print(uuid.uuid4())")
+          CORRELATION_ID=$(python3 -c "import uuid; print(uuid.uuid4())")
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          # Merge payload with envelope fields
-          ENVELOPE=$(echo '${{ inputs.payload }}' | jq \
-            --arg et "${{ inputs.event_type }}" \
+          if ! printf '%s' "$RAW_PAYLOAD" | jq -e 'type == "object"' >/dev/null 2>&1; then
+            echo "::error::inputs.payload must be a JSON object string"
+            exit 1
+          fi
+
+          printf '%s' "$RAW_PAYLOAD" | jq -c \
+            --arg et "$EVENT_TYPE" \
+            --arg sn "$SOURCE_NODE" \
             --arg ts "$TIMESTAMP" \
             --arg cid "$CORRELATION_ID" \
-            '. + {event_type: $et, timestamp: $ts, correlation_id: $cid, provenance: {charter: "Picard_Delta_3", l3_compliance: true}}')
+            '{event_type: $et,
+              source_node: $sn,
+              timestamp: $ts,
+              correlation_id: $cid,
+              provenance: {charter: "Picard_Delta_3", l3_compliance: true},
+              payload: .}' > event_envelope.json
 
-          # Write to file to avoid shell escaping issues
-          echo "$ENVELOPE" > /tmp/event_envelope.json
+          # Validate our own envelope before we spend a dispatch on it.
+          python3 -m pip install --quiet jsonschema
+          python3 - <<'PY'
+          import json, sys
+          from jsonschema import validate, ValidationError
+          schema = json.load(open('.constellation-hub/constellation-contracts/schemas/constellation-event.schema.json', encoding='utf-8'))
+          envelope = json.load(open('event_envelope.json', encoding='utf-8'))
+          try:
+              validate(instance=envelope, schema=schema)
+          except ValidationError as exc:
+              print(f'::error::Envelope failed hub schema validation before dispatch: {exc.message}')
+              sys.exit(1)
+          print('Envelope conforms to constellation-event.schema.json')
+          PY
+
+          {
+            echo "envelope<<CONSTELLATION_ENVELOPE_EOF"
+            cat event_envelope.json
+            echo ""
+            echo "CONSTELLATION_ENVELOPE_EOF"
+          } >> "$GITHUB_OUTPUT"
           echo "correlation_id=$CORRELATION_ID" >> "$GITHUB_OUTPUT"
 
       - name: Dispatch to hub
@@ -73,8 +121,8 @@ jobs:
           token: ${{ secrets.CONSTELLATION_TOKEN }}
           repository: AUo959/aurora-cloudbank-symbolic
           event-type: ${{ inputs.event_type }}
-          client-payload: ${{ steps.envelope.outputs.envelope || inputs.payload }}
+          client-payload: ${{ steps.envelope.outputs.envelope }}
 
       - name: Audit log
         run: |
-          echo "::notice::Published constellation event: type=${{ inputs.event_type }}, correlation_id=${{ steps.envelope.outputs.correlation_id }}"
+          echo "::notice::Published constellation event: type=${{ inputs.event_type }}, source=${{ inputs.source_node }}, correlation_id=${{ steps.envelope.outputs.correlation_id }}"

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/salvage/corpus_custody_release.schema.json",
+  "title": "Corpus Custody Verbatim Release Manifest",
+  "description": "Authority-separated manifest that releases exact custody-inventoried UTF-8 content for read-only corpus archaeology preparation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "release_id", "inventory_report_id", "entries"],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "release_id": {
+      "type": "string",
+      "pattern": "^release:[A-Za-z0-9_.:/-]+$"
+    },
+    "inventory_report_id": {
+      "type": "string",
+      "pattern": "^inventory:[a-f0-9]{64}$"
+    },
+    "entries": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/release_entry"}
+    }
+  },
+  "$defs": {
+    "release_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "sha256",
+        "content",
+        "source_type",
+        "creator_type",
+        "authority_status"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^artifact:[a-f0-9]{24}$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "content": {"type": "string"},
+        "source_type": {
+          "enum": [
+            "chat",
+            "document",
+            "issue",
+            "pull_request",
+            "commit",
+            "code",
+            "test",
+            "artifact",
+            "report",
+            "unknown"
+          ]
+        },
+        "creator_type": {
+          "enum": ["human", "assistant", "model", "system", "mixed", "unknown"]
+        },
+        "authority_status": {
+          "enum": ["current", "historical", "reference", "draft", "unknown"]
+        },
+        "platform": {"type": ["string", "null"], "minLength": 1},
+        "title": {"type": ["string", "null"], "minLength": 1}
+      }
+    }
+  }
+}

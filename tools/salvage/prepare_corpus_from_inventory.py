@@ -6,7 +6,7 @@ This adapter deliberately does not open legacy source artifacts. It accepts only
 identity/digest boundaries, and emits a deterministic #1533 prepared corpus record.
 
 Custody release authorizes exact bytes only. It does not grant creator identity,
-epistemic authority, or implementation-evidence classification.
+epistemic authority, source semantics, or implementation-evidence classification.
 """
 
 from __future__ import annotations
@@ -42,21 +42,6 @@ CORPUS_SCHEMA_PATH = (
     REPO_ROOT / "schemas" / "salvage" / "corpus_archaeology_input.schema.json"
 )
 MAX_MANIFEST_BYTES = 64 * 1024 * 1024
-
-# #1382 custody categories describe artifact form, not epistemic authority.
-# Only code/documentation have a sufficiently narrow meaning to project into the
-# archaeology source taxonomy. Broader categories remain unknown until a separate
-# evidence-classification layer supplies a stronger, provenance-bearing judgment.
-_CATEGORY_SOURCE_TYPE = {
-    "code": "code",
-    "documentation": "document",
-    "data": "unknown",
-    "generated_media": "unknown",
-    "configuration": "unknown",
-    "archive": "unknown",
-    "executable": "unknown",
-    "unknown": "unknown",
-}
 
 
 class CustodyAdapterError(CorpusArchaeologyError):
@@ -142,7 +127,7 @@ def _base_source(artifact: dict[str, Any], report_id: str) -> dict[str, Any]:
     source: dict[str, Any] = {
         "source_ref": f"custody:{artifact['artifact_id']}",
         "title": artifact["relative_path"],
-        "source_type": _CATEGORY_SOURCE_TYPE[artifact["category"]],
+        "source_type": "unknown",
         "platform": "legacy_inventory",
         "creator_type": "unknown",
         "authority_status": "unknown",

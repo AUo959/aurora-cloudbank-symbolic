@@ -1,9 +1,11 @@
-#!/usr/bin/env python3
 """Project custody inventory + verbatim release manifest into corpus input.
 
-This adapter deliberately does not open legacy source artifacts. It accepts only the
-#1382 inventory report and a separate custody-issued release manifest, verifies
-identity/digest boundaries, and emits a deterministic #1533 prepared corpus record.
+This Phase-1 adapter is intentionally a pure in-memory transformation. It accepts
+already-loaded #1382 inventory and custody-release records, verifies identity/digest
+boundaries, and returns a deterministic #1533 prepared corpus record.
+
+It does not open source artifacts, manifests, archives, or output paths. Transport and
+filesystem I/O belong to a separately reviewed boundary.
 
 Custody release authorizes exact bytes only. It does not grant creator identity,
 epistemic authority, source semantics, or implementation-evidence classification.
@@ -11,21 +13,13 @@ epistemic authority, source semantics, or implementation-evidence classification
 
 from __future__ import annotations
 
-import argparse
 import json
-import os
-import stat
-import sys
 from pathlib import Path
 from typing import Any
 
 import jsonschema
 
-_REPO_ROOT = str(Path(__file__).resolve().parents[2])
-if _REPO_ROOT not in sys.path:
-    sys.path.insert(0, _REPO_ROOT)
-
-from tools.salvage.corpus_archaeology_shared import (  # noqa: E402
+from tools.salvage.corpus_archaeology_shared import (
     CorpusArchaeologyError,
     make_id,
     sha256_text,
@@ -41,7 +35,6 @@ RELEASE_SCHEMA_PATH = (
 CORPUS_SCHEMA_PATH = (
     REPO_ROOT / "schemas" / "salvage" / "corpus_archaeology_input.schema.json"
 )
-MAX_MANIFEST_BYTES = 64 * 1024 * 1024
 
 
 class CustodyAdapterError(CorpusArchaeologyError):
@@ -155,7 +148,7 @@ def _released_source(
 def prepare_corpus(
     inventory: dict[str, Any], release: dict[str, Any]
 ) -> dict[str, Any]:
-    """Return a deterministic prepared corpus without reading legacy artifacts."""
+    """Return a deterministic prepared corpus without performing external I/O."""
     _validate(inventory, INVENTORY_SCHEMA_PATH, "inventory")
     _validate(release, RELEASE_SCHEMA_PATH, "release")
 
@@ -194,93 +187,3 @@ def prepare_corpus(
     }
     _validate(prepared, CORPUS_SCHEMA_PATH, "prepared corpus")
     return prepared
-
-
-def _read_json(path: Path) -> dict[str, Any]:
-    if path.is_symlink():
-        raise CustodyAdapterError(f"input manifest must not be a symlink: {path}")
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        fd = os.open(path, flags)
-    except OSError as exc:
-        raise CustodyAdapterError(f"cannot open input manifest safely: {path}") from exc
-    try:
-        info = os.fstat(fd)
-        if not stat.S_ISREG(info.st_mode):
-            raise CustodyAdapterError(f"input manifest must be a regular file: {path}")
-        if info.st_size > MAX_MANIFEST_BYTES:
-            raise CustodyAdapterError(f"input manifest exceeds size limit: {path}")
-        with os.fdopen(fd, "r", encoding="utf-8") as stream:
-            fd = -1
-            value = json.load(stream)
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise CustodyAdapterError(f"invalid input manifest: {path}") from exc
-    finally:
-        if fd >= 0:
-            os.close(fd)
-    if not isinstance(value, dict):
-        raise CustodyAdapterError(
-            f"input manifest must contain a JSON object: {path}"
-        )
-    return value
-
-
-def _write_new(path: Path, payload: str) -> None:
-    path = path.absolute()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        fd = os.open(path, flags, 0o600)
-    except OSError as exc:
-        raise CustodyAdapterError(
-            f"output path must be new and writable: {path}"
-        ) from exc
-    with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
-        stream.write(payload)
-        stream.flush()
-        os.fsync(stream.fileno())
-
-
-def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description=(
-            "Project a custody inventory + verbatim release manifest into corpus input"
-        )
-    )
-    parser.add_argument("inventory", type=Path)
-    parser.add_argument("release", type=Path)
-    parser.add_argument("--output", type=Path)
-    return parser
-
-
-def main() -> int:
-    args = _build_parser().parse_args()
-    try:
-        inventory = _read_json(args.inventory)
-        release = _read_json(args.release)
-        prepared = prepare_corpus(inventory, release)
-        payload = json.dumps(
-            prepared,
-            indent=2,
-            sort_keys=True,
-            ensure_ascii=False,
-        ) + "\n"
-        if args.output is None:
-            print(payload, end="")
-        else:
-            if args.output.resolve(strict=False) in {
-                args.inventory.resolve(strict=False),
-                args.release.resolve(strict=False),
-            }:
-                raise CustodyAdapterError(
-                    "output path must not replace an input manifest"
-                )
-            _write_new(args.output, payload)
-    except CustodyAdapterError as exc:
-        print(f"INVALID: {exc}")
-        return 1
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

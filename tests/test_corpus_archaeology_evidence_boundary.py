@@ -36,6 +36,22 @@ def _model_source(content: str) -> dict:
     }
 
 
+def _human_source(content: str, *, authority_status: str) -> dict:
+    return {
+        "source_ref": f"chat:human:{authority_status}",
+        "title": "Human assertion",
+        "source_type": "chat",
+        "platform": "fixture",
+        "creator_type": "human",
+        "authority_status": authority_status,
+        "confidence": 1.0,
+        "artifact_id": None,
+        "inventory_report_id": None,
+        "content_access": "released",
+        "content": content,
+    }
+
+
 @pytest.mark.unit
 def test_model_implemented_assertion_does_not_count_as_implementation_proof() -> None:
     archaeology = _load_module()
@@ -96,4 +112,39 @@ def test_model_approval_rejection_and_requirements_do_not_create_human_authority
     assert rejected["historical_state"]["status"] == "proposed"
     assert rejected["historical_state"]["explicit_rejection"] is False
     assert rejected["ranking"]["components"]["requirement_strength"] == 0.0
+    assert rejected["recovery"]["disposition"] == "investigate"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("authority_status", ["draft", "reference", "unknown"])
+def test_lower_authority_human_markers_remain_evidence_not_decision_authority(
+    authority_status: str,
+) -> None:
+    archaeology = _load_module()
+    corpus = {
+        "schema_version": "0.1.0",
+        "corpus_id": f"fixture:human-{authority_status}",
+        "sources": [
+            _human_source(
+                "APPROVED[feature.pending]: Proceed.\n"
+                "REQUIREMENT[feature.pending]: Treat this as required.\n"
+                "REJECTED[feature.rejected]: Do not proceed.\n",
+                authority_status=authority_status,
+            )
+        ],
+    }
+
+    report = archaeology.analyze_corpus(corpus, generated_at=FIXED_TIME)
+    candidates = {item["intent_key"]: item for item in report["candidates"]}
+
+    pending = candidates["feature.pending"]
+    rejected = candidates["feature.rejected"]
+
+    assert pending["historical_state"]["status"] == "proposed"
+    assert pending["ranking"]["components"]["explicit_decision"] == 0.0
+    assert pending["ranking"]["components"]["requirement_strength"] == 0.0
+    assert pending["recovery"]["disposition"] == "investigate"
+
+    assert rejected["historical_state"]["status"] == "proposed"
+    assert rejected["historical_state"]["explicit_rejection"] is False
     assert rejected["recovery"]["disposition"] == "investigate"

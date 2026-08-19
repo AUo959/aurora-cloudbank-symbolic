@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 IMPLEMENTATION_EVIDENCE_KINDS = {"implementation_artifact", "test_result"}
+HUMAN_AUTHORITY_STATUSES = {"current", "historical"}
 COMMITMENT_TYPES = {
     "approval",
     "decision",
@@ -21,6 +22,7 @@ def _human_claim_types(claims: list[dict[str, Any]]) -> set[str]:
         item["claim_type"]
         for item in claims
         if item["evidence_kind"] == "human_statement"
+        and item["authority_status"] in HUMAN_AUTHORITY_STATUSES
     }
 
 

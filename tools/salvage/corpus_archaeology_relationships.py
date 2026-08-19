@@ -23,6 +23,10 @@ def _known_sources(
     raw: dict[str, Any], known_sources: set[str], index: int
 ) -> list[str]:
     refs = sorted(set(raw["evidence_source_refs"]))
+    if not refs:
+        raise CorpusArchaeologyError(
+            f"relationship_hints[{index}] requires at least one evidence source"
+        )
     unknown = set(refs) - known_sources
     if unknown:
         raise CorpusArchaeologyError(

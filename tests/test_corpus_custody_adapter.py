@@ -50,10 +50,16 @@ def _inventory(artifacts: list[dict]) -> dict:
     }
 
 
-def _release(inventory: dict, entries: list[dict]) -> dict:
+def _release(
+    inventory: dict,
+    entries: list[dict],
+    *,
+    authority_ref: str = "custody-authority:fixture",
+) -> dict:
     return {
         "schema_version": "0.1.0",
         "release_id": "release:fixture-v1",
+        "release_authority_ref": authority_ref,
         "inventory_report_id": inventory["report_id"],
         "entries": entries,
     }
@@ -172,6 +178,17 @@ def test_duplicate_release_entries_fail_closed() -> None:
 
 
 @pytest.mark.unit
+def test_duplicate_inventory_artifact_ids_fail_closed() -> None:
+    first = _artifact("artifact:" + "c" * 24, content="First custody record.\n")
+    second = copy.deepcopy(first)
+    second["relative_path"] = "legacy/conflicting-second-record.txt"
+    inventory = _inventory([first, second])
+
+    with pytest.raises(CustodyAdapterError, match="duplicate artifact ID"):
+        prepare_corpus(inventory, _release(inventory, []))
+
+
+@pytest.mark.unit
 def test_artifact_without_digest_cannot_be_released() -> None:
     artifact = _artifact("artifact:" + "7" * 24, content=None)
     inventory = _inventory([artifact])
@@ -219,3 +236,22 @@ def test_fixed_inputs_produce_deterministic_output() -> None:
     assert [source["artifact_id"] for source in result_a["sources"]] == sorted(
         [first["artifact_id"], second["artifact_id"]]
     )
+
+
+@pytest.mark.unit
+def test_release_authority_participates_in_corpus_identity() -> None:
+    content = "Authority-bound source.\n"
+    artifact = _artifact("artifact:" + "d" * 24, content=content)
+    inventory = _inventory([artifact])
+    entry = _entry(artifact, content)
+
+    first = prepare_corpus(
+        inventory,
+        _release(inventory, [entry], authority_ref="custody-authority:first"),
+    )
+    second = prepare_corpus(
+        inventory,
+        _release(inventory, [entry], authority_ref="custody-authority:second"),
+    )
+
+    assert first["corpus_id"] != second["corpus_id"]

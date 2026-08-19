@@ -60,18 +60,28 @@ def _release(inventory: dict, content: str) -> dict:
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "category",
-    ["data", "configuration", "generated_media", "archive", "executable", "unknown"],
+    [
+        "code",
+        "documentation",
+        "data",
+        "configuration",
+        "generated_media",
+        "archive",
+        "executable",
+        "unknown",
+    ],
 )
-def test_broad_custody_categories_do_not_become_implementation_artifacts(
+def test_custody_categories_do_not_become_implementation_authority(
     category: str,
 ) -> None:
-    content = "IMPLEMENTED[fixture.capability]: A broad custody category says implemented.\n"
+    content = "IMPLEMENTED[fixture.capability]: Custody metadata says implemented.\n"
     inventory = _inventory(category, content)
     prepared = prepare_corpus(inventory, _release(inventory, content))
 
-    assert prepared["sources"][0]["source_type"] == "unknown"
-    assert prepared["sources"][0]["creator_type"] == "unknown"
-    assert prepared["sources"][0]["authority_status"] == "unknown"
+    source = prepared["sources"][0]
+    assert source["source_type"] == "unknown"
+    assert source["creator_type"] == "unknown"
+    assert source["authority_status"] == "unknown"
 
     report = analyze_corpus(prepared, generated_at="2026-08-19T03:00:00Z")
     claim = report["claims"][0]
@@ -81,21 +91,4 @@ def test_broad_custody_categories_do_not_become_implementation_artifacts(
     assert claim["evidence_kind"] == "unknown"
     assert candidate["historical_state"]["implementation_evidence_present"] is False
     assert candidate["historical_state"]["status"] == "proposed"
-
-
-@pytest.mark.unit
-def test_code_category_can_prove_implementation_but_not_current_preservation() -> None:
-    content = "IMPLEMENTED[fixture.code]: This custody object is classified as code.\n"
-    inventory = _inventory("code", content)
-    prepared = prepare_corpus(inventory, _release(inventory, content))
-
-    source = prepared["sources"][0]
-    assert source["source_type"] == "code"
-    assert source["authority_status"] == "unknown"
-
-    report = analyze_corpus(prepared, generated_at="2026-08-19T03:00:00Z")
-    candidate = report["candidates"][0]
-
-    assert candidate["historical_state"]["implementation_evidence_present"] is True
-    assert candidate["historical_state"]["status"] == "implemented"
     assert candidate["preservation"]["implementation_preserved"] is None

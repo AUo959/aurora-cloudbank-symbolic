@@ -241,7 +241,7 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _write_new(path: Path, payload: str) -> None:
-    path = path.resolve(strict=False)
+    path = path.absolute()
     path.parent.mkdir(parents=True, exist_ok=True)
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
     try:

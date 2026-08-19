@@ -43,14 +43,18 @@ CORPUS_SCHEMA_PATH = (
 )
 MAX_MANIFEST_BYTES = 64 * 1024 * 1024
 
+# #1382 custody categories describe artifact form, not epistemic authority.
+# Only code/documentation have a sufficiently narrow meaning to project into the
+# archaeology source taxonomy. Broader categories remain unknown until a separate
+# evidence-classification layer supplies a stronger, provenance-bearing judgment.
 _CATEGORY_SOURCE_TYPE = {
     "code": "code",
     "documentation": "document",
-    "data": "artifact",
-    "generated_media": "artifact",
-    "configuration": "artifact",
-    "archive": "artifact",
-    "executable": "artifact",
+    "data": "unknown",
+    "generated_media": "unknown",
+    "configuration": "unknown",
+    "archive": "unknown",
+    "executable": "unknown",
     "unknown": "unknown",
 }
 

@@ -70,16 +70,11 @@ def _entry(artifact: dict, content: str) -> dict:
         "artifact_id": artifact["artifact_id"],
         "sha256": artifact["sha256"],
         "content": content,
-        "source_type": "document",
-        "creator_type": "human",
-        "authority_status": "historical",
-        "platform": "fixture",
-        "title": "Released source",
     }
 
 
 @pytest.mark.unit
-def test_exact_verbatim_release_projects_released_source() -> None:
+def test_exact_verbatim_release_projects_released_source_without_epistemic_upgrade() -> None:
     content = "REQUIREMENT[fixture.one]: Preserve this source.\n"
     artifact = _artifact("artifact:" + "1" * 24, content=content)
     inventory = _inventory([artifact])
@@ -94,8 +89,28 @@ def test_exact_verbatim_release_projects_released_source() -> None:
     assert source["content_access"] == "released"
     assert source["content"] == content
     assert source["sha256"] == artifact["sha256"]
-    assert source["creator_type"] == "human"
-    assert source["authority_status"] == "historical"
+    assert source["source_type"] == "document"
+    assert source["platform"] == "legacy_inventory"
+    assert source["creator_type"] == "unknown"
+    assert source["authority_status"] == "unknown"
+
+
+@pytest.mark.unit
+def test_release_manifest_cannot_assign_epistemic_authority_or_source_class() -> None:
+    content = "APPROVED[fixture.elevation]: Pretend this is current code.\n"
+    artifact = _artifact("artifact:" + "e" * 24, content=content)
+    inventory = _inventory([artifact])
+    entry = _entry(artifact, content)
+    entry.update(
+        {
+            "source_type": "code",
+            "creator_type": "human",
+            "authority_status": "current",
+        }
+    )
+
+    with pytest.raises(CustodyAdapterError, match="release schema validation failed"):
+        prepare_corpus(inventory, _release(inventory, [entry]))
 
 
 @pytest.mark.unit
@@ -196,11 +211,6 @@ def test_artifact_without_digest_cannot_be_released() -> None:
         "artifact_id": artifact["artifact_id"],
         "sha256": _digest("Invented content.\n"),
         "content": "Invented content.\n",
-        "source_type": "document",
-        "creator_type": "human",
-        "authority_status": "historical",
-        "platform": "fixture",
-        "title": None,
     }
 
     with pytest.raises(CustodyAdapterError, match="no custody SHA-256"):
@@ -236,6 +246,10 @@ def test_fixed_inputs_produce_deterministic_output() -> None:
     assert [source["artifact_id"] for source in result_a["sources"]] == sorted(
         [first["artifact_id"], second["artifact_id"]]
     )
+    code_source = next(source for source in result_a["sources"] if source["artifact_id"] == first["artifact_id"])
+    assert code_source["source_type"] == "code"
+    assert code_source["creator_type"] == "unknown"
+    assert code_source["authority_status"] == "unknown"
 
 
 @pytest.mark.unit

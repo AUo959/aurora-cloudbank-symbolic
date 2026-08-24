@@ -4,15 +4,15 @@
 # Chain Notation: #SERVICES//NEMO//REQUIREMENTS//
 
 # ── Core inference framework ──────────────────────────────────────────────
-nemo_toolkit[all]>=2.7.3
+nemo_toolkit[all]>=3.0.0
 
 # ── Web server ────────────────────────────────────────────────────────────
 fastapi>=0.141.1
-uvicorn[standard]>=0.52.1
+uvicorn[standard]>=0.52.4
 
 # ── Settings management ───────────────────────────────────────────────────
 pydantic>=2.13.4
-pydantic-settings>=2.14.2
+pydantic-settings>=2.15.0
 
 # ── PyTorch (GPU build installed via base NeMo image; listed for reference)
 # torch>=2.0.0   # Provided by nvcr.io/nvidia/nemo base image

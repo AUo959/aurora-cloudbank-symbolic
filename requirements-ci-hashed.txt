@@ -18,9 +18,9 @@ annotated-types==0.8.0 \
     # via
     #   -c requirements-hashed.txt
     #   pydantic
-anthropic==0.120.2 \
-    --hash=sha256:0f0bc2b381dc0eb41c8d886b815d79c2041cd2374f83aed36f574b6dc9c579c1 \
-    --hash=sha256:9722efc10c27a30a69f5338ddacdb35bc6a64297a4e4ba729bf83af873d5fb3a
+anthropic==1.0.0 \
+    --hash=sha256:32dd52e9e1d774393b27182f451398ba4262287a4d0eab30887f89f1481b3ae4 \
+    --hash=sha256:42be3c97604af7252c5898413aee076ace6c46e9bca0d0d90ceb77c7d3719027
     # via
     #   -c requirements-hashed.txt
     #   -r requirements.txt
@@ -847,9 +847,9 @@ numpy==2.5.1 \
     #   qiskit-aer
     #   rustworkx
     #   scipy
-openai==2.53.0 \
-    --hash=sha256:baf5802ad08980e1d9d561e1b996e800c8bcd14af5847c6d0e7a5cc59e4d4116 \
-    --hash=sha256:c694ffc747a3c4d1663ef2b07b811315a476164ee5efa3a993967349ebca7618
+openai==3.3.1 \
+    --hash=sha256:6f22807de1a976c932cecda620e8172a8c3fdbaeed29c7f21564e0c2410edf56 \
+    --hash=sha256:9652df7fdf8ee6f5bd58e0a12f2b1d414a18e0f06bb7a9a57c8643a5f5469bd3
     # via
     #   -c requirements-hashed.txt
     #   -r requirements.txt

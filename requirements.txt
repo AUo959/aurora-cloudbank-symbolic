@@ -80,8 +80,8 @@ slowapi>=0.1.10,<1.0.0               # Rate limiting for FastAPI
 # ===================================================================
 # AI MODEL INTEGRATIONS
 # ===================================================================
-anthropic>=0.120.2,<1.0.0            # Claude 3.5/4.5 integration
-openai>=2.53.0,<3.0.0               # GPT-4/5 integration
+anthropic>=1.0.0,<2.0.0            # Claude 3.5/4.5 integration
+openai>=3.3.1,<4.0.0               # GPT-4/5 integration
 
 # ===================================================================
 # VALIDATION

@@ -19,6 +19,10 @@ Items with an `open` or `ready` lifecycle and all dependencies resolved.
 | 2 | arch/layer-canonization | Layer architecture canonization (L1/L2/L3 enforcement in code) | `architecture` `canonical` `L1` `L2` `L3` |
 | 4 | ops/QGIA-doctrine-store | QGIA analytical framework — store in ops/analytical_frameworks/QGIA/ | `QGIA` `analytical-framework` `ops` `non-canonical` |
 | 5 | docs/api-reference | API reference documentation | `docs` `api` |
+| 7 | #1329 | Prevent AI model catalog drift: validate model IDs and capabilities against provider catalogs | `blocking` `ci` `needs info` `owner-decision` |
+| 8 | #1233 | Ethics documentation follow-ups (consolidated) | `backlog` `documentation` `ethics` `implementation-needed` `needs info` `security` |
+| 9 | #1361 | security: resolve SHADOWFAX identity and custody ambiguity across ORD runtime surfaces | `audit-integrity` `high-priority` `needs info` `owner-decision` `security` |
+| 10 | #1530 | security(playground): fail closed when isolated sandbox runtime is unavailable | `bug` `security` |
 
 ---
 

@@ -90,4 +90,4 @@ sentry-sdk>=2.65.0                  # Error tracking
 # Required by connector/server.py to expose Aurora state over the Model
 # Context Protocol. Without it the connector and tests/connector are
 # unavailable; the core API is unaffected. See connector/README.md.
-mcp>=1.29.0,<2.0.0                  # Model Context Protocol SDK (v1 API)
+mcp>=1.29.1,<2.0.0                  # Model Context Protocol SDK (v1 API)

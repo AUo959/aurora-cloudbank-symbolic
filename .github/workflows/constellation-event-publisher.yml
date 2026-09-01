@@ -96,7 +96,7 @@ jobs:
           # Version-locked to match requirements-lock.txt; this reusable
           # workflow runs in spoke repos and sparse-checks-out only the schema
           # directory, so it cannot install from the hub's lock file.
-          python3 -m pip install --quiet 'jsonschema==4.26.0'
+          python3 -m pip install --quiet --only-binary=:all: 'jsonschema==4.26.0'
           python3 - <<'PY'
           import json, sys
           from jsonschema import validate, ValidationError

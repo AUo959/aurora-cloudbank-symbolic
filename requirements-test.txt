@@ -14,4 +14,4 @@ flake8==7.3.0
 # Connector test support
 # Runtime use remains optional, but tests/connector and test_mcp_connector_wired
 # import the MCP SDK during collection.
-mcp==1.29.0
+mcp==1.29.1

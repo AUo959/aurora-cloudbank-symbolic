@@ -38,7 +38,7 @@ semgrep>=1.165.0                    # Static analysis security scanner
 # DEVELOPMENT PRODUCTIVITY
 # ===================================================================
 pre-commit>=4.6.0                   # Git hooks
-python-dotenv>=1.1.1                # Environment management
+python-dotenv>=1.2.3                # Environment management
 GitPython>=3.1.45                   # Git integration
 httptools>=0.6.4                    # Fast HTTP parsing
 uvloop>=0.21.0                      # Fast event loop (Unix)
@@ -50,7 +50,7 @@ watchfiles>=1.1.0                   # File watching for auto-reload
 mkdocs>=1.5.0                       # Documentation generator
 mkdocs-material>=9.7.6              # Material theme for MkDocs
 rich>=14.1.0                        # Rich terminal formatting
-Pygments>=2.20.0                    # Syntax highlighting
+Pygments>=2.21.0                    # Syntax highlighting
 markdown-it-py>=4.2.0               # Markdown parser
 
 # ===================================================================

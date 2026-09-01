@@ -43,8 +43,21 @@ jobs:
         id: parse
         env:
           CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          EVENT_ACTION: ${{ github.event.action }}
         run: |
-          echo "event_type=${{ github.event.action }}" >> "$GITHUB_OUTPUT"
+          # EVENT_ACTION is the repository_dispatch `event-type`, supplied by
+          # whoever dispatched. It is never interpolated into this script body,
+          # and it is shape-checked before reaching $GITHUB_OUTPUT: an embedded
+          # newline would otherwise forge later output lines (e.g. `valid=true`)
+          # and defeat the schema gate below. The `case` pattern tests the whole
+          # string, so control characters cannot slip past a per-line match.
+          case "$EVENT_ACTION" in
+            "" | *[!a-z0-9._-]*)
+              echo "::error::Rejecting malformed repository_dispatch event-type; expected [a-z0-9._-]+"
+              exit 1
+              ;;
+          esac
+          echo "event_type=$EVENT_ACTION" >> "$GITHUB_OUTPUT"
           echo "source_node=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.source_node // "unknown"')" >> "$GITHUB_OUTPUT"
           echo "correlation_id=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.correlation_id // "none"')" >> "$GITHUB_OUTPUT"
 
@@ -91,10 +104,11 @@ jobs:
       - name: Audit log
         env:
           CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          EVENT_TYPE: ${{ steps.parse.outputs.event_type }}
         run: |
           SOURCE=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.source_node // "unknown"')
           CORR=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.correlation_id // "none"')
-          echo "::notice::Constellation Event received: type=${{ github.event.action }}, source=${SOURCE}, correlation_id=${CORR}"
+          echo "::notice::Constellation Event received: type=${EVENT_TYPE}, source=${SOURCE}, correlation_id=${CORR}"
 
   route-event:
     name: Route to ${{ matrix.subscriber }}
@@ -143,8 +157,11 @@ jobs:
     steps:
       - name: Reject self-route
         if: format('{0}/{1}', matrix.owner, matrix.subscriber) == github.repository
+        env:
+          EVENT_TYPE: ${{ needs.validate-event.outputs.event_type }}
+          THIS_REPO: ${{ github.repository }}
         run: |
-          echo "::error::Refusing to dispatch ${{ github.event.action }} back to ${{ github.repository }} — self-routing creates an unbounded dispatch loop under a PAT."
+          echo "::error::Refusing to dispatch ${EVENT_TYPE} back to ${THIS_REPO} — self-routing creates an unbounded dispatch loop under a PAT."
           exit 1
 
       - name: Enforce hop limit

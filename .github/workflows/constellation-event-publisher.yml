@@ -124,5 +124,12 @@ jobs:
           client-payload: ${{ steps.envelope.outputs.envelope }}
 
       - name: Audit log
+        env:
+          # `inputs.*` on a workflow_call are supplied by the calling spoke, so
+          # they are caller-controlled exactly like a repository_dispatch
+          # event-type and must not be interpolated into this script body.
+          EVENT_TYPE: ${{ inputs.event_type }}
+          SOURCE_NODE: ${{ inputs.source_node }}
+          CORRELATION_ID: ${{ steps.envelope.outputs.correlation_id }}
         run: |
-          echo "::notice::Published constellation event: type=${{ inputs.event_type }}, source=${{ inputs.source_node }}, correlation_id=${{ steps.envelope.outputs.correlation_id }}"
+          echo "::notice::Published constellation event: type=${EVENT_TYPE}, source=${SOURCE_NODE}, correlation_id=${CORRELATION_ID}"

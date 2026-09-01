@@ -67,7 +67,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install jsonschema
-        run: pip install jsonschema
+        run: pip install 'jsonschema==4.26.0'  # matches requirements-lock.txt
 
       - name: Validate payload against schema
         id: validate

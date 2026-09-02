@@ -14,7 +14,8 @@
     "s.tag::quantum.vault",
     "s.tag::qgia.corpus",
     "s.tag::qgia.spine",
-    "s.tag::zipwiz.engine"
+    "s.tag::zipwiz.engine",
+    "s.tag::sentinel.coordinator"
   ],
   "governance": {
     "charter": "Picard_Delta_3",

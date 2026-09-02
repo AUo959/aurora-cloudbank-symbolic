@@ -320,9 +320,14 @@ class UnifiedAIInterface:
         # Try Anthropic
         try:
             import anthropic
-            import httpx
 
-            _TIMEOUT = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0)
+            # Use the SDK's own re-export rather than constructing an
+            # `httpx.Timeout`. anthropic 1.x moved its HTTP layer to httpx2, and
+            # an old-httpx Timeout handed to that client fails every request
+            # with a misleading `APIConnectionError: Connection error.` rather
+            # than a type error. `anthropic.Timeout` is correct on both the
+            # currently pinned 0.120.2 and on 1.x. See #1560.
+            _TIMEOUT = anthropic.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0)
             _MAX_RETRIES = 2
 
             self.anthropic_client = anthropic.AsyncAnthropic(
@@ -521,11 +526,16 @@ class UnifiedAIInterface:
 
         messages = [{"role": "user", "content": request.prompt}]
 
+        # `temperature` / `top_p` / `top_k` are deliberately not sent.
+        # Sampling parameters were removed from the Claude models this
+        # interface can select: claude-opus-5 and claude-sonnet-5 reject a
+        # request that carries any of them. They are also absent from the
+        # anthropic 1.x `messages.create()` signature, so passing them raises
+        # TypeError there before a request is even made. `AIRequest.temperature`
+        # and `.top_p` are retained because `_execute_openai` still uses them.
         response = await self.anthropic_client.messages.create(
             model=model.value,
             max_tokens=request.max_tokens,
-            temperature=request.temperature,
-            top_p=request.top_p,
             system=request.system_prompt or "",
             messages=messages,
         )

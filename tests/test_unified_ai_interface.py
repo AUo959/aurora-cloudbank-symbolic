@@ -747,3 +747,112 @@ class TestAIIntegrationResilience:
         # Metadata should be preserved even if request fails
         assert request.context_tag == "test_context_123"
         assert request.dlp_tracking is True
+
+
+@pytest.mark.critical
+class TestAnthropicRequestConstruction:
+    """Assert the request `_execute_anthropic` actually builds.
+
+    Every other Anthropic test in this module patches `_execute_anthropic`
+    itself, so the method body never runs and the outgoing keyword arguments
+    are never observed. That is how #1560 survived: the call passed
+    `temperature` and `top_p`, which `claude-opus-5` and `claude-sonnet-5`
+    both reject, and which the anthropic 1.x client does not accept at all.
+
+    These tests patch the *client* instead, so the real body executes.
+    """
+
+    @staticmethod
+    def _mock_client() -> MagicMock:
+        message = MagicMock()
+        message.content = [MagicMock(text="ok")]
+        message.usage.input_tokens = 11
+        message.usage.output_tokens = 7
+        message.stop_reason = "end_turn"
+
+        client = MagicMock()
+        client.messages.create = AsyncMock(return_value=message)
+        return client
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "banned", ["temperature", "top_p", "top_k"]
+    )
+    async def test_sampling_parameters_are_not_sent(self, banned: str) -> None:
+        """Sampling parameters must never reach the Anthropic API."""
+        interface = UnifiedAIInterface()
+        interface.anthropic_client = self._mock_client()
+
+        await interface._execute_anthropic(
+            AIRequest(prompt="test"), AIModel.CLAUDE_SONNET_5
+        )
+
+        kwargs = interface.anthropic_client.messages.create.await_args.kwargs
+        assert banned not in kwargs, (
+            f"{banned} was sent to messages.create; claude-opus-5 and "
+            "claude-sonnet-5 reject it and anthropic 1.x raises TypeError"
+        )
+
+    @pytest.mark.asyncio
+    async def test_supported_parameters_are_sent(self) -> None:
+        """Removing sampling parameters must not drop the real ones."""
+        interface = UnifiedAIInterface()
+        interface.anthropic_client = self._mock_client()
+
+        await interface._execute_anthropic(
+            AIRequest(prompt="hello", system_prompt="be brief", max_tokens=256),
+            AIModel.CLAUDE_OPUS_5,
+        )
+
+        kwargs = interface.anthropic_client.messages.create.await_args.kwargs
+        assert kwargs["model"] == AIModel.CLAUDE_OPUS_5.value
+        assert kwargs["max_tokens"] == 256
+        assert kwargs["system"] == "be brief"
+        assert kwargs["messages"] == [{"role": "user", "content": "hello"}]
+
+    @pytest.mark.asyncio
+    async def test_response_is_mapped_from_the_real_body(self) -> None:
+        """The mapping from the API response is exercised, not mocked away."""
+        interface = UnifiedAIInterface()
+        interface.anthropic_client = self._mock_client()
+
+        result = await interface._execute_anthropic(
+            AIRequest(prompt="test", context_tag="ctx-1"), AIModel.CLAUDE_SONNET_5
+        )
+
+        assert result.content == "ok"
+        assert result.provider is AIProvider.ANTHROPIC
+        assert result.model_used is AIModel.CLAUDE_SONNET_5
+        assert result.tokens_used == 18
+        assert result.context_tag == "ctx-1"
+        assert result.metadata["stop_reason"] == "end_turn"
+
+    def test_client_timeout_matches_the_sdk_http_layer(self) -> None:
+        """The Anthropic client's timeout must be the SDK's own `Timeout` type.
+
+        anthropic 1.x moved its HTTP layer from httpx to httpx2. A raw
+        `httpx.Timeout` is accepted at construction but fails every request
+        with a misleading `APIConnectionError: Connection error.`, so client
+        setup alone looks healthy. Verified against both versions:
+
+            anthropic 1.2.0   httpx.Timeout -> APIConnectionError
+                              anthropic.Timeout / httpx2.Timeout -> HTTP 401
+            anthropic 0.120.2 both -> HTTP 401 (anthropic.Timeout IS
+                              httpx.Timeout there, so the fix is a no-op)
+
+        Identity against `anthropic.Timeout` is the assertion that works on
+        both. A `__module__` check does not: the SDK reassigns
+        ``Timeout.__module__ = "anthropic"`` on the shared class, so on 0.120.2
+        even a raw `httpx.Timeout` reports ``"anthropic"``.
+        """
+        anthropic = pytest.importorskip("anthropic")
+
+        with patch.object(anthropic, "AsyncAnthropic") as mock_ctor:
+            UnifiedAIInterface()
+
+        assert mock_ctor.called, "Anthropic client was never constructed"
+        timeout = mock_ctor.call_args.kwargs["timeout"]
+        assert type(timeout) is anthropic.Timeout, (
+            f"Anthropic client built with {type(timeout)!r}; use "
+            "anthropic.Timeout so the object matches the SDK's HTTP layer"
+        )

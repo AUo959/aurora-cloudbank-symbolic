@@ -214,6 +214,68 @@ jobs:
           print('All manifest versions match')
           "
 
+      - name: Check constellation graph consistency
+        run: |
+          python3 -c "
+          import json, glob, sys
+
+          # Node registry: the hub declares itself in .aurora/constellation.json;
+          # every other node has a manifest. Two nodes may share a repo — the hub
+          # repo hosts both CONSTELLATION-PRIME (role hub) and
+          # SENTINEL-COORDINATOR (role spoke, PROJECT SENTINEL, issue #1069) —
+          # so nodes are keyed by symbolic_tag, never by repo.
+          nodes = {}
+          sources = [('.aurora/constellation.json', json.load(open('.aurora/constellation.json')))]
+          for path in sorted(glob.glob('constellation-contracts/manifests/*.manifest.json')):
+              sources.append((path, json.load(open(path))))
+
+          errors = 0
+          for path, doc in sources:
+              tag = doc['node']['symbolic_tag']
+              if tag in nodes:
+                  print(f'  x {path}: duplicate symbolic_tag {tag} (also in {nodes[tag][0]})', file=sys.stderr)
+                  errors += 1
+                  continue
+              nodes[tag] = (path, doc)
+
+          # Every edge must be declared from both ends. A one-directional edge
+          # means the graph disagrees with itself about who talks to whom:
+          # SENTINEL-COORDINATOR declared the hub as upstream while the hub's
+          # downstream omitted it, and nothing objected.
+          for tag, (path, doc) in sorted(nodes.items()):
+              des = doc['node']['designation']
+              for other, near, far in (
+                  ('upstream', 'upstream', 'downstream'),
+                  ('downstream', 'downstream', 'upstream'),
+              ):
+                  for peer in doc.get(near, []):
+                      if peer not in nodes:
+                          print(f'  x {des}: {near} {peer} is not a declared node', file=sys.stderr)
+                          errors += 1
+                      elif tag not in nodes[peer][1].get(far, []):
+                          peer_des = nodes[peer][1]['node']['designation']
+                          print(f'  x {des} declares {near} {peer}, but {peer_des}.{far} omits {tag}', file=sys.stderr)
+                          errors += 1
+
+          # Every declared node must be a routable source_node. The reverse is
+          # deliberately NOT enforced: the enum may reserve a designation before
+          # its node exists (ORIONCORE-CONTROL does), and removing a published
+          # enum value is a breaking contract change. See #1562, #1563.
+          enum = set(json.load(open('constellation-contracts/schemas/constellation-event.schema.json'))['properties']['source_node']['enum'])
+          for tag, (path, doc) in sorted(nodes.items()):
+              des = doc['node']['designation']
+              if des not in enum:
+                  print(f'  x {des} ({path}) is not in the constellation-event source_node enum', file=sys.stderr)
+                  errors += 1
+
+          if errors:
+              sys.exit(1)
+          print(f'Constellation graph is consistent: {len(nodes)} nodes, all edges bidirectional')
+          for tag, (path, doc) in sorted(nodes.items()):
+              n = doc['node']
+              print(f\"  ok {n['designation']} ({n['role']}) in {n['repo']}\")
+          "
+
   health-report:
     name: Constellation Health Report
     needs: [validate-schemas, validate-openapi, validate-python-types, validate-manifests]

@@ -31,6 +31,8 @@ jobs:
 
       - name: Fetch spoke manifests
         id: fetch
+        env:
+          HUB_VERSION: ${{ steps.hub.outputs.version }}
         run: |
           REPOS=(
             "AUo959/AuroraOS"
@@ -38,11 +40,12 @@ jobs:
             "AUo959/qgia-knowledge-library"
             "AUo959/qgia-knowledge-spine"
             "AUo959/zip_wizard"
+            "AUo959/Aurora_ORIONCORE_Directory_Main"
           )
 
           DRIFT_DETECTED=false
           REPORT="## Constellation Health Audit Report\n\n"
-          REPORT+="**Hub version**: ${{ steps.hub.outputs.version }}\n"
+          REPORT+="**Hub version**: ${HUB_VERSION}\n"
           REPORT+="**Audit date**: $(date -u +%Y-%m-%dT%H:%M:%SZ)\n\n"
           REPORT+="| Node | Repo | Version | Status |\n"
           REPORT+="|------|------|---------|--------|\n"
@@ -62,10 +65,10 @@ jobs:
               SPOKE_VERSION=$(echo "$MANIFEST" | jq -r '.constellation_version // "unknown"')
               SPOKE_NODE=$(echo "$MANIFEST" | jq -r '.node.designation // "unknown"')
 
-              if [ "$SPOKE_VERSION" = "${{ steps.hub.outputs.version }}" ]; then
+              if [ "$SPOKE_VERSION" = "$HUB_VERSION" ]; then
                 REPORT+="| $SPOKE_NODE | $REPO_NAME | $SPOKE_VERSION | ✅ In sync |\n"
               else
-                REPORT+="| $SPOKE_NODE | $REPO_NAME | $SPOKE_VERSION | ❌ Drift ($SPOKE_VERSION != ${{ steps.hub.outputs.version }}) |\n"
+                REPORT+="| $SPOKE_NODE | $REPO_NAME | $SPOKE_VERSION | ❌ Drift ($SPOKE_VERSION != $HUB_VERSION) |\n"
                 DRIFT_DETECTED=true
               fi
             fi

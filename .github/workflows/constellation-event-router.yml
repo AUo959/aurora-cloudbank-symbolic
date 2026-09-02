@@ -1,6 +1,16 @@
 name: "Constellation Event Router"
 
 # Ref: Aurora Constellation Architecture Proposal v1.0.0 — Gap 3
+#
+# CONNECTIVITY PASS 2026-08-19:
+#   - The route matrix contained entries whose subscriber is this repo
+#     (aurora-cloudbank-symbolic) for event types this workflow itself
+#     subscribes to. Routing dispatches with a PAT (CONSTELLATION_TOKEN), so
+#     GitHub's same-token loop suppression does NOT apply and each self-route
+#     would re-trigger this router indefinitely. Self-routes are removed and a
+#     defensive guard rejects any future self-route at run time.
+#   - A `hop` counter is enforced so a mis-configured spoke cannot ping-pong
+#     events through the hub forever.
 
 on:
   repository_dispatch:
@@ -33,8 +43,21 @@ jobs:
         id: parse
         env:
           CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          EVENT_ACTION: ${{ github.event.action }}
         run: |
-          echo "event_type=${{ github.event.action }}" >> "$GITHUB_OUTPUT"
+          # EVENT_ACTION is the repository_dispatch `event-type`, supplied by
+          # whoever dispatched. It is never interpolated into this script body,
+          # and it is shape-checked before reaching $GITHUB_OUTPUT: an embedded
+          # newline would otherwise forge later output lines (e.g. `valid=true`)
+          # and defeat the schema gate below. The `case` pattern tests the whole
+          # string, so control characters cannot slip past a per-line match.
+          case "$EVENT_ACTION" in
+            "" | *[!a-z0-9._-]*)
+              echo "::error::Rejecting malformed repository_dispatch event-type; expected [a-z0-9._-]+"
+              exit 1
+              ;;
+          esac
+          echo "event_type=$EVENT_ACTION" >> "$GITHUB_OUTPUT"
           echo "source_node=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.source_node // "unknown"')" >> "$GITHUB_OUTPUT"
           echo "correlation_id=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.correlation_id // "none"')" >> "$GITHUB_OUTPUT"
 
@@ -44,7 +67,11 @@ jobs:
           python-version: "3.12"
 
       - name: Install jsonschema
-        run: pip install jsonschema
+        # --only-binary=:all: refuses sdists, so no setup.py from a
+        # dependency runs at install time. Version matches
+        # requirements-lock.txt.
+        run: |
+          pip install --only-binary=:all: 'jsonschema==4.26.0'
 
       - name: Validate payload against schema
         id: validate
@@ -81,10 +108,11 @@ jobs:
       - name: Audit log
         env:
           CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          EVENT_TYPE: ${{ steps.parse.outputs.event_type }}
         run: |
           SOURCE=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.source_node // "unknown"')
           CORR=$(printf '%s' "$CLIENT_PAYLOAD" | jq -r '.correlation_id // "none"')
-          echo "::notice::Constellation Event received: type=${{ github.event.action }}, source=${SOURCE}, correlation_id=${CORR}"
+          echo "::notice::Constellation Event received: type=${EVENT_TYPE}, source=${SOURCE}, correlation_id=${CORR}"
 
   route-event:
     name: Route to ${{ matrix.subscriber }}
@@ -102,18 +130,12 @@ jobs:
           - event: qgia.forecast.completed
             subscriber: zip_wizard
             owner: AUo959
-          # qgia.forecast.requested → CONSTELLATION-PRIME (self, for logging)
-          - event: qgia.forecast.requested
-            subscriber: aurora-cloudbank-symbolic
-            owner: AUo959
-          # zipwiz.archive.processed → CONSTELLATION-PRIME
-          - event: zipwiz.archive.processed
-            subscriber: aurora-cloudbank-symbolic
-            owner: AUo959
-          # qgia.knowledge.updated → CONSTELLATION-PRIME, AURORA-RUNTIME
-          - event: qgia.knowledge.updated
-            subscriber: aurora-cloudbank-symbolic
-            owner: AUo959
+          # qgia.forecast.requested / zipwiz.archive.processed /
+          # qgia.knowledge.updated are consumed IN-REPO by the hub's own
+          # workflows (e.g. constellation-knowledge-aggregator.yml). They are
+          # deliberately NOT re-dispatched to this repo — that was an
+          # unbounded-loop edge.
+          # qgia.knowledge.updated → AURORA-RUNTIME
           - event: qgia.knowledge.updated
             subscriber: AuroraOS
             owner: AUo959
@@ -133,7 +155,31 @@ jobs:
           - event: constellation.health.check
             subscriber: zip_wizard
             owner: AUo959
+          - event: constellation.health.check
+            subscriber: Aurora_ORIONCORE_Directory_Main
+            owner: AUo959
     steps:
+      - name: Reject self-route
+        if: format('{0}/{1}', matrix.owner, matrix.subscriber) == github.repository
+        env:
+          EVENT_TYPE: ${{ needs.validate-event.outputs.event_type }}
+          THIS_REPO: ${{ github.repository }}
+        run: |
+          echo "::error::Refusing to dispatch ${EVENT_TYPE} back to ${THIS_REPO} — self-routing creates an unbounded dispatch loop under a PAT."
+          exit 1
+
+      - name: Enforce hop limit
+        if: needs.validate-event.outputs.event_type == matrix.event
+        env:
+          HOP: ${{ github.event.client_payload.hop }}
+        run: |
+          HOP="${HOP:-0}"
+          if [ "$HOP" -ge 3 ]; then
+            echo "::error::hop=$HOP exceeds the constellation hop limit (3); dropping event to break a routing loop."
+            exit 1
+          fi
+          echo "Routing at hop $HOP (limit 3)"
+
       - name: Route event
         if: needs.validate-event.outputs.event_type == matrix.event
         uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697  # v4.0.1

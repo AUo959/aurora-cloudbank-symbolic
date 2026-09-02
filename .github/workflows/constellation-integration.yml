@@ -9,12 +9,20 @@ on:
       - "constellation-contracts/**"
       - ".aurora/constellation.json"
       - "modules/qgia/**"
+      # Without this, the workflow cannot run on changes to itself: a PR
+      # editing only this file matched no path and skipped every validation
+      # job, so a change to the checks below shipped unexercised.
+      - ".github/workflows/constellation-integration.yml"
   pull_request:
     branches: [main]
     paths:
       - "constellation-contracts/**"
       - ".aurora/constellation.json"
       - "modules/qgia/**"
+      # Without this, the workflow cannot run on changes to itself: a PR
+      # editing only this file matched no path and skipped every validation
+      # job, so a change to the checks below shipped unexercised.
+      - ".github/workflows/constellation-integration.yml"
   schedule:
     - cron: "17 6 * * 1"  # Weekly Monday 06:17 UTC
 

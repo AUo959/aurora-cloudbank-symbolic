@@ -9,12 +9,20 @@ on:
       - "constellation-contracts/**"
       - ".aurora/constellation.json"
       - "modules/qgia/**"
+      # Without this, the workflow cannot run on changes to itself: a PR
+      # editing only this file matched no path and skipped every validation
+      # job, so a change to the checks below shipped unexercised.
+      - ".github/workflows/constellation-integration.yml"
   pull_request:
     branches: [main]
     paths:
       - "constellation-contracts/**"
       - ".aurora/constellation.json"
       - "modules/qgia/**"
+      # Without this, the workflow cannot run on changes to itself: a PR
+      # editing only this file matched no path and skipped every validation
+      # job, so a change to the checks below shipped unexercised.
+      - ".github/workflows/constellation-integration.yml"
   schedule:
     - cron: "17 6 * * 1"  # Weekly Monday 06:17 UTC
 
@@ -167,6 +175,27 @@ jobs:
           print(f'Hub version: {hub_version}')
 
           errors = 0
+
+          # constellation-contracts/VERSION and .aurora/constellation.json are
+          # the same concept in two files, read by two different workflows:
+          # the health audit compares deployed spoke manifests against VERSION,
+          # while the loop below locks the registry manifests to the hub node
+          # manifest. Nothing previously compared the two to each other, so
+          # they could drift silently — #1546 advanced VERSION to 1.1.0-alpha
+          # and left the hub manifest at 1.0.0-alpha, and every check stayed
+          # green because both sides of each comparison were internally
+          # consistent. See #1562.
+          with open('constellation-contracts/VERSION') as f:
+              version_file = f.read().strip()
+          if version_file != hub_version:
+              print(
+                  f'  ✗ constellation-contracts/VERSION: {version_file} != '
+                  f'hub manifest {hub_version}',
+                  file=sys.stderr,
+              )
+              errors += 1
+          else:
+              print(f'  ✓ constellation-contracts/VERSION: {version_file}')
           # Only spoke manifests participate in constellation-version locking.
           # Other JSON documents in this directory (for example neutral shipment
           # manifests) are still syntax/schema validated by their dedicated jobs.

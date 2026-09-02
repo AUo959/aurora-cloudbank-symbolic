@@ -155,9 +155,6 @@ jobs:
           - event: constellation.health.check
             subscriber: zip_wizard
             owner: AUo959
-          - event: constellation.health.check
-            subscriber: Aurora_ORIONCORE_Directory_Main
-            owner: AUo959
     steps:
       - name: Reject self-route
         if: format('{0}/{1}', matrix.owner, matrix.subscriber) == github.repository

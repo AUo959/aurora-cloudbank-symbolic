@@ -40,7 +40,6 @@ jobs:
             "AUo959/qgia-knowledge-library"
             "AUo959/qgia-knowledge-spine"
             "AUo959/zip_wizard"
-            "AUo959/Aurora_ORIONCORE_Directory_Main"
           )
 
           DRIFT_DETECTED=false

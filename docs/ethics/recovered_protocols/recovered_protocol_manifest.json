@@ -248,8 +248,8 @@
         "verification_date": "PENDING",
         "reviewer_or_agent_surface": "PENDING",
         "unresolved_blockers": [
-          "Standalone SHADOWFAX bundle not yet located — HARD BLOCK on any wiring decision.",
-          "Exact source package name and hash not yet verified.",
+          "Standalone SHADOWFAX bundle identified but not in hand — HARD BLOCK on any wiring decision. .repohealth/artifacts_manifest.json records it as releases/SRB_SHADOWFAX_Stillness_v1.0.zip, 7595909 bytes, created 2025-08-17T13:57:44Z, expected sha256 6c97167ed6b9c2339b63428cdd06ac5f507e7c87ce347bb0631d0484b87eb26d, with 11 entries listed in .repohealth/zip_inventory.json. releases/ is not tracked in git, so the bytes are not obtainable from this repository and none of the hashes below can be checked.",
+          "Exact source package name and hash not yet verified — the digest recorded above is an expectation carried by the artifact manifest, not a verification. source_package_sha256 stays PENDING until the artifact is obtained and hashed.",
           "Internal file path and hash not yet verified."
         ],
         "promotion_decision": "blocked_pending_bundle_location"

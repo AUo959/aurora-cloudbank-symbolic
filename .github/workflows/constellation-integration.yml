@@ -57,7 +57,10 @@ jobs:
 
       - name: Validate JSON Schema draft-07 compliance
         run: |
-          pip install jsonschema
+          # --only-binary=:all: refuses sdists, so no setup.py from a
+          # dependency runs at install time. Version matches
+          # requirements-lock.txt.
+          pip install --only-binary=:all: 'jsonschema==4.26.0'
           python3 -c "
           import json, glob, sys
           from jsonschema import Draft7Validator
@@ -109,7 +112,11 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install jsonschema
+        # --only-binary=:all: refuses sdists, so no setup.py from a
+        # dependency runs at install time. Version matches
+        # requirements-lock.txt.
+        run: |
+          pip install --only-binary=:all: 'jsonschema==4.26.0'
 
       - name: Import and validate types
         run: |

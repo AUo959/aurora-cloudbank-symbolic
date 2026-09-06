@@ -286,9 +286,9 @@ PORT=6000 npm run constellation:start
 ### Service Connection Issues
 
 Check that satellite services are running:
-- AuroraOS on ws://localhost:3000
-- zip_wizard on http://localhost:8080
-- cloudbank-quantum-en on http://localhost:9000
+- AuroraOS on `ws://localhost:3000`
+- zip_wizard on `http://localhost:8080`
+- cloudbank-quantum-en on `http://localhost:9000`
 
 ### Memory Seals Not Created
 

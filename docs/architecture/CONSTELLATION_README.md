@@ -4,12 +4,45 @@ Cross-repository orchestration system for the Aurora CloudBank Symbolic ecosyste
 
 ## Overview
 
-The Constellation architecture provides seamless coordination between multiple repositories in the Aurora ecosystem:
+The Constellation architecture provides seamless coordination between multiple repositories in the Aurora ecosystem. The authoritative node list is
+`constellation-contracts/manifests/`; this section mirrors it.
 
-- **aurora-cloudbank-symbolic** (Hub) - Central orchestration and service discovery
-- **AuroraOS** (Runtime) - Real-time execution environment
-- **zip_wizard** (Archives) - File compression and archival operations
-- **cloudbank-quantum-en** (Quantum/Encryption) - Quantum operations and encryption
+| Designation | Repository | Role | Publishes |
+|---|---|---|---|
+| `CONSTELLATION-PRIME` | aurora-cloudbank-symbolic | hub — orchestration and service discovery | — |
+| `AURORA-RUNTIME` | AuroraOS | spoke — real-time execution environment | — |
+| `ZIPWIZ-ENGINE` | zip_wizard | spoke — compression and archival | — |
+| `QUANTUM-VAULT` | cloudbank-quantum-en | spoke — quantum operations and encryption | — |
+| `QGIA-CORPUS` | qgia-knowledge-library | spoke — curated intelligence corpus | `knowledge-index` |
+| `QGIA-SPINE` | qgia-knowledge-spine | spoke — forecasting and methodology spine | `knowledge-index` |
+| `SENTINEL-COORDINATOR` | aurora-cloudbank-symbolic | spoke — PROJECT SENTINEL stream aggregation | `sentinel-status` |
+
+`SENTINEL-COORDINATOR` is a distinct node hosted inside the hub repository, not a
+second identity for the hub. `CONSTELLATION-PRIME` is the repository acting as
+hub; nodes are keyed by `symbolic_tag`, never by repository.
+
+### The QGIA peer network
+
+`QGIA-CORPUS` and `QGIA-SPINE` are the constellation's only **peer** pair. Every
+other spoke is a leaf — `upstream: [constellation.prime]`, `downstream: []`. The
+spine alone declares two upstreams:
+
+```
+QGIA-CORPUS   upstream [constellation.prime]                downstream [qgia.spine]
+QGIA-SPINE    upstream [constellation.prime, qgia.corpus]   downstream []
+```
+
+So the two-node L1 QGIA network is a corpus → spine flow layered *on top of* the
+hub-and-spoke topology, not an alternative to it. Both nodes remain ordinary
+spokes for governance, health reporting and event routing — the hub still
+validates and routes every event between them — while the corpus → spine edge
+expresses that the spine's forecasting methodology consumes the corpus's curated
+material. Both publish the same `knowledge-index` contract, which is what the
+hub's knowledge aggregator merges into `knowledge-indexes/`.
+
+This is the only spoke-to-spoke edge in the graph, and it is enforced: the
+bidirectional-edge check in `constellation-integration.yml` fails if either side
+of it is dropped.
 
 ## Symbolic Anchors
 
@@ -253,9 +286,9 @@ PORT=6000 npm run constellation:start
 ### Service Connection Issues
 
 Check that satellite services are running:
-- AuroraOS on ws://localhost:3000
-- zip_wizard on http://localhost:8080
-- cloudbank-quantum-en on http://localhost:9000
+- AuroraOS on `ws://localhost:3000`
+- zip_wizard on `http://localhost:8080`
+- cloudbank-quantum-en on `http://localhost:9000`
 
 ### Memory Seals Not Created
 

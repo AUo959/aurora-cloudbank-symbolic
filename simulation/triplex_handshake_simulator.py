@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """
+Status: NON-CANONICAL variant of simulation/triplex_handshake_simulation.py.
+Neither file is imported by any module; the other one is the documented
+entrypoint in simulation/SIMULATION_STATUS_REPORT.md, so this copy is not
+the one to run or extend. Retained for its narrative framing of "The
+Reflection Event". See #1132.
+
 Orion Station – Triplex Handshake & Drift/Coherence Simulation Prototype
 
 This simulation models the ethical decision-making framework demonstrated in

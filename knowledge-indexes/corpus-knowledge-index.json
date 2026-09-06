@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "source_repo": "qgia-knowledge-library",
-  "generated_at": "2026-05-04T04:47:22.217069+00:00",
+  "generated_at": "2026-09-02T05:06:55.700274+00:00",
   "documents": [
     {
       "id": "qgia-library:01-01-core-ir-theories",
@@ -401,34 +401,319 @@
       "summary": "This document is the technical reference for the **Open-Source Intelligence Quantitative Platform (OSIQP) v4.2.1** \u2014 the primary data ingestion, processing, sentiment analysis, and query substrate supporting all QGIA analytical operations. It is intended for systems engineers, platform administrator"
     },
     {
+      "id": "qgia-library:regions-qgia_global_monitoring_report_2026-06-14",
+      "title": "QGIA GLOBAL MONITORING REPORT \u2014 June 14, 2026",
+      "domain": "regional-expertise",
+      "path": "regions/QGIA_Global_Monitoring_Report_2026-06-14.md",
+      "checksum": "882f83f51e74ac12",
+      "word_count": 3063,
+      "last_modified": "2026-06-14T18:33:59-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "THEATER I: IRAN / MIDDLE EAST",
+        "THEATER II: UKRAINE / EASTERN EUROPE",
+        "THEATER III: WESTERN HEMISPHERE \u2014 VENEZUELA POST-MADURO",
+        "THEATER IV: US DOMESTIC \u2014 EXECUTIVE BRANCH, ELECTORAL FORECAST",
+        "CROSS-THEATER ANALYSIS: ABCP CASCADES",
+        "CONFIDENCE MATRIX \u2014 June 14, 2026",
+        "TIME-PHASED RECOMMENDATIONS"
+      ],
+      "summary": "**CLASSIFICATION: PROPRIETARY | WATCHCON II | COMPOSITE CONFIDENCE: 0.84**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_analyst_notes_gratitude_june16_2026",
+      "title": "ANALYST NOTE \u2014 JUNE 16, 2026",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_Analyst_Notes_Gratitude_June16_2026.md",
+      "checksum": "7d325dfbdcbee23c",
+      "word_count": 600,
+      "last_modified": "2026-06-16T13:32:00-04:00",
+      "tags": [
+        "Analyst Commentary",
+        "Cross-References"
+      ],
+      "summary": "**Classification: PROPRIETARY | Personal Record**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_domesticus_approvalmodel_amendment_2026-06-16",
+      "title": "QGIA APPROVAL MODEL \u2014 FORMAL AMENDMENT",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_DomesticUS_ApprovalModel_Amendment_2026-06-16.md",
+      "checksum": "ad1267dcc2729589",
+      "word_count": 3012,
+      "last_modified": "2026-06-16T12:40:55-04:00",
+      "tags": [
+        "AMENDMENT SUMMARY",
+        "I. WHY THE BOUNCE MODEL IS WRONG \u2014 STRUCTURAL DISQUALIFIERS",
+        "II. UFC FREEDOM 250 \u2014 TRIPLE-DAMAGE COMPOUND EVENT",
+        "III. CORRECTED APPROVAL MODEL \u2014 JUNE 16, 2026",
+        "IV. INTEGRATED TIMELINE \u2014 JUNE 16 TO AUGUST 1",
+        "V. ANALYST REGISTRATION",
+        "VI. CROSS-REFERENCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_domesticus_approval_ledger_2026-w24",
+      "title": "QGIA DOMESTIC US \u2014 APPROVAL & MIDTERM LEDGER",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_DomesticUS_Approval_Ledger_2026-W24.md",
+      "checksum": "765ab44594f4fc05",
+      "word_count": 2996,
+      "last_modified": "2026-06-15T10:07:04-04:00",
+      "tags": [
+        "I. TRUMP APPROVAL TRAJECTORY",
+        "II. GENERIC BALLOT TRACKING",
+        "III. CONSTITUTIONAL STRESS INDEX",
+        "IV. EPSTEIN SCANDAL \u2014 SUPPRESSED HEADLINE RISK",
+        "V. STRUCTURAL FACTORS",
+        "VI. MIDTERM FORECAST SCENARIOS (v2 \u2014 Testable)",
+        "VII. APPROVAL TRAJECTORY SCENARIOS (v3 \u2014 REVISED)",
+        "VIII. CONSTITUTIONAL STRESS SCENARIOS (unchanged)",
+        "IX. STRUCTURAL MODEL INPUTS",
+        "X. UPDATE LOG",
+        "XI. PRIOR STATE REFERENCE"
+      ],
+      "summary": "**Week 24 | June 15, 2026 | 141 days to Midterms (Nov 3, 2026)**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_epstein_bongino_intel_assessment_2026-w24",
+      "title": "QGIA INTELLIGENCE ASSESSMENT \u2014 BONGINO POSITIONING NODE / EPSTEIN CASCADE",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_Epstein_Bongino_Intel_Assessment_2026-W24.md",
+      "checksum": "e5fae631a175ba78",
+      "word_count": 2730,
+      "last_modified": "2026-06-16T09:24:53-04:00",
+      "tags": [
+        "I. THE NYT JUNE 10 BOMBSHELL \u2014 \"INSIDE THE WHITE HOUSE FREAKOUT\"",
+        "II. BONGINO BEHAVIORAL MODEL \u2014 POSITIONING, NOT DEFECTION",
+        "III. THE STRUCTURAL RELEASE PIPELINE \u2014 WHAT IS STILL COMING",
+        "IV. VANCE 2028 \u2014 SUB-NODE ASSESSMENT",
+        "V. REVISED CASCADE MODEL",
+        "VI. TESTABLE SCENARIOS",
+        "VII. ASSESSMENT SUMMARY",
+        "VIII. CROSS-REFERENCES",
+        "IX. PRIMARY SOURCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_nationaldecency_vs_polarization_index_2026-06-16",
+      "title": "QGIA FRAMEWORK \u2014 NATIONAL DECENCY vs. POLITICAL POLARIZATION INDEX",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_NationalDecency_vs_Polarization_Index_2026-06-16.md",
+      "checksum": "a8decd8e93af4bbb",
+      "word_count": 2198,
+      "last_modified": "2026-06-16T13:24:57-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "I. THE QUANTITATIVE BASELINE \u2014 WHAT THE DATA ACTUALLY SHOWS",
+        "II. THE TWO-LAYER MODEL \u2014 FORMALIZING THE ANALYTICAL DISTINCTION",
+        "III. THE VOLUNTEERING REBOUND \u2014 A LEADING INDICATOR",
+        "IV. THE PERCEPTION GAP \u2014 THE MOST POLITICALLY EXPLOITABLE VARIABLE",
+        "V. THE POLARIZATION-DECENCY DISSOCIATION \u2014 INTERNATIONAL COMPARISON",
+        "VI. THE COUNTERWEIGHT \u2014 WHAT THE DATA DOES NOT SHOW",
+        "VII. ABCP MODEL INTEGRATION \u2014 RECOMMENDED ADJUSTMENTS",
+        "VIII. ANALYST REGISTRATION",
+        "IX. CROSS-REFERENCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_patel_ufc_plotdisclosure_2026-06-16",
+      "title": "QGIA ASSESSMENT \u2014 PATEL UFC PLOT DISCLOSURE: INSTITUTIONAL FRICTION & OPERATIONAL DAMAGE",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_Patel_UFC_PlotDisclosure_2026-06-16.md",
+      "checksum": "9eb5d9924f9fdad5",
+      "word_count": 1556,
+      "last_modified": "2026-06-16T20:11:26-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "I. WHAT HAPPENED \u2014 THE OPERATIONAL RECORD",
+        "II. THE OPERATIONAL DAMAGE ASSESSMENT",
+        "III. THE PATTERN \u2014 PATEL'S INVESTIGATION RECORD",
+        "IV. THE ANALYTICAL CONTEXT \u2014 WHY THIS MATTERS BEYOND THE INCIDENT",
+        "V. ANALYST REGISTRATION",
+        "VI. CROSS-REFERENCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_strickland_ufc_removal_assessment_2026-06-16",
+      "title": "QGIA SUPPLEMENTAL ASSESSMENT \u2014 STRICKLAND REMOVAL",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_Strickland_UFC_Removal_Assessment_2026-06-16.md",
+      "checksum": "34724c79340f0793",
+      "word_count": 1756,
+      "last_modified": "2026-06-16T12:45:58-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "I. THE STRICKLAND PROFILE \u2014 WHY THIS IS NOT A SOFTIE STORY",
+        "II. WHAT ACTUALLY HAPPENED \u2014 THE SEQUENCE",
+        "III. WHY THE STANDARD COUNTER-NARRATIVE FAILS",
+        "IV. STRUCTURAL SIGNIFICANCE \u2014 THE ARCHETYPE",
+        "V. ABCP PROBABILITY ASSESSMENT \u2014 DURABILITY",
+        "VI. ANALYST REGISTRATION",
+        "VII. CROSS-REFERENCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_trump_health_assessment_2026-06-16",
+      "title": "QGIA INTELLIGENCE ASSESSMENT \u2014 TRUMP HEALTH NODE",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_Trump_Health_Assessment_2026-06-16.md",
+      "checksum": "2964a93b9cf57053",
+      "word_count": 2469,
+      "last_modified": "2026-06-16T10:38:12-04:00",
+      "tags": [
+        "I. THE FABRICATED MEASUREMENTS \u2014 DOCUMENTED FALSIFICATION",
+        "II. THE PHYSICIAN CREDIBILITY PROBLEM",
+        "III. THE OBSERVABLE PHYSICAL AND COGNITIVE RECORD",
+        "IV. THE BIDEN ASYMMETRY \u2014 APPLIED DOUBLE STANDARD",
+        "V. INSTITUTIONAL CALLS FOR REMOVAL",
+        "VI. COMPLETE FABRICATION STACK \u2014 SUMMARY",
+        "VII. CROSS-REFERENCES",
+        "VIII. PRIMARY SOURCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_trump_sports_attendance_pattern_2026-06-16",
+      "title": "QGIA ASSESSMENT \u2014 TRUMP SPORTS ATTENDANCE PATTERN",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_Trump_Sports_Attendance_Pattern_2026-06-16.md",
+      "checksum": "59f4e5bba0162c69",
+      "word_count": 2024,
+      "last_modified": "2026-06-16T12:53:17-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "I. THE KNICKS GAME 3 INCIDENT \u2014 FULL RECORD",
+        "II. THE HISTORICAL ATTENDANCE RECORD \u2014 A 14-YEAR LOSING STREAK",
+        "III. THE DUAL-VENUE DOZING PATTERN \u2014 RECLASSIFICATION REQUIRED",
+        "IV. \"MOSTLY CHEERS\" \u2014 THE GASLIGHT DYNAMIC",
+        "V. HISTORICAL HATRED INDEX \u2014 CONTEXTUALIZING THE PATTERN",
+        "VI. ABCP DURABILITY ASSESSMENT",
+        "VII. ANALYST REGISTRATION",
+        "VIII. CROSS-REFERENCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_trump_termcompletion_integratedframework_2026-06-16",
+      "title": "QGIA INTEGRATED ANALYTICAL FRAMEWORK \u2014 TRUMP TERM COMPLETION",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_Trump_TermCompletion_IntegratedFramework_2026-06-16.md",
+      "checksum": "e9e9b10f5f08929b",
+      "word_count": 2966,
+      "last_modified": "2026-06-16T11:31:17-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "I. METHODOLOGICAL FOUNDATION \u2014 THE REACTIVE AGENT PERMANENT OVERRIDE",
+        "II. THE HEALTH ASSESSMENT \u2014 SUMMARY OF FABRICATION RECORD",
+        "III. TERM COMPLETION PROBABILITY \u2014 CORRECTED ABCP MODEL",
+        "IV. THE TRUNCATED TIME HORIZON THESIS",
+        "V. INTEGRATED SCENARIO RANKINGS",
+        "VI. TRIPWIRES AND MONITORING TRIGGERS",
+        "VII. CONFIDENCE VALIDATION",
+        "VIII. CROSS-REFERENCES",
+        "IX. ANALYST NOTES \u2014 METHODOLOGICAL RECORD"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_worldcup_hope_paradox_2026-06-16",
+      "title": "QGIA ASSESSMENT \u2014 THE WORLD CUP HOPE PARADOX",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_WorldCup_Hope_Paradox_2026-06-16.md",
+      "checksum": "577e87d9e896fc7a",
+      "word_count": 2823,
+      "last_modified": "2026-06-16T13:11:29-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "I. THE STRUCTURAL PARADOX \u2014 SOFT POWER DECOUPLED FROM THE PRESIDENT",
+        "II. THE VIRAL HOSPITALITY PHENOMENON \u2014 THE DECOUPLING MADE VISIBLE",
+        "III. THE SOFT POWER CEILING \u2014 FOREIGN POLICY ANALYSIS",
+        "IV. THE HOPE PARADOX \u2014 WHY THIS IS STRUCTURALLY HARMFUL TO AUTHORITARIANISM",
+        "V. THE IRAN FAN BAN \u2014 DELIBERATE NARRATIVE FORECLOSURE",
+        "VI. ABCP PROBABILITY ASSESSMENT \u2014 POLITICAL IMPACT",
+        "VII. ANALYST REGISTRATION",
+        "VIII. CROSS-REFERENCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-domestic-us-qgia_worldcup_middleamerica_decency_2026-06-16",
+      "title": "QGIA ASSESSMENT \u2014 THE MIDDLE AMERICA DECENCY INDEX",
+      "domain": "regional-expertise",
+      "path": "regions/domestic-us/QGIA_WorldCup_MiddleAmerica_Decency_2026-06-16.md",
+      "checksum": "ef905fd09f210bb4",
+      "word_count": 2062,
+      "last_modified": "2026-06-16T13:20:14-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "I. THE EMPIRICAL RECORD \u2014 WHAT ACTUALLY HAPPENED",
+        "II. THE ANALYTICAL THESIS \u2014 FORMALLY REGISTERED",
+        "III. WHY THIS IS POLITICALLY SIGNIFICANT \u2014 THE MIDTERM IMPLICATION",
+        "IV. THE MEDIA FRAME GAP \u2014 ANALYTICAL NOTE",
+        "V. ANALYST REGISTRATION",
+        "VI. CROSS-REFERENCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
+      "id": "qgia-library:regions-middle-east-qgia_israel_leverage_assessment_2026-w24",
+      "title": "QGIA INTELLIGENCE ASSESSMENT \u2014 US-ISRAEL LEVERAGE NODE",
+      "domain": "regional-expertise",
+      "path": "regions/middle-east/QGIA_Israel_Leverage_Assessment_2026-W24.md",
+      "checksum": "fb92a94cdc7857bc",
+      "word_count": 2246,
+      "last_modified": "2026-06-16T09:55:46-04:00",
+      "tags": [
+        "I. THE DEPENDENCY ARCHITECTURE \u2014 NEAR-TOTAL ASYMMETRY",
+        "II. THE \"THEY KNEW THE DEAL\" PRINCIPLE",
+        "III. THE TRUMP-NETANYAHU CAPITULATION PATTERN \u2014 FULL BEHAVIORAL RECORD",
+        "IV. WHY TRUMP DOES NOT IMPOSE COSTS \u2014 THE THREE-LAYER MODEL",
+        "V. THE LEVERAGE THAT EXISTS AND IS NOT BEING USED",
+        "VI. ABCP SCENARIO RANKINGS \u2014 ISRAEL DEFIANCE TRACK",
+        "VII. STRATEGIC VERDICT",
+        "VIII. CROSS-REFERENCES",
+        "IX. PRIMARY SOURCES"
+      ],
+      "summary": "**Classification: PROPRIETARY | OSIQP v4.2.1**"
+    },
+    {
       "id": "qgia-library:regions-middle-east-iran-iran-war-2026-readme",
       "title": "Iran War 2026 \u2014 Documentation Package",
       "domain": "theater_readme",
       "path": "regions/middle-east/iran/iran-war-2026/README.md",
-      "checksum": "82300bd621ae8ad9",
-      "word_count": 308,
-      "last_modified": "2026-04-19T00:17:48-04:00",
+      "checksum": "5d81ee981bb2a5e7",
+      "word_count": 520,
+      "last_modified": "2026-06-15T09:37:15-04:00",
       "tags": [
         "Scope",
         "Package Contents",
+        "Current Operational Status",
+        "Critical Watch \u2014 June 19 Geneva",
         "Current Analytical Focus",
         "Baseline Date",
         "Dependencies",
         "Confidence Benchmarks",
         "Maintenance"
       ],
-      "summary": "This package contains baseline documentation for the Iran War 2026 assessment set within the QGIA Knowledge Library. It bridges reusable QGIA schema from the Knowledge Spine with theater-specific scenario definitions, actor cards, and probability ledgers."
+      "summary": "**Last audit:** 2026-06-15T09:31:00 EDT"
     },
     {
       "id": "qgia-library:regions-middle-east-iran-iran-war-2026-actor-cards",
       "title": "Iran War 2026 \u2014 Actor Cards",
       "domain": "actor_cards",
       "path": "regions/middle-east/iran/iran-war-2026/actor-cards.md",
-      "checksum": "c6bc0a430b56160d",
-      "word_count": 496,
-      "last_modified": "2026-04-19T00:17:48-04:00",
+      "checksum": "a820c37b9119ccf1",
+      "word_count": 959,
+      "last_modified": "2026-06-15T09:15:28-04:00",
       "tags": [
         "IRGC-QF / IRGC High Command",
+        "Supreme Leader Node",
         "Netanyahu Coalition / Israeli War Cabinet",
         "US Executive Node"
       ],
@@ -439,13 +724,14 @@
       "title": "Iran War 2026 \u2014 Baseline Probability Ledger",
       "domain": "ledger",
       "path": "regions/middle-east/iran/iran-war-2026/baseline-ledger.md",
-      "checksum": "9461e22e242c98dc",
-      "word_count": 493,
-      "last_modified": "2026-04-19T00:17:48-04:00",
+      "checksum": "9b9e5b75de43c897",
+      "word_count": 1139,
+      "last_modified": "2026-06-15T09:14:21-04:00",
       "tags": [
         "Strategic War Outcomes (0\u2013180 days)",
         "Regime Trajectory Set (12 months)",
         "Composite Confidence Breakdown",
+        "Brier Score Summary (Resolved Scenarios)",
         "Update Log"
       ],
       "summary": "**Baseline date:** 2026-04-19T00:00:00Z"
@@ -455,17 +741,101 @@
       "title": "Iran War 2026 \u2014 Scenario Catalog",
       "domain": "scenario_catalog",
       "path": "regions/middle-east/iran/iran-war-2026/scenario-catalog.md",
-      "checksum": "16328f23f57a4833",
-      "word_count": 712,
-      "last_modified": "2026-04-19T00:17:48-04:00",
+      "checksum": "6f74cc97724b3611",
+      "word_count": 1077,
+      "last_modified": "2026-06-15T09:36:04-04:00",
       "tags": [
-        "Tier I Scenarios (P \u2265 0.25)",
-        "Tier II Scenarios (P 0.10\u20130.25)",
-        "Tier III Scenarios (P < 0.10)",
-        "Scenario Descriptions",
+        "Tier I \u2014 Active Scenarios (P \u2265 0.25)",
+        "Tier II \u2014 Elevated Risk Scenarios (P 0.10\u20130.25)",
+        "Tier III \u2014 Low-Probability, High-Consequence (P < 0.10)",
+        "Resolved Archive",
+        "Post-MoU Scenario Descriptions (New)",
+        "Legacy Scenario Descriptions (Unchanged)",
         "Monitoring Indicators"
       ],
       "summary": "**Baseline date:** 2026-04-19T00:00:00Z"
+    },
+    {
+      "id": "qgia-library:regions-ukraine-qgia_ukraine_ledger_2026-w24",
+      "title": "QGIA UKRAINE THEATER LEDGER",
+      "domain": "regional-expertise",
+      "path": "regions/ukraine/QGIA_Ukraine_Ledger_2026-W24.md",
+      "checksum": "5f54d5e6c59232e9",
+      "word_count": 1751,
+      "last_modified": "2026-06-15T09:23:10-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "I. BATTLEFIELD STATUS \u2014 WAR DAY 1,572",
+        "II. RUSSIAN MASS STRIKE \u2014 NIGHT OF JUNE 14\u201315 (WAR DAY 1,572)",
+        "III. RUSSIAN FORCE COMPOSITION & EXTERNAL ENABLERS",
+        "IV. DIPLOMATIC TRACK \u2014 WEEK 24",
+        "V. STRATEGIC ASSESSMENT",
+        "VI. WATCHLIST \u2014 INDICATORS TO MONITOR",
+        "VII. PRIOR STATE REFERENCE"
+      ],
+      "summary": "**Week 24 | June 9\u201315, 2026 | War Day 1,565\u20131,572**"
+    },
+    {
+      "id": "qgia-library:regions-ukraine-baseline-ledger",
+      "title": "QGIA Ukraine Theater \u2014 Baseline Probability Ledger",
+      "domain": "ledger",
+      "path": "regions/ukraine/baseline-ledger.md",
+      "checksum": "60dca05a38e20ef8",
+      "word_count": 1154,
+      "last_modified": "2026-06-15T09:50:22-04:00",
+      "tags": [
+        "I. WAR TERMINATION SET (mutually exclusive at 12-month horizon)",
+        "II. RUSSIAN FORCE TRAJECTORY (0\u20136 month window)",
+        "III. DIPLOMATIC TRACK (0\u20136 month window)",
+        "IV. BILETSKY / 3RD BRIGADE OPERATIONAL WINDOW",
+        "V. COMPOSITE CONFIDENCE BREAKDOWN",
+        "VI. BRIER SCORE TRACKING (Resolved Scenarios)",
+        "VII. UPDATE LOG",
+        "VIII. PRIOR STATE REFERENCE"
+      ],
+      "summary": "**Baseline date:** 2026-06-15T09:45:00 EDT (War Day 1,572)"
+    },
+    {
+      "id": "qgia-library:regions-weekly-rollups-qgia_weekly_rollup_2026-w24_june09-15",
+      "title": "QGIA WEEKLY INTELLIGENCE ROLLUP \u2014 Week 24, June 9\u201315, 2026",
+      "domain": "regional-expertise",
+      "path": "regions/weekly-rollups/QGIA_Weekly_Rollup_2026-W24_June09-15.md",
+      "checksum": "93f8dc24e74f6cf1",
+      "word_count": 2441,
+      "last_modified": "2026-06-15T08:52:25-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "THEATER I: IRAN / MIDDLE EAST",
+        "THEATER II: UKRAINE / EASTERN EUROPE",
+        "THEATER III: WESTERN HEMISPHERE \u2014 VENEZUELA",
+        "THEATER IV: US DOMESTIC",
+        "CROSS-THEATER INTERACTIONS \u2014 WEEK 24",
+        "COLLECTION PRIORITIES \u2014 WEEK OF JUNE 15\u201322",
+        "CONFIDENCE MATRIX \u2014 Week 24",
+        "NOTABLE ASSESSMENTS FROM BRIEFING ARCHIVE (March\u2013June)",
+        "WEEK-AHEAD WATCHBOARD"
+      ],
+      "summary": "**CLASSIFICATION: PROPRIETARY | WATCHCON II | COMPOSITE CONFIDENCE: 0.84**"
+    },
+    {
+      "id": "qgia-library:regions-western-hemisphere-venezuela-qgia_venezuela_ledger_2026-w24",
+      "title": "QGIA VENEZUELA THEATER LEDGER",
+      "domain": "regional-expertise",
+      "path": "regions/western-hemisphere/venezuela/QGIA_Venezuela_Ledger_2026-W24.md",
+      "checksum": "a9289894a41a1a4f",
+      "word_count": 965,
+      "last_modified": "2026-06-15T09:40:34-04:00",
+      "tags": [
+        "EXECUTIVE SUMMARY",
+        "I. POLITICAL STATUS \u2014 VENEZUELA (June 15, 2026)",
+        "II. LEGAL TRACK \u2014 US v. MADURO (SDNY)",
+        "III. REGIONAL DYNAMICS",
+        "IV. SCENARIO DISTRIBUTION \u2014 0\u201390 DAY WINDOW",
+        "V. WATCHLIST",
+        "VI. ANALYTICAL NOTE \u2014 OP ABSOLUTE RESOLVE CALIBRATION",
+        "VII. PRIOR STATE REFERENCE"
+      ],
+      "summary": "**Week 24 | June 9\u201315, 2026 | Op Absolute Resolve D+163**"
     }
   ]
 }

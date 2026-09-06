@@ -14,7 +14,9 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from validate_model_catalog import compare_entry, main  # noqa: E402
+from validate_model_catalog import anthropic_entries, compare_entry, main  # noqa: E402
+
+from modules.ai_core.unified_ai_interface import AIModel, UnifiedAIInterface  # noqa: E402
 
 
 def test_unresolvable_model_is_a_finding():
@@ -67,10 +69,27 @@ def test_absent_remote_fields_are_not_treated_as_mismatch():
     assert findings == []
 
 
-def test_missing_api_key_skips_rather_than_passing_falsely(monkeypatch, capsys):
-    """A missing secret must be visibly SKIPPED, never a silent green."""
+def test_missing_api_key_fails_closed(monkeypatch, capsys):
+    """A live validator that cannot run must not produce a green check."""
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    assert main() == 0
-    out = capsys.readouterr().out
-    assert "SKIPPED" in out
-    assert "not a pass" in out
+    assert main() == 2
+    err = capsys.readouterr().err
+    assert "ERROR" in err
+    assert "could not be checked" in err
+
+
+def test_missing_anthropic_dependency_fails_closed(monkeypatch, capsys):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-only-not-a-real-key")
+    monkeypatch.setitem(sys.modules, "anthropic", None)
+
+    assert main() == 2
+    assert "not installed" in capsys.readouterr().err
+
+
+def test_disabled_available_entry_still_gets_live_validation(monkeypatch):
+    """Routing policy must not hide a provider-existence claim from validation."""
+    cap = UnifiedAIInterface.CAPABILITIES[AIModel.CLAUDE_OPUS_5]
+    monkeypatch.setattr(cap, "enabled", False)
+
+    assert cap.available
+    assert cap in anthropic_entries()

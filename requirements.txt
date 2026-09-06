@@ -63,7 +63,7 @@ qiskit-aer>=0.13.0,<1.0.0           # Quantum simulators
 # ===================================================================
 # VISUALIZATION & MONITORING
 # ===================================================================
-plotly>=6.9.0,<7.0.0               # Interactive visualizations
+plotly>=7.0.0,<8.0.0               # Interactive visualizations
 prometheus-client>=0.26.0,<1.0.0    # Metrics collection
 
 # ===================================================================
@@ -80,8 +80,8 @@ slowapi>=0.1.10,<1.0.0               # Rate limiting for FastAPI
 # ===================================================================
 # AI MODEL INTEGRATIONS
 # ===================================================================
-anthropic>=0.120.2,<1.0.0            # Claude 3.5/4.5 integration
-openai>=2.53.0,<3.0.0               # GPT-4/5 integration
+anthropic>=1.2.0,<2.0.0            # Claude 3.5/4.5 integration
+openai>=3.6.0,<4.0.0               # GPT-4/5 integration
 
 # ===================================================================
 # VALIDATION

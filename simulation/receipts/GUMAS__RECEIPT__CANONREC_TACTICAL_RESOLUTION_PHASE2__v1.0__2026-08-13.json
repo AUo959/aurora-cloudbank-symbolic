@@ -1,0 +1,89 @@
+{
+  "artifact": "GUMAS CanonRec tactical resolution Phase-2 receipt",
+  "version": "1.0",
+  "date": "2026-08-13",
+  "status": "PASS",
+  "accepted_code_head": "f00013245f58c15e6d56e3213a858df985b12147",
+  "canonrec_repository": "AUo959/CanonRec",
+  "canonrec_commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+  "resolver_version": "1.0.1",
+  "derivation_version": "canonrec-tactical-derivation-v1.1",
+  "canonical_json_profile": "aurora-canonical-json-v1",
+  "material_source_set_sha256": "6cafe7da44d36161c6d73d956b43ea553b7c1cde1d8fdc62a669ae2ea11c15e6",
+  "control_manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc",
+  "substitution_manifest_sha256": "d20cbe034f522d99f17311436a61cd47dd4602aacc3f4d82aaac1483d4ab9fae",
+  "authority_resolution": {
+    "galactic_union_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+    "prime_construct_sha256": "1efa649a65e78f757f83dd604a0b1304305c13c1ad71708521ced576ec7217e5",
+    "doctrine_vectors_differ": true
+  },
+  "control_aggregate_capability": {
+    "boarding": 357,
+    "carrier_projection": 190,
+    "command": 446,
+    "defense": 506,
+    "electronic_warfare": 515,
+    "endurance": 635,
+    "firepower": 484,
+    "mobility": 772,
+    "range": 583,
+    "sensors": 725,
+    "stealth": 488,
+    "support": 452
+  },
+  "substitution_aggregate_capability": {
+    "boarding": 360,
+    "carrier_projection": 198,
+    "command": 457,
+    "defense": 536,
+    "electronic_warfare": 517,
+    "endurance": 660,
+    "firepower": 497,
+    "mobility": 730,
+    "range": 594,
+    "sensors": 717,
+    "stealth": 468,
+    "support": 468
+  },
+  "accepted_semantic_gates": {
+    "current_canonrec_schema_entity_id_and_certainty": true,
+    "lifecycle_status_not_misread_as_canonicality": true,
+    "whole_token_phrase_matching": true,
+    "ai_does_not_match_rail": true,
+    "central_does_not_match_decentralized": true,
+    "same_roster_replay_byte_equivalent_normalized_manifest": true,
+    "alternate_class_substitution_changes_real_capability_values": true,
+    "alternate_polity_organization_uses_same_resolver_path": true,
+    "marshal_sentinel_scope_containment": true,
+    "sentinel_scoped_doctrine_source_count": 2,
+    "generic_union_classes_do_not_inherit_marshal_sentinel_scope": true,
+    "lossless_unsigned_seed64_encoding_available": true,
+    "nonfinite_numbers_rejected_from_canonical_hash_profile": true
+  },
+  "source_identity": {
+    "digest_type": "git_blob_sha1",
+    "files": {
+      "simulation/runtime/canonrec_tactical/resolver.py": "9eebd574ab1669331227bf854396acb1cffe56b5",
+      "simulation/runtime/canonrec_tactical/resolution_smoke.py": "1a3c80e4d70f4a101894972e65f1426c586bb1cd",
+      "tests/test_canonrec_tactical_resolution.py": "19ad0fb98d528da0a478044ed21980667b387821",
+      ".github/workflows/gumas-canonrec-resolution.yml": "b2d975106875a16fc743ee87c6aa814a80884804"
+    }
+  },
+  "focused_validation": {
+    "workflow": "GUMAS CanonRec Resolution",
+    "run_id": 31760439826,
+    "job_id": 94645445525,
+    "conclusion": "success",
+    "artifact_id": 9204379781,
+    "artifact_digest": "sha256:04665a2c1c8fbc11425bf9066b42d44ced3a568833becc82c30c016801707ae7"
+  },
+  "repository_validation": {
+    "workflow": "Aurora CI (Minimal)",
+    "run_id": 31760439839,
+    "job_id": 94645484810,
+    "full_test_suite": "success",
+    "conclusion": "success"
+  },
+  "phase2_gate": "ACCEPTED",
+  "next_phase": "Phase 3 — deterministic per-vessel T0 physical instantiation"
+}

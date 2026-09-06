@@ -1,0 +1,170 @@
+{
+  "receipt_id": "GUMAS-PHASE8-MORALE-RESOLUTION-TERMINATION-ACCEPTANCE-2026-08-15",
+  "task_id": "TASK-20260812-gumas-deterministic-battle-runtime",
+  "phase": 8,
+  "phase_name": "morale, resolution, protection, and termination",
+  "status": "PASS",
+  "accepted_branch_head": "34109c37f6f7548685559e1c13ba81c61510533b",
+  "repository_ci_merge_sha": "c34e79f74415deb3b7aaa0d06466e8c7bd894e3d",
+  "historical_canon_status": "non_canon_simulation_instance",
+  "run0_executed": false,
+  "run0_remains_blocked": true,
+  "contract": {
+    "contract_id": "GUMAS_MORALE_RESOLUTION_TERMINATION_v1_0",
+    "version": "1.0.0",
+    "normative_spec_path": "simulation/specs/GUMAS__SPEC__DETERMINISTIC_MORALE_RESOLUTION_TERMINATION__v1.0__2026-08-14.md",
+    "normative_spec_sha256": "3e80c431f8457896278ef0b39467b28072529166540433df977fa68301d8f01a",
+    "reconciliation_decision_path": "simulation/specs/GUMAS__DECISION__PHASE8_CONTRACT_RECONCILIATION__v1.0__2026-08-14.md",
+    "reconciliation_decision_sha256": "6b3631f3d6b268b5def4499724703dbab3ad96db9f2e4711a5a753c1c4fc1df0",
+    "superseded_design_evidence_path": "simulation/specs/GUMAS__SPEC__DETERMINISTIC_MORALE_WITHDRAWAL_TERMINATION__v1.0__2026-08-14.md",
+    "superseded_design_semantics_used": false,
+    "runtime_path": "simulation/runtime/gumas_morale_resolution/",
+    "canonical_json_profile": "aurora-canonical-json-v1",
+    "arithmetic": "integer_fixed_point",
+    "ambient_rng_used": false,
+    "floating_authority_used": false,
+    "prose_inputs_used": false,
+    "physical_state_owner": "Phase 7 damage/readiness/physical-disposition layer",
+    "phase8_physical_state_mutation_authority": false
+  },
+  "source_identity": {
+    "morale_resolution_core": {
+      "bundle_sha256": "52d89f6ea6c17428d747b16143f8d6bbdda03743b14bf5dea02962773bbfced7",
+      "module_sha256": {
+        "constants.py": "194fc8f5a682907570dd181275ea4581e24b6c55bbec3a57792bc30e4c1f3226",
+        "kernel.py": "37ad82fdd4fa41935040e3b9e0089df3af7acfaa2da7835dde6cb34ef8a11777"
+      }
+    },
+    "validated_public_boundary": {
+      "bundle_sha256": "6096d1c1249f6c4881fceb0b39d1dbbf9c8d7598ef34996c9f1e3ea294bb6990",
+      "module_sha256": {
+        "__init__.py": "0eb7b7e334a5403d5f05c91eab8f62317338953135f578ed61389f53673895a2",
+        "boundary.py": "8699292d66ac51aabac0a547411a4ad2704cc8c3caf6c05e1ffcaac0329db34c"
+      }
+    },
+    "composite_phase8_source_sha256": "a848e798414d98b0840a5d2dc46b88f2d0a9cc4d76028d25a47beb207990277a",
+    "acceptance_fixture_sha256": "d807a7bb039986136b8779fc0805ebaa5cce5dfc6ef3fcb3a922421c26b9ee07",
+    "real_source_smoke_sha256": "0f703a8377db8317e678cb242a156f7022e09294aa479d7658072dc332f22393"
+  },
+  "upstream_provenance": {
+    "phase4_command": {
+      "receipt_path": "simulation/receipts/GUMAS__RECEIPT__COMMAND_POLICY_PHASE4__v1.0__2026-08-13.json",
+      "policy_bundle_sha256": "8c9ba9d413945404e7648c8f427b660576b0e85887c7639a0944f56b38585b3f",
+      "decision_sha256_by_side": {
+        "loyalist": "7bce2c3697a5813c6175cf569ebe3d21d625f74f44e48ff5cdbac577efe5f15c",
+        "rebel": "a3e22b6a75ea784352a39d524959fd0bc39bb3fdb278ec749caf7a17d5e8e8d5"
+      }
+    },
+    "phase5_movement": {
+      "receipt_path": "simulation/receipts/GUMAS__RECEIPT__MOVEMENT_GEOMETRY_PHASE5__v1.0__2026-08-13.json",
+      "movement_bundle_sha256": "565ef76f94cef320a4e4e8a0cbf75a301270eeef4326975b4cf41681d46bab57",
+      "accepted_next_state_sha256": "c947b95b3e6a38c6676c4a197c5351f017734aebd56ecdf48ab0324311dd1c74",
+      "phase8_smoke_movement_receipt_sha256": "5305954ffe3db7e7c26aa149b7b78993b3a06814d6058b544c15f7ba68a826db"
+    },
+    "phase6_sensing_fire_control": {
+      "receipt_path": "simulation/receipts/GUMAS__RECEIPT__SENSING_EW_TARGETING_WEAPONS_PHASE6__v1.0__2026-08-13.json",
+      "source_bundle_sha256": "05e65b2ee5744809f22eeb1dd6cf5cbf637690d1fa16c177c3bbeedca74427e7",
+      "state_sha256": "393ffd735e01da4fe4ca2e35547ee457d626005f5e27add5d6f4e97ea7ca7479",
+      "receipt_sha256": "3b84a912d1826846599dcd2c01ec763f2430af3da8931a03c01940f26faef775",
+      "effect_descriptors": 0
+    },
+    "phase7_damage_disposition": {
+      "receipt_path": "simulation/receipts/GUMAS__RECEIPT__DAMAGE_DISPOSITION_PHASE7__v1.0__2026-08-14.json",
+      "composite_source_sha256": "bbe6d1663ddf32b651db957434f6b1c6e86d56456c9bd93cffd8b8ecf972ed5a",
+      "state_sha256": "701ee047f86a8f3f29c7d57f5820214daf3fd60891160235ce533db9b63ea473",
+      "receipt_sha256": "ab0ecdbdcbbb6edc78378e312a60d77b98b1b755a174d0b7466f630713bb0c2b",
+      "physical_state_authority_retained": true
+    },
+    "canonrec": {
+      "repository": "AUo959/CanonRec",
+      "commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+      "source_set_path": "simulation/canon_snapshots/canonrec/CANONREC__SOURCE_SET__GUMAS_RUN0_PHASE2__v1.0__2026-08-12.json",
+      "network_access_during_battle_execution_permitted": false
+    }
+  },
+  "accepted_control_witness": {
+    "source_t0_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec",
+    "movement_state_sha256": "c947b95b3e6a38c6676c4a197c5351f017734aebd56ecdf48ab0324311dd1c74",
+    "movement_receipt_sha256": "5305954ffe3db7e7c26aa149b7b78993b3a06814d6058b544c15f7ba68a826db",
+    "phase6_state_sha256": "393ffd735e01da4fe4ca2e35547ee457d626005f5e27add5d6f4e97ea7ca7479",
+    "phase6_receipt_sha256": "3b84a912d1826846599dcd2c01ec763f2430af3da8931a03c01940f26faef775",
+    "phase7_state_sha256": "701ee047f86a8f3f29c7d57f5820214daf3fd60891160235ce533db9b63ea473",
+    "phase7_receipt_sha256": "ab0ecdbdcbbb6edc78378e312a60d77b98b1b755a174d0b7466f630713bb0c2b",
+    "phase8_next_state_sha256": "481c85e115ff5349d865f7214d4241ece855ff0cb33fec29d4f5ce6e7000c5df",
+    "phase8_resolution_state_sha256": "e7d756332b10d1dce7d1f3a7e7093c365bdd45c7e28d546bc108344704082365",
+    "phase8_receipt_sha256": "5f31bcb6a7a1e2113e8a61e69b317997f101aa5215345814bd888f95b9163562",
+    "public_boundary_validated": true,
+    "strategic_posture_by_side": {
+      "loyalist": "POSITIONAL_MANEUVER",
+      "rebel": "PRESS"
+    },
+    "battle_shock_q1000_by_side": {
+      "loyalist": 0,
+      "rebel": 0
+    },
+    "negotiation_signal_q1000_by_side": {
+      "loyalist": 0,
+      "rebel": 0
+    },
+    "morale_cohesion_unchanged": true,
+    "protected_ship_count": 0,
+    "terminated": false,
+    "termination_mode": "ongoing",
+    "interpretation": "The accepted first-step witness contains no Phase-6 weapon effects and no Phase-7 physical shock. Phase 8 therefore preserves morale and cohesion, emits no negotiation signal, and keeps the battle ongoing. This witness is not a battle result and does not authorize Run 0."
+  },
+  "verified_invariants": {
+    "same_input_replay_exact": true,
+    "command_mapping_order_inert": true,
+    "quiet_step_morale_cohesion_exactly_unchanged": true,
+    "dissent_without_physical_shock_inert": true,
+    "damage_and_incapacity_monotonicity": true,
+    "ceasefire_offer_ttl_and_rescission_exact": true,
+    "mutual_ceasefire_no_victor": true,
+    "mutual_disengagement_requires_persistence": true,
+    "withdrawal_requires_disengage_boundary_and_outbound_evidence": true,
+    "unilateral_withdrawal_no_false_victor": true,
+    "surrender_requires_eligible_posture_and_full_numeric_predicate": true,
+    "disabled_not_automatically_surrendered": true,
+    "incapacity_distinct_from_surrender_and_annihilation": true,
+    "hard_limit_exact": true,
+    "termination_precedence_exact": true,
+    "protected_ship_ids_complete_and_sorted": true,
+    "phase7_physical_state_unchanged": true,
+    "class_polity_and_prose_branches_absent": true,
+    "ambient_rng_absent": true,
+    "floating_point_authority_absent": true
+  },
+  "validation": {
+    "focused_workflow": {
+      "name": "GUMAS Morale Resolution",
+      "run_id": 31867481871,
+      "job_id": 94970739480,
+      "head_sha": "34109c37f6f7548685559e1c13ba81c61510533b",
+      "conclusion": "success",
+      "focused_tests": "18 passed",
+      "real_pinned_canonrec_smoke": "success",
+      "artifact_id": 9242441626,
+      "artifact_name": "gumas-morale-resolution-evidence",
+      "artifact_sha256": "11dfe079a52c7307ecbc86a32eea6ea6888962fcaf9296c78d2e62496d9fad6c"
+    },
+    "local_reproduction": {
+      "python": "3.12.13",
+      "focused_tests": "18 passed in 0.22s",
+      "real_pinned_canonrec_smoke": "success",
+      "smoke_phase8_receipt_sha256": "5f31bcb6a7a1e2113e8a61e69b317997f101aa5215345814bd888f95b9163562"
+    },
+    "repository_workflow": {
+      "name": "Aurora CI (Minimal)",
+      "run_id": 31867481900,
+      "job_id": 94970768823,
+      "head_sha": "34109c37f6f7548685559e1c13ba81c61510533b",
+      "tested_merge_sha": "c34e79f74415deb3b7aaa0d06466e8c7bd894e3d",
+      "conclusion": "success",
+      "full_test_suite": "3626 passed, 113 skipped, 9 xfailed, 2 xpassed, 101 subtests passed",
+      "pytest_log_artifact_id": 9242530126,
+      "pytest_log_artifact_sha256": "bbbf125c0f2afc2350691b10cc653c8c7f7b212d6242d6a78a38b509c9743798"
+    },
+    "other_required_checks": "GUMAS restoration, CanonRec resolution, Physical T0, Command Policy, Movement Geometry, Sensing/EW/Weapons, Damage/Disposition, CodeQL, Code Quality, Constellation CI, PR Evaluation, Safety Commit Guard, Branch Protection, Catastrophe Prevention, PR Selective Integration, and CI Status Project Automation succeeded on the accepted head; Codacy was skipped rather than failed."
+  },
+  "decision": "Phase 8 is accepted. Phase 9 may begin only through a committed contract and tests for LIVE_COMMAND_OBSERVATION_BRIDGE, authoritative macrostep ordering, terminal short-circuiting, and immutable ledger continuity. Run 0 remains blocked."
+}

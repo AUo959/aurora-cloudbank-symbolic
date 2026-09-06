@@ -1,0 +1,56 @@
+{
+  "artifact": "GUMAS v2 tactical restoration manifest",
+  "version": "1.1",
+  "date": "2026-08-13",
+  "status": "ACCEPTED_PHASE1_HARDENED",
+  "supersedes_for_active_runtime": "simulation/runtime/gumas_v2_restored/GUMAS__RESTORATION_MANIFEST__v1.0__2026-08-12.json",
+  "historical_evidence_policy": "The v1.0 manifest remains immutable historical evidence and is not rewritten.",
+  "historical_package_anchor": "GUMAS-PACKAGE-V2",
+  "recovered_modules_tree_sha256": "a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9",
+  "recovery_package_sha256": "039c0f48341aa9847b8400e45a29e41fef734a2b2e80b78bfe3de1abc165ec07",
+  "restoration_version": "2.0.1-restored.2",
+  "restoration_contract": "CombatResolver.resolve_battle(CombatState, attacker_fleets, defender_fleets, topology_manager)",
+  "hardening": {
+    "recovery_materialization": "decoded recovery bytes are SHA-256 verified, written to a same-directory temporary file, fsync'd, verified, and atomically published with os.replace",
+    "historical_import_isolation": "historical modules.gumas is exposed only inside a Python import-lock scope; sys.path and pre-existing modules/modules.gumas entries are restored after import",
+    "ambient_python_isolation": "restoration regression executes the smoke script through python -I with PYTHONPATH removed",
+    "archival_source_mutated": false
+  },
+  "deterministic_replay": {
+    "normalized_replay_sha256": "de55355d1b489c1a89c63508d9fbe5779e0ac9e66248f28850c1012c266d07ea",
+    "automatic_battlefield_condition": "open_space",
+    "explicit_battlefield_condition": "chokepoint",
+    "combat_turns": 1,
+    "historical_import_isolated": true
+  },
+  "accepted_code_head": "f00013245f58c15e6d56e3213a858df985b12147",
+  "source_identity": {
+    "digest_type": "git_blob_sha1",
+    "files": {
+      "simulation/runtime/gumas_v2_restored/restored_engine.py": "371c2025773b47904a7a2a0c16a69ba1bea76414",
+      "simulation/runtime/gumas_v2_restored/restoration_smoke.py": "1f670b2443785a4083f82d7bcb439399fbeae9ef",
+      "tests/test_gumas_v2_restored_combat.py": "b0128736eee7801bcca3f12ae90c2a84a47b62cd",
+      ".github/workflows/gumas-v2-restoration.yml": "3ff5bed8e8aa77257da05f7b1ec15fa281ce8114"
+    }
+  },
+  "validation": {
+    "focused_workflow": {
+      "name": "GUMAS v2 Restoration",
+      "run_id": 31760439850,
+      "job_id": 94645445647,
+      "head_sha": "f00013245f58c15e6d56e3213a858df985b12147",
+      "conclusion": "success",
+      "artifact_id": 9204380440,
+      "artifact_digest": "sha256:86e04dc9820753dd91d2b1ece9881918aa24d8f785ea6ed78b610c242ffe439d"
+    },
+    "repository_workflow": {
+      "name": "Aurora CI (Minimal)",
+      "run_id": 31760439839,
+      "job_id": 94645484810,
+      "head_sha": "f00013245f58c15e6d56e3213a858df985b12147",
+      "full_test_suite": "success",
+      "conclusion": "success"
+    }
+  },
+  "phase_gate": "PASS"
+}

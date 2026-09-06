@@ -1,0 +1,53 @@
+name: GUMAS CanonRec Resolution
+
+on:
+  pull_request:
+    paths:
+      - 'simulation/runtime/canonrec_tactical/**'
+      - 'simulation/canon_snapshots/canonrec/CANONREC__SOURCE_SET__GUMAS_RUN0_PHASE2__v1.0__2026-08-12.json'
+      - 'tests/test_canonrec_tactical_resolution.py'
+      - '.github/workflows/gumas-canonrec-resolution.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canonrec-resolution:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CloudBank
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Checkout pinned CanonRec
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: AUo959/CanonRec
+          ref: dc629a566b2f42fa1c652140b9eef72a4fb0d58a
+          path: canonrec
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+
+      - name: Install focused test dependency
+        run: >-
+          python -m pip install --only-binary=:all: pytest==9.0.3
+
+      - name: Run deterministic resolver unit tests
+        run: pytest --noconftest tests/test_canonrec_tactical_resolution.py -q --no-header
+
+      - name: Run real CanonRec control and substitution smoke
+        run: |
+          set -o pipefail
+          python simulation/runtime/canonrec_tactical/resolution_smoke.py --canonrec-root canonrec 2>&1 | tee canonrec-resolution-smoke.log
+
+      - name: Upload CanonRec smoke log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: gumas-canonrec-resolution-smoke-log
+          path: canonrec-resolution-smoke.log
+          retention-days: 30
+          if-no-files-found: error

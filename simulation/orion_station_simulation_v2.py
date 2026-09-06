@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 """
+Status: CANONICAL. This is the active Orion multi-agent simulation — the
+only one imported anywhere in the tree (tests/test_orion_simulation.py and
+simulation/interactive_collab_demo.py). Prefer this module for new work.
+Superseded predecessor: simulation/orion_station_simulation.py. See #1132.
+
 Orion Station Simulation v2.0 - L1 Canon Character Integration
 --------------------------------------------------------------
 Enhanced simulation using canonical character loader for authentic crew modeling.

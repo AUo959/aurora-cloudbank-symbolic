@@ -6,7 +6,7 @@
 pytest==9.1.1
 pytest-asyncio==1.4.0
 pytest-cov==7.1.0
-coverage==7.15.4
+coverage==7.16.1
 
 # Syntax gate used by CI
 flake8==7.3.0
@@ -14,4 +14,4 @@ flake8==7.3.0
 # Connector test support
 # Runtime use remains optional, but tests/connector and test_mcp_connector_wired
 # import the MCP SDK during collection.
-mcp==1.29.1
+mcp==1.30.0

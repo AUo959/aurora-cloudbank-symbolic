@@ -13,9 +13,9 @@
 # CORE WEB FRAMEWORK
 # ===================================================================
 fastapi>=0.141.1,<1.0.0             # FastAPI web framework (updated for starlette 0.50+ compatibility)
-uvicorn[standard]>=0.52.4,<1.0.0    # ASGI server
+uvicorn[standard]>=0.53.0,<1.0.0    # ASGI server
 starlette>=1.6.0,<2.0.0            # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
-pydantic>=2.5.0,<3.0.0             # Data validation (cap at next major; V2->V3 would be breaking)
+pydantic>=2.13.5,<3.0.0             # Data validation (cap at next major; V2->V3 would be breaking)
 pydantic-settings>=2.15.0,<3.0.0    # Settings management via environment variables
 python-multipart>=0.0.20,<1.0.0     # File upload handling
 
@@ -23,7 +23,7 @@ python-multipart>=0.0.20,<1.0.0     # File upload handling
 # HTTP & NETWORKING
 # ===================================================================
 httpx>=0.28.0,<1.0.0                # Async HTTP client (requires httpcore 1.x)
-httpx2>=2.12.0,<3.0.0                # Starlette TestClient transport (replaces deprecated httpx fallback)
+httpx2>=2.13.0,<3.0.0                # Starlette TestClient transport (replaces deprecated httpx fallback)
 httpcore>=1.0.0,<2.0.0              # HTTP core (requires h11 0.16.0+)
 h11>=0.16.0,<1.0.0                  # HTTP/1.1 implementation (security updates)
 websockets>=17.1,<18.0.0          # WebSocket support
@@ -34,16 +34,16 @@ aiofiles>=24.1.0,<26.0.0            # Async file operations
 # ===================================================================
 cryptography>=50.0.1,<51.0.0        # Cryptographic library (cap reviewed quarterly; bump for security releases)
 bcrypt>=4.1.2,<6.0.0                # Password hashing
-pyjwt>=2.10.0,<3.0.0                 # JWT tokens (migrated from python-jose)
+pyjwt>=2.14.0,<3.0.0                 # JWT tokens (migrated from python-jose)
 passlib[bcrypt]>=1.7.4,<2.0.0       # Password handling
 # python-jose removed - see security migration Nov 2025 (ecdsa vulnerability)
 
 # ===================================================================
 # DATA PROCESSING & SCIENTIFIC COMPUTING
 # ===================================================================
-numpy>=2.5.2,<3.0.0                # Numerical computing
+numpy>=2.5.3,<3.0.0                # Numerical computing
 scipy>=1.18.1,<2.0.0                # Scientific computing
-pandas>=3.0.5,<4.0.0                # Data analysis
+pandas>=3.0.6,<4.0.0                # Data analysis
 
 # ===================================================================
 # CONFIGURATION & UTILITIES
@@ -63,7 +63,7 @@ qiskit-aer>=0.13.0,<1.0.0           # Quantum simulators
 # ===================================================================
 # VISUALIZATION & MONITORING
 # ===================================================================
-plotly>=7.0.0,<8.0.0               # Interactive visualizations
+plotly>=7.1.0,<8.0.0               # Interactive visualizations
 prometheus-client>=0.26.0,<1.0.0    # Metrics collection
 
 # ===================================================================
@@ -80,8 +80,8 @@ slowapi>=0.1.10,<1.0.0               # Rate limiting for FastAPI
 # ===================================================================
 # AI MODEL INTEGRATIONS
 # ===================================================================
-anthropic>=1.2.0,<2.0.0            # Claude 3.5/4.5 integration
-openai>=3.6.0,<4.0.0               # GPT-4/5 integration
+anthropic>=1.7.0,<2.0.0            # Claude 3.5/4.5 integration
+openai>=3.16.2,<4.0.0               # GPT-4/5 integration
 
 # ===================================================================
 # VALIDATION
@@ -92,8 +92,8 @@ jsonschema>=4.17.0,<5.0.0           # JSON Schema validation (MCP tool inputSche
 # SYSTEM UTILITIES
 # ===================================================================
 requests>=2.34.2,<3.0.0             # HTTP library
-urllib3>=2.7.0,<3.0.0               # HTTP connection pooling
+urllib3>=2.8.0,<3.0.0               # HTTP connection pooling
 certifi>=2026.7.22                   # SSL certificates
 charset-normalizer>=3.5.1,<4.0.0    # Character encoding detection
-idna>=3.19,<4.0.0                   # Internationalized domain names
+idna>=3.20,<4.0.0                   # Internationalized domain names
 psutil>=7.2.2,<8.0.0                # Process and system monitoring (for R-2 telemetry)

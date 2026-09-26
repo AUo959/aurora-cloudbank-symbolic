@@ -1,0 +1,118 @@
+{
+  "receipt_id": "GUMAS-PHASE7-DAMAGE-DISPOSITION-ACCEPTANCE-2026-08-14",
+  "task_id": "TASK-20260812-gumas-deterministic-battle-runtime",
+  "phase": 7,
+  "phase_name": "shield, armor, hull, readiness, and physical disposition transitions",
+  "status": "PASS",
+  "accepted_code_head": "c2cd8ef8044c0caec73f820ba28b97613a7440bd",
+  "historical_canon_status": "non_canon_simulation_instance",
+  "run0_executed": false,
+  "run0_remains_blocked": true,
+  "contract": {
+    "contract_id": "GUMAS_DAMAGE_DISPOSITION_v1_0",
+    "version": "1.0.0",
+    "spec_path": "simulation/specs/GUMAS__SPEC__DETERMINISTIC_DAMAGE_DISPOSITION__v1.0__2026-08-13.md",
+    "runtime_path": "simulation/runtime/gumas_damage_disposition/",
+    "canonical_json_profile": "aurora-canonical-json-v1",
+    "arithmetic": "integer_fixed_point",
+    "ambient_rng_used": false,
+    "floating_authority_used": false,
+    "morale_authority": false,
+    "cohesion_authority": false,
+    "termination_authority": false
+  },
+  "source_identity": {
+    "damage_core": {
+      "bundle_sha256": "ff5d94f98b0742b3d81a3230827b640777870dea8c3a6c1011d9e0e1c81dcad1",
+      "module_sha256": {
+        "constants.py": "e12f92132bd2c7d3a922d4517818b65e5c9cfa4e553fb9afb0d3b714b1064820",
+        "kernel.py": "10d664316cac8a8378ea3ebdb07449a6e043ca975a8dce5286a639ea981735a6"
+      }
+    },
+    "semantic_boundary_normalizer": {
+      "bundle_sha256": "ad9f5ad8217813db66796cd2960d0788e140bfae1fe7ad2ce263695be2ccfefe",
+      "module_sha256": {
+        "__init__.py": "350a1311e62c8fbd90f4f1e2eb89cf78e6a809ee30189e14481e32c4b9f6589a",
+        "normalization.py": "56f83746bb20d4c39f74802f76a37c6edc7fe5f751ece186c84c1f77710e755d"
+      }
+    },
+    "composite_phase7_source_sha256": "bbe6d1663ddf32b651db957434f6b1c6e86d56456c9bd93cffd8b8ecf972ed5a"
+  },
+  "phase6_provenance_boundary": {
+    "raw_phase6_receipt_sha256": "3b84a912d1826846599dcd2c01ec763f2430af3da8931a03c01940f26faef775",
+    "raw_receipt_validated_before_normalization": true,
+    "phase7_bound_normalized_phase6_receipt_sha256": "cb1c2337d22aa17883fae8a203286337a95313114c4f645f974111e68bf10259",
+    "semantic_lists_normalized": [
+      "contacts",
+      "selections",
+      "weapon_attempts",
+      "effect_descriptors"
+    ],
+    "reason": "Phase 7 consumes simultaneous effect semantics. Raw Phase-6 provenance is verified first, then semantically unordered lists are canonicalized so insertion order cannot perturb authoritative Phase-7 state hashes."
+  },
+  "accepted_control_witness": {
+    "source_t0_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec",
+    "movement_state_sha256": "c947b95b3e6a38c6676c4a197c5351f017734aebd56ecdf48ab0324311dd1c74",
+    "movement_receipt_sha256": "21ee10210cba1be1ee6c359173f25d45fa8f916d8e66a6e6ddef7fead00c8ded",
+    "phase6_state_sha256": "393ffd735e01da4fe4ca2e35547ee457d626005f5e27add5d6f4e97ea7ca7479",
+    "phase6_effect_descriptors": 0,
+    "phase7_next_state_sha256": "701ee047f86a8f3f29c7d57f5820214daf3fd60891160235ce533db9b63ea473",
+    "damage_ledger_sha256": "d2842b8e0f519b9c4ea759fb7ca4ac255ceb3865fd3924be9ca8f4928d2a38f4",
+    "phase7_receipt_sha256": "ab0ecdbdcbbb6edc78378e312a60d77b98b1b755a174d0b7466f630713bb0c2b",
+    "affected_targets": 0,
+    "material_state_unchanged": true,
+    "morale_mutated": false,
+    "cohesion_mutated": false,
+    "termination_decision_made": false,
+    "interpretation": "At the accepted first-step Run-0 geometry Phase 6 emits no weapon effects, therefore the correct deterministic Phase-7 transition is exact no-damage preservation with provenance and ledger metadata only."
+  },
+  "verified_invariants": {
+    "same_input_replay_exact": true,
+    "simultaneous_effect_insertion_order_inert": true,
+    "zero_effect_material_state_unchanged": true,
+    "shield_before_armor_before_hull": true,
+    "exact_shield_depletion_boundary": true,
+    "exact_armor_depletion_boundary": true,
+    "hull_clamped_nonnegative_and_overkill_recorded": true,
+    "higher_shield_capacity_cannot_increase_downstream_loss": true,
+    "higher_armor_capacity_cannot_increase_hull_loss": true,
+    "no_hull_penetration_no_readiness_shock": true,
+    "greater_hull_loss_cannot_reduce_readiness_degradation": true,
+    "higher_damage_control_readiness_cannot_increase_degradation": true,
+    "destroyed_exactly_at_hull_zero": true,
+    "disabled_distinct_from_destroyed": true,
+    "morale_unchanged": true,
+    "cohesion_unchanged": true,
+    "duplicate_effect_fails_closed": true,
+    "pre_destroyed_target_effect_fails_closed": true,
+    "actual_phase6_effect_descriptors_consumed_by_phase7": true,
+    "run0_first_step_zero_damage_transition_exact": true,
+    "ambient_rng_absent": true,
+    "floating_authority_absent": true
+  },
+  "validation": {
+    "focused_workflow": {
+      "name": "GUMAS Damage Disposition",
+      "run_id": 31847120622,
+      "job_id": 94915720078,
+      "conclusion": "success",
+      "focused_tests": "10 passed",
+      "real_pinned_canonrec_smoke": "success",
+      "artifact_id": 9236280005,
+      "artifact_name": "gumas-damage-disposition-evidence",
+      "artifact_sha256": "321beb095cd328dedf14992f2cd19ed0e970c782aa9bd5a891dbf132bcb20aad",
+      "log_sha256": "aec84f63c5e7b426984580f25c1367ede7666cc12ba753a3d5e9108b350e97eb"
+    },
+    "repository_workflow": {
+      "name": "Aurora CI (Minimal)",
+      "run_id": 31847120609,
+      "job_id": 94915767503,
+      "conclusion": "success",
+      "full_test_suite": "success",
+      "pytest_log_artifact_id": 9236441932,
+      "pytest_log_artifact_sha256": "d2d13e7a9449e5e97e8aad8c883102ecca45d8b013aa3e574c881436325502cd"
+    },
+    "other_required_checks": "CodeQL, Code Quality, Constellation CI, PR Evaluation, GUMAS restoration, CanonRec resolution, Physical T0, Command Policy, Movement Geometry, Sensing/EW/Weapons, Safety Commit Guard, Branch Protection, Catastrophe Prevention, PR Selective Integration, and CI Status Project Automation all succeeded on the accepted head; Codacy was skipped rather than failed."
+  },
+  "decision": "Phase 7 is accepted as the deterministic physical damage and disposition layer. Phase 8 may define morale, withdrawal, surrender, ceasefire, disengagement, incapacity, and battle-termination semantics. Phase 7 does not authorize reporting or Run 0."
+}

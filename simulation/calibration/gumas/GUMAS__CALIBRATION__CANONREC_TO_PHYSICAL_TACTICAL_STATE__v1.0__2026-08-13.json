@@ -1,0 +1,209 @@
+{
+  "schema": "aurora://simulation/gumas/canonrec_physical_calibration/v1.0",
+  "artifact": "GUMAS CanonRec-to-physical tactical-state calibration",
+  "version": "1.0",
+  "date": "2026-08-13",
+  "layer": "L2",
+  "status": "normative_phase3_scenario_local_calibration",
+  "authority_boundary": {
+    "historical_gumas_authority": "GUMAS-PACKAGE-V2 via separately versioned restoration",
+    "canonrec_identity_authority": "AUo959/CanonRec@dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+    "canonrec_resolver_version": "1.0.1",
+    "canonrec_derivation_version": "canonrec-tactical-derivation-v1.1",
+    "control_manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc",
+    "calibration_provenance": "SCENARIO_LOCAL",
+    "canon_promotion": false,
+    "combat_resolution_authority": false
+  },
+  "numeric_policy": {
+    "id": "gumas-t0-fixed-point-v1",
+    "decimal_input": "parse source numbers from decimal text, never through process-randomized hash or implicit binary-float derivation",
+    "rounding": "ROUND_HALF_EVEN",
+    "position_unit": "m",
+    "velocity_unit": "mm/s",
+    "acceleration_unit": "mm/s^2",
+    "range_unit": "m",
+    "capacity_unit": "milliunit",
+    "fraction_scale": 1000,
+    "attitude_scale": 1000000000000,
+    "turn_scale": 1000000000000,
+    "canonical_json_profile": "aurora-canonical-json-v1",
+    "non_finite_allowed": false
+  },
+  "identity_mapping": {
+    "organization_id": "org_galactic_union",
+    "baseline_class_to_canonrec": {
+      "CLASS-JUDICATOR-01": "cls_judicator",
+      "CLASS-AEGIS-01": "cls_aegis",
+      "CLASS-PALISADE-01": "cls_palisade",
+      "CLASS-SENTINEL-01": "cls_sentinel",
+      "CLASS-OBSIDIAN-01": "cls_obsidian",
+      "CLASS-VANGUARD-01": "cls_vanguard",
+      "CLASS-PEREGRINE-01": "cls_peregrine",
+      "CLASS-RELIANT-01": "cls_reliant"
+    }
+  },
+  "physical_equations": {
+    "max_accel_mm_s2": {
+      "source_capability": "mobility",
+      "formula": "base + round_half_even(span * capability / 1000)",
+      "base": 5000,
+      "span": 115000,
+      "provenance": "SCENARIO_LOCAL_CALIBRATION_FROM_DERIVED_FROM_CANON"
+    },
+    "firepower_milliunits": {
+      "source_capability": "firepower",
+      "formula": "base + round_half_even(span * capability / 1000)",
+      "base": 1000,
+      "span": 19000,
+      "provenance": "SCENARIO_LOCAL_CALIBRATION_FROM_DERIVED_FROM_CANON"
+    },
+    "shield_capacity_milliunits": {
+      "source_capability": "defense",
+      "formula": "base + round_half_even(span * capability / 1000)",
+      "base": 1000,
+      "span": 19000,
+      "provenance": "SCENARIO_LOCAL_CALIBRATION_FROM_DERIVED_FROM_CANON"
+    },
+    "armor_integrity_milliunits": {
+      "source_capabilities": {"defense": 7, "endurance": 3},
+      "weight_denominator": 10,
+      "formula": "base + round_half_even(span * weighted_capability / 1000)",
+      "base": 1000,
+      "span": 19000,
+      "provenance": "SCENARIO_LOCAL_CALIBRATION_FROM_DERIVED_FROM_CANON"
+    },
+    "hull_integrity_milliunits": {
+      "source_capabilities": {"defense": 1, "endurance": 1},
+      "weight_denominator": 2,
+      "formula": "base + round_half_even(span * weighted_capability / 1000)",
+      "base": 2000,
+      "span": 18000,
+      "provenance": "SCENARIO_LOCAL_CALIBRATION_FROM_DERIVED_FROM_CANON"
+    },
+    "effective_weapon_range_m": {
+      "source_capability": "range",
+      "formula": "base + round_half_even(span * capability / 1000)",
+      "base": 800000,
+      "span": 6200000,
+      "provenance": "SCENARIO_LOCAL_CALIBRATION_FROM_DERIVED_FROM_CANON"
+    },
+    "sensor_range_m": {
+      "source_capability": "sensors",
+      "formula": "base + round_half_even(span * capability / 1000)",
+      "base": 3000000,
+      "span": 15000000,
+      "provenance": "SCENARIO_LOCAL_CALIBRATION_FROM_DERIVED_FROM_CANON"
+    }
+  },
+  "direct_capability_fields_q1000": {
+    "electronic_warfare_q1000": "electronic_warfare",
+    "stealth_q1000": "stealth",
+    "carrier_projection_q1000": "carrier_projection",
+    "support_q1000": "support",
+    "boarding_q1000": "boarding",
+    "command_q1000": "command",
+    "endurance_q1000": "endurance"
+  },
+  "initial_state": {
+    "resources_q1000": {
+      "fuel": 1000,
+      "energy": 1000,
+      "ammunition": 1000,
+      "supply": 1000
+    },
+    "readiness_q1000": {
+      "overall": 1000,
+      "sensors": 1000,
+      "ew": 1000,
+      "propulsion": 1000,
+      "weapons": 1000,
+      "damage_control": 1000
+    },
+    "morale_q1000": 1000,
+    "cohesion_q1000": 1000,
+    "damage_state": "undamaged",
+    "disposition": "combat_capable",
+    "shield_fraction_q1000": 1000,
+    "armor_fraction_q1000": 1000,
+    "hull_fraction_q1000": 1000,
+    "relative_formation_velocity": "zero",
+    "provenance": "SCENARIO_LOCAL"
+  },
+  "formation": {
+    "algorithm": "gumas_zero_sum_paired_slots_v1",
+    "formation_radius_source": "baseline.sides.*.formation_radius_km",
+    "flagship_role": "flagship_command",
+    "flagship_slot": 0,
+    "remaining_assignment": "sort remaining vessels by complete ship_id lexicographically, then assign slots 1..18",
+    "slot_scale_permille": 1000,
+    "side_transform_sign": {"loyalist": 1, "rebel": -1},
+    "slots_permille": {
+      "1": [800, 0, 0],
+      "2": [-800, 0, 0],
+      "3": [0, 800, 0],
+      "4": [0, -800, 0],
+      "5": [0, 0, 800],
+      "6": [0, 0, -800],
+      "7": [600, 600, 0],
+      "8": [-600, -600, 0],
+      "9": [600, 0, 600],
+      "10": [-600, 0, -600],
+      "11": [0, 600, 600],
+      "12": [0, -600, -600],
+      "13": [600, -600, 0],
+      "14": [-600, 600, 0],
+      "15": [600, 0, -600],
+      "16": [-600, 0, 600],
+      "17": [0, 600, -600],
+      "18": [0, -600, 600]
+    },
+    "required_invariants": {
+      "slot_vector_sum": [0, 0, 0],
+      "all_non_flagship_slot_magnitudes_lte_radius": true,
+      "duplicate_slots_forbidden": true,
+      "rng_consumption": false
+    }
+  },
+  "attitude": {
+    "frame": "P17_SCENARIO_INERTIAL_XYZ",
+    "forward_rule": "normalized vector from vessel position to opposing frozen fleet centroid",
+    "up_rule": "P17 spin axis",
+    "parallel_fallback_up_q12": [0, 1000000000000, 0],
+    "normalization": "Decimal sqrt with deterministic precision and ROUND_HALF_EVEN quantization to q12",
+    "quaternion_authoritative": false
+  },
+  "planetoid_rotation_completion": {
+    "body_id": "PLANETOID-P17",
+    "provenance": "SCENARIO_LOCAL",
+    "reference_frame": "P17_SCENARIO_INERTIAL_XYZ",
+    "axis_alignment_at_phase_zero": {
+      "semi_axis_a": "+X",
+      "semi_axis_b": "+Y",
+      "semi_axis_c": "+Z"
+    },
+    "spin_axis_q12": [0, 0, 1000000000000],
+    "phase_at_t0_turn_q12": 0,
+    "positive_rotation": "right_hand_rule_about_positive_Z",
+    "rotation_period_ms": 28080000
+  },
+  "run0_symmetry_contract": {
+    "expected_vessels_per_side": 19,
+    "expected_total_vessels": 38,
+    "centroid_positions_are_exact_sign_inverses": true,
+    "centroid_velocities_are_exact_sign_inverses": true,
+    "material_class_multiplicity_identical": true,
+    "command_person_attributes_required_to_mirror": false,
+    "local_offsets_required_to_sign_invert": true,
+    "physical_coefficients_required_identical_for_same_class": true
+  },
+  "fail_closed": [
+    "missing or out-of-range capability",
+    "missing baseline-to-CanonRec identity mapping",
+    "unsupported vessel count for fixed Run-0 formation template",
+    "formation invariant failure",
+    "generated position intersects P17 triaxial collision ellipsoid",
+    "control material-symmetry failure",
+    "non-finite or non-deterministic numeric conversion"
+  ]
+}

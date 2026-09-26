@@ -1,0 +1,45 @@
+name: GUMAS v2 Restoration
+
+on:
+  pull_request:
+    paths:
+      - 'simulation/runtime/gumas_v2_restored/**'
+      - 'tests/test_gumas_v2_restored_combat.py'
+      - '.github/workflows/gumas-v2-restoration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  restored-combat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CloudBank
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+
+      - name: Install focused test dependency
+        run: >-
+          python -m pip install --only-binary=:all: pytest==9.0.3
+
+      - name: Run isolated restored-combat regression
+        env:
+          PYTHONHASHSEED: '0'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -o pipefail
+          pytest --noconftest tests/test_gumas_v2_restored_combat.py -q --no-header 2>&1 | tee gumas-v2-restoration.log
+
+      - name: Upload restoration log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: gumas-v2-restoration-log
+          path: gumas-v2-restoration.log
+          retention-days: 30
+          if-no-files-found: error

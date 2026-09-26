@@ -5,11 +5,13 @@ Tests model selection, fallback chains, and integration
 """
 
 import asyncio
+import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from modules.ai_core.unified_ai_interface import (
+    MODEL_PROVIDER_NOT_FOUND_TOTAL,
     AIModel,
     AIProvider,
     AIRequest,
@@ -20,20 +22,20 @@ from modules.ai_core.unified_ai_interface import (
 
 
 @pytest.fixture(autouse=True)
-def restore_model_availability():
-    """Restore the shipped ``available`` flags after every test.
+def restore_model_catalog_gates():
+    """Restore the shipped catalog and routing flags after every test.
 
-    ``UnifiedAIInterface.CAPABILITIES`` is a class attribute, so every instance
-    (including the module-level ``unified_ai`` singleton) shares one dict.
-    Tests that flip availability would otherwise leak into later tests and make
-    assertions about shipped defaults order-dependent.
+    Instances deep-copy the class catalog, but guarding the class defaults here
+    also protects future tests that deliberately exercise those defaults.
     """
     original = {
-        model: caps.available for model, caps in UnifiedAIInterface.CAPABILITIES.items()
+        model: (caps.available, caps.enabled)
+        for model, caps in UnifiedAIInterface.CAPABILITIES.items()
     }
     yield
-    for model, available in original.items():
+    for model, (available, enabled) in original.items():
         UnifiedAIInterface.CAPABILITIES[model].available = available
+        UnifiedAIInterface.CAPABILITIES[model].enabled = enabled
 
 
 @pytest.mark.unit
@@ -114,6 +116,7 @@ class TestUnifiedAIInterface:
         # Make all models available
         for model in interface.CAPABILITIES:
             interface.CAPABILITIES[model].available = True
+            interface.CAPABILITIES[model].enabled = True
 
         request = AIRequest(prompt="test")
 
@@ -126,31 +129,45 @@ class TestUnifiedAIInterface:
         assert selected_reasoning == AIModel.CLAUDE_OPUS_5  # First in reasoning chain
 
     def test_get_available_models(self):
-        """Test getting list of available models"""
+        """The compatibility API returns only available and enabled models."""
         interface = UnifiedAIInterface()
 
         # Set some models as available
         interface.CAPABILITIES[AIModel.GPT_4O].available = True
+        interface.CAPABILITIES[AIModel.GPT_4O].enabled = False
         interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5].available = True
         interface.CAPABILITIES[AIModel.GPT_5].available = False
 
         available = interface.get_available_models()
 
-        assert AIModel.GPT_4O in available
+        assert AIModel.GPT_4O not in available
         assert AIModel.CLAUDE_SONNET_5 in available
         assert AIModel.GPT_5 not in available
 
     def test_enable_disable_models(self):
-        """Test runtime model enable/disable"""
+        """Routing policy changes do not rewrite provider availability."""
+        interface = UnifiedAIInterface()
+        model = AIModel.GPT_4O
+
+        interface.disable_model(model)
+        assert interface.CAPABILITIES[model].available
+        assert not interface.CAPABILITIES[model].enabled
+        assert not interface.CAPABILITIES[model].routable
+
+        interface.enable_model(model)
+        assert interface.CAPABILITIES[model].available
+        assert interface.CAPABILITIES[model].enabled
+        assert interface.CAPABILITIES[model].routable
+
+    def test_unverified_model_cannot_be_enabled(self):
+        """Local routing policy cannot promote an unverified catalog entry."""
         interface = UnifiedAIInterface()
 
-        # Disable GPT-5
-        interface.disable_model(AIModel.GPT_5)
-        assert not interface.CAPABILITIES[AIModel.GPT_5].available
+        with pytest.raises(ValueError, match="unverified or provider-unavailable"):
+            interface.enable_model(AIModel.GPT_5)
 
-        # Enable GPT-5
-        interface.enable_model(AIModel.GPT_5)
-        assert interface.CAPABILITIES[AIModel.GPT_5].available
+        assert not interface.CAPABILITIES[AIModel.GPT_5].available
+        assert not interface.CAPABILITIES[AIModel.GPT_5].enabled
 
     def test_aspirational_models_default_unavailable(self):
         """Aspirational placeholder IDs must ship gated (available=False)."""
@@ -161,6 +178,7 @@ class TestUnifiedAIInterface:
                 f"{model.value} is an unverified placeholder and must default to "
                 "available=False"
             )
+            assert interface.CAPABILITIES[model].enabled is False
 
     def test_claude_models_are_current_catalog_ids(self):
         """Claude entries must carry live, date-suffix-free catalog IDs and be
@@ -187,6 +205,7 @@ class TestUnifiedAIInterface:
             assert interface.CAPABILITIES[model].available is True, (
                 f"{model.value} is verified live and must be selectable"
             )
+            assert interface.CAPABILITIES[model].routable is True
 
         assert AIModel.CLAUDE_OPUS_5.value == "claude-opus-5"
         assert AIModel.CLAUDE_SONNET_5.value == "claude-sonnet-5"
@@ -499,6 +518,63 @@ class TestAIIntegrationErrorHandling:
         assert selected == AIModel.CLAUDE_SONNET_5
 
     @pytest.mark.asyncio
+    async def test_provider_404_alerts_before_successful_fallback(self, caplog):
+        """An enabled model disappearing must be observable, even if fallback works."""
+
+        class ModelNotFoundError(RuntimeError):
+            status_code = 404
+
+        interface = UnifiedAIInterface()
+        interface._budget = None
+        request = AIRequest(
+            prompt="test",
+            model_preference=AIModel.CLAUDE_OPUS_5,
+            fallback_chain=[AIModel.GPT_4O],
+        )
+        fallback_response = AIResponse(
+            content="fallback worked",
+            model_used=AIModel.GPT_4O,
+            provider=AIProvider.OPENAI,
+            tokens_used=5,
+            latency_ms=10,
+        )
+        metric = MODEL_PROVIDER_NOT_FOUND_TOTAL.labels(
+            provider=AIProvider.ANTHROPIC.value,
+            model=AIModel.CLAUDE_OPUS_5.value,
+        )
+        before = metric._value.get()
+
+        with caplog.at_level(logging.CRITICAL):
+            with (
+                patch.object(
+                    interface,
+                    "_execute_anthropic",
+                    new_callable=AsyncMock,
+                    side_effect=ModelNotFoundError("HTTP 404 model_not_found"),
+                ),
+                patch.object(
+                    interface,
+                    "_execute_openai",
+                    new_callable=AsyncMock,
+                    return_value=fallback_response,
+                ),
+            ):
+                response = await interface.execute_request(request)
+
+        assert response is fallback_response
+        assert metric._value.get() == before + 1
+        assert "MODEL CATALOG ALERT" in caplog.text
+        assert AIModel.CLAUDE_OPUS_5.value in caplog.text
+
+    def test_not_found_detection_rejects_unrelated_404_text(self):
+        assert UnifiedAIInterface._is_model_not_found(
+            RuntimeError("processed 404 tokens")
+        ) is False
+        assert UnifiedAIInterface._is_model_not_found(
+            RuntimeError("provider says model_not_found")
+        ) is True
+
+    @pytest.mark.asyncio
     async def test_all_models_unavailable(self):
         """Test behavior when all models are unavailable."""
         interface = UnifiedAIInterface()
@@ -727,11 +803,13 @@ class TestAIIntegrationResilience:
 
         # Simulate failure
         interface.disable_model(model)
-        assert not interface.CAPABILITIES[model].available
+        assert interface.CAPABILITIES[model].available
+        assert not interface.CAPABILITIES[model].enabled
 
         # Simulate recovery
         interface.enable_model(model)
         assert interface.CAPABILITIES[model].available
+        assert interface.CAPABILITIES[model].enabled
 
     @pytest.mark.asyncio
     async def test_request_metadata_preservation(self):

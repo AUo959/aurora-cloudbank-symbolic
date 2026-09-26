@@ -18,7 +18,15 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+from prometheus_client import Counter
+
 logger = logging.getLogger(__name__)
+
+MODEL_PROVIDER_NOT_FOUND_TOTAL = Counter(
+    "aurora_ai_model_provider_not_found_total",
+    "Provider model-not-found responses observed before AI fallback",
+    ("provider", "model"),
+)
 
 
 class AIProvider(Enum):
@@ -35,10 +43,11 @@ class AIModel(Enum):
 
     Identifiers tagged "UNVERIFIED placeholder" below are aspirational and are
     NOT confirmed against the provider's live catalog. They are gated by
-    ``available=False`` in ``CAPABILITIES`` so they can never be selected
-    through the public interface (see ``select_optimal_model``). Promote one to
-    a live identifier only after confirming it against the provider catalog and
-    flipping its ``available`` flag in the same change.
+    ``available=False`` and ``enabled=False`` in ``CAPABILITIES`` so they can
+    never be selected through the public interface (see
+    ``select_optimal_model``). Promote one to a live identifier only after
+    confirming it against the provider catalog and recording a dated source;
+    routing policy can then enable it independently.
 
     A "Verified live" tag means the identifier was checked against the
     provider's own catalog on the reconciliation date above — not that it was
@@ -79,7 +88,11 @@ class ModelCapabilities:
     mathematical_strength: int = 5  # 1-10 scale
     cost_per_1k_tokens: float = 0.0  # USD
     latency_avg_ms: int = 1000
+    # Provider/catalog fact: this identifier exists and has a dated source.
     available: bool = True
+    # Local routing policy: operators may disable a verified model without
+    # erasing the catalog fact that it exists.
+    enabled: bool = True
 
     # Machine-readable verification claim, replacing the "# Verified live"
     # comment convention. A comment is a *claim*; nothing can falsify it, which
@@ -99,6 +112,11 @@ class ModelCapabilities:
     # numbers no API can confirm.
     verified_on: str = ""
     verified_source: str = "unverified"
+
+    @property
+    def routable(self) -> bool:
+        """Whether live selection may route traffic to this model."""
+        return self.available and self.enabled
 
 
 @dataclass
@@ -226,6 +244,7 @@ class UnifiedAIInterface:
             cost_per_1k_tokens=0.02,  # Expected pricing
             latency_avg_ms=1000,
             available=False,  # Not yet released
+            enabled=False,
             verified_on="",
             verified_source="unverified",
         ),
@@ -243,6 +262,7 @@ class UnifiedAIInterface:
             cost_per_1k_tokens=0.025,  # Expected pricing
             latency_avg_ms=900,
             available=False,  # Not yet released
+            enabled=False,
             verified_on="",
             verified_source="unverified",
         ),
@@ -285,8 +305,8 @@ class UnifiedAIInterface:
         #
         # CAPABILITIES is declared at class level, so every instance shared one
         # dict and enable_model()/disable_model() mutated it process-wide: one
-        # caller ungating a model ungated it for every other caller, including
-        # the IDs deliberately shipped as available=False unverified
+        # caller changing routing policy changed it for every other caller,
+        # including the IDs deliberately shipped as unavailable, unverified
         # placeholders. A gate that any instance can silently open for all the
         # others is not a gate.
         #
@@ -343,8 +363,8 @@ class UnifiedAIInterface:
 
         # Try OpenAI
         try:
-            import openai
             import httpx
+            import openai
 
             _TIMEOUT = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0)
             _MAX_RETRIES = 2
@@ -360,13 +380,12 @@ class UnifiedAIInterface:
         except Exception as e:
             logger.warning(f"⚠️  OpenAI client initialization failed: {e}")
 
-        # Surface the active model catalog so operators can verify which IDs are
-        # actually selectable (available=True) versus gated placeholders.
-        active = [model.value for model, caps in self.CAPABILITIES.items() if caps.available]
-        gated = [model.value for model, caps in self.CAPABILITIES.items() if not caps.available]
-        logger.info("🧭 Active AI models (available=True): %s", ", ".join(active) or "none")
+        # Surface routing state separately from provider/catalog existence.
+        active = [model.value for model, caps in self.CAPABILITIES.items() if caps.routable]
+        gated = [model.value for model, caps in self.CAPABILITIES.items() if not caps.routable]
+        logger.info("🧭 Routable AI models (available and enabled): %s", ", ".join(active) or "none")
         if gated:
-            logger.info("🚧 Gated AI models (available=False, not selectable): %s", ", ".join(gated))
+            logger.info("🚧 Gated AI models (unavailable or disabled): %s", ", ".join(gated))
 
     async def select_optimal_model(
         self, request: AIRequest, task_type: str = "general"
@@ -381,32 +400,67 @@ class UnifiedAIInterface:
         Returns:
             Selected AI model
         """
-        # Use explicit preference if provided and available
+        # Use explicit preference if provided and routable
         if request.model_preference:
             caps = self.CAPABILITIES.get(request.model_preference)
-            if caps and caps.available:
+            if caps and caps.routable:
                 return request.model_preference
 
         # Use fallback chain if provided
         if request.fallback_chain:
             for model in request.fallback_chain:
                 caps = self.CAPABILITIES.get(model)
-                if caps and caps.available:
+                if caps and caps.routable:
                     return model
 
         # Use task-specific fallback chain
         fallback = self.FALLBACK_CHAINS.get(task_type, self.FALLBACK_CHAINS["general"])
         for model in fallback:
             caps = self.CAPABILITIES.get(model)
-            if caps and caps.available:
+            if caps and caps.routable:
                 return model
 
-        # Final fallback to any available model
+        # Final fallback to any routable model
         for model, caps in self.CAPABILITIES.items():
-            if caps.available:
+            if caps.routable:
                 return model
 
-        raise RuntimeError("No AI models available")
+        raise RuntimeError("No AI models available and enabled")
+
+    @staticmethod
+    def _is_model_not_found(error: Exception) -> bool:
+        """Recognize provider model-not-found failures across SDK shapes."""
+        status_code = getattr(error, "status_code", None)
+        if status_code is None:
+            status_code = getattr(getattr(error, "response", None), "status_code", None)
+        if status_code is not None:
+            return status_code == 404
+        detail = str(error).lower()
+        return any(
+            marker in detail
+            for marker in ("model_not_found", "model not found", "not_found_error")
+        )
+
+    @classmethod
+    def _alert_on_model_not_found(
+        cls,
+        model: AIModel,
+        caps: ModelCapabilities,
+        error: Exception,
+    ) -> None:
+        """Emit an operator-visible metric and log before attempting fallback."""
+        if not cls._is_model_not_found(error):
+            return
+        MODEL_PROVIDER_NOT_FOUND_TOTAL.labels(
+            provider=caps.provider.value,
+            model=model.value,
+        ).inc()
+        logger.critical(
+            "MODEL CATALOG ALERT: provider returned 404/not-found for enabled "
+            "model %s (%s); attempting fallback",
+            model.value,
+            caps.provider.value,
+        )
 
     async def execute_request(
         self, request: AIRequest, task_type: str = "general"
@@ -462,6 +516,7 @@ class UnifiedAIInterface:
 
         except Exception as e:
             logger.error(f"Model {model.value} failed: {e}")
+            self._alert_on_model_not_found(model, caps, e)
 
             # Try fallback chain
             fallback = request.fallback_chain or self.FALLBACK_CHAINS.get(
@@ -473,7 +528,7 @@ class UnifiedAIInterface:
                     continue  # Skip the failed model
 
                 fallback_caps = self.CAPABILITIES.get(fallback_model)
-                if not fallback_caps or not fallback_caps.available:
+                if not fallback_caps or not fallback_caps.routable:
                     continue
 
                 if attempt > 0:
@@ -503,6 +558,11 @@ class UnifiedAIInterface:
 
                 except Exception as fallback_error:
                     logger.error(f"Fallback model {fallback_model.value} failed: {fallback_error}")
+                    self._alert_on_model_not_found(
+                        fallback_model,
+                        fallback_caps,
+                        fallback_error,
+                    )
                     continue
 
             # All models failed
@@ -604,19 +664,25 @@ class UnifiedAIInterface:
         return self.CAPABILITIES[model]
 
     def get_available_models(self) -> List[AIModel]:
-        """Get list of currently available models"""
-        return [model for model, caps in self.CAPABILITIES.items() if caps.available]
+        """Get models that both exist in the provider catalog and are enabled."""
+        return [model for model, caps in self.CAPABILITIES.items() if caps.routable]
 
     def enable_model(self, model: AIModel):
-        """Enable a model (e.g., when a gated placeholder like GPT-5 becomes available)"""
-        if model in self.CAPABILITIES:
-            self.CAPABILITIES[model].available = True
-            logger.info(f"✅ Model {model.value} enabled")
+        """Enable routing for a model whose provider existence is verified."""
+        if model not in self.CAPABILITIES:
+            return
+        caps = self.CAPABILITIES[model]
+        if not caps.available or not caps.verified_on or caps.verified_source == "unverified":
+            raise ValueError(
+                f"Cannot enable unverified or provider-unavailable model: {model.value}"
+            )
+        caps.enabled = True
+        logger.info(f"✅ Model {model.value} enabled")
 
     def disable_model(self, model: AIModel):
-        """Disable a model (e.g., for maintenance or cost control)"""
+        """Disable routing without erasing the provider/catalog fact."""
         if model in self.CAPABILITIES:
-            self.CAPABILITIES[model].available = False
+            self.CAPABILITIES[model].enabled = False
             logger.info(f"⚠️  Model {model.value} disabled")
 
 

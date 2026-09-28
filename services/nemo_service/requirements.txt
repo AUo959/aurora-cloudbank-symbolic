@@ -8,10 +8,10 @@ nemo_toolkit[all]>=3.0.0
 
 # ── Web server ────────────────────────────────────────────────────────────
 fastapi>=0.141.1
-uvicorn[standard]>=0.52.4
+uvicorn[standard]>=0.54.0
 
 # ── Settings management ───────────────────────────────────────────────────
-pydantic>=2.13.4
+pydantic>=2.13.5
 pydantic-settings>=2.15.0
 
 # ── PyTorch (GPU build installed via base NeMo image; listed for reference)

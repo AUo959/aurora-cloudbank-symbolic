@@ -92,7 +92,7 @@ jsonschema>=4.17.0,<5.0.0           # JSON Schema validation (MCP tool inputSche
 # SYSTEM UTILITIES
 # ===================================================================
 requests>=2.34.2,<3.0.0             # HTTP library
-urllib3>=2.7.0,<3.0.0               # HTTP connection pooling
+urllib3>=2.8.0,<3.0.0               # HTTP connection pooling
 certifi>=2026.7.22                   # SSL certificates
 charset-normalizer>=3.5.1,<4.0.0    # Character encoding detection
 idna>=3.19,<4.0.0                   # Internationalized domain names

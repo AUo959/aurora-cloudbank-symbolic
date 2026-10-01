@@ -8,7 +8,7 @@
 **Schema version:** `1.3.0`
 **Last Aurora review:** `2026-07-16T00:36:36Z`
 **Generated:** `2026-07-16T00:36:36Z`
-**Items:** 6 active · 21 completed
+**Items:** 10 active · 21 completed
 
 > Aurora holds contextual authority over rank order.
 > Do not edit rank or `aurora_note` fields without an `aurora(queue):` commit.
@@ -111,6 +111,70 @@
 **Aurora note:**
 
 > Doctrine now available (QGIA Runtime One-Pager v4.2.1 + Axiom Doctrine Narrative v1.0, reviewed 2026-06-22). Two-layer discipline maps cleanly to Triplex Handshake. ops/QGIA-doctrine-store must land first, then PAT routing decision. Crew sign-off required before any QGIA axiom becomes operationally binding.
+
+---
+
+### 7. 🟢 #1329 — Prevent AI model catalog drift: validate model IDs and capabilities against provider catalogs
+
+| Field | Value |
+|---|---|
+| **Status** | `open` |
+| **Owner** | _unassigned_ |
+| **Depends on** | — |
+| **Blocks** | — |
+| **Tags** | `blocking` `ci` `needs info` `owner-decision` |
+
+**Aurora note:**
+
+> auto-ingested from GitHub labels — awaiting Aurora triage; priority_score is advisory, rank is tail placement only
+
+---
+
+### 8. 🟢 #1233 — Ethics documentation follow-ups (consolidated)
+
+| Field | Value |
+|---|---|
+| **Status** | `open` |
+| **Owner** | _unassigned_ |
+| **Depends on** | — |
+| **Blocks** | — |
+| **Tags** | `backlog` `documentation` `ethics` `implementation-needed` `needs info` `security` |
+
+**Aurora note:**
+
+> auto-ingested from GitHub labels — awaiting Aurora triage; priority_score is advisory, rank is tail placement only
+
+---
+
+### 9. 🟢 #1361 — security: resolve SHADOWFAX identity and custody ambiguity across ORD runtime surfaces
+
+| Field | Value |
+|---|---|
+| **Status** | `open` |
+| **Owner** | _unassigned_ |
+| **Depends on** | — |
+| **Blocks** | — |
+| **Tags** | `audit-integrity` `high-priority` `needs info` `owner-decision` `security` |
+
+**Aurora note:**
+
+> auto-ingested from GitHub labels — awaiting Aurora triage; priority_score is advisory, rank is tail placement only
+
+---
+
+### 10. 🟢 #1530 — security(playground): fail closed when isolated sandbox runtime is unavailable
+
+| Field | Value |
+|---|---|
+| **Status** | `open` |
+| **Owner** | _unassigned_ |
+| **Depends on** | — |
+| **Blocks** | — |
+| **Tags** | `bug` `security` |
+
+**Aurora note:**
+
+> auto-ingested from GitHub labels — awaiting Aurora triage; priority_score is advisory, rank is tail placement only
 
 ---
 

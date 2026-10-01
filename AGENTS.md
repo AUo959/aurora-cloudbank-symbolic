@@ -45,3 +45,12 @@ New agent, first entry into a session on this repo:
 ## Session transfer and restore
 
 If picking up mid-session or after a break, use the RESETCORE ritual (`QGIA_Integration/RESETCORE_Bootstrap.md`) rather than re-deriving context from scratch. It references the current lockpoint and vector state — check `AURORA_CONTEXT.json`'s `active_state` block first, since those values carry a known staleness caveat (issue #1083).
+
+## Migrated plug-in interfaces
+
+When using migrated Aurora-family plug-ins in this repo, read
+[the constellation consolidation guide](docs/plugins/README.md) and
+[responsibility map](docs/plugins/RESPONSIBILITY_MAP.md). Keep RiverThread 808
+and Archy distinct; preserve their historical linkage as provenance. Migrated
+activation/seal claims are historical or symbolic until separately verified.
+This guidance does not install plug-ins, activate runtime agents or promote canon.

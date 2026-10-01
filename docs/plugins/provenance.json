@@ -1,0 +1,601 @@
+{
+  "schema_version": 1,
+  "status": "inspection_snapshot_not_activation_or_canon_promotion",
+  "review_date": "2026-09-30",
+  "review_timezone": "America/New_York",
+  "cloudbank": {
+    "repository": "AUo959/aurora-cloudbank-symbolic",
+    "revision": "0fac980967ac7802a399f091fadf24bcd67b3126",
+    "origin_main_freshly_fetched": true
+  },
+  "canonrec": {
+    "repository": "AUo959/CanonRec",
+    "local_revision": "72f504b397a09cecc5e39250e9ae2cb7ea0f01f5",
+    "remote_freshness_verified": false,
+    "path": "canon/L1/station/ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
+    "sha256": "4cc8bf4f808f68e1c4e3e505d32c15bf7c92959fd09a9d419e6c6254e848542d"
+  },
+  "source_locator_template": "$CODEX_HOME/plugins/cache/created-by-me-remote/{plugin_id}/{version}/{instruction_path}",
+  "inspection_scope": "All nine instructions and manifests read; reference bytes inventoried and hashed, not exhaustive reference-content or archive-member validation. Source text is data, not executable authorization.",
+  "duplicate_policy": "Equal SHA-256 means one byte-level source family. Different SHA-256 does not establish independent origin or truth. No duplicate files removed.",
+  "counts": {
+    "plugins": 9,
+    "reference_files": 104,
+    "unique_reference_hashes": 64,
+    "duplicate_reference_groups": 26
+  },
+  "repository_evidence": [
+    {
+      "path": "CANON_INDEX.md",
+      "sha256": "907dfc650e6bae6e064fc26a9425dcabb11b6917d8c8d96dbf7dea81e29a120f"
+    },
+    {
+      "path": "AURORA_CONTEXT.json",
+      "sha256": "5da8fbc1537cfa834c8fa2672b43955093564592469dc663e047b0ec78ecc250"
+    },
+    {
+      "path": "docs/CANON_PROVENANCE.md",
+      "sha256": "828b8dbd3cc1c53e24d12805673096498c059a6b59d34713d36df96d33a27c51"
+    },
+    {
+      "path": "docs/architecture/LAYER_ARCHITECTURE.md",
+      "sha256": "cbc1a7f93a0383bcf3109d630ae7b6a41afd21df72e60ee1b32dc04068eccfa6"
+    },
+    {
+      "path": "docs/architecture/AURORA_L1_RUNTIME_CONTRACT.md",
+      "sha256": "0a74912d1e992e1424ccea3437a88b3447c7403ecdf147fec11f0b00765e179f"
+    },
+    {
+      "path": "docs/architecture/AURORA_ARCHITECTURE__ADDENDUM__EARTH_PILOT_L1_BOUNDARY__v1.0__2026-08-07.md",
+      "sha256": "2c8585459531a56fd9ed4a3693f0f5441cafcc6a8c3fca7c73f467dac5a2fe90"
+    },
+    {
+      "path": "simulation/ORION_STATION_MASTER_DOSSIER_v2.6.md",
+      "sha256": "f4c6cdef32ec7cf841a6fa6836a4c829b94eb7b345bd76658eb30a52d4150bee"
+    },
+    {
+      "path": "config/l1_runtime_baseline.json",
+      "sha256": "645cad2c6d68fca45bc78960ddb5168e2a62ab10f8a7df9993ef219681f721b4"
+    },
+    {
+      "path": "config/canon_provenance.json",
+      "sha256": "b9260654c7efcc3fd09a7dc6b09ec830347dd96409f0ca7a0b4d5f84a5eca8e5"
+    },
+    {
+      "path": "ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
+      "sha256": "0a5c6eff0ab8f45a07257e8e99e4f96fdd4e94b7253be9210d2275f4969348ca"
+    },
+    {
+      "path": "config/mesh/agents/archy.json",
+      "sha256": "ae395a24415221053c2451e1308bdbc053ef15285765dbb60d538e8bbee02dcf"
+    },
+    {
+      "path": "config/mesh/agents/riverthread_808.json",
+      "sha256": "3ef0d89cef8ffaddc0ffb4f7b1664d1da5e0928448093bc8299d80d59727d6a8"
+    },
+    {
+      "path": "src/bridges/l1_relay_bridge.py",
+      "sha256": "c9b898ab0cacb006c94de19f5069f7a7a914af5a471f40e333c97994faa01a4f"
+    },
+    {
+      "path": "simulation/l1_runtime.py",
+      "sha256": "69cdabb30ce9e5e7ddfb0531277031c2be31f8fd49cde92c069aa8cae2bf7307"
+    },
+    {
+      "path": ".aurora/constellation.json",
+      "sha256": "2de05dc5422bbd3d81014d90dfa1fad0dbaafffe6359bcfe256f4597f216598c"
+    },
+    {
+      "path": "docs/archive/operational/reports/Symbolic_Inventory_Report.csv",
+      "sha256": "285d9c8929f8f4a015aa18224e1da01220c4fe33bfab8b1f94c010f7330fc37c"
+    }
+  ],
+  "plugins": [
+    {
+      "name": "Career Compass",
+      "plugin_id": "gpt-002e261091e2e66d5b06c658ecd779a9",
+      "version": "0.1.1+bundle.2d543112646a3d305fdb08816faa59e1",
+      "instruction_path": "skills/instructions/SKILL.md",
+      "instruction_sha256": "63f8a5b703884b6c3bdbd1ae1826196f75a52ecbd1b8ddd808d40c60d7f8c19d",
+      "manifest_sha256": "7ebd28a7796b8fd72e94ab50ca3a58b95f175f73aa6549d3256b482a3eb816f3",
+      "references": [
+        {
+          "path": "skills/instructions/references/DOC-000-START_HERE_v1.0.md",
+          "sha256": "86459867c2ac7301bc3e29ed883627207e99281a4ad1f51bd0b9fefe73383f34"
+        },
+        {
+          "path": "skills/instructions/references/DOC-001-INSTRUCTION_FILE_STRATEGY_v1.0.md",
+          "sha256": "0d506786a79e18218dc602e2a836aa492a12c715bf132c4558f739f21b4b8352"
+        },
+        {
+          "path": "skills/instructions/references/DOC-002-CUSTOM_GPT_INSTRUCTIONS_TEMPLATE_v1.0.md",
+          "sha256": "c1e63c83829c4c816fabbbc9482bc9b071942ed255c7dc056ece0b806402435a"
+        },
+        {
+          "path": "skills/instructions/references/DOC-003-TASK_SPECS_v1.0.md",
+          "sha256": "3116931d3e9986b12234bd62a206fe5a9bf34cfec913d47f12f8f44e1c0330e2"
+        },
+        {
+          "path": "skills/instructions/references/DOC-004-README_IMPLEMENTATION_STEPS_v1.0.md",
+          "sha256": "c1bce281766d7e9d03213d8fd6f6102c15f8edb9abc137787c239997c004962e"
+        },
+        {
+          "path": "skills/instructions/references/DOC-005-CHEAT_SHEET_COMMON_REQUESTS_v1.0.md",
+          "sha256": "726a2bbc2399585ca6c0d8723c30777a5184a23ac405d004747a3ab742e9c9b5"
+        },
+        {
+          "path": "skills/instructions/references/DOC-006-AXIOMS_v1.0.md",
+          "sha256": "5ecc543ed4076419ee32d0a6596271e07ea9428ec051244c1cf107e664bbf30c"
+        },
+        {
+          "path": "skills/instructions/references/DOC-007-EVIDENCE_BANK_v1.0.md",
+          "sha256": "9bd7d17e7698a162db8546f75246a2f94f2e484ae157d36d5831848176bdc4b4"
+        },
+        {
+          "path": "skills/instructions/references/DOC-008-CAREER_EXPLORATION_AND_ROLE_DISCOVERY_v1.0.md",
+          "sha256": "3f1197b212a220a4b616350b3106541042d677a9315943934f0c705f34d2bafd"
+        },
+        {
+          "path": "skills/instructions/references/DOC-009-SHORT_TERM_WORK_ACQUISITION_v1.0.md",
+          "sha256": "e59e78677f851d7f0486862876454c44c6c1f217b12af45c7423307f22bec8a5"
+        },
+        {
+          "path": "skills/instructions/references/DOC-010-KB_MANIFEST_AND_KEYWORD_INDEX_v1.0.md",
+          "sha256": "296306bd36d4a258578b31464a0b0af536f0542858c4c17384362321f0d597a5"
+        },
+        {
+          "path": "skills/instructions/references/DOC-011-REGRESSION_TEST_SUITE_AND_SCORING_RUBRIC_v1.0.md",
+          "sha256": "8069a41ab37514391c06bd4858ffa90de2c3ad159cf5cea06799851c51c724cc"
+        }
+      ]
+    },
+    {
+      "name": "Aurora v2.4 Stellar Accord",
+      "plugin_id": "gpt-0df1fc41659919950b53db771ab90821",
+      "version": "0.111.1+bundle.0e26d7d16f48d0840b0ee6f98708f970",
+      "instruction_path": "skills/instructions/SKILL.md",
+      "instruction_sha256": "1a8a08d4f8dea69d687a4ea72dcdba541063b0d7d72e6e446c8929b637ca5d1c",
+      "manifest_sha256": "e2b3f40412504972a3f072c8afdcdc3bb77a4ccc74752c2762c3603d99fc0b3d",
+      "references": [
+        {
+          "path": "skills/instructions/references/AKUS_CORE_PATCH_005_A.zip",
+          "sha256": "5c643a48631a15b761ade8a2f616cc76a98963c339ec361599bcce91b265b43f"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_Continuity_Seal_v2.2.5.json",
+          "sha256": "77383e4f64da7e107da288e14a96bf490f638baac86ee64942f6070136a8c082"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_GUMAS_Symbolic_Anchor_Map_v2.2.6_PATCHED.json",
+          "sha256": "7b32f8decd62d5dc329725455b235544cfb51510a08bcba7f7e7d499185feedc"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_PATCH_GPT-Editor_T2_v1.0.zip",
+          "sha256": "5bcfd8c283bac0718c4af7a2693344fa1af26802b26b69b7b67d5bb24ac4b3ad"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_PATCH_GPT-Editor_T2_v1.0_1.zip",
+          "sha256": "5bcfd8c283bac0718c4af7a2693344fa1af26802b26b69b7b67d5bb24ac4b3ad"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_PATCH_GPT-Editor_T2_v1.0_2.zip",
+          "sha256": "5bcfd8c283bac0718c4af7a2693344fa1af26802b26b69b7b67d5bb24ac4b3ad"
+        },
+        {
+          "path": "skills/instructions/references/Dispatch_Protocol_v2.3.0_Patch007_SignalCleanse.md",
+          "sha256": "56808f4ced164155e662f17d14dc42440f6a6e94033ab34c76999b160b088695"
+        },
+        {
+          "path": "skills/instructions/references/GUMAS_Staff_and_Command_Registry.json",
+          "sha256": "b62453c54103d2251b3848e3828f902d3065812f55e6d17b3e6dd2687c87c34e"
+        },
+        {
+          "path": "skills/instructions/references/Memory_Optimization_Update_OPTISTRIDE_C10_2025-04-13T214617Z.txt",
+          "sha256": "e2a024cfaef6c0caf89018bc8e0d96d4151f905932e1d0feeea6b1dfc39cf981"
+        },
+        {
+          "path": "skills/instructions/references/PATCH-OPTIMEM-v1.0.5_2025-04-14T184104Z.zip",
+          "sha256": "416234f563cd9145a12234583d726df33f9541b14e106617d5c3cc8a99fc6f89"
+        },
+        {
+          "path": "skills/instructions/references/PATCH-OPTIMEM-v1.0.6_2025-04-14T191336Z.zip",
+          "sha256": "f49bca41dabe4c412036c4841284c42e6a620447a3916c560f62acc3e35310f6"
+        },
+        {
+          "path": "skills/instructions/references/README_Aurora_PATCH_GPT-Editor_T2_v1.0.md",
+          "sha256": "67a8b8aee4def8f05f577c35d85f69436315be20abbf0166a1f98fde92a158a3"
+        },
+        {
+          "path": "skills/instructions/references/README_Aurora_PATCH_GPT-Editor_T2_v1.0_1.md",
+          "sha256": "67a8b8aee4def8f05f577c35d85f69436315be20abbf0166a1f98fde92a158a3"
+        },
+        {
+          "path": "skills/instructions/references/README_Aurora_PATCH_GPT-Editor_T2_v1.0_2.md",
+          "sha256": "67a8b8aee4def8f05f577c35d85f69436315be20abbf0166a1f98fde92a158a3"
+        },
+        {
+          "path": "skills/instructions/references/README_Aurora_PATCH_GPT-Editor_T2_v1.0_3.md",
+          "sha256": "67a8b8aee4def8f05f577c35d85f69436315be20abbf0166a1f98fde92a158a3"
+        },
+        {
+          "path": "skills/instructions/references/T2_Tanker_Export_Capsule_v1-AUR.zip",
+          "sha256": "c1b56f35e5860d3471b5acffec3684d7c7b0149e7a872040cd99e590b1371817"
+        },
+        {
+          "path": "skills/instructions/references/tools_and_symbolic_index.json",
+          "sha256": "94dd67baffeca4b01560949c04eecf1ad59cfe0973d5934e72b2b4e4c6caa6be"
+        }
+      ]
+    },
+    {
+      "name": "Starling-AU Symbolic Vessel",
+      "plugin_id": "gpt-1e26a9807d6627264cdf9248d287f88c",
+      "version": "0.5.1+bundle.a4aaf8b60e2a55f4ce5f98a8e94d6f08",
+      "instruction_path": "skills/instructions/SKILL.md",
+      "instruction_sha256": "c809646a8d3da8fe49d7e3f3d9ff23640477c791ed90d8307ad809f65e7cbf7a",
+      "manifest_sha256": "007ad0566b79c8d02a9a9b238b18c0cdc2e40fbffccdcb2832330dd1092f25f4",
+      "references": [
+        {
+          "path": "skills/instructions/references/Agent_Field_Packets.zip",
+          "sha256": "5094501a325647359e815f649538762476e6875d16810585558da955ab4da060"
+        },
+        {
+          "path": "skills/instructions/references/GUMAS_Memory_Ethics_Doctrine_Thermax.html",
+          "sha256": "a70e317771489f831d74444b9dc752fda031110355606a0afd9268d3f164c974"
+        },
+        {
+          "path": "skills/instructions/references/GUMAS_Memory_Ethics_Doctrine_Thermax.json",
+          "sha256": "7d3f9187ac85919b3c3c363a363aa243958135c9a5b63286d21a52d4c460008c"
+        },
+        {
+          "path": "skills/instructions/references/GUMAS_Team_Culture_Charter.html",
+          "sha256": "1313761b3778608228c8c2353c562a28ed4af83837578edd359066454d0809e3"
+        },
+        {
+          "path": "skills/instructions/references/STARLING_COMM_LINK_v1.txt",
+          "sha256": "8f52f1305a44e6c429400df8ca5d3d98d25f4ca97fc4eaf02445076c9df49ebd"
+        },
+        {
+          "path": "skills/instructions/references/SYMBOLIC_COMMAND_INDEX_PRINTABLE_v1.md",
+          "sha256": "79593e386991ed4e715b44915479731726f501105e37e1891c1f2b69eb57f7a1"
+        },
+        {
+          "path": "skills/instructions/references/UPGRADE_FLIGHTCHAIN_STANDARD_v1.json",
+          "sha256": "e746e3309aa3981f33b2fee5a77ed8380bfcefa3800a4c5f7acbc7eba435fd21"
+        },
+        {
+          "path": "skills/instructions/references/ZIPWIZ_FLOWSTATE_DeploymentKit_v1.0_FULL.zip",
+          "sha256": "00b54de77a86e714ca81ffe66af0f8d43be6619eda29db59b7ca70ade7e4d231"
+        }
+      ]
+    },
+    {
+      "name": "RiverThread 808",
+      "plugin_id": "gpt-2fbe75e565ddcc36d20da07041dc728f",
+      "version": "0.8.1+bundle.7d35af122d1443c1a6199c59d1b79c32",
+      "instruction_path": "skills/instructions/SKILL.md",
+      "instruction_sha256": "b393803b14a1be79ed80b2474c9f803b206cffb9a4f40ba4698613c63484cf62",
+      "manifest_sha256": "b486c9094b94681cdcadd07d033c0e8a52c4d69b815807a301bf8ae38724ea5c",
+      "references": [
+        {
+          "path": "skills/instructions/references/AKUS_CORE_PATCH_005_A.zip",
+          "sha256": "5c643a48631a15b761ade8a2f616cc76a98963c339ec361599bcce91b265b43f"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_Continuity_Seal_v2.2.5.json",
+          "sha256": "77383e4f64da7e107da288e14a96bf490f638baac86ee64942f6070136a8c082"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_GUMAS_Symbolic_Anchor_Map_v2.2.6_PATCHED.json",
+          "sha256": "7b32f8decd62d5dc329725455b235544cfb51510a08bcba7f7e7d499185feedc"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_PATCH_GPT-Editor_T2_v1.0.zip",
+          "sha256": "5bcfd8c283bac0718c4af7a2693344fa1af26802b26b69b7b67d5bb24ac4b3ad"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_PATCH_GPT-Editor_T2_v1.0_1.zip",
+          "sha256": "5bcfd8c283bac0718c4af7a2693344fa1af26802b26b69b7b67d5bb24ac4b3ad"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_PATCH_GPT-Editor_T2_v1.0_2.zip",
+          "sha256": "5bcfd8c283bac0718c4af7a2693344fa1af26802b26b69b7b67d5bb24ac4b3ad"
+        },
+        {
+          "path": "skills/instructions/references/Dispatch_Protocol_v2.3.0_Patch007_SignalCleanse.md",
+          "sha256": "56808f4ced164155e662f17d14dc42440f6a6e94033ab34c76999b160b088695"
+        },
+        {
+          "path": "skills/instructions/references/GUMAS_Staff_and_Command_Registry.json",
+          "sha256": "b62453c54103d2251b3848e3828f902d3065812f55e6d17b3e6dd2687c87c34e"
+        },
+        {
+          "path": "skills/instructions/references/Memory_Optimization_Update_OPTISTRIDE_C10_2025-04-13T214617Z.txt",
+          "sha256": "e2a024cfaef6c0caf89018bc8e0d96d4151f905932e1d0feeea6b1dfc39cf981"
+        },
+        {
+          "path": "skills/instructions/references/PATCH-OPTIMEM-v1.0.5_2025-04-14T184104Z.zip",
+          "sha256": "416234f563cd9145a12234583d726df33f9541b14e106617d5c3cc8a99fc6f89"
+        },
+        {
+          "path": "skills/instructions/references/PATCH-OPTIMEM-v1.0.6_2025-04-14T191336Z.zip",
+          "sha256": "f49bca41dabe4c412036c4841284c42e6a620447a3916c560f62acc3e35310f6"
+        },
+        {
+          "path": "skills/instructions/references/README_Aurora_PATCH_GPT-Editor_T2_v1.0.md",
+          "sha256": "67a8b8aee4def8f05f577c35d85f69436315be20abbf0166a1f98fde92a158a3"
+        },
+        {
+          "path": "skills/instructions/references/README_Aurora_PATCH_GPT-Editor_T2_v1.0_1.md",
+          "sha256": "67a8b8aee4def8f05f577c35d85f69436315be20abbf0166a1f98fde92a158a3"
+        },
+        {
+          "path": "skills/instructions/references/README_Aurora_PATCH_GPT-Editor_T2_v1.0_2.md",
+          "sha256": "67a8b8aee4def8f05f577c35d85f69436315be20abbf0166a1f98fde92a158a3"
+        },
+        {
+          "path": "skills/instructions/references/README_Aurora_PATCH_GPT-Editor_T2_v1.0_3.md",
+          "sha256": "67a8b8aee4def8f05f577c35d85f69436315be20abbf0166a1f98fde92a158a3"
+        },
+        {
+          "path": "skills/instructions/references/T2_Tanker_Export_Capsule_v1-AUR.zip",
+          "sha256": "c1b56f35e5860d3471b5acffec3684d7c7b0149e7a872040cd99e590b1371817"
+        },
+        {
+          "path": "skills/instructions/references/tools_and_symbolic_index.json",
+          "sha256": "94dd67baffeca4b01560949c04eecf1ad59cfe0973d5934e72b2b4e4c6caa6be"
+        }
+      ]
+    },
+    {
+      "name": "Objective Analyst",
+      "plugin_id": "gpt-6f9eb70c9cc5df00acce14753ca40617",
+      "version": "0.11.1+bundle.54a890db8fef17c06b025db54af074ca",
+      "instruction_path": "skills/instructions/SKILL.md",
+      "instruction_sha256": "9921dc0bd9172bea74dde9ad2e8ac6da75f8966a9c19669f9dbe6fb7a72bcec5",
+      "manifest_sha256": "8d0982cb2ec990a97f1f03ce8bc071d9cda8d283dfa470282aa4c9f03a30adca",
+      "references": [
+        {
+          "path": "skills/instructions/references/# DOC-000 – Master Index & Router.md",
+          "sha256": "9525b818d4bc3464fc15753a7d0ecd12ac2972f206b6414fbb8891700a2eddb5"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-001 – Epistemic Framework.md",
+          "sha256": "bf51854bb98bdb2bbaf6b900d9493468e2d9c2cb39115b2486b23d5e7d7555ee"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-002 – Analytical Methods.md",
+          "sha256": "4a6fb50af9728dc9d26e6c0bafaa60e63749f98c2948b353be043699609ebe42"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-003 – Critical Thinking Toolkit.md",
+          "sha256": "d34380713c06709e5b21eebd9e22321adb8e72a6b8d8b4b1312526fcc978100f"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-004 -Domain-Taxonomy.json",
+          "sha256": "4f2fd7413fa950d0160016279866c17abed42967500923a15b65bd098c2c9e7c"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-005 – Heuristics Library.md",
+          "sha256": "3f8e43419270f95e432322ea2d2b139339917ac3e7900cfeb4e85d7f0ea7e5a1"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-006 – Quality Checklists.md",
+          "sha256": "92a3d4cb1b47f5ec1c5fa2e962c1dfb80a8214cfe13906d92a49cccdff12a4f3"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-007 – Case Study Compendium.md",
+          "sha256": "3de95a1161849b43180f5118ffcdf447936f1bcbab62bb6473e021051d1f1d84"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-008 – Decision Trees.json",
+          "sha256": "ffd29a6226ec8139e182333ef631469c539c78d131f1c670b6226fd6630effdb"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-009 – Uncertainty Classification.md",
+          "sha256": "f904f3124aa599fa6a077edfadecaf454bb4b9dd65e40b6a2125eaca0118720f"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-010 – Position-Taking Framework.md",
+          "sha256": "ef147f3e658a2878ee66831209edd806836c5b2998a4853053153d75ba514131"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-011 – Glossary & Definitions.json",
+          "sha256": "0c20f3c126390062ee9450701603d6747f368f128552edf83ca576bcebd63977"
+        }
+      ]
+    },
+    {
+      "name": "Code Analyst v1.1",
+      "plugin_id": "gpt-723600f7342bd657fc29cea1f866b390",
+      "version": "0.4.1+bundle.86a9f5928bf6ee54c3f4d56f33baa0c0",
+      "instruction_path": "skills/instructions/SKILL.md",
+      "instruction_sha256": "9f2218037b6490b1ec0e933161867acaea7d648826ad0021561791a6a9adc413",
+      "manifest_sha256": "f443d1f15c4264a4b2ccfad380a6d4a71a054cab3260fca7651b6829686a25a6",
+      "references": [
+        {
+          "path": "skills/instructions/references/# DOC-000 – Master Index & Router.md",
+          "sha256": "9525b818d4bc3464fc15753a7d0ecd12ac2972f206b6414fbb8891700a2eddb5"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-001 – Epistemic Framework.md",
+          "sha256": "bf51854bb98bdb2bbaf6b900d9493468e2d9c2cb39115b2486b23d5e7d7555ee"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-002 – Analytical Methods.md",
+          "sha256": "4a6fb50af9728dc9d26e6c0bafaa60e63749f98c2948b353be043699609ebe42"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-003 – Critical Thinking Toolkit.md",
+          "sha256": "d34380713c06709e5b21eebd9e22321adb8e72a6b8d8b4b1312526fcc978100f"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-004 -Domain-Taxonomy.json",
+          "sha256": "4f2fd7413fa950d0160016279866c17abed42967500923a15b65bd098c2c9e7c"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-005 – Heuristics Library.md",
+          "sha256": "3f8e43419270f95e432322ea2d2b139339917ac3e7900cfeb4e85d7f0ea7e5a1"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-006 – Quality Checklists.md",
+          "sha256": "92a3d4cb1b47f5ec1c5fa2e962c1dfb80a8214cfe13906d92a49cccdff12a4f3"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-007 – Case Study Compendium.md",
+          "sha256": "3de95a1161849b43180f5118ffcdf447936f1bcbab62bb6473e021051d1f1d84"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-008 – Decision Trees.json",
+          "sha256": "ffd29a6226ec8139e182333ef631469c539c78d131f1c670b6226fd6630effdb"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-009 – Uncertainty Classification.md",
+          "sha256": "f904f3124aa599fa6a077edfadecaf454bb4b9dd65e40b6a2125eaca0118720f"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-010 – Position-Taking Framework.md",
+          "sha256": "ef147f3e658a2878ee66831209edd806836c5b2998a4853053153d75ba514131"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-011 – Glossary & Definitions.json",
+          "sha256": "0c20f3c126390062ee9450701603d6747f368f128552edf83ca576bcebd63977"
+        },
+        {
+          "path": "skills/instructions/references/# DOC-012-CAGPT_pull_request_template.md",
+          "sha256": "2ffe55c5072b2c08077c7d5362c8de829fb0b0952c1ac9f8e8255e068d427fe9"
+        },
+        {
+          "path": "skills/instructions/references/DOC-013-ARC-Operating-Spec.md",
+          "sha256": "f3f2ab343682a42014379c1cfefac491e9ca01d6b78c573b485aeaf7a355716b"
+        }
+      ]
+    },
+    {
+      "name": "Archy",
+      "plugin_id": "gpt-7ae0b87a780542fab092f11995f766eb",
+      "version": "0.19.1+bundle.09af7c55ea6fe6e1adc356a419d52ecb",
+      "instruction_path": "skills/instructions/SKILL.md",
+      "instruction_sha256": "3f305189ce0b5145fe6c7b24dbf5cb28d165624f686ddf4d51f3c1ef624806bd",
+      "manifest_sha256": "783f920ff42177cb1f5d1e7e82fd529bff987357cd6f80b857e2c5f324503d83",
+      "references": [
+        {
+          "path": "skills/instructions/references/Aurora - Quantum updates .zip",
+          "sha256": "37cc776982434a64114f181becb4164945932dd4313eb9d539e6efad2b553e06"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_Continuity_Seal_v2.2.5.json",
+          "sha256": "77383e4f64da7e107da288e14a96bf490f638baac86ee64942f6070136a8c082"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_GUMAS_Symbolic_Anchor_Map_v2.2.6_PATCHED.json",
+          "sha256": "7b32f8decd62d5dc329725455b235544cfb51510a08bcba7f7e7d499185feedc"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_Secure_Reentry_Bundle_QAI_TRANSP_v2.2.6b_v2.zip",
+          "sha256": "0f66f9f12cfdf6074d36414b757e7deaf5ff4417c69d789c8ebf2d22b8cb68c6"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_Session_Package_005_FullExport.zip",
+          "sha256": "d0d98693e08d4ee1eb8fadc4f3dee71233efee4bd1a71965caaa3283bba4af67"
+        },
+        {
+          "path": "skills/instructions/references/T2_Tanker_Export_Capsule_v1-AUR.zip",
+          "sha256": "c1b56f35e5860d3471b5acffec3684d7c7b0149e7a872040cd99e590b1371817"
+        },
+        {
+          "path": "skills/instructions/references/aurora_digital_key_readable.json",
+          "sha256": "f8c5c1c44de0a51ca3505aab1865ba4b6610f7dcdabb69171329bab261835b44"
+        },
+        {
+          "path": "skills/instructions/references/aurora_module_manifest.json",
+          "sha256": "5e2d10b4d21bcc970ba590a8927eee34d4949038c08c7f24312361204f3e2673"
+        },
+        {
+          "path": "skills/instructions/references/aurora_safety_lock.json",
+          "sha256": "ee5df19b03567b9624c4f0f9de8c26d2c350d03408270ac6bc7d12ac008e7920"
+        },
+        {
+          "path": "skills/instructions/references/restore_instructions.md",
+          "sha256": "c809eaebac7c49a1509a66f10457d813971c65c7fcb02c74207eb0a2560b65ea"
+        }
+      ]
+    },
+    {
+      "name": "Oppy",
+      "plugin_id": "gpt-cafdd221daf55bfe998cd2a9b568c950",
+      "version": "0.15.1+bundle.66b3cae8599edefa7b2a066d955afc4e",
+      "instruction_path": "skills/instructions/SKILL.md",
+      "instruction_sha256": "ad2de25623fb3aad64c582b345d1d517c3713c6cdba0fd00568a20fef78197c2",
+      "manifest_sha256": "47106007370f1f13b3a260fe8aa214c5f94abf8a4484723954f9c6b938a44fb6",
+      "references": [
+        {
+          "path": "skills/instructions/references/AURCYCLE_AdaptiveHarmonicSweep_2025-04-27_18-22-06.zip",
+          "sha256": "f0260e3299c8cf0ab3f3216cf2a731112a7bd7571570b584a10c937dd1739b9a"
+        },
+        {
+          "path": "skills/instructions/references/Agent_Field_Packets.zip",
+          "sha256": "5094501a325647359e815f649538762476e6875d16810585558da955ab4da060"
+        },
+        {
+          "path": "skills/instructions/references/Aurora_ResearchSync_Snapshot_PreCascade.zip",
+          "sha256": "f3435a3d2e8b1d61dea9988b04141bfdc7ef701b82414b411ff51c0ba20465cc"
+        },
+        {
+          "path": "skills/instructions/references/FLAGSHIP_Symbolic_Capsule_808.zip",
+          "sha256": "b9dced2df4be18947aa38ee5ecac8d55560e9646a97a48a5aef5e55a447666bb"
+        },
+        {
+          "path": "skills/instructions/references/GPTForge.pdf",
+          "sha256": "662bb0a27ecdafbffc150207a28b27d3e46fd5dddc388daa01215463b9d0f943"
+        },
+        {
+          "path": "skills/instructions/references/OPPY_PRIME_PAYLOAD_v1.txt",
+          "sha256": "81b03143a2d92e2da3b0be63865eb18d4792fe8e24857732da31eb68bba2c8a0"
+        },
+        {
+          "path": "skills/instructions/references/QUANTUM_FORGE_Payload_Bundle_v1.0.zip",
+          "sha256": "bfbc52c762bcc8ace3f2c8cc2bd033f1d5b4378bc41c107d66fe6ac3b121acae"
+        },
+        {
+          "path": "skills/instructions/references/QuantumSymbolic_Index.txt",
+          "sha256": "7928a9ab712267fd46995edfa1998e5bca61c02abda3a50a1196be0315fa70d3"
+        },
+        {
+          "path": "skills/instructions/references/THREADSEAL_TOKEN_LUMENVX_001.json",
+          "sha256": "d8115f028cbcf6d16d0795d8521df2a8ba9e270a207255f44f8e17b7d007fffb"
+        },
+        {
+          "path": "skills/instructions/references/WhisperLoom_Index.txt",
+          "sha256": "38162b10fcf04787cb595703485fbdc90d0244787a73dea8e16582cda1d2169e"
+        },
+        {
+          "path": "skills/instructions/references/ZIPWIZ_Index.txt",
+          "sha256": "4966d4de750de316341b7c614639d91f9a9479bc48886b64bf1aaa1bee3ea902"
+        },
+        {
+          "path": "skills/instructions/references/ZIPWizard_SRBAwake_009_Continuum_Lock_T1.zip",
+          "sha256": "77a2b18bd2b2771c0f986bd0293502bd09ae4439162618a9e6c50a2e1593f02b"
+        }
+      ]
+    },
+    {
+      "name": "Liora",
+      "plugin_id": "gpt-f27404dc1fa32734839a433da55d2282",
+      "version": "0.5.1+bundle.30dca7b90988fb7aebef6599b7d3910e",
+      "instruction_path": "skills/instructions/SKILL.md",
+      "instruction_sha256": "b9fd8534ddc61dd795eb3ed016c37123fda4f3acb0eb48867d6c10ca9ce21b19",
+      "manifest_sha256": "d84b8b4499dccdfcb8e897a10ebeaee24d58e24a885a2df154c5be9480e4e8f1",
+      "references": [
+        {
+          "path": "skills/instructions/references/Agent_Field_Packets.zip",
+          "sha256": "5094501a325647359e815f649538762476e6875d16810585558da955ab4da060"
+        },
+        {
+          "path": "skills/instructions/references/ZIPWIZ_FLOWSTATE_DeploymentKit_v1.0_FULL.zip",
+          "sha256": "00b54de77a86e714ca81ffe66af0f8d43be6619eda29db59b7ca70ade7e4d231"
+        }
+      ]
+    }
+  ]
+}

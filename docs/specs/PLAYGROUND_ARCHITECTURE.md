@@ -79,6 +79,13 @@ QGIA tasking rule is in
 design specification; committed runtime code and tests remain authoritative
 for current behavior.
 
+Playground execution fails closed when isolation is unavailable. Missing Docker
+SDK or failed Docker client initialization returns a failed execution result with
+`sandbox_unavailable`; container startup/execution errors return a failed result.
+Submitted Python or JavaScript is never sent to a host subprocess as a fallback.
+This applies to both inline and queued execution through the shared sandbox
+runner. Authentication does not relax this isolation requirement.
+
 ---
 
 ## 2. System Architecture

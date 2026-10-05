@@ -34,15 +34,15 @@ dependencies = [
     "typer[all]>=0.27.2,<1.0.0",
     "rich>=15.0.0",
     "pyyaml>=6.0.3",
-    "python-dotenv>=1.2.3",
+    "python-dotenv>=1.2.4",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
-    "mypy>=2.3.1",
-    "ruff>=0.16.5",
+    "mypy>=2.4.0",
+    "ruff>=0.16.10",
     "black>=26.5.1",
 ]
 

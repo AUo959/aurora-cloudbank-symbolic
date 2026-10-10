@@ -130,16 +130,15 @@ async def run(task_id: str, revision: str, task: str, snapshot: dict[str, str],
             pending = []
             finals = []
             for item in response.output:
-                agent = getattr(getattr(item, "agent", None), "agent_name", None)
+                # The beta SDK omits agent attribution for ordinary root items.
+                agent = getattr(getattr(item, "agent", None), "agent_name", None) or "/root"
                 if agent and agent not in receipt["agents"]:
                     receipt["agents"].append(agent)
-                if item.type.startswith("agent_"):
+                if item.type.startswith("agent_") or item.type in {"multi_agent_call", "multi_agent_call_output"}:
                     receipt["agent_events"].append({
-                        key: getattr(item, key, None) for key in ("type", "id", "author", "recipient")
+                        key: getattr(item, key, None) for key in ("type", "id", "action", "call_id", "author", "recipient")
                     } | {"agent": agent})
                 if item.type == "function_call":
-                    if config.mode == "multi" and not agent:
-                        raise SpikeRejected("missing_tool_attribution")
                     if item.call_id in seen or len(seen) >= config.max_tool_calls:
                         raise SpikeRejected("tool_budget_or_duplicate")
                     seen.add(item.call_id)
@@ -158,7 +157,7 @@ async def run(task_id: str, revision: str, task: str, snapshot: dict[str, str],
                     pending.append(output)
                 elif item.type == "message" and (
                     config.mode == "single"
-                    or (agent == "/root" and getattr(item, "phase", None) == "final_answer")
+                    or (agent == "/root" and getattr(item, "phase", None) in {None, "final_answer"})
                 ):
                     finals.extend(part.text for part in item.content if part.type == "output_text")
             if getattr(response, "status", None) != "completed":

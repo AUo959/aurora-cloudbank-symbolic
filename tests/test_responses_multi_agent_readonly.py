@@ -78,13 +78,37 @@ async def test_tool_provenance_root_result_and_no_private_reasoning():
 
 
 @pytest.mark.parametrize("item", [call(name="advance"), call(arguments='{"section":"../CanonRec"}'),
-                                  call(arguments='{"section":"l1","write":true}'), call(agent=None)])
+                                  call(arguments='{"section":"l1","write":true}')])
 @pytest.mark.asyncio
 async def test_tool_requests_fail_closed(item):
     c = client([item])
     receipt = await invoke(c)
     assert receipt["status"] == "failed" and receipt["tool_calls"] == []
     c.responses.create.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_root_tool_call_and_legacy_final_with_omitted_agent():
+    root = message(phase=None, text="legacy root final")
+    root.agent = None
+    c = client([call(agent=None)], [message(phase="commentary", text="not final"),
+                                  message("/root/worker", phase=None, text="not root"), root])
+    receipt = await invoke(c)
+    assert receipt["status"] == "completed_candidate" and receipt["findings"] == ["legacy root final"]
+    assert receipt["tool_calls"][0]["agent"] == "/root"
+    assert c.beta.responses.create.call_args.kwargs["input"][-1]["agent"] == {"agent_name": "/root"}
+
+
+@pytest.mark.asyncio
+async def test_coordination_metadata_links_calls_without_private_content():
+    items = [NS(type=kind, id=f"item-{kind}", action="spawn_agent", call_id="coord1", agent=None,
+                arguments="private prompt", output="private output")
+             for kind in ("multi_agent_call", "multi_agent_call_output")]
+    receipt = await invoke(client([*items, message()]))
+    assert len(receipt["agent_events"]) == 2
+    assert all(event["call_id"] == "coord1" and event["action"] == "spawn_agent"
+               and event["agent"] == "/root" for event in receipt["agent_events"])
+    assert "private" not in json.dumps(receipt)
 
 
 @pytest.mark.asyncio

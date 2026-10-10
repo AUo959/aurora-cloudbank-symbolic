@@ -36,7 +36,8 @@ comprehensive injection detector.
 - Feature flag defaults off; model is explicitly `gpt-6.1-sol`, effort `low`.
 - Concurrency is 1–3, default 3; at most 30 seconds of client execution,
   three Responses calls, four dispatched tool calls, and 1,024 requested output
-  tokens per Responses call. SDK retries are disabled. There is no fallback.
+  tokens per Responses call. Client cleanup has a separate one-second timeout.
+  SDK retries are disabled. There is no fallback.
 - Task is at most 4 KiB; snapshot is at most 16 KiB and eight named sections.
 - Strict tool schema and local validation reject unknown tools/arguments/sections.
 - Single and multi request paths are explicit. Advanced controls are rejected
@@ -50,6 +51,9 @@ comprehensive injection detector.
   remains unknown. Findings are candidate text; deltas are not extracted/applied.
 - Every candidate has `validation=not_applied`. Root #95 remains the authority
   contract dependency; this proof introduces no validator or commit authority.
+- Preflight failures return `status=rejected` receipts without creating a client.
+  Cleanup timeout/failure stays visible in the receipt, preserves an earlier
+  execution error, and prevents a successful-result claim when cleanup fails.
 
 Concurrency does not cap total agents or tree depth. Client deadlines/cancellation
 do not prove server-side termination or a hard dollar ceiling. No total-agent,
@@ -68,6 +72,10 @@ No dependency update or timeout migration is needed for this proof.
 
 No live model call, model access verification, delegation-quality evaluation,
 server cost measurement, or production-readiness assertion is included.
+
+The required `CI Check` workflow explicitly executes the complete spike test
+file as a blocking step. Every nonzero pytest exit, including collection errors,
+fails that step; the suite does not depend on critical/smoke marker discovery.
 
 ```sh
 python -m pytest tests/test_responses_multi_agent_readonly.py \

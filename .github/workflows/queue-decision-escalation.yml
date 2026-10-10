@@ -78,49 +78,7 @@ jobs:
         if: steps.escalate.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          python - <<'PY'
-          import json, subprocess
-          report = json.load(open("/tmp/escalations.json"))
-          for gate in report["escalations"]:
-              issue = gate.get("github_issue")
-              if not issue:
-                  continue
-              state_check = subprocess.run(
-                  ["gh", "issue", "view", str(issue), "--json", "state", "--jq", ".state"],
-                  check=False,
-                  capture_output=True,
-                  text=True,
-              )
-              issue_state = state_check.stdout.strip().upper()
-              if state_check.returncode != 0 or issue_state != "OPEN":
-                  detail = issue_state or state_check.stderr.strip() or "UNKNOWN"
-                  print(
-                      f"::warning::skipping {gate['gate_id']}: linked issue "
-                      f"#{issue} is not confirmed open ({detail})"
-                  )
-                  continue
-              age = gate.get("days_since_surfaced")
-              body = (
-                  f"⏰ **Decision-gate escalation** ({gate['gate_id']}, tier {gate['escalation_tier']}): "
-                  f"this gate has awaited an operator decision for "
-                  f"{age if age is not None else 'an unknown number of'} days "
-                  f"(threshold {report['threshold_days']}).\n\n"
-                  f"Blocks: {', '.join(gate.get('blocks_queue_items') or []) or 'none recorded'}. "
-                  f"Owner: {gate.get('decision_owner', 'operator')}.\n\n"
-                  f"_Automated weekly escalation per #1131; last_surfaced has been bumped, "
-                  f"so this will not re-ping before the threshold elapses again._"
-              )
-              subprocess.run(["gh", "issue", "comment", str(issue), "--body", body], check=True)
-              print(f"pinged issue #{issue} for {gate['gate_id']}")
-          for item in report["ungated_decisions"]:
-              print(f"registry drift (reported in PR body): {item['id']} — {item['title']}")
-          for gate in report.get("integrity_holds", []):
-              print(
-                  f"integrity hold (reported in PR body): {gate['gate_id']} — "
-                  f"{gate.get('integrity_note') or gate['title']}"
-              )
-          PY
+        run: python scripts/publish_queue_pr.py --kind escalation --notify-escalations /tmp/escalations.json
 
       - name: Open registry-update PR
         if: steps.escalate.outputs.changed == 'true'

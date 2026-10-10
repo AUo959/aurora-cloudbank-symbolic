@@ -10,6 +10,14 @@ escalation workflow also defers issue pings, preventing repeat notifications
 while its previous `last_surfaced` update is still under review. When no proposal
 of that kind remains open, the next run generates from current `main` again.
 
+Notification comments carry a durable marker derived from the gate id and its
+pre-update `opened`/`last_surfaced` baseline. Before posting, the helper reads all
+comment pages and skips an existing matching `github-actions[bot]` marker. If
+delivery or subsequent PR creation fails partway through, the next run skips
+delivered notifications and retries the remaining gates. A merged surfacing
+update changes the baseline, allowing the next eligible escalation cycle.
+Comment lookup errors fail the job before posting; closed issues are skipped.
+
 The helper refuses a matching proposal with an unexpected author, fork, base,
 head SHA, or changed-file scope. It checks all pages of open PRs and changed
 files. Workflow changes and executable code never qualify as generated data.

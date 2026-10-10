@@ -175,3 +175,93 @@ def test_diff_rejection_does_not_dispatch_or_allow_generation(monkeypatch, tmp_p
     with pytest.raises(ValueError, match="scope"):
         publisher.main()
     assert not output.exists()
+
+
+def gate(issue=1558):
+    return {
+        "gate_id": f"gate-{issue}", "github_issue": issue,
+        "opened": "2026-09-01", "last_surfaced": "2026-09-28",
+        "days_since_surfaced": 12, "escalation_tier": 1,
+    }
+
+
+def test_partial_notification_failure_retries_only_undelivered_gates(monkeypatch):
+    comments, attempts = {}, []
+    fail_once = True
+
+    def gh(*args):
+        nonlocal fail_once
+        if args[0] == "api":
+            return json.dumps({"state": "open"})
+        issue = int(args[2])
+        attempts.append(issue)
+        if issue == 1559 and fail_once:
+            fail_once = False
+            raise RuntimeError("delivery failed")
+        comments.setdefault(issue, []).append({
+            "user": {"login": "github-actions[bot]"}, "body": args[-1],
+        })
+        return ""
+
+    monkeypatch.setattr(publisher, "gh", gh)
+    monkeypatch.setattr(publisher, "pages", lambda endpoint: comments.get(int(endpoint.split("/")[4]), []))
+    report = {"escalations": [gate(), gate(1559)], "threshold_days": 3, "ungated_decisions": []}
+    with pytest.raises(RuntimeError, match="delivery failed"):
+        publisher.notify_escalations(REPO, report)
+    publisher.notify_escalations(REPO, report)
+    # Also covers successful delivery followed by failed PR creation: same baseline.
+    publisher.notify_escalations(REPO, report)
+    assert attempts == [1558, 1559, 1559]
+
+
+def test_marker_changes_only_when_registry_baseline_changes():
+    original = gate()
+    retry = {**original, "days_since_surfaced": 19}
+    next_cycle = {**original, "last_surfaced": "2026-10-10"}
+    assert publisher.escalation_marker(original) == publisher.escalation_marker(retry)
+    assert publisher.escalation_marker(original) != publisher.escalation_marker(next_cycle)
+
+
+def test_non_bot_marker_does_not_suppress_delivery(monkeypatch):
+    calls = []
+    monkeypatch.setattr(publisher, "gh", lambda *args: calls.append(args) or json.dumps({"state": "open"}))
+    monkeypatch.setattr(publisher, "pages", lambda endpoint: [{
+        "user": {"login": "owner"}, "body": publisher.escalation_marker(gate()),
+    }])
+    publisher.notify_gate(REPO, gate(), 3)
+    assert calls[-1][:5] == ("issue", "comment", "1558", "--repo", REPO)
+
+
+def test_comment_lookup_error_prevents_posting(monkeypatch):
+    calls = []
+    monkeypatch.setattr(publisher, "gh", lambda *args: calls.append(args) or json.dumps({"state": "open"}))
+
+    def fail(endpoint):
+        raise RuntimeError("comments unavailable")
+
+    monkeypatch.setattr(publisher, "pages", fail)
+    with pytest.raises(RuntimeError, match="comments unavailable"):
+        publisher.notify_gate(REPO, gate(), 3)
+    assert all(c[0] == "api" for c in calls)
+
+
+def test_closed_issue_is_not_notified(monkeypatch):
+    calls = []
+    monkeypatch.setattr(publisher, "gh", lambda *args: calls.append(args) or json.dumps({"state": "closed"}))
+    monkeypatch.setattr(publisher, "pages", lambda endpoint: pytest.fail("closed issue comments read"))
+    publisher.notify_gate(REPO, gate(), 3)
+    assert len(calls) == 1
+
+
+def test_notification_cli_uses_report_without_pr_dispatch(monkeypatch, tmp_path):
+    report = tmp_path / "report.json"
+    payload = {"escalations": [], "threshold_days": 3, "ungated_decisions": []}
+    report.write_text(json.dumps(payload))
+    monkeypatch.setenv("GITHUB_REPOSITORY", REPO)
+    monkeypatch.setattr("sys.argv", ["publish_queue_pr.py", "--kind", "escalation",
+                                    "--notify-escalations", str(report)])
+    calls = []
+    monkeypatch.setattr(publisher, "notify_escalations", lambda *args: calls.append(args))
+    monkeypatch.setattr(publisher, "pages", lambda endpoint: pytest.fail("PR lookup during notification"))
+    assert publisher.main() == 0
+    assert calls == [(REPO, payload)]

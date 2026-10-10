@@ -9,6 +9,7 @@ Only same-repository bot PRs with the expected generated-file scope qualify.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -96,13 +97,67 @@ def dispatch_checks(repo: str, pr: dict) -> None:
         print(f"#{pr['number']} dispatched {workflow} on {sha}")
 
 
+def escalation_marker(gate: dict) -> str:
+    # Use the pre-apply registry baseline, which survives failed PR publication.
+    cycle = [gate["gate_id"], gate.get("opened"), gate.get("last_surfaced")]
+    digest = hashlib.sha256(json.dumps(cycle).encode()).hexdigest()
+    return f"<!-- queue-escalation:{digest} -->"
+
+
+def notify_gate(repo: str, gate: dict, threshold: int) -> None:
+    issue = gate["github_issue"]
+    if not isinstance(issue, int) or isinstance(issue, bool) or issue <= 0:
+        raise ValueError("Escalation requires a positive GitHub issue number")
+    endpoint = f"repos/{repo}/issues/{issue}"
+    state = json.loads(gh("api", endpoint))["state"]
+    if state != "open":
+        print(f"Skipping {gate['gate_id']}: issue #{issue} is {state}")
+        return
+    marker = escalation_marker(gate)
+    comments = pages(f"{endpoint}/comments?per_page=100")
+    if any(c["user"]["login"] == "github-actions[bot]"
+           and marker in (c.get("body") or "") for c in comments):
+        print(f"Issue #{issue} already notified for {gate['gate_id']} at this baseline")
+        return
+    age = gate.get("days_since_surfaced")
+    body = (
+        f"⏰ **Decision-gate escalation** ({gate['gate_id']}, tier {gate['escalation_tier']}): "
+        f"this gate has awaited an operator decision for "
+        f"{age if age is not None else 'an unknown number of'} days "
+        f"(threshold {threshold}).\n\n"
+        f"Blocks: {', '.join(gate.get('blocks_queue_items') or []) or 'none recorded'}. "
+        f"Owner: {gate.get('decision_owner') or 'operator'}.\n\n"
+        "_Automated weekly escalation per #1131; the surfacing update is proposed "
+        "through review. This marker prevents retry duplicates until the registry "
+        f"baseline changes._\n\n{marker}"
+    )
+    gh("issue", "comment", str(issue), "--repo", repo, "--body", body)
+
+
+def notify_escalations(repo: str, report: dict) -> None:
+    for gate in report["escalations"]:
+        if gate.get("github_issue") is not None:
+            notify_gate(repo, gate, report["threshold_days"])
+    for item in report["ungated_decisions"]:
+        print(f"registry drift (reported in PR body): {item['id']} — {item['title']}")
+    for gate in report.get("integrity_holds", []):
+        print(f"integrity hold (reported in PR body): {gate['gate_id']} — "
+              f"{gate.get('integrity_note') or gate['title']}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--kind", choices=POLICIES, required=True)
+    parser.add_argument("--notify-escalations", type=Path)
     args = parser.parse_args()
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repo):
         raise ValueError("GITHUB_REPOSITORY must identify the workflow repository")
+    if args.notify_escalations:
+        if args.kind != "escalation":
+            raise ValueError("Issue notifications are only supported for escalation")
+        notify_escalations(repo, json.loads(args.notify_escalations.read_text()))
+        return 0
     prs = pages(f"repos/{repo}/pulls?state=open&base=main&per_page=100")
     pr = select_pending(prs, args.kind, repo)
     if pr:

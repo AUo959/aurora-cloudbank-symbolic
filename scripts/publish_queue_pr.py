@@ -12,7 +12,7 @@ import argparse
 import json
 import os
 import re
-import subprocess
+import subprocess  # nosec B404 — fixed gh argv; no shell or eval.
 from pathlib import Path
 
 
@@ -46,18 +46,22 @@ def pages(endpoint: str) -> list[dict]:
     return [item for page in result for item in page]
 
 
+def validate_proposal(pr: dict, repo: str) -> None:
+    if (
+        pr["state"] != "open"
+        or pr["base"]["ref"] != "main"
+        or pr["user"]["login"] != "github-actions[bot]"
+        or (pr["head"].get("repo") or {}).get("full_name") != repo
+        or not re.fullmatch(r"[0-9a-f]{40}", pr["head"]["sha"])
+    ):
+        raise ValueError(f"Untrusted queue proposal #{pr['number']}; operator review required")
+
+
 def select_pending(prs: list[dict], kind: str, repo: str) -> dict | None:
     pattern, _ = POLICIES[kind]
     matching = [p for p in prs if re.fullmatch(pattern, p["head"]["ref"])]
     for pr in matching:
-        if (
-            pr["state"] != "open"
-            or pr["base"]["ref"] != "main"
-            or pr["user"]["login"] != "github-actions[bot]"
-            or (pr["head"].get("repo") or {}).get("full_name") != repo
-            or not re.fullmatch(r"[0-9a-f]{40}", pr["head"]["sha"])
-        ):
-            raise ValueError(f"Untrusted queue proposal #{pr['number']}; operator review required")
+        validate_proposal(pr, repo)
     return max(matching, key=lambda p: p["number"], default=None)
 
 

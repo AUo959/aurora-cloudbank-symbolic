@@ -24,9 +24,14 @@ on:
         default: 'Manual escalation run'
 
 permissions:
+  actions: write  # Explicitly dispatch checks for GITHUB_TOKEN-created PRs.
   contents: write
   issues: write
   pull-requests: write
+
+concurrency:
+  group: queue-decision-escalation
+  cancel-in-progress: false
 
 jobs:
   escalate:
@@ -43,7 +48,14 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Reuse pending proposal and request validation
+        id: pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_queue_pr.py --kind escalation
+
       - name: Run escalation check (and bump last_surfaced)
+        if: steps.pending.outputs.pending != 'true'
         id: escalate
         run: |
           set +e
@@ -57,6 +69,10 @@ jobs:
           else
             exit "$code"
           fi
+
+      - name: Regenerate queue views after the registry update
+        if: steps.escalate.outputs.changed == 'true'
+        run: python ops/work_queue/sync_queue.py
 
       - name: Ping linked issues
         if: steps.escalate.outputs.changed == 'true'
@@ -115,7 +131,7 @@ jobs:
           git config user.name "aurora-queue-escalation[bot]"
           git config user.email "aurora-queue-escalation@users.noreply.github.com"
           git checkout -b "$branch"
-          git add ops/work_queue/gate_registry.json
+          git add ops/work_queue/gate_registry.json ops/work_queue/OPEN_GATES.md
           if git diff --cached --quiet; then
             echo "No registry changes to propose (drift-only run)."
             exit 0
@@ -126,3 +142,9 @@ jobs:
             --title "aurora(queue): record gate escalation surfacing" \
             --body "$(printf 'Automated last_surfaced bump for gates escalated this run (see #1131 for the design). Linked issues were pinged directly; this PR only records the surfacing so gates do not re-ping inside the threshold window.\n\nEscalation report:\n\n```json\n%s\n```' "$(cat /tmp/escalations.json)")" \
             --base main --head "$branch"
+
+      - name: Request validation for the new proposal
+        if: steps.escalate.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_queue_pr.py --kind escalation

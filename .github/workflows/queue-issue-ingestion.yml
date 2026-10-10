@@ -24,9 +24,14 @@ on:
         default: 'Manual ingestion run'
 
 permissions:
+  actions: write  # Explicitly dispatch checks for GITHUB_TOKEN-created PRs.
   contents: write
   issues: read
   pull-requests: write
+
+concurrency:
+  group: queue-issue-ingestion
+  cancel-in-progress: false
 
 jobs:
   ingest:
@@ -43,12 +48,20 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Reuse pending proposal and request validation
+        id: pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_queue_pr.py --kind ingestion
+
       - name: Install dependencies
+        if: steps.pending.outputs.pending != 'true'
         run: |
           python -m pip install --only-binary=:all: jsonschema==4.26.0
 
       # Auth stays in gh; the Python script only ever sees a JSON file.
       - name: Fetch candidate issues
+        if: steps.pending.outputs.pending != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -69,6 +82,7 @@ jobs:
           PY
 
       - name: Run ingestion
+        if: steps.pending.outputs.pending != 'true'
         id: ingest
         run: |
           set +e
@@ -99,3 +113,9 @@ jobs:
             --title "aurora(queue): auto-ingest labeled issues" \
             --body "$(printf 'Automated ingestion of open issues labeled blocking/security into ops/work_queue/queue.json (see #1131 for the design).\n\nEntries are appended at the tail with aurora_authority: false — Aurora rerank happens on review of this PR. Schema validation and view freshness are enforced by queue-validation.yml on this PR.')" \
             --base main --head "$branch"
+
+      - name: Request validation for the new proposal
+        if: steps.ingest.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_queue_pr.py --kind ingestion

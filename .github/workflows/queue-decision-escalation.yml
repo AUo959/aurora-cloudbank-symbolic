@@ -24,9 +24,14 @@ on:
         default: 'Manual escalation run'
 
 permissions:
+  actions: write  # Explicitly dispatch checks for GITHUB_TOKEN-created PRs.
   contents: write
   issues: write
   pull-requests: write
+
+concurrency:
+  group: queue-decision-escalation
+  cancel-in-progress: false
 
 jobs:
   escalate:
@@ -43,7 +48,14 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Reuse pending proposal and request validation
+        id: pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_queue_pr.py --kind escalation
+
       - name: Run escalation check (and bump last_surfaced)
+        if: steps.pending.outputs.pending != 'true'
         id: escalate
         run: |
           set +e
@@ -58,53 +70,15 @@ jobs:
             exit "$code"
           fi
 
+      - name: Regenerate queue views after the registry update
+        if: steps.escalate.outputs.changed == 'true'
+        run: python ops/work_queue/sync_queue.py
+
       - name: Ping linked issues
         if: steps.escalate.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          python - <<'PY'
-          import json, subprocess
-          report = json.load(open("/tmp/escalations.json"))
-          for gate in report["escalations"]:
-              issue = gate.get("github_issue")
-              if not issue:
-                  continue
-              state_check = subprocess.run(
-                  ["gh", "issue", "view", str(issue), "--json", "state", "--jq", ".state"],
-                  check=False,
-                  capture_output=True,
-                  text=True,
-              )
-              issue_state = state_check.stdout.strip().upper()
-              if state_check.returncode != 0 or issue_state != "OPEN":
-                  detail = issue_state or state_check.stderr.strip() or "UNKNOWN"
-                  print(
-                      f"::warning::skipping {gate['gate_id']}: linked issue "
-                      f"#{issue} is not confirmed open ({detail})"
-                  )
-                  continue
-              age = gate.get("days_since_surfaced")
-              body = (
-                  f"⏰ **Decision-gate escalation** ({gate['gate_id']}, tier {gate['escalation_tier']}): "
-                  f"this gate has awaited an operator decision for "
-                  f"{age if age is not None else 'an unknown number of'} days "
-                  f"(threshold {report['threshold_days']}).\n\n"
-                  f"Blocks: {', '.join(gate.get('blocks_queue_items') or []) or 'none recorded'}. "
-                  f"Owner: {gate.get('decision_owner', 'operator')}.\n\n"
-                  f"_Automated weekly escalation per #1131; last_surfaced has been bumped, "
-                  f"so this will not re-ping before the threshold elapses again._"
-              )
-              subprocess.run(["gh", "issue", "comment", str(issue), "--body", body], check=True)
-              print(f"pinged issue #{issue} for {gate['gate_id']}")
-          for item in report["ungated_decisions"]:
-              print(f"registry drift (reported in PR body): {item['id']} — {item['title']}")
-          for gate in report.get("integrity_holds", []):
-              print(
-                  f"integrity hold (reported in PR body): {gate['gate_id']} — "
-                  f"{gate.get('integrity_note') or gate['title']}"
-              )
-          PY
+        run: python scripts/publish_queue_pr.py --kind escalation --notify-escalations /tmp/escalations.json
 
       - name: Open registry-update PR
         if: steps.escalate.outputs.changed == 'true'
@@ -115,7 +89,7 @@ jobs:
           git config user.name "aurora-queue-escalation[bot]"
           git config user.email "aurora-queue-escalation@users.noreply.github.com"
           git checkout -b "$branch"
-          git add ops/work_queue/gate_registry.json
+          git add ops/work_queue/gate_registry.json ops/work_queue/OPEN_GATES.md
           if git diff --cached --quiet; then
             echo "No registry changes to propose (drift-only run)."
             exit 0
@@ -126,3 +100,9 @@ jobs:
             --title "aurora(queue): record gate escalation surfacing" \
             --body "$(printf 'Automated last_surfaced bump for gates escalated this run (see #1131 for the design). Linked issues were pinged directly; this PR only records the surfacing so gates do not re-ping inside the threshold window.\n\nEscalation report:\n\n```json\n%s\n```' "$(cat /tmp/escalations.json)")" \
             --base main --head "$branch"
+
+      - name: Request validation for the new proposal
+        if: steps.escalate.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_queue_pr.py --kind escalation

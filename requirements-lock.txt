@@ -29,7 +29,7 @@ jsonschema-specifications==2025.9.1
 jsonschema==4.26.0
 limits==5.8.0
 mccabe==0.7.0
-mcp==1.29.1
+mcp==1.30.0
 narwhals==2.25.0
 numpy==2.5.2
 openai==3.6.0

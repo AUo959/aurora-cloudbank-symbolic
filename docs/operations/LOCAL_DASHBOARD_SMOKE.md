@@ -26,6 +26,10 @@ They are not an all-time execution count; completed runs remain represented
 after leaving the active registry until their results expire or are evicted.
 
 Unmeasured `memory.cache_hit_rate` and `quantum.average_speedup` are `null`.
+Missing optional memory/quantum components also produce null counters while
+the other sections remain available. Memory cards share the system snapshot
+instead of polling it twice. Failed refreshes mark connectivity unavailable
+even when the browser retains the last successful snapshot.
 Response latency is `null` before request samples exist. The UI labels them
 unavailable and reports API connectivity rather than claiming optimal health.
 The activity examples remain explicitly illustrative.

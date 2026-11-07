@@ -59,3 +59,20 @@ def test_dashboard_contract_is_mounted_on_primary_api(monkeypatch):
     response = TestClient(app).get("/api/system/metrics")
     assert response.status_code == 200
     assert response.json() == {"context_tag": "contract-check"}
+
+
+@pytest.mark.unit
+def test_missing_optional_components_preserve_other_metrics(monkeypatch):
+    monkeypatch.setenv("CSRF_SECRET_KEY", "dashboard-test-csrf-not-a-production-key")
+    monkeypatch.setenv("WS_AUTH_SECRET", "dashboard-test-ws-not-a-production-key")
+    from src.observability import dashboard_metrics as metrics
+
+    monkeypatch.setattr(metrics, "memory_manager", None)
+    monkeypatch.setattr(metrics, "active_simulations", None)
+    monkeypatch.setattr(metrics, "get_cache", None)
+    monkeypatch.setattr(metrics, "get_all_crew_agents", lambda: {})
+    result = metrics.collect_dashboard_metrics()
+    assert result["memory"]["total_memories"] is None
+    assert result["quantum"]["total_simulations"] is None
+    assert result["agents"]["total_agents"] == 0
+    assert result["system"]["memory_usage"] >= 0

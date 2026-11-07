@@ -286,7 +286,9 @@ export default function Dashboard() {
                 {memoryMetrics && (
                   <>
                     {formatNumber(memoryMetrics.active_memories)} active •{' '}
-                    {percentage(memoryMetrics.cache_hit_rate, 1).toFixed(0)}% cache hit
+                    {memoryMetrics.cache_hit_rate === null
+                      ? 'Cache rate unavailable'
+                      : `${percentage(memoryMetrics.cache_hit_rate, 1).toFixed(0)}% cache hit`}
                   </>
                 )}
               </p>
@@ -315,7 +317,9 @@ export default function Dashboard() {
               </div>
               <p className="text-xs text-gray-500">
                 {metrics?.quantum.simulations_running || 0} running •{' '}
-                {metrics?.quantum.average_speedup?.toFixed(1) || '0'}x speedup
+                {metrics?.quantum.average_speedup == null
+                  ? 'Speedup unavailable'
+                  : `${metrics.quantum.average_speedup.toFixed(1)}x speedup`}
               </p>
             </CardContent>
           </Card>
@@ -345,8 +349,12 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
-                <CheckCircle2 className="h-5 w-5 text-success" />
-                <span className="text-2xl font-bold text-success">Optimal</span>
+                {metrics
+                  ? <CheckCircle2 className="h-5 w-5 text-success" />
+                  : <AlertCircle className="h-5 w-5 text-gray-500" />}
+                <span className={`text-2xl font-bold ${metrics ? 'text-success' : 'text-gray-500'}`}>
+                  {metrics ? 'Connected' : 'Unavailable'}
+                </span>
               </div>
               <p className="text-xs text-gray-500">
                 CPU: {metrics?.system.cpu_usage?.toFixed(0) || 0}% • Mem:{' '}
@@ -383,7 +391,9 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-400">Avg Response Time</span>
                     <span className="font-mono font-semibold text-accent-400">
-                      {formatDuration(metrics?.system.average_response_time_ms || 0)}
+                      {metrics?.system.average_response_time_ms == null
+                        ? 'Unavailable'
+                        : formatDuration(metrics.system.average_response_time_ms)}
                     </span>
                   </div>
                 </div>
@@ -406,7 +416,7 @@ export default function Dashboard() {
                 <Activity className="h-5 w-5 text-secondary-500" />
                 <span>Recent Activity</span>
               </CardTitle>
-              <CardDescription>Latest system events</CardDescription>
+              <CardDescription>Illustrative example events</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">

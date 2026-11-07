@@ -24,6 +24,9 @@ Simulation totals count unique active IDs plus unexpired retained results in
 the scenario cache (normally 24 hours, bounded by the configured cache size).
 They are not an all-time execution count; completed runs remain represented
 after leaving the active registry until their results expire or are evicted.
+The endpoint assembles its snapshot without awaiting on the simulation API's
+owning event loop, serializing cache reads with its async API writers rather
+than iterating the mutable cache from a worker thread.
 
 Unmeasured `memory.cache_hit_rate` and `quantum.average_speedup` are `null`.
 Missing optional memory/quantum components also produce null counters while

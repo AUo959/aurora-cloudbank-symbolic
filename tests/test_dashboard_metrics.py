@@ -55,7 +55,14 @@ def test_dashboard_contract_is_mounted_on_primary_api(monkeypatch):
     from api.aurora_api import app
     from src.observability import dashboard_metrics as metrics
 
-    monkeypatch.setattr(metrics, "collect_dashboard_metrics", lambda: {"context_tag": "contract-check"})
+    def snapshot_on_owner_loop():
+        import asyncio
+        # A synchronous worker-thread endpoint has no running event loop and
+        # races the async simulation/cache writers. Keep this read serialized.
+        asyncio.get_running_loop()
+        return {"context_tag": "contract-check"}
+
+    monkeypatch.setattr(metrics, "collect_dashboard_metrics", snapshot_on_owner_loop)
     response = TestClient(app).get("/api/system/metrics")
     assert response.status_code == 200
     assert response.json() == {"context_tag": "contract-check"}

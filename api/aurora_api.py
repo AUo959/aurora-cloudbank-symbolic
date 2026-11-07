@@ -1242,6 +1242,20 @@ def health_check(request: Request):
     }
 
 
+# Read-only dashboard metrics; this endpoint never starts simulations or tasks.
+@app.get("/api/system/metrics")
+@limiter.limit("60/minute")
+async def dashboard_metrics(request: Request):
+    """Read counters on the same event loop that owns simulation/cache writes.
+
+    No await occurs during collection: a completing simulation cannot resize
+    its cache while the snapshot is being assembled in a worker thread.
+    """
+    from src.observability.dashboard_metrics import collect_dashboard_metrics
+
+    return collect_dashboard_metrics()
+
+
 # Compatibility alias for Docker healthcheck (docker-compose points to /api/health)
 @app.get("/api/health")
 @limiter.limit("300/minute")

@@ -16,6 +16,8 @@ GPT-4 remains an enum member for callers that store its name, but the existing
 availability gate now refuses to select it, including when explicitly preferred.
 Existing available fallback models are used instead. This does not introduce a
 new provider or select a newer model on the owner's behalf.
+The mathematical fallback chain now uses the already-available GPT-4o entry
+in place of GPT-4, preserving fallback when both Anthropic entries fail.
 
 **GPT-4o must be migrated or disabled before 2027-01-14.** That date precedes
 the next 90-day freshness deadline. The current boolean catalog does not

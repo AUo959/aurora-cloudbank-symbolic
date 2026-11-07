@@ -217,6 +217,29 @@ class TestUnifiedAIInterface:
         assert interface.CAPABILITIES[selected].available is True
 
     @pytest.mark.asyncio
+    async def test_mathematical_request_survives_anthropic_failure(self):
+        """Retiring GPT-4 must preserve the available OpenAI fallback."""
+        interface = UnifiedAIInterface()
+        interface._budget = None
+        expected = AIResponse(
+            content="42", model_used=AIModel.GPT_4O, provider=AIProvider.OPENAI,
+            tokens_used=5, latency_ms=10,
+        )
+        with (
+            patch.object(interface, "_execute_anthropic", new_callable=AsyncMock) as anthropic,
+            patch.object(interface, "_execute_openai", new_callable=AsyncMock) as openai,
+            patch("modules.ai_core.unified_ai_interface.asyncio.sleep", new_callable=AsyncMock),
+        ):
+            anthropic.side_effect = RuntimeError("provider unavailable")
+            openai.return_value = expected
+            request = AIRequest(prompt="calculate")
+            result = await interface.execute_request(request, task_type="mathematical")
+        assert result.success is True
+        assert result.model_used is AIModel.GPT_4O
+        assert anthropic.await_count == 2
+        openai.assert_awaited_once_with(request, AIModel.GPT_4O)
+
+    @pytest.mark.asyncio
     async def test_unavailable_model_cannot_be_selected(self):
         """An available=False model is never returned by the public selector,
         even when requested explicitly as the preference."""

@@ -271,7 +271,7 @@ class UnifiedAIInterface:
             AIModel.CLAUDE_OPUS_5,
             AIModel.CLAUDE_SONNET_5,
             AIModel.GPT_5,
-            AIModel.GPT_4,
+            AIModel.GPT_4O,
         ],
         "general": [
             AIModel.GPT_4O,

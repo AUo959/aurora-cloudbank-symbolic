@@ -17,8 +17,12 @@ def test_dashboard_snapshot_reads_counters_and_marks_unknowns(monkeypatch):
     )
     monkeypatch.setattr(metrics, "get_all_crew_agents", lambda: {"test": agent})
     monkeypatch.setattr(metrics, "active_simulations", {
-        "running": SimpleNamespace(status="running"), "done": SimpleNamespace(status="completed")
+        "running": SimpleNamespace(status="running")
     })
+    monkeypatch.setattr(metrics, "get_cache", lambda: SimpleNamespace(
+        max_cache_size=1000,
+        list_scenarios=lambda limit: [SimpleNamespace(simulation_id="done")],
+    ))
     monkeypatch.setattr(metrics, "get_pusher", lambda: SimpleNamespace(
         get_metrics=lambda: {"request_count": 8, "avg_latency_ms": 12.5}
     ))
@@ -37,6 +41,10 @@ def test_dashboard_snapshot_reads_counters_and_marks_unknowns(monkeypatch):
     assert result["system"]["average_response_time_ms"] == 12.5
     assert result["system"]["cpu_usage"] == 17.0
     assert result["system"]["memory_usage"] == 42.0
+
+    # Completion removes the running entry but retains its cached result.
+    monkeypatch.setattr(metrics, "active_simulations", {})
+    assert metrics.collect_dashboard_metrics()["quantum"]["total_simulations"] == 1
 
 
 @pytest.mark.api

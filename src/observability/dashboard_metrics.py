@@ -5,6 +5,7 @@ import psutil
 
 from modules.aumemmanager.api_integration import memory_manager
 from modules.quantum_simulator.api import active_simulations
+from modules.quantum_simulator.scenario_cache import get_cache
 from src.agents.crew.base_agent import get_all_crew_agents
 from src.monitoring.metrics_pusher import get_pusher
 
@@ -15,6 +16,10 @@ def collect_dashboard_metrics() -> dict:
     agents = list(get_all_crew_agents().values())
     request_metrics = get_pusher().get_metrics()
     simulations = list(active_simulations.values())
+    cache = get_cache()
+    retained_ids = set(active_simulations).union(
+        item.simulation_id for item in cache.list_scenarios(limit=cache.max_cache_size)
+    )
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "memory": {
@@ -24,7 +29,7 @@ def collect_dashboard_metrics() -> dict:
         } | {"cache_hit_rate": None},
         "quantum": {
             "simulations_running": sum(item.status in ("running", "pending") for item in simulations),
-            "total_simulations": len(simulations),
+            "total_simulations": len(retained_ids),
             "average_speedup": None,
         },
         "agents": {

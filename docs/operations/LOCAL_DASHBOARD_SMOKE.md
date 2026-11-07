@@ -20,6 +20,10 @@ crew-agent runtime registry, psutil resource observations, and the existing
 60-second HTTP metrics window. Counts are process-local, not persistent or
 cross-worker totals. Registry counts describe initialized runtime agents, not
 a canon personnel census.
+Simulation totals count unique active IDs plus unexpired retained results in
+the scenario cache (normally 24 hours, bounded by the configured cache size).
+They are not an all-time execution count; completed runs remain represented
+after leaving the active registry until their results expire or are evicted.
 
 Unmeasured `memory.cache_hit_rate` and `quantum.average_speedup` are `null`.
 Response latency is `null` before request samples exist. The UI labels them

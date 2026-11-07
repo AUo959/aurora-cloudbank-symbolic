@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Re-verify the AI model catalog against provider documentation (2026-11-07),
+  disable the shut-down GPT-4 alias, correct Sonnet 5/GPT-4o input pricing and
+  GPT output ceilings, and document GPT-4o's scheduled 2027-01-14 shutdown.
+
 ## [2.2.5] - 2026-06-20
 
 ### 🧠 QGIA INTEGRATION BUNDLE — Stage 1 + Stage 2

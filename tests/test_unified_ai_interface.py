@@ -204,7 +204,17 @@ class TestUnifiedAIInterface:
         sonnet = interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5]
         assert sonnet.context_window == 1_000_000
         assert sonnet.max_output_tokens == 128_000
-        assert sonnet.cost_per_1k_tokens == 0.003
+        assert sonnet.cost_per_1k_tokens == 0.002
+
+    @pytest.mark.asyncio
+    async def test_shutdown_gpt4_preference_uses_available_fallback(self):
+        """The retired GPT-4 alias must not be sent to a provider."""
+        interface = UnifiedAIInterface()
+        assert interface.CAPABILITIES[AIModel.GPT_4].available is False
+        request = AIRequest(prompt="test", model_preference=AIModel.GPT_4)
+        selected = await interface.select_optimal_model(request)
+        assert selected is not AIModel.GPT_4
+        assert interface.CAPABILITIES[selected].available is True
 
     @pytest.mark.asyncio
     async def test_unavailable_model_cannot_be_selected(self):

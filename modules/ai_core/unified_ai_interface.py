@@ -31,7 +31,8 @@ class AIProvider(Enum):
 class AIModel(Enum):
     """Supported AI models with version tracking.
 
-    Catalog reconciliation: 2026-07-25 (Anthropic entries).
+    Catalog reconciliation: 2026-11-07 (published provider documentation).
+    Sources and lifecycle notes: docs/MODEL_CATALOG_VERIFICATION_2026-11-07.md.
 
     Identifiers tagged "UNVERIFIED placeholder" below are aspirational and are
     NOT confirmed against the provider's live catalog. They are gated by
@@ -40,9 +41,9 @@ class AIModel(Enum):
     a live identifier only after confirming it against the provider catalog and
     flipping its ``available`` flag in the same change.
 
-    A "Verified live" tag means the identifier was checked against the
-    provider's own catalog on the reconciliation date above — not that it was
-    once believed correct. The previous Claude entries violated that rule: a
+    A "Published catalog" tag means the identifier was checked against the
+    provider's documentation; it does not establish account-specific API access.
+    The previous Claude entries violated that rule: a
     retired identifier (``claude-3-5-sonnet-20241022``, retired 2025-10-28)
     carried the tag while being the only selectable Anthropic model, and the
     gated entry (``claude-4-5-opus-20250115``) named a release that never
@@ -51,14 +52,14 @@ class AIModel(Enum):
     written.
     """
 
-    # Claude family — verified against the Anthropic catalog on 2026-07-25
-    CLAUDE_OPUS_5 = "claude-opus-5"  # Verified live
-    CLAUDE_SONNET_5 = "claude-sonnet-5"  # Verified live
+    # Claude family — published catalog checked on 2026-11-07
+    CLAUDE_OPUS_5 = "claude-opus-5"  # Published catalog: active legacy model
+    CLAUDE_SONNET_5 = "claude-sonnet-5"  # Published catalog: active legacy model
 
     # GPT family
-    GPT_4 = "gpt-4"  # Verified live
+    GPT_4 = "gpt-4"  # Shut down 2026-10-23; available=False
     GPT_4_TURBO = "gpt-4-turbo-preview"  # Defined but no capability profile -> not selectable
-    GPT_4O = "gpt-4o"  # Verified live
+    GPT_4O = "gpt-4o"  # Deprecated; scheduled shutdown 2027-01-14
     GPT_5 = "gpt-5"  # UNVERIFIED placeholder (available=False)
     GPT_5_CODEX = "gpt-5-codex"  # UNVERIFIED placeholder (available=False)
 
@@ -149,7 +150,9 @@ class UnifiedAIInterface:
     - DLP-compliant request/response tracking
     """
 
-    # Model capabilities registry
+    # Model capabilities registry. cost_per_1k_tokens is the standard uncached
+    # input-token price; output/tool costs and latency/strength estimates are
+    # not verified by these published-catalog claims. See the source receipt.
     CAPABILITIES: Dict[AIModel, ModelCapabilities] = {
         AIModel.CLAUDE_OPUS_5: ModelCapabilities(
             model=AIModel.CLAUDE_OPUS_5,
@@ -164,8 +167,8 @@ class UnifiedAIInterface:
             mathematical_strength=10,
             cost_per_1k_tokens=0.005,  # $5 / 1M input tokens
             latency_avg_ms=1200,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.CLAUDE_SONNET_5: ModelCapabilities(
             model=AIModel.CLAUDE_SONNET_5,
@@ -178,39 +181,40 @@ class UnifiedAIInterface:
             reasoning_strength=9,
             code_generation_strength=9,
             mathematical_strength=9,
-            cost_per_1k_tokens=0.003,  # $3 / 1M input tokens
+            cost_per_1k_tokens=0.002,  # $2 / 1M input tokens
             latency_avg_ms=800,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.GPT_4: ModelCapabilities(
             model=AIModel.GPT_4,
             provider=AIProvider.OPENAI,
             context_window=8192,
-            max_output_tokens=4096,
+            max_output_tokens=8192,
             supports_function_calling=True,
             reasoning_strength=8,
             code_generation_strength=7,
             mathematical_strength=8,
             cost_per_1k_tokens=0.03,
             latency_avg_ms=1500,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            available=False,  # Provider shut down gpt-4 on 2026-10-23.
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.GPT_4O: ModelCapabilities(
             model=AIModel.GPT_4O,
             provider=AIProvider.OPENAI,
             context_window=128_000,
-            max_output_tokens=4096,
+            max_output_tokens=16_384,
             supports_function_calling=True,
             supports_vision=True,
             reasoning_strength=9,
             code_generation_strength=8,
             mathematical_strength=8,
-            cost_per_1k_tokens=0.005,
+            cost_per_1k_tokens=0.0025,  # $2.50 / 1M input tokens
             latency_avg_ms=600,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.GPT_5: ModelCapabilities(
             model=AIModel.GPT_5,

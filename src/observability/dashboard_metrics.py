@@ -13,7 +13,7 @@ def collect_dashboard_metrics() -> dict:
     """Return live counters, with null for measurements we do not collect."""
     memory = memory_manager.get_metrics()
     agents = list(get_all_crew_agents().values())
-    requests = get_pusher().get_metrics()
+    request_metrics = get_pusher().get_metrics()
     simulations = list(active_simulations.values())
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -39,8 +39,8 @@ def collect_dashboard_metrics() -> dict:
         "system": {
             "cpu_usage": psutil.cpu_percent(interval=None),
             "memory_usage": psutil.virtual_memory().percent,
-            "api_requests_per_minute": int(requests.get("request_count", 0)),
-            "average_response_time_ms": requests.get("avg_latency_ms"),
+            "api_requests_per_minute": int(request_metrics.get("request_count", 0)),
+            "average_response_time_ms": request_metrics.get("avg_latency_ms"),
         },
         "context_tag": "dashboard_metrics_snapshot",
     }

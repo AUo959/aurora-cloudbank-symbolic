@@ -7,6 +7,9 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      // Monaco's relative sanitizer import otherwise bypasses npm overrides.
+      // This alias applies in development dependency optimization and builds.
+      './dompurify/dompurify.js': path.resolve(__dirname, './node_modules/dompurify/dist/purify.es.mjs'),
       '@': path.resolve(__dirname, './src'),
       '@/components': path.resolve(__dirname, './src/components'),
       '@/features': path.resolve(__dirname, './src/features'),

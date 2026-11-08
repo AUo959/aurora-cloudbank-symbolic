@@ -11,7 +11,7 @@ import path from 'node:path';
 for (const fragments of [
   ['$', '{probe()}'],
   ['{', '{probe}', '}'],
-  ['<', '%probe()%>'],
+  ['<', '%', 'probe()', '%', '>'],
 ]) {
   test(`shadow-root template fragments are scrubbed: ${fragments.join('')}`, () => {
     const { window } = new JSDOM('');

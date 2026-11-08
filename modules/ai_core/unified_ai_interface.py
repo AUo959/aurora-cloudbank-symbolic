@@ -460,15 +460,7 @@ class UnifiedAIInterface:
             else:
                 raise ValueError(f"Unknown provider: {caps.provider}")
 
-            # Record billed usage, including incomplete responses.
-            if self._budget is not None and response.tokens_used > 0:
-                self._budget.record_usage(
-                    user_id=request.user_id,
-                    tokens_used=response.tokens_used,
-                    context_tag=request.context_tag,
-                )
-
-            return response
+            return self._finalize_response(request, response)
 
         except TokenBudgetExceededError:
             # Budget errors indicate limits are reached, not transient failures.
@@ -503,15 +495,7 @@ class UnifiedAIInterface:
                     else:
                         continue
 
-                    # Record billed usage even if the fallback exhausted its output budget.
-                    if self._budget is not None and response.tokens_used > 0:
-                        self._budget.record_usage(
-                            user_id=request.user_id,
-                            tokens_used=response.tokens_used,
-                            context_tag=request.context_tag,
-                        )
-
-                    return response
+                    return self._finalize_response(request, response)
 
                 except TokenBudgetExceededError:
                     raise
@@ -531,6 +515,20 @@ class UnifiedAIInterface:
                 error=f"All models failed. Last error: {str(e)}",
                 context_tag=request.context_tag,
             )
+
+    def _finalize_response(self, request: AIRequest, response: AIResponse) -> AIResponse:
+        """Account for billed output before returning or entering provider fallback."""
+        if self._budget is not None and response.tokens_used > 0:
+            self._budget.record_usage(
+                user_id=request.user_id,
+                tokens_used=response.tokens_used,
+                context_tag=request.context_tag,
+            )
+        # A failed Responses result is a provider failure, even on HTTP 200.
+        # Incomplete output remains visible to callers without a billed retry.
+        if not response.success and response.metadata.get("finish_reason") == "failed":
+            raise RuntimeError(response.error or "OpenAI response failed")
+        return response
 
     async def _execute_anthropic(self, request: AIRequest, model: AIModel) -> AIResponse:
         """Execute request using Anthropic API"""

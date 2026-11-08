@@ -116,3 +116,26 @@ async def test_incomplete_output_still_counts_toward_token_budget():
     assert not result.success
     interface._budget.record_usage.assert_called_once_with(
         user_id='anonymous', tokens_used=100, context_tag='aurora_ai_request')
+
+
+@pytest.mark.asyncio
+async def test_failed_responses_result_falls_back_after_accounting_for_usage():
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+    from modules.ai_core.unified_ai_interface import AIProvider, AIResponse
+    interface = UnifiedAIInterface()
+    interface._budget = MagicMock()
+    interface.openai_client = AsyncMock()
+    interface.openai_client.responses.create.return_value = SimpleNamespace(
+        id='resp_failed', status='failed', output=[], output_text='',
+        usage=SimpleNamespace(input_tokens=3, output_tokens=0, total_tokens=3))
+    expected = AIResponse(content='Recovered', model_used=AIModel.CLAUDE_SONNET_5,
+                          provider=AIProvider.ANTHROPIC, tokens_used=5, latency_ms=1)
+    with (
+        patch.object(interface, '_execute_anthropic', AsyncMock(return_value=expected)) as fallback,
+        patch('modules.ai_core.unified_ai_interface.asyncio.sleep', AsyncMock()),
+    ):
+        result = await interface.execute_request(AIRequest(prompt='test'))
+    assert result is expected
+    fallback.assert_awaited_once()
+    assert [call.kwargs['tokens_used'] for call in interface._budget.record_usage.call_args_list] == [3, 5]

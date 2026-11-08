@@ -68,11 +68,11 @@ No paid provider inference or account entitlement is claimed by those tests.
 
 ## Official sources
 
-- https://developers.openai.com/api/docs/models.md
-- https://developers.openai.com/api/docs/models/gpt-6.1-sol.md
-- https://developers.openai.com/api/docs/models/gpt-6-astra.md
-- https://developers.openai.com/api/docs/guides/latest-model.md
-- https://developers.openai.com/api/docs/deprecations
+- <https://developers.openai.com/api/docs/models.md>
+- <https://developers.openai.com/api/docs/models/gpt-6.1-sol.md>
+- <https://developers.openai.com/api/docs/models/gpt-6-astra.md>
+- <https://developers.openai.com/api/docs/guides/latest-model.md>
+- <https://developers.openai.com/api/docs/deprecations>
 
 The previous dated catalog receipt is historical; this document supersedes its
 GPT-4o routing decision. Source byte digests are recorded below.

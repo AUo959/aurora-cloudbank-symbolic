@@ -152,3 +152,23 @@ async def test_astra_requires_explicit_selection_when_other_models_are_disabled(
         prompt='test', model_preference=AIModel.GPT_6_ASTRA)) is AIModel.GPT_6_ASTRA
     assert await interface.select_optimal_model(AIRequest(
         prompt='test', fallback_chain=[AIModel.GPT_6_ASTRA])) is AIModel.GPT_6_ASTRA
+
+
+@pytest.mark.asyncio
+async def test_billed_failure_rechecks_remaining_budget_before_fallback():
+    from types import SimpleNamespace
+    from modules.ai_core.token_budget import TokenBudget, TokenBudgetExceededError
+    interface = UnifiedAIInterface()
+    interface._budget = TokenBudget(limits={'max_per_user_hour': 100})
+    interface.openai_client = AsyncMock()
+    interface.openai_client.responses.create.return_value = SimpleNamespace(
+        id='resp_failed', status='failed', output=[], output_text='',
+        usage=SimpleNamespace(input_tokens=30, output_tokens=0, total_tokens=30))
+    with (
+        patch.object(interface, '_execute_anthropic', AsyncMock()) as fallback,
+        patch('modules.ai_core.unified_ai_interface.asyncio.sleep', AsyncMock()),
+    ):
+        with pytest.raises(TokenBudgetExceededError):
+            await interface.execute_request(AIRequest(prompt='test', max_tokens=80))
+    interface.openai_client.responses.create.assert_awaited_once()
+    fallback.assert_not_awaited()

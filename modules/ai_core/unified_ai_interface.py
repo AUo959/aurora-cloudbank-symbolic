@@ -487,6 +487,12 @@ class UnifiedAIInterface:
                     await asyncio.sleep(0.5 * (2 ** (attempt - 1)))
 
                 try:
+                    if self._budget is not None:
+                        self._budget.check_pre_call(
+                            user_id=request.user_id,
+                            max_tokens_requested=request.max_tokens,
+                            context_tag=request.context_tag,
+                        )
                     logger.info(f"Trying fallback model: {fallback_model.value}")
                     if fallback_caps.provider == AIProvider.ANTHROPIC:
                         response = await self._execute_anthropic(request, fallback_model)

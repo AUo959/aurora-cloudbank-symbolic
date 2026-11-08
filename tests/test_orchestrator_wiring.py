@@ -243,3 +243,23 @@ def test_hybrid_orchestrator_disposition_in_docstring():
     from modules.nexus.quantum import hybrid_orchestrator
     assert "DISPOSITION" in hybrid_orchestrator.__doc__
     assert "wired" in hybrid_orchestrator.__doc__.lower()
+
+
+@pytest.mark.integration
+@pytest.mark.ai
+@pytest.mark.parametrize('model', ['gpt-6.1-sol', 'gpt-6-astra'])
+def test_ai_complete_forwards_current_openai_preference(client, model):
+    from modules.ai_core.unified_ai_interface import AIModel, AIProvider, AIResponse
+    response = AIResponse(content='Ready', model_used=AIModel(model),
+                          provider=AIProvider.OPENAI, tokens_used=20, latency_ms=1)
+    ai = MagicMock()
+    ai.execute_request = AsyncMock(return_value=response)
+    with patch('api.aurora_api._get_unified_ai', return_value=ai):
+        result = client.post('/api/ai/complete', json={
+            'prompt': 'Hello', 'model_preference': model, 'reasoning_effort': 'high',
+        }, headers=_auth_headers())
+    assert result.status_code == 200
+    assert result.json()['model_used'] == model
+    forwarded = ai.execute_request.call_args.args[0]
+    assert forwarded.model_preference is AIModel(model)
+    assert forwarded.reasoning_effort == 'high'

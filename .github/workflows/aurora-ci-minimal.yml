@@ -101,7 +101,7 @@ jobs:
             echo "No target directories found for syntax check" && exit 0
           fi
           flake8 $paths --count --select=E9,F63,F7,F82 --show-source --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,.security/*
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv
 
       # STYLE CHECKS - informational only, allowed to fail
       - name: Code style check (informational)
@@ -115,8 +115,8 @@ jobs:
           if [ -z "$paths" ]; then
             echo "No target directories found for style check" && exit 0
           fi
-          flake8 $paths --count --max-complexity=10 --max-line-length=127 --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,.security/*
+          flake8 $paths --count --max-complexity=10 --max-line-length=120 --statistics \
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv
 
       # OPAL2 LANDING GATE - must pass, fail closed
       - name: Run OPAL2 standalone foundry tests
@@ -201,3 +201,19 @@ jobs:
           path: pytest-full.log
           retention-days: 30
           if-no-files-found: ignore
+
+      - name: Record exact-checkout verification
+        if: always()
+        env:
+          CI_RESULT: ${{ job.status }}
+          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python scripts/ci_verification.py record
+
+      - name: Upload exact-checkout verification
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: ci-verification-${{ github.run_attempt }}
+          path: ci-verification.json
+          retention-days: 7
+          if-no-files-found: error

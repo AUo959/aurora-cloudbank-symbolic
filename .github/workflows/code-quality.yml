@@ -4,43 +4,34 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+      - 'LICENSE'
   pull_request:
     branches:
       - main
 
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   code_quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-
-      - name: Install linting tools
-        run: pip install flake8
-
-      - name: Syntax errors (fail closed)
-        run: |
-          paths=""
-          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager modules/nexus modules/opal2; do
-            [ -d "$d" ] && paths="$paths $d"
-          done
-          [ -z "$paths" ] && echo "No target directories" && exit 0
-          flake8 $paths --count --select=E9,F63,F7,F82 --show-source --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build
-
-      - name: Style and complexity (informational)
-        continue-on-error: true
-        run: |
-          paths=""
-          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager modules/nexus modules/opal2; do
-            [ -d "$d" ] && paths="$paths $d"
-          done
-          [ -z "$paths" ] && echo "No target directories" && exit 0
-          flake8 $paths --count --max-complexity=10 --max-line-length=120 --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build
+      - name: Verify canonical syntax, style and test result
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python scripts/ci_verification.py wait

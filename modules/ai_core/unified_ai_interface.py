@@ -3,7 +3,7 @@ Unified AI Interface for Aurora CloudBank Symbolic
 
 Multi-model AI abstraction layer supporting:
 - Claude Opus 5, Claude Sonnet 5
-- GPT-4, GPT-4o, GPT-5 (Codex)
+- GPT-6.1 Sol and GPT-6 Astra through the Responses API
 - Intelligent fallback chains
 - Runtime model selection
 - Performance tracking and optimization
@@ -31,7 +31,8 @@ class AIProvider(Enum):
 class AIModel(Enum):
     """Supported AI models with version tracking.
 
-    Catalog reconciliation: 2026-07-25 (Anthropic entries).
+    Catalog reconciliation: 2026-11-07 (published provider documentation).
+    Sources and lifecycle notes: docs/MODEL_CATALOG_VERIFICATION_2026-11-07.md.
 
     Identifiers tagged "UNVERIFIED placeholder" below are aspirational and are
     NOT confirmed against the provider's live catalog. They are gated by
@@ -40,9 +41,9 @@ class AIModel(Enum):
     a live identifier only after confirming it against the provider catalog and
     flipping its ``available`` flag in the same change.
 
-    A "Verified live" tag means the identifier was checked against the
-    provider's own catalog on the reconciliation date above — not that it was
-    once believed correct. The previous Claude entries violated that rule: a
+    A "Published catalog" tag means the identifier was checked against the
+    provider's documentation; it does not establish account-specific API access.
+    The previous Claude entries violated that rule: a
     retired identifier (``claude-3-5-sonnet-20241022``, retired 2025-10-28)
     carried the tag while being the only selectable Anthropic model, and the
     gated entry (``claude-4-5-opus-20250115``) named a release that never
@@ -51,14 +52,16 @@ class AIModel(Enum):
     written.
     """
 
-    # Claude family — verified against the Anthropic catalog on 2026-07-25
-    CLAUDE_OPUS_5 = "claude-opus-5"  # Verified live
-    CLAUDE_SONNET_5 = "claude-sonnet-5"  # Verified live
+    # Claude family — published catalog checked on 2026-11-07
+    CLAUDE_OPUS_5 = "claude-opus-5"  # Published catalog: active legacy model
+    CLAUDE_SONNET_5 = "claude-sonnet-5"  # Published catalog: active legacy model
 
-    # GPT family
-    GPT_4 = "gpt-4"  # Verified live
+    # GPT family — current direct OpenAI models
+    GPT_6_1_SOL = "gpt-6.1-sol"  # Published catalog: 2026-11-08
+    GPT_6_ASTRA = "gpt-6-astra"  # Published catalog: 2026-11-08
+    GPT_4 = "gpt-4"  # Shut down 2026-10-23; available=False
     GPT_4_TURBO = "gpt-4-turbo-preview"  # Defined but no capability profile -> not selectable
-    GPT_4O = "gpt-4o"  # Verified live
+    GPT_4O = "gpt-4o"  # Legacy identifier; disabled after migration
     GPT_5 = "gpt-5"  # UNVERIFIED placeholder (available=False)
     GPT_5_CODEX = "gpt-5-codex"  # UNVERIFIED placeholder (available=False)
 
@@ -118,6 +121,7 @@ class AIRequest:
     safety_level: str = "high"
     stream: bool = False
     user_id: str = "anonymous"
+    reasoning_effort: str = "medium"
 
 
 @dataclass
@@ -149,7 +153,9 @@ class UnifiedAIInterface:
     - DLP-compliant request/response tracking
     """
 
-    # Model capabilities registry
+    # Model capabilities registry. cost_per_1k_tokens is the standard uncached
+    # input-token price; output/tool costs and latency/strength estimates are
+    # not verified by these published-catalog claims. See the source receipt.
     CAPABILITIES: Dict[AIModel, ModelCapabilities] = {
         AIModel.CLAUDE_OPUS_5: ModelCapabilities(
             model=AIModel.CLAUDE_OPUS_5,
@@ -164,8 +170,8 @@ class UnifiedAIInterface:
             mathematical_strength=10,
             cost_per_1k_tokens=0.005,  # $5 / 1M input tokens
             latency_avg_ms=1200,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.CLAUDE_SONNET_5: ModelCapabilities(
             model=AIModel.CLAUDE_SONNET_5,
@@ -178,39 +184,69 @@ class UnifiedAIInterface:
             reasoning_strength=9,
             code_generation_strength=9,
             mathematical_strength=9,
-            cost_per_1k_tokens=0.003,  # $3 / 1M input tokens
+            cost_per_1k_tokens=0.002,  # $2 / 1M input tokens
             latency_avg_ms=800,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
+        ),
+        AIModel.GPT_6_1_SOL: ModelCapabilities(
+            model=AIModel.GPT_6_1_SOL,
+            provider=AIProvider.OPENAI,
+            context_window=1_050_000,
+            max_output_tokens=128_000,
+            supports_function_calling=True,
+            supports_vision=True,
+            reasoning_strength=10,
+            code_generation_strength=10,
+            mathematical_strength=10,
+            cost_per_1k_tokens=0.002,  # Standard uncached input; long-context surcharges apply.
+            verified_on="2026-11-08",
+            verified_source="pricing-docs",
+        ),
+        AIModel.GPT_6_ASTRA: ModelCapabilities(
+            model=AIModel.GPT_6_ASTRA,
+            provider=AIProvider.OPENAI,
+            context_window=1_050_000,
+            max_output_tokens=128_000,
+            supports_function_calling=True,
+            supports_vision=True,
+            reasoning_strength=10,
+            code_generation_strength=10,
+            mathematical_strength=10,
+            cost_per_1k_tokens=0.01,  # Standard uncached input; long-context surcharges apply.
+            verified_on="2026-11-08",
+            verified_source="pricing-docs",
         ),
         AIModel.GPT_4: ModelCapabilities(
             model=AIModel.GPT_4,
             provider=AIProvider.OPENAI,
             context_window=8192,
-            max_output_tokens=4096,
+            max_output_tokens=8192,
             supports_function_calling=True,
             reasoning_strength=8,
             code_generation_strength=7,
             mathematical_strength=8,
             cost_per_1k_tokens=0.03,
             latency_avg_ms=1500,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            available=False,  # Provider shut down gpt-4 on 2026-10-23.
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.GPT_4O: ModelCapabilities(
             model=AIModel.GPT_4O,
             provider=AIProvider.OPENAI,
             context_window=128_000,
-            max_output_tokens=4096,
+            max_output_tokens=16_384,
             supports_function_calling=True,
             supports_vision=True,
             reasoning_strength=9,
             code_generation_strength=8,
             mathematical_strength=8,
-            cost_per_1k_tokens=0.005,
+            cost_per_1k_tokens=0.0025,  # Historical $2.50 / 1M input tokens
             latency_avg_ms=600,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            available=False,  # Migrated to GPT-6.1 Sol before retirement.
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.GPT_5: ModelCapabilities(
             model=AIModel.GPT_5,
@@ -250,31 +286,10 @@ class UnifiedAIInterface:
 
     # Default fallback chains for different task types
     FALLBACK_CHAINS = {
-        "reasoning": [
-            AIModel.CLAUDE_OPUS_5,
-            AIModel.GPT_5,
-            AIModel.CLAUDE_SONNET_5,
-            AIModel.GPT_4O,
-        ],
-        "code_generation": [
-            AIModel.GPT_5_CODEX,
-            AIModel.GPT_5,
-            AIModel.CLAUDE_OPUS_5,
-            AIModel.CLAUDE_SONNET_5,
-            AIModel.GPT_4O,
-        ],
-        "mathematical": [
-            AIModel.CLAUDE_OPUS_5,
-            AIModel.CLAUDE_SONNET_5,
-            AIModel.GPT_5,
-            AIModel.GPT_4,
-        ],
-        "general": [
-            AIModel.GPT_4O,
-            AIModel.CLAUDE_SONNET_5,
-            AIModel.GPT_5,
-            AIModel.CLAUDE_OPUS_5,
-        ],
+        "reasoning": [AIModel.CLAUDE_OPUS_5, AIModel.GPT_6_1_SOL, AIModel.CLAUDE_SONNET_5],
+        "code_generation": [AIModel.GPT_6_1_SOL, AIModel.CLAUDE_OPUS_5, AIModel.CLAUDE_SONNET_5],
+        "mathematical": [AIModel.CLAUDE_OPUS_5, AIModel.CLAUDE_SONNET_5, AIModel.GPT_6_1_SOL],
+        "general": [AIModel.GPT_6_1_SOL, AIModel.CLAUDE_SONNET_5, AIModel.CLAUDE_OPUS_5],
     }
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -350,7 +365,7 @@ class UnifiedAIInterface:
             _MAX_RETRIES = 2
 
             self.openai_client = openai.AsyncOpenAI(
-                api_key=self.config.get("openai_api_key", ""),
+                api_key=self.config.get("openai_api_key") or os.environ.get("OPENAI_API_KEY"),
                 timeout=_TIMEOUT,
                 max_retries=_MAX_RETRIES,
             )
@@ -401,9 +416,9 @@ class UnifiedAIInterface:
             if caps and caps.available:
                 return model
 
-        # Final fallback to any available model
+        # Astra is opt-in, including when all ordinary defaults are disabled.
         for model, caps in self.CAPABILITIES.items():
-            if caps.available:
+            if caps.available and model is not AIModel.GPT_6_ASTRA:
                 return model
 
         raise RuntimeError("No AI models available")
@@ -445,15 +460,7 @@ class UnifiedAIInterface:
             else:
                 raise ValueError(f"Unknown provider: {caps.provider}")
 
-            # Record actual usage after a successful call
-            if self._budget is not None and response.success:
-                self._budget.record_usage(
-                    user_id=request.user_id,
-                    tokens_used=response.tokens_used,
-                    context_tag=request.context_tag,
-                )
-
-            return response
+            return self._finalize_response(request, response)
 
         except TokenBudgetExceededError:
             # Budget errors indicate limits are reached, not transient failures.
@@ -480,6 +487,12 @@ class UnifiedAIInterface:
                     await asyncio.sleep(0.5 * (2 ** (attempt - 1)))
 
                 try:
+                    if self._budget is not None:
+                        self._budget.check_pre_call(
+                            user_id=request.user_id,
+                            max_tokens_requested=request.max_tokens,
+                            context_tag=request.context_tag,
+                        )
                     logger.info(f"Trying fallback model: {fallback_model.value}")
                     if fallback_caps.provider == AIProvider.ANTHROPIC:
                         response = await self._execute_anthropic(request, fallback_model)
@@ -488,15 +501,7 @@ class UnifiedAIInterface:
                     else:
                         continue
 
-                    # Record actual usage for the successful fallback call
-                    if self._budget is not None and response.success:
-                        self._budget.record_usage(
-                            user_id=request.user_id,
-                            tokens_used=response.tokens_used,
-                            context_tag=request.context_tag,
-                        )
-
-                    return response
+                    return self._finalize_response(request, response)
 
                 except TokenBudgetExceededError:
                     raise
@@ -517,6 +522,20 @@ class UnifiedAIInterface:
                 context_tag=request.context_tag,
             )
 
+    def _finalize_response(self, request: AIRequest, response: AIResponse) -> AIResponse:
+        """Account for billed output before returning or entering provider fallback."""
+        if self._budget is not None and response.tokens_used > 0:
+            self._budget.record_usage(
+                user_id=request.user_id,
+                tokens_used=response.tokens_used,
+                context_tag=request.context_tag,
+            )
+        # A failed Responses result is a provider failure, even on HTTP 200.
+        # Incomplete output remains visible to callers without a billed retry.
+        if not response.success and response.metadata.get("finish_reason") == "failed":
+            raise RuntimeError(response.error or "OpenAI response failed")
+        return response
+
     async def _execute_anthropic(self, request: AIRequest, model: AIModel) -> AIResponse:
         """Execute request using Anthropic API"""
         if not self.anthropic_client:
@@ -532,7 +551,8 @@ class UnifiedAIInterface:
         # request that carries any of them. They are also absent from the
         # anthropic 1.x `messages.create()` signature, so passing them raises
         # TypeError there before a request is even made. `AIRequest.temperature`
-        # and `.top_p` are retained because `_execute_openai` still uses them.
+        # and `.top_p` remain compatibility fields; reasoning OpenAI models
+        # also omit them.
         response = await self.anthropic_client.messages.create(
             model=model.value,
             max_tokens=request.max_tokens,
@@ -563,39 +583,54 @@ class UnifiedAIInterface:
 
         start_time = asyncio.get_event_loop().time()
 
-        messages = []
-        if request.system_prompt:
-            messages.append({"role": "system", "content": request.system_prompt})
-        messages.append({"role": "user", "content": request.prompt})
+        if request.stream:
+            raise ValueError("Unified AIResponse requires stream=False")
+        caps = self.CAPABILITIES[model]
+        if not 1 <= request.max_tokens <= caps.max_output_tokens:
+            raise ValueError("max_tokens exceeds the model output limit")
 
         kwargs = {
             "model": model.value,
-            "messages": messages,
-            "max_tokens": request.max_tokens,
-            "temperature": request.temperature,
-            "top_p": request.top_p,
+            "input": [{"role": "user", "content": request.prompt}],
+            "max_output_tokens": request.max_tokens,
+            "store": False,
         }
-
+        if request.system_prompt:
+            kwargs["instructions"] = request.system_prompt
+        if model in (AIModel.GPT_6_1_SOL, AIModel.GPT_6_ASTRA):
+            if request.reasoning_effort not in {"low", "medium", "high", "xhigh", "max"}:
+                raise ValueError("Unsupported reasoning effort")
+            kwargs["reasoning"] = {"effort": request.reasoning_effort}
         if request.functions:
-            kwargs["tools"] = [
-                {"type": "function", "function": func} for func in request.functions
-            ]
+            # Responses uses flat function definitions, unlike Chat Completions.
+            kwargs["tools"] = [{"type": "function", "strict": False, **func} for func in request.functions]
 
-        response = await self.openai_client.chat.completions.create(**kwargs)
-
+        response = await self.openai_client.responses.create(**kwargs)
         latency = (asyncio.get_event_loop().time() - start_time) * 1000
-
+        calls = [
+            {
+                "id": item.call_id,
+                "type": "function",
+                "function": {"name": item.name, "arguments": item.arguments},
+            }
+            for item in response.output if item.type == "function_call"
+        ]
+        success = response.status == "completed"
         return AIResponse(
-            content=response.choices[0].message.content or "",
+            content=response.output_text,
             model_used=model,
             provider=AIProvider.OPENAI,
-            tokens_used=response.usage.total_tokens,
+            tokens_used=response.usage.total_tokens if response.usage else 0,
             latency_ms=latency,
+            success=success,
+            error=None if success else f"OpenAI response status: {response.status}",
+            function_calls=calls or None,
             context_tag=request.context_tag,
             metadata={
-                "input_tokens": response.usage.prompt_tokens,
-                "output_tokens": response.usage.completion_tokens,
-                "finish_reason": response.choices[0].finish_reason,
+                "input_tokens": response.usage.input_tokens if response.usage else 0,
+                "output_tokens": response.usage.output_tokens if response.usage else 0,
+                "finish_reason": response.status,
+                "response_id": response.id,
             },
         )
 

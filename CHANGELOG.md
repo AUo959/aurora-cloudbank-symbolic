@@ -1,11 +1,22 @@
 # Changelog
 
+Current OpenAI migration: direct GPT-6.1 Sol / explicit GPT-6 Astra via Responses;
+GPT-4o disabled. See docs/OPENAI_CURRENT_MODEL_MIGRATION_2026-11-08.md.
+
 All notable changes to Aurora CloudBank Symbolic will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Fixed
+
+- Re-verify the AI model catalog against provider documentation (2026-11-07),
+  disable the shut-down GPT-4 alias, correct Sonnet 5/GPT-4o input pricing and
+  GPT output ceilings, and document GPT-4o's scheduled 2027-01-14 shutdown.
+- Restore the dashboard's local API connection through the same-origin proxy
+  and serve process-local metrics, marking unmeasured cache/speedup values unavailable.
 
 ## [2.2.5] - 2026-06-20
 

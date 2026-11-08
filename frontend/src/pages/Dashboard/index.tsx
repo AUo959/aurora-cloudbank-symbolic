@@ -160,22 +160,10 @@ export default function Dashboard() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  // Fetch memory metrics with error handling
-  const {
-    data: memoryMetrics,
-    isError: memoryError,
-    refetch: refetchMemory,
-  } = useQuery({
-    queryKey: ['memory-metrics'],
-    queryFn: () => auroraAPI.memory.metrics(),
-    refetchInterval: 5000,
-    staleTime: 10000,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  });
-
+  const memoryMetrics = metrics?.memory;
   const isLoading = metricsLoading;
-  const hasAnyError = metricsError || memoryError;
+  const hasAnyError = metricsError;
+  const connected = Boolean(metrics) && !metricsError;
 
   if (isLoading) {
     return (
@@ -210,7 +198,6 @@ export default function Dashboard() {
                 size="sm"
                 onClick={() => {
                   refetchMetrics();
-                  refetchMemory();
                 }}
                 className="text-xs"
               >
@@ -280,13 +267,15 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gradient">
-                {memoryMetrics ? formatNumber(memoryMetrics.total_memories) : '0'}
+                {memoryMetrics?.total_memories == null ? 'Unavailable' : formatNumber(memoryMetrics.total_memories)}
               </div>
               <p className="text-xs text-gray-500">
                 {memoryMetrics && (
                   <>
-                    {formatNumber(memoryMetrics.active_memories)} active •{' '}
-                    {percentage(memoryMetrics.cache_hit_rate, 1).toFixed(0)}% cache hit
+                    {memoryMetrics.active_memories == null ? 'Unavailable' : formatNumber(memoryMetrics.active_memories)} active •{' '}
+                    {memoryMetrics.cache_hit_rate === null
+                      ? 'Cache rate unavailable'
+                      : `${percentage(memoryMetrics.cache_hit_rate, 1).toFixed(0)}% cache hit`}
                   </>
                 )}
               </p>
@@ -294,7 +283,7 @@ export default function Dashboard() {
                 <div
                   className="h-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all"
                   style={{
-                    width: memoryMetrics
+                    width: memoryMetrics?.active_memories != null && memoryMetrics.total_memories != null
                       ? `${percentage(memoryMetrics.active_memories, memoryMetrics.total_memories)}%`
                       : '0%',
                   }}
@@ -311,11 +300,13 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gradient">
-                {metrics?.quantum.total_simulations || 0}
+                {metrics?.quantum.total_simulations ?? 'Unavailable'}
               </div>
               <p className="text-xs text-gray-500">
-                {metrics?.quantum.simulations_running || 0} running •{' '}
-                {metrics?.quantum.average_speedup?.toFixed(1) || '0'}x speedup
+                {metrics?.quantum.simulations_running ?? 'Unavailable'} running •{' '}
+                {metrics?.quantum.average_speedup == null
+                  ? 'Speedup unavailable'
+                  : `${metrics.quantum.average_speedup.toFixed(1)}x speedup`}
               </p>
             </CardContent>
           </Card>
@@ -345,8 +336,12 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
-                <CheckCircle2 className="h-5 w-5 text-success" />
-                <span className="text-2xl font-bold text-success">Optimal</span>
+                {connected
+                  ? <CheckCircle2 className="h-5 w-5 text-success" />
+                  : <AlertCircle className="h-5 w-5 text-gray-500" />}
+                <span className={`text-2xl font-bold ${connected ? 'text-success' : 'text-gray-500'}`}>
+                  {connected ? 'Connected' : 'Unavailable'}
+                </span>
               </div>
               <p className="text-xs text-gray-500">
                 CPU: {metrics?.system.cpu_usage?.toFixed(0) || 0}% • Mem:{' '}
@@ -383,7 +378,9 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-400">Avg Response Time</span>
                     <span className="font-mono font-semibold text-accent-400">
-                      {formatDuration(metrics?.system.average_response_time_ms || 0)}
+                      {metrics?.system.average_response_time_ms == null
+                        ? 'Unavailable'
+                        : formatDuration(metrics.system.average_response_time_ms)}
                     </span>
                   </div>
                 </div>
@@ -406,7 +403,7 @@ export default function Dashboard() {
                 <Activity className="h-5 w-5 text-secondary-500" />
                 <span>Recent Activity</span>
               </CardTitle>
-              <CardDescription>Latest system events</CardDescription>
+              <CardDescription>Illustrative example events</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">

@@ -190,16 +190,16 @@ export interface Experiment {
 export interface SystemMetrics {
   timestamp: string;
   memory: {
-    total_memories: number;
-    active_memories: number;
-    compressed_memories: number;
-    archived_memories: number;
-    cache_hit_rate: number;
+    total_memories: number | null;
+    active_memories: number | null;
+    compressed_memories: number | null;
+    archived_memories: number | null;
+    cache_hit_rate: number | null;
   };
   quantum: {
-    simulations_running: number;
-    total_simulations: number;
-    average_speedup: number;
+    simulations_running: number | null;
+    total_simulations: number | null;
+    average_speedup: number | null;
   };
   agents: {
     total_agents: number;
@@ -211,7 +211,7 @@ export interface SystemMetrics {
     cpu_usage: number;
     memory_usage: number;
     api_requests_per_minute: number;
-    average_response_time_ms: number;
+    average_response_time_ms: number | null;
   };
 }
 

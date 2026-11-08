@@ -34,7 +34,7 @@ aiofiles>=24.1.0,<26.0.0            # Async file operations
 # ===================================================================
 cryptography>=50.0.1,<51.0.0        # Cryptographic library (cap reviewed quarterly; bump for security releases)
 bcrypt>=4.1.2,<6.0.0                # Password hashing
-pyjwt>=2.10.0,<3.0.0                 # JWT tokens (migrated from python-jose)
+pyjwt>=2.15.1,<3.0.0                 # JWT tokens (migrated from python-jose)
 passlib[bcrypt]>=1.7.4,<2.0.0       # Password handling
 # python-jose removed - see security migration Nov 2025 (ecdsa vulnerability)
 
@@ -92,8 +92,8 @@ jsonschema>=4.17.0,<5.0.0           # JSON Schema validation (MCP tool inputSche
 # SYSTEM UTILITIES
 # ===================================================================
 requests>=2.34.2,<3.0.0             # HTTP library
-urllib3>=2.7.0,<3.0.0               # HTTP connection pooling
-certifi>=2026.7.22                   # SSL certificates
+urllib3>=2.8.0,<3.0.0               # HTTP connection pooling
+certifi>=2026.10.23                   # SSL certificates
 charset-normalizer>=3.5.1,<4.0.0    # Character encoding detection
 idna>=3.19,<4.0.0                   # Internationalized domain names
 psutil>=7.2.2,<8.0.0                # Process and system monitoring (for R-2 telemetry)

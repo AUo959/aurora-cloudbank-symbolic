@@ -17,7 +17,8 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test:security": "node --test tests/security/*.check.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -25,6 +26,7 @@
     "axios": "^1.20.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "dompurify": "3.4.17",
     "lucide-react": "^1.35.0",
     "monaco-editor": "^0.56.0",
     "react": "^19.2.8",
@@ -47,8 +49,8 @@
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.61.0",
     "@vitejs/plugin-react-swc": "^4.3.3",
-    "@vitest/coverage-v8": "^4.1.11",
-    "@vitest/ui": "^4.1.8",
+    "@vitest/coverage-v8": "^4.1.12",
+    "@vitest/ui": "^4.1.12",
     "autoprefixer": "^10.5.4",
     "eslint": "^10.9.1",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -63,11 +65,12 @@
     "tailwindcss": "^4.3.3",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.3.3",
-    "vite": "^8.2.2",
-    "vitest": "^4.1.9"
+    "vite": "^8.3.6",
+    "vitest": "^4.1.12"
   },
   "overrides": {
-    "dompurify": "3.4.12"
+    "dompurify": "3.4.17",
+    "minimatch@>=7.0.0 <11.0.1": "11.0.1"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

@@ -40,7 +40,7 @@ try:
     )
 except ImportError:
     print(
-        'ERROR: MCP SDK not installed. Run: pip install "mcp>=1.28.1,<2.0.0"',
+        'ERROR: MCP SDK not installed. Run: pip install "mcp>=1.30.0,<2.0.0"',
         file=sys.stderr,
     )
     sys.exit(1)

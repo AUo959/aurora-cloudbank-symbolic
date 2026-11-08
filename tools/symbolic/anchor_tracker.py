@@ -98,7 +98,7 @@ class SymbolicAnchorTracker:
         # Extensive skip patterns for performance
         skip_dirs = {
             '__pycache__', 'node_modules', '.git', '.venv', 'venv_opal2',
-            '.pytest_cache', 'htmlcov', '.benchmarks', 'coverage'
+            '.pytest_cache', 'htmlcov', '.benchmarks', 'coverage', 'dist'
         }
 
         for root, dirs, files in os.walk(self.repo_path):

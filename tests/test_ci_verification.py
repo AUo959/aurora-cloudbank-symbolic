@@ -188,3 +188,66 @@ def test_kubernetes_markdown_push_cannot_wait_for_absent_canonical_run():
     assert triggers['push']['paths'][-1] == '!**.md'
     assert 'k8s/**' in triggers['push']['paths'][:-1]
     assert '!**.md' not in triggers['pull_request']['paths']
+
+
+def test_fork_run_without_api_pr_association_uses_bound_receipt():
+    fork = dict(RUN, pull_requests=[])
+    def fork_api(endpoint, binary=False):
+        if '/runs?' in endpoint:
+            return {'workflow_runs': [fork]}
+        return api(endpoint, binary)
+    ci.wait(ENV, api=fork_api)
+
+
+def test_unrelated_fork_receipt_cannot_mask_this_pr():
+    unrelated = dict(RUN, id=124, pull_requests=[])
+    def fork_api(endpoint, binary=False):
+        if binary:
+            return archive(dict(PROOF, run_id=124, ref='refs/pull/10/merge'))
+        return api(endpoint, binary)
+    assert ci.latest_run([RUN, unrelated], EXPECTED, fork_api) == RUN
+
+
+def test_unresolved_newer_fork_run_blocks_old_success():
+    for changes in ({'status': 'in_progress'}, {}):
+        unknown = dict(RUN, id=124, pull_requests=[], **changes)
+        assert ci.latest_run([RUN, unknown], EXPECTED, lambda _: {'artifacts': []}) is None
+
+
+def test_failed_fork_attempt_is_not_hidden_by_old_success():
+    failed = dict(RUN, id=124, pull_requests=[], conclusion='failure')
+    def fork_api(endpoint, binary=False):
+        if binary:
+            return archive(dict(PROOF, run_id=124, result='failure'))
+        return api(endpoint, binary)
+    latest = ci.latest_run([RUN, failed], EXPECTED, fork_api)
+    assert latest == failed
+    with pytest.raises(ValueError, match='did not succeed'):
+        ci.verify_run(latest, EXPECTED, fork_api)
+
+
+def test_fork_checkout_mismatch_cannot_expose_old_success():
+    newer = dict(RUN, id=124, pull_requests=[])
+    def fork_api(endpoint, binary=False):
+        if binary:
+            return archive(dict(PROOF, run_id=124, checkout_sha=HEAD))
+        return api(endpoint, binary)
+    latest = ci.latest_run([RUN, newer], EXPECTED, fork_api)
+    assert latest == newer
+    assert not ci.verify_run(latest, EXPECTED, fork_api)
+
+
+def test_fork_identity_must_belong_to_current_attempt():
+    with pytest.raises(ValueError, match='identify'):
+        ci.latest_run([dict(RUN, id=124, pull_requests=[])], EXPECTED, api)
+
+
+def test_unknown_fork_receipt_ref_cannot_expose_old_success():
+    def invalid_api(endpoint, binary=False):
+        if binary:
+            proof = dict(PROOF, run_id=124)
+            del proof['ref']
+            return archive(proof)
+        return api(endpoint, binary)
+    with pytest.raises(ValueError, match='identify a PR'):
+        ci.latest_run([RUN, dict(RUN, id=124, pull_requests=[])], EXPECTED, invalid_api)

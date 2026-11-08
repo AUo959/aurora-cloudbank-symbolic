@@ -37,6 +37,13 @@ latest run, requires its successful completion, and downloads only that attempt'
 receipt. Both head and checkout must match: for PRs the checkout is the synthetic
 merge commit, while the run API's head is the source branch commit.
 
+Fork-origin runs can have an empty PR association in GitHub metadata. In that
+case the attempt-specific receipt resolves the PR identity before run selection.
+A newer run with unresolved identity blocks acceptance of older results until
+its receipt is available; an unrelated PR's verified identity can be excluded.
+A failed attempt for the current PR still fails the gate. Missing receipts or
+invalid source identity fail closed.
+
 A successful branch-only test, an old merge-base checkout, manual run, previous
 attempt, expired/malformed/oversized artifact, failed run, or unrelated workflow
 cannot satisfy the gate. Missing or stale receipts time out closed after 15
@@ -71,11 +78,14 @@ They are retained, not represented as real security or health coverage.
 
 ## Remaining consolidation
 
-Repository access cannot read branch-protection settings (GitHub returns 403).
-Therefore this tranche preserves all workflow filenames and public check names,
-including placeholders and disabled entry points. Before removing them, obtain
-the actual required-check/workflow settings and map them to substantive owners.
-Do not infer that a check is optional from a green PR or an empty API response.
+The full branch-protection administration endpoint returns 403, while read-only
+branch metadata reports required **CI Check** (Actions app 15368, non-admins
+enforcement). Effective branch rules add Copilot review, deletion and
+non-fast-forward protection, without additional workflow requirements. No
+protection setting is changed. This tranche preserves workflow filenames and
+public check names, including placeholders and disabled entry points; the
+required-check summary can inform the next compatibility-lane cleanup after
+checking their consumers. A summary is not a complete administration export.
 
 Next inventory reviews should compare constellation validation with the
 canonical suite, examine legacy build/publish paths and their consumers, and

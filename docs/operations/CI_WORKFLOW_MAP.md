@@ -54,7 +54,8 @@ and actions/read. Canonical CI's permission scope is unchanged.
 
 Pull requests always trigger canonical and quality validation. Their push
 ignore paths agree and Kubernetes excludes Markdown-only pushes, so documentation-only pushes do not create a quality gate
-waiting for intentionally absent canonical CI. A manual Kubernetes run does not
+waiting for intentionally absent canonical CI. Changes to the shared verifier, its tests, or canonical workflow also trigger
+Kubernetes validation. A manual Kubernetes run does not
 need a canonical receipt and can test arbitrary refs independently.
 
 ## Workflow inventory

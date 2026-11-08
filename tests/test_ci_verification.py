@@ -251,3 +251,11 @@ def test_unknown_fork_receipt_ref_cannot_expose_old_success():
         return api(endpoint, binary)
     with pytest.raises(ValueError, match='identify a PR'):
         ci.latest_run([RUN, dict(RUN, id=124, pull_requests=[])], EXPECTED, invalid_api)
+
+
+def test_kubernetes_exercises_changes_to_shared_verification_contract():
+    triggers = workflows()['k8s-deploy.yml']['on']
+    for event in ('push', 'pull_request'):
+        assert 'scripts/ci_verification.py' in triggers[event]['paths']
+        assert 'tests/test_ci_verification.py' in triggers[event]['paths']
+        assert '.github/workflows/aurora-ci-minimal.yml' in triggers[event]['paths']

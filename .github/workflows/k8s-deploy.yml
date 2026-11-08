@@ -18,6 +18,9 @@ on:
       - 'Dockerfile'
       - 'requirements*.txt'
       - '.github/workflows/k8s-deploy.yml'
+      - '.github/workflows/aurora-ci-minimal.yml'
+      - 'scripts/ci_verification.py'
+      - 'tests/test_ci_verification.py'
       - '!**.md'  # Canonical CI intentionally skips Markdown-only pushes.
   pull_request:
     branches: [main, develop]
@@ -29,6 +32,9 @@ on:
       - 'Dockerfile'
       - 'requirements*.txt'
       - '.github/workflows/k8s-deploy.yml'
+      - '.github/workflows/aurora-ci-minimal.yml'
+      - 'scripts/ci_verification.py'
+      - 'tests/test_ci_verification.py'
   workflow_dispatch:
     inputs:
       environment:

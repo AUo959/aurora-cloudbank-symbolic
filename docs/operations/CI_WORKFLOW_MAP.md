@@ -41,6 +41,8 @@ Fork-origin runs can have an empty PR association in GitHub metadata. In that
 case the attempt-specific receipt resolves the PR identity before run selection.
 A newer run with unresolved identity blocks acceptance of older results until
 its receipt is available; an unrelated PR's verified identity can be excluded.
+The final status recheck uses only metadata and previously verified identities
+keyed by run ID and attempt; it never downloads after the final status snapshot.
 A failed attempt for the current PR still fails the gate. Missing receipts or
 invalid source identity fail closed.
 

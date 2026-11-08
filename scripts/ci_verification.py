@@ -65,17 +65,27 @@ def same_ref(run, expected):
     return run.get('head_branch') == expected['ref'].removeprefix('refs/heads/').removeprefix('refs/tags/')
 
 
-def run_ref_matches(run, expected, api):
-    """A missing fork association is unknown until its attempt receipt is available."""
-    if expected['event'] != 'pull_request' or run.get('pull_requests'):
-        return same_ref(run, expected)
-    if api is None or run['status'] != 'completed':
-        return None
+def receipt_ref_matches(run, expected, api):
     proof = fetch_receipt(run, expected, api)
     if proof is None:
         return None
     validate_receipt_identity(proof, expected, run)
     return proof['ref'] == expected['ref']
+
+
+def run_ref_matches(run, expected, api, identities, resolve):
+    """Cache only validated identities, keyed by immutable run/attempt identity."""
+    if expected['event'] != 'pull_request' or run.get('pull_requests'):
+        return same_ref(run, expected)
+    key = (run['id'], run['run_attempt'])
+    if key in identities:
+        return identities[key]
+    if not resolve or api is None or run['status'] != 'completed':
+        return None
+    matches = receipt_ref_matches(run, expected, api)
+    if matches is not None:
+        identities[key] = matches
+    return matches
 
 
 def validate_receipt_identity(proof, expected, run):
@@ -87,11 +97,12 @@ def validate_receipt_identity(proof, expected, run):
         raise ValueError('Receipt does not identify a PR')
 
 
-def latest_run(runs, expected, api=None):
+def latest_run(runs, expected, api=None, identities=None, resolve=True):
+    identities = {} if identities is None else identities
     candidates = [run for run in runs if run['head_sha'] == expected['head_sha']
                   and run['event'] == expected['event']]
     for run in sorted(candidates, key=lambda run: run['id'], reverse=True):
-        matches = run_ref_matches(run, expected, api)
+        matches = run_ref_matches(run, expected, api, identities, resolve)
         if matches is None:
             return None  # An unresolved newer run must never expose an older success.
         if matches:
@@ -147,12 +158,13 @@ def wait(environ, timeout=900, interval=15, api=gh_api, clock=time.monotonic, sl
     expected = context(environ)
     base = f"repos/{expected['repository']}/actions/workflows/{WORKFLOW}/runs"
     endpoint = f"{base}?head_sha={expected['head_sha']}&event={expected['event']}&per_page=100"
+    identities = {}
     deadline = clock() + timeout
     while clock() < deadline:
-        run = latest_run(api(endpoint)['workflow_runs'], expected, api)
+        run = latest_run(api(endpoint)['workflow_runs'], expected, api, identities)
         if run and verify_run(run, expected, api):
             # Reruns/new runs must not be masked by a previously successful attempt.
-            current = latest_run(api(endpoint)['workflow_runs'], expected, api)
+            current = latest_run(api(endpoint)['workflow_runs'], expected, api, identities, resolve=False)
             if current and (current['id'], current['run_attempt'], current['status']) == (
                     run['id'], run['run_attempt'], 'completed') and current['conclusion'] == 'success':
                 print(f"Canonical CI verified checkout {expected['checkout_sha']} (run {run['id']}).")

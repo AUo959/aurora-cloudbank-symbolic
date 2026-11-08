@@ -259,3 +259,31 @@ def test_kubernetes_exercises_changes_to_shared_verification_contract():
         assert 'scripts/ci_verification.py' in triggers[event]['paths']
         assert 'tests/test_ci_verification.py' in triggers[event]['paths']
         assert '.github/workflows/aurora-ci-minimal.yml' in triggers[event]['paths']
+
+
+def test_fork_final_status_check_never_downloads_identity_after_status_snapshot():
+    reads = []
+    def fork_api(endpoint, binary=False):
+        if '/runs?' in endpoint:
+            reads.append('metadata')
+            return {'workflow_runs': [dict(RUN, pull_requests=[])]}
+        # A download after the final snapshot would permit a rerun during I/O
+        # to be accepted against the pre-download successful status.
+        assert reads.count('metadata') == 1, 'Receipt I/O after final status snapshot'
+        return api(endpoint, binary)
+    ci.wait(ENV, api=fork_api)
+    assert reads == ['metadata', 'metadata']
+
+
+def test_new_unresolved_fork_attempt_at_final_check_blocks_old_success():
+    reads = []
+    def fork_api(endpoint, binary=False):
+        if '/runs?' in endpoint:
+            reads.append('metadata')
+            attempt = 2 if len(reads) == 1 else 3
+            return {'workflow_runs': [dict(RUN, pull_requests=[], run_attempt=attempt)]}
+        assert len(reads) == 1, 'Final check must not resolve new identities via I/O'
+        return api(endpoint, binary)
+    ticks = iter([0, 0, 2])
+    with pytest.raises(TimeoutError):
+        ci.wait(ENV, timeout=1, api=fork_api, clock=lambda: next(ticks), sleep=lambda _: None)

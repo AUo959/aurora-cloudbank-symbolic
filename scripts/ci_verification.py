@@ -65,10 +65,49 @@ def same_ref(run, expected):
     return run.get('head_branch') == expected['ref'].removeprefix('refs/heads/').removeprefix('refs/tags/')
 
 
-def latest_run(runs, expected):
+def receipt_ref_matches(run, expected, api):
+    proof = fetch_receipt(run, expected, api)
+    if proof is None:
+        return None
+    validate_receipt_identity(proof, expected, run)
+    return proof['ref'] == expected['ref']
+
+
+def run_ref_matches(run, expected, api, identities, resolve):
+    """Cache only validated identities, keyed by immutable run/attempt identity."""
+    if expected['event'] != 'pull_request' or run.get('pull_requests'):
+        return same_ref(run, expected)
+    key = (run['id'], run['run_attempt'])
+    if key in identities:
+        return identities[key]
+    if not resolve or api is None or run['status'] != 'completed':
+        return None
+    matches = receipt_ref_matches(run, expected, api)
+    if matches is not None:
+        identities[key] = matches
+    return matches
+
+
+def validate_receipt_identity(proof, expected, run):
+    fields = {key: expected[key] for key in ('repository', 'event', 'head_sha')}
+    fields.update(run_id=run['id'], run_attempt=run['run_attempt'])
+    if not all(proof.get(key) == value for key, value in fields.items()):
+        raise ValueError('Receipt does not identify its canonical run')
+    if not re.fullmatch(r'refs/pull/[1-9][0-9]*/merge', proof.get('ref', '')):
+        raise ValueError('Receipt does not identify a PR')
+
+
+def latest_run(runs, expected, api=None, identities=None, resolve=True):
+    identities = {} if identities is None else identities
     candidates = [run for run in runs if run['head_sha'] == expected['head_sha']
-                  and run['event'] == expected['event'] and same_ref(run, expected)]
-    return max(candidates, key=lambda run: run['id'], default=None)
+                  and run['event'] == expected['event']]
+    for run in sorted(candidates, key=lambda run: run['id'], reverse=True):
+        matches = run_ref_matches(run, expected, api, identities, resolve)
+        if matches is None:
+            return None  # An unresolved newer run must never expose an older success.
+        if matches:
+            return run
+    return None
 
 
 def read_receipt(payload):
@@ -93,33 +132,39 @@ def valid_artifact(matches):
     return matches[0]
 
 
+def fetch_receipt(run, expected, api):
+    base = f"repos/{expected['repository']}/actions"
+    artifacts = api(f"{base}/runs/{run['id']}/artifacts?per_page=100")['artifacts']
+    name = f"ci-verification-{run['run_attempt']}"
+    matches = [artifact for artifact in artifacts if artifact['name'] == name]
+    if not matches:
+        return None
+    artifact = valid_artifact(matches)
+    payload = api(f"{base}/artifacts/{int(artifact['id'])}/zip", binary=True)
+    return read_receipt(payload)
+
+
 def verify_run(run, expected, api):
     """Return false while pending; failures and invalid artifacts fail closed."""
     if run['status'] != 'completed':
         return False
     if run['conclusion'] != 'success':
         raise ValueError('Canonical CI did not succeed')
-    base = f"repos/{expected['repository']}/actions"
-    artifacts = api(f"{base}/runs/{run['id']}/artifacts?per_page=100")['artifacts']
-    name = f"ci-verification-{run['run_attempt']}"
-    matches = [artifact for artifact in artifacts if artifact['name'] == name]
-    if not matches:
-        return False  # Old runs cannot prove the current checkout; wait for a fresh run.
-    artifact = valid_artifact(matches)
-    payload = api(f"{base}/artifacts/{int(artifact['id'])}/zip", binary=True)
-    return matching_receipt(read_receipt(payload), expected, run)
+    proof = fetch_receipt(run, expected, api)
+    return proof is not None and matching_receipt(proof, expected, run)
 
 
 def wait(environ, timeout=900, interval=15, api=gh_api, clock=time.monotonic, sleep=time.sleep):
     expected = context(environ)
     base = f"repos/{expected['repository']}/actions/workflows/{WORKFLOW}/runs"
     endpoint = f"{base}?head_sha={expected['head_sha']}&event={expected['event']}&per_page=100"
+    identities = {}
     deadline = clock() + timeout
     while clock() < deadline:
-        run = latest_run(api(endpoint)['workflow_runs'], expected)
+        run = latest_run(api(endpoint)['workflow_runs'], expected, api, identities)
         if run and verify_run(run, expected, api):
             # Reruns/new runs must not be masked by a previously successful attempt.
-            current = latest_run(api(endpoint)['workflow_runs'], expected)
+            current = latest_run(api(endpoint)['workflow_runs'], expected, api, identities, resolve=False)
             if current and (current['id'], current['run_attempt'], current['status']) == (
                     run['id'], run['run_attempt'], 'completed') and current['conclusion'] == 'success':
                 print(f"Canonical CI verified checkout {expected['checkout_sha']} (run {run['id']}).")

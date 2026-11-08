@@ -416,9 +416,9 @@ class UnifiedAIInterface:
             if caps and caps.available:
                 return model
 
-        # Final fallback to any available model
+        # Astra is opt-in, including when all ordinary defaults are disabled.
         for model, caps in self.CAPABILITIES.items():
-            if caps.available:
+            if caps.available and model is not AIModel.GPT_6_ASTRA:
                 return model
 
         raise RuntimeError("No AI models available")

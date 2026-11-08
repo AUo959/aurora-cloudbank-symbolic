@@ -139,3 +139,16 @@ async def test_failed_responses_result_falls_back_after_accounting_for_usage():
     assert result is expected
     fallback.assert_awaited_once()
     assert [call.kwargs['tokens_used'] for call in interface._budget.record_usage.call_args_list] == [3, 5]
+
+
+@pytest.mark.asyncio
+async def test_astra_requires_explicit_selection_when_other_models_are_disabled():
+    interface = UnifiedAIInterface()
+    for model, caps in interface.CAPABILITIES.items():
+        caps.available = model is AIModel.GPT_6_ASTRA
+    with pytest.raises(RuntimeError, match='No AI models available'):
+        await interface.select_optimal_model(AIRequest(prompt='test'))
+    assert await interface.select_optimal_model(AIRequest(
+        prompt='test', model_preference=AIModel.GPT_6_ASTRA)) is AIModel.GPT_6_ASTRA
+    assert await interface.select_optimal_model(AIRequest(
+        prompt='test', fallback_chain=[AIModel.GPT_6_ASTRA])) is AIModel.GPT_6_ASTRA

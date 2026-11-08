@@ -104,23 +104,16 @@ def escalation_marker(gate: dict) -> str:
     return f"<!-- queue-escalation:{digest} -->"
 
 
-def notify_gate(repo: str, gate: dict, threshold: int) -> None:
+def issue_number(gate: dict) -> int:
     issue = gate["github_issue"]
     if not isinstance(issue, int) or isinstance(issue, bool) or issue <= 0:
         raise ValueError("Escalation requires a positive GitHub issue number")
-    endpoint = f"repos/{repo}/issues/{issue}"
-    state = json.loads(gh("api", endpoint))["state"]
-    if state != "open":
-        print(f"Skipping {gate['gate_id']}: issue #{issue} is {state}")
-        return
-    marker = escalation_marker(gate)
-    comments = pages(f"{endpoint}/comments?per_page=100")
-    if any(c["user"]["login"] == "github-actions[bot]"
-           and marker in (c.get("body") or "") for c in comments):
-        print(f"Issue #{issue} already notified for {gate['gate_id']} at this baseline")
-        return
+    return issue
+
+
+def notification_body(gate: dict, threshold: int, marker: str) -> str:
     age = gate.get("days_since_surfaced")
-    body = (
+    return (
         f"⏰ **Decision-gate escalation** ({gate['gate_id']}, tier {gate['escalation_tier']}): "
         f"this gate has awaited an operator decision for "
         f"{age if age is not None else 'an unknown number of'} days "
@@ -131,7 +124,27 @@ def notify_gate(repo: str, gate: dict, threshold: int) -> None:
         "through review. This marker prevents retry duplicates until the registry "
         f"baseline changes._\n\n{marker}"
     )
-    gh("issue", "comment", str(issue), "--repo", repo, "--body", body)
+
+
+def already_notified(comments: list[dict], marker: str) -> bool:
+    return any(c["user"]["login"] == "github-actions[bot]"
+               and marker in (c.get("body") or "") for c in comments)
+
+
+def notify_gate(repo: str, gate: dict, threshold: int) -> None:
+    issue = issue_number(gate)
+    endpoint = f"repos/{repo}/issues/{issue}"
+    state = json.loads(gh("api", endpoint))["state"]
+    if state != "open":
+        print(f"Skipping {gate['gate_id']}: issue #{issue} is {state}")
+        return
+    marker = escalation_marker(gate)
+    comments = pages(f"{endpoint}/comments?per_page=100")
+    if already_notified(comments, marker):
+        print(f"Issue #{issue} already notified for {gate['gate_id']} at this baseline")
+        return
+    gh("issue", "comment", str(issue), "--repo", repo,
+       "--body", notification_body(gate, threshold, marker))
 
 
 def notify_escalations(repo: str, report: dict) -> None:

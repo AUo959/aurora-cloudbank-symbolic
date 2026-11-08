@@ -38,7 +38,9 @@ DOMPurify, and the React wrapper defaults to a CDN-hosted editor. The editor now
 loads the locked local ESM module and local workers. A Vite alias redirects
 Monaco's relative sanitizer import to the direct, exact DOMPurify dependency.
 The production module-graph test requires the patched module and rejects the
-vendored implementation. This binding is also used for development optimization.
+vendored implementation. Monaco is excluded from development prebundling because the optimizer can
+otherwise retain its vendored copy. A forced-optimizer regression plus direct
+ESM transform check verifies that the patched binding is used in development.
 
 The reported critical advisory requires non-default shadow-root/template
 handling, which was not observed in the application's Monaco configuration.
@@ -68,9 +70,13 @@ was used.
   connector tests retain their existing environment guards. An actual SDK
   stdio initialization/list-tools smoke independently verifies all five tool
   schemas with a temporary in-memory connector token and no remote backend.
-- Frontend type-check, strict lint, production build, and five security checks
+- Frontend type-check, strict lint, production build, and six security checks
   pass. Chromium verifies local editor loading, typing, and worker requests
-  with no Monaco CDN requests or page errors. An unrelated external font
+  with no Monaco CDN requests or page errors. Development browser checks also
+verify that the sanitizer request targets the patched package, not the vendor
+copy. The source-anchor scanner excludes gitignored dist directories so a
+post-build backend test run does not scan large generated/minified bundles;
+a regression preserves scanning of authored source. An unrelated external font
   stylesheet is stubbed for the deterministic browser check.
 - Full test/CI landing evidence: PENDING_FINAL_CHECKS.
 

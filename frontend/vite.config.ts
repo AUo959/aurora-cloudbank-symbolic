@@ -71,6 +71,9 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
+    // Keep Monaco's internal relative imports in Vite's patched ESM graph.
+    // Prebundling the package can retain its vendored sanitizer instead.
+    exclude: ['monaco-editor'],
     include: ['react', 'react-dom', 'react-router-dom'],
   },
 });

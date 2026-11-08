@@ -599,7 +599,7 @@ class UnifiedAIInterface:
             kwargs["reasoning"] = {"effort": request.reasoning_effort}
         if request.functions:
             # Responses uses flat function definitions, unlike Chat Completions.
-            kwargs["tools"] = [{"type": "function", **func} for func in request.functions]
+            kwargs["tools"] = [{"type": "function", "strict": False, **func} for func in request.functions]
 
         response = await self.openai_client.responses.create(**kwargs)
         latency = (asyncio.get_event_loop().time() - start_time) * 1000

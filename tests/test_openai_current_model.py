@@ -55,6 +55,7 @@ async def test_responses_wire_contract(model):
     assert body['store'] is False
     assert not {'messages', 'max_tokens', 'temperature', 'top_p'} & body.keys()
     assert body['tools'][0]['name'] == 'lookup'
+    assert body['tools'][0]['strict'] is False
     assert 'function' not in body['tools'][0]
     assert result.success and result.content == 'Ready'
     assert result.model_used is model and result.tokens_used == 20

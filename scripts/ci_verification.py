@@ -11,7 +11,7 @@ import json
 import os
 from pathlib import Path
 import re
-import subprocess
+import subprocess  # nosec B404 — fixed runner CLIs; no shell or eval.
 import time
 import zipfile
 
@@ -22,7 +22,7 @@ MAX_BYTES = 16384
 
 def gh_api(endpoint, binary=False):
     """Only fixed gh argv is executed; endpoints are constructed from validated IDs."""
-    result = subprocess.run(  # nosec B603,B607 -- fixed runner CLI, no shell
+    result = subprocess.run(  # nosec B603 B607
         ['gh', 'api', endpoint], check=True, capture_output=True, timeout=45,
     )
     return result.stdout if binary else json.loads(result.stdout)
@@ -48,7 +48,7 @@ def context(environ):
 
 def record(environ):
     proof = context(environ)
-    checkout = subprocess.run(  # nosec B603,B607 -- fixed git argv, no shell
+    checkout = subprocess.run(  # nosec B603 B607
         ['git', 'rev-parse', 'HEAD'], check=True, capture_output=True, text=True,
     ).stdout.strip()
     if checkout != proof['checkout_sha']:
@@ -87,6 +87,12 @@ def matching_receipt(proof, expected, run):
     return all(proof.get(key) == value for key, value in fields.items())
 
 
+def valid_artifact(matches):
+    if len(matches) != 1 or matches[0]['expired'] or matches[0]['size_in_bytes'] > MAX_BYTES:
+        raise ValueError('Invalid CI receipt artifact')
+    return matches[0]
+
+
 def verify_run(run, expected, api):
     """Return false while pending; failures and invalid artifacts fail closed."""
     if run['status'] != 'completed':
@@ -99,9 +105,7 @@ def verify_run(run, expected, api):
     matches = [artifact for artifact in artifacts if artifact['name'] == name]
     if not matches:
         return False  # Old runs cannot prove the current checkout; wait for a fresh run.
-    if len(matches) != 1 or matches[0]['expired'] or matches[0]['size_in_bytes'] > MAX_BYTES:
-        raise ValueError('Invalid CI receipt artifact')
-    artifact = matches[0]
+    artifact = valid_artifact(matches)
     payload = api(f"{base}/artifacts/{int(artifact['id'])}/zip", binary=True)
     return matching_receipt(read_receipt(payload), expected, run)
 

@@ -55,3 +55,10 @@ def test_cloudhub_image_uses_hash_locked_wheels():
     CHECK.assertIn("--require-hashes", dockerfile)
     CHECK.assertIn("!requirements-hashed.txt", dockerignore)
     CHECK.assertNotIn("!requirements.txt\n", dockerignore)
+
+
+def test_queue_escalation_pins_privileged_actions():
+    workflow = (WORKFLOWS / "queue-decision-escalation.yml").read_text(encoding="utf-8")
+    refs = re.findall(r"uses: [^@\s]+@([^\s]+)", workflow)
+    CHECK.assertTrue(refs)
+    CHECK.assertTrue(all(re.fullmatch(r"[0-9a-f]{40}", ref) for ref in refs))

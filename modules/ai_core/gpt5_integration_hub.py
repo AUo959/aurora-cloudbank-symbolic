@@ -1,7 +1,7 @@
 """
-GPT-5 and Codex Integration Hub for Aurora CloudBank Symbolic
+OpenAI Integration Hub for Aurora CloudBank Symbolic
 
-Supports GPT-4, GPT-4o, GPT-5, and GPT-5 Codex with intelligent routing
+Defaults to GPT-6.1 Sol. GPT5IntegrationHub is retained as a compatibility name.
 Specialized for code generation, reasoning, and agent mode interactions
 """
 
@@ -27,15 +27,15 @@ class GPTConfig:
     """Configuration for GPT model integration"""
 
     # Model selection
-    preferred_model: str = "gpt-5"  # Default to GPT-5 when available
-    codex_model: str = "gpt-5-codex"  # Specialized Codex variant
-    fallback_model: str = "gpt-4o"  # Reliable fallback
+    preferred_model: str = "gpt-6.1-sol"
+    codex_model: str = "gpt-6.1-sol"
+    fallback_model: str = "gpt-6.1-sol"
 
     # Performance settings
-    max_tokens: int = 32768  # GPT-5 expected capacity
+    max_tokens: int = 32768  # Conservative Responses output budget
     temperature: float = 0.7
     top_p: float = 0.9
-    context_window: int = 1_000_000  # GPT-5 expected 1M context
+    context_window: int = 1_050_000  # Current OpenAI API context limit
 
     # Code generation settings
     code_temperature: float = 0.3  # Lower for deterministic code
@@ -54,11 +54,11 @@ class GPTConfig:
 
 class GPT5IntegrationHub:
     """
-    GPT-5 and Codex integration hub for Aurora CloudBank
+    Current OpenAI integration hub; class name retained for compatibility.
 
     Key features:
-    - GPT-4/4o/5 unified interface
-    - Specialized Codex support for code generation
+    - Direct GPT-6.1 Sol / GPT-6 Astra support
+    - Current model routing for code generation
     - ChatGPT Agent Mode integration
     - Function calling and parallel execution
     - Intelligent routing based on task type
@@ -80,9 +80,9 @@ class GPT5IntegrationHub:
         gpt_cfg = self.config.get("gpt", {})
 
         return GPTConfig(
-            preferred_model=gpt_cfg.get("preferred_model", "gpt-5"),
-            codex_model=gpt_cfg.get("codex_model", "gpt-5-codex"),
-            fallback_model=gpt_cfg.get("fallback_model", "gpt-4o"),
+            preferred_model=gpt_cfg.get("preferred_model", "gpt-6.1-sol"),
+            codex_model=gpt_cfg.get("codex_model", "gpt-6.1-sol"),
+            fallback_model=gpt_cfg.get("fallback_model", "gpt-6.1-sol"),
             max_tokens=gpt_cfg.get("max_tokens", 32768),
             temperature=gpt_cfg.get("temperature", 0.7),
             top_p=gpt_cfg.get("top_p", 0.9),
@@ -93,43 +93,12 @@ class GPT5IntegrationHub:
         )
 
     def _check_model_availability(self):
-        """Check which GPT models are currently available"""
-        if not self._unified_ai:
-            logger.warning("⚠️  Unified AI interface not available")
-            return
-
-        try:
-            available = self._unified_ai.get_available_models()
-
-            # Check for GPT-5
-            if AIModel and AIModel.GPT_5 in available:
-                logger.info("✅ GPT-5 available")
-                self.gpt5_available = True
-            else:
-                logger.info("⏳ GPT-5 not yet available, will use GPT-4o")
-                self.gpt5_available = False
-
-            # Check for GPT-5 Codex
-            if AIModel and AIModel.GPT_5_CODEX in available:
-                logger.info("✅ GPT-5 Codex available")
-                self.gpt5_codex_available = True
-            else:
-                logger.info("⏳ GPT-5 Codex not yet available")
-                self.gpt5_codex_available = False
-
-            # Check for GPT-4o (fallback)
-            if AIModel and AIModel.GPT_4O in available:
-                logger.info("✅ GPT-4o available (fallback)")
-                self.gpt4o_available = True
-            else:
-                logger.warning("⚠️  GPT-4o not available")
-                self.gpt4o_available = False
-
-        except Exception as e:
-            logger.error(f"Error checking model availability: {e}")
-            self.gpt5_available = False
-            self.gpt5_codex_available = False
-            self.gpt4o_available = True  # Assume 4o works
+        """Report configured catalog availability, not account entitlement."""
+        available = self._unified_ai.get_available_models() if self._unified_ai else []
+        self.gpt5_available = bool(AIModel and AIModel.GPT_5 in available)
+        self.gpt5_codex_available = bool(AIModel and AIModel.GPT_5_CODEX in available)
+        self.gpt4o_available = bool(AIModel and AIModel.GPT_4O in available)
+        self.current_openai_available = bool(AIModel and AIModel.GPT_6_1_SOL in available)
 
     async def execute_code_generation(
         self,
@@ -173,6 +142,7 @@ class GPT5IntegrationHub:
             fallback_chain=fallback_chain,
             context_tag=f"{self.gpt_config.context_tag_prefix}_code_{context_tag}",
             dlp_tracking=self.gpt_config.dlp_tracking,
+            reasoning_effort=kwargs.get("reasoning_effort", "medium"),
         )
 
         try:
@@ -216,6 +186,7 @@ class GPT5IntegrationHub:
             fallback_chain=fallback_chain,
             context_tag=f"{self.gpt_config.context_tag_prefix}_{context_tag}",
             dlp_tracking=self.gpt_config.dlp_tracking,
+            reasoning_effort=kwargs.get("reasoning_effort", "medium"),
         )
 
         try:
@@ -263,6 +234,7 @@ class GPT5IntegrationHub:
             functions=functions or self.agent_tools.get("functions", []),
             context_tag=f"{self.gpt_config.context_tag_prefix}_agent_{context_tag}",
             dlp_tracking=self.gpt_config.dlp_tracking,
+            reasoning_effort=kwargs.get("reasoning_effort", "medium"),
         )
 
         try:
@@ -272,48 +244,26 @@ class GPT5IntegrationHub:
             logger.error(f"Agent action failed: {e}")
             return None
 
-    def _build_codex_fallback_chain(self) -> list:
-        """Build fallback chain for code generation (prefers Codex)"""
-        if not AIModel:
+    def _configured_chain(self, preferred: str) -> list:
+        """Honor current configuration and exclude disabled legacy models."""
+        if not AIModel or not self._unified_ai:
             return []
-
+        available = self._unified_ai.get_available_models()
         chain = []
-        if self.gpt5_codex_available:
-            chain.append(AIModel.GPT_5_CODEX)
-        if self.gpt5_available:
-            chain.append(AIModel.GPT_5)
-        if self.gpt4o_available:
-            chain.append(AIModel.GPT_4O)
-
+        for name in (preferred, self.gpt_config.fallback_model):
+            model = AIModel(name)
+            if model in available and model not in chain:
+                chain.append(model)
         return chain
+
+    def _build_codex_fallback_chain(self) -> list:
+        return self._configured_chain(self.gpt_config.codex_model)
 
     def _build_reasoning_fallback_chain(self) -> list:
-        """Build fallback chain for reasoning tasks"""
-        if not AIModel:
-            return []
-
-        chain = []
-        if self.gpt5_available:
-            chain.append(AIModel.GPT_5)
-        if self.gpt4o_available:
-            chain.append(AIModel.GPT_4O)
-        if self.gpt5_codex_available:
-            chain.append(AIModel.GPT_5_CODEX)
-
-        return chain
+        return self._configured_chain(self.gpt_config.preferred_model)
 
     def _build_agent_fallback_chain(self) -> list:
-        """Build fallback chain for agent mode"""
-        if not AIModel:
-            return []
-
-        chain = []
-        if self.gpt5_available:
-            chain.append(AIModel.GPT_5)
-        if self.gpt4o_available:
-            chain.append(AIModel.GPT_4O)
-
-        return chain
+        return self._configured_chain(self.gpt_config.preferred_model)
 
     def _get_default_system_prompt(self) -> str:
         """Get default system prompt for GPT"""
@@ -409,6 +359,7 @@ class GPT5IntegrationHub:
             Status dictionary with model availability and configuration
         """
         return {
+            "current_openai_available": self.current_openai_available,
             "gpt4o_available": self.gpt4o_available,
             "gpt5_available": self.gpt5_available,
             "gpt5_codex_available": self.gpt5_codex_available,

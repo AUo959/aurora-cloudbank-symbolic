@@ -1,5 +1,8 @@
 # Changelog
 
+Current OpenAI migration: direct GPT-6.1 Sol / explicit GPT-6 Astra via Responses;
+GPT-4o disabled. See docs/OPENAI_CURRENT_MODEL_MIGRATION_2026-11-08.md.
+
 All notable changes to Aurora CloudBank Symbolic will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

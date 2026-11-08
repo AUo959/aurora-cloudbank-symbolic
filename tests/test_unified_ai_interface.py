@@ -119,7 +119,7 @@ class TestUnifiedAIInterface:
 
         # For code generation, should prefer Codex
         selected_code = await interface.select_optimal_model(request, "code_generation")
-        assert selected_code == AIModel.GPT_5_CODEX  # First in code gen chain
+        assert selected_code == AIModel.GPT_6_1_SOL  # Current direct OpenAI model
 
         # For reasoning, should prefer Claude Opus 5
         selected_reasoning = await interface.select_optimal_model(request, "reasoning")
@@ -222,7 +222,7 @@ class TestUnifiedAIInterface:
         interface = UnifiedAIInterface()
         interface._budget = None
         expected = AIResponse(
-            content="42", model_used=AIModel.GPT_4O, provider=AIProvider.OPENAI,
+            content="42", model_used=AIModel.GPT_6_1_SOL, provider=AIProvider.OPENAI,
             tokens_used=5, latency_ms=10,
         )
         with (
@@ -235,9 +235,9 @@ class TestUnifiedAIInterface:
             request = AIRequest(prompt="calculate")
             result = await interface.execute_request(request, task_type="mathematical")
         assert result.success is True
-        assert result.model_used is AIModel.GPT_4O
+        assert result.model_used is AIModel.GPT_6_1_SOL
         assert anthropic.await_count == 2
-        openai.assert_awaited_once_with(request, AIModel.GPT_4O)
+        openai.assert_awaited_once_with(request, AIModel.GPT_6_1_SOL)
 
     @pytest.mark.asyncio
     async def test_unavailable_model_cannot_be_selected(self):

@@ -3305,6 +3305,7 @@ try:
     from modules.ai_core.unified_ai_interface import (
         unified_ai as _unified_ai_singleton,
         AIRequest,
+        AIModel,
     )
 
     def _get_unified_ai():
@@ -3313,6 +3314,8 @@ try:
     class AICompleteRequest(BaseModel):
         model_config = ConfigDict(extra="forbid")
         prompt: str = Field(..., min_length=1, max_length=32_000)
+        model_preference: Optional[AIModel] = None
+        reasoning_effort: str = Field("medium", pattern=r"^(low|medium|high|xhigh|max)$")
         task_type: str = Field("general", pattern=r"^[a-z_]{1,40}$")
         max_tokens: int = Field(1024, ge=1, le=8192)
         context_tag: str = Field(
@@ -3331,6 +3334,8 @@ try:
         ai = _get_unified_ai()
         ai_request = AIRequest(
             prompt=body.prompt,
+            model_preference=body.model_preference,
+            reasoning_effort=body.reasoning_effort,
             max_tokens=body.max_tokens,
             context_tag=body.context_tag,
         )

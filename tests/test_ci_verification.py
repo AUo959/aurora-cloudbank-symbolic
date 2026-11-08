@@ -12,10 +12,10 @@ from scripts import ci_verification as ci
 SHA = 'a' * 40
 HEAD = 'b' * 40
 ENV = {'GITHUB_REPOSITORY': 'owner/repo', 'GITHUB_EVENT_NAME': 'pull_request',
-       'GITHUB_SHA': SHA, 'CI_HEAD_SHA': HEAD}
+       'GITHUB_SHA': SHA, 'CI_HEAD_SHA': HEAD, 'GITHUB_REF': 'refs/pull/9/merge'}
 EXPECTED = ci.context(ENV)
 RUN = {'id': 123, 'run_attempt': 2, 'status': 'completed', 'conclusion': 'success',
-       'event': 'pull_request', 'head_sha': HEAD}
+       'event': 'pull_request', 'head_sha': HEAD, 'pull_requests': [{'number': 9}]}
 PROOF = dict(EXPECTED, run_id=123, run_attempt=2, result='success')
 ARTIFACT = {'id': 456, 'name': 'ci-verification-2', 'expired': False, 'size_in_bytes': 500}
 
@@ -43,7 +43,7 @@ def test_exact_success_can_be_reused():
 
 
 @pytest.mark.parametrize('field,value', [
-    ('repository', 'other/repo'), ('event', 'push'), ('checkout_sha', HEAD),
+    ('repository', 'other/repo'), ('event', 'push'), ('ref', 'refs/pull/10/merge'), ('checkout_sha', HEAD),
     ('head_sha', SHA), ('run_id', 122), ('run_attempt', 1), ('result', 'failure'),
 ])
 def test_unrelated_or_stale_receipts_cannot_satisfy_gate(field, value):
@@ -168,3 +168,23 @@ def test_canonical_receipt_is_attempt_specific_and_always_recorded():
     assert record['env']['CI_RESULT'] == '${{ job.status }}'
     assert upload['with']['name'] == 'ci-verification-${{ github.run_attempt }}'
     assert upload['with']['if-no-files-found'] == 'error'
+
+
+def test_other_pr_cannot_mask_the_correct_run_even_with_the_same_head():
+    unrelated = dict(RUN, id=124, pull_requests=[{'number': 10}], conclusion='failure')
+    assert ci.latest_run([RUN, unrelated], EXPECTED) == RUN
+    assert ci.latest_run([dict(RUN, pull_requests=[])], EXPECTED) is None
+
+
+def test_push_runs_are_scoped_to_the_branch():
+    expected = ci.context(dict(ENV, GITHUB_EVENT_NAME='push', GITHUB_REF='refs/heads/main'))
+    main = dict(RUN, event='push', head_branch='main')
+    develop = dict(main, id=124, head_branch='develop')
+    assert ci.latest_run([main, develop], expected) == main
+
+
+def test_kubernetes_markdown_push_cannot_wait_for_absent_canonical_run():
+    triggers = workflows()['k8s-deploy.yml']['on']
+    assert triggers['push']['paths'][-1] == '!**.md'
+    assert 'k8s/**' in triggers['push']['paths'][:-1]
+    assert '!**.md' not in triggers['pull_request']['paths']

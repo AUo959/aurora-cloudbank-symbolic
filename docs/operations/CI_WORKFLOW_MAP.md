@@ -30,8 +30,9 @@ path. Code Quality now reports the combined canonical outcome, including tests.
 
 Canonical CI uploads `ci-verification-<run_attempt>` containing
 `ci-verification.json`, even after failure. The record binds the repository,
-event, branch head, actual checkout, run ID, attempt and job result. The consumer
-queries only `aurora-ci-minimal.yml` runs with its event and head SHA, chooses the
+event, ref/PR identity, branch head, actual checkout, run ID, attempt and job result. The consumer
+queries only `aurora-ci-minimal.yml` runs with its event and head SHA, filters
+them to the same PR number or push branch, chooses the
 latest run, requires its successful completion, and downloads only that attempt's
 receipt. Both head and checkout must match: for PRs the checkout is the synthetic
 merge commit, while the run API's head is the source branch commit.
@@ -45,7 +46,7 @@ code from artifacts is executed, and the consumer token has only contents/read
 and actions/read. Canonical CI's permission scope is unchanged.
 
 Pull requests always trigger canonical and quality validation. Their push
-ignore paths agree, so documentation-only pushes do not create a quality gate
+ignore paths agree and Kubernetes excludes Markdown-only pushes, so documentation-only pushes do not create a quality gate
 waiting for intentionally absent canonical CI. A manual Kubernetes run does not
 need a canonical receipt and can test arbitrary refs independently.
 

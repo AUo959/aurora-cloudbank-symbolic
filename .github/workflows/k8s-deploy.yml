@@ -18,6 +18,7 @@ on:
       - 'Dockerfile'
       - 'requirements*.txt'
       - '.github/workflows/k8s-deploy.yml'
+      - '!**.md'  # Canonical CI intentionally skips Markdown-only pushes.
   pull_request:
     branches: [main, develop]
     paths:

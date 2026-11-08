@@ -34,13 +34,16 @@ def context(environ):
     event = environ['GITHUB_EVENT_NAME']
     sha = environ['GITHUB_SHA']
     head = environ.get('CI_HEAD_SHA') or sha
+    ref = environ['GITHUB_REF']
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*', repo):
         raise ValueError('Invalid repository')
     if event not in ('push', 'pull_request', 'workflow_dispatch'):
         raise ValueError('Unsupported CI event')
     if not all(re.fullmatch(r'[0-9a-f]{40}', value) for value in (sha, head)):
         raise ValueError('Invalid checkout/head SHA')
-    return {'repository': repo, 'event': event, 'checkout_sha': sha, 'head_sha': head}
+    if event == 'pull_request' and not re.fullmatch(r'refs/pull/[1-9][0-9]*/merge', ref):
+        raise ValueError('Invalid PR ref')
+    return {'repository': repo, 'event': event, 'ref': ref, 'checkout_sha': sha, 'head_sha': head}
 
 
 def record(environ):
@@ -55,9 +58,16 @@ def record(environ):
     Path(RECEIPT).write_text(json.dumps(proof, sort_keys=True) + '\n')
 
 
+def same_ref(run, expected):
+    if expected['event'] == 'pull_request':
+        number = int(expected['ref'].split('/')[2])
+        return any(pr['number'] == number for pr in run.get('pull_requests', []))
+    return run.get('head_branch') == expected['ref'].removeprefix('refs/heads/').removeprefix('refs/tags/')
+
+
 def latest_run(runs, expected):
     candidates = [run for run in runs if run['head_sha'] == expected['head_sha']
-                  and run['event'] == expected['event']]
+                  and run['event'] == expected['event'] and same_ref(run, expected)]
     return max(candidates, key=lambda run: run['id'], default=None)
 
 

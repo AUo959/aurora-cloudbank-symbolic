@@ -78,7 +78,9 @@ copy. The source-anchor scanner excludes gitignored dist directories so a
 post-build backend test run does not scan large generated/minified bundles;
 a regression preserves scanning of authored source. An unrelated external font
   stylesheet is stubbed for the deterministic browser check.
-- Full test/CI landing evidence: PENDING_FINAL_CHECKS.
+- Full required CI and final reviewed revision are recorded on
+  [CloudBank PR #1686](https://github.com/AUo959/aurora-cloudbank-symbolic/pull/1686);
+  the root completion receipt records the final landing and test totals.
 
 The independent pre-patch investigator confirmed the separate vendored/CDN
 boundary. The candidate reviewer could not run because of its usage limit;

@@ -99,3 +99,19 @@ async def test_incomplete_response_is_not_reported_as_success():
     result = await interface._execute_openai(AIRequest(prompt='test'), AIModel.GPT_6_1_SOL)
     assert not result.success
     assert 'incomplete' in result.error
+
+
+@pytest.mark.asyncio
+async def test_incomplete_output_still_counts_toward_token_budget():
+    from unittest.mock import MagicMock
+    from modules.ai_core.unified_ai_interface import AIProvider, AIResponse
+    interface = UnifiedAIInterface()
+    interface._budget = MagicMock()
+    response = AIResponse(content='', model_used=AIModel.GPT_6_1_SOL,
+                          provider=AIProvider.OPENAI, tokens_used=100, latency_ms=1,
+                          success=False, error='incomplete')
+    with patch.object(interface, '_execute_openai', AsyncMock(return_value=response)):
+        result = await interface.execute_request(AIRequest(prompt='test'))
+    assert not result.success
+    interface._budget.record_usage.assert_called_once_with(
+        user_id='anonymous', tokens_used=100, context_tag='aurora_ai_request')

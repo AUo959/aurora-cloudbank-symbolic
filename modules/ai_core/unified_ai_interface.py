@@ -460,8 +460,8 @@ class UnifiedAIInterface:
             else:
                 raise ValueError(f"Unknown provider: {caps.provider}")
 
-            # Record actual usage after a successful call
-            if self._budget is not None and response.success:
+            # Record billed usage, including incomplete responses.
+            if self._budget is not None and response.tokens_used > 0:
                 self._budget.record_usage(
                     user_id=request.user_id,
                     tokens_used=response.tokens_used,
@@ -503,8 +503,8 @@ class UnifiedAIInterface:
                     else:
                         continue
 
-                    # Record actual usage for the successful fallback call
-                    if self._budget is not None and response.success:
+                    # Record billed usage even if the fallback exhausted its output budget.
+                    if self._budget is not None and response.tokens_used > 0:
                         self._budget.record_usage(
                             user_id=request.user_id,
                             tokens_used=response.tokens_used,

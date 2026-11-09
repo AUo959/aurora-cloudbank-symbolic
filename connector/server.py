@@ -21,26 +21,22 @@ import os
 import sys
 from typing import Any
 
-# jsonschema is an optional dependency — validation is skipped gracefully if absent
+# MCP SDK v2 uses typed constructor callbacks and explicit result envelopes.
+# Keep this contract aligned with the standalone and repository requirements.
 try:
-    import jsonschema as _jsonschema
-    _JSONSCHEMA_AVAILABLE = True
-except ImportError:
-    _jsonschema = None  # type: ignore[assignment]
-    _JSONSCHEMA_AVAILABLE = False
-
-# MCP SDK v1 -- keep this contract aligned with connector/pyproject.toml and
-# requirements-optional.txt. MCP v2 uses a different Server handler API.
-try:
-    from mcp.server import Server
+    import jsonschema
+    from mcp.server import Server, ServerRequestContext
     from mcp.server.stdio import stdio_server
-    from mcp.types import (
+    from mcp_types import (
+        CallToolRequestParams,
+        CallToolResult,
+        ListToolsResult,
+        PaginatedRequestParams,
         TextContent,
-        Tool,
     )
 except ImportError:
     print(
-        'ERROR: MCP SDK not installed. Run: pip install "mcp>=1.30.0,<2.0.0"',
+        'ERROR: MCP SDK dependencies not installed. Run: pip install "mcp>=2.3.0,<3.0.0"',
         file=sys.stderr,
     )
     sys.exit(1)
@@ -59,64 +55,49 @@ APP_NAME = "aurora-cloudbank-connector"
 APP_VERSION = "0.1.0"
 
 
+def _error_result(message: str) -> CallToolResult:
+    return CallToolResult(content=[TextContent(type="text", text=message)], is_error=True)
+
+
+def _validation_error(tool: Any, arguments: dict[str, Any]) -> str | None:
+    input_schema = tool.schema().input_schema
+    if input_schema:
+        try:
+            jsonschema.validate(arguments, input_schema)
+        except jsonschema.ValidationError as error:
+            path = "/".join(str(part) for part in error.absolute_path)
+            return f"TOOL_VALIDATION_ERROR: {error.message}" + (f" (path: {path})" if path else "")
+    return None
+
+
 def build_server() -> Server:
-    """Construct and configure the MCP server instance."""
-    server = Server(APP_NAME)
+    """Construct v2 callbacks while preserving the connector's five tool contracts."""
+    async def list_tools(
+        _context: ServerRequestContext, _params: PaginatedRequestParams | None,
+    ) -> ListToolsResult:
+        return ListToolsResult(tools=[tool.schema() for tool in TOOL_REGISTRY.values()])
 
-    @server.list_tools()
-    async def list_tools() -> list[Tool]:
-        """Return schemas for all registered Aurora tools."""
-        return [tool.schema() for tool in TOOL_REGISTRY.values()]
-
-    _jsonschema_warning_emitted = False
-
-    @server.call_tool()
-    async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
-        """Dispatch a tool call to the appropriate handler."""
-        nonlocal _jsonschema_warning_emitted
-
+    async def call_tool(
+        _context: ServerRequestContext, params: CallToolRequestParams,
+    ) -> CallToolResult:
+        name = params.name
+        arguments = params.arguments or {}
         if name not in TOOL_REGISTRY:
-            return [TextContent(
-                type="text",
-                text=f"ERROR: Unknown tool '{name}'. "
-                     f"Available: {', '.join(TOOL_REGISTRY.keys())}"
-            )]
-
+            return _error_result(
+                f"ERROR: Unknown tool '{name}'. Available: {', '.join(TOOL_REGISTRY.keys())}"
+            )
         tool = TOOL_REGISTRY[name]
-
-        # --- inputSchema validation ---
-        if _JSONSCHEMA_AVAILABLE:
-            tool_schema = tool.schema()
-            input_schema = getattr(tool_schema, "inputSchema", None)
-            if input_schema:
-                try:
-                    _jsonschema.validate(arguments, input_schema)
-                except _jsonschema.ValidationError as ve:
-                    path = "/".join(str(p) for p in ve.absolute_path)
-                    return [TextContent(
-                        type="text",
-                        text=f"TOOL_VALIDATION_ERROR: {ve.message}"
-                             + (f" (path: {path})" if path else ""),
-                    )]
-        else:
-            if not _jsonschema_warning_emitted:
-                log.warning(
-                    "jsonschema not installed — tool input validation is disabled. "
-                    "Install it with: pip install jsonschema"
-                )
-                _jsonschema_warning_emitted = True
-
+        message = _validation_error(tool, arguments)
+        if message:
+            return _error_result(message)
         try:
             result = await tool.run(arguments)
-            return [TextContent(type="text", text=result)]
+            return CallToolResult(content=[TextContent(type="text", text=result)])
         except Exception:  # noqa: BLE001
             log.exception("Tool '%s' raised an exception", name)
-            return [TextContent(
-                type="text",
-                text=f"TOOL_EXECUTION_ERROR: tool '{name}' failed; check server logs"
-            )]
+            return _error_result(f"TOOL_EXECUTION_ERROR: tool '{name}' failed; check server logs")
 
-    return server
+    return Server(APP_NAME, version=APP_VERSION, on_list_tools=list_tools, on_call_tool=call_tool)
 
 
 async def run_stdio(server: Server) -> None:
@@ -130,43 +111,38 @@ async def run_stdio(server: Server) -> None:
         )
 
 
+def build_sse_app(server: Server):
+    """Build the legacy SSE endpoint as ASGI, preserving the public /sse URL."""
+    from mcp.server.sse import SseServerTransport
+    from starlette.applications import Starlette
+    from starlette.routing import Mount, Route
+
+    transport = SseServerTransport("/messages/")
+
+    class SseEndpoint:
+        async def __call__(self, scope, receive, send):
+            async with transport.connect_sse(scope, receive, send) as streams:
+                await server.run(streams[0], streams[1], server.create_initialization_options())
+
+    # An ASGI callable instance prevents Route from wrapping this as a
+    # one-argument request handler. The transport owns the response lifecycle.
+    return Starlette(routes=[
+        Route("/sse", endpoint=SseEndpoint(), methods=["GET"]),
+        Mount("/messages", app=transport.handle_post_message),
+    ])
+
+
 async def run_sse(server: Server, port: int) -> None:
-    """Run the MCP server over SSE (HTTP streaming) transport."""
+    """Run the MCP server over the existing SSE transport."""
     try:
-        from mcp.server.sse import SseServerTransport
-        from starlette.applications import Starlette
-        from starlette.routing import Route, Mount
         import uvicorn
+        app = build_sse_app(server)
     except ImportError:
-        log.error("SSE transport requires: pip install mcp[sse] uvicorn starlette")
+        log.error("SSE transport requires the connector's sse dependencies (uvicorn and starlette)")
         sys.exit(1)
-
-    log.info(
-        "Aurora Cloudbank MCP Connector v%s starting (SSE) on port %d",
-        APP_VERSION,
-        port,
-    )
-
-    sse_transport = SseServerTransport("/messages")
-
-    async def handle_sse(scope, receive, send):
-        async with sse_transport.connect_sse(scope, receive, send) as streams:
-            await server.run(
-                streams[0],
-                streams[1],
-                server.create_initialization_options(),
-            )
-
-    starlette_app = Starlette(
-        routes=[
-            Route("/sse", endpoint=handle_sse),
-            Mount("/messages", app=sse_transport.handle_post_message),
-        ]
-    )
-
-    config = uvicorn.Config(starlette_app, host="0.0.0.0", port=port, log_level="info")
-    server_instance = uvicorn.Server(config)
-    await server_instance.serve()
+    log.info("Aurora Cloudbank MCP Connector v%s starting (SSE) on port %d", APP_VERSION, port)
+    config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
+    await uvicorn.Server(config).serve()
 
 
 def main() -> None:

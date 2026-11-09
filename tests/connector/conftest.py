@@ -18,8 +18,12 @@ To run them:
 """
 
 import os
+from pathlib import Path
 
 import pytest
+from mcp import Client
+
+from connector.server import build_server
 
 # Modules whose tests reach a live bridge. Everything else in this package
 # (seal HMAC, schema validation of declared inputs, server dispatch and error
@@ -28,7 +32,6 @@ _REQUIRES_LIVE_BRIDGE = {
     "test_tools.py",
     "test_bridge_headers.py",
     "test_transport.py",
-    "test_schema_validation.py",
 }
 
 _SKIP_REASON = (
@@ -48,5 +51,15 @@ def pytest_collection_modifyitems(config, items):
 
     skip_marker = pytest.mark.skip(reason=_SKIP_REASON)
     for item in items:
-        if item.path.name in _REQUIRES_LIVE_BRIDGE:
+        if item.path.parent == Path(__file__).parent and item.path.name in _REQUIRES_LIVE_BRIDGE:
             item.add_marker(skip_marker)
+
+
+# Exercise the public v2 client/dispatcher, including both current discovery
+# and legacy initialize/initialized sessions; no private handler table access.
+
+
+@pytest.fixture(params=["auto", "legacy"])
+def mcp_client(request):
+    # Enter and exit in the test task; AnyIO cancel scopes are task-local.
+    return Client(build_server(), mode=request.param)

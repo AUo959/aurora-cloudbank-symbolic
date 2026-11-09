@@ -41,7 +41,7 @@ def test_queue_workflows_pin_actions_and_python_packages():
 def test_constellation_ci_executes_only_installed_node_tools():
     workflow = (WORKFLOWS / "constellation-ci.yml").read_text(encoding="utf-8")
     CHECK.assertNotIn("npx ", workflow)
-    CHECK.assertEqual(workflow.count("npm ci --ignore-scripts"), 3)
+    CHECK.assertEqual(workflow.count("npm ci --ignore-scripts"), 1)
     CHECK.assertIn("./node_modules/.bin/tsc", workflow)
 
 

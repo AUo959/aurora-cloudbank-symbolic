@@ -244,7 +244,7 @@ pytest -x tests/
 ### Local CI Equivalents
 ```bash
 make check              # = aurora-ci-minimal.yml
-make lint-tools         # = code-quality.yml (scoped)
+make lint-tools         # = aurora-ci-minimal.yml (scoped)
 python scripts/validate_dependencies.py  # = dependency-validation.yml
 ```
 

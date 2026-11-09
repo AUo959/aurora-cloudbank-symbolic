@@ -1,9 +1,9 @@
 """Trust-boundary tests for canonical CI reuse (no network or runner required)."""
 import io
 import json
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
-import zipfile
 
 import pytest
 
@@ -91,7 +91,7 @@ def test_missing_or_stale_proof_times_out_closed():
     for response in ({'workflow_runs': []}, {'workflow_runs': [dict(RUN, status='queued')]}):
         ticks = iter([0, 0, 2])
         with pytest.raises(TimeoutError):
-            ci.wait(ENV, timeout=1, api=lambda _: response, clock=lambda: next(ticks), sleep=lambda _: None)
+            ci.wait(ENV, timeout=1, api=lambda _, response=response: response, clock=lambda ticks=ticks: next(ticks), sleep=lambda _: None)
 
 
 def test_rerun_started_during_download_is_not_accepted():
@@ -131,13 +131,12 @@ def workflows():
     # BaseLoader preserves GitHub's literal `on` key (YAML 1.1 treats it as True).
     root = Path(__file__).resolve().parents[1] / '.github/workflows'
     return {name: yaml.load((root / name).read_text(), Loader=yaml.BaseLoader) for name in (
-        'aurora-ci-minimal.yml', 'code-quality.yml', 'k8s-deploy.yml')}
+        'aurora-ci-minimal.yml', 'constellation-ci.yml', 'k8s-deploy.yml')}
 
 
 def test_check_names_and_build_dependency_are_preserved():
     files = workflows()
     assert files['aurora-ci-minimal.yml']['jobs']['ci']['name'] == 'CI Check'
-    assert 'code_quality' in files['code-quality.yml']['jobs']
     k8s = files['k8s-deploy.yml']['jobs']
     assert k8s['test']['name'] == 'Run Tests'
     assert k8s['build']['needs'] == ['test']
@@ -153,11 +152,25 @@ def test_manual_tests_and_automatic_verification_are_separate():
     assert 'GH_TOKEN' in gate['env']
 
 
-def test_docs_only_push_cannot_leave_quality_waiting_for_absent_ci():
-    files = workflows()
-    assert files['code-quality.yml']['on']['push']['paths-ignore'] == (
-        files['aurora-ci-minimal.yml']['on']['push']['paths-ignore'])
-    assert 'paths-ignore' not in files['code-quality.yml']['on']['pull_request']
+def test_constellation_preserves_unique_validation_with_one_install():
+    workflow = workflows()['constellation-ci.yml']
+    assert set(workflow['jobs']) == {'test'}
+    steps = workflow['jobs']['test']['steps']
+    commands = [step.get('run', '') for step in steps]
+    assert commands.count('npm ci --ignore-scripts') == 1
+    audit = next(step for step in steps if 'npm audit' in step.get('run', ''))
+    types = next(step for step in steps if '--noEmit' in step.get('run', ''))
+    assert audit['continue-on-error'] == 'true'
+    assert steps.index(audit) < steps.index(types)
+    assert 'continue-on-error' not in types
+    assert any('npm run lint:check' in command for command in commands)
+    assert any('npm run build' in command for command in commands)
+    artifacts = {step.get('with', {}).get('name'): step for step in steps
+                 if 'upload-artifact@' in step.get('uses', '')}
+    assert set(artifacts) == {'security-audit', 'typescript-check', 'lint-check', 'build-log'}
+    assert all(step['if'] == 'always()' for step in artifacts.values())
+    assert 'pull_request' in workflow['on']
+    assert 'paths-ignore' not in workflows()['aurora-ci-minimal.yml']['on']['pull_request']
 
 
 def test_canonical_receipt_is_attempt_specific_and_always_recorded():

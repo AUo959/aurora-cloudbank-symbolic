@@ -1,7 +1,7 @@
 # CI ownership and consolidation
 
-Baseline: 41 workflow files on November 8, 2026 UTC. This is the first
-consolidation tranche, not completion of the roadmap's roughly eight core
+Baseline: 41 workflow files on November 8, 2026 UTC; 37 remain after the
+November 9 cleanup. This is a partial consolidation, not completion of the roadmap's roughly eight core
 validation lanes. Deployment, event routing, scheduled maintenance and project
 board automation are not interchangeable with pull request validation.
 
@@ -12,19 +12,18 @@ checks, advisory style (120 columns), OPAL2 and critical tests, and mandatory
 full Python suite. Its fatal syntax exclusions are narrowed to preserve the
 union of the previous lint coverage. Its public check remains **CI Check**.
 
-`code-quality.yml` retains **code_quality**, but verifies this result instead of
-installing an independent, unpinned linter. `k8s-deploy.yml` retains **Run Tests**
-and verifies the result before automatic container builds. Manual Kubernetes
-runs retain their original independent installation/lint/test path and explicit
-`skip_tests` input. Manifest validation, container build, SBOM and deployment
-steps remain separate. The notification job now explicitly depends on `test`
-so its existing test-result expression is valid.
+`k8s-deploy.yml` retains **Run Tests** and verifies canonical CI before automatic
+container builds. Manual Kubernetes runs retain independent tests and the explicit
+`skip_tests` input. Manifest validation, container build, SBOM and deployment remain.
+The redundant `code-quality.yml` receipt-only compatibility gate was retired.
 
-On matching automatic events, this removes one duplicate Python environment
-installation and test suite from Kubernetes, and one unpinned lint installation
-from Code Quality. It does not claim measured runner-minute or latency savings:
-verification jobs poll using runners and canonical CI remains on the critical
-path. Code Quality now reports the combined canonical outcome, including tests.
+Constellation CI now installs the root npm graph once. Its blocking TypeScript
+check and advisory lint, build and npm audit retain their diagnostic artifacts.
+Audit runs before the blocking check, so type failures cannot suppress it. The
+old integration job only printed a placeholder and was removed. Actual contract,
+OpenAPI, schema, Python type and manifest checks remain in
+`constellation-integration.yml`; root Node/web tests and frontend tests remain
+separate because they exercise distinct commands or dependency graphs.
 
 ## Exact result reuse
 
@@ -54,51 +53,51 @@ download invalidates acceptance. No workflow is automatically dispatched, no
 code from artifacts is executed, and the consumer token has only contents/read
 and actions/read. Canonical CI's permission scope is unchanged.
 
-Pull requests always trigger canonical and quality validation. Their push
-ignore paths agree and Kubernetes excludes Markdown-only pushes, so documentation-only pushes do not create a quality gate
-waiting for intentionally absent canonical CI. Changes to the shared verifier, its tests, or canonical workflow also trigger
-Kubernetes validation. A manual Kubernetes run does not
-need a canonical receipt and can test arbitrary refs independently.
+Pull requests always trigger canonical validation. Kubernetes excludes Markdown-only
+pushes; verifier, test or canonical workflow changes trigger its validation. Manual
+Kubernetes runs do not need a canonical receipt.
 
 ## Workflow inventory
 
 | Responsibility | Workflows |
 | --- | --- |
-| Canonical Python and compatibility entry points | `aurora-ci-minimal`, `code-quality` |
+| Canonical Python | `aurora-ci-minimal` |
 | JavaScript and browser application | `node-tests`, `frontend-ci` |
 | Specialized validation | `cross-platform-paths`, `dependency-validation`, `model-catalog-validation`, `catastrophe-prevention`, `queue-validation`, `safety_commit` |
-| Code scanning and status compatibility | `codeql-unified`, `branch-protection`, `codacy-analysis`, `codacy` |
+| Code scanning | `codeql-unified` |
 | Constellation contracts and integration | `constellation-ci`, `constellation-integration` |
 | Build, publish and collaboration | `k8s-deploy`, `aurora-release`, `aurora_agent_runner`, `deploy-pages`, `symbolic-bundle`, `collab-sync`, `cross-repo-capsule-exchange`, `synergy_dashboard` |
 | Constellation events and scheduled services | `constellation-event-publisher`, `constellation-event-router`, `constellation-health-audit`, `constellation-knowledge-aggregator` |
 | Queue, PR and project-board automation | `auto-assign-and-review`, `auto-labeler`, `auto-merge-admin`, `ci-status-project-automation`, `pr-selective-integration`, `pr_evaluation`, `project-board-ci-sync`, `queue-decision-escalation`, `queue-issue-ingestion`, `sonarcloud-issue-reporter`, `stale-and-blocked-report` |
 | State maintenance and manual administration | `simulation-state-freshness`, `admin-quick-push` |
 
-Names omit the `.yml` extension. Codacy workflows are explicitly disabled in the
-baseline; external Codacy checks are a separate integration. The three jobs in
-`branch-protection.yml` currently print success without substantive validation.
-They are retained, not represented as real security or health coverage.
+Names omit the `.yml` extension. Retired: `branch-protection` (three echo-only
+jobs), `codacy` and `codacy-analysis` (disabled jobs), and `code-quality`
+(receipt-only duplicate). External Codacy app checks and configuration remain.
 
-## Remaining consolidation
+## Required checks and consumer audit
 
-The full branch-protection administration endpoint returns 403, while read-only
-branch metadata reports required **CI Check** (Actions app 15368, non-admins
-enforcement). Effective branch rules add Copilot review, deletion and
-non-fast-forward protection, without additional workflow requirements. No
-protection setting is changed. This tranche preserves workflow filenames and
-public check names, including placeholders and disabled entry points; the
-required-check summary can inform the next compatibility-lane cleanup after
-checking their consumers. A summary is not a complete administration export.
+On November 9, read-only main branch metadata reports required **CI Check**
+(Actions app 15368, non-admin enforcement). Effective rules add Copilot review,
+deletion and non-fast-forward protection, without additional workflow requirements.
+The full protection administration endpoint returns 403; this is not a complete
+administration export. No protection setting was changed.
 
-Next inventory reviews should compare constellation validation with the
-canonical suite, examine legacy build/publish paths and their consumers, and
-replace placeholder branch-protection checks with substantive validation.
-Keep unique security, platform, dependency-resolution, frontend and deployment
-coverage. Validate each migration on both a PR and its resulting main push;
-update the root queue with measured results and remaining work.
+Repository workflow consumers use wildcard workflow-run routing rather than the
+retired filenames. No workflow_call, dispatch or required-check dependency on the
+retired lanes was found in maintained workflows. Active auditor and Copilot
+instructions now point to canonical CI; obsolete Codacy dispatch instructions were
+replaced with external-app troubleshooting. Historical investigation reports retain
+old filenames as historical evidence.
 
-To recover from a gate timeout, inspect the canonical run for the same event and
-head. Rerun canonical CI for the current checkout if necessary, then rerun the
-consumer job. Never accept a stale receipt to make a build proceed. Reverting
-the three changed workflow files restores the independent jobs; the helper,
-tests and this map can then be removed in the same reviewed rollback.
+## Remaining consolidation and rollback
+
+The roadmap remains open: specialized validation and legacy build/publish owners
+still need review before claiming roughly eight core lanes. Keep unique security,
+platform, dependency-resolution, frontend and deployment coverage. Check PR and
+resulting main runs and synchronize root pins and receipts.
+
+For receipt timeouts, inspect canonical CI for the same event and head, rerun it
+if needed, then rerun the consumer. Never accept stale proof. Reverting this
+cleanup restores the retired compatibility workflows and separate Constellation
+jobs. The canonical receipt format and Kubernetes proof gate were not changed.

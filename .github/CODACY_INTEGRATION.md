@@ -3,7 +3,6 @@
 > Current status: disabled Actions entry points were retired on November 9, 2026.
 > See [Codacy integration status](CODACY_SETUP_REQUIRED.md). The following is historical setup guidance.
 
-
 ## ✅ Completed Setup
 
 ### 1. Workflow Configuration

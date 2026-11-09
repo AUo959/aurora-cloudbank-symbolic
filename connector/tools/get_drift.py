@@ -22,7 +22,7 @@ info → L3.
 
 import json
 from datetime import datetime, timezone
-from mcp.types import Tool
+from mcp_types import Tool
 
 from connector.transport.bridge import (
     CloudbankBridge,
@@ -58,7 +58,7 @@ class GetDriftTool:
         return Tool(
             name=self.NAME,
             description=self.DESCRIPTION,
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "include_history": {

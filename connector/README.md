@@ -10,7 +10,7 @@
 
 The Aurora Cloudbank MCP Connector exposes Aurora's live symbolic state
 to **any LLM interface** that supports the Model Context Protocol —
-Claude, GPT-4o, Gemini, Ollama, and any future MCP-capable host.
+Claude, OpenAI integrations, Gemini, Ollama, and other MCP-capable hosts.
 
 It works exactly like the GitHub MCP server: the LLM discovers available
 tools, calls them by name, and receives structured responses. No custom
@@ -71,23 +71,42 @@ prompting required. Aurora's state becomes a first-class data source.
 
 ### MCP SDK Compatibility Contract
 
-The connector supports `mcp>=1.28.1,<2.0.0`. Its low-level server uses the
-MCP v1 `Server.list_tools()` and `Server.call_tool()` registration decorators.
-Repository test and lock environments pin `mcp==1.28.1` so CI exercises that
-exact public API. MCP 2.x uses a different handler-registration API and is not
-supported until a dedicated connector migration lands.
+The connector supports the Python SDK v2 line, `mcp>=2.3.0,<3.0.0`.
+CI pins `mcp==2.3.0`, including the SDK's matching `mcp-types` dependency.
+The server uses typed `on_list_tools`/`on_call_tool` callbacks and explicit
+result envelopes. Python model attributes use snake_case; the five public tool
+names and JSON input schemas retain their v1 wire format. Validation and tool
+execution failures carry the existing error prefixes and `isError: true`.
+Input validation is required; an incomplete install fails before server startup.
 
-Keep these declarations aligned when changing the contract:
+Stdio remains the default. The existing SSE entry point remains `/sse`, with
+message POSTs advertised at `/messages/`. The API bearer-token requirement and
+bridge headers remain unchanged. Both current SDK discovery and legacy
+initialize/initialized clients are tested; Python SDK v1 server APIs are no
+longer supported. See the [migration receipt](../docs/operations/MCP_V2_MIGRATION_2026-11-08.md)
+for dependency, protocol, installation and rollback evidence.
+
+Keep these declarations aligned:
 
 - `connector/pyproject.toml` for standalone connector installs;
 - `requirements-optional.txt` for repository optional installs;
 - `requirements-test.txt`, `requirements-lock.txt`, and
   `requirements-ci-hashed.txt` for reproducible CI/test installs.
 
-### Prerequisites
+### Installation
+
+From the repository root, install the standalone connector:
 
 ```bash
-pip install "mcp>=1.28.1,<2.0.0" httpx python-dotenv
+pip install ./connector
+# Optional named extra for existing SSE deployment instructions:
+pip install './connector[sse]'
+```
+
+For an existing source checkout, install its SDK dependencies with:
+
+```bash
+pip install 'mcp>=2.3.0,<3.0.0' 'httpx>=0.27.0,<1.0.0' 'jsonschema>=4.20.0,<5.0.0' python-dotenv
 ```
 
 ### Environment Variables
@@ -111,7 +130,7 @@ python -m connector.server
 ### Run (SSE transport — for HTTP-based hosts)
 
 ```bash
-python -m connector.server --transport sse --port 8765
+python -m connector.server --transport sse --port 8765 --host 127.0.0.1
 ```
 
 ### Claude Desktop Config (`claude_desktop_config.json`)
@@ -166,3 +185,13 @@ should eventually be replaced with a live config fetch.
 ---
 
 *Continuity flows through coherence. The system remembers because we chose to align.*
+
+### SSE listener boundary
+
+The SDK v2 migration changes the SSE listen default from all interfaces to
+`127.0.0.1`. Stdio remains the default transport. Use `--host` to select a
+different listen address when deploying behind an authenticated gateway.
+That gateway must protect both `/sse` and `/messages/`.
+`AURORA_CONNECTOR_TOKEN` authenticates the connector to the Aurora backend;
+it does not authenticate incoming MCP clients. Keep direct local deployments
+on loopback.

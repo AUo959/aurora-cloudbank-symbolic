@@ -17,7 +17,7 @@ Each tool is tested for:
 import json
 
 import pytest
-from mcp.types import Tool
+from mcp_types import Tool
 
 from connector.tools.get_state import GetStateTool
 from connector.tools.get_agents import GetAgentsTool
@@ -42,10 +42,10 @@ def test_get_state_schema_name():
 
 @pytest.mark.unit
 def test_get_state_schema_has_include_echochain_property():
-    """schema().inputSchema must advertise the include_echochain parameter."""
+    """schema().input_schema must advertise the include_echochain parameter."""
     tool = GetStateTool()
     schema = tool.schema()
-    assert "include_echochain" in schema.inputSchema["properties"]
+    assert "include_echochain" in schema.input_schema["properties"]
 
 
 @pytest.mark.unit
@@ -110,10 +110,10 @@ def test_get_agents_schema_name():
 
 @pytest.mark.unit
 def test_get_agents_schema_has_visibility_filter():
-    """schema().inputSchema must advertise the visibility_filter parameter."""
+    """schema().input_schema must advertise the visibility_filter parameter."""
     tool = GetAgentsTool()
     schema = tool.schema()
-    assert "visibility_filter" in schema.inputSchema["properties"]
+    assert "visibility_filter" in schema.input_schema["properties"]
 
 
 @pytest.mark.unit
@@ -190,10 +190,10 @@ def test_get_drift_schema_name():
 
 @pytest.mark.unit
 def test_get_drift_schema_has_include_history():
-    """schema().inputSchema must advertise the include_history parameter."""
+    """schema().input_schema must advertise the include_history parameter."""
     tool = GetDriftTool()
     schema = tool.schema()
-    assert "include_history" in schema.inputSchema["properties"]
+    assert "include_history" in schema.input_schema["properties"]
 
 
 @pytest.mark.unit
@@ -284,10 +284,10 @@ def test_get_ethics_log_schema_name():
 
 @pytest.mark.unit
 def test_get_ethics_log_schema_has_limit_and_severity():
-    """schema().inputSchema must advertise the limit and severity_filter parameters."""
+    """schema().input_schema must advertise the limit and severity_filter parameters."""
     tool = GetEthicsLogTool()
     schema = tool.schema()
-    props = schema.inputSchema["properties"]
+    props = schema.input_schema["properties"]
     assert "limit" in props
     assert "severity_filter" in props
 
@@ -372,10 +372,10 @@ def test_get_capsules_schema_name():
 
 @pytest.mark.unit
 def test_get_capsules_schema_has_loaded_only():
-    """schema().inputSchema must advertise the loaded_only parameter."""
+    """schema().input_schema must advertise the loaded_only parameter."""
     tool = GetCapsulesTool()
     schema = tool.schema()
-    assert "loaded_only" in schema.inputSchema["properties"]
+    assert "loaded_only" in schema.input_schema["properties"]
 
 
 @pytest.mark.unit

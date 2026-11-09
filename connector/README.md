@@ -10,7 +10,7 @@
 
 The Aurora Cloudbank MCP Connector exposes Aurora's live symbolic state
 to **any LLM interface** that supports the Model Context Protocol —
-Claude, GPT-4o, Gemini, Ollama, and any future MCP-capable host.
+Claude, OpenAI integrations, Gemini, Ollama, and other MCP-capable hosts.
 
 It works exactly like the GitHub MCP server: the LLM discovers available
 tools, calls them by name, and receives structured responses. No custom

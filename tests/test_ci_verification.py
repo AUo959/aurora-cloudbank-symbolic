@@ -1,9 +1,9 @@
 """Trust-boundary tests for canonical CI reuse (no network or runner required)."""
 import io
 import json
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
-import zipfile
 
 import pytest
 
@@ -91,7 +91,7 @@ def test_missing_or_stale_proof_times_out_closed():
     for response in ({'workflow_runs': []}, {'workflow_runs': [dict(RUN, status='queued')]}):
         ticks = iter([0, 0, 2])
         with pytest.raises(TimeoutError):
-            ci.wait(ENV, timeout=1, api=lambda _: response, clock=lambda: next(ticks), sleep=lambda _: None)
+            ci.wait(ENV, timeout=1, api=lambda _, response=response: response, clock=lambda ticks=ticks: next(ticks), sleep=lambda _: None)
 
 
 def test_rerun_started_during_download_is_not_accepted():

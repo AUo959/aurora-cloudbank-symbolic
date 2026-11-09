@@ -179,7 +179,7 @@ suggest a test pattern?"
 **CI/CD Pipeline Help:**
 ```
 User: "Why is my PR failing CI?"
-Auditor: "Looking at the workflow logs... The code-quality.yml workflow is failing 
+Auditor: "Looking at the workflow logs... The aurora-ci-minimal.yml workflow is failing
 on flake8. Specifically:
 
 - src/new_module.py:45:121 - Line too long (134 > 120)
@@ -306,7 +306,7 @@ pytest -m "not slow"                    # Fast tests only (CI pattern)
 - **Copilot Instructions:** `.github/copilot-instructions.md`
 - **Code Quality System:** `docs/CODE_QUALITY_SYSTEM.md`
 - **Validation Checklist:** See "Before Committing" section
-- **CI Workflows:** `.github/workflows/code-quality.yml`
+- **CI Workflows:** `.github/workflows/aurora-ci-minimal.yml`
 - **Security Policy:** `.security/SECURITY_POLICY.md`
 
 ---

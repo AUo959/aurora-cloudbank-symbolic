@@ -1,0 +1,155 @@
+{
+  "receipt_id": "GUMAS-PHASE10-FACTUAL-REPORTER-EVIDENCE-EXPORT-ACCEPTANCE-2026-08-15",
+  "task_id": "TASK-20260812-gumas-deterministic-battle-runtime",
+  "phase": 10,
+  "phase_name": "deterministic factual reporter and evidence export",
+  "status": "PASS",
+  "accepted_branch_head": "635e97e05790c5d2efae6d66141bc3c1450e3d43",
+  "historical_canon_status": "non_canon_simulation_instance",
+  "run0_executed": false,
+  "run0_remains_blocked": true,
+  "contract": {
+    "contract_id": "GUMAS_DETERMINISTIC_FACTUAL_REPORTER_EVIDENCE_EXPORT_v1_0",
+    "version": "1.0.0",
+    "normative_spec_path": "simulation/specs/GUMAS__SPEC__DETERMINISTIC_FACTUAL_REPORTER_EVIDENCE_EXPORT__v1.0__2026-08-15.md",
+    "normative_spec_sha256": "016f2bfb39a5af911462a55c53e96959b7b8fe409f6b1f741c76156db7e4e041",
+    "runtime_path": "simulation/runtime/gumas_factual_reporter/",
+    "canonical_json_profile": "aurora-canonical-json-v1",
+    "profiles": [
+      "public_summary_v1",
+      "simulation_truth_v1"
+    ],
+    "projection_only": true,
+    "transition_imports_or_calls_permitted": false,
+    "ambient_rng_used": false,
+    "floating_authority_used": false,
+    "wall_clock_used": false,
+    "network_used": false,
+    "llm_authority_used": false
+  },
+  "source_identity": {
+    "phase10_bundle_sha256": "ca6c4c61e91c9ab87578aafb1308910539fd56e3e8c4cee38b0502022af3942a",
+    "module_sha256": {
+      "__init__.py": "78fe5c97a0c0303a0931e06fdd293dd826a54af12081f4aa017f332f86b28e12",
+      "constants.py": "bd1945eff9a4bc92365af2d0eea5f33370afd9be102d8ccf7e95df7f98c4a2dc",
+      "exporter.py": "3c1bedb42f9eabd4aef2f673f293b026c39d2f881a7646cab10d30faa79abf00",
+      "identity.py": "249798641bb39c7f281a0b562fa8b6b07d14a4273d21512a3e70a21099b90f65",
+      "projection.py": "f2b70d68c8e9a11ed7a7b2e0e88f316d6c6a013c67d7a426703f7249ec44a11e",
+      "rendering.py": "630f1a2e3e4f4bfb028b08d09c49ba162b9c9dc66da0af114ce2054618463995",
+      "validation.py": "22a7cb0f0f28b4456af74dd9704dd2ca0d35dc3d5b9351ff456b6fa068bdef84"
+    },
+    "smoke_module_sha256": "740e912c1528ce0c404099f3443e7fe32540794111ca788fac2daeec3f8d2855",
+    "workflow_sha256": "3df677b217e910e56c095d5d9447f2fceac12db870aa2deb4c4b3f611f69b3b7",
+    "focused_test_sha256": "2ed049e908a1c611456a201236eab50be6be3682fb7ee97ede312737d922332d",
+    "contract_test_sha256": "3330d2636699f604be037848ddd2ea8cae43ee1bdcf708f39000d300eae1a014"
+  },
+  "accepted_input_witness": {
+    "phase9_receipt_path": "simulation/receipts/GUMAS__RECEIPT__LIVE_OBSERVATION_ORCHESTRATOR_LEDGER_PHASE9__v1.0__2026-08-15.json",
+    "phase9_accepted_branch_head": "689eb440114c3be9463a2e1228117d0e0af0aacb",
+    "source_t0_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec",
+    "t0_roster_sha256": "11d22e6de49e18768a94b4a0f43170b70ae6b0fd901dafa6d610f7f1e180ff85",
+    "run_identity_sha256": "5173f288268c7d430621f493cd22dd843a740d0026952800c4e507a19ef33528",
+    "ledger_entry_sha256": "e5fbf15363efe8786171229a8ee7bca99972ac24db44c013158f0835c0d9122a",
+    "macrosteps_in_witness": 1,
+    "termination_mode": "ongoing",
+    "can_continue": true,
+    "transition_reporter_invoked": false,
+    "run0_executed": false
+  },
+  "accepted_report_outputs": {
+    "truth_normalized_report_sha256": "d0a06b970b1f2e72ee349d0a45cee52024dfacd8da19b9a9a3d5d65abe68820f",
+    "truth_rendered_report_sha256": "b414221d5bd4c1d7f4ee1d9527e687f96415eeeca29651ba3eeed75679f7b4e7",
+    "truth_evidence_index_sha256": "3f4bd6b2b28065fb0e3c81314ab2c74bbaeefc12d5dc1e7dc3992830ab1ceb7b",
+    "truth_export_receipt_sha256": "3ba3b4bf6be044c118955de7812b292ebfed0c1e1ae63305b6fb8b94e349044d",
+    "public_normalized_report_sha256": "a2de14d90169c7571671b521ba18abbf80059c68401e5b3fbe6ec49657a0bbbc",
+    "public_rendered_report_sha256": "39f48ae18a7b8973e01317b8639229110d25e8d1da6c19b6536ef1187e5ea23c",
+    "reporter_replay_exact": true
+  },
+  "training_export_boundary": {
+    "leakage_safe_pair": "command_observation -> command_order",
+    "pair_is_projected_only_from_validated_accepted_artifacts": true,
+    "hidden_opponent_state_exposed": false,
+    "rendered_prose_is_transition_authority": false,
+    "model_output_may_feed_back_into_run0": false,
+    "interpretation": "The pair is a governed deterministic training/evaluation example for a future Aurora-native state model. It is not permission to train, deploy, command, continue the witness, or execute Run 0."
+  },
+  "verified_invariants": {
+    "caller_run_and_ledger_trust_anchors_required": true,
+    "complete_genesis_to_head_ledger_chain_required": true,
+    "artifact_hashes_and_cross_links_recomputed": true,
+    "phase6_raw_and_phase7_semantic_normalized_identities_distinct": true,
+    "ledger_gap_reorder_fork_and_mutation_fail_closed": true,
+    "same_input_regenerates_byte_identical_outputs": true,
+    "mapping_insertion_order_inert": true,
+    "hidden_state_cannot_enter_projection": true,
+    "phase8_terminal_outcome_copied_not_redecided": true,
+    "public_profile_is_whitelist_projection_of_truth": true,
+    "every_rendered_statement_maps_to_evidence_refs": true,
+    "reporter_absent_from_transition_path": true,
+    "reporter_does_not_execute_macrosteps": true,
+    "run0_false_proven": true
+  },
+  "validation": {
+    "focused_workflow": {
+      "name": "GUMAS Factual Reporter",
+      "run_id": 31870997151,
+      "job_id": 94979474632,
+      "head_sha": "635e97e05790c5d2efae6d66141bc3c1450e3d43",
+      "conclusion": "success",
+      "focused_tests": "10 passed",
+      "real_pinned_canonrec_one_step_smoke": "success",
+      "phase9_execute_macrostep_call_count": 1,
+      "reporter_execute_macrostep_call_count": 0,
+      "artifact_id": 9243405496,
+      "artifact_name": "gumas-factual-reporter-evidence",
+      "artifact_size_bytes": 1380,
+      "artifact_sha256": "0b2969553b33bae5d2ab5ee67e9e372e6b2497f8c4eafb809c6fc5f010f047cd"
+    },
+    "local_cross_phase": {
+      "tests": "73 passed",
+      "phases": "Phase 4 through Phase 10",
+      "focused_tests": "10 passed",
+      "ruff": "all checks passed",
+      "real_pinned_canonrec_one_step_smoke": "success"
+    },
+    "local_repository_suite_context": {
+      "status": "not accepted as evidence",
+      "root_venv_blocker": "Starlette import requires unavailable httpx2",
+      "system_python_blocker": "Python 3.9 and missing repository dependencies caused 122 collection errors",
+      "acceptance_authority": "GitHub Aurora CI (Minimal) provisioned runner"
+    },
+    "repository_workflow": {
+      "name": "Aurora CI (Minimal)",
+      "run_id": 31870997221,
+      "job_id": 94979475013,
+      "head_sha": "635e97e05790c5d2efae6d66141bc3c1450e3d43",
+      "base_sha": "9c34d8e9768c6dfb1afe18f96d42e3c743e2a4e9",
+      "conclusion": "success",
+      "full_test_suite": "3714 passed, 113 skipped, 9 xfailed, 2 xpassed, 61 warnings, 101 subtests passed in 409.63s",
+      "pytest_log_artifact_id": 9243490568,
+      "pytest_log_artifact_name": "pytest-full-log",
+      "pytest_log_artifact_size_bytes": 86336,
+      "pytest_log_artifact_sha256": "26abc05bbafda6bbfd3449baac3903780d55055d57546b92a2e42665c9e65202"
+    },
+    "required_status_checks": {
+      "contexts": [
+        "CI Check"
+      ],
+      "all_succeeded": true
+    },
+    "repository_native_checks": "All reported repository-native checks on the accepted head succeeded; native codacy-analysis and integration jobs were skipped rather than failed.",
+    "external_advisory_checks": {
+      "Codacy Static Code Analysis": "failure",
+      "SonarCloud Code Analysis": "failure",
+      "required_by_branch_protection": false
+    }
+  },
+  "remaining_authority_gates": {
+    "phase11_contract_and_preflight": "admitted",
+    "control_a_exact_replay": "blocked_pending_committed_contract_and_explicit_owner_execution_authority",
+    "control_b_class_substitution": "blocked_pending_committed_contract_and_explicit_owner_execution_authority",
+    "control_c_polity_substitution": "blocked_pending_committed_contract_and_explicit_owner_execution_authority",
+    "run0": "blocked_pending_all_remaining_gates_and_explicit_owner_execution_authority"
+  },
+  "decision": "Phase 10 is accepted on implementation head 635e97e05790c5d2efae6d66141bc3c1450e3d43. Phase 11 may begin only as an authority-safe determinism/substitution validation contract and refusing preflight. No real Control A/B/C execution, additional exact-scenario macrostep, or Run 0 is authorized."
+}

@@ -1,0 +1,101 @@
+{
+  "receipt_id": "GUMAS-PHASE6-SENSING-EW-TARGETING-WEAPONS-ACCEPTANCE-2026-08-13",
+  "task_id": "TASK-20260812-gumas-deterministic-battle-runtime",
+  "phase": 6,
+  "phase_name": "sensing, EW, targeting, and weapons",
+  "status": "PASS",
+  "accepted_code_head": "f6dfa0a2335ca1c25bf6749c0775f5bb95675e24",
+  "historical_canon_status": "non_canon_simulation_instance",
+  "run0_executed": false,
+  "run0_remains_blocked": true,
+  "contract": {
+    "contract_id": "GUMAS_SENSING_EW_TARGETING_WEAPONS_v1_0",
+    "version": "1.0.0",
+    "spec_path": "simulation/specs/GUMAS__SPEC__DETERMINISTIC_SENSING_EW_TARGETING_WEAPONS__v1.0__2026-08-13.md",
+    "runtime_path": "simulation/runtime/gumas_sensing_weapons/",
+    "canonical_json_profile": "aurora-canonical-json-v1",
+    "weapon_abstraction": "effective_salvo",
+    "ambient_rng_used": false,
+    "floating_authority_used": false,
+    "damage_applied": false
+  },
+  "phase3_capability_bridge": {
+    "reason": "Accepted Phase-3 T0 intentionally stores direct q1000 capabilities under calibrated output names and folds sensors/mobility into invertible physical fields.",
+    "electronic_warfare_source": "capability_q1000.electronic_warfare_q1000",
+    "stealth_source": "capability_q1000.stealth_q1000",
+    "sensors_source": "inverse of accepted Phase-3 sensor_range_m calibration: base 3000000 m, span 15000000 m",
+    "mobility_source": "inverse of accepted Phase-3 max_accel_mm_s2 calibration: base 5000 mm/s^2, span 115000 mm/s^2",
+    "phase3_state_mutated": false,
+    "class_or_polity_special_case_added": false
+  },
+  "source_identity": {
+    "bundle_sha256": "05e65b2ee5744809f22eeb1dd6cf5cbf637690d1fa16c177c3bbeedca74427e7",
+    "module_sha256": {
+      "constants.py": "4958641b12ec762c33197f7bf7bb299485296dd944ca5816deb0422535abdd4e",
+      "kernel.py": "df17a75eb1ad9323a1971c3955a4b0ad839489b57d00f67fd7fafcfac609db28"
+    }
+  },
+  "accepted_control_witness": {
+    "source_t0_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec",
+    "movement_state_sha256": "c947b95b3e6a38c6676c4a197c5351f017734aebd56ecdf48ab0324311dd1c74",
+    "movement_receipt_sha256": "92e1b6772ab90abe3d45ae4a72d2adac137c2f1273c4998485a325a435c68d77",
+    "observation_state_sha256": "bf8606c0ae9e682cefa2cda649e817d39dea57e36687b274d9f6c3892aa5f1f3",
+    "fire_control_state_sha256": "43ec46c18f5f2efbd9ff029fb429445aa2b231086bd018c2a104c27804c64adc",
+    "phase6_next_state_sha256": "393ffd735e01da4fe4ca2e35547ee457d626005f5e27add5d6f4e97ea7ca7479",
+    "phase6_receipt_sha256": "3b84a912d1826846599dcd2c01ec763f2430af3da8931a03c01940f26faef775",
+    "contacts": 440,
+    "hostile_confirmed_contacts": 58,
+    "weapon_attempts_fired": 0,
+    "weapon_hits": 0,
+    "effect_descriptors": 0,
+    "interpretation": "At the accepted first-step geometry, the forces establish many contacts but no shooter has an eligible hostile-confirmed target within effective weapon range. The correct deterministic result is therefore no firing and no damage."
+  },
+  "verified_invariants": {
+    "same_input_replay_exact": true,
+    "command_map_insertion_order_inert": true,
+    "p17_occultation_removes_contact": true,
+    "sensor_strength_monotonic": true,
+    "target_stealth_monotonic": true,
+    "hostile_ew_cannot_improve_contact": true,
+    "protect_network_cannot_worsen_defense_under_equal_conditions": true,
+    "weapon_range_boundary_exact": true,
+    "hold_fire_produces_no_attempt": true,
+    "protected_target_ineligible": true,
+    "higher_target_mobility_cannot_increase_hit_probability": true,
+    "higher_firepower_cannot_reduce_base_effect": true,
+    "child_draw_stable_and_unrelated_attempt_independent": true,
+    "shield_armor_hull_unchanged": true,
+    "ambient_rng_absent": true,
+    "floating_authority_absent": true
+  },
+  "validation": {
+    "focused_workflow": {
+      "name": "GUMAS Sensing EW Weapons",
+      "run_id": 31767364701,
+      "job_id": 94665878398,
+      "conclusion": "success",
+      "unit_tests": "8 passed",
+      "real_pinned_canonrec_smoke": "success",
+      "artifact_id": 9206803228,
+      "artifact_name": "gumas-sensing-weapons-evidence",
+      "artifact_sha256": "1a89961f91dc6bceb7b2186f1ac4913637d23899ac26e51973ceb648fea52698",
+      "log_sha256": "2ff4bed183d76862fbf6ece3edfc1f0e5104a9dc07686d57481ed8d9706aa9c8"
+    },
+    "repository_workflow": {
+      "name": "Aurora CI (Minimal)",
+      "run_id": 31767364715,
+      "job_id": 94665918498,
+      "conclusion": "success",
+      "full_test_suite": "success",
+      "pytest_log_artifact_id": 9206939612,
+      "pytest_log_artifact_sha256": "2ec5379b8fe6a6b76501881fdd17610f2b8a998f356bdd48301152271ab5cfc7"
+    },
+    "other_required_checks": "CodeQL, Code Quality, Constellation CI, PR Evaluation, GUMAS restoration, CanonRec resolution, Physical T0, Command Policy, Movement Geometry, Safety Commit Guard, Branch Protection, Catastrophe Prevention, and PR Selective Integration all succeeded on the accepted head; Codacy was skipped rather than failed."
+  },
+  "known_integration_obligation": {
+    "id": "LIVE_COMMAND_OBSERVATION_BRIDGE",
+    "status": "required_before_integrated_run",
+    "detail": "The Phase-6 acceptance smoke intentionally reuses the frozen synthetic Phase-4 command-observation fixture to produce deterministic command receipts. The authoritative battle loop must instead derive each command-policy observation from the previously committed physical/contact/damage/logistics state. This requirement is carried into the DTER and must be implemented in the later step-orchestration/ledger phase before Controls A/B/C or Run 0."
+  },
+  "decision": "Phase 6 is accepted as a deterministic sensing/EW/targeting/weapons subsystem. Phase 7 may begin after the DTER is versioned forward. Phase 6 does not claim damage, disposition, termination, reporting, or an authoritative battle run."
+}

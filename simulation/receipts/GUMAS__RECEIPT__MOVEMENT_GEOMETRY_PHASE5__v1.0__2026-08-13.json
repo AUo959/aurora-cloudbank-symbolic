@@ -1,0 +1,106 @@
+{
+  "receipt_id": "GUMAS-PHASE5-MOVEMENT-GEOMETRY-ACCEPTANCE-2026-08-13",
+  "task_id": "TASK-20260812-gumas-deterministic-battle-runtime",
+  "phase": 5,
+  "phase_name": "bounded movement and geometry",
+  "status": "PASS",
+  "accepted_code_head": "9d89f64866ed6d884c9830574c1cd60b76b121f9",
+  "historical_canon_status": "non_canon_simulation_instance",
+  "run0_executed": false,
+  "run0_remains_blocked": true,
+  "movement_contract": {
+    "contract_id": "GUMAS_MOVEMENT_GEOMETRY_v1_0",
+    "version": "1.0.0",
+    "spec_path": "simulation/specs/GUMAS__SPEC__DETERMINISTIC_MOVEMENT_GEOMETRY__v1.0__2026-08-13.md",
+    "runtime_path": "simulation/runtime/gumas_movement_geometry/",
+    "canonical_json_profile": "aurora-canonical-json-v1",
+    "macrostep_ms": 10000,
+    "substep_ms": 100,
+    "substeps_per_macrostep": 100,
+    "rng_used": false,
+    "floating_authority_used": false
+  },
+  "movement_source_identity": {
+    "bundle_sha256": "565ef76f94cef320a4e4e8a0cbf75a301270eeef4326975b4cf41681d46bab57",
+    "module_sha256": {
+      "constants.py": "2d9ba7639250980bc35f43a8d10301e3fc12487064b1185bd6e2578127f14dea",
+      "geometry.py": "37995ef3e26bd8c787fbb5133db7b15f7f5f0db009911dc73c022a53b212163e",
+      "kernel.py": "123d5bdecf7aeafa2b93a99a830b4ea35f7f2fc0a26249b42efc66be22cf5501"
+    }
+  },
+  "accepted_control_witness": {
+    "source_t0_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec",
+    "initial_movement_state_sha256": "6b5e6b195aa8f7f839d69c1ba8e89f4a9b74db7946035f11a4a9c2e79581548d",
+    "next_movement_state_sha256": "c947b95b3e6a38c6676c4a197c5351f017734aebd56ecdf48ab0324311dd1c74",
+    "movement_receipt_sha256": "5977f48a5d32a19cf87a6c3caa8d11f26c83c1021957df0474adb982cd0444e0",
+    "command_decision_sha256": {
+      "loyalist": "7bce2c3697a5813c6175cf569ebe3d21d625f74f44e48ff5cdbac577efe5f15c",
+      "rebel": "a3e22b6a75ea784352a39d524959fd0bc39bb3fdb278ec749caf7a17d5e8e8d5"
+    },
+    "strategic_posture": {
+      "loyalist": "POSITIONAL_MANEUVER",
+      "rebel": "PRESS"
+    },
+    "navigation_intent": {
+      "loyalist": "POSITION_FOR_ADVANTAGE",
+      "rebel": "EVASIVE_VECTOR"
+    },
+    "engineering_intent": {
+      "loyalist": "PRIORITIZE_PROPULSION",
+      "rebel": "REINFORCE_DEFENSE"
+    },
+    "applied_throttle_q1000": {
+      "loyalist": 800,
+      "rebel": 650
+    },
+    "fleet_centroid_start_um": {
+      "TF-LOYALIST-P17": [-6500000000000, -1600000000000, 500000000000],
+      "TF-REBEL-P17": [6500000000000, 1600000000000, -500000000000]
+    },
+    "fleet_centroid_end_um": {
+      "TF-LOYALIST-P17": [-6485110511606, -1577640397736, 500999999895],
+      "TF-REBEL-P17": [6486726008594, 1571038831985, -500999999895]
+    },
+    "fleet_centroid_separation_start_um": 13425349157471,
+    "fleet_centroid_separation_end_um": 13386064679287,
+    "collisions": 0
+  },
+  "verified_invariants": {
+    "same_input_one_step_replay_exact": true,
+    "order_map_insertion_order_inert": true,
+    "hundred_macrostep_replay_exact": true,
+    "mirrored_gravity_points_inward": true,
+    "rotating_ellipsoid_transform_verified": true,
+    "swept_collision_detection_verified": true,
+    "ellipsoid_occultation_verified": true,
+    "class_calibrated_acceleration_caps_causal": true,
+    "impossible_evasive_order_without_reference_fails_closed": true,
+    "withdrawal_boundary_geometry_verified": true,
+    "real_38_vessel_smoke_zero_collisions": true,
+    "rng_absent": true,
+    "floating_point_authority_absent": true
+  },
+  "validation": {
+    "focused_workflow": {
+      "name": "GUMAS Movement Geometry",
+      "run_id": 31765543911,
+      "job_id": 94660577608,
+      "conclusion": "success",
+      "artifact_id": 9206158953,
+      "artifact_name": "gumas-movement-geometry-evidence",
+      "artifact_sha256": "40deba6ac343cc6b670470b1be42831b49d3c185abcf69a6dbc59521770ea4cd",
+      "log_sha256": "df9ce864fbcabe2f9008aae0b0eedc652c0b2e51528248529097548e4e02d95d"
+    },
+    "repository_workflow": {
+      "name": "Aurora CI (Minimal)",
+      "run_id": 31765543826,
+      "job_id": 94660620186,
+      "conclusion": "success",
+      "full_test_suite": "success",
+      "pytest_log_artifact_id": 9206312934,
+      "pytest_log_artifact_sha256": "b61f94fb4baf2c8518f430aecdfe84ee622117535ea5bb4d7f7ca97e31de7655"
+    },
+    "other_required_checks": "CodeQL, Code Quality, Constellation CI, PR Evaluation, GUMAS restoration, CanonRec resolution, Physical T0, Command Policy, Safety Commit Guard, Branch Protection, Catastrophe Prevention, and PR Selective Integration all succeeded on the accepted head; Codacy was skipped rather than failed."
+  },
+  "decision": "Phase 5 is accepted. Phase 6 may begin only after the DTER is versioned forward to sensing, EW, targeting, and weapons. Phase 5 establishes deterministic physical movement and geometry only; no sensing truth, weapon effect, damage, disposition, termination, reporting, or battle outcome is claimed."
+}

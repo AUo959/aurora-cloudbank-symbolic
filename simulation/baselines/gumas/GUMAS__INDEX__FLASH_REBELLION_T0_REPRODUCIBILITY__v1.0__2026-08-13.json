@@ -1,0 +1,50 @@
+{
+  "index_id": "GUMAS-RUN0-P17-T0-REPRODUCIBILITY-v1.0",
+  "purpose": "Compact durable index for regenerating and verifying the accepted 38-vessel T0 snapshot without storing a second mutable copy of the generated snapshot in Git.",
+  "status": "accepted_phase3_reference",
+  "accepted_code_head": "d8214ee7f289169a6a322459bb927061f6e525b6",
+  "generator": {
+    "path": "simulation/runtime/gumas_physical_t0/t0_smoke.py",
+    "constructor_path": "simulation/runtime/gumas_physical_t0/constructor.py",
+    "constructor_version": "1.0.0",
+    "constructor_source_sha256": "01dd9f1ed08ebc1822e42c28d038e2fff742fe8d0421c342198fbebf56208f6f"
+  },
+  "inputs": {
+    "baseline_path": "simulation/baselines/gumas/GUMAS__BASELINE__FLASH_REBELLION_PLANETOID_EQUAL_FLEETS__v1.2__2026-08-11.json",
+    "baseline_sha256": "bafb248a395135ebabf00c5ea6f8de7420daed92affb61ae9f0589a61ab0bf4c",
+    "calibration_path": "simulation/calibration/gumas/GUMAS__CALIBRATION__CANONREC_TO_PHYSICAL_TACTICAL_STATE__v1.0__2026-08-13.json",
+    "calibration_sha256": "94a6cd7ec934d3fd4a382af051e1a6bb5994ecb5d2bf6b906102367c28592cf6",
+    "canonrec_source_set_path": "simulation/canon_snapshots/canonrec/CANONREC__SOURCE_SET__GUMAS_RUN0_PHASE2__v1.0__2026-08-12.json",
+    "canonrec_commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+    "resolved_manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc",
+    "seed_u64": "0x161d76e1af7cc2a4"
+  },
+  "expected_output": {
+    "schema": "aurora://simulation/gumas/deterministic_t0_physical_state/v1.0",
+    "canonical_json_profile": "aurora-canonical-json-v1",
+    "vessels_total": 38,
+    "normalized_t0_state_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec",
+    "canonical_snapshot_file_sha256": "b9c249ceb3c8ac6c67396046aa6cbfe04d65cc0fb9b6a175d3772113ca3e9968",
+    "canonical_snapshot_size_bytes": 82075
+  },
+  "ci_evidence": {
+    "workflow": "GUMAS Physical T0",
+    "run_id": 31762064025,
+    "job_id": 94650331791,
+    "artifact_id": 9204971167,
+    "artifact_name": "gumas-physical-t0-evidence",
+    "artifact_sha256": "8954357a63240287df4c1005b0531bf38141f319048887bc1ce4b37c2fe4afb9",
+    "artifact_members": {
+      "gumas-physical-t0.log": {
+        "size_bytes": 4028,
+        "sha256": "83b93262a7c4fb6b9797ff6bce49c2a240c1a21d74d75d77d5e9eabe567c1732"
+      },
+      "gumas-t0-snapshot.json": {
+        "size_bytes": 82075,
+        "sha256": "b9c249ceb3c8ac6c67396046aa6cbfe04d65cc0fb9b6a175d3772113ca3e9968"
+      }
+    }
+  },
+  "verification_rule": "A regenerated snapshot is accepted only if canonical bytes hash to canonical_snapshot_file_sha256 and its embedded t0_sha256 equals normalized_t0_state_sha256. Any mismatch fails closed.",
+  "storage_note": "The full generated snapshot is an ephemeral CI evidence artifact and deterministically regenerable product. This index is the durable Git reference; authoritative causal inputs remain the pinned baseline, CanonRec snapshot/source set, resolver, calibration, restoration identity, constructor source, and seed."
+}

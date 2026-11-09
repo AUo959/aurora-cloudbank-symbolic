@@ -1,0 +1,78 @@
+{
+  "receipt_id": "GUMAS-PHASE3-PHYSICAL-T0-ACCEPTANCE-2026-08-13",
+  "task_id": "TASK-20260812-gumas-deterministic-battle-runtime",
+  "phase": 3,
+  "phase_name": "deterministic per-vessel T0 physical instantiation",
+  "status": "PASS",
+  "accepted_code_head": "d8214ee7f289169a6a322459bb927061f6e525b6",
+  "historical_canon_status": "non_canon_simulation_instance",
+  "run0_executed": false,
+  "run0_remains_blocked": true,
+  "inputs": {
+    "baseline_path": "simulation/baselines/gumas/GUMAS__BASELINE__FLASH_REBELLION_PLANETOID_EQUAL_FLEETS__v1.2__2026-08-11.json",
+    "baseline_sha256": "bafb248a395135ebabf00c5ea6f8de7420daed92affb61ae9f0589a61ab0bf4c",
+    "calibration_path": "simulation/calibration/gumas/GUMAS__CALIBRATION__CANONREC_TO_PHYSICAL_TACTICAL_STATE__v1.0__2026-08-13.json",
+    "calibration_sha256": "94a6cd7ec934d3fd4a382af051e1a6bb5994ecb5d2bf6b906102367c28592cf6",
+    "canonrec_commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+    "resolved_manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc",
+    "historical_source_tree_sha256": "a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9",
+    "restoration_version": "2.0.1-restored.2",
+    "seed_u64": "0x161d76e1af7cc2a4"
+  },
+  "constructor": {
+    "version": "1.0.0",
+    "path": "simulation/runtime/gumas_physical_t0/constructor.py",
+    "source_sha256": "01dd9f1ed08ebc1822e42c28d038e2fff742fe8d0421c342198fbebf56208f6f",
+    "git_blob_sha1": "f04dcf1d66ba21dafc05c43e32b7d8bc14f3e0c4",
+    "numeric_policy": "gumas-t0-fixed-point-v1",
+    "canonical_json_profile": "aurora-canonical-json-v1"
+  },
+  "accepted_output": {
+    "vessels_total": 38,
+    "vessels_per_side": 19,
+    "normalized_t0_state_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec",
+    "canonical_snapshot_size_bytes": 82075,
+    "canonical_snapshot_file_sha256": "b9c249ceb3c8ac6c67396046aa6cbfe04d65cc0fb9b6a175d3772113ca3e9968",
+    "snapshot_schema": "aurora://simulation/gumas/deterministic_t0_physical_state/v1.0"
+  },
+  "verified_invariants": {
+    "same_inputs_same_t0": true,
+    "material_symmetry_verified": true,
+    "position_sign_inversion_verified": true,
+    "velocity_sign_inversion_verified": true,
+    "formation_centroid_preserved": true,
+    "planetoid_rotation_reference_pinned": true,
+    "baseline_proxy_coefficients_non_authoritative": true,
+    "proxy_mutation_leaves_material_payload_unchanged": true,
+    "canonrec_derived_capabilities_enter_physical_state": true
+  },
+  "planetoid_rotation": {
+    "reference_frame": "P17_SCENARIO_INERTIAL_XYZ",
+    "spin_axis_q12": [0, 0, 1000000000000],
+    "rotation_period_ms": 28080000,
+    "phase_at_t0_turn_q12": 0,
+    "positive_rotation": "right_hand_rule_about_positive_Z"
+  },
+  "validation": {
+    "focused_workflow": {
+      "name": "GUMAS Physical T0",
+      "run_id": 31762064025,
+      "job_id": 94650331791,
+      "conclusion": "success",
+      "artifact_id": 9204971167,
+      "artifact_name": "gumas-physical-t0-evidence",
+      "artifact_sha256": "8954357a63240287df4c1005b0531bf38141f319048887bc1ce4b37c2fe4afb9",
+      "log_sha256": "83b93262a7c4fb6b9797ff6bce49c2a240c1a21d74d75d77d5e9eabe567c1732"
+    },
+    "repository_workflow": {
+      "name": "Aurora CI (Minimal)",
+      "run_id": 31762064059,
+      "job_id": 94650378556,
+      "conclusion": "success",
+      "full_test_suite": "success",
+      "pytest_log_artifact_id": 9205111671,
+      "pytest_log_artifact_sha256": "3795447e41dd053dcba18db31e781e49b16181f1b77598dbd955c42424ac21f2"
+    }
+  },
+  "decision": "Phase 3 is accepted. Phase 4 may begin only after the DTER is versioned forward to make deterministic command-team policy the active phase. No battle outcome is claimed."
+}

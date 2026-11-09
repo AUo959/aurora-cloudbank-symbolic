@@ -1,0 +1,141 @@
+{
+  "receipt_id": "GUMAS-PHASE4-COMMAND-POLICY-ACCEPTANCE-2026-08-13",
+  "task_id": "TASK-20260812-gumas-deterministic-battle-runtime",
+  "phase": 4,
+  "phase_name": "deterministic command-team policy",
+  "status": "PASS",
+  "accepted_code_head": "4e6027e218decf9ea4f92121436c2ba8d9ecdd7e",
+  "historical_canon_status": "non_canon_simulation_instance",
+  "run0_executed": false,
+  "run0_remains_blocked": true,
+  "policy": {
+    "policy_id": "GUMAS_COMMAND_POLICY_v1_0",
+    "policy_version": "1.0.0",
+    "spec_path": "simulation/specs/GUMAS__SPEC__DETERMINISTIC_COMMAND_TEAM_POLICY__v1.0__2026-08-13.md",
+    "policy_module_path": "simulation/runtime/gumas_command_policy/policy.py",
+    "coefficient_table_path": "simulation/runtime/gumas_command_policy/coefficients.py",
+    "policy_bundle_sha256": "8c9ba9d413945404e7648c8f427b660576b0e85887c7639a0944f56b38585b3f",
+    "policy_module_sha256": "fa8cd517dec187ee0792b9d4fceac4a5f7a6ce9c5df59affe11600b56afd3f21",
+    "coefficient_table_sha256": "c318548f9b43477f1d081c3fac3eec7d8b94c03cfb8adbdc55a64fe6f4c82eee",
+    "canonical_json_profile": "aurora-canonical-json-v1",
+    "numeric_policy": "signed integer Q1000 with round-half-even boundary conversion",
+    "rng_used": false,
+    "prose_inputs_used": false,
+    "side_specific_behavioral_branches": false
+  },
+  "control_observation": {
+    "sha256": "e0960c0e2370118d7621a3321482467ff8d97dac504bb6a5ec56f07029bc167a",
+    "values_q1000": {
+      "carrier_opportunity": 600,
+      "contact_quality": 800,
+      "enemy_closing_pressure": 600,
+      "enemy_damage_estimate": 150,
+      "ew_opportunity": 500,
+      "geometry_opportunity": 100,
+      "logistics_strain": 150,
+      "mission_pressure": 750,
+      "mobility_margin": 800,
+      "negotiation_signal": 0,
+      "own_damage": 150,
+      "relative_advantage": 400,
+      "repair_need": 100,
+      "time_pressure": 500,
+      "uncertainty": 250,
+      "withdrawal_viability": 700
+    }
+  },
+  "control_witness": {
+    "loyalist": {
+      "command_team_numeric_sha256": "2c79736d782338cda8dc8acb3052e8cbe0e093069ac3df17b986377c0764a573",
+      "decision_sha256": "7bce2c3697a5813c6175cf569ebe3d21d625f74f44e48ff5cdbac577efe5f15c",
+      "strategic_posture": "POSITIONAL_MANEUVER",
+      "strategic_scores": {
+        "CEASEFIRE_PROBE": 203,
+        "DISENGAGE": 91,
+        "HOLD": 315,
+        "POSITIONAL_MANEUVER": 607,
+        "PRESS": 491
+      },
+      "specialist_intents": {
+        "carrier_ops": "COMMIT_STRIKE_CRAFT",
+        "engineering": "PRIORITIZE_PROPULSION",
+        "ew_sensors": "ACTIVE_JAM",
+        "logistics": "SURGE_EXPENDITURE",
+        "navigation": "POSITION_FOR_ADVANTAGE",
+        "tactical": "MAX_EFFECT_FIRE"
+      },
+      "dissent_q1000": {
+        "carrier_ops": 0,
+        "engineering": 200,
+        "ew_sensors": 0,
+        "logistics": 0,
+        "navigation": 82,
+        "tactical": 0
+      }
+    },
+    "rebel": {
+      "command_team_numeric_sha256": "11a2b94e26e17eafcc73a08749cd81e9de7b71cf47ba69fb4a76e386a22bdc53",
+      "decision_sha256": "a3e22b6a75ea784352a39d524959fd0bc39bb3fdb278ec749caf7a17d5e8e8d5",
+      "strategic_posture": "PRESS",
+      "strategic_scores": {
+        "CEASEFIRE_PROBE": 233,
+        "DISENGAGE": 7,
+        "HOLD": 347,
+        "POSITIONAL_MANEUVER": 612,
+        "PRESS": 642
+      },
+      "specialist_intents": {
+        "carrier_ops": "COMMIT_STRIKE_CRAFT",
+        "engineering": "REINFORCE_DEFENSE",
+        "ew_sensors": "ACTIVE_JAM",
+        "logistics": "SURGE_EXPENDITURE",
+        "navigation": "EVASIVE_VECTOR",
+        "tactical": "MAX_EFFECT_FIRE"
+      },
+      "dissent_q1000": {
+        "carrier_ops": 0,
+        "engineering": 0,
+        "ew_sensors": 0,
+        "logistics": 0,
+        "navigation": 0,
+        "tactical": 0
+      }
+    },
+    "interpretation": "Both sides received the same tactical observation. Their different strategic and specialist intents arise from different frozen numeric officer attributes; the policy contains no loyalist/rebel scoring branch."
+  },
+  "verified_invariants": {
+    "same_observation_same_team_same_receipt": true,
+    "dict_and_roster_order_independent": true,
+    "side_label_behaviorally_neutral": true,
+    "prose_characteristics_causally_inert": true,
+    "commander_attribute_monotonicity_tests_pass": true,
+    "specialist_domain_skill_is_role_local": true,
+    "lower_alignment_can_increase_explicit_dissent": true,
+    "coefficient_table_bound_into_policy_identity": true,
+    "coefficient_byte_change_changes_bundle_identity": true,
+    "rng_absent": true
+  },
+  "validation": {
+    "focused_workflow": {
+      "name": "GUMAS Command Policy",
+      "run_id": 31764360847,
+      "job_id": 94657059129,
+      "conclusion": "success",
+      "artifact_id": 9205734400,
+      "artifact_name": "gumas-command-policy-evidence",
+      "artifact_sha256": "d3ddeecda953c56692ad3813506b07ceef0aab8449f18f4a7f1dc956aa08d6f8",
+      "log_sha256": "200bb552ac9c9c0fc55511caddf38713fca073a2278a7b1b8e2930938b93003b"
+    },
+    "repository_workflow": {
+      "name": "Aurora CI (Minimal)",
+      "run_id": 31764360860,
+      "job_id": 94657100680,
+      "conclusion": "success",
+      "full_test_suite": "success",
+      "pytest_log_artifact_id": 9205863707,
+      "pytest_log_artifact_sha256": "d26b465c6b89e1444cb8968d8c35910989474f5fda2a0f81b71e5572cd92aa22"
+    },
+    "other_required_checks": "CodeQL, Code Quality, Constellation CI, PR Evaluation, GUMAS restoration, CanonRec resolution, Physical T0, Safety Commit Guard, Branch Protection, Catastrophe Prevention, and PR Selective Integration all succeeded on the accepted head; Codacy was skipped rather than failed."
+  },
+  "decision": "Phase 4 is accepted. Phase 5 may begin only after the DTER is versioned forward to bounded movement and geometry. The command policy emits deterministic orders only; no movement or combat consequence has yet been executed."
+}

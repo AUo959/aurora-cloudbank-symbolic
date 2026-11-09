@@ -130,7 +130,7 @@ python -m connector.server
 ### Run (SSE transport — for HTTP-based hosts)
 
 ```bash
-python -m connector.server --transport sse --port 8765
+python -m connector.server --transport sse --port 8765 --host 127.0.0.1
 ```
 
 ### Claude Desktop Config (`claude_desktop_config.json`)
@@ -185,3 +185,13 @@ should eventually be replaced with a live config fetch.
 ---
 
 *Continuity flows through coherence. The system remembers because we chose to align.*
+
+### SSE listener boundary
+
+The SDK v2 migration changes the SSE listen default from all interfaces to
+`127.0.0.1`. Stdio remains the default transport. Use `--host` to select a
+different listen address when deploying behind an authenticated gateway.
+That gateway must protect both `/sse` and `/messages/`.
+`AURORA_CONNECTOR_TOKEN` authenticates the connector to the Aurora backend;
+it does not authenticate incoming MCP clients. Keep direct local deployments
+on loopback.

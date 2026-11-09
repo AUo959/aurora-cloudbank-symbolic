@@ -132,7 +132,7 @@ def build_sse_app(server: Server):
     ])
 
 
-async def run_sse(server: Server, port: int) -> None:
+async def run_sse(server: Server, port: int, host: str = "127.0.0.1") -> None:
     """Run the MCP server over the existing SSE transport."""
     try:
         import uvicorn
@@ -141,7 +141,7 @@ async def run_sse(server: Server, port: int) -> None:
         log.error("SSE transport requires the connector's sse dependencies (uvicorn and starlette)")
         sys.exit(1)
     log.info("Aurora Cloudbank MCP Connector v%s starting (SSE) on port %d", APP_VERSION, port)
-    config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
+    config = uvicorn.Config(app, host=host, port=port, log_level="info")
     await uvicorn.Server(config).serve()
 
 
@@ -159,6 +159,11 @@ def main() -> None:
         default=8765,
         help="Port for SSE transport (default: 8765)",
     )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Listen address for SSE transport (default: 127.0.0.1)",
+    )
     args = parser.parse_args()
 
     # Validate required environment before starting
@@ -167,7 +172,7 @@ def main() -> None:
     server = build_server()
 
     if args.transport == "sse":
-        asyncio.run(run_sse(server, args.port))
+        asyncio.run(run_sse(server, args.port, args.host))
     else:
         asyncio.run(run_stdio(server))
 

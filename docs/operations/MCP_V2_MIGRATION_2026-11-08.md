@@ -22,7 +22,10 @@ The SSE route now receives an ASGI callable instead of a function that
 Starlette would wrap as a one-argument request handler. The transport owns the
 stream lifecycle. `/sse` remains public and the message endpoint advertises its
 canonical trailing slash. Stdio remains the CLI default, with protocol output
-separate from logging. Authentication to the Aurora API, identifying headers,
+separate from logging. SSE now defaults to loopback (`127.0.0.1`); `--host` explicitly selects another
+listen address. Externally reachable deployments require an authenticated
+gateway protecting both SSE and message endpoints. Backend credentials do not
+authenticate incoming MCP callers. Authentication to the Aurora API, identifying headers,
 Pilot-seal implementation and backend endpoint bindings are unchanged.
 
 The standalone wheel previously contained only distribution metadata. Explicit

@@ -125,3 +125,20 @@ def test_cli_without_credentials_fails_before_protocol_start():
     assert result.returncode != 0
     assert not result.stdout
     assert 'AURORA_CONNECTOR_TOKEN' in result.stderr
+
+
+@pytest.mark.parametrize('host', [None, '192.0.2.10'])
+def test_sse_cli_defaults_to_loopback_and_allows_explicit_host(monkeypatch, host):
+    from unittest.mock import AsyncMock
+    from connector import server as module
+    sentinel = object()
+    serve = AsyncMock()
+    monkeypatch.setattr(module, 'validate_environment', lambda: None)
+    monkeypatch.setattr(module, 'build_server', lambda: sentinel)
+    monkeypatch.setattr(module, 'run_sse', serve)
+    args = ['aurora-mcp', '--transport', 'sse', '--port', '9000']
+    if host is not None:
+        args.extend(['--host', host])
+    monkeypatch.setattr(sys, 'argv', args)
+    module.main()
+    serve.assert_awaited_once_with(sentinel, 9000, host or '127.0.0.1')

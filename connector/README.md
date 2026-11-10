@@ -195,3 +195,30 @@ That gateway must protect both `/sse` and `/messages/`.
 `AURORA_CONNECTOR_TOKEN` authenticates the connector to the Aurora backend;
 it does not authenticate incoming MCP clients. Keep direct local deployments
 on loopback.
+
+### SSE Host and Origin validation (DNS-rebinding guard)
+
+Loopback binding stops network peers but not a browser page whose hostname is
+rebound to `127.0.0.1`. The SSE transport therefore validates the `Host` and
+`Origin` headers on **both** `GET /sse` and `POST /messages/` using the MCP
+SDK's `TransportSecuritySettings`:
+
+- **Host** must be exactly `127.0.0.1:<port>`, `localhost:<port>` or
+  `[::1]:<port>` (the listen port), the concrete address given to `--host`, or
+  a value passed with `--allowed-host`. A refused Host gets HTTP 421.
+- **Origin** may be absent (non-browser MCP clients). When present it must be a
+  loopback web origin (`http://127.0.0.1:*`, `http://localhost:*`,
+  `http://[::1]:*`, any port) or a value passed with `--allowed-origin`.
+  A refused Origin gets HTTP 403. Any local web app on a loopback origin is
+  therefore accepted; this is the SDK's own localhost profile.
+- `--host 0.0.0.0` or `--host ::` trusts nothing extra. A remote deployment
+  must name its public host explicitly, for example
+  `--allowed-host mcp.example.com:443 --allowed-origin https://app.example.com`.
+  Entries are exact `host[:port]` / `scheme://host[:port]` strings; the only
+  wildcard is a trailing `:*` for any port, and `*` or `*.example.com` are
+  rejected at startup. Matching is case-sensitive, so list lower-case names.
+- `--allowed-host`/`--allowed-origin` are refused with the stdio transport.
+
+This is header validation, not authentication: the authenticated-gateway
+requirement for non-loopback deployments, protecting both `/sse` and
+`/messages/`, is unchanged.

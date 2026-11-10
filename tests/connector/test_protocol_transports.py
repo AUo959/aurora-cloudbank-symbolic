@@ -141,4 +141,4 @@ def test_sse_cli_defaults_to_loopback_and_allows_explicit_host(monkeypatch, host
         args.extend(['--host', host])
     monkeypatch.setattr(sys, 'argv', args)
     module.main()
-    serve.assert_awaited_once_with(sentinel, 9000, host or '127.0.0.1')
+    serve.assert_awaited_once_with(sentinel, 9000, host or '127.0.0.1', (), ())

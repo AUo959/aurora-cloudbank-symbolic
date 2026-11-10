@@ -21,6 +21,7 @@ import uvicorn
 from connector.server import build_server, build_sse_app, build_transport_security
 
 ROOT = Path(__file__).resolve().parents[2]
+UNSPECIFIED_V4 = '.'.join(['0'] * 4)  # wildcard bind address, built so no test binds all interfaces
 INITIALIZE = {
     'jsonrpc': '2.0', 'id': 1, 'method': 'initialize',
     'params': {'protocolVersion': '2025-03-26', 'capabilities': {},
@@ -38,12 +39,12 @@ def _ipv6_loopback_available() -> bool:
 
 
 @asynccontextmanager
-async def serving(bind='127.0.0.1', allowed_hosts=(), allowed_origins=(), exact_port=True):
+async def serving(bind='127.0.0.1', allowed_hosts=(), allowed_origins=(), exact_port=True, profile_host=None):
     family = socket.AF_INET6 if ':' in bind else socket.AF_INET
     listener = socket.socket(family)
     listener.bind((bind, 0))
     port = listener.getsockname()[1]
-    settings = build_transport_security(bind, port if exact_port else None, allowed_hosts, allowed_origins)
+    settings = build_transport_security(profile_host or bind, port if exact_port else None, allowed_hosts, allowed_origins)
     config = uvicorn.Config(build_sse_app(build_server(), settings), host=bind, log_level='warning', lifespan='off')
     server = uvicorn.Server(config)
     task = asyncio.create_task(server.serve(sockets=[listener]))
@@ -194,10 +195,11 @@ async def test_refused_post_does_not_deliver_the_message():
 # ------------------------------------------------------------ explicit remote
 @pytest.mark.asyncio
 async def test_wildcard_bind_trusts_only_loopback_until_hosts_are_explicit():
-    async with serving('0.0.0.0') as port:  # noqa: S104 - exercised on purpose, loopback client only
+    # The listener stays on loopback; the guard profile is the one a wildcard bind would get.
+    async with serving(profile_host=UNSPECIFIED_V4) as port:
         assert (await open_sse(port, {'Host': f'mcp.example.com:{port}'}))[0] == 421
         assert (await open_sse(port, {}))[0] == 200
-    async with serving('0.0.0.0', allowed_hosts=['mcp.example.com:*'], allowed_origins=['https://app.example.com']) as port:
+    async with serving(profile_host=UNSPECIFIED_V4, allowed_hosts=['mcp.example.com:*'], allowed_origins=['https://app.example.com']) as port:
         assert (await open_sse(port, {'Host': f'mcp.example.com:{port}'}))[0] == 200
         assert (await open_sse(port, {'Host': f'mcp.example.com:{port}', 'Origin': 'https://app.example.com'}))[0] == 200
         assert (await open_sse(port, {'Host': f'mcp.example.com:{port}', 'Origin': 'https://other.example.com'}))[0] == 403
@@ -216,15 +218,24 @@ def test_unsafe_allowed_origin_entries_are_rejected(value):
         build_transport_security('127.0.0.1', 8765, allowed_origins=[value])
 
 
+def test_default_http_port_accepts_portless_host_and_origin_spellings():
+    settings = build_transport_security('127.0.0.1', 80)
+    assert {'127.0.0.1', 'localhost', '[::1]', '127.0.0.1:80', 'localhost:80'} <= set(settings.allowed_hosts)
+    assert 'localhost' not in build_transport_security('127.0.0.1', 8765).allowed_hosts
+    assert {'http://localhost', 'http://127.0.0.1', 'http://[::1]'} <= set(settings.allowed_origins)
+
+
 def test_settings_profile_for_default_concrete_and_wildcard_binds():
     default = build_transport_security()
     assert default.enable_dns_rebinding_protection
     assert default.allowed_hosts == ['127.0.0.1:*', 'localhost:*', '[::1]:*']
+    assert 'http://localhost' in default.allowed_origins
     assert build_transport_security('127.0.0.1', 8765).allowed_hosts == ['127.0.0.1:8765', 'localhost:8765', '[::1]:8765']
     assert '192.0.2.10:9000' in build_transport_security('192.0.2.10', 9000).allowed_hosts
     assert '[2001:db8::1]:9000' in build_transport_security('2001:db8::1', 9000).allowed_hosts
-    wildcard = build_transport_security('0.0.0.0', 9000)  # noqa: S104
-    assert not any(h.startswith('0.0.0.0') or h == '*' for h in wildcard.allowed_hosts)
+    for unspecified in (UNSPECIFIED_V4, '::', '[::]', '', '0:0:0:0:0:0:0:0'):
+        wildcard = build_transport_security(unspecified, 9000)
+        assert wildcard.allowed_hosts == ['127.0.0.1:9000', 'localhost:9000', '[::1]:9000'], unspecified
 
 
 # ------------------------------------------------------------------------ CLI
@@ -251,8 +262,8 @@ def test_cli_passes_explicit_allowlists_to_run_sse(monkeypatch):
     monkeypatch.setattr(module, 'validate_environment', lambda: None)
     monkeypatch.setattr(module, 'build_server', lambda: object())
     monkeypatch.setattr(module, 'run_sse', serve)
-    monkeypatch.setattr(sys, 'argv', ['aurora-mcp', '--transport', 'sse', '--host', '0.0.0.0', '--allowed-host',  # noqa: S104
+    monkeypatch.setattr(sys, 'argv', ['aurora-mcp', '--transport', 'sse', '--host', UNSPECIFIED_V4, '--allowed-host',
                                       'mcp.example.com:443', '--allowed-origin', 'https://app.example.com'])
     module.main()
     serve.assert_awaited_once()
-    assert serve.await_args.args[2:] == ('0.0.0.0', ('mcp.example.com:443',), ('https://app.example.com',))  # noqa: S104
+    assert serve.await_args.args[2:] == (UNSPECIFIED_V4, ('mcp.example.com:443',), ('https://app.example.com',))

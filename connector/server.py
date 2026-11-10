@@ -17,6 +17,7 @@ The server registers all Aurora tools and handles the MCP lifecycle:
 import argparse
 import asyncio
 from contextlib import AsyncExitStack
+import ipaddress
 import logging
 import os
 import sys
@@ -113,13 +114,46 @@ async def run_stdio(server: Server) -> None:
 
 
 LOOPBACK_NAMES = ("127.0.0.1", "localhost", "[::1]")
-# Loopback web origins (any port); plain http is correct for a loopback page, not a transport downgrade.
-LOOPBACK_ORIGINS = ("http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*")
-_WILDCARD_BINDS = ("", "0.0.0.0", "::")  # nosec B104 - recognised only to refuse implicit trust
+# Loopback web origins; plain http is correct for a loopback page, not a transport downgrade.
+# Any port, plus the portless spelling a page served on the default port sends.
+LOOPBACK_ORIGINS = (
+    "http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*",
+    "http://127.0.0.1", "http://localhost", "http://[::1]",
+)
+HTTP_DEFAULT_PORT = 80
 
 
 def _bracket(host: str) -> str:
     return f"[{host}]" if ":" in host and not host.startswith("[") else host
+
+
+def _is_wildcard_bind(host: str) -> bool:
+    """True for an empty or unspecified bind address (IPv4 or IPv6, bracketed or not)."""
+    bare = host.strip().strip("[]")
+    if not bare:
+        return True
+    try:
+        return ipaddress.ip_address(bare).is_unspecified
+    except ValueError:
+        return False
+
+
+def _host_spellings(name: str, port: int | None) -> list[str]:
+    """Host header values a client may send for ``name`` on the listen port."""
+    if not port:
+        return [f"{name}:*"]
+    spellings = [f"{name}:{port}"]
+    if port == HTTP_DEFAULT_PORT:
+        spellings.append(name)  # HTTP clients omit the default port
+    return spellings
+
+
+def _bind_host_entries(host: str, port: int | None) -> list[str]:
+    """A concrete (non-wildcard, non-loopback) --host is trusted by name; wildcard binds trust nothing extra."""
+    if _is_wildcard_bind(host):
+        return []
+    shown = _bracket(host.strip().strip("[]"))
+    return [] if shown in LOOPBACK_NAMES else _host_spellings(shown, port)
 
 
 def _check_entry(value: str, kind: str) -> str:
@@ -146,19 +180,15 @@ def build_transport_security(
 
     Host: loopback names on the exact listen port, plus a concrete (non-wildcard) bind
     address, plus operator-supplied entries. Origin: absent is accepted by the SDK;
-    otherwise only loopback web origins (any port) and operator-supplied origins.
-    Wildcard binds such as 0.0.0.0 add nothing: remote names must be allowed explicitly.
+    otherwise only loopback web origins and operator-supplied origins.
+    Wildcard binds (an unspecified address) add nothing: remote names must be allowed explicitly.
     """
     from mcp.server.transport_security import TransportSecuritySettings
 
-    suffix = f":{port}" if port else ":*"
-    hosts = [f"{name}{suffix}" for name in LOOPBACK_NAMES]
-    bound = _bracket(host.strip())
-    if bound not in _WILDCARD_BINDS and bound not in LOOPBACK_NAMES:
-        hosts.append(f"{bound}{suffix}")
+    hosts = [spelling for name in LOOPBACK_NAMES for spelling in _host_spellings(name, port)]
+    hosts += _bind_host_entries(host, port)
     hosts += [_check_entry(h, "host") for h in allowed_hosts]
-    origins = list(LOOPBACK_ORIGINS)
-    origins += [_check_entry(o, "origin") for o in allowed_origins]
+    origins = list(LOOPBACK_ORIGINS) + [_check_entry(o, "origin") for o in allowed_origins]
     return TransportSecuritySettings(
         enable_dns_rebinding_protection=True,
         allowed_hosts=list(dict.fromkeys(hosts)),
@@ -216,6 +246,16 @@ async def run_sse(
     await uvicorn.Server(config).serve()
 
 
+def _validate_sse_options(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    """Fail before startup on allowlist flags that do not apply or are unsafe."""
+    if args.transport != "sse" and (args.allowed_host or args.allowed_origin):
+        parser.error("--allowed-host/--allowed-origin apply only to --transport sse")
+    try:
+        build_transport_security(args.host, args.port, args.allowed_host, args.allowed_origin)
+    except ValueError as error:
+        parser.error(str(error))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Aurora Cloudbank MCP Connector")
     parser.add_argument(
@@ -251,12 +291,7 @@ def main() -> None:
         help="Additional browser Origin accepted by SSE, e.g. https://app.example.com (repeatable).",
     )
     args = parser.parse_args()
-    if args.transport != "sse" and (args.allowed_host or args.allowed_origin):
-        parser.error("--allowed-host/--allowed-origin apply only to --transport sse")
-    try:
-        build_transport_security(args.host, args.port, args.allowed_host, args.allowed_origin)
-    except ValueError as error:
-        parser.error(str(error))
+    _validate_sse_options(parser, args)
 
     # Validate required environment before starting
     validate_environment()

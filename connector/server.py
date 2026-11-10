@@ -113,6 +113,8 @@ async def run_stdio(server: Server) -> None:
 
 
 LOOPBACK_NAMES = ("127.0.0.1", "localhost", "[::1]")
+# Loopback web origins (any port); plain http is correct for a loopback page, not a transport downgrade.
+LOOPBACK_ORIGINS = ("http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*")
 _WILDCARD_BINDS = ("", "0.0.0.0", "::")  # nosec B104 - recognised only to refuse implicit trust
 
 
@@ -155,7 +157,7 @@ def build_transport_security(
     if bound not in _WILDCARD_BINDS and bound not in LOOPBACK_NAMES:
         hosts.append(f"{bound}{suffix}")
     hosts += [_check_entry(h, "host") for h in allowed_hosts]
-    origins = [f"http://{name}:*" for name in LOOPBACK_NAMES]
+    origins = list(LOOPBACK_ORIGINS)
     origins += [_check_entry(o, "origin") for o in allowed_origins]
     return TransportSecuritySettings(
         enable_dns_rebinding_protection=True,

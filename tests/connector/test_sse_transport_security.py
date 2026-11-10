@@ -103,7 +103,8 @@ async def test_loopback_host_forms_without_origin_open_sse_and_accept_posts(host
     async with serving() as port:
         headers = {'Host': host_header.format(p=port)}  # no Origin header: a non-browser client
         async with sse_session(port, headers) as (status, endpoint):
-            assert status == 200 and endpoint.startswith('/messages/?session_id=')
+            assert status == 200
+            assert endpoint.startswith('/messages/?session_id=')
             assert await post_message(port, endpoint, headers) == 202
 
 
@@ -112,7 +113,8 @@ async def test_loopback_host_forms_without_origin_open_sse_and_accept_posts(host
 async def test_real_ipv6_loopback_listener_serves_a_legitimate_client():
     async with serving('::1') as port:
         status, endpoint = await open_sse(port, base=f'http://[::1]:{port}')
-        assert status == 200 and endpoint.startswith('/messages/?session_id=')
+        assert status == 200
+        assert endpoint.startswith('/messages/?session_id=')
 
 
 @pytest.mark.asyncio
@@ -234,9 +236,11 @@ def _cli(*args):
 
 def test_cli_rejects_allowlists_on_stdio_and_wildcards_before_startup():
     stdio = _cli('--allowed-host', 'mcp.example.com')
-    assert stdio.returncode == 2 and 'only to --transport sse' in stdio.stderr
+    assert stdio.returncode == 2
+    assert 'only to --transport sse' in stdio.stderr
     wildcard = _cli('--transport', 'sse', '--allowed-host', '*')
-    assert wildcard.returncode == 2 and 'wildcards are not accepted' in wildcard.stderr
+    assert wildcard.returncode == 2
+    assert 'wildcards are not accepted' in wildcard.stderr
     assert not wildcard.stdout
 
 

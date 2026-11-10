@@ -156,18 +156,32 @@ def _bind_host_entries(host: str, port: int | None) -> list[str]:
     return [] if shown in LOOPBACK_NAMES else _host_spellings(shown, port)
 
 
+def _check_wildcards(entry: str, kind: str) -> None:
+    allowed = 1 if entry.endswith(":*") else 0
+    if entry.count("*") > allowed:
+        raise ValueError(f"wildcards are not accepted in allowed {kind} {entry!r} (only a trailing ':*' port)")
+
+
+def _check_host_entry(entry: str) -> str:
+    if "://" in entry or "/" in entry:
+        raise ValueError(f"allowed host {entry!r} must be a bare Host header value (host[:port])")
+    return entry
+
+
+def _check_origin_entry(entry: str) -> str:
+    scheme, _, rest = entry.partition("://")
+    if scheme not in ("http", "https") or not rest or "/" in rest:
+        raise ValueError(f"allowed origin {entry!r} must look like http(s)://host[:port]")
+    return entry
+
+
 def _check_entry(value: str, kind: str) -> str:
     """Accept only exact entries, or a trailing ':*' port wildcard; never a name wildcard."""
     entry = value.strip()
     if not entry or any(c.isspace() for c in entry):
         raise ValueError(f"empty or malformed allowed {kind}: {value!r}")
-    if entry.count("*") > (1 if entry.endswith(":*") else 0):
-        raise ValueError(f"wildcards are not accepted in allowed {kind} {value!r} (only a trailing ':*' port)")
-    if kind == "host" and ("://" in entry or "/" in entry):
-        raise ValueError(f"allowed host {value!r} must be a bare Host header value (host[:port])")
-    if kind == "origin" and not (entry.startswith(("http://", "https://")) and "/" not in entry.split("://", 1)[1]):
-        raise ValueError(f"allowed origin {value!r} must look like http(s)://host[:port]")
-    return entry
+    _check_wildcards(entry, kind)
+    return _check_host_entry(entry) if kind == "host" else _check_origin_entry(entry)
 
 
 def build_transport_security(

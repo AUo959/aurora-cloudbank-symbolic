@@ -148,12 +148,12 @@ Commands run in this worktree:
 | `python3 -m pytest -q tests/test_opal2_api_routes.py` | Passed: 3 tests, 1 skipped because optional `slowapi` was not installed in the system Python environment. |
 | `python3 -m pytest -q tools/command_chain/tests/test_parser.py tests/test_command_chain_entrypoints.py` | Passed: 41 tests. |
 | `python3 -m pytest -q tests/test_flight_control_infrastructure.py` | Passed: 10 tests. |
-| `/Users/travisstreets/.local/bin/python3.11 -c "from modules.hr_system.core.character_generator import CharacterGenerator; g=CharacterGenerator(); print('generate_profile', hasattr(g, 'generate_profile')); print('generate_character', hasattr(g, 'generate_character'))"` | Confirmed `generate_profile False`, `generate_character True`. |
+| `~/.local/bin/python3.11 -c "from modules.hr_system.core.character_generator import CharacterGenerator; g=CharacterGenerator(); print('generate_profile', hasattr(g, 'generate_profile')); print('generate_character', hasattr(g, 'generate_character'))"` | Confirmed `generate_profile False`, `generate_character True`. |
 | `python3 -m pytest -q tests/hr/test_hr_module.py` | Not completed in the system Python 3.9 environment: missing `numpy`; current package metadata requires Python `>=3.11`. |
-| `/Users/travisstreets/.local/bin/python3.11 -m pytest -q tests/hr/test_hr_module.py` | Not completed: the local Python 3.11 interpreter does not have `pytest` installed. |
+| `~/.local/bin/python3.11 -m pytest -q tests/hr/test_hr_module.py` | Not completed: the local Python 3.11 interpreter does not have `pytest` installed. |
 | `python3 -m pytest -q tests/test_subroutines_quick.py` | Not completed in the system Python 3.9 environment: current subroutine code imports `datetime.UTC` and current package metadata requires Python `>=3.11`; async tests also need an async pytest plugin. |
-| `/Users/travisstreets/.local/bin/python3.11 -m pytest -q tests/test_subroutines_quick.py` | Not completed: the local Python 3.11 interpreter does not have `pytest` installed. |
-| `/Users/travisstreets/.local/bin/python3.12 -m pytest -q tests/test_subroutines_quick.py` | Not completed: the local Python 3.12 interpreter does not have `pytest` installed. |
+| `~/.local/bin/python3.11 -m pytest -q tests/test_subroutines_quick.py` | Not completed: the local Python 3.11 interpreter does not have `pytest` installed. |
+| `~/.local/bin/python3.12 -m pytest -q tests/test_subroutines_quick.py` | Not completed: the local Python 3.12 interpreter does not have `pytest` installed. |
 | `python3 -m pytest -q tests/test_code_quality_analyzer.py` | Not completed in the system Python 3.9 environment: current code imports `datetime.UTC`; package metadata requires Python `>=3.11`. |
 | `python3 -m pytest -q tests/test_bridge_v2_basic.py tests/test_cross_repo_bridge_thread_transfer.py` | Not completed in this local pytest stack: async tests require an async pytest plugin that is not active here. |
 | `git diff --check` | Passed. |

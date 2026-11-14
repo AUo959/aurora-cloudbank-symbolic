@@ -139,6 +139,8 @@ class UnifiedCausalTests(unittest.TestCase):
             CausalEngine(world)
         with self.assertRaisesRegex(ValueError, "superluminal"):
             CausalEngine(fixture(), PhysicsProfile(signal_speed_ceiling_km_s=500000))
+        with self.assertRaisesRegex(ValueError, "superluminal cargo"):
+            CausalEngine(fixture(), PhysicsProfile(cargo_speed_ceiling_km_s=500000))
 
     def test_no_energy_infinite_motion(self):
         world = fixture()

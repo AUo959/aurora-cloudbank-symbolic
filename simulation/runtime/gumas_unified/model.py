@@ -96,6 +96,8 @@ class Universe:
         natural(profile.cargo_speed_ceiling_km_s, "cargo ceiling", positive=True)
         if profile.signal_speed_ceiling_km_s > 299792:
             raise ValueError("P0 does not authorize superluminal signaling")
+        if profile.cargo_speed_ceiling_km_s > 299792:
+            raise ValueError("P0 does not authorize superluminal cargo transport")
         for key, site in self.sites.items():
             if key != site.site_id or not site.polity_id:
                 raise ValueError("invalid site identity")

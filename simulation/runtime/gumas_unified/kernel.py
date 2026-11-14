@@ -70,12 +70,17 @@ class CausalEngine:
         self.run_id = run_id
         self.initial_hash = self._state.digest()
         self._initial_totals = self._state.totals()
-        self.ledger: list[Receipt] = []
+        self._ledger: list[Receipt] = []
 
     @property
     def state(self) -> Universe:
         """Return a snapshot; external callers cannot mutate committed L2 state."""
         return deepcopy(self._state)
+
+    @property
+    def ledger(self) -> list[Receipt]:
+        """Return receipts by value; callers cannot rewrite recorded history."""
+        return deepcopy(self._ledger)
 
     def _commit(self, kind: str, actor: str | None, cause: str,
                 mutation: Callable[[Universe], dict[str, Any]]) -> Receipt:
@@ -88,15 +93,15 @@ class CausalEngine:
         if candidate.totals() != self._initial_totals:
             raise AssertionError("closed-system resource and energy accounting failed")
         after = candidate.digest()
-        previous = self.ledger[-1].digest if self.ledger else "GENESIS"
-        receipt = Receipt(number=len(self.ledger) + 1, time_s=candidate.time_s,
+        previous = self._ledger[-1].digest if self._ledger else "GENESIS"
+        receipt = Receipt(number=len(self._ledger) + 1, time_s=candidate.time_s,
                           kind=kind, actor_id=actor, cause=cause,
                           effect=effect, before=before, after=after,
                           previous=previous, digest="")
         receipt = Receipt(**{**receipt.payload(), "digest": _digest(receipt.payload())})
         self._state = candidate
-        self.ledger.append(receipt)
-        return receipt
+        self._ledger.append(receipt)
+        return deepcopy(receipt)
 
     @staticmethod
     def _id(world: Universe, prefix: str) -> str:
@@ -284,6 +289,6 @@ class CausalEngine:
                 "authority": "L2_synthetic_only", "initial_state": self.initial_hash,
                 "final_state": self._state.digest(),
                 "resource_totals": self._state.totals(),
-                "ledger": [asdict(receipt) for receipt in self.ledger],
-                "ledger_valid": verify_ledger(self.ledger, self.initial_hash,
+                "ledger": [asdict(receipt) for receipt in self._ledger],
+                "ledger_valid": verify_ledger(self._ledger, self.initial_hash,
                                               self._state.digest())}

@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import asdict
 import unittest
 
 from simulation.runtime.gumas_unified import (
-    Actor, CausalEngine, Corridor, FeasibilityError, PhysicsProfile,
-    Site, Universe, observe_legacy_political_snapshot, verify_ledger,
+    CausalEngine, FeasibilityError, PhysicsProfile,
+    observe_legacy_political_snapshot, verify_ledger,
 )
 from simulation.runtime.gumas_unified.scenario import fixture, run_experiment
 
@@ -110,6 +109,18 @@ class UnifiedCausalTests(unittest.TestCase):
         snapshot.corridors["corridor_a"].enabled = False
         self.assertEqual(engine.state.sites["union_depot"].inventory["rations"], 20)
         self.assertTrue(engine.state.corridors["corridor_a"].enabled)
+
+    def test_external_receipts_cannot_mutate_committed_ledger(self):
+        engine = self.make_engine()
+        receipt = engine.disrupt_route("corridor_a", 4,
+                                      cause="fixture:disruption")
+        receipt.effect["new_capacity"] = 999
+        public_history = engine.ledger
+        public_history[0].effect["new_capacity"] = 888
+        public_history.clear()
+        self.assertEqual(engine.ledger[0].effect["new_capacity"], 4)
+        self.assertTrue(verify_ledger(engine.ledger, engine.initial_hash,
+                                      engine.state.digest()))
 
     def test_ledger_tampering_detected(self):
         engine = self.make_engine()

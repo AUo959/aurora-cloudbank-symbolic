@@ -72,6 +72,34 @@ class ScheduledEvent:
 
 
 @dataclass
+class Institution:
+    """One synthetic local deliberative institution; never universal polity law."""
+    institution_id: str
+    seat_site_id: str
+    members: tuple[str, ...]
+    quorum: int
+    approval_threshold: int
+    polity_id: str
+
+
+@dataclass
+class ReliefMotion:
+    """Proposed and voted resource allocation, not a rebellion probability."""
+    motion_id: str
+    institution_id: str
+    proposer_id: str
+    route_id: str
+    commodity: str
+    amount: int
+    expires_s: int
+    votes: dict[str, bool] = field(default_factory=dict)
+    status: str = "proposed"
+    escrow_amount: int = 0
+    approved_at_s: int | None = None
+    shipment_id: str | None = None
+
+
+@dataclass
 class Universe:
     time_s: int
     sites: dict[str, Site]
@@ -83,6 +111,8 @@ class Universe:
     heat_j: int = 0
     next_serial: int = 0
     identity_bindings: dict[str, dict[str, Any]] = field(default_factory=dict)
+    institutions: dict[str, Institution] = field(default_factory=dict)
+    relief_motions: dict[str, ReliefMotion] = field(default_factory=dict)
 
     def validate(self, profile: PhysicsProfile) -> None:
         def natural(value: int, name: str, *, positive: bool = False) -> None:
@@ -141,6 +171,57 @@ class Universe:
             ).hexdigest()
             if record.get("binding_sha256") != expected:
                 raise ValueError("identity binding fingerprint does not match record")
+        for key, institution in self.institutions.items():
+            if key != institution.institution_id or institution.seat_site_id not in self.sites:
+                raise ValueError("invalid institution identity or seat")
+            if self.sites[institution.seat_site_id].polity_id != institution.polity_id:
+                raise ValueError("institution polity does not match its local seat")
+            if (not institution.members or len(set(institution.members)) != len(institution.members)
+                    or any(m not in self.actors for m in institution.members)):
+                raise ValueError("institution must have distinct, existing members")
+            natural(institution.quorum, "institution quorum", positive=True)
+            natural(institution.approval_threshold, "approval threshold", positive=True)
+            if (institution.quorum > len(institution.members)
+                    or institution.approval_threshold > institution.quorum):
+                raise ValueError("impossible institution quorum or approval threshold")
+        for key, motion in self.relief_motions.items():
+            if key != motion.motion_id or motion.institution_id not in self.institutions:
+                raise ValueError("invalid relief motion identity or institution")
+            institution = self.institutions[motion.institution_id]
+            if motion.proposer_id not in institution.members:
+                raise ValueError("motion proposer not a member")
+            if motion.route_id not in self.corridors:
+                raise ValueError("motion references nonexistent corridor")
+            route = self.corridors[motion.route_id]
+            if route.origin_id != institution.seat_site_id:
+                raise ValueError("motion route not connected to institution seat")
+            if not motion.commodity or motion.commodity == "energy_j":
+                raise ValueError("invalid motion commodity")
+            natural(motion.amount, "motion amount", positive=True)
+            natural(motion.expires_s, "motion expiry", positive=True)
+            natural(motion.escrow_amount, "motion escrow")
+            if (motion.status not in ("proposed", "ratified", "dispatched",
+                                      "rejected", "expired")
+                    or motion.escrow_amount not in (0, motion.amount)
+                    or (motion.status == "ratified") != (motion.escrow_amount == motion.amount)):
+                raise ValueError("inconsistent motion status or escrow")
+            if motion.status == "dispatched" and not motion.shipment_id:
+                raise ValueError("dispatched motion missing shipment reference")
+            if motion.status != "dispatched" and motion.shipment_id is not None:
+                raise ValueError("motion shipment reference without dispatch")
+            if any(voter not in institution.members or type(vote) is not bool
+                   for voter, vote in motion.votes.items()):
+                raise ValueError("unauthorized or invalid policy ballot")
+            if motion.status in ("ratified", "dispatched") and (
+                    motion.approved_at_s is None
+                    or type(motion.approved_at_s) is not int
+                    or not 0 <= motion.approved_at_s < motion.expires_s
+                    or sum(motion.votes.values()) < institution.approval_threshold
+                    or len(motion.votes) < institution.quorum):
+                raise ValueError("motion lacks sufficient recorded approval")
+            if motion.status in ("proposed", "rejected", "expired") and (
+                    motion.approved_at_s is not None):
+                raise ValueError("unapproved motion has approval timestamp")
         for key, route in self.corridors.items():
             if key != route.corridor_id:
                 raise ValueError("invalid route identity")
@@ -171,8 +252,12 @@ class Universe:
             natural(event.order, "pending order")
             if event.due_s < self.time_s:
                 raise ValueError("scheduled event in the past")
-            if event.kind not in ("cargo_arrival", "report_arrival"):
+            if event.kind not in ("cargo_arrival", "report_arrival", "policy_expiry"):
                 raise ValueError("unknown scheduled event")
+            if event.kind == "policy_expiry":
+                motion = self.relief_motions.get(event.payload.get("motion_id"))
+                if motion is None or motion.expires_s != event.due_s:
+                    raise ValueError("policy expiry event lacks matching motion")
 
     def totals(self) -> dict[str, int]:
         """Account for all represented matter and energy, including in-flight cargo.
@@ -187,6 +272,10 @@ class Universe:
         for shipment in self.in_transit.values():
             key = shipment.cargo_name
             totals[key] = totals.get(key, 0) + shipment.amount
+        for motion in self.relief_motions.values():
+            if motion.escrow_amount:
+                key = motion.commodity
+                totals[key] = totals.get(key, 0) + motion.escrow_amount
         totals["energy_j"] = totals.get("energy_j", 0) + self.heat_j
         return {k: v for k, v in totals.items() if v != 0}
 
@@ -196,6 +285,10 @@ class Universe:
         # state hashes and existing historical replay receipts.
         if not payload["identity_bindings"]:
             payload.pop("identity_bindings")
+        if not payload["institutions"]:
+            payload.pop("institutions")
+        if not payload["relief_motions"]:
+            payload.pop("relief_motions")
         data = json.dumps(payload, sort_keys=True, separators=(",", ":"),
                           ensure_ascii=False, allow_nan=False).encode("utf-8")
         return hashlib.sha256(data).hexdigest()

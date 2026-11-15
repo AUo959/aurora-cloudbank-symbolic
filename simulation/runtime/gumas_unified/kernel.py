@@ -136,6 +136,30 @@ class CausalEngine:
         return self._commit("fixture_identity_bound", record["actor_id"],
                             record["grant_ref"], change)
 
+    def propose_relief(self, proposal: "ReliefProposal", *, cause: str) -> Receipt:
+        """Commit a state-bound, synthetic noncombat policy proposal."""
+        from .political_actions import commit_relief_proposal
+
+        return commit_relief_proposal(self, proposal, cause=cause)
+
+    def cast_relief_vote(self, motion_id: str, voter_id: str,
+                         approve: bool, *, cause: str) -> Receipt:
+        from .political_actions import cast_relief_vote
+
+        return cast_relief_vote(self, motion_id, voter_id, approve, cause=cause)
+
+    def ratify_relief(self, motion_id: str, officer_id: str, *,
+                      cause: str) -> Receipt:
+        from .political_actions import ratify_relief
+
+        return ratify_relief(self, motion_id, officer_id, cause=cause)
+
+    def dispatch_ratified_relief(self, motion_id: str,
+                                 executor_id: str, *, cause: str) -> Receipt:
+        from .political_actions import dispatch_ratified_relief
+
+        return dispatch_ratified_relief(self, motion_id, executor_id, cause=cause)
+
     @staticmethod
     def _id(world: Universe, prefix: str) -> str:
         world.next_serial += 1
@@ -277,6 +301,24 @@ class CausalEngine:
                         "route_id": payload["route_id"]})
                     return {"recipient": actor.actor_id, "from": payload["sender"],
                             "sent_s": payload["sent_s"]}
+                if event.kind == "policy_expiry":
+                    motion = world.relief_motions[event.payload["motion_id"]]
+                    old_status = motion.status
+                    returned = motion.escrow_amount
+                    if returned:
+                        institution = world.institutions[motion.institution_id]
+                        site = world.sites[institution.seat_site_id]
+                        site.inventory[motion.commodity] = (
+                            site.inventory.get(motion.commodity, 0) + returned)
+                        motion.escrow_amount = 0
+                    if motion.status in ("proposed", "ratified"):
+                        motion.status = "expired"
+                        motion.approved_at_s = None
+                    return {"motion_id": motion.motion_id,
+                            "previous_status": old_status, "status": motion.status,
+                            "resource_released": returned,
+                            "commodity": motion.commodity,
+                            "canonical_authority": False}
                 raise AssertionError("unsupported scheduled event")
 
             committed.append(self._commit(event.kind, None,
@@ -291,8 +333,18 @@ class CausalEngine:
 
     def site_view(self, site_id: str) -> dict[str, Any]:
         site = self._state.sites[site_id]
-        return {"site_id": site_id, "polity_id": site.polity_id,
-                "time_s": self._state.time_s, "inventory": dict(site.inventory)}
+        result = {"site_id": site_id, "polity_id": site.polity_id,
+                  "time_s": self._state.time_s, "inventory": dict(site.inventory)}
+        reserved: dict[str, int] = {}
+        for motion in self._state.relief_motions.values():
+            if motion.escrow_amount and (
+                self._state.institutions[motion.institution_id].seat_site_id == site_id
+            ):
+                reserved[motion.commodity] = (
+                    reserved.get(motion.commodity, 0) + motion.escrow_amount)
+        if reserved:
+            result["reserved"] = reserved
+        return result
 
     def polity_view(self, polity_id: str) -> dict[str, Any]:
         """Authoritative aggregate, not a claim of anyone's personal knowledge."""
@@ -307,8 +359,15 @@ class CausalEngine:
             if shipment.destination_id in sites:
                 incoming[shipment.cargo_name] = (
                     incoming.get(shipment.cargo_name, 0) + shipment.amount)
-        return {"polity_id": polity_id, "time_s": self._state.time_s,
-                "sites": sites, "available": available, "incoming": incoming}
+        result = {"polity_id": polity_id, "time_s": self._state.time_s,
+                  "sites": sites, "available": available, "incoming": incoming}
+        reserved: dict[str, int] = {}
+        for site_id in sites:
+            for commodity, amount in self.site_view(site_id).get("reserved", {}).items():
+                reserved[commodity] = reserved.get(commodity, 0) + amount
+        if reserved:
+            result["reserved"] = reserved
+        return result
 
     def actor_view(self, actor_id: str) -> dict[str, Any]:
         """Only local inventory and actually delivered reports are visible."""

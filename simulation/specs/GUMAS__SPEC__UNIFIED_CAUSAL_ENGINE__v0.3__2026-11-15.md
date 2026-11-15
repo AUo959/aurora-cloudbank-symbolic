@@ -43,6 +43,9 @@ Implementation: \`simulation/runtime/gumas_unified/bindings.py\`.
 - The binding is a **synthetic identity label only**. It does not alter
   actor physical location, permissions, preferences, memories, observations,
   inventory, affiliations or canon.
+- Empty identity-binding registries are omitted from the canonical state
+  digest, preserving the exact P0/P1 fixture hashes and receipt ancestry.
+  A committed nonempty registry changes the state hash and is ledger-bound.
 - After expiry, the original receipt remains in history; the binding view
   reports \`active_at_current_time = false\`. P2 has no rebind, revoke,
   authenticated permission grant or time-based event scheduler for identity.

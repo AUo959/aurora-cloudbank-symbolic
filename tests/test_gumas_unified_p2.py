@@ -390,6 +390,41 @@ class UnifiedP2Tests(unittest.TestCase):
         self.assertEqual(engine.ledger, events)
         self.assertEqual(engine.actor_view("governor")["received_reports"], [])
 
+    def test_original_p0_digest_is_unchanged_with_empty_bindings(self):
+        from simulation.runtime.gumas_unified.scenario import run_experiment
+
+        result = run_experiment()
+        self.assertEqual(
+            result["evidence"]["final_state"],
+            "518eff3927c3f38d7c6e8faa46c011d7f411ce410357cf6b92f83abcb3e1e11c",
+        )
+        self.assertEqual(result["evidence"]["resource_totals"]["rations"], 23)
+
+    def test_clock_refuses_fabricated_empty_ledger_projection(self):
+        engine = self.make_engine()
+        tactical = tactical_projection()
+        tactical["phase9_entries_structurally_verified"] = 0
+        tactical["projection_sha256"] = canonical_sha256({
+            k: v for k, v in tactical.items() if k != "projection_sha256"
+        })
+        with self.assertRaisesRegex(EvidenceError, "span"):
+            prepare_fixture_clock_anchor(
+                engine, tactical, clock_grant(engine, tactical))
+
+    def test_clock_refuses_rehashed_nonsynthetic_frame(self):
+        engine = self.make_engine()
+        tactical = tactical_projection()
+        anchor = prepare_fixture_clock_anchor(
+            engine, tactical, clock_grant(engine, tactical))
+        anchor["reference_frame_id"] = "canonical:unauthorized-frame"
+        anchor["anchor_sha256"] = canonical_sha256({
+            k: v for k, v in anchor.items() if k != "anchor_sha256"
+        })
+        with self.assertRaisesRegex(EvidenceError, "synthetic clock"):
+            project_tactical_interval(
+                engine, tactical, anchor, start_elapsed_ms=0,
+                end_elapsed_ms=425)
+
     def test_cross_scale_view_refuses_expired_bindings(self):
         engine = self.make_engine()
         ace, tactical = ace_projection(), tactical_projection()

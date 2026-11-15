@@ -191,6 +191,11 @@ class Universe:
         return {k: v for k, v in totals.items() if v != 0}
 
     def digest(self) -> str:
-        data = json.dumps(asdict(self), sort_keys=True, separators=(",", ":"),
+        payload = asdict(self)
+        # Empty P2 identity storage is not a new fact: preserve exact P0/P1
+        # state hashes and existing historical replay receipts.
+        if not payload["identity_bindings"]:
+            payload.pop("identity_bindings")
+        data = json.dumps(payload, sort_keys=True, separators=(",", ":"),
                           ensure_ascii=False, allow_nan=False).encode("utf-8")
         return hashlib.sha256(data).hexdigest()

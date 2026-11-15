@@ -48,6 +48,13 @@ def _verified_projection(projection: Mapping[str, Any]) -> None:
     }
     if set(projection) != allowed:
         raise EvidenceError("unexpected tactical projection fields")
+    if (projection.get("source_contract")
+            != "GUMAS_LIVE_OBSERVATION_ORCHESTRATOR_LEDGER_v1_0"
+            or type(projection.get("phase9_entries_structurally_verified")) is not int
+            or not 1 <= projection["phase9_entries_structurally_verified"] <= 128
+            or not isinstance(projection.get("last_recorded_termination_mode"), str)
+            or not projection["last_recorded_termination_mode"]):
+        raise EvidenceError("tactical projection lacks a valid accepted Phase-9 span")
     if (projection.get("schema") != _PHASE9_SCHEMA
             or projection.get("authority") != "unverified_external_observation_only"
             or projection.get("time_basis") != "relative_to_external_tactical_T0"
@@ -154,6 +161,13 @@ def project_tactical_interval(engine: CausalEngine,
             or anchor.get("canon_timeline_promoted") is not False
             or anchor.get("rate") != "1_ms_per_ms"):
         raise EvidenceError("clock anchor contains unapproved authority")
+    if (not isinstance(anchor.get("reference_frame_id"), str)
+            or not anchor["reference_frame_id"].startswith("fixture:")
+            or not isinstance(anchor.get("grant_sha256"), str)
+            or len(anchor["grant_sha256"]) != 64
+            or any(ch not in "0123456789abcdef"
+                   for ch in anchor["grant_sha256"])):
+        raise EvidenceError("invalid synthetic clock frame or grant reference")
     checksum = anchor.get("anchor_sha256")
     if checksum != canonical_sha256({k: v for k, v in anchor.items()
                                      if k != "anchor_sha256"}):

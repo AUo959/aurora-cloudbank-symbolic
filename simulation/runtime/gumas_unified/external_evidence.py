@@ -60,7 +60,7 @@ def _sha(value: Any, name: str, *, length: int = 64) -> str:
     if not isinstance(value, str) or not (
         _HEX40 if length == 40 else _HEX64
     ).fullmatch(value):
-        raise EvidenceError(f"{name} must be lowercase hex sha{length * 4 // 10}")
+        raise EvidenceError(f"{name} must be lowercase hexadecimal ({length} characters)")
     return value
 
 

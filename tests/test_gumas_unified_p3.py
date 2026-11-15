@@ -239,7 +239,9 @@ class PoliticalCausalTests(unittest.TestCase):
     def test_policy_and_manual_dispatch_share_transport_capacity(self):
         engine, motion_id = self.make_engine()
         self.approve(engine, motion_id)
-        engine.dispatch("local_dissenter", "corridor_a", "rations", 2,
+        # P0 corridor capacity is six units per window. Four manual plus
+        # three reserved relief units must exceed that single shared limit.
+        engine.dispatch("local_dissenter", "corridor_a", "rations", 4,
                         cause="actor:unrelated-shipment")
         before = engine.state.digest()
         with self.assertRaisesRegex(FeasibilityError, "capacity"):

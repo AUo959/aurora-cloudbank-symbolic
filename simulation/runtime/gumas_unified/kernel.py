@@ -103,6 +103,39 @@ class CausalEngine:
         self._ledger.append(receipt)
         return deepcopy(receipt)
 
+    def bind_fixture_identity(self, ace_projection: dict[str, Any],
+                              grant: dict[str, Any]) -> Receipt:
+        """Commit a provenance-labeled synthetic identity alias, not source canon.
+
+        A fixture-only grant is explicit test intent, not authenticated
+        operator authorization. No ACE or tactical processes are invoked.
+        """
+        from .bindings import prepare_fixture_identity_binding
+
+        record = prepare_fixture_identity_binding(self, ace_projection, grant)
+
+        def change(world: Universe) -> dict[str, Any]:
+            actor_id = record["actor_id"]
+            if actor_id not in world.actors:
+                raise FeasibilityError("bound actor no longer exists")
+            if actor_id in world.identity_bindings:
+                raise FeasibilityError("actor identity already bound")
+            if any((value["world_id"], value["entity_id"])
+                   == (record["world_id"], record["entity_id"])
+                   for value in world.identity_bindings.values()):
+                raise FeasibilityError("ACE identity already assigned")
+            if world.time_s != record["bound_at_s"]:
+                raise FeasibilityError("binding grant is stale")
+            world.identity_bindings[actor_id] = deepcopy(record)
+            return {"actor_id": actor_id, "world_id": record["world_id"],
+                    "entity_id": record["entity_id"],
+                    "binding_sha256": record["binding_sha256"],
+                    "scope": "synthetic_fixture_only",
+                    "source_canon_promoted": False}
+
+        return self._commit("fixture_identity_bound", record["actor_id"],
+                            record["grant_ref"], change)
+
     @staticmethod
     def _id(world: Universe, prefix: str) -> str:
         world.next_serial += 1

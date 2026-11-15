@@ -82,6 +82,7 @@ class Universe:
     capacity_used: dict[str, int] = field(default_factory=dict)
     heat_j: int = 0
     next_serial: int = 0
+    identity_bindings: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def validate(self, profile: PhysicsProfile) -> None:
         def natural(value: int, name: str, *, positive: bool = False) -> None:
@@ -110,6 +111,36 @@ class Universe:
                 raise ValueError("invalid actor identity or site")
             if any(s not in self.sites for s in actor.authorized_dispatch_sites):
                 raise ValueError("invalid actor authorization site")
+        bound_entities: set[tuple[str, str]] = set()
+        for actor_id, record in self.identity_bindings.items():
+            if not isinstance(record, dict):
+                raise ValueError("identity binding must be an object")
+            if (actor_id not in self.actors or record.get("actor_id") != actor_id
+                    or record.get("schema") != "gumas.unified.fixture_identity_binding.p2"
+                    or record.get("scope") != "synthetic_fixture_only"
+                    or record.get("grant_authenticated") is not False
+                    or record.get("source_canon_promoted") is not False
+                    or record.get("actor_permissions_changed") is not False
+                    or record.get("agent_memory_injected") is not False):
+                raise ValueError("unauthorized or inconsistent L2 fixture identity binding")
+            key = (record.get("world_id"), record.get("entity_id"))
+            if not all(isinstance(value, str) and value for value in key):
+                raise ValueError("invalid identity reference")
+            if key in bound_entities:
+                raise ValueError("duplicate ACE identity binding")
+            bound_entities.add(key)
+            natural(record.get("bound_at_s"), "identity bound_at_s")
+            natural(record.get("valid_until_s"), "identity valid_until_s")
+            if (record["bound_at_s"] > self.time_s
+                    or record["valid_until_s"] <= record["bound_at_s"]):
+                raise ValueError("identity binding has invalid validity interval")
+            payload = {k: v for k, v in record.items() if k != "binding_sha256"}
+            expected = hashlib.sha256(
+                json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                           ensure_ascii=False, allow_nan=False).encode("utf-8")
+            ).hexdigest()
+            if record.get("binding_sha256") != expected:
+                raise ValueError("identity binding fingerprint does not match record")
         for key, route in self.corridors.items():
             if key != route.corridor_id:
                 raise ValueError("invalid route identity")
@@ -160,6 +191,11 @@ class Universe:
         return {k: v for k, v in totals.items() if v != 0}
 
     def digest(self) -> str:
-        data = json.dumps(asdict(self), sort_keys=True, separators=(",", ":"),
+        payload = asdict(self)
+        # Empty P2 identity storage is not a new fact: preserve exact P0/P1
+        # state hashes and existing historical replay receipts.
+        if not payload["identity_bindings"]:
+            payload.pop("identity_bindings")
+        data = json.dumps(payload, sort_keys=True, separators=(",", ":"),
                           ensure_ascii=False, allow_nan=False).encode("utf-8")
         return hashlib.sha256(data).hexdigest()

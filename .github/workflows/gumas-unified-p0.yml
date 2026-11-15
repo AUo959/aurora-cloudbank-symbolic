@@ -1,4 +1,4 @@
-name: GUMAS Unified P0-P4 contract tests
+name: GUMAS Unified P0-P5 contract tests
 on:
   pull_request:
     paths:
@@ -9,8 +9,8 @@ on:
       - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.3__2026-11-15.md"
       - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.4__2026-11-15.md"
       - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.5__2026-11-15.md"
-      - "simulation/audits/GUMAS__AUDIT__P4_INFRASTRUCTURE_ALIGNMENT__v1.0__2026-11-15.md"
-      - "simulation/audits/GUMAS__AUDIT__P4_INFRASTRUCTURE_ALIGNMENT__v1.1__2026-11-15.md"
+      - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.6__2026-11-15.md"
+      - "simulation/audits/GUMAS__AUDIT__P5_DISTRIBUTED_GOVERNANCE_ALIGNMENT__v1.0__2026-11-15.md"
       - ".github/workflows/gumas-unified-p0.yml"
   workflow_dispatch:
 permissions:
@@ -26,11 +26,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Verify all P0-P4 causal invariants
+      - name: Verify original P0-P4 and new P5 invariants
         run: python -m unittest discover -s tests -p 'test_gumas_unified*.py' -v
-      - name: Verify P0 fixture
+      - name: Execute original synthetic corridor
         run: python -m simulation.runtime.gumas_unified.scenario > /dev/null
-      - name: Verify P3 institutional fixture
+      - name: Execute P3 political choice
         run: python -m simulation.runtime.gumas_unified.political_scenario > /dev/null
-      - name: Verify P4 governance counterfactuals
+      - name: Execute P4 heterogeneous governance
         run: python -m simulation.runtime.gumas_unified.governance_scenario > /dev/null
+      - name: Execute P5 delayed distributed governance
+        run: python -m simulation.runtime.gumas_unified.distributed_scenario > /dev/null

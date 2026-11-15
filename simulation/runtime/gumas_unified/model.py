@@ -112,6 +112,20 @@ class ReliefMotion:
 
 
 @dataclass
+class RemoteBallot:
+    """A sent but not necessarily counted synthetic remote political ballot."""
+    ballot_id: str
+    motion_id: str
+    voter_id: str
+    route_id: str
+    approve: bool
+    sent_s: int
+    arrives_s: int
+    notice_sha256: str
+    status: str = "in_flight"
+
+
+@dataclass
 class Universe:
     time_s: int
     sites: dict[str, Site]
@@ -126,6 +140,7 @@ class Universe:
     institutions: dict[str, Institution] = field(default_factory=dict)
     relief_motions: dict[str, ReliefMotion] = field(default_factory=dict)
     governance_rules: dict[str, GovernanceProtocol] = field(default_factory=dict)
+    remote_ballots: dict[str, RemoteBallot] = field(default_factory=dict)
 
     def validate(self, profile: PhysicsProfile) -> None:
         def natural(value: int, name: str, *, positive: bool = False) -> None:
@@ -262,6 +277,64 @@ class Universe:
                 raise ValueError("invalid shipment destination or commodity")
             natural(shipment.amount, "shipment amount", positive=True)
             natural(shipment.arrives_s, "shipment due")
+        seen_ballots: set[tuple[str, str]] = set()
+        for key, ballot in self.remote_ballots.items():
+            if not isinstance(ballot, RemoteBallot) or key != ballot.ballot_id:
+                raise ValueError("invalid remote ballot record")
+            if ballot.motion_id not in self.relief_motions:
+                raise ValueError("remote ballot refers to missing motion")
+            motion = self.relief_motions[ballot.motion_id]
+            institution = self.institutions[motion.institution_id]
+            if (ballot.voter_id not in self.actors
+                    or not ballot_eligible(self, motion, ballot.voter_id)
+                    or ballot.route_id not in self.corridors
+                    or type(ballot.approve) is not bool):
+                raise ValueError("remote ballot has invalid voter, rule or route")
+            actor = self.actors[ballot.voter_id]
+            corridor = self.corridors[ballot.route_id]
+            if (actor.site_id == institution.seat_site_id
+                    or corridor.origin_id != actor.site_id
+                    or corridor.destination_id != institution.seat_site_id):
+                raise ValueError("remote ballot lacks directed information path")
+            natural(ballot.sent_s, "remote ballot sent_s")
+            natural(ballot.arrives_s, "remote ballot arrives_s")
+            travel = ((corridor.distance_km + corridor.signal_speed_km_s - 1)
+                      // corridor.signal_speed_km_s)
+            if (ballot.sent_s > self.time_s
+                    or ballot.arrives_s != ballot.sent_s + travel
+                    or not isinstance(ballot.notice_sha256, str)
+                    or len(ballot.notice_sha256) != 64
+                    or any(c not in "0123456789abcdef" for c in ballot.notice_sha256)):
+                raise ValueError("remote ballot has invalid timing or notice fingerprint")
+            pair = (ballot.motion_id, ballot.voter_id)
+            if pair in seen_ballots:
+                raise ValueError("duplicate remote voter intent")
+            seen_ballots.add(pair)
+            matching_notice = [
+                report for report in actor.received_reports
+                if (report.get("kind") == "policy_motion_notice"
+                    and report.get("motion_id") == ballot.motion_id
+                    and report.get("motion_sha256") == ballot.notice_sha256
+                    and report.get("received_s", self.time_s + 1) <= ballot.sent_s)
+            ]
+            if not matching_notice:
+                raise ValueError("remote ballot lacks prior delivered motion notice")
+            if ballot.status == "in_flight":
+                if ballot.voter_id in motion.votes or not any(
+                    e.kind == "policy_ballot_arrival"
+                    and e.payload.get("ballot_id") == ballot.ballot_id
+                    and e.due_s == ballot.arrives_s for e in self.pending
+                ):
+                    raise ValueError("remote ballot in flight missing scheduled receipt")
+            elif ballot.status == "counted":
+                if (ballot.arrives_s > self.time_s
+                        or motion.votes.get(ballot.voter_id) is not ballot.approve):
+                    raise ValueError("remote counted ballot not present in institution")
+            elif ballot.status == "arrived_unusable":
+                if ballot.arrives_s > self.time_s:
+                    raise ValueError("unusable remote ballot has not arrived")
+            else:
+                raise ValueError("unknown remote ballot status")
         for k, used in self.capacity_used.items():
             if not k:
                 raise ValueError("invalid capacity key")
@@ -271,12 +344,44 @@ class Universe:
             natural(event.order, "pending order")
             if event.due_s < self.time_s:
                 raise ValueError("scheduled event in the past")
-            if event.kind not in ("cargo_arrival", "report_arrival", "policy_expiry"):
+            if event.kind not in (
+                "cargo_arrival", "report_arrival", "policy_expiry",
+                "policy_notice_arrival", "policy_ballot_arrival",
+            ):
                 raise ValueError("unknown scheduled event")
             if event.kind == "policy_expiry":
                 motion = self.relief_motions.get(event.payload.get("motion_id"))
                 if motion is None or motion.expires_s != event.due_s:
                     raise ValueError("policy expiry event lacks matching motion")
+            if event.kind == "policy_notice_arrival":
+                from .distributed_actions import motion_fingerprint
+                payload = event.payload
+                motion = self.relief_motions.get(payload.get("motion_id"))
+                recipient = self.actors.get(payload.get("recipient"))
+                sender = self.actors.get(payload.get("sender"))
+                route = self.corridors.get(payload.get("route_id"))
+                if (motion is None or recipient is None or sender is None
+                        or route is None or sender.actor_id not in
+                        self.institutions[motion.institution_id].members
+                        or recipient.actor_id not in
+                        self.institutions[motion.institution_id].members
+                        or sender.site_id != route.origin_id
+                        or recipient.site_id != route.destination_id
+                        or route.origin_id !=
+                        self.institutions[motion.institution_id].seat_site_id
+                        or route.destination_id == route.origin_id
+                        or payload.get("motion_sha256") != motion_fingerprint(motion)
+                        or type(payload.get("sent_s")) is not int
+                        or payload["sent_s"] > self.time_s
+                        or event.due_s != payload["sent_s"]
+                        + (route.distance_km + route.signal_speed_km_s - 1)
+                        // route.signal_speed_km_s):
+                    raise ValueError("policy notice lacks physically supported provenance")
+            if event.kind == "policy_ballot_arrival":
+                ballot = self.remote_ballots.get(event.payload.get("ballot_id"))
+                if (ballot is None or ballot.status != "in_flight"
+                        or event.due_s != ballot.arrives_s):
+                    raise ValueError("policy ballot event lacks in-flight ballot")
 
     def totals(self) -> dict[str, int]:
         """Account for all represented matter and energy, including in-flight cargo.
@@ -310,6 +415,8 @@ class Universe:
             payload.pop("relief_motions")
         if not payload["governance_rules"]:
             payload.pop("governance_rules")
+        if not payload["remote_ballots"]:
+            payload.pop("remote_ballots")
         data = json.dumps(payload, sort_keys=True, separators=(",", ":"),
                           ensure_ascii=False, allow_nan=False).encode("utf-8")
         return hashlib.sha256(data).hexdigest()

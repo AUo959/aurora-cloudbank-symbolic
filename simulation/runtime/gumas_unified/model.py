@@ -82,6 +82,18 @@ class Institution:
     polity_id: str
 
 
+@dataclass(frozen=True)
+class GovernanceProtocol:
+    """A local decision rule, not a civilization or polity classification.
+
+    Synthetic-only: P4 cannot import canonical authority or execute L1 work.
+    """
+    institution_id: str
+    kind: str
+    delegate_id: str | None = None
+    veto_ids: tuple[str, ...] = ()
+
+
 @dataclass
 class ReliefMotion:
     """Proposed and voted resource allocation, not a rebellion probability."""
@@ -113,6 +125,7 @@ class Universe:
     identity_bindings: dict[str, dict[str, Any]] = field(default_factory=dict)
     institutions: dict[str, Institution] = field(default_factory=dict)
     relief_motions: dict[str, ReliefMotion] = field(default_factory=dict)
+    governance_rules: dict[str, GovernanceProtocol] = field(default_factory=dict)
 
     def validate(self, profile: PhysicsProfile) -> None:
         def natural(value: int, name: str, *, positive: bool = False) -> None:
@@ -184,6 +197,12 @@ class Universe:
             if (institution.quorum > len(institution.members)
                     or institution.approval_threshold > institution.quorum):
                 raise ValueError("impossible institution quorum or approval threshold")
+        from .governance_rules import validate_protocol, approval_ready, ballot_eligible
+
+        for key, rule in self.governance_rules.items():
+            if key not in self.institutions or not isinstance(rule, GovernanceProtocol):
+                raise ValueError("governance protocol refers to an absent institution")
+            validate_protocol(self.institutions[key], rule)
         for key, motion in self.relief_motions.items():
             if key != motion.motion_id or motion.institution_id not in self.institutions:
                 raise ValueError("invalid relief motion identity or institution")
@@ -209,15 +228,15 @@ class Universe:
                 raise ValueError("dispatched motion missing shipment reference")
             if motion.status != "dispatched" and motion.shipment_id is not None:
                 raise ValueError("motion shipment reference without dispatch")
-            if any(voter not in institution.members or type(vote) is not bool
+            if any(type(vote) is not bool
+                   or not ballot_eligible(self, motion, voter)
                    for voter, vote in motion.votes.items()):
                 raise ValueError("unauthorized or invalid policy ballot")
             if motion.status in ("ratified", "dispatched") and (
                     motion.approved_at_s is None
                     or type(motion.approved_at_s) is not int
                     or not 0 <= motion.approved_at_s < motion.expires_s
-                    or sum(motion.votes.values()) < institution.approval_threshold
-                    or len(motion.votes) < institution.quorum):
+                    or not approval_ready(self, motion)):
                 raise ValueError("motion lacks sufficient recorded approval")
             if motion.status in ("proposed", "rejected", "expired") and (
                     motion.approved_at_s is not None):
@@ -289,6 +308,8 @@ class Universe:
             payload.pop("institutions")
         if not payload["relief_motions"]:
             payload.pop("relief_motions")
+        if not payload["governance_rules"]:
+            payload.pop("governance_rules")
         data = json.dumps(payload, sort_keys=True, separators=(",", ":"),
                           ensure_ascii=False, allow_nan=False).encode("utf-8")
         return hashlib.sha256(data).hexdigest()

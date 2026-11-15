@@ -12,6 +12,7 @@ from typing import Any
 
 from .external_evidence import canonical_sha256
 from .kernel import CausalEngine, FeasibilityError, Receipt, _travel_seconds
+from .governance_rules import ballot_eligible, unreachable_approval, approval_ready, protocol_label
 from .model import ReliefMotion, ScheduledEvent, Shipment, Universe
 
 SCHEMA = "gumas.unified.relief_proposal.p3"
@@ -156,19 +157,23 @@ def cast_relief_vote(engine: CausalEngine, motion_id: str, voter_id: str,
 
     def change(world: Universe) -> dict[str, Any]:
         motion = _motion(world, motion_id)
-        institution = _institution_at_seat(
-            world, motion.institution_id, voter_id)
+        _institution_at_seat(world, motion.institution_id, voter_id)
+        if not ballot_eligible(world, motion, voter_id):
+            raise FeasibilityError("actor is not eligible under the local governance protocol")
         if voter_id in motion.votes:
             raise FeasibilityError("actor has already voted on this motion")
         motion.votes[voter_id] = approve
         yes_count = sum(motion.votes.values())
         no_count = len(motion.votes) - yes_count
-        if len(institution.members) - no_count < institution.approval_threshold:
+        if unreachable_approval(world, motion):
             motion.status = "rejected"
-        return {"motion_id": motion_id, "voter_id": voter_id,
-                "voter_binding_sha256": _actor_binding(world, voter_id),
-                "approve": approve, "yes_votes": yes_count,
-                "no_votes": no_count, "status": motion.status}
+        effect = {"motion_id": motion_id, "voter_id": voter_id,
+                  "voter_binding_sha256": _actor_binding(world, voter_id),
+                  "approve": approve, "yes_votes": yes_count,
+                  "no_votes": no_count, "status": motion.status}
+        if world.governance_rules.get(motion.institution_id) is not None:
+            effect["decision_protocol"] = protocol_label(world, motion.institution_id)
+        return effect
     return engine._commit("relief_vote_recorded", voter_id, cause, change)
 
 
@@ -179,9 +184,8 @@ def ratify_relief(engine: CausalEngine, motion_id: str,
     def change(world: Universe) -> dict[str, Any]:
         motion = _motion(world, motion_id)
         institution = _institution_at_seat(world, motion.institution_id, officer_id)
-        if (len(motion.votes) < institution.quorum
-                or sum(motion.votes.values()) < institution.approval_threshold):
-            raise FeasibilityError("quorum or approval threshold not satisfied")
+        if not approval_ready(world, motion):
+            raise FeasibilityError("quorum or governance approval threshold not satisfied")
         route = engine._route(world, motion.route_id)
         site = world.sites[route.origin_id]
         if site.inventory.get(motion.commodity, 0) < motion.amount:
@@ -190,13 +194,16 @@ def ratify_relief(engine: CausalEngine, motion_id: str,
         motion.escrow_amount = motion.amount
         motion.status = "ratified"
         motion.approved_at_s = world.time_s
-        return {"motion_id": motion_id, "institution_id": institution.institution_id,
-                "yes_votes": sum(motion.votes.values()),
-                "ballots_cast": len(motion.votes),
-                "reserved_at_site": site.site_id,
-                "commodity": motion.commodity, "reserved_amount": motion.amount,
-                "available_after_reservation": site.inventory[motion.commodity],
-                "status": "ratified", "canonical_authority": False}
+        effect = {"motion_id": motion_id, "institution_id": institution.institution_id,
+                  "yes_votes": sum(motion.votes.values()),
+                  "ballots_cast": len(motion.votes),
+                  "reserved_at_site": site.site_id,
+                  "commodity": motion.commodity, "reserved_amount": motion.amount,
+                  "available_after_reservation": site.inventory[motion.commodity],
+                  "status": "ratified", "canonical_authority": False}
+        if world.governance_rules.get(motion.institution_id) is not None:
+            effect["decision_protocol"] = protocol_label(world, motion.institution_id)
+        return effect
     return engine._commit("relief_ratified_and_reserved", officer_id, cause, change)
 
 
@@ -270,13 +277,16 @@ def institution_view(engine: CausalEngine, institution_id: str) -> dict[str, Any
                 "shipment_id": motion.shipment_id,
                 "expires_s": motion.expires_s,
             }
-    return {"schema": "gumas.unified.institution_view.p3",
-            "authority": "synthetic_operator_only",
-            "institution_id": institution_id,
-            "polity_id": institution.polity_id,
-            "seat_site_id": institution.seat_site_id,
-            "time_s": world.time_s,
-            "membership_count": len(institution.members),
-            "quorum": institution.quorum,
-            "approval_threshold": institution.approval_threshold,
-            "motions": motions}
+    result = {"schema": "gumas.unified.institution_view.p3",
+              "authority": "synthetic_operator_only",
+              "institution_id": institution_id,
+              "polity_id": institution.polity_id,
+              "seat_site_id": institution.seat_site_id,
+              "time_s": world.time_s,
+              "membership_count": len(institution.members),
+              "quorum": institution.quorum,
+              "approval_threshold": institution.approval_threshold,
+              "motions": motions}
+    if world.governance_rules.get(institution_id) is not None:
+        result["decision_protocol"] = protocol_label(world, institution_id)
+    return result

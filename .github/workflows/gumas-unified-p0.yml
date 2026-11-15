@@ -10,6 +10,7 @@ on:
       - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.4__2026-11-15.md"
       - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.5__2026-11-15.md"
       - "simulation/audits/GUMAS__AUDIT__P4_INFRASTRUCTURE_ALIGNMENT__v1.0__2026-11-15.md"
+      - "simulation/audits/GUMAS__AUDIT__P4_INFRASTRUCTURE_ALIGNMENT__v1.1__2026-11-15.md"
       - ".github/workflows/gumas-unified-p0.yml"
   workflow_dispatch:
 permissions:

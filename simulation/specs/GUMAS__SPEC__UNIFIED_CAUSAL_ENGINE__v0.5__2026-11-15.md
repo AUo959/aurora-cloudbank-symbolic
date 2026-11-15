@@ -2,7 +2,7 @@
 
 **Version:** 0.5 | **Date:** 2026-11-15
 **Status:** PROPOSED / L2 SYNTHETIC ONLY
-**Alignment audit:** \`simulation/audits/GUMAS__AUDIT__P4_INFRASTRUCTURE_ALIGNMENT__v1.0__2026-11-15.md\`
+**Alignment audit:** `simulation/audits/GUMAS__AUDIT__P4_INFRASTRUCTURE_ALIGNMENT__v1.1__2026-11-15.md`
 **Lineage:** P0 #1701 → P1 #1702 → P2 #1703 → P3 #1704 → P4.
 
 ## Objective
@@ -14,21 +14,21 @@ causal reality, not a required nation-state type or a universal decision law.
 
 ## Implementation
 
-A frozen \`GovernanceProtocol\` is keyed by a preexisting institution in
-\`Universe.governance_rules\`. Missing protocols imply exactly the P3
-\`quorum_threshold\` rule; the P3 state/receipt/projection shape is unchanged
+A frozen `GovernanceProtocol` is keyed by a preexisting institution in
+`Universe.governance_rules`. Missing protocols imply exactly the P3
+`quorum_threshold` rule; the P3 state/receipt/projection shape is unchanged
 when no P4 policy is present.
 
 Three supplemental modes:
 
-1. \`delegated\`: a single existing institution member is an explicit delegate;
+1. `delegated`: a single existing institution member is an explicit delegate;
    their positive ballot enables ratification; a negative ballot rejects.
    The local fixture uses quorum=1 and threshold=1. This is recorded
    delegation as scenario data, not an automatic hereditary monarchy.
-2. \`unanimous\`: all institution members vote yes. Any negative ballot
+2. `unanimous`: all institution members vote yes. Any negative ballot
    rejects; no other actor can create their vote. Exact 3-of-3
    is the initial synthetic example, not a universal limit.
-3. \`veto\`: a quorum/threshold is required **plus** every named veto holder's
+3. `veto`: a quorum/threshold is required **plus** every named veto holder's
    affirmative ballot. A veto holder's no rejects immediately. A threshold
    alone cannot override recorded veto power.
 
@@ -54,7 +54,7 @@ forge causal event receipts.
 - No remote voting across nonlocal routes; a later stage must explicitly
   account for message latency and individual information.
 - No government termination, insurgency onset, coup or war probability is
-  introduced; the legacy v3 \`CIVIL_WAR_ONSET\` issue remains separate.
+  introduced; the legacy v3 `CIVIL_WAR_ONSET` issue remains separate.
 
 ## Contract tests
 

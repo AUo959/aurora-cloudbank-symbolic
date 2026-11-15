@@ -147,7 +147,8 @@ class P4GovernanceTests(unittest.TestCase):
         world = p3_fixture()
         payload = asdict(world)
         self.assertEqual(payload.pop("governance_rules"), {})
-        for field in ("identity_bindings", "relief_motions"):
+        # Empty P5 remote-ballot storage also must not alter P3 history.
+        for field in ("identity_bindings", "relief_motions", "remote_ballots"):
             if not payload[field]:
                 payload.pop(field)
         data = json.dumps(payload, sort_keys=True, separators=(",", ":"),

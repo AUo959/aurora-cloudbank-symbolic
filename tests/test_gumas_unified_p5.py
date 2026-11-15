@@ -424,6 +424,69 @@ class P5DistributedGovernanceTests(unittest.TestCase):
                 motion_id, "member_b", 1, "return_signal", cause="actor:integer-yes")
         self.assertEqual(engine.state.digest(), before)
 
+    def test_p2_identity_reference_is_provenance_not_voting_authority(self):
+        from simulation.runtime.gumas_unified.external_evidence import observe_ace_identity
+
+        engine, motion_id = prepared_engine("veto")
+        source = {
+            "world_id": "p5-fixture-world",
+            "world_scope": "isolated_aurora_world",
+            "status": "ready",
+            "canonical_workspace_authority": False,
+            "canon_head": "a" * 40,
+            "sources": {
+                "root": {"commit": "b" * 40},
+                "CanonRec": {"commit": "c" * 40},
+                "aurora-cloudbank-symbolic-main": {"commit": "d" * 40},
+            },
+        }
+        response = {
+            "world_id": source["world_id"],
+            "world_scope": "isolated_aurora_world",
+            "request_id": "synthetic-p5-id-retrieval",
+            "operation": "retrieve",
+            "status": "RETRIEVED_CANON",
+            "determination_id": "synthetic-p5-determination",
+            "entity_id": "fixture_remote_actor",
+            "character": {
+                "canonical_id": "fixture_remote_actor",
+                "name": "Fixture Remote Participant",
+            },
+            "origin": "sandbox_created",
+        }
+        ace = observe_ace_identity(source, response)
+        state = engine.state
+        grant = {
+            "schema": "gumas.unified.fixture_binding_grant.p2",
+            "operation": "bind_fixture_identity",
+            "scope": "synthetic_fixture_only",
+            "grant_ref": "fixture:p5-actor-alias",
+            "operator_intent_explicit": True,
+            "run_id": engine.run_id, "state_sha256": state.digest(),
+            "actor_id": "member_b", "site_id": "frontier_port",
+            "world_id": ace["world_id"], "entity_id": ace["entity_id"],
+            "ace_projection_sha256": ace["projection_sha256"],
+            "effective_at_s": state.time_s, "valid_until_s": 28,
+            "allow_canon_promotion": False,
+            "allow_agent_memory_injection": False,
+            "allow_permission_changes": False,
+        }
+        engine.bind_fixture_identity(ace, grant)
+        binding = engine.state.identity_bindings["member_b"]
+        delivered_notice(engine, motion_id)
+        receipt = engine.submit_remote_ballot(
+            motion_id, "member_b", True, "return_signal",
+            cause="actor:p5-bound-member-votes")
+        self.assertEqual(receipt.effect["voter_binding_sha256"],
+                         binding["binding_sha256"])
+        self.assertFalse(binding["source_canon_promoted"])
+        self.assertFalse(binding["actor_permissions_changed"])
+        self.assertFalse(binding["agent_memory_injected"])
+        self.assertEqual(engine.state.relief_motions[motion_id].votes, {})
+        engine.advance_to(8)
+        self.assertTrue(engine.state.relief_motions[motion_id].votes["member_b"])
+        self.assertTrue(engine.evidence()["ledger_valid"])
+
     def test_directly_injected_unproven_remote_ballot_fails_state_validation(self):
         world = distributed_fixture("veto")
         world.remote_ballots["fake"] = RemoteBallot(

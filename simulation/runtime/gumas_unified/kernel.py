@@ -160,6 +160,24 @@ class CausalEngine:
 
         return dispatch_ratified_relief(self, motion_id, executor_id, cause=cause)
 
+    def send_policy_notice(self, motion_id: str, sender_id: str,
+                           recipient_id: str, route_id: str, *,
+                           cause: str) -> Receipt:
+        """Send a typed proposal notice over a real outgoing information route."""
+        from .distributed_actions import send_policy_notice
+
+        return send_policy_notice(
+            self, motion_id, sender_id, recipient_id, route_id, cause=cause)
+
+    def submit_remote_ballot(self, motion_id: str, voter_id: str,
+                             approve: bool, return_route_id: str, *,
+                             cause: str) -> Receipt:
+        """Transmit remote intent; it becomes a ballot only at arrival."""
+        from .distributed_actions import submit_remote_ballot
+
+        return submit_remote_ballot(
+            self, motion_id, voter_id, approve, return_route_id, cause=cause)
+
     @staticmethod
     def _id(world: Universe, prefix: str) -> str:
         world.next_serial += 1
@@ -301,6 +319,14 @@ class CausalEngine:
                         "route_id": payload["route_id"]})
                     return {"recipient": actor.actor_id, "from": payload["sender"],
                             "sent_s": payload["sent_s"]}
+                if event.kind == "policy_notice_arrival":
+                    from .distributed_actions import deliver_policy_notice
+
+                    return deliver_policy_notice(world, event.payload)
+                if event.kind == "policy_ballot_arrival":
+                    from .distributed_actions import deliver_remote_ballot
+
+                    return deliver_remote_ballot(world, event.payload["ballot_id"])
                 if event.kind == "policy_expiry":
                     motion = world.relief_motions[event.payload["motion_id"]]
                     old_status = motion.status

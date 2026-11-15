@@ -16,9 +16,9 @@ from .model import ReliefMotion, RemoteBallot, ScheduledEvent, Universe
 from .political_actions import _actor_binding
 
 
-def motion_fingerprint(motion: ReliefMotion) -> str:
-    """Stable policy terms: no mutable ballots, outcomes or observation fields."""
-    return canonical_sha256({
+def public_motion_terms(motion: ReliefMotion) -> dict[str, Any]:
+    """Public, immutable proposal terms explicitly included in each notice."""
+    return {
         "motion_id": motion.motion_id,
         "institution_id": motion.institution_id,
         "proposer_id": motion.proposer_id,
@@ -26,7 +26,12 @@ def motion_fingerprint(motion: ReliefMotion) -> str:
         "commodity": motion.commodity,
         "amount": motion.amount,
         "expires_s": motion.expires_s,
-    })
+    }
+
+
+def motion_fingerprint(motion: ReliefMotion) -> str:
+    """Stable policy terms: no mutable ballots, outcomes or observation fields."""
+    return canonical_sha256(public_motion_terms(motion))
 
 
 def _identifier(value: str, label: str) -> str:
@@ -96,6 +101,7 @@ def send_policy_notice(engine: CausalEngine, motion_id: str, sender_id: str,
             scheduled_id, due, world.next_serial,
             "policy_notice_arrival", {
                 "motion_id": motion_id, "motion_sha256": digest,
+                "proposal": public_motion_terms(motion),
                 "sender": sender_id, "recipient": recipient_id,
                 "route_id": route_id, "sent_s": world.time_s,
             }))
@@ -118,13 +124,15 @@ def deliver_policy_notice(world: Universe, payload: dict[str, Any]) -> dict[str,
     actor = world.actors[recipient_id]
     motion = world.relief_motions[payload["motion_id"]]
     digest = motion_fingerprint(motion)
-    if digest != payload["motion_sha256"]:
-        raise FeasibilityError("scheduled policy notice fingerprint drift")
+    if (digest != payload["motion_sha256"]
+            or payload.get("proposal") != public_motion_terms(motion)):
+        raise FeasibilityError("scheduled policy notice content fingerprint drift")
     actor.received_reports.append({
         "kind": "policy_motion_notice",
         "motion_id": motion.motion_id,
         "institution_id": motion.institution_id,
         "motion_sha256": digest,
+        "proposal": dict(payload["proposal"]),
         "from": payload["sender"],
         "route_id": payload["route_id"],
         "sent_s": payload["sent_s"],
@@ -173,6 +181,7 @@ def submit_remote_ballot(engine: CausalEngine, motion_id: str, voter_id: str,
                 and notice.get("motion_id") == motion_id
                 and notice.get("institution_id") == motion.institution_id
                 and notice.get("motion_sha256") == digest
+                and notice.get("proposal") == public_motion_terms(motion)
                 and type(notice.get("received_s")) is int
                 and notice["received_s"] <= world.time_s)
         ]

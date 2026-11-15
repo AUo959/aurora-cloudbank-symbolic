@@ -34,11 +34,14 @@ changes and negotiated jurisdiction are later work.
    accumulated as heat using P0 signal mechanics; a notice-arrival event
    is scheduled at `t + ceil(distance_km / signal_speed_km_s)`.
    The remote actor's received knowledge is unchanged until this event.
-3. **Received knowledge:** `policy_notice_arrival` writes an exact motion
-   reference and SHA256 fingerprint to the recipient's `received_reports`.
-   Remote actors cannot ballot via this P5 API before this typed, delivered
-   notice exists. A hash is internal consistency evidence, not an
-   authenticated signature.
+3. **Received knowledge:** `policy_notice_arrival` writes immutable
+   actionable public proposal terms (proposer, institution, commodity,
+   amount, route and expiry), a motion reference and matching SHA256
+   fingerprint to the recipient's `received_reports`. The terms
+   are bound at send time, carried in the scheduled event, and checked
+   again at delivery and ballot submission. Remote actors cannot ballot
+   via this P5 API before this typed, delivered information exists.
+   A hash is internal consistency evidence, not an authenticated signature.
 4. **Individually chosen remote vote:** an eligible, actually informed
    member sends a `remote_ballot_sent` signal over a separately established,
    enabled **return** route from their present site to the institution seat.

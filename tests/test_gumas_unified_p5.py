@@ -91,6 +91,42 @@ class P5DistributedGovernanceTests(unittest.TestCase):
             result["motion_id"]]["status"], "rejected")
         self.assertEqual(result["at_20s"]["destination"]["inventory"]["rations"], 3)
 
+    def test_delivered_notice_contains_actionable_public_motion_terms(self):
+        engine, motion_id = prepared_engine()
+        engine.send_policy_notice(
+            motion_id, "governor", "member_b", "corridor_a",
+            cause="actor:deliver-actionable-proposal")
+        self.assertEqual(engine.actor_view("member_b")["received_reports"], [])
+        engine.advance_to(4)
+        notice = engine.actor_view("member_b")["received_reports"][0]
+        terms = notice["proposal"]
+        self.assertEqual(terms["motion_id"], motion_id)
+        self.assertEqual(terms["commodity"], "rations")
+        self.assertEqual(terms["amount"], 3)
+        self.assertEqual(terms["route_id"], "corridor_a")
+        self.assertEqual(terms["expires_s"], 28)
+        self.assertEqual(notice["motion_sha256"],
+                         motion_fingerprint(engine.state.relief_motions[motion_id]))
+
+    def test_matching_fingerprint_without_correct_terms_cannot_support_ballot(self):
+        engine, motion_id = prepared_engine()
+        world = engine.state
+        motion = world.relief_motions[motion_id]
+        world.actors["member_b"].received_reports.append({
+            "kind": "policy_motion_notice", "motion_id": motion_id,
+            "institution_id": motion.institution_id,
+            "motion_sha256": motion_fingerprint(motion),
+            "proposal": {"amount": 999},
+            "received_s": 0, "sent_s": 0,
+        })
+        forged = CausalEngine(world, run_id="synthetic-p5-fabricated-notice")
+        before = forged.state.digest()
+        with self.assertRaisesRegex(FeasibilityError, "has not received"):
+            forged.submit_remote_ballot(
+                motion_id, "member_b", True, "return_signal",
+                cause="actor:invalid-motion-content")
+        self.assertEqual(forged.state.digest(), before)
+
     def test_notice_must_arrive_before_remote_actor_can_vote(self):
         engine, motion_id = prepared_engine()
         before, n = engine.state.digest(), len(engine.ledger)

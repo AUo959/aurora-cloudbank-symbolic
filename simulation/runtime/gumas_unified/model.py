@@ -310,11 +310,14 @@ class Universe:
             if pair in seen_ballots:
                 raise ValueError("duplicate remote voter intent")
             seen_ballots.add(pair)
+            from .distributed_actions import public_motion_terms
+
             matching_notice = [
                 report for report in actor.received_reports
                 if (report.get("kind") == "policy_motion_notice"
                     and report.get("motion_id") == ballot.motion_id
                     and report.get("motion_sha256") == ballot.notice_sha256
+                    and report.get("proposal") == public_motion_terms(motion)
                     and report.get("received_s", self.time_s + 1) <= ballot.sent_s)
             ]
             if not matching_notice:
@@ -354,7 +357,9 @@ class Universe:
                 if motion is None or motion.expires_s != event.due_s:
                     raise ValueError("policy expiry event lacks matching motion")
             if event.kind == "policy_notice_arrival":
-                from .distributed_actions import motion_fingerprint
+                from .distributed_actions import (
+                    motion_fingerprint, public_motion_terms,
+                )
                 payload = event.payload
                 motion = self.relief_motions.get(payload.get("motion_id"))
                 recipient = self.actors.get(payload.get("recipient"))
@@ -371,6 +376,7 @@ class Universe:
                         self.institutions[motion.institution_id].seat_site_id
                         or route.destination_id == route.origin_id
                         or payload.get("motion_sha256") != motion_fingerprint(motion)
+                        or payload.get("proposal") != public_motion_terms(motion)
                         or type(payload.get("sent_s")) is not int
                         or payload["sent_s"] > self.time_s
                         or event.due_s != payload["sent_s"]

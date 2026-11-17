@@ -1,16 +1,12 @@
-name: GUMAS Unified P0-P5 contract tests
+name: GUMAS Unified P0-P6 contract tests
 on:
   pull_request:
     paths:
       - "simulation/runtime/gumas_unified/**"
       - "tests/test_gumas_unified*.py"
-      - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.1__2026-11-14.md"
-      - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.2__2026-11-14.md"
-      - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.3__2026-11-15.md"
-      - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.4__2026-11-15.md"
-      - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.5__2026-11-15.md"
-      - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.6__2026-11-15.md"
-      - "simulation/audits/GUMAS__AUDIT__P5_DISTRIBUTED_GOVERNANCE_ALIGNMENT__v1.0__2026-11-15.md"
+      - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__*.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.0__2026-11-16.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.1__2026-11-17.md"
       - ".github/workflows/gumas-unified-p0.yml"
   workflow_dispatch:
 permissions:
@@ -26,13 +22,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Verify original P0-P4 and new P5 invariants
+      - name: Verify P0-P6 isolation and causal contracts
         run: python -m unittest discover -s tests -p 'test_gumas_unified*.py' -v
-      - name: Execute original synthetic corridor
+      - name: Baseline P0 corridor fixture
         run: python -m simulation.runtime.gumas_unified.scenario > /dev/null
-      - name: Execute P3 political choice
+      - name: P3 institutional decision fixture
         run: python -m simulation.runtime.gumas_unified.political_scenario > /dev/null
-      - name: Execute P4 heterogeneous governance
+      - name: P4 governance variants
         run: python -m simulation.runtime.gumas_unified.governance_scenario > /dev/null
-      - name: Execute P5 delayed distributed governance
+      - name: P5 delayed voting fixture
         run: python -m simulation.runtime.gumas_unified.distributed_scenario > /dev/null
+      - name: P6 seatless association and mandates
+        run: python -m simulation.runtime.gumas_unified.federated_scenario > /dev/null

@@ -178,6 +178,51 @@ class CausalEngine:
         return submit_remote_ballot(
             self, motion_id, voter_id, approve, return_route_id, cause=cause)
 
+    def offer_charter(self, founder_id: str, invitee_id: str, purpose: str,
+                      outbound_route_id: str, *,
+                      expires_s: int, cause: str) -> Receipt:
+        from .federated_actions import offer_charter
+
+        return offer_charter(self, founder_id, invitee_id, purpose,
+                             outbound_route_id, expires_s=expires_s, cause=cause)
+
+    def respond_charter(self, charter_id: str, invitee_id: str, accept: bool,
+                        return_route_id: str, *, cause: str) -> Receipt:
+        from .federated_actions import respond_charter
+
+        return respond_charter(self, charter_id, invitee_id, accept,
+                               return_route_id, cause=cause)
+
+    def confirm_association(self, association_id: str, founder_id: str, *,
+                            cause: str) -> Receipt:
+        from .federated_actions import confirm_association
+
+        return confirm_association(self, association_id, founder_id, cause=cause)
+
+    def propose_mandate(self, association_id: str, proposer_id: str,
+                        cargo_route_id: str, notice_route_id: str,
+                        commodity: str, amount: int, *, expires_s: int,
+                        cause: str) -> Receipt:
+        from .federated_actions import propose_mandate
+
+        return propose_mandate(
+            self, association_id, proposer_id, cargo_route_id,
+            notice_route_id, commodity, amount, expires_s=expires_s,
+            cause=cause)
+
+    def respond_mandate(self, mandate_id: str, voter_id: str, approve: bool,
+                        return_route_id: str, *, cause: str) -> Receipt:
+        from .federated_actions import respond_mandate
+
+        return respond_mandate(
+            self, mandate_id, voter_id, approve, return_route_id, cause=cause)
+
+    def execute_mandate(self, mandate_id: str, custodian_id: str, *,
+                        cause: str) -> Receipt:
+        from .federated_actions import execute_mandate
+
+        return execute_mandate(self, mandate_id, custodian_id, cause=cause)
+
     @staticmethod
     def _id(world: Universe, prefix: str) -> str:
         world.next_serial += 1
@@ -327,6 +372,15 @@ class CausalEngine:
                     from .distributed_actions import deliver_remote_ballot
 
                     return deliver_remote_ballot(world, event.payload["ballot_id"])
+                if event.kind in {
+                    "charter_offer_arrival", "charter_response_arrival",
+                    "charter_expiry", "association_confirm_arrival",
+                    "mandate_offer_arrival", "mandate_vote_arrival",
+                    "mandate_expiry",
+                }:
+                    from .federated_actions import deliver_federated_event
+
+                    return deliver_federated_event(world, event.kind, event.payload)
                 if event.kind == "policy_expiry":
                     motion = world.relief_motions[event.payload["motion_id"]]
                     old_status = motion.status

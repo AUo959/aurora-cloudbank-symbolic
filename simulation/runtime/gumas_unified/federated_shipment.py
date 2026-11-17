@@ -17,6 +17,50 @@ if TYPE_CHECKING:
     from .model import Universe
 
 
+def _valid_dispatch_clock(world: Universe, mandate: Mandate) -> int:
+    """Check that dispatch followed approval and due time follows route physics."""
+    departed, due = mandate.shipment_departed_s, mandate.shipment_due_s
+    if type(departed) is not int or type(due) is not int:
+        raise ValueError("executed mandate needs exact integer shipment times")
+    if not mandate.authorized_at_s <= departed < mandate.expires_s:
+        raise ValueError("executed mandate dispatch lies outside authority period")
+    if departed > world.time_s:
+        raise ValueError("executed mandate cannot dispatch in the future")
+    route = world.corridors[mandate.cargo_route_id]
+    expected = departed + _travel_seconds(route.distance_km,
+                                           route.cargo_speed_km_s)
+    if due != expected:
+        raise ValueError("executed mandate has invalid cargo arrival time")
+    return due
+
+
+def _check_inflight_cargo(world: Universe, mandate: Mandate) -> None:
+    """A pending P0 arrival must match every committed mandate cargo field."""
+    shipment_id = mandate.shipment_id
+    cargo = world.in_transit.get(shipment_id)
+    if cargo is None:
+        raise ValueError("undelivered mandate is missing in-transit cargo")
+    route = world.corridors[mandate.cargo_route_id]
+    fields = (
+        cargo.route_id == mandate.cargo_route_id,
+        cargo.cargo_name == mandate.commodity,
+        cargo.amount == mandate.amount,
+        cargo.sender_id == mandate.custodian_id,
+        cargo.destination_id == route.destination_id,
+        cargo.departed_s == mandate.shipment_departed_s,
+        cargo.arrives_s == mandate.shipment_due_s,
+    )
+    if not all(fields):
+        raise ValueError("in-transit cargo disagrees with authorized mandate")
+    if not any(
+        item.kind == "cargo_arrival"
+        and item.due_s == mandate.shipment_due_s
+        and item.payload.get("shipment_id") == shipment_id
+        for item in world.pending
+    ):
+        raise ValueError("mandate shipment has no scheduled cargo receipt")
+
+
 def validate_executed_shipment(world: Universe, mandate: Mandate) -> None:
     """Fail closed on ghost cargo, mismatched payloads and impossible times."""
     details = (mandate.shipment_id, mandate.shipment_departed_s,
@@ -25,38 +69,13 @@ def validate_executed_shipment(world: Universe, mandate: Mandate) -> None:
         if any(value is not None for value in details):
             raise ValueError("unexecuted mandate cannot claim shipment provenance")
         return
-    shipment_id, departed, due = details
-    if (not isinstance(shipment_id, str) or not shipment_id
-            or type(departed) is not int
-            or type(due) is not int
-            or departed < mandate.authorized_at_s
-            or departed >= mandate.expires_s
-            or departed > world.time_s):
-        raise ValueError("executed mandate has invalid dispatch history")
-    route = world.corridors[mandate.cargo_route_id]
-    expected_due = departed + _travel_seconds(route.distance_km,
-                                               route.cargo_speed_km_s)
-    if due != expected_due:
-        raise ValueError("executed mandate has invalid cargo arrival time")
-    cargo = world.in_transit.get(shipment_id)
+    shipment_id = mandate.shipment_id
+    if not isinstance(shipment_id, str) or not shipment_id:
+        raise ValueError("executed mandate requires an existing shipment reference")
+    due = _valid_dispatch_clock(world, mandate)
     if world.time_s < due:
-        if cargo is None:
-            raise ValueError("undelivered mandate is missing in-transit cargo")
-        if (cargo.route_id != mandate.cargo_route_id
-                or cargo.cargo_name != mandate.commodity
-                or cargo.amount != mandate.amount
-                or cargo.sender_id != mandate.custodian_id
-                or cargo.destination_id != route.destination_id
-                or cargo.departed_s != departed
-                or cargo.arrives_s != due):
-            raise ValueError("in-transit cargo disagrees with authorized mandate")
-        if not any(
-            item.kind == "cargo_arrival" and item.due_s == due
-            and item.payload.get("shipment_id") == shipment_id
-            for item in world.pending
-        ):
-            raise ValueError("mandate shipment has no scheduled cargo receipt")
-    elif cargo is not None:
+        _check_inflight_cargo(world, mandate)
+    elif shipment_id in world.in_transit:
         raise ValueError("overdue mandate cargo remains incorrectly in transit")
 
 

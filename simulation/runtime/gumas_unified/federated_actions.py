@@ -15,7 +15,8 @@ from .federated_model import (
     Association, Charter, Mandate, charter_terms, fingerprint, mandate_terms,
 )
 from .kernel import CausalEngine, FeasibilityError, Receipt, _travel_seconds
-from .model import ScheduledEvent, Shipment, Universe
+from .model import ScheduledEvent, Universe
+from .federated_shipment import dispatch_mandate_shipment
 
 
 def _bounded(value: Any, name: str, limit: int = 128) -> str:
@@ -293,44 +294,12 @@ def execute_mandate(engine: CausalEngine, mandate_id: str,
             raise FeasibilityError("mandate is not an active physical dispatch authority")
         assoc, _ = _association_for_member(world, mandate.association_id,
                                            custodian_id)
-        route = engine._route(world, mandate.cargo_route_id)
-        actor = world.actors[custodian_id]
-        if actor.site_id != route.origin_id:
-            raise FeasibilityError("custodian cannot physically access cargo source")
-        window = world.time_s // route.window_seconds
-        slot = f"{route.corridor_id}@{window}"
-        occupied = world.capacity_used.get(slot, 0)
-        if occupied + mandate.amount > route.capacity_units_per_window:
-            raise FeasibilityError("federated shipment exceeds P0 physical capacity")
-        site = world.sites[route.origin_id]
-        if site.inventory.get(mandate.commodity, 0) < mandate.amount:
-            raise FeasibilityError("mandate has no physical resource escrow or stock")
-        energy = route.distance_km * mandate.amount * route.shipment_energy_j_per_unit_km
-        if site.inventory.get("energy_j", 0) < energy:
-            raise FeasibilityError("mandate execution lacks physical energy")
-        site.inventory[mandate.commodity] -= mandate.amount
-        site.inventory["energy_j"] -= energy
-        world.heat_j += energy
-        world.capacity_used[slot] = occupied + mandate.amount
-        shipment_id = engine._id(world, "shipment")
-        arrives = world.time_s + _travel_seconds(
-            route.distance_km, route.cargo_speed_km_s)
-        world.in_transit[shipment_id] = Shipment(
-            shipment_id, route.corridor_id, mandate.commodity, mandate.amount,
-            custodian_id, route.destination_id, world.time_s, arrives)
-        _schedule(engine, world, "cargo_arrival", arrives, "shipment_id", shipment_id)
-        mandate.status = "executed"
-        mandate.shipment_id = shipment_id
+        material = dispatch_mandate_shipment(
+            engine, world, mandate, custodian_id)
         return {
             "mandate_id": mandate_id, "association_id": assoc.association_id,
             "custodian_id": custodian_id,
-            "shipment_id": shipment_id, "commodity": mandate.commodity,
-            "amount": mandate.amount, "cargo_arrives_s": arrives,
-            "energy_to_heat_j": energy,
-            "association_approved": True,
-            "site_dispatch_authorized":
-                route.origin_id in actor.authorized_dispatch_sites,
-            "authority": "synthetic_L2_only", "source_canon_promoted": False,
+            **material,
         }
     return engine._commit("seatless_mandate_dispatched",
                           custodian_id, cause, change)

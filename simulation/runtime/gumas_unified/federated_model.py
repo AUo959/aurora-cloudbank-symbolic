@@ -167,6 +167,12 @@ def _validate_charter(world: Any, key: str, charter: Charter) -> None:
         if not _seen(invitee, "seatless_charter_offer", key,
                      charter.terms_sha256, charter_terms(charter), world.time_s):
             raise ValueError("charter recipient lacks actually delivered terms")
+    if charter.status in {"offer_inflight", "awaiting_response"}:
+        if charter.response_sent_s is not None:
+            raise ValueError("charter cannot have a response before transmission")
+    if charter.status in {"response_inflight", "formed", "declined"}:
+        if charter.response_sent_s is None:
+            raise ValueError("charter decision requires recorded return transmission")
     if charter.response_sent_s is None:
         if (charter.return_route_id is not None
                 or charter.response_due_s is not None
@@ -283,6 +289,12 @@ def _validate_mandate(world: Any, key: str, mandate: Mandate) -> None:
         if not _seen(voter, "seatless_mandate_offer", key,
                      mandate.terms_sha256, mandate_terms(mandate), world.time_s):
             raise ValueError("mandate voter lacks delivered terms")
+    if mandate.status in {"offer_inflight", "awaiting_vote"}:
+        if mandate.vote_sent_s is not None:
+            raise ValueError("mandate cannot contain unsent or prematurely counted vote")
+    if mandate.status in {"vote_inflight", "authorized", "rejected", "executed"}:
+        if mandate.vote_sent_s is None:
+            raise ValueError("mandate requires recorded vote transmission")
     if mandate.vote_sent_s is None:
         if (mandate.return_route_id is not None
                 or mandate.vote_due_s is not None
@@ -320,6 +332,8 @@ def _validate_mandate(world: Any, key: str, mandate: Mandate) -> None:
             raise ValueError("authorized mandate lacks timely affirmative vote")
     elif mandate.authorized_at_s is not None:
         raise ValueError("unapproved mandate has approval timestamp")
+    if mandate.status == "rejected" and mandate.vote_approve is not False:
+        raise ValueError("rejected mandate must derive from negative consent")
     if (mandate.status == "executed") != (mandate.shipment_id is not None):
         raise ValueError("mandate shipment/status mismatch")
     if mandate.shipment_id is not None:

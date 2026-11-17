@@ -365,7 +365,8 @@ class P5DistributedGovernanceTests(unittest.TestCase):
         world = distributed_fixture("veto")
         payload = asdict(world)
         self.assertEqual(payload.pop("remote_ballots"), {})
-        for optional in ("identity_bindings", "relief_motions"):
+        for optional in ("identity_bindings", "relief_motions",
+                         "charters", "associations", "mandates"):
             if not payload[optional]:
                 payload.pop(optional)
         encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"),

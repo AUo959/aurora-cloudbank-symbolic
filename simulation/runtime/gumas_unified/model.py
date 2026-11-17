@@ -10,6 +10,8 @@ import hashlib
 import json
 from typing import Any
 
+from .federated_model import Association, Charter, Mandate, validate_federated_world
+
 
 @dataclass(frozen=True)
 class PhysicsProfile:
@@ -141,6 +143,9 @@ class Universe:
     relief_motions: dict[str, ReliefMotion] = field(default_factory=dict)
     governance_rules: dict[str, GovernanceProtocol] = field(default_factory=dict)
     remote_ballots: dict[str, RemoteBallot] = field(default_factory=dict)
+    charters: dict[str, Charter] = field(default_factory=dict)
+    associations: dict[str, Association] = field(default_factory=dict)
+    mandates: dict[str, Mandate] = field(default_factory=dict)
 
     def validate(self, profile: PhysicsProfile) -> None:
         def natural(value: int, name: str, *, positive: bool = False) -> None:
@@ -350,6 +355,10 @@ class Universe:
             if event.kind not in (
                 "cargo_arrival", "report_arrival", "policy_expiry",
                 "policy_notice_arrival", "policy_ballot_arrival",
+                "charter_offer_arrival", "charter_response_arrival",
+                "charter_expiry", "association_confirm_arrival",
+                "mandate_offer_arrival", "mandate_vote_arrival",
+                "mandate_expiry",
             ):
                 raise ValueError("unknown scheduled event")
             if event.kind == "policy_expiry":
@@ -388,6 +397,7 @@ class Universe:
                 if (ballot is None or ballot.status != "in_flight"
                         or event.due_s != ballot.arrives_s):
                     raise ValueError("policy ballot event lacks in-flight ballot")
+        validate_federated_world(self)
 
     def totals(self) -> dict[str, int]:
         """Account for all represented matter and energy, including in-flight cargo.
@@ -423,6 +433,9 @@ class Universe:
             payload.pop("governance_rules")
         if not payload["remote_ballots"]:
             payload.pop("remote_ballots")
+        for field_name in ("charters", "associations", "mandates"):
+            if not payload[field_name]:
+                payload.pop(field_name)
         data = json.dumps(payload, sort_keys=True, separators=(",", ":"),
                           ensure_ascii=False, allow_nan=False).encode("utf-8")
         return hashlib.sha256(data).hexdigest()

@@ -588,6 +588,37 @@ class P6SeatlessAssociationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             CausalEngine(snapshot)
 
+    def test_all_seatless_entrypoints_reject_nonsynthetic_engine_runs(self):
+        engine = CausalEngine(federated_fixture(), run_id="operational-not-l2")
+        calls = (
+            lambda: engine.offer_charter(
+                "governor", "member_b", "Unapproved", "corridor_a",
+                expires_s=42, cause="operator:invalid"),
+            lambda: engine.respond_charter(
+                "fictional-charter", "member_b", True, "return_signal",
+                cause="operator:invalid"),
+            lambda: engine.confirm_association(
+                "fictional-association", "governor",
+                cause="operator:invalid"),
+            lambda: engine.propose_mandate(
+                "fictional-association", "governor", "corridor_a",
+                "corridor_a", "rations", 3, expires_s=42,
+                cause="operator:invalid"),
+            lambda: engine.respond_mandate(
+                "fictional-mandate", "member_b", True, "return_signal",
+                cause="operator:invalid"),
+            lambda: engine.execute_mandate(
+                "fictional-mandate", "governor",
+                cause="operator:invalid"),
+            lambda: association_view(engine, "fictional-association"),
+        )
+        before, history = engine.state.digest(), engine.ledger
+        for call in calls:
+            with self.assertRaisesRegex(FeasibilityError, "synthetic L2"):
+                call()
+            self.assertEqual(engine.state.digest(), before)
+            self.assertEqual(engine.ledger, history)
+
     def test_p6_clock_determinism_and_event_replay_checks(self):
         a, b = run_p6(), run_p6()
         self.assertEqual(a, b)

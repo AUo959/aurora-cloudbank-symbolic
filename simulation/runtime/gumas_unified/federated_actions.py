@@ -19,6 +19,13 @@ from .model import ScheduledEvent, Universe
 from .federated_shipment import dispatch_mandate_shipment
 
 
+def _require_synthetic_engine(engine: CausalEngine) -> None:
+    """All P6 mutators must refuse non-fixture run identities, not just formation."""
+    if (not isinstance(engine, CausalEngine)
+            or not engine.run_id.startswith("synthetic-")):
+        raise FeasibilityError("P6 actions require an isolated synthetic L2 run")
+
+
 def _bounded(value: Any, name: str, limit: int = 128) -> str:
     if not isinstance(value, str) or not 0 < len(value) <= limit or not value.strip():
         raise FeasibilityError(f"{name} must be a bounded nonempty string")
@@ -79,8 +86,7 @@ def offer_charter(engine: CausalEngine, founder_id: str, invitee_id: str,
                     (purpose, "purpose"), (outbound_route_id, "route"),
                     (cause, "cause")):
         _bounded(v, name, 160 if name == "purpose" else 128)
-    if not isinstance(engine, CausalEngine) or not engine.run_id.startswith("synthetic-"):
-        raise FeasibilityError("charters are synthetic L2 only")
+    _require_synthetic_engine(engine)
 
     def change(world: Universe) -> dict[str, Any]:
         route = _route(engine, world, outbound_route_id, founder_id, invitee_id)
@@ -114,6 +120,7 @@ def offer_charter(engine: CausalEngine, founder_id: str, invitee_id: str,
 
 def respond_charter(engine: CausalEngine, charter_id: str, invitee_id: str,
                     accept: bool, return_route_id: str, *, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     if type(accept) is not bool:
         raise FeasibilityError("charter consent must be explicit yes or no")
     for v, n in ((charter_id, "charter_id"), (invitee_id, "invitee"),
@@ -153,6 +160,7 @@ def respond_charter(engine: CausalEngine, charter_id: str, invitee_id: str,
 
 def confirm_association(engine: CausalEngine, association_id: str,
                         founder_id: str, *, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     for v, n in ((association_id, "association_id"),
                  (founder_id, "founder"), (cause, "cause")):
         _bounded(v, n)
@@ -200,6 +208,7 @@ def propose_mandate(engine: CausalEngine, association_id: str, proposer_id: str,
                     cargo_route_id: str, notice_route_id: str,
                     commodity: str, amount: int, *,
                     expires_s: int, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     for v, n in ((association_id, "association_id"), (proposer_id, "proposer"),
                  (cargo_route_id, "cargo route"), (notice_route_id, "notice route"),
                  (commodity, "commodity"), (cause, "cause")):
@@ -244,6 +253,7 @@ def propose_mandate(engine: CausalEngine, association_id: str, proposer_id: str,
 
 def respond_mandate(engine: CausalEngine, mandate_id: str, voter_id: str,
                     approve: bool, return_route_id: str, *, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     if type(approve) is not bool:
         raise FeasibilityError("mandate response must be a Boolean personal choice")
     for v, n in ((mandate_id, "mandate"), (voter_id, "voter"),
@@ -282,6 +292,7 @@ def respond_mandate(engine: CausalEngine, mandate_id: str, voter_id: str,
 
 def execute_mandate(engine: CausalEngine, mandate_id: str,
                     custodian_id: str, *, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     _bounded(mandate_id, "mandate")
     _bounded(custodian_id, "custodian")
     _bounded(cause, "cause")
@@ -412,6 +423,7 @@ def deliver_federated_event(world: Universe, kind: str,
 
 def association_view(engine: CausalEngine, association_id: str) -> dict[str, Any]:
     """Review-only projection; never transmit this omniscient operator packet."""
+    _require_synthetic_engine(engine)
     world = engine.state
     assoc = world.associations.get(association_id)
     if assoc is None:

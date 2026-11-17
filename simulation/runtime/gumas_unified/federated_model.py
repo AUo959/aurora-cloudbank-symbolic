@@ -72,6 +72,8 @@ class Mandate:
     vote_approve: bool | None = None
     authorized_at_s: int | None = None
     shipment_id: str | None = None
+    shipment_departed_s: int | None = None
+    shipment_due_s: int | None = None
 
 
 def charter_terms(charter: Charter) -> dict[str, Any]:
@@ -142,7 +144,8 @@ def _validate_charter(world: Any, key: str, charter: Charter) -> None:
         raise ValueError("invalid seatless charter record")
     founder = world.actors.get(charter.founder_id)
     invitee = world.actors.get(charter.invitee_id)
-    if (founder is None or invitee is None or founder == invitee
+    if (founder is None or invitee is None
+            or charter.founder_id == charter.invitee_id
             or not isinstance(charter.purpose, str)
             or not 0 < len(charter.purpose) <= 160
             or not _nat(charter.offered_s)
@@ -334,16 +337,9 @@ def _validate_mandate(world: Any, key: str, mandate: Mandate) -> None:
         raise ValueError("unapproved mandate has approval timestamp")
     if mandate.status == "rejected" and mandate.vote_approve is not False:
         raise ValueError("rejected mandate must derive from negative consent")
-    if (mandate.status == "executed") != (mandate.shipment_id is not None):
-        raise ValueError("mandate shipment/status mismatch")
-    if mandate.shipment_id is not None:
-        if not any(e.kind == "cargo_arrival"
-                   and e.payload.get("shipment_id") == mandate.shipment_id
-                   for e in world.pending) and mandate.shipment_id not in world.in_transit:
-            # A completed shipment need not remain in transit. The terminal
-            # mandate receipt persists; P0's ledger supplies its history.
-            if world.time_s < mandate.authorized_at_s:
-                raise ValueError("executed mandate precedes authorization")
+    from .federated_shipment import validate_executed_shipment
+
+    validate_executed_shipment(world, mandate)
 
 
 def validate_federated_world(world: Any) -> None:

@@ -15,7 +15,15 @@ from .federated_model import (
     Association, Charter, Mandate, charter_terms, fingerprint, mandate_terms,
 )
 from .kernel import CausalEngine, FeasibilityError, Receipt, _travel_seconds
-from .model import ScheduledEvent, Shipment, Universe
+from .model import ScheduledEvent, Universe
+from .federated_shipment import dispatch_mandate_shipment
+
+
+def _require_synthetic_engine(engine: CausalEngine) -> None:
+    """All P6 mutators must refuse non-fixture run identities, not just formation."""
+    if (not isinstance(engine, CausalEngine)
+            or not engine.run_id.startswith("synthetic-")):
+        raise FeasibilityError("P6 actions require an isolated synthetic L2 run")
 
 
 def _bounded(value: Any, name: str, limit: int = 128) -> str:
@@ -78,8 +86,7 @@ def offer_charter(engine: CausalEngine, founder_id: str, invitee_id: str,
                     (purpose, "purpose"), (outbound_route_id, "route"),
                     (cause, "cause")):
         _bounded(v, name, 160 if name == "purpose" else 128)
-    if not isinstance(engine, CausalEngine) or not engine.run_id.startswith("synthetic-"):
-        raise FeasibilityError("charters are synthetic L2 only")
+    _require_synthetic_engine(engine)
 
     def change(world: Universe) -> dict[str, Any]:
         route = _route(engine, world, outbound_route_id, founder_id, invitee_id)
@@ -113,6 +120,7 @@ def offer_charter(engine: CausalEngine, founder_id: str, invitee_id: str,
 
 def respond_charter(engine: CausalEngine, charter_id: str, invitee_id: str,
                     accept: bool, return_route_id: str, *, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     if type(accept) is not bool:
         raise FeasibilityError("charter consent must be explicit yes or no")
     for v, n in ((charter_id, "charter_id"), (invitee_id, "invitee"),
@@ -152,6 +160,7 @@ def respond_charter(engine: CausalEngine, charter_id: str, invitee_id: str,
 
 def confirm_association(engine: CausalEngine, association_id: str,
                         founder_id: str, *, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     for v, n in ((association_id, "association_id"),
                  (founder_id, "founder"), (cause, "cause")):
         _bounded(v, n)
@@ -199,6 +208,7 @@ def propose_mandate(engine: CausalEngine, association_id: str, proposer_id: str,
                     cargo_route_id: str, notice_route_id: str,
                     commodity: str, amount: int, *,
                     expires_s: int, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     for v, n in ((association_id, "association_id"), (proposer_id, "proposer"),
                  (cargo_route_id, "cargo route"), (notice_route_id, "notice route"),
                  (commodity, "commodity"), (cause, "cause")):
@@ -243,6 +253,7 @@ def propose_mandate(engine: CausalEngine, association_id: str, proposer_id: str,
 
 def respond_mandate(engine: CausalEngine, mandate_id: str, voter_id: str,
                     approve: bool, return_route_id: str, *, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     if type(approve) is not bool:
         raise FeasibilityError("mandate response must be a Boolean personal choice")
     for v, n in ((mandate_id, "mandate"), (voter_id, "voter"),
@@ -281,6 +292,7 @@ def respond_mandate(engine: CausalEngine, mandate_id: str, voter_id: str,
 
 def execute_mandate(engine: CausalEngine, mandate_id: str,
                     custodian_id: str, *, cause: str) -> Receipt:
+    _require_synthetic_engine(engine)
     _bounded(mandate_id, "mandate")
     _bounded(custodian_id, "custodian")
     _bounded(cause, "cause")
@@ -293,44 +305,12 @@ def execute_mandate(engine: CausalEngine, mandate_id: str,
             raise FeasibilityError("mandate is not an active physical dispatch authority")
         assoc, _ = _association_for_member(world, mandate.association_id,
                                            custodian_id)
-        route = engine._route(world, mandate.cargo_route_id)
-        actor = world.actors[custodian_id]
-        if actor.site_id != route.origin_id:
-            raise FeasibilityError("custodian cannot physically access cargo source")
-        window = world.time_s // route.window_seconds
-        slot = f"{route.corridor_id}@{window}"
-        occupied = world.capacity_used.get(slot, 0)
-        if occupied + mandate.amount > route.capacity_units_per_window:
-            raise FeasibilityError("federated shipment exceeds P0 physical capacity")
-        site = world.sites[route.origin_id]
-        if site.inventory.get(mandate.commodity, 0) < mandate.amount:
-            raise FeasibilityError("mandate has no physical resource escrow or stock")
-        energy = route.distance_km * mandate.amount * route.shipment_energy_j_per_unit_km
-        if site.inventory.get("energy_j", 0) < energy:
-            raise FeasibilityError("mandate execution lacks physical energy")
-        site.inventory[mandate.commodity] -= mandate.amount
-        site.inventory["energy_j"] -= energy
-        world.heat_j += energy
-        world.capacity_used[slot] = occupied + mandate.amount
-        shipment_id = engine._id(world, "shipment")
-        arrives = world.time_s + _travel_seconds(
-            route.distance_km, route.cargo_speed_km_s)
-        world.in_transit[shipment_id] = Shipment(
-            shipment_id, route.corridor_id, mandate.commodity, mandate.amount,
-            custodian_id, route.destination_id, world.time_s, arrives)
-        _schedule(engine, world, "cargo_arrival", arrives, "shipment_id", shipment_id)
-        mandate.status = "executed"
-        mandate.shipment_id = shipment_id
+        material = dispatch_mandate_shipment(
+            engine, world, mandate, custodian_id)
         return {
             "mandate_id": mandate_id, "association_id": assoc.association_id,
             "custodian_id": custodian_id,
-            "shipment_id": shipment_id, "commodity": mandate.commodity,
-            "amount": mandate.amount, "cargo_arrives_s": arrives,
-            "energy_to_heat_j": energy,
-            "association_approved": True,
-            "site_dispatch_authorized":
-                route.origin_id in actor.authorized_dispatch_sites,
-            "authority": "synthetic_L2_only", "source_canon_promoted": False,
+            **material,
         }
     return engine._commit("seatless_mandate_dispatched",
                           custodian_id, cause, change)
@@ -443,6 +423,7 @@ def deliver_federated_event(world: Universe, kind: str,
 
 def association_view(engine: CausalEngine, association_id: str) -> dict[str, Any]:
     """Review-only projection; never transmit this omniscient operator packet."""
+    _require_synthetic_engine(engine)
     world = engine.state
     assoc = world.associations.get(association_id)
     if assoc is None:

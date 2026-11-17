@@ -72,6 +72,8 @@ class Mandate:
     vote_approve: bool | None = None
     authorized_at_s: int | None = None
     shipment_id: str | None = None
+    shipment_departed_s: int | None = None
+    shipment_due_s: int | None = None
 
 
 def charter_terms(charter: Charter) -> dict[str, Any]:
@@ -142,7 +144,8 @@ def _validate_charter(world: Any, key: str, charter: Charter) -> None:
         raise ValueError("invalid seatless charter record")
     founder = world.actors.get(charter.founder_id)
     invitee = world.actors.get(charter.invitee_id)
-    if (founder is None or invitee is None or founder == invitee
+    if (founder is None or invitee is None
+            or charter.founder_id == charter.invitee_id
             or not isinstance(charter.purpose, str)
             or not 0 < len(charter.purpose) <= 160
             or not _nat(charter.offered_s)
@@ -167,6 +170,12 @@ def _validate_charter(world: Any, key: str, charter: Charter) -> None:
         if not _seen(invitee, "seatless_charter_offer", key,
                      charter.terms_sha256, charter_terms(charter), world.time_s):
             raise ValueError("charter recipient lacks actually delivered terms")
+    if charter.status in {"offer_inflight", "awaiting_response"}:
+        if charter.response_sent_s is not None:
+            raise ValueError("charter cannot have a response before transmission")
+    if charter.status in {"response_inflight", "formed", "declined"}:
+        if charter.response_sent_s is None:
+            raise ValueError("charter decision requires recorded return transmission")
     if charter.response_sent_s is None:
         if (charter.return_route_id is not None
                 or charter.response_due_s is not None
@@ -283,6 +292,12 @@ def _validate_mandate(world: Any, key: str, mandate: Mandate) -> None:
         if not _seen(voter, "seatless_mandate_offer", key,
                      mandate.terms_sha256, mandate_terms(mandate), world.time_s):
             raise ValueError("mandate voter lacks delivered terms")
+    if mandate.status in {"offer_inflight", "awaiting_vote"}:
+        if mandate.vote_sent_s is not None:
+            raise ValueError("mandate cannot contain unsent or prematurely counted vote")
+    if mandate.status in {"vote_inflight", "authorized", "rejected", "executed"}:
+        if mandate.vote_sent_s is None:
+            raise ValueError("mandate requires recorded vote transmission")
     if mandate.vote_sent_s is None:
         if (mandate.return_route_id is not None
                 or mandate.vote_due_s is not None
@@ -320,16 +335,11 @@ def _validate_mandate(world: Any, key: str, mandate: Mandate) -> None:
             raise ValueError("authorized mandate lacks timely affirmative vote")
     elif mandate.authorized_at_s is not None:
         raise ValueError("unapproved mandate has approval timestamp")
-    if (mandate.status == "executed") != (mandate.shipment_id is not None):
-        raise ValueError("mandate shipment/status mismatch")
-    if mandate.shipment_id is not None:
-        if not any(e.kind == "cargo_arrival"
-                   and e.payload.get("shipment_id") == mandate.shipment_id
-                   for e in world.pending) and mandate.shipment_id not in world.in_transit:
-            # A completed shipment need not remain in transit. The terminal
-            # mandate receipt persists; P0's ledger supplies its history.
-            if world.time_s < mandate.authorized_at_s:
-                raise ValueError("executed mandate precedes authorization")
+    if mandate.status == "rejected" and mandate.vote_approve is not False:
+        raise ValueError("rejected mandate must derive from negative consent")
+    from .federated_shipment import validate_executed_shipment
+
+    validate_executed_shipment(world, mandate)
 
 
 def validate_federated_world(world: Any) -> None:

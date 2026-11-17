@@ -487,6 +487,141 @@ class P6SeatlessAssociationTests(unittest.TestCase):
                          ensure_ascii=False, allow_nan=False).encode("utf-8")
         self.assertEqual(world.digest(), hashlib.sha256(enc).hexdigest())
 
+    def _approved_mandate(self):
+        engine, _, association_id = setup_engine()
+        mandate_id = proposal(engine, association_id)
+        respond(engine, mandate_id)
+        receipt = engine.execute_mandate(
+            mandate_id, "governor", cause="actor:well-formed-execution")
+        return engine, mandate_id, receipt.effect["shipment_id"]
+
+    def test_executed_mandate_carries_exact_cargo_provenance(self):
+        engine, mandate_id, shipment_id = self._approved_mandate()
+        mandate = engine.state.mandates[mandate_id]
+        cargo = engine.state.in_transit[shipment_id]
+        self.assertEqual(mandate.shipment_departed_s, cargo.departed_s)
+        self.assertEqual(mandate.shipment_due_s, cargo.arrives_s)
+        self.assertEqual((cargo.departed_s, cargo.arrives_s), (16, 28))
+        self.assertTrue(engine.evidence()["ledger_valid"])
+
+    def test_forged_executed_mandate_without_real_cargo_is_rejected(self):
+        engine, mandate_id, _ = self._approved_mandate()
+        snapshot = engine.state
+        snapshot.mandates[mandate_id].shipment_id = "invented-shipment"
+        with self.assertRaisesRegex(ValueError, "missing in-transit"):
+            CausalEngine(snapshot)
+
+    def test_phantom_or_mismatched_cargo_fields_are_rejected(self):
+        engine, mandate_id, shipment_id = self._approved_mandate()
+        for field, value in (("cargo_name", "fictitious_goods"),
+                             ("route_id", "return_signal"),
+                             ("amount", 2),
+                             ("sender_id", "member_a"),
+                             ("destination_id", "union_depot"),
+                             ("departed_s", 15),
+                             ("arrives_s", 29)):
+            with self.subTest(field=field):
+                snapshot = engine.state
+                setattr(snapshot.in_transit[shipment_id], field, value)
+                with self.assertRaises(ValueError):
+                    CausalEngine(snapshot)
+
+    def test_mandate_arrival_clock_cannot_be_forged(self):
+        engine, mandate_id, _ = self._approved_mandate()
+        for field, value in (("shipment_departed_s", 15),
+                             ("shipment_due_s", 27),
+                             ("shipment_due_s", 9999),
+                             ("shipment_departed_s", None)):
+            with self.subTest(field=field, value=value):
+                snapshot = engine.state
+                setattr(snapshot.mandates[mandate_id], field, value)
+                with self.assertRaises(ValueError):
+                    CausalEngine(snapshot)
+
+    def test_completed_shipment_retains_valid_provenance_after_delivery(self):
+        engine, mandate_id, shipment_id = self._approved_mandate()
+        engine.advance_to(28)
+        self.assertNotIn(shipment_id, engine.state.in_transit)
+        mandate = engine.state.mandates[mandate_id]
+        self.assertEqual(mandate.shipment_due_s, 28)
+        self.assertTrue(engine.evidence()["ledger_valid"])
+        for field, value in (("shipment_due_s", 29),
+                             ("shipment_due_s", None),
+                             ("shipment_departed_s", 17)):
+            snapshot = engine.state
+            setattr(snapshot.mandates[mandate_id], field, value)
+            with self.assertRaises(ValueError):
+                CausalEngine(snapshot)
+
+    def test_pending_mandate_cannot_contain_shipment_metadata(self):
+        engine, _, association_id = setup_engine()
+        mandate_id = proposal(engine, association_id)
+        snapshot = engine.state
+        snapshot.mandates[mandate_id].shipment_id = "ghost"
+        snapshot.mandates[mandate_id].shipment_departed_s = 8
+        snapshot.mandates[mandate_id].shipment_due_s = 20
+        with self.assertRaisesRegex(ValueError, "unexecuted"):
+            CausalEngine(snapshot)
+
+    def test_unacknowledged_charter_and_mandate_ballot_states_are_invalid(self):
+        engine = CausalEngine(federated_fixture())
+        charter_id = engine.offer_charter(
+            "governor", "member_b", "Strict provenance",
+            "corridor_a", expires_s=42, cause="actor:propose").effect["charter_id"]
+        state = engine.state
+        state.charters[charter_id].status = "response_inflight"
+        with self.assertRaises(ValueError):
+            CausalEngine(state)
+        engine, _, association_id = setup_engine()
+        mandate_id = proposal(engine, association_id)
+        state = engine.state
+        state.mandates[mandate_id].status = "authorized"
+        with self.assertRaises(ValueError):
+            CausalEngine(state)
+
+    def test_unreceived_negative_vote_cannot_be_forced_into_rejection(self):
+        engine, _, association_id = setup_engine()
+        mandate_id = proposal(engine, association_id)
+        snapshot = engine.state
+        snapshot.mandates[mandate_id].status = "rejected"
+        snapshot.mandates[mandate_id].vote_approve = True
+        with self.assertRaises(ValueError):
+            CausalEngine(snapshot)
+
+    def test_all_seatless_entrypoints_reject_nonsynthetic_engine_runs(self):
+        # P0 already rejects non-synthetic run IDs at construction.
+        # Tampering after creation probes P6's additional defense in depth.
+        engine = CausalEngine(federated_fixture(), run_id="synthetic-guard-test")
+        engine.run_id = "operational-not-l2"
+        calls = (
+            lambda: engine.offer_charter(
+                "governor", "member_b", "Unapproved", "corridor_a",
+                expires_s=42, cause="operator:invalid"),
+            lambda: engine.respond_charter(
+                "fictional-charter", "member_b", True, "return_signal",
+                cause="operator:invalid"),
+            lambda: engine.confirm_association(
+                "fictional-association", "governor",
+                cause="operator:invalid"),
+            lambda: engine.propose_mandate(
+                "fictional-association", "governor", "corridor_a",
+                "corridor_a", "rations", 3, expires_s=42,
+                cause="operator:invalid"),
+            lambda: engine.respond_mandate(
+                "fictional-mandate", "member_b", True, "return_signal",
+                cause="operator:invalid"),
+            lambda: engine.execute_mandate(
+                "fictional-mandate", "governor",
+                cause="operator:invalid"),
+            lambda: association_view(engine, "fictional-association"),
+        )
+        before, history = engine.state.digest(), engine.ledger
+        for call in calls:
+            with self.assertRaisesRegex(FeasibilityError, "synthetic L2"):
+                call()
+            self.assertEqual(engine.state.digest(), before)
+            self.assertEqual(engine.ledger, history)
+
     def test_p6_clock_determinism_and_event_replay_checks(self):
         a, b = run_p6(), run_p6()
         self.assertEqual(a, b)

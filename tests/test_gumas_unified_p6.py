@@ -589,7 +589,10 @@ class P6SeatlessAssociationTests(unittest.TestCase):
             CausalEngine(snapshot)
 
     def test_all_seatless_entrypoints_reject_nonsynthetic_engine_runs(self):
-        engine = CausalEngine(federated_fixture(), run_id="operational-not-l2")
+        # P0 already rejects non-synthetic run IDs at construction.
+        # Tampering after creation probes P6's additional defense in depth.
+        engine = CausalEngine(federated_fixture(), run_id="synthetic-guard-test")
+        engine.run_id = "operational-not-l2"
         calls = (
             lambda: engine.offer_charter(
                 "governor", "member_b", "Unapproved", "corridor_a",

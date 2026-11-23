@@ -39,27 +39,35 @@ class PhonotacticError(ValueError):
     pass
 
 
+def _split_cluster(cluster: tuple[str, ...], tactics: Phonotactics) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Split an intervocalic cluster into (coda, onset), giving the onset its longest legal tail."""
+    for k in range(len(cluster)):
+        if cluster[k:] in tactics.onsets:
+            return cluster[:k], cluster[k:]
+    return cluster, ()
+
+
+def _word_onset(symbols: Sequence[str], nuclei: Sequence[int], tactics: Phonotactics) -> tuple[str, ...]:
+    """The consonants before the first nucleus, which must form a legal onset."""
+    if not nuclei:
+        raise PhonotacticError(f"no syllable nucleus in {''.join(symbols)!r}")
+    onset = tuple(symbols[: nuclei[0]])
+    if onset and onset not in tactics.onsets:
+        raise PhonotacticError(f"illegal word onset {''.join(onset)!r} in {''.join(symbols)!r}")
+    return onset
+
+
 def syllabify(segments: Sequence[Phoneme], tactics: Phonotactics) -> list[Syllable]:
     """Split a segment string into syllables, giving each nucleus the longest legal onset."""
     symbols = [s.symbol for s in segments]
     nuclei = [i for i, s in enumerate(segments) if s.feature("syllabic")]
-    if not nuclei:
-        raise PhonotacticError(f"no syllable nucleus in {''.join(symbols)!r}")
+    onset = _word_onset(symbols, nuclei, tactics)
     syllables: list[Syllable] = []
-    onset: tuple[str, ...] = tuple(symbols[: nuclei[0]])
-    if onset and onset not in tactics.onsets:
-        raise PhonotacticError(f"illegal word onset {''.join(onset)!r} in {''.join(symbols)!r}")
-    for position, nucleus in enumerate(nuclei):
-        nxt = nuclei[position + 1] if position + 1 < len(nuclei) else None
-        cluster = tuple(symbols[nucleus + 1 : nxt if nxt is not None else len(symbols)])
-        if nxt is None:
-            coda, next_onset = cluster, ()
-        else:
-            split = next(
-                (k for k in range(len(cluster) + 1) if cluster[k:] in tactics.onsets or k == len(cluster)),
-                len(cluster),
-            )
-            coda, next_onset = cluster[:split], cluster[split:]
+    ends = nuclei[1:] + [len(symbols)]
+    for nucleus, end in zip(nuclei, ends):
+        cluster = tuple(symbols[nucleus + 1 : end])
+        final = end == len(symbols)
+        coda, next_onset = (cluster, ()) if final else _split_cluster(cluster, tactics)
         syllables.append(Syllable(onset, symbols[nucleus], coda))
         onset = next_onset
     return syllables

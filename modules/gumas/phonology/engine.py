@@ -65,39 +65,63 @@ class Profile:
     @classmethod
     def load(cls, directory: str | Path) -> "Profile":
         directory = Path(directory)
-        raw = {part: json.loads((directory / f"{part}.json").read_text(encoding="utf-8"))
-               for part in ("inventory", "chronology", "lexicon", "attested")}  # fmt: skip
+        raw = _read_profile_files(directory)
         inventory = Inventory(raw["inventory"]["phonemes"])
-        consonants = [s for s in inventory.symbols() if not inventory[s].feature("syllabic")]
-        tactics = syllables.Phonotactics.from_profile(raw["inventory"].get("phonotactics", {}), consonants)
-        laws = tuple(sorted((SoundLaw.from_dict(d) for d in raw["chronology"]["laws"]), key=lambda law: law.date))
-        if len({law.date for law in laws}) != len(laws):
-            raise ValueError("two sound laws share a date; relative order would be ambiguous")
-        lexicon = {}
-        for key, entry in raw["lexicon"]["roots"].items():
-            root = Root(key, entry["proto"], entry["gloss"], entry["gloss_status"], entry.get("kind", "root"),
-                        entry.get("lineage"), entry.get("source"))  # fmt: skip
-            inventory.parse(root.proto)  # fail fast on symbols outside the inventory
-            lexicon[key] = root
-        lineages = {
-            name: Lineage(name, spec["prefix"], tuple(spec["roots"]), tuple(spec["eras"]))
-            for name, spec in raw["lexicon"]["lineages"].items()
-            if not name.startswith("_")
-        }
+        chronology = raw["chronology"]
         canonical = json.dumps(raw, sort_keys=True, separators=(",", ":"))
         return cls(
             name=directory.name,
             inventory=inventory,
-            tactics=tactics,
-            laws=laws,
-            eras={name: spec["formed_at"] for name, spec in raw["chronology"]["eras"].items()},
-            reform_date=raw["chronology"]["orthographic_events"]["scribal_reform"]["date"],
-            lexicon=lexicon,
-            lineages=lineages,
+            tactics=_load_tactics(raw["inventory"], inventory),
+            laws=_load_laws(chronology["laws"]),
+            eras={name: spec["formed_at"] for name, spec in chronology["eras"].items()},
+            reform_date=chronology["orthographic_events"]["scribal_reform"]["date"],
+            lexicon=_load_lexicon(raw["lexicon"]["roots"], inventory),
+            lineages=_load_lineages(raw["lexicon"]["lineages"]),
             content_roots=tuple(raw["lexicon"]["generative_content_roots"]),
             attested=tuple(raw["attested"]["names"]),
             digest=hashlib.sha256(canonical.encode()).hexdigest()[:16],
         )
+
+
+_PROFILE_FILES = ("inventory", "chronology", "lexicon", "attested")
+
+
+def _read_profile_files(directory: Path) -> dict[str, Any]:
+    return {part: json.loads((directory / f"{part}.json").read_text(encoding="utf-8")) for part in _PROFILE_FILES}
+
+
+def _load_tactics(raw_inventory: Mapping[str, Any], inventory: Inventory) -> syllables.Phonotactics:
+    consonants = [s for s in inventory.symbols() if not inventory[s].feature("syllabic")]
+    return syllables.Phonotactics.from_profile(raw_inventory.get("phonotactics", {}), consonants)
+
+
+def _load_laws(raw_laws: Sequence[Mapping[str, Any]]) -> tuple[SoundLaw, ...]:
+    laws = tuple(sorted((SoundLaw.from_dict(d) for d in raw_laws), key=lambda law: law.date))
+    if len({law.date for law in laws}) != len(laws):
+        raise ValueError("two sound laws share a date; relative order would be ambiguous")
+    return laws
+
+
+def _load_lexicon(raw_roots: Mapping[str, Mapping[str, Any]], inventory: Inventory) -> dict[str, Root]:
+    lexicon = {}
+    for key, entry in raw_roots.items():
+        inventory.parse(entry["proto"])  # fail fast on symbols outside the inventory
+        lexicon[key] = Root(
+            key=key,
+            proto=entry["proto"],
+            gloss=entry["gloss"],
+            gloss_status=entry["gloss_status"],
+            kind=entry.get("kind", "root"),
+            lineage=entry.get("lineage"),
+            source=entry.get("source"),
+        )
+    return lexicon
+
+
+def _load_lineages(raw_lineages: Mapping[str, Any]) -> dict[str, Lineage]:
+    specs = {name: spec for name, spec in raw_lineages.items() if not name.startswith("_")}
+    return {name: Lineage(name, s["prefix"], tuple(s["roots"]), tuple(s["eras"])) for name, s in specs.items()}
 
 
 @lru_cache(maxsize=None)
@@ -170,38 +194,39 @@ class Engine:
             out += root.proto
         return out
 
-    def derive(self, roots: Sequence[str], era: str | None = None, *, formed_at: int | None = None) -> Derivation:
+    def _lookup(self, roots: Sequence[str]) -> list[Root]:
         missing = [key for key in roots if key not in self.profile.lexicon]
         if missing:
             raise KeyError(f"unknown {self.profile.name} roots: {missing}")
-        era, formed_at = self._formation(era, formed_at)
-        used = [self.profile.lexicon[key] for key in roots]
+        return [self.profile.lexicon[key] for key in roots]
+
+    def _evolve(self, used: Sequence[Root], formed_at: int) -> tuple[Word, list[dict[str, Any]]]:
+        """Run the chronology: separate words before ``formed_at``, one word from then on."""
         inventory = self.profile.inventory
         pieces = [Word.from_morph(Morph(r.key, r.kind, r.lineage), inventory.parse(r.proto)) for r in used]
-        joined: Word | None = Word.join(pieces, formed_at) if len(pieces) == 1 else None
+        early, late = _partition(self.profile.laws, formed_at)
         trace: list[dict[str, Any]] = []
+        pieces = self._run_laws(early, pieces, trace)
+        word = Word.join(pieces, formed_at)
+        if len(pieces) > 1:
+            trace.append({"event": "compounded", "date": formed_at, "form": word.phonemic()})
+        (word,) = self._run_laws(late, [word], trace)
+        return word, trace
 
-        def show() -> str:
-            return joined.phonemic() if joined is not None else " · ".join(p.phonemic() for p in pieces)
+    def _run_laws(self, laws: Sequence[SoundLaw], words: list[Word], trace: list[dict[str, Any]]) -> list[Word]:
+        """Apply laws in order to each word independently, recording every change."""
+        for law in laws:
+            before = _show(words)
+            words = [law.apply(w, self.profile.inventory) for w in words]
+            _record(trace, law, before, _show(words))
+        return words
 
-        for law in self.profile.laws:
-            if joined is None and law.date >= formed_at:
-                joined = Word.join(pieces, formed_at)
-                trace.append({"event": "compounded", "date": formed_at, "form": joined.phonemic()})
-            before = show()
-            if joined is not None:
-                joined = law.apply(joined, inventory)
-            else:
-                pieces = [law.apply(p, inventory) for p in pieces]
-            after = show()
-            if after != before:
-                trace.append({"law": law.law_id, "name": law.name, "date": law.date, "era": law.era,
-                              "before": before, "after": after})  # fmt: skip
-        if joined is None:
-            joined = Word.join(pieces, formed_at)
-            trace.append({"event": "compounded", "date": formed_at, "form": joined.phonemic()})
-
+    def derive(self, roots: Sequence[str], era: str | None = None, *, formed_at: int | None = None) -> Derivation:
+        used = self._lookup(roots)
+        era, formed_at = self._formation(era, formed_at)
+        joined, trace = self._evolve(used, formed_at)
         formal, informal = self._render(joined)
+        lineages = [r.lineage for r in used if r.lineage]
         return Derivation(
             roots=tuple(roots),
             era=era,
@@ -212,7 +237,7 @@ class Engine:
             informal=informal,
             gloss=" + ".join(r.gloss for r in used),
             gloss_status=[r.gloss_status for r in used],
-            lineage=next((r.lineage for r in used if r.lineage), None),
+            lineage=lineages[0] if lineages else None,
             trace=trace,
             phonotactic_problems=syllables.check(joined.segments(), self.profile.tactics),
             profile=self.profile.name,
@@ -229,22 +254,30 @@ class Engine:
         name (Vel'Rynn) but not when it is a common noun (T'karas).
         Informal: the apostrophe is dropped and the word written solid.
         """
-        chunks: list[tuple[str, Morph | None]] = []  # (text, morph that opens the chunk)
-        current, opener = "", None
+        chunks = self._written_chunks(word)
+        formal_parts = [chunks[0][0].capitalize()]
+        formal_parts += [text.capitalize() if morph.lineage else text for text, morph in chunks[1:]]
+        return "'".join(formal_parts), "".join(text for text, _ in chunks).capitalize()
+
+    def _written_chunks(self, word: Word) -> list[tuple[str, Morph]]:
+        """Split a word at its apostrophe junctions: (spelling, morph that opens the chunk)."""
+        texts: list[list[str]] = []
+        openers: list[Morph] = []
+        start_new = True
         for token in word.tokens:
             if isinstance(token, Boundary):
-                if token.kind == "compound" and token.formed_at >= self.profile.reform_date:
-                    chunks.append((current, opener))
-                    current, opener = "", None
+                start_new = start_new or self._written_junction(token)
                 continue
-            if not current and opener is None:
-                opener = word.morphs[token.morph]
-            current += token.phoneme.grapheme
-        chunks.append((current, opener))
-        formal_parts = [chunks[0][0].capitalize()]
-        for text, morph in chunks[1:]:
-            formal_parts.append(text.capitalize() if morph is not None and morph.lineage else text)
-        return "'".join(formal_parts), "".join(text for text, _ in chunks).capitalize()
+            if start_new:
+                texts.append([])
+                openers.append(word.morphs[token.morph])
+                start_new = False
+            texts[-1].append(token.phoneme.grapheme)
+        return [("".join(text), morph) for text, morph in zip(texts, openers)]
+
+    def _written_junction(self, boundary: Boundary) -> bool:
+        """Compound junctions formed on or after the scribal reform are written with an apostrophe."""
+        return boundary.kind == "compound" and boundary.formed_at >= self.profile.reform_date
 
     # ------------------------------------------------------------------ corpus fit
 
@@ -281,31 +314,56 @@ class Engine:
         With ``registry`` (a ``naming.NameRegistry``), candidates carry collision
         findings and BLOCK-level candidates are dropped.
         """
-        if lineage not in self.profile.lineages:
-            raise KeyError(f"unknown lineage {lineage!r}; known: {sorted(self.profile.lineages)}")
-        spec = self.profile.lineages[lineage]
-        allowed_eras = tuple(eras) if eras else spec.eras
-        digest = hashlib.sha256(f"{ENGINE_VERSION}|{self.profile.digest}|{lineage}|{seed}".encode()).hexdigest()
-        # Deterministic, seeded shuffle for reproducible naming; not used for security.
-        rng = random.Random(int(digest[:16], 16))  # nosec B311
-        pool = [(p, c, e) for p in spec.roots for c in self.profile.content_roots for e in allowed_eras]
-        rng.shuffle(pool)
         out: list[Derivation] = []
         seen: set[str] = set()
-        for prefix, content, era in pool:
+        for prefix, content, era in self._candidate_pool(lineage, seed, eras):
             derived = self.derive((prefix, content), era)
             key = derived.informal.lower()
-            if key in seen or not derived.legal:
+            if key in seen or not _admissible(derived, registry):
                 continue
-            if registry is not None:
-                derived.findings = registry.evaluate(derived.formal)
-                if any(f.get("level") == "BLOCK" for f in derived.findings):
-                    continue
             seen.add(key)
             out.append(derived)
             if len(out) >= count:
                 break
         return out
+
+    def _candidate_pool(self, lineage: str, seed: int, eras: Sequence[str] | None) -> list[tuple[str, str, str]]:
+        """Every (lineage root, content root, era) combination, in a seed-determined order."""
+        if lineage not in self.profile.lineages:
+            raise KeyError(f"unknown lineage {lineage!r}; known: {sorted(self.profile.lineages)}")
+        spec = self.profile.lineages[lineage]
+        allowed_eras = tuple(eras) if eras else spec.eras
+        pool = [(p, c, e) for p in spec.roots for c in self.profile.content_roots for e in allowed_eras]
+        digest = hashlib.sha256(f"{ENGINE_VERSION}|{self.profile.digest}|{lineage}|{seed}".encode()).hexdigest()
+        # Deterministic, seeded shuffle for reproducible naming; not used for security.
+        random.Random(int(digest[:16], 16)).shuffle(pool)  # nosec B311
+        return pool
+
+
+def _admissible(derived: Derivation, registry: Any | None) -> bool:
+    """Legal phonotactics and, when a registry is given, no BLOCK-level collision."""
+    if not derived.legal:
+        return False
+    if registry is None:
+        return True
+    derived.findings = registry.evaluate(derived.formal)
+    return not any(f.get("level") == "BLOCK" for f in derived.findings)
+
+
+def _partition(laws: Sequence[SoundLaw], formed_at: int) -> tuple[list[SoundLaw], list[SoundLaw]]:
+    """Laws before a compound's formation date, and laws from that date on."""
+    early = [law for law in laws if law.date < formed_at]
+    return early, list(laws[len(early) :])  # laws are sorted by date
+
+
+def _show(pieces: Sequence[Word]) -> str:
+    return " · ".join(p.phonemic() for p in pieces)
+
+
+def _record(trace: list[dict[str, Any]], law: SoundLaw, before: str, after: str) -> None:
+    if after != before:
+        trace.append({"law": law.law_id, "name": law.name, "date": law.date, "era": law.era,
+                      "before": before, "after": after})  # fmt: skip
 
 
 def shared_roots(a: Derivation, b: Derivation) -> set[str]:

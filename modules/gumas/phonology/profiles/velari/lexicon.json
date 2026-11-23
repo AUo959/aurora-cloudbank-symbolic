@@ -1,0 +1,42 @@
+{
+  "_note": "Velari roots. gloss_status: canon (stated in canon) | inferred (implied by canon context) | draft (invented here) | unknown (form attested, meaning not). Only canon-status glosses are canon.",
+  "roots": {
+    "wela":   {"proto": "wela",   "gloss": "high, elder",             "gloss_status": "inferred", "lineage": "noble"},
+    "warna":  {"proto": "warna",  "gloss": "guard (zero-grade)",      "gloss_status": "inferred", "lineage": "military"},
+    "warena": {"proto": "warena", "gloss": "guard (full-grade)",      "gloss_status": "inferred", "lineage": "military"},
+    "tessa":  {"proto": "tessa",  "gloss": "keep, remember",          "gloss_status": "inferred", "lineage": "scholarly"},
+    "rina":   {"proto": "rina",   "gloss": "voice",                   "gloss_status": "inferred", "lineage": "reformist"},
+    "tu":     {"proto": "tu",     "gloss": "outward, far",            "gloss_status": "inferred", "lineage": "outworld"},
+
+    "ari":    {"proto": "ari",    "gloss": "people of, ones who",     "gloss_status": "draft", "kind": "suffix"},
+    "ta":     {"proto": "ta",     "gloss": "that, the (demonstrative)", "gloss_status": "draft", "kind": "proclitic"},
+
+    "kuna":   {"proto": "kuna",   "gloss": "flame",       "gloss_status": "inferred", "source": "House Velkonn; 'Sira of Flamewake'"},
+    "tala":   {"proto": "tala",   "gloss": "stand fast",  "gloss_status": "draft"},
+    "karasa": {"proto": "karasa", "gloss": "hold, fortress", "gloss_status": "draft"},
+    "karisa": {"proto": "karisa", "gloss": "(unknown)",   "gloss_status": "unknown", "source": "Velkaris"},
+    "rena":   {"proto": "rena",   "gloss": "(unknown)",   "gloss_status": "unknown", "source": "Tyren"},
+    "mara":   {"proto": "mara",   "gloss": "(unknown)",   "gloss_status": "unknown", "source": "Tymar"},
+    "tura":   {"proto": "tura",   "gloss": "(unknown)",   "gloss_status": "unknown", "source": "Tyr"},
+    "sela":   {"proto": "sela",   "gloss": "star",        "gloss_status": "draft"},
+    "dura":   {"proto": "dura",   "gloss": "stone",       "gloss_status": "draft"},
+    "lira":   {"proto": "lira",   "gloss": "song",        "gloss_status": "draft"},
+    "hesa":   {"proto": "hesa",   "gloss": "night",       "gloss_status": "draft"},
+    "mora":   {"proto": "mora",   "gloss": "deep",        "gloss_status": "draft"},
+    "ketha":  {"proto": "ketha",  "gloss": "blade",       "gloss_status": "draft", "source": "legacy NameService chunk 'keth"},
+    "drena":  {"proto": "drena",  "gloss": "watch",       "gloss_status": "draft", "source": "legacy NameService chunk 'dren"},
+    "syra":   {"proto": "syra",   "gloss": "silver",      "gloss_status": "draft", "source": "legacy NameService chunk 'syr"},
+    "vakara": {"proto": "vakara", "gloss": "oath",        "gloss_status": "draft", "source": "legacy NameService chunk 'vakar"},
+    "nima":   {"proto": "nima",   "gloss": "river",       "gloss_status": "draft"},
+    "lunda":  {"proto": "lunda",  "gloss": "harbor",      "gloss_status": "draft"}
+  },
+  "lineages": {
+    "_source": "canon/L2/entities/polities/polity_velar_imperium.json naming_conventions.lineage_prefixes (prefix spellings are canon; root assignments and eras are prototype inference)",
+    "noble":     {"prefix": "Vel",   "roots": ["wela"],  "eras": ["elder", "middle", "scribal"]},
+    "military":  {"prefix": "Varn",  "roots": ["warna"], "eras": ["elder", "middle", "scribal"]},
+    "scholarly": {"prefix": "Thess", "roots": ["tessa"], "eras": ["elder", "middle", "scribal"]},
+    "reformist": {"prefix": "Rynn",  "roots": ["rina"],  "eras": ["scribal"], "era_note": "Reformist families are a late political formation, so their names are scribal-era coinages."},
+    "outworld":  {"prefix": "Ty",    "roots": ["tu"],    "eras": ["elder", "middle", "scribal"]}
+  },
+  "generative_content_roots": ["kuna", "karasa", "sela", "dura", "lira", "hesa", "mora", "ketha", "drena", "syra", "vakara", "nima", "lunda"]
+}

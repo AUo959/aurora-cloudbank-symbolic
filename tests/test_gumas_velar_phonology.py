@@ -2,8 +2,7 @@ import pytest
 
 from modules.gumas.naming import NameRegistry, RegistryEntry
 from modules.gumas.velar_phonology import (
-    ATTESTED,
-    LEXICON,
+    ENGINE,
     Lineage,
     Stratum,
     derive,
@@ -29,27 +28,37 @@ def test_engine_reproduces_attested_canon_names(row):
 
 
 def test_register_rule_predicts_attested_informal_aliases():
-    # Canon lists "Virex Talvaren" and "Tkaras Prime" as aliases; the engine was
-    # not given them as targets for the informal register rule.
+    # Canon lists "Virex Talvaren" and "Tkaras Prime" as aliases.
     assert derive(("tala", "warena"), Stratum.SCRIBAL).informal == "Talvaren"
     assert derive(("ta", "karasa"), Stratum.SCRIBAL).informal == "Tkaras"
 
 
-def test_apostrophe_marks_only_a_scribal_elision():
-    elder = derive(("wela", "kuna"), Stratum.ELDER)
-    scribal = derive(("wela", "kuna"), Stratum.SCRIBAL)
-    no_elision = derive(("tu", "rena"), Stratum.SCRIBAL)  # *tu ends in u, nothing elided
-    assert "'" not in elder.formal
-    assert scribal.formal == "Vel'konn"
-    assert "'" not in no_elision.formal
+def test_formation_era_shapes_the_compound():
+    # Same roots, three coinage dates, three historically distinct shapes.
+    assert derive(("wela", "kuna"), Stratum.ELDER).formal == "Velkonn"
+    assert derive(("wela", "kuna"), Stratum.MIDDLE).formal == "Velakynn"
+    assert derive(("wela", "kuna"), Stratum.SCRIBAL).formal == "Vel'kynn"
 
 
-def test_derivation_is_deterministic_and_traced():
+def test_apostrophe_marks_a_post_reform_junction():
+    for stratum in (Stratum.ELDER, Stratum.MIDDLE):
+        assert "'" not in derive(("tu", "rena"), stratum).formal
+    assert derive(("tu", "rena"), Stratum.SCRIBAL).formal == "Ty'ren"
+
+
+def test_derivation_is_deterministic_and_dated():
     a = derive(("tala", "warena"), "scribal")
     b = derive(("tala", "warena"), "scribal")
     assert a.receipt() == b.receipt()
-    assert [step["law"] for step in a.trace] == ["VL1", "VL4", "VL5"]
-    assert a.receipt()["proto"] == "*tala~warena"
+    laws = [step["law"] for step in a.trace if "law" in step]
+    assert laws == ["VL1", "VL5"]
+    dates = [step["date"] for step in a.trace]
+    assert dates == sorted(dates)
+    assert any(step.get("event") == "compounded" for step in a.trace)
+    receipt = a.receipt()
+    assert receipt["proto"] == "*tala~warena"
+    assert receipt["profile"] == "velari"
+    assert receipt["profile_digest"] == ENGINE.profile.digest
 
 
 @pytest.mark.parametrize("lineage", list(Lineage))
@@ -58,8 +67,15 @@ def test_generated_names_carry_canonical_lineage_prefix(lineage):
     assert len(names) == 6
     for form in names:
         assert form.formal.startswith(CANON_PREFIX[lineage]), form.formal
-        assert form.lineage is lineage
+        assert form.lineage == lineage.value
+        assert form.legal
         assert phonotactic_ok(form.formal)
+
+
+def test_reformist_names_are_scribal_coinages():
+    for form in generate_house_names(Lineage.REFORMIST, seed=11, count=8):
+        assert form.era == "scribal"
+        assert form.formal.startswith("Rynn'")
 
 
 def test_generation_is_seed_deterministic():
@@ -72,10 +88,10 @@ def test_generation_is_seed_deterministic():
 
 def test_registry_blocks_collision_with_canon_house():
     registry = NameRegistry([RegistryEntry(canonical_name="Velkonn", entity_id="org_house_velkonn")])
-    names = [f.formal for f in generate_house_names("noble", seed=4718224, count=13, registry=registry)]
-    assert "Vel'konn" not in names
-    unchecked = [f.formal for f in generate_house_names("noble", seed=4718224, count=13)]
-    assert "Vel'konn" in unchecked
+    checked = generate_house_names("noble", seed=4718224, count=40, stratum="elder", registry=registry)
+    unchecked = generate_house_names("noble", seed=4718224, count=40, stratum="elder")
+    assert "Velkonn" in [f.formal for f in unchecked]
+    assert "Velkonn" not in [f.formal for f in checked]
 
 
 def test_shared_roots_identifies_cognates():
@@ -86,17 +102,14 @@ def test_shared_roots_identifies_cognates():
     assert shared_roots(velkonn, tyren) == set()
 
 
-def test_attested_specs_reference_known_roots():
-    for _, _, spec in ATTESTED:
-        assert all(key in LEXICON for key in spec.roots)
-
-
 def test_unknown_root_rejected():
     with pytest.raises(KeyError):
         derive(("wela", "zzz"))
 
 
-def test_phonotactics_reject_bad_final_cluster():
+def test_phonotactics():
     assert phonotactic_ok("Velkonn")
     assert phonotactic_ok("Varn")
-    assert not phonotactic_ok("Velosk")
+    assert phonotactic_ok("Tal'Varen")
+    assert not phonotactic_ok("Velrsk")  # illegal coda cluster
+    assert not phonotactic_ok("Velq")  # q is not in the inventory

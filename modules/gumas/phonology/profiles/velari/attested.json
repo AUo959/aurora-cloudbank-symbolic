@@ -1,0 +1,17 @@
+{
+  "_note": "Canon names the rules must reproduce. This is the regression corpus: a change to the chronology that breaks any row is a change to canon, not a tuning step.",
+  "names": [
+    {"formal": "Velari",    "roots": ["wela", "ari"],      "era": "elder",   "source": "species_velari"},
+    {"formal": "Thessari",  "roots": ["tessa", "ari"],     "era": "elder",   "source": "polity_velar_imperium social_structure.lorekeepers_thessari"},
+    {"formal": "Velkonn",   "roots": ["wela", "kuna"],     "era": "elder",   "source": "org_house_velkonn"},
+    {"formal": "Velkaris",  "roots": ["wela", "karisa"],   "era": "elder",   "source": "location Velkaris V"},
+    {"formal": "Tyren",     "roots": ["tu", "rena"],       "era": "elder",   "source": "Jaxx Tyren"},
+    {"formal": "Tymar",     "roots": ["tu", "mara"],       "era": "elder",   "source": "naming_conventions lineage_prefixes Ty-"},
+    {"formal": "Tyr",       "roots": ["tura"],             "era": "elder",   "source": "Jasrek Tyr"},
+    {"formal": "Rynn",      "roots": ["rina"],             "era": "elder",   "source": "Thalen Rynn"},
+    {"formal": "Varn",      "roots": ["warna"],            "era": "elder",   "source": "naming_conventions lineage_prefixes Varn-"},
+    {"formal": "Vel'Rynn",  "roots": ["wela", "rina"],     "era": "scribal", "source": "naming_conventions lineage_prefixes Vel-"},
+    {"formal": "Tal'Varen", "informal": "Talvaren", "roots": ["tala", "warena"], "era": "scribal", "source": "Lord Marshal Virex Tal'Varen (alias Virex Talvaren)"},
+    {"formal": "T'karas",   "informal": "Tkaras",   "roots": ["ta", "karasa"],   "era": "scribal", "source": "T'karas Prime (alias Tkaras Prime)"}
+  ]
+}

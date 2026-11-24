@@ -29,6 +29,11 @@
      "target": {"phoneme": "a"}, "change": {"delete": true},
      "when": {"before": ["+"], "stress": "unstressed"}},
 
+    {"id": "VL11", "name": "hiatus elision", "date": 470, "era": "Middle Velari",
+     "description": "Unstressed *a is lost before a vowel across a boundary (*dyra-isa > dyr-isa), so later coinages avoid vowel clashes.",
+     "target": {"phoneme": "a"}, "change": {"delete": true},
+     "when": {"before": ["+", {"syllabic": true}], "stress": "unstressed"}},
+
     {"id": "VL5", "name": "apocope", "date": 500, "era": "Middle Velari",
      "description": "Unstressed word-final *a is lost after a consonant in words of two or more syllables.",
      "target": {"phoneme": "a"}, "change": {"delete": true},
@@ -43,6 +48,11 @@
      "description": "Remaining *u lowers to o.",
      "target": {"phoneme": "u"}, "change": {"features": {"high": false}}},
 
+    {"id": "VL10", "name": "cluster reduction", "date": 620, "era": "Court Velari",
+     "description": "Of a doubled consonant after another consonant, one is lost (*varn+nim > varnim). Scribal compounds joined later keep both, written across the apostrophe.",
+     "target": {"consonantal": true}, "change": {"delete": true},
+     "when": {"reduce_triple": true}},
+
     {"id": "VL8", "name": "i-rounding", "date": 700, "era": "Court Velari",
      "description": "i rounds to y before a geminate nn.",
      "target": {"phoneme": "i"}, "change": {"features": {"round": true}},
@@ -52,5 +62,33 @@
      "description": "The vowel of a proclitic is lost before the word it leans on.",
      "target": {"syllabic": true}, "change": {"delete": true},
      "when": {"proclitic": true, "before": ["+"]}}
-  ]
+  ],
+  "dialects": {
+    "_note": "Velari speech splits after the last common law. Canon: the Velari people are not the Imperium state; imperial, reformist and Union-aligned Velari coexist (species_velari.distribution). The branch laws and the split date are draft; the split is not yet mapped to a canon calendar date.",
+    "split_at": 1000,
+    "branches": {
+      "imperial": {
+        "description": "Court speech of the Imperium and its loyalist houses.",
+        "laws": [
+          {"id": "VI1", "name": "velar unrounding", "date": 1020, "era": "Imperial Velari",
+           "description": "y unrounds to i after k (Vel'kynn > Vel'kinn).",
+           "target": {"phoneme": "y"}, "change": {"features": {"round": false}},
+           "when": {"after": [{"phoneme": "k"}]}}
+        ]
+      },
+      "union": {
+        "description": "Reformist and Union-aligned speech, including Vel-Surak.",
+        "laws": [
+          {"id": "VU1", "name": "s-degemination", "date": 1010, "era": "Union Velari",
+           "description": "ss simplifies to s.",
+           "target": {"phoneme": "s"}, "change": {"delete": true},
+           "when": {"before": [{"phoneme": "s"}]}},
+          {"id": "VU2", "name": "final th-stopping", "date": 1040, "era": "Union Velari",
+           "description": "Word-final th becomes t (keth > ket).",
+           "target": {"phoneme": "th"}, "change": {"features": {"continuant": false}},
+           "when": {"word_final": true}}
+        ]
+      }
+    }
+  }
 }

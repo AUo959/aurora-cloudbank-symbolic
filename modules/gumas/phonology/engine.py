@@ -9,6 +9,9 @@ So the shape of a compound records when it was coined:
 * middle: the linking vowel survives syncope, e.g. Vela-kynn
 * scribal (after the scribal reform): the parts were already worn-down words,
   and the junction is written with an apostrophe, e.g. Vel'Rynn, Tal'Varen
+
+After the common laws, speech may split into dialects; each branch adds its
+own later laws (``chronology.json`` -> ``dialects``).
 """
 
 from __future__ import annotations
@@ -19,33 +22,19 @@ import random
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 from . import syllables
+from .lexicon import Lineage, Root, load_lexicon
 from .rules import Boundary, Morph, SoundLaw, Word
 from .segments import Inventory
 
-ENGINE_VERSION = "GUMAS_PHONOLOGY_ENGINE_v0.2"
+ENGINE_VERSION = "GUMAS_PHONOLOGY_ENGINE_v0.3"
 PROFILES_DIR = Path(__file__).resolve().parent / "profiles"
+COMMON = "common"
 
-
-@dataclass(frozen=True)
-class Root:
-    key: str
-    proto: str
-    gloss: str
-    gloss_status: str
-    kind: str = "root"
-    lineage: str | None = None
-    source: str | None = None
-
-
-@dataclass(frozen=True)
-class Lineage:
-    name: str
-    prefix: str
-    roots: tuple[str, ...]
-    eras: tuple[str, ...]
+__all__ = ["COMMON", "ENGINE_VERSION", "Derivation", "Engine", "Lineage", "Profile", "Root", "load_profile",
+           "shared_roots"]  # fmt: skip
 
 
 @dataclass(frozen=True)
@@ -54,11 +43,14 @@ class Profile:
     inventory: Inventory
     tactics: syllables.Phonotactics
     laws: tuple[SoundLaw, ...]
+    dialects: Mapping[str, tuple[SoundLaw, ...]]
+    split_at: int | None
     eras: Mapping[str, int]
     reform_date: int
     lexicon: Mapping[str, Root]
     lineages: Mapping[str, Lineage]
     content_roots: tuple[str, ...]
+    personal_suffixes: tuple[str, ...]
     attested: tuple[Mapping[str, Any], ...]
     fixtures: tuple[Mapping[str, Any], ...]
     digest: str
@@ -69,17 +61,22 @@ class Profile:
         raw = _read_profile_files(directory)
         inventory = Inventory(raw["inventory"]["phonemes"])
         chronology = raw["chronology"]
+        laws = _load_laws(chronology["laws"])
+        lexicon = load_lexicon(raw["lexicon"], inventory)
         canonical = json.dumps(raw, sort_keys=True, separators=(",", ":"))
         return cls(
             name=directory.name,
             inventory=inventory,
             tactics=_load_tactics(raw["inventory"], inventory),
-            laws=_load_laws(chronology["laws"]),
+            laws=laws,
+            dialects=_load_dialects(chronology.get("dialects"), laws),
+            split_at=chronology.get("dialects", {}).get("split_at"),
             eras={name: spec["formed_at"] for name, spec in chronology["eras"].items()},
             reform_date=chronology["orthographic_events"]["scribal_reform"]["date"],
-            lexicon=_load_lexicon(raw["lexicon"]["roots"], inventory),
-            lineages=_load_lineages(raw["lexicon"]["lineages"]),
-            content_roots=tuple(raw["lexicon"]["generative_content_roots"]),
+            lexicon=lexicon.roots,
+            lineages=lexicon.lineages,
+            content_roots=lexicon.content_roots,
+            personal_suffixes=lexicon.personal_suffixes,
             attested=tuple(raw["attested"]["names"]),
             fixtures=tuple(raw["attested"].get("fixtures", [])),
             digest=hashlib.sha256(canonical.encode()).hexdigest()[:16],
@@ -98,32 +95,28 @@ def _load_tactics(raw_inventory: Mapping[str, Any], inventory: Inventory) -> syl
     return syllables.Phonotactics.from_profile(raw_inventory.get("phonotactics", {}), consonants)
 
 
-def _load_laws(raw_laws: Sequence[Mapping[str, Any]]) -> tuple[SoundLaw, ...]:
+def _load_laws(raw_laws: Iterable[Mapping[str, Any]]) -> tuple[SoundLaw, ...]:
     laws = tuple(sorted((SoundLaw.from_dict(d) for d in raw_laws), key=lambda law: law.date))
     if len({law.date for law in laws}) != len(laws):
         raise ValueError("two sound laws share a date; relative order would be ambiguous")
     return laws
 
 
-def _load_lexicon(raw_roots: Mapping[str, Mapping[str, Any]], inventory: Inventory) -> dict[str, Root]:
-    lexicon = {}
-    for key, entry in raw_roots.items():
-        inventory.parse(entry["proto"])  # fail fast on symbols outside the inventory
-        lexicon[key] = Root(
-            key=key,
-            proto=entry["proto"],
-            gloss=entry["gloss"],
-            gloss_status=entry["gloss_status"],
-            kind=entry.get("kind", "root"),
-            lineage=entry.get("lineage"),
-            source=entry.get("source"),
-        )
-    return lexicon
+def _load_dialects(raw: Mapping[str, Any] | None, common: Sequence[SoundLaw]) -> dict[str, tuple[SoundLaw, ...]]:
+    """Branch laws per dialect. Every branch law must postdate the split and the last common law."""
+    if not raw:
+        return {}
+    dialects = {name: _load_laws(spec["laws"]) for name, spec in raw["branches"].items()}
+    if COMMON in dialects:
+        raise ValueError(f"{COMMON!r} is reserved for the undivided language")
+    _check_branch_dates(dialects, max([raw["split_at"]] + [law.date for law in common]))
+    return dialects
 
 
-def _load_lineages(raw_lineages: Mapping[str, Any]) -> dict[str, Lineage]:
-    specs = {name: spec for name, spec in raw_lineages.items() if not name.startswith("_")}
-    return {name: Lineage(name, s["prefix"], tuple(s["roots"]), tuple(s["eras"])) for name, s in specs.items()}
+def _check_branch_dates(dialects: Mapping[str, Sequence[SoundLaw]], floor: int) -> None:
+    early = sorted(law.law_id for laws in dialects.values() for law in laws if law.date <= floor)
+    if early:
+        raise ValueError(f"dialect laws must postdate the split and the common laws: {early}")
 
 
 @lru_cache(maxsize=None)
@@ -134,8 +127,10 @@ def load_profile(name: str) -> Profile:
 @dataclass
 class Derivation:
     roots: tuple[str, ...]
+    radicals: tuple[str, ...]
     era: str | None
     formed_at: int
+    dialect: str
     proto: str
     phonemic: str
     formal: str
@@ -160,8 +155,10 @@ class Derivation:
             "profile": self.profile,
             "profile_digest": self.profile_digest,
             "roots": list(self.roots),
+            "radicals": list(self.radicals),
             "era": self.era,
             "formed_at": self.formed_at,
+            "dialect": self.dialect,
             "proto": "*" + self.proto,
             "phonemic": "/" + self.phonemic + "/",
             "formal": self.formal,
@@ -187,6 +184,14 @@ class Engine:
             raise KeyError(f"unknown era {era!r}; known: {sorted(self.profile.eras)}")
         return era, self.profile.eras[era]
 
+    def laws_for(self, dialect: str | None) -> tuple[SoundLaw, ...]:
+        """The common laws, followed by a dialect's own laws when one is named."""
+        if dialect in (None, COMMON):
+            return self.profile.laws
+        if dialect not in self.profile.dialects:
+            raise KeyError(f"unknown dialect {dialect!r}; known: {[COMMON, *sorted(self.profile.dialects)]}")
+        return self.profile.laws + self.profile.dialects[dialect]
+
     def _proto(self, roots: Sequence[Root], formed_at: int) -> str:
         joiner = "+" if formed_at < self.profile.reform_date else "~"
         out = ""
@@ -202,11 +207,13 @@ class Engine:
             raise KeyError(f"unknown {self.profile.name} roots: {missing}")
         return [self.profile.lexicon[key] for key in roots]
 
-    def _evolve(self, used: Sequence[Root], formed_at: int) -> tuple[Word, list[dict[str, Any]]]:
+    def _evolve(
+        self, used: Sequence[Root], formed_at: int, laws: Sequence[SoundLaw]
+    ) -> tuple[Word, list[dict[str, Any]]]:
         """Run the chronology: separate words before ``formed_at``, one word from then on."""
         inventory = self.profile.inventory
         pieces = [Word.from_morph(Morph(r.key, r.kind, r.lineage), inventory.parse(r.proto)) for r in used]
-        early, late = _partition(self.profile.laws, formed_at)
+        early, late = _partition(laws, formed_at)
         trace: list[dict[str, Any]] = []
         pieces = self._run_laws(early, pieces, trace)
         word = Word.join(pieces, formed_at)
@@ -223,16 +230,25 @@ class Engine:
             _record(trace, law, before, _show(words))
         return words
 
-    def derive(self, roots: Sequence[str], era: str | None = None, *, formed_at: int | None = None) -> Derivation:
+    def derive(
+        self,
+        roots: Sequence[str],
+        era: str | None = None,
+        *,
+        formed_at: int | None = None,
+        dialect: str | None = None,
+    ) -> Derivation:
         used = self._lookup(roots)
         era, formed_at = self._formation(era, formed_at)
-        joined, trace = self._evolve(used, formed_at)
+        joined, trace = self._evolve(used, formed_at, self.laws_for(dialect))
         formal, informal = self._render(joined)
         lineages = [r.lineage for r in used if r.lineage]
         return Derivation(
             roots=tuple(roots),
+            radicals=tuple(r.radical for r in used),
             era=era,
             formed_at=formed_at,
+            dialect=dialect or COMMON,
             proto=self._proto(used, formed_at),
             phonemic=joined.phonemic(),
             formal=formal,
@@ -295,7 +311,7 @@ class Engine:
         return [self._fit_row(tier, row) for tier, row in rows]
 
     def _fit_row(self, tier: str, row: Mapping[str, Any]) -> dict[str, Any]:
-        derived = self.derive(row["roots"], row["era"])
+        derived = self.derive(row["roots"], row["era"], dialect=row.get("dialect"))
         spelled = derived.formal == row["formal"] and row.get("informal", derived.informal) == derived.informal
         return {
             "tier": tier,
@@ -305,6 +321,7 @@ class Engine:
             "derived_informal": derived.informal,
             "proto": "*" + derived.proto,
             "era": row["era"],
+            "dialect": derived.dialect,
             "legal": derived.legal,
             "match": spelled and derived.legal,
             "evidence": row.get("evidence"),
@@ -320,17 +337,49 @@ class Engine:
         seed: int,
         count: int = 6,
         eras: Sequence[str] | None = None,
+        dialect: str | None = None,
         registry: Any | None = None,
     ) -> list[Derivation]:
-        """Deterministically propose names for a lineage class.
+        """Deterministically propose house names for a lineage class.
 
-        With ``registry`` (a ``naming.NameRegistry``), candidates carry collision
-        findings and BLOCK-level candidates are dropped.
+        ``dialect`` defaults to the lineage's own (``lexicon.json``); pass
+        ``"common"`` for the undivided language. With ``registry`` (a
+        ``naming.NameRegistry``), BLOCK-level collisions are dropped.
         """
+        spec = self._lineage(lineage)
+        pool = [(p, c, e) for p in spec.roots for c in self.profile.content_roots for e in (eras or spec.eras)]
+        return self._pick(pool, f"house|{lineage}|{seed}", count, dialect or spec.dialect, registry)
+
+    def generate_given_names(
+        self,
+        *,
+        seed: int,
+        count: int = 6,
+        eras: Sequence[str] | None = None,
+        dialect: str | None = None,
+        registry: Any | None = None,
+    ) -> list[Derivation]:
+        """Deterministically propose given names: a content root plus a personal suffix."""
+        allowed = eras or tuple(self.profile.eras)
+        pool = [(c, s, e) for c in self.profile.content_roots for s in self.profile.personal_suffixes for e in allowed]
+        return self._pick(pool, f"given|{seed}", count, dialect, registry)
+
+    def _lineage(self, lineage: str) -> Lineage:
+        if lineage not in self.profile.lineages:
+            raise KeyError(f"unknown lineage {lineage!r}; known: {sorted(self.profile.lineages)}")
+        return self.profile.lineages[lineage]
+
+    def _pick(
+        self, pool: list[tuple[str, str, str]], tag: str, count: int, dialect: str | None, registry: Any | None
+    ) -> list[Derivation]:
+        """Shuffle the pool by seed, derive in order, keep the first ``count`` admissible names."""
+        digest = hashlib.sha256(f"{ENGINE_VERSION}|{self.profile.digest}|{tag}".encode()).hexdigest()
+        # Deterministic, seeded shuffle for reproducible naming; not used for security.
+        random.Random(int(digest[:16], 16)).shuffle(pool)  # nosec B311
         out: list[Derivation] = []
         seen: set[str] = set()
-        for prefix, content, era in self._candidate_pool(lineage, seed, eras):
-            derived = self.derive((prefix, content), era)
+        for first, second, era in pool:
+            derived = self.derive((first, second), era, dialect=dialect)
             key = derived.informal.lower()
             if key in seen or not _admissible(derived, registry):
                 continue
@@ -339,18 +388,6 @@ class Engine:
             if len(out) >= count:
                 break
         return out
-
-    def _candidate_pool(self, lineage: str, seed: int, eras: Sequence[str] | None) -> list[tuple[str, str, str]]:
-        """Every (lineage root, content root, era) combination, in a seed-determined order."""
-        if lineage not in self.profile.lineages:
-            raise KeyError(f"unknown lineage {lineage!r}; known: {sorted(self.profile.lineages)}")
-        spec = self.profile.lineages[lineage]
-        allowed_eras = tuple(eras) if eras else spec.eras
-        pool = [(p, c, e) for p in spec.roots for c in self.profile.content_roots for e in allowed_eras]
-        digest = hashlib.sha256(f"{ENGINE_VERSION}|{self.profile.digest}|{lineage}|{seed}".encode()).hexdigest()
-        # Deterministic, seeded shuffle for reproducible naming; not used for security.
-        random.Random(int(digest[:16], 16)).shuffle(pool)  # nosec B311
-        return pool
 
 
 def _admissible(derived: Derivation, registry: Any | None) -> bool:
@@ -380,5 +417,9 @@ def _record(trace: list[dict[str, Any]], law: SoundLaw, before: str, after: str)
 
 
 def shared_roots(a: Derivation, b: Derivation) -> set[str]:
-    """Roots two derivations share. Non-empty means a resemblance is cognate, not crowding."""
-    return set(a.roots) & set(b.roots)
+    """Radicals two derivations share. Non-empty means a resemblance is cognate, not crowding.
+
+    Entries derived from one radical in different ablaut grades (warna, warena)
+    share it, so Varn- and -Varen names are recognised as kin.
+    """
+    return set(a.radicals) & set(b.radicals)

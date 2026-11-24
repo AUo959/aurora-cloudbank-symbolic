@@ -189,6 +189,22 @@ def _proclitic(ctx: _MatchContext, value: bool) -> bool:
     return value == (ctx.word.morphs[ctx.token.morph].kind == "proclitic")
 
 
+def _next_segment(ctx: _MatchContext) -> Seg | None:
+    """The next segment, looking through morpheme boundaries."""
+    for token in ctx.word.tokens[ctx.index + 1 :]:
+        if isinstance(token, Seg):
+            return token
+    return None
+
+
+def _reduce_triple(ctx: _MatchContext, value: bool) -> bool:
+    """The target is the first of a doubled consonant and follows a different consonant (r|nn -> rn)."""
+    prev, nxt = ctx.neighbour(-1), _next_segment(ctx)
+    doubled = nxt is not None and nxt.phoneme == ctx.token.phoneme
+    after_other = isinstance(prev, Seg) and prev.phoneme.feature("consonantal") and prev.phoneme != ctx.token.phoneme
+    return value == (doubled and after_other)
+
+
 CONDITIONS: Mapping[str, Callable[[_MatchContext, Any], bool]] = {
     "element_initial": _element_initial,
     "element_final": _element_final,
@@ -198,6 +214,7 @@ CONDITIONS: Mapping[str, Callable[[_MatchContext, Any], bool]] = {
     "stress": _stress,
     "min_syllables": _min_syllables,
     "proclitic": _proclitic,
+    "reduce_triple": _reduce_triple,
 }
 
 

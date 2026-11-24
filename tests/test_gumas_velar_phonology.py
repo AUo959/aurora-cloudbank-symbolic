@@ -3,10 +3,12 @@ import pytest
 from modules.gumas.naming import NameRegistry, RegistryEntry
 from modules.gumas.velar_phonology import (
     ENGINE,
+    Dialect,
     Lineage,
     Stratum,
     derive,
     fit_attested,
+    generate_given_names,
     generate_house_names,
     phonotactic_ok,
     shared_roots,
@@ -131,3 +133,92 @@ def test_phonotactics():
     assert phonotactic_ok("Tal'Varen")
     assert not phonotactic_ok("Velrsk")  # illegal coda cluster
     assert not phonotactic_ok("Velq")  # q is not in the inventory
+
+
+# ---------------------------------------------------------------- phase 2
+
+
+def test_ablaut_grades_share_one_radical():
+    varn = derive(("warna", "ketha"))
+    varen = derive(("tala", "warena"), Stratum.SCRIBAL)
+    assert ENGINE.profile.lexicon["warna"].grade == "zero"
+    assert ENGINE.profile.lexicon["warena"].grade == "full"
+    assert ENGINE.profile.lexicon["warena"].gloss == "guard (full-grade)"
+    assert shared_roots(varn, varen) == {"WAR"}  # Varn- and -Varen are kin, not crowding
+    assert varen.receipt()["radicals"] == ["tala", "WAR"]
+
+
+def test_cluster_reduction_only_inside_fused_compounds():
+    assert derive(("warna", "nima"), Stratum.ELDER).formal == "Varnim"
+    assert derive(("warna", "nima"), Stratum.SCRIBAL).formal == "Varn'nim"
+    assert derive(("rina", "nima"), Stratum.SCRIBAL).formal == "Rynn'nim"  # canonical Rynn- survives
+
+
+def test_hiatus_elision_keeps_middle_era_suffixes_clean():
+    assert derive(("dura", "isa"), Stratum.MIDDLE).formal == "Dyris"
+    assert derive(("karasa", "ara"), Stratum.MIDDLE).formal == "Karasar"
+
+
+@pytest.mark.parametrize(
+    "roots, stratum, common, imperial, union",
+    [
+        (("wela", "kuna"), Stratum.SCRIBAL, "Vel'kynn", "Vel'kinn", "Vel'kynn"),
+        (("tessa", "ari"), Stratum.ELDER, "Thessari", "Thessari", "Thesari"),
+        (("warna", "ketha"), Stratum.ELDER, "Varnketh", "Varnketh", "Varnket"),
+    ],
+)
+def test_dialects_diverge_after_the_split(roots, stratum, common, imperial, union):
+    assert derive(roots, stratum).formal == common
+    assert derive(roots, stratum, Dialect.IMPERIAL).formal == imperial
+    assert derive(roots, stratum, Dialect.UNION).formal == union
+
+
+def test_dialect_tagged_canon_rows_survive_their_branch():
+    tagged = [r for r in fit_attested() if r["dialect"] != "common"]
+    assert {(r["attested"], r["dialect"]) for r in tagged} == {
+        ("Velkonn", "imperial"),
+        ("Tyr", "imperial"),
+        ("Tal'Varen", "imperial"),
+        ("Rynn", "union"),
+    }
+    assert all(r["match"] for r in tagged)
+
+
+def test_lineages_generate_in_their_own_dialect():
+    assert {f.dialect for f in generate_house_names(Lineage.REFORMIST, seed=3, count=4)} == {"union"}
+    assert {f.dialect for f in generate_house_names(Lineage.NOBLE, seed=3, count=4)} == {"imperial"}
+    assert {f.dialect for f in generate_house_names(Lineage.OUTWORLD, seed=3, count=4)} == {"common"}
+    forced = generate_house_names(Lineage.NOBLE, seed=3, count=4, dialect=Dialect.COMMON)
+    assert {f.dialect for f in forced} == {"common"}
+
+
+def test_given_names_are_root_plus_personal_suffix():
+    names = generate_given_names(seed=4718224, count=12)
+    assert len(names) == 12
+    assert len({n.informal for n in names}) == 12
+    for name in names:
+        assert name.legal
+        assert name.lineage is None
+        assert ENGINE.profile.lexicon[name.roots[1]].kind == "suffix"
+        assert name.roots[1] in ENGINE.profile.personal_suffixes
+    again = [n.formal for n in generate_given_names(seed=4718224, count=12)]
+    assert again == [n.formal for n in names]
+
+
+def test_given_names_screened_by_registry():
+    first = generate_given_names(seed=4718224, count=1)[0].formal
+    registry = NameRegistry([RegistryEntry(canonical_name=first, entity_id="char_existing")])
+    assert first not in [n.formal for n in generate_given_names(seed=4718224, count=12, registry=registry)]
+
+
+def test_unexplained_canon_given_names_are_recorded_with_reasons():
+    import json
+
+    from modules.gumas.phonology.engine import PROFILES_DIR
+
+    data = json.loads((PROFILES_DIR / "velari" / "attested.json").read_text(encoding="utf-8"))
+    rows = [r for r in data["unexplained"] if "formal" in r]
+    assert {r["formal"] for r in rows} == {"Sira", "Syrr", "Talyx", "Virex", "Thalen", "Jasrek", "Jaxx"}
+    assert all(r["reason"] and r["source"].startswith("canon/L2/") for r in rows)
+    corpus = {r["attested"] for r in fit_attested(include_fixtures=True)}
+    assert corpus.isdisjoint(r["formal"] for r in rows)

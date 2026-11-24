@@ -141,13 +141,13 @@ Moriarty's `ethics_gate` eligibility is conditional on containment boundary test
 - `ethics_gate` wiring remains blocked
 - Any containment action must remain a **recommendation to a human reviewer**, not an automated gate
 
-### SHADOWFAX — Bundle Location Required
+### SHADOWFAX — Protocol File Attribution Required
 
-SHADOWFAX has no eligible surface mapping until the standalone bundle is located and hash-verified. This is not a documentation gap — the source material itself is unlocated. The `missing_dependency` classification in the fixture and manifest reflects this. Until the bundle is found:
-
-- No surface mapping design for SHADOWFAX may be finalized
-- The `blocked_pending_bundle_location` promotion decision is schema-enforced and cannot be changed without operator approval
-- When the bundle is located, Gate 1 custody resolution applies in full before any mapping discussion
+The [live manifest](recovered_protocol_manifest.json) records the verified
+historical package. Attribution and verification of the internal SHADOWFAX
+protocol file remain mandatory under Gate 1. The ORD-3 identity boundary
+also requires reconciliation before finalizing any mapping.
+[#1361](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1361)
 
 ---
 

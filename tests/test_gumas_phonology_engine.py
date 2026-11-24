@@ -140,3 +140,66 @@ def test_profile_rejects_roots_outside_inventory(tmp_path):
     (copy / "lexicon.json").write_text(json.dumps(lexicon))
     with pytest.raises(ValueError):
         Profile.load(copy)
+
+
+# ---------------------------------------------------------------- phase 2: lexicon, dialects, conditions
+
+
+def _mutated_profile(tmp_path, part, mutate):
+    copy = tmp_path / "velari"
+    shutil.copytree(PROFILES_DIR / "velari", copy)
+    data = json.loads((copy / f"{part}.json").read_text())
+    mutate(data)
+    (copy / f"{part}.json").write_text(json.dumps(data))
+    return copy
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda lx: lx["roots"]["warna"]["derive"].update(radical="NOPE"),
+        lambda lx: lx["roots"]["warna"]["derive"].update(grade="lengthened"),
+        lambda lx: lx["generative_content_roots"].append("missing_root"),
+        lambda lx: lx["personal_suffixes"].append("kuna"),
+    ],
+    ids=["unknown-radical", "unknown-grade", "undefined-reference", "suffix-not-suffix"],
+)
+def test_lexicon_rejects_broken_references(tmp_path, mutate):
+    with pytest.raises(ValueError):
+        Profile.load(_mutated_profile(tmp_path, "lexicon", mutate))
+
+
+def test_dialect_laws_must_postdate_the_split(tmp_path):
+    def early(ch):
+        ch["dialects"]["branches"]["union"]["laws"][0]["date"] = 990
+
+    with pytest.raises(ValueError):
+        Profile.load(_mutated_profile(tmp_path, "chronology", early))
+
+
+def test_common_is_reserved_and_unknown_dialects_rejected(tmp_path):
+    def reserve(ch):
+        ch["dialects"]["branches"]["common"] = {"laws": []}
+
+    with pytest.raises(ValueError):
+        Profile.load(_mutated_profile(tmp_path, "chronology", reserve))
+    with pytest.raises(KeyError):
+        VELARI.derive(("wela", "kuna"), dialect="nythran")
+
+
+def test_laws_for_appends_branch_laws_in_date_order():
+    imperial = VELARI.laws_for("imperial")
+    assert imperial[: len(VELARI.profile.laws)] == VELARI.profile.laws
+    assert [law.law_id for law in imperial[len(VELARI.profile.laws) :]] == ["VI1"]
+    assert VELARI.laws_for(None) == VELARI.laws_for("common") == VELARI.profile.laws
+
+
+def test_reduce_triple_condition():
+    law = SoundLaw.from_dict({
+        "id": "T3", "name": "test reduction", "date": 1,
+        "target": {"consonantal": True}, "change": {"delete": True}, "when": {"reduce_triple": True},
+    })  # fmt: skip
+    pieces = [Word.from_morph(Morph(k, "root"), INV.parse(p)) for k, p in (("a", "varn"), ("b", "nim"))]
+    assert law.apply(Word.join(pieces, formed_at=50), INV).phonemic() == "var+nim"
+    pieces = [Word.from_morph(Morph(k, "root"), INV.parse(p)) for k, p in (("a", "rynn"), ("b", "nim"))]
+    assert law.apply(Word.join(pieces, formed_at=50), INV).phonemic() == "rynn+nim"  # nn after a vowel stays

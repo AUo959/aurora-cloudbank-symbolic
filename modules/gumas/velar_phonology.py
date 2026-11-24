@@ -18,7 +18,7 @@ from typing import Any, Sequence
 
 from . import phonology
 from .phonology import syllables
-from .phonology.engine import Derivation, Engine, shared_roots
+from .phonology.engine import COMMON, Derivation, Engine, shared_roots
 
 ENGINE = Engine("velari")
 ENGINE_VERSION = phonology.ENGINE_VERSION
@@ -38,8 +38,20 @@ class Stratum(str, Enum):
     SCRIBAL = "scribal"
 
 
-def derive(roots: Sequence[str], stratum: Stratum | str = Stratum.ELDER) -> Derivation:
-    return ENGINE.derive(roots, Stratum(stratum).value)
+class Dialect(str, Enum):
+    COMMON = COMMON
+    IMPERIAL = "imperial"
+    UNION = "union"
+
+
+def _dialect(dialect: Dialect | str | None) -> str | None:
+    return Dialect(dialect).value if dialect is not None else None
+
+
+def derive(
+    roots: Sequence[str], stratum: Stratum | str = Stratum.ELDER, dialect: Dialect | str | None = None
+) -> Derivation:
+    return ENGINE.derive(roots, Stratum(stratum).value, dialect=_dialect(dialect))
 
 
 def fit_attested(*, include_fixtures: bool = False) -> list[dict[str, Any]]:
@@ -52,10 +64,27 @@ def generate_house_names(
     seed: int,
     count: int = 6,
     stratum: Stratum | str | None = None,
+    dialect: Dialect | str | None = None,
     registry: Any | None = None,
 ) -> list[Derivation]:
+    """House names for a lineage; the dialect defaults to the lineage's own."""
     eras = [Stratum(stratum).value] if stratum else None
-    return ENGINE.generate(Lineage(lineage).value, seed=seed, count=count, eras=eras, registry=registry)
+    return ENGINE.generate(
+        Lineage(lineage).value, seed=seed, count=count, eras=eras, dialect=_dialect(dialect), registry=registry
+    )
+
+
+def generate_given_names(
+    *,
+    seed: int,
+    count: int = 6,
+    stratum: Stratum | str | None = None,
+    dialect: Dialect | str | None = None,
+    registry: Any | None = None,
+) -> list[Derivation]:
+    """Given names: a content root plus a personal suffix."""
+    eras = [Stratum(stratum).value] if stratum else None
+    return ENGINE.generate_given_names(seed=seed, count=count, eras=eras, dialect=_dialect(dialect), registry=registry)
 
 
 def phonotactic_ok(written: str) -> bool:
@@ -71,10 +100,12 @@ __all__ = [
     "ENGINE",
     "ENGINE_VERSION",
     "Derivation",
+    "Dialect",
     "Lineage",
     "Stratum",
     "derive",
     "fit_attested",
+    "generate_given_names",
     "generate_house_names",
     "phonotactic_ok",
     "shared_roots",

@@ -1,14 +1,24 @@
 {
   "_note": "Velari roots. gloss_status: canon (stated in canon) | inferred (implied by canon context) | draft (invented here) | unknown (form attested, meaning not). Only canon-status glosses are canon.",
+  "radicals": {
+    "_note": "Radicals carry the meaning; stem formants in an ablaut grade make words from them. Entries derived from one radical are cognates.",
+    "WAR": {"form": "war", "gloss": "guard", "gloss_status": "inferred", "lineage": "military"}
+  },
+  "formants": {
+    "N": {"gloss": "stem former", "grades": {"zero": "na", "full": "ena"}}
+  },
   "roots": {
     "wela":   {"proto": "wela",   "gloss": "high, elder",             "gloss_status": "inferred", "lineage": "noble"},
-    "warna":  {"proto": "warna",  "gloss": "guard (zero-grade)",      "gloss_status": "inferred", "lineage": "military"},
-    "warena": {"proto": "warena", "gloss": "guard (full-grade)",      "gloss_status": "inferred", "lineage": "military"},
+    "warna":  {"derive": {"radical": "WAR", "formant": "N", "grade": "zero"}},
+    "warena": {"derive": {"radical": "WAR", "formant": "N", "grade": "full"}},
     "tessa":  {"proto": "tessa",  "gloss": "keep, remember",          "gloss_status": "inferred", "lineage": "scholarly"},
     "rina":   {"proto": "rina",   "gloss": "voice",                   "gloss_status": "inferred", "lineage": "reformist"},
     "tu":     {"proto": "tu",     "gloss": "outward, far",            "gloss_status": "inferred", "lineage": "outworld"},
 
     "ari":    {"proto": "ari",    "gloss": "people of, ones who",     "gloss_status": "draft", "kind": "suffix"},
+    "ena":    {"proto": "ena",    "gloss": "one of (personal)",       "gloss_status": "draft", "kind": "suffix"},
+    "isa":    {"proto": "isa",    "gloss": "bearer of (personal)",    "gloss_status": "draft", "kind": "suffix"},
+    "ara":    {"proto": "ara",    "gloss": "child of (personal)",     "gloss_status": "draft", "kind": "suffix"},
     "ta":     {"proto": "ta",     "gloss": "that, the (demonstrative)", "gloss_status": "draft", "kind": "proclitic"},
 
     "kuna":   {"proto": "kuna",   "gloss": "flame",       "gloss_status": "inferred", "source": "House Velkonn; 'Sira of Flamewake'"},
@@ -31,12 +41,13 @@
     "lunda":  {"proto": "lunda",  "gloss": "harbor",      "gloss_status": "draft"}
   },
   "lineages": {
-    "_source": "canon/L2/entities/polities/polity_velar_imperium.json naming_conventions.lineage_prefixes (prefix spellings are canon; root assignments and eras are prototype inference)",
-    "noble":     {"prefix": "Vel",   "roots": ["wela"],  "eras": ["elder", "middle", "scribal"]},
-    "military":  {"prefix": "Varn",  "roots": ["warna"], "eras": ["elder", "middle", "scribal"]},
-    "scholarly": {"prefix": "Thess", "roots": ["tessa"], "eras": ["elder", "middle", "scribal"]},
-    "reformist": {"prefix": "Rynn",  "roots": ["rina"],  "eras": ["scribal"], "era_note": "Reformist families are a late political formation, so their names are scribal-era coinages."},
-    "outworld":  {"prefix": "Ty",    "roots": ["tu"],    "eras": ["elder", "middle", "scribal"]}
+    "_source": "canon/L2/entities/polities/polity_velar_imperium.json naming_conventions.lineage_prefixes (prefix spellings are canon; root assignments, eras and dialects are prototype inference)",
+    "noble":     {"prefix": "Vel",   "roots": ["wela"],  "eras": ["elder", "middle", "scribal"], "dialect": "imperial"},
+    "military":  {"prefix": "Varn",  "roots": ["warna"], "eras": ["elder", "middle", "scribal"], "dialect": "imperial"},
+    "scholarly": {"prefix": "Thess", "roots": ["tessa"], "eras": ["elder", "middle", "scribal"], "dialect": "imperial"},
+    "reformist": {"prefix": "Rynn",  "roots": ["rina"],  "eras": ["scribal"], "dialect": "union", "era_note": "Reformist families are a late political formation, so their names are scribal-era coinages."},
+    "outworld":  {"prefix": "Ty",    "roots": ["tu"],    "eras": ["elder", "middle", "scribal"], "dialect_note": "Frontier speech keeps the common pre-split forms (draft)."}
   },
-  "generative_content_roots": ["kuna", "karasa", "sela", "dura", "lira", "hesa", "mora", "ketha", "drena", "syra", "vakara", "nima", "lunda"]
+  "generative_content_roots": ["kuna", "karasa", "sela", "dura", "lira", "hesa", "mora", "ketha", "drena", "syra", "vakara", "nima", "lunda"],
+  "personal_suffixes": ["ena", "isa", "ara"]
 }

@@ -63,13 +63,13 @@ class PhonologyShadow:
     # ------------------------------------------------------------------ hook
 
     def applies(self, request: "NameRequest") -> bool:
-        return (request.faction_context or "").casefold() in FACTION_PROFILES
+        return faction_key(request.faction_context) in FACTION_PROFILES
 
     def observe(self, request: "NameRequest", resolution: "NameResolution") -> ShadowObservation | None:
         """Record what the engine thinks of a resolved name. Errors are logged, never raised."""
         if not self.applies(request):
             return None
-        faction = (request.faction_context or "").casefold()
+        faction = faction_key(request.faction_context)
         observation = ShadowObservation(
             entity_id=request.entity_id,
             entity_type=request.entity_type.value,
@@ -140,6 +140,11 @@ class PhonologyShadow:
             "given": _derivation_record(given),
             "house": _derivation_record(house),
         }
+
+
+def faction_key(faction_context: str | None) -> str:
+    """Normalize a faction exactly as ``NameService._person_candidate`` does ("Velar Imperium" -> velar_imperium)."""
+    return (faction_context or "").casefold().replace(" ", "_")
 
 
 def name_words(name: str) -> list[str]:

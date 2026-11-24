@@ -118,3 +118,13 @@ def test_mint_script_stdout_unchanged_by_shadow_flag(tmp_path):
     assert _mint("--phonology-shadow", str(report_path)) == _mint()
     report = json.loads(report_path.read_text())
     assert report["observed"] == 3 and report["errors"] == 0
+
+
+@pytest.mark.parametrize("spelling", ["velar_imperium", "Velar Imperium", "VELAR_IMPERIUM", "velar imperium"])
+def test_shadow_accepts_every_faction_spelling_nameservice_accepts(spelling):
+    shadow = PhonologyShadow()
+    resolution = NameService(NameRegistry(), shadow=shadow).resolve(_request("char_s", spelling, seed_hint=11))
+    canonical = NameService(NameRegistry()).resolve(_request("char_s", "velar_imperium", seed_hint=11))
+    assert resolution.canonical_name == canonical.canonical_name  # NameService treats them alike
+    assert len(shadow.observations) == 1  # so must the shadow
+    assert shadow.observations[0].faction == "velar_imperium"

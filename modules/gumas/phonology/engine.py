@@ -60,6 +60,7 @@ class Profile:
     lineages: Mapping[str, Lineage]
     content_roots: tuple[str, ...]
     attested: tuple[Mapping[str, Any], ...]
+    fixtures: tuple[Mapping[str, Any], ...]
     digest: str
 
     @classmethod
@@ -80,6 +81,7 @@ class Profile:
             lineages=_load_lineages(raw["lexicon"]["lineages"]),
             content_roots=tuple(raw["lexicon"]["generative_content_roots"]),
             attested=tuple(raw["attested"]["names"]),
+            fixtures=tuple(raw["attested"].get("fixtures", [])),
             digest=hashlib.sha256(canonical.encode()).hexdigest()[:16],
         )
 
@@ -281,22 +283,33 @@ class Engine:
 
     # ------------------------------------------------------------------ corpus fit
 
-    def fit_attested(self) -> list[dict[str, Any]]:
-        report = []
-        for row in self.profile.attested:
-            derived = self.derive(row["roots"], row["era"])
-            ok = derived.formal == row["formal"] and row.get("informal", derived.informal) == derived.informal
-            report.append({
-                "attested": row["formal"],
-                "attested_informal": row.get("informal"),
-                "derived": derived.formal,
-                "derived_informal": derived.informal,
-                "proto": "*" + derived.proto,
-                "era": row["era"],
-                "match": ok,
-                "source": row.get("source"),
-            })  # fmt: skip
-        return report
+    def fit_attested(self, *, include_fixtures: bool = False) -> list[dict[str, Any]]:
+        """Derive every corpus row and compare spelling, informal form and legality.
+
+        Rows from ``names`` are canon evidence (tier ``canon``). With
+        ``include_fixtures``, non-canon regression targets follow (tier ``fixture``).
+        """
+        rows = [("canon", row) for row in self.profile.attested]
+        if include_fixtures:
+            rows += [("fixture", row) for row in self.profile.fixtures]
+        return [self._fit_row(tier, row) for tier, row in rows]
+
+    def _fit_row(self, tier: str, row: Mapping[str, Any]) -> dict[str, Any]:
+        derived = self.derive(row["roots"], row["era"])
+        spelled = derived.formal == row["formal"] and row.get("informal", derived.informal) == derived.informal
+        return {
+            "tier": tier,
+            "attested": row["formal"],
+            "attested_informal": row.get("informal"),
+            "derived": derived.formal,
+            "derived_informal": derived.informal,
+            "proto": "*" + derived.proto,
+            "era": row["era"],
+            "legal": derived.legal,
+            "match": spelled and derived.legal,
+            "evidence": row.get("evidence"),
+            "source": row.get("source") or row.get("reason"),
+        }
 
     # ------------------------------------------------------------------ generation
 

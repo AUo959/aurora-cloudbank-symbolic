@@ -42,8 +42,8 @@ def derive(roots: Sequence[str], stratum: Stratum | str = Stratum.ELDER) -> Deri
     return ENGINE.derive(roots, Stratum(stratum).value)
 
 
-def fit_attested() -> list[dict[str, Any]]:
-    return ENGINE.fit_attested()
+def fit_attested(*, include_fixtures: bool = False) -> list[dict[str, Any]]:
+    return ENGINE.fit_attested(include_fixtures=include_fixtures)
 
 
 def generate_house_names(

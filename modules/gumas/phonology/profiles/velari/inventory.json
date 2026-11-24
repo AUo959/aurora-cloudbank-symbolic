@@ -22,7 +22,8 @@
     "h":  {"features": {"continuant": true, "low": true}}
   },
   "phonotactics": {
-    "onset_clusters": [["d", "r"], ["t", "r"], ["k", "r"], ["k", "l"], ["th", "r"], ["s", "k"], ["s", "t"]],
+    "_onset_note": "t k is attested word-initially by canon T'karas (proclitic *ta- elided before karas).",
+    "onset_clusters": [["d", "r"], ["t", "r"], ["k", "r"], ["k", "l"], ["th", "r"], ["s", "k"], ["s", "t"], ["t", "k"]],
     "coda_clusters": [["n", "n"], ["r", "n"], ["r", "r"], ["s", "s"], ["l", "l"]],
     "never_coda": ["h", "w"],
     "never_final": ["d", "v"]

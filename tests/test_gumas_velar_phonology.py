@@ -22,9 +22,27 @@ CANON_PREFIX = {
 }
 
 
-@pytest.mark.parametrize("row", fit_attested(), ids=lambda r: r["attested"])
-def test_engine_reproduces_attested_canon_names(row):
+@pytest.mark.parametrize("row", fit_attested(include_fixtures=True), ids=lambda r: f"{r['tier']}:{r['attested']}")
+def test_engine_reproduces_corpus_spelling_and_legality(row):
+    # match requires the exact spelling, the informal form when given, and phonotactic legality
+    assert row["legal"], row
     assert row["match"], row
+
+
+def test_canon_corpus_rows_are_cited_and_fixtures_are_not_canon():
+    canon = fit_attested()
+    assert {r["tier"] for r in canon} == {"canon"}
+    for row in canon:
+        assert row["evidence"] in {"entity", "canon_text"}, row
+        assert row["source"]["path"].startswith("canon/L2/"), row
+    fixtures = [r for r in fit_attested(include_fixtures=True) if r["tier"] == "fixture"]
+    assert {r["attested"] for r in fixtures} == {"Varn", "Thessari"}
+    assert all(r["evidence"] is None for r in fixtures)
+
+
+def test_attested_tkaras_is_phonotactically_legal():
+    assert derive(("ta", "karasa"), Stratum.SCRIBAL).legal
+    assert phonotactic_ok("T'karas")
 
 
 def test_register_rule_predicts_attested_informal_aliases():

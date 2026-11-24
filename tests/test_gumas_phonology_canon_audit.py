@@ -85,3 +85,43 @@ def test_set_aside_reasons():
 def test_name_words_split_dashes_and_typographic_apostrophes():
     assert canon_audit.name_words("T’karas Prime") == ["T'karas", "Prime"]
     assert canon_audit.name_words("Union–Imperium Border") == ["Union", "Imperium", "Border"]
+
+
+# ---------------------------------------------------------------- unreadable input is never silent
+
+
+def test_clean_tree_is_complete(canon):
+    report = canon_audit.audit(canon, english=frozenset())
+    assert report["complete"] is True
+    assert report["unreadable"] == []
+
+
+def test_malformed_record_is_reported_not_skipped(canon):
+    bad = canon / "canon" / "L2" / "entities" / "characters" / "char_broken.json"
+    bad.write_text('{"entity_id": "char_broken", "name": "Velkonn", ', encoding="utf-8")
+    report = canon_audit.audit(canon, english=frozenset())
+    assert report["complete"] is False
+    assert [u["path"] for u in report["unreadable"]] == ["characters/char_broken.json"]
+    assert report["unreadable"][0]["error"].startswith("JSONDecodeError")
+    assert report["records"] == {"velar": 4, "control": 1}  # readable records are still counted
+
+
+def test_valid_non_record_json_is_out_of_scope_not_unreadable(canon):
+    (canon / "canon" / "L2" / "entities" / "index.json").write_text("[1, 2, 3]", encoding="utf-8")
+    report = canon_audit.audit(canon, english=frozenset())
+    assert report["complete"] is True
+
+
+def _run_main(monkeypatch, canon, out):
+    monkeypatch.setattr("sys.argv", ["audit", "--canon-root", str(canon), "--out", str(out)])
+    monkeypatch.setattr(canon_audit, "english_words", lambda: frozenset())
+    return canon_audit.main()
+
+
+def test_main_exits_nonzero_on_incomplete_audit(canon, tmp_path, monkeypatch, capsys):
+    out = tmp_path / "report.json"
+    assert _run_main(monkeypatch, canon, out) == 0
+    (canon / "canon" / "L2" / "entities" / "characters" / "char_broken.json").write_text("{", encoding="utf-8")
+    assert _run_main(monkeypatch, canon, out) == 1
+    assert json.loads(out.read_text())["complete"] is False  # the report is still written
+    assert "audit incomplete: 1 unreadable canon file(s): characters/char_broken.json" in capsys.readouterr().err

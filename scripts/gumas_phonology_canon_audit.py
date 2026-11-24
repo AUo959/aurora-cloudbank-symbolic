@@ -19,6 +19,10 @@ name-words; titles, numbers, Roman numerals, record-id aliases and common
 English words (lowercase entries of the system word list) are set aside and
 listed in the report. The linking and the English filter are heuristics.
 Nothing is written to the canon repository.
+
+A canon file that cannot be read or parsed is never skipped silently: it is
+listed under ``unreadable``, the report is marked ``complete: false``, and the
+script exits with status 1 after writing the report.
 """
 
 from __future__ import annotations
@@ -27,6 +31,7 @@ import argparse
 import collections
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -51,23 +56,26 @@ WORD_LIST = Path("/usr/share/dict/words")
 # ---------------------------------------------------------------------- loading
 
 
-def load_records(canon_root: Path) -> list[dict[str, Any]]:
-    """CANON entity records with a name; each gets ``_path`` relative to canon/L2/entities."""
+def load_records(canon_root: Path) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
+    """CANON entity records with a name, plus every file that could not be read or parsed.
+
+    Each record gets ``_path`` relative to canon/L2/entities. Valid JSON that is not a named CANON record
+    (a list, a STAGING entry) is simply out of scope; unreadable files are returned, never dropped.
+    """
     base = canon_root / "canon" / "L2" / "entities"
-    records = []
+    records: list[dict[str, Any]] = []
+    unreadable: list[dict[str, str]] = []
     for path in sorted(base.rglob("*.json")):
-        data = _read_json(path)
+        rel = path.relative_to(base).as_posix()
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            unreadable.append({"path": rel, "error": f"{type(exc).__name__}: {exc}"})
+            continue
         if isinstance(data, dict) and data.get("name") and data.get("certainty") == "CANON":
-            data["_path"] = path.relative_to(base).as_posix()
+            data["_path"] = rel
             records.append(data)
-    return records
-
-
-def _read_json(path: Path) -> Any:
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
+    return records, unreadable
 
 
 def english_words(path: Path = WORD_LIST) -> frozenset[str]:
@@ -209,13 +217,15 @@ def distance_stats(results: list[dict[str, Any]], tier: str) -> dict[str, Any]:
 
 
 def audit(canon_root: Path, english: frozenset[str] | None = None) -> dict[str, Any]:
-    records = load_records(canon_root)
+    records, unreadable = load_records(canon_root)
     corpus_text = (PROFILES_DIR / "velari" / "attested.json").read_text(encoding="utf-8")
     linker = VelariLinker(records, corpus_text)
     words, tally = collect_words(records, linker, english_words() if english is None else english)
     results = analyze_words(words, Analyzer(Engine("velari")))
     tiers = ("velar", "control")
     return {
+        "complete": not unreadable,
+        "unreadable": unreadable,
         "records": dict(tally["records"]),
         "link_basis": dict(tally["link_basis"]),
         "velar_orgs": linker.velar_orgs,
@@ -236,8 +246,12 @@ def main() -> int:
         raise SystemExit(f"no canon/L2/entities under {args.canon_root}")
     report = audit(args.canon_root)
     args.out.write_text(json.dumps(report, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    keys = ("records", "link_basis", "name_words", "status_by_tier", "nearest_distance")
+    keys = ("complete", "records", "link_basis", "name_words", "status_by_tier", "nearest_distance")
     print(json.dumps({k: report[k] for k in keys}, indent=1))
+    if report["unreadable"]:
+        paths = ", ".join(item["path"] for item in report["unreadable"])
+        print(f"audit incomplete: {len(report['unreadable'])} unreadable canon file(s): {paths}", file=sys.stderr)
+        return 1
     return 0
 
 

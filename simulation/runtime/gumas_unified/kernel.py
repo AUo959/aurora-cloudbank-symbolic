@@ -200,15 +200,11 @@ class CausalEngine:
         return confirm_association(self, association_id, founder_id, cause=cause)
 
     def propose_mandate(self, association_id: str, proposer_id: str,
-                        cargo_route_id: str, notice_route_id: str,
-                        commodity: str, amount: int, *, expires_s: int,
-                        cause: str) -> Receipt:
+                        request: "MandateRequest", *, cause: str) -> Receipt:
         from .federated_actions import propose_mandate
 
         return propose_mandate(
-            self, association_id, proposer_id, cargo_route_id,
-            notice_route_id, commodity, amount, expires_s=expires_s,
-            cause=cause)
+            self, association_id, proposer_id, request, cause=cause)
 
     def respond_mandate(self, mandate_id: str, voter_id: str, approve: bool,
                         return_route_id: str, *, cause: str) -> Receipt:

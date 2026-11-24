@@ -12,7 +12,8 @@ from __future__ import annotations
 from typing import Any
 
 from .federated_model import (
-    Association, Charter, Mandate, charter_terms, fingerprint, mandate_terms,
+    Association, Charter, Mandate, MandateRequest,
+    charter_terms, fingerprint, mandate_terms,
 )
 from .kernel import CausalEngine, FeasibilityError, Receipt, _travel_seconds
 from .model import ScheduledEvent, Universe
@@ -205,10 +206,15 @@ def _association_for_member(world: Universe, association_id: str,
 
 
 def propose_mandate(engine: CausalEngine, association_id: str, proposer_id: str,
-                    cargo_route_id: str, notice_route_id: str,
-                    commodity: str, amount: int, *,
-                    expires_s: int, cause: str) -> Receipt:
+                    request: MandateRequest, *, cause: str) -> Receipt:
     _require_synthetic_engine(engine)
+    if not isinstance(request, MandateRequest):
+        raise FeasibilityError("mandate requires typed synthetic proposal terms")
+    cargo_route_id = request.cargo_route_id
+    notice_route_id = request.notice_route_id
+    commodity = request.commodity
+    amount = request.amount
+    expires_s = request.expires_s
     for v, n in ((association_id, "association_id"), (proposer_id, "proposer"),
                  (cargo_route_id, "cargo route"), (notice_route_id, "notice route"),
                  (commodity, "commodity"), (cause, "cause")):
@@ -329,73 +335,96 @@ def _report(world: Universe, actor_id: str, kind: str,
     actor.received_reports.append(record)
 
 
+def _arrive_charter_offer(world: Universe, charter: Charter) -> dict[str, Any]:
+    informed = charter.status == "offer_inflight" and world.time_s < charter.expires_s
+    if informed:
+        charter.status = "awaiting_response"
+        _report(world, charter.invitee_id, "seatless_charter_offer",
+                charter.charter_id, charter.terms_sha256, charter_terms(charter))
+    return {"invitee_informed": informed}
+
+
+def _arrive_charter_response(world: Universe, charter: Charter) -> dict[str, Any]:
+    counted = charter.status == "response_inflight" and world.time_s < charter.expires_s
+    effect: dict[str, Any] = {"response_counted": counted}
+    if not counted:
+        return effect
+    _report(world, charter.founder_id, "seatless_charter_response",
+            charter.charter_id, charter.terms_sha256, charter_terms(charter),
+            charter.response_accept)
+    if charter.response_accept:
+        aid = f"association-{charter.charter_id}"
+        world.associations[aid] = Association(
+            aid, charter.charter_id, (charter.founder_id, charter.invitee_id),
+            world.time_s, charter.terms_sha256)
+        charter.association_id = aid
+        charter.status = "formed"
+        effect["association_id"] = aid
+    else:
+        charter.status = "declined"
+    return effect
+
+
+def _expire_charter(charter: Charter) -> dict[str, Any]:
+    previous = charter.status
+    if previous in {"offer_inflight", "awaiting_response", "response_inflight"}:
+        charter.status = "expired"
+    return {"previous_status": previous}
+
+
 def _charter_event(world: Universe, kind: str, charter_id: str) -> dict[str, Any]:
     charter = world.charters[charter_id]
     result: dict[str, Any] = {"charter_id": charter_id, "time_s": world.time_s}
     if kind == "charter_offer_arrival":
-        if charter.status == "offer_inflight" and world.time_s < charter.expires_s:
-            charter.status = "awaiting_response"
-            _report(world, charter.invitee_id, "seatless_charter_offer",
-                    charter_id, charter.terms_sha256, charter_terms(charter))
-            result["invitee_informed"] = True
-        else:
-            result["invitee_informed"] = False
+        result.update(_arrive_charter_offer(world, charter))
     elif kind == "charter_response_arrival":
-        if charter.status == "response_inflight" and world.time_s < charter.expires_s:
-            _report(world, charter.founder_id, "seatless_charter_response",
-                    charter_id, charter.terms_sha256, charter_terms(charter),
-                    charter.response_accept)
-            if charter.response_accept:
-                aid = f"association-{charter.charter_id}"
-                world.associations[aid] = Association(
-                    aid, charter_id, (charter.founder_id, charter.invitee_id),
-                    world.time_s, charter.terms_sha256)
-                charter.association_id = aid
-                charter.status = "formed"
-                result["association_id"] = aid
-            else:
-                charter.status = "declined"
-            result["response_counted"] = True
-        else:
-            result["response_counted"] = False
+        result.update(_arrive_charter_response(world, charter))
     elif kind == "charter_expiry":
-        prior = charter.status
-        if prior in {"offer_inflight", "awaiting_response", "response_inflight"}:
-            charter.status = "expired"
-        result["previous_status"] = prior
+        result.update(_expire_charter(charter))
     result["status"] = charter.status
     return result
+
+
+def _arrive_mandate_offer(world: Universe, mandate: Mandate) -> dict[str, Any]:
+    informed = mandate.status == "offer_inflight" and world.time_s < mandate.expires_s
+    if informed:
+        mandate.status = "awaiting_vote"
+        _report(world, mandate.voter_id, "seatless_mandate_offer",
+                mandate.mandate_id, mandate.terms_sha256, mandate_terms(mandate))
+    return {"peer_informed": informed}
+
+
+def _arrive_mandate_vote(world: Universe, mandate: Mandate) -> dict[str, Any]:
+    counted = mandate.status == "vote_inflight" and world.time_s < mandate.expires_s
+    if not counted:
+        return {"decision_counted": False}
+    _report(world, mandate.proposer_id, "seatless_mandate_response",
+            mandate.mandate_id, mandate.terms_sha256, mandate_terms(mandate),
+            mandate.vote_approve)
+    mandate.status = "authorized" if mandate.vote_approve else "rejected"
+    if mandate.vote_approve:
+        mandate.authorized_at_s = world.time_s
+    return {"decision_counted": True}
+
+
+def _expire_mandate(mandate: Mandate) -> dict[str, Any]:
+    previous = mandate.status
+    if previous in {"offer_inflight", "awaiting_vote", "vote_inflight",
+                    "authorized"}:
+        mandate.status = "expired"
+        mandate.authorized_at_s = None
+    return {"previous_status": previous}
 
 
 def _mandate_event(world: Universe, kind: str, mandate_id: str) -> dict[str, Any]:
     mandate = world.mandates[mandate_id]
     result: dict[str, Any] = {"mandate_id": mandate_id, "time_s": world.time_s}
     if kind == "mandate_offer_arrival":
-        if mandate.status == "offer_inflight" and world.time_s < mandate.expires_s:
-            mandate.status = "awaiting_vote"
-            _report(world, mandate.voter_id, "seatless_mandate_offer",
-                    mandate_id, mandate.terms_sha256, mandate_terms(mandate))
-            result["peer_informed"] = True
-        else:
-            result["peer_informed"] = False
+        result.update(_arrive_mandate_offer(world, mandate))
     elif kind == "mandate_vote_arrival":
-        if mandate.status == "vote_inflight" and world.time_s < mandate.expires_s:
-            _report(world, mandate.proposer_id, "seatless_mandate_response",
-                    mandate_id, mandate.terms_sha256, mandate_terms(mandate),
-                    mandate.vote_approve)
-            mandate.status = "authorized" if mandate.vote_approve else "rejected"
-            if mandate.vote_approve:
-                mandate.authorized_at_s = world.time_s
-            result["decision_counted"] = True
-        else:
-            result["decision_counted"] = False
+        result.update(_arrive_mandate_vote(world, mandate))
     elif kind == "mandate_expiry":
-        prior = mandate.status
-        if prior in {"offer_inflight", "awaiting_vote",
-                     "vote_inflight", "authorized"}:
-            mandate.status = "expired"
-            mandate.authorized_at_s = None
-        result["previous_status"] = prior
+        result.update(_expire_mandate(mandate))
     result["status"] = mandate.status
     return result
 

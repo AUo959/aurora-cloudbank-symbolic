@@ -26,7 +26,7 @@ and **not exercised** by P6. No Phase-9 Run 0 permission is granted.
 ## Contract compatibility matrix
 
 | Existing component | P6 seam | Decision |
-|---|---|---|
+| --- | --- | --- |
 | P0 `Universe`, `CausalEngine`, scheduler and SHA256 receipts | Add optional charter/association/mandate maps and six/fewer new scheduled event kinds; transitions remain kernel `_commit` | Empty maps are excluded from state hash; original receipt effects unchanged |
 | P0 physical corridor, energy/heat, cargo capacity and shipment | Use `_route`, ceiling speed and original `Shipment`/arrival structures | A political yes cannot bypass physics, time or inventory |
 | P1 read-only external evidence | No external connector data imported | Preserve non-authoritative boundaries |

@@ -76,6 +76,16 @@ class Mandate:
     shipment_due_s: int | None = None
 
 
+@dataclass(frozen=True)
+class MandateRequest:
+    """Bounded P6 proposal terms without an overlong positional API."""
+    cargo_route_id: str
+    notice_route_id: str
+    commodity: str
+    amount: int
+    expires_s: int
+
+
 def charter_terms(charter: Charter) -> dict[str, Any]:
     return {
         "charter_id": charter.charter_id,
@@ -139,78 +149,121 @@ def _seen(actor: Any, kind: str, ref_id: str, digest: str,
     )
 
 
-def _validate_charter(world: Any, key: str, charter: Charter) -> None:
+def _charter_grounding(world: Any, key: str, charter: Charter):
     if not isinstance(charter, Charter) or key != charter.charter_id:
         raise ValueError("invalid seatless charter record")
     founder = world.actors.get(charter.founder_id)
     invitee = world.actors.get(charter.invitee_id)
-    if (founder is None or invitee is None
-            or charter.founder_id == charter.invitee_id
-            or not isinstance(charter.purpose, str)
-            or not 0 < len(charter.purpose) <= 160
-            or not _nat(charter.offered_s)
-            or not _nat(charter.expires_s)
-            or charter.expires_s <= charter.offered_s
-            or charter.offered_s > world.time_s
-            or not _path(world, charter.outbound_route_id,
-                         founder.site_id, invitee.site_id,
-                         charter.offered_s, charter.offer_due_s)
-            or not _sha(charter.terms_sha256)
-            or charter.terms_sha256 != fingerprint(charter_terms(charter))):
+    if founder is None or invitee is None:
         raise ValueError("charter has ungrounded actors, path or terms")
+    if not isinstance(charter.purpose, str):
+        raise ValueError("charter has ungrounded actors, path or terms")
+    valid = (
+        charter.founder_id != charter.invitee_id,
+        0 < len(charter.purpose) <= 160,
+        _nat(charter.offered_s),
+        _nat(charter.expires_s),
+        charter.expires_s > charter.offered_s,
+        charter.offered_s <= world.time_s,
+        _path(world, charter.outbound_route_id, founder.site_id,
+              invitee.site_id, charter.offered_s, charter.offer_due_s),
+        _sha(charter.terms_sha256),
+        charter.terms_sha256 == fingerprint(charter_terms(charter)),
+    )
+    if not all(valid):
+        raise ValueError("charter has ungrounded actors, path or terms")
+    return founder, invitee
+
+
+def _charter_offer_state(world: Any, key: str, charter: Charter,
+                         invitee: Any) -> None:
     allowed = {"offer_inflight", "awaiting_response", "response_inflight",
                "formed", "declined", "expired"}
     if charter.status not in allowed:
         raise ValueError("invalid charter state")
-    if (charter.status == "offer_inflight"
-            and not _event(world, "charter_offer_arrival", "charter_id", key,
-                           charter.offer_due_s)):
-        raise ValueError("charter offer missing its scheduled transmission")
-    if charter.status in {"awaiting_response", "response_inflight", "formed", "declined"}:
+    if charter.status == "offer_inflight":
+        if not _event(world, "charter_offer_arrival", "charter_id",
+                      key, charter.offer_due_s):
+            raise ValueError("charter offer missing its scheduled transmission")
+    informed = {"awaiting_response", "response_inflight", "formed", "declined"}
+    if charter.status in informed:
         if not _seen(invitee, "seatless_charter_offer", key,
                      charter.terms_sha256, charter_terms(charter), world.time_s):
             raise ValueError("charter recipient lacks actually delivered terms")
-    if charter.status in {"offer_inflight", "awaiting_response"}:
-        if charter.response_sent_s is not None:
-            raise ValueError("charter cannot have a response before transmission")
-    if charter.status in {"response_inflight", "formed", "declined"}:
-        if charter.response_sent_s is None:
-            raise ValueError("charter decision requires recorded return transmission")
+
+
+def _charter_sent_intent(world: Any, charter: Charter,
+                         founder: Any, invitee: Any) -> None:
+    if type(charter.response_accept) is not bool:
+        raise ValueError("charter response lacks physical informed intent")
+    correct = (
+        _path(world, charter.return_route_id, invitee.site_id, founder.site_id,
+              charter.response_sent_s, charter.response_due_s),
+        charter.response_sent_s >= charter.offer_due_s,
+        charter.response_sent_s < charter.expires_s,
+        _seen(invitee, "seatless_charter_offer", charter.charter_id,
+              charter.terms_sha256, charter_terms(charter),
+              charter.response_sent_s),
+    )
+    if not all(correct):
+        raise ValueError("charter response lacks physical informed intent")
+
+
+def _charter_response_fields(world: Any, charter: Charter,
+                             founder: Any, invitee: Any) -> None:
+    unopened = {"offer_inflight", "awaiting_response"}
+    answered = {"response_inflight", "formed", "declined"}
+    if charter.status in unopened and charter.response_sent_s is not None:
+        raise ValueError("charter cannot have a response before transmission")
+    if charter.status in answered and charter.response_sent_s is None:
+        raise ValueError("charter decision requires recorded return transmission")
     if charter.response_sent_s is None:
-        if (charter.return_route_id is not None
-                or charter.response_due_s is not None
-                or charter.response_accept is not None):
+        fields = (charter.return_route_id, charter.response_due_s,
+                  charter.response_accept)
+        if any(value is not None for value in fields):
             raise ValueError("charter response fields without sent intent")
-    else:
-        if (type(charter.response_accept) is not bool
-                or not _path(world, charter.return_route_id,
-                             invitee.site_id, founder.site_id,
-                             charter.response_sent_s, charter.response_due_s)
-                or charter.response_sent_s < charter.offer_due_s
-                or charter.response_sent_s >= charter.expires_s
-                or not _seen(invitee, "seatless_charter_offer", key,
-                             charter.terms_sha256, charter_terms(charter),
-                             charter.response_sent_s)):
-            raise ValueError("charter response lacks physical informed intent")
-    if (charter.status == "response_inflight"
-            and not _event(world, "charter_response_arrival", "charter_id", key,
-                           charter.response_due_s)):
-        raise ValueError("in-flight charter response missing return event")
+        return
+    _charter_sent_intent(world, charter, founder, invitee)
+
+
+def _choice_delivered(actor: Any, kind: str, ref_id: str,
+                      digest: str, terms: dict[str, Any],
+                      decision: bool, time_s: int) -> bool:
+    return any(
+        all((
+            entry.get("kind") == kind,
+            entry.get("ref_id") == ref_id,
+            entry.get("decision") is decision,
+            entry.get("terms_sha256") == digest,
+            entry.get("terms") == terms,
+            entry.get("received_s") == time_s,
+        ))
+        for entry in actor.received_reports
+    )
+
+
+def _charter_receipt_state(world: Any, key: str, charter: Charter,
+                           founder: Any) -> None:
+    if charter.status == "response_inflight":
+        if not _event(world, "charter_response_arrival", "charter_id",
+                      key, charter.response_due_s):
+            raise ValueError("in-flight charter response missing return event")
     if charter.status in {"formed", "declined"}:
-        if not any(
-            r.get("kind") == "seatless_charter_response"
-            and r.get("ref_id") == key
-            and r.get("decision") is charter.response_accept
-            and r.get("terms_sha256") == charter.terms_sha256
-            and r.get("terms") == charter_terms(charter)
-            and r.get("received_s") == charter.response_due_s
-            for r in founder.received_reports
+        if not _choice_delivered(
+            founder, "seatless_charter_response", key,
+            charter.terms_sha256, charter_terms(charter),
+            charter.response_accept, charter.response_due_s,
         ):
             raise ValueError("founder has not actually received the charter decision")
+
+
+def _charter_terminal_state(charter: Charter) -> None:
     if charter.status == "formed":
-        if (charter.association_id is None
-                or charter.response_accept is not True
-                or charter.response_due_s >= charter.expires_s):
+        if not all((
+            charter.association_id is not None,
+            charter.response_accept is True,
+            charter.response_due_s < charter.expires_s,
+        )):
             raise ValueError("charter formed without timely affirmative receipt")
     elif charter.association_id is not None:
         raise ValueError("unformed charter cannot confer association authority")
@@ -218,134 +271,254 @@ def _validate_charter(world: Any, key: str, charter: Charter) -> None:
         raise ValueError("declined charter must derive from explicit negative response")
 
 
-def _validate_association(world: Any, key: str, association: Association) -> None:
+def _validate_charter(world: Any, key: str, charter: Charter) -> None:
+    founder, invitee = _charter_grounding(world, key, charter)
+    _charter_offer_state(world, key, charter, invitee)
+    _charter_response_fields(world, charter, founder, invitee)
+    _charter_receipt_state(world, key, charter, founder)
+    _charter_terminal_state(charter)
+
+
+def _association_foundation(world: Any, key: str, association: Association):
     if not isinstance(association, Association) or key != association.association_id:
         raise ValueError("invalid association record")
     charter = world.charters.get(association.charter_id)
-    if (charter is None or charter.status != "formed"
-            or charter.association_id != key
-            or association.members != (charter.founder_id, charter.invitee_id)
-            or association.charter_sha256 != charter.terms_sha256
-            or association.authority != "synthetic_L2_only"
-            or not _nat(association.formed_s)
-            or association.formed_s != charter.response_due_s
-            or association.formed_s > world.time_s):
+    if charter is None:
         raise ValueError("seatless association was not founded by received consent")
+    valid = (
+        charter.status == "formed",
+        charter.association_id == key,
+        association.members == (charter.founder_id, charter.invitee_id),
+        association.charter_sha256 == charter.terms_sha256,
+        association.authority == "synthetic_L2_only",
+        _nat(association.formed_s),
+        association.formed_s == charter.response_due_s,
+        association.formed_s <= world.time_s,
+    )
+    if not all(valid):
+        raise ValueError("seatless association was not founded by received consent")
+    return charter
+
+
+def _association_confirmation_delivery(world: Any, key: str,
+                                       association: Association,
+                                       charter: Charter) -> None:
+    if association.confirmed_to_invitee:
+        if not _seen(world.actors[charter.invitee_id],
+                     "seatless_association_confirm", key,
+                     charter.terms_sha256, charter_terms(charter), world.time_s):
+            raise ValueError("remote member cannot know unreceived association")
+    elif not _event(world, "association_confirm_arrival", "association_id",
+                    key, association.confirmation_due_s):
+        raise ValueError("association confirmation is not actually in transit")
+
+
+def _association_confirmation(world: Any, key: str, association: Association,
+                              charter: Charter) -> None:
     if association.confirmation_sent_s is None:
         if (association.confirmation_due_s is not None
                 or association.confirmed_to_invitee is not False):
             raise ValueError("association has no physically sent formation confirmation")
-    else:
-        if (association.confirmation_sent_s < association.formed_s
-                or not _path(world, charter.outbound_route_id,
-                             world.actors[charter.founder_id].site_id,
-                             world.actors[charter.invitee_id].site_id,
-                             association.confirmation_sent_s,
-                             association.confirmation_due_s)):
-            raise ValueError("association confirmation lacks physical signal path")
-        if association.confirmed_to_invitee:
-            if not _seen(world.actors[charter.invitee_id],
-                         "seatless_association_confirm", key,
-                         charter.terms_sha256, charter_terms(charter),
-                         world.time_s):
-                raise ValueError("remote member cannot know unreceived association")
-        elif not _event(world, "association_confirm_arrival", "association_id",
-                        key, association.confirmation_due_s):
-            raise ValueError("association confirmation is not actually in transit")
+        return
+    path = _path(
+        world, charter.outbound_route_id,
+        world.actors[charter.founder_id].site_id,
+        world.actors[charter.invitee_id].site_id,
+        association.confirmation_sent_s, association.confirmation_due_s,
+    )
+    if association.confirmation_sent_s < association.formed_s or not path:
+        raise ValueError("association confirmation lacks physical signal path")
+    _association_confirmation_delivery(world, key, association, charter)
 
 
-def _validate_mandate(world: Any, key: str, mandate: Mandate) -> None:
+def _validate_association(world: Any, key: str, association: Association) -> None:
+    charter = _association_foundation(world, key, association)
+    _association_confirmation(world, key, association, charter)
+
+
+def _mandate_participants(world: Any, key: str, mandate: Mandate):
     if not isinstance(mandate, Mandate) or key != mandate.mandate_id:
         raise ValueError("invalid association mandate")
-    association = world.associations.get(mandate.association_id)
-    if association is None or {mandate.proposer_id, mandate.voter_id} != set(association.members):
+    assoc = world.associations.get(mandate.association_id)
+    if assoc is None:
         raise ValueError("mandate lacks distinct recorded association participants")
-    proposer = world.actors[mandate.proposer_id]
-    voter = world.actors[mandate.voter_id]
+    if {mandate.proposer_id, mandate.voter_id} != set(assoc.members):
+        raise ValueError("mandate lacks distinct recorded association participants")
+    return assoc, world.actors[mandate.proposer_id], world.actors[mandate.voter_id]
+
+
+def _mandate_grounding(world: Any, mandate: Mandate,
+                       assoc: Association, proposer: Any, voter: Any) -> None:
     custodian = world.actors.get(mandate.custodian_id)
     route = world.corridors.get(mandate.cargo_route_id)
-    if (custodian is None or mandate.custodian_id != mandate.proposer_id
-            or route is None or route.origin_id != custodian.site_id
-            or not isinstance(mandate.commodity, str)
-            or not 0 < len(mandate.commodity) <= 128
-            or mandate.commodity == "energy_j"
-            or type(mandate.amount) is not int or mandate.amount <= 0
-            or not _nat(mandate.offered_s)
-            or mandate.offered_s < association.formed_s
-            or mandate.offered_s > world.time_s
-            or not _nat(mandate.expires_s)
-            or mandate.expires_s <= mandate.offered_s
-            or not _path(world, mandate.outbound_route_id,
-                         proposer.site_id, voter.site_id,
-                         mandate.offered_s, mandate.offer_due_s)
-            or not _sha(mandate.terms_sha256)
-            or mandate.terms_sha256 != fingerprint(mandate_terms(mandate))):
+    if custodian is None or route is None:
         raise ValueError("mandate has invalid custody, physical path or terms")
-    if mandate.status not in {"offer_inflight", "awaiting_vote", "vote_inflight",
-                              "authorized", "rejected", "expired", "executed"}:
+    if not isinstance(mandate.commodity, str):
+        raise ValueError("mandate has invalid custody, physical path or terms")
+    valid = (
+        mandate.custodian_id == mandate.proposer_id,
+        route.origin_id == custodian.site_id,
+        0 < len(mandate.commodity) <= 128,
+        mandate.commodity != "energy_j",
+        type(mandate.amount) is int,
+        mandate.amount > 0,
+        _nat(mandate.offered_s),
+        mandate.offered_s >= assoc.formed_s,
+        mandate.offered_s <= world.time_s,
+        _nat(mandate.expires_s),
+        mandate.expires_s > mandate.offered_s,
+        _path(world, mandate.outbound_route_id, proposer.site_id,
+              voter.site_id, mandate.offered_s, mandate.offer_due_s),
+        _sha(mandate.terms_sha256),
+        mandate.terms_sha256 == fingerprint(mandate_terms(mandate)),
+    )
+    if not all(valid):
+        raise ValueError("mandate has invalid custody, physical path or terms")
+
+
+def _mandate_offer_state(world: Any, key: str, mandate: Mandate,
+                         voter: Any) -> None:
+    allowed = {"offer_inflight", "awaiting_vote", "vote_inflight",
+               "authorized", "rejected", "expired", "executed"}
+    if mandate.status not in allowed:
         raise ValueError("invalid mandate state")
-    if (mandate.status == "offer_inflight"
-            and not _event(world, "mandate_offer_arrival", "mandate_id", key,
-                           mandate.offer_due_s)):
-        raise ValueError("mandate offer lacks scheduled path")
-    if mandate.status in {"awaiting_vote", "vote_inflight", "authorized", "rejected", "executed"}:
+    if mandate.status == "offer_inflight":
+        if not _event(world, "mandate_offer_arrival", "mandate_id",
+                      key, mandate.offer_due_s):
+            raise ValueError("mandate offer lacks scheduled path")
+    informed = {"awaiting_vote", "vote_inflight", "authorized", "rejected",
+                "executed"}
+    if mandate.status in informed:
         if not _seen(voter, "seatless_mandate_offer", key,
                      mandate.terms_sha256, mandate_terms(mandate), world.time_s):
             raise ValueError("mandate voter lacks delivered terms")
-    if mandate.status in {"offer_inflight", "awaiting_vote"}:
-        if mandate.vote_sent_s is not None:
-            raise ValueError("mandate cannot contain unsent or prematurely counted vote")
-    if mandate.status in {"vote_inflight", "authorized", "rejected", "executed"}:
-        if mandate.vote_sent_s is None:
-            raise ValueError("mandate requires recorded vote transmission")
-    if mandate.vote_sent_s is None:
-        if (mandate.return_route_id is not None
-                or mandate.vote_due_s is not None
-                or mandate.vote_approve is not None):
-            raise ValueError("mandate voting fields without intent")
-    elif (type(mandate.vote_approve) is not bool
-          or not _path(world, mandate.return_route_id,
-                       voter.site_id, proposer.site_id,
-                       mandate.vote_sent_s, mandate.vote_due_s)
-          or mandate.vote_sent_s < mandate.offer_due_s
-          or mandate.vote_sent_s >= mandate.expires_s
-          or not _seen(voter, "seatless_mandate_offer", key,
-                       mandate.terms_sha256, mandate_terms(mandate),
-                       mandate.vote_sent_s)):
+
+
+def _mandate_sent_vote(world: Any, mandate: Mandate,
+                       proposer: Any, voter: Any) -> None:
+    correct = (
+        type(mandate.vote_approve) is bool,
+        _path(world, mandate.return_route_id, voter.site_id, proposer.site_id,
+              mandate.vote_sent_s, mandate.vote_due_s),
+        mandate.vote_sent_s >= mandate.offer_due_s,
+        mandate.vote_sent_s < mandate.expires_s,
+        _seen(voter, "seatless_mandate_offer", mandate.mandate_id,
+              mandate.terms_sha256, mandate_terms(mandate),
+              mandate.vote_sent_s),
+    )
+    if not all(correct):
         raise ValueError("mandate vote lacks physically informed actor")
-    if (mandate.status == "vote_inflight"
-            and not _event(world, "mandate_vote_arrival", "mandate_id", key,
-                           mandate.vote_due_s)):
-        raise ValueError("mandate vote has no causal return event")
+
+
+def _mandate_vote_fields(world: Any, mandate: Mandate,
+                         proposer: Any, voter: Any) -> None:
+    unopened = {"offer_inflight", "awaiting_vote"}
+    answered = {"vote_inflight", "authorized", "rejected", "executed"}
+    if mandate.status in unopened and mandate.vote_sent_s is not None:
+        raise ValueError("mandate cannot contain unsent or prematurely counted vote")
+    if mandate.status in answered and mandate.vote_sent_s is None:
+        raise ValueError("mandate requires recorded vote transmission")
+    if mandate.vote_sent_s is None:
+        fields = (mandate.return_route_id, mandate.vote_due_s,
+                  mandate.vote_approve)
+        if any(x is not None for x in fields):
+            raise ValueError("mandate voting fields without intent")
+        return
+    _mandate_sent_vote(world, mandate, proposer, voter)
+
+
+def _mandate_receipt_state(world: Any, key: str, mandate: Mandate,
+                           proposer: Any) -> None:
+    if mandate.status == "vote_inflight":
+        if not _event(world, "mandate_vote_arrival", "mandate_id",
+                      key, mandate.vote_due_s):
+            raise ValueError("mandate vote has no causal return event")
     if mandate.status in {"authorized", "executed", "rejected"}:
-        if not any(
-            r.get("kind") == "seatless_mandate_response"
-            and r.get("ref_id") == key
-            and r.get("decision") is mandate.vote_approve
-            and r.get("terms_sha256") == mandate.terms_sha256
-            and r.get("terms") == mandate_terms(mandate)
-            and r.get("received_s") == mandate.vote_due_s
-            for r in proposer.received_reports
+        if not _choice_delivered(
+            proposer, "seatless_mandate_response", key,
+            mandate.terms_sha256, mandate_terms(mandate),
+            mandate.vote_approve, mandate.vote_due_s,
         ):
             raise ValueError("mandate coordinator lacks physically received decision")
+
+
+def _mandate_authority_state(mandate: Mandate) -> None:
     if mandate.status in {"authorized", "executed"}:
-        if (mandate.vote_approve is not True
-                or mandate.authorized_at_s != mandate.vote_due_s
-                or mandate.vote_due_s >= mandate.expires_s):
+        valid = (
+            mandate.vote_approve is True,
+            mandate.authorized_at_s == mandate.vote_due_s,
+            mandate.vote_due_s < mandate.expires_s,
+        )
+        if not all(valid):
             raise ValueError("authorized mandate lacks timely affirmative vote")
     elif mandate.authorized_at_s is not None:
         raise ValueError("unapproved mandate has approval timestamp")
     if mandate.status == "rejected" and mandate.vote_approve is not False:
         raise ValueError("rejected mandate must derive from negative consent")
+
+
+def _validate_mandate(world: Any, key: str, mandate: Mandate) -> None:
+    assoc, proposer, voter = _mandate_participants(world, key, mandate)
+    _mandate_grounding(world, mandate, assoc, proposer, voter)
+    _mandate_offer_state(world, key, mandate, voter)
+    _mandate_vote_fields(world, mandate, proposer, voter)
+    _mandate_receipt_state(world, key, mandate, proposer)
+    _mandate_authority_state(mandate)
     from .federated_shipment import validate_executed_shipment
 
     validate_executed_shipment(world, mandate)
 
 
+_CHARTER_EVENTS = {
+    "charter_offer_arrival": "offer_due_s",
+    "charter_response_arrival": "response_due_s",
+    "charter_expiry": "expires_s",
+}
+_MANDATE_EVENTS = {
+    "mandate_offer_arrival": "offer_due_s",
+    "mandate_vote_arrival": "vote_due_s",
+    "mandate_expiry": "expires_s",
+}
+
+
+def _validate_charter_scheduler_event(world: Any, event: Any) -> None:
+    charter = world.charters.get(event.payload.get("charter_id"))
+    if charter is None:
+        raise ValueError("orphaned charter scheduler event")
+    if event.due_s != getattr(charter, _CHARTER_EVENTS[event.kind]):
+        raise ValueError("charter scheduler time mismatches contract")
+
+
+def _validate_mandate_scheduler_event(world: Any, event: Any) -> None:
+    mandate = world.mandates.get(event.payload.get("mandate_id"))
+    if mandate is None:
+        raise ValueError("orphaned mandate scheduler event")
+    if event.due_s != getattr(mandate, _MANDATE_EVENTS[event.kind]):
+        raise ValueError("mandate scheduler time mismatches contract")
+
+
+def _validate_confirmation_scheduler_event(world: Any, event: Any) -> None:
+    assoc = world.associations.get(event.payload.get("association_id"))
+    if assoc is None:
+        raise ValueError("orphaned association confirmation signal")
+    if assoc.confirmed_to_invitee or assoc.confirmation_due_s != event.due_s:
+        raise ValueError("orphaned association confirmation signal")
+
+
+def _validate_federated_scheduler_event(world: Any, event: Any) -> None:
+    if event.kind in _CHARTER_EVENTS:
+        _validate_charter_scheduler_event(world, event)
+    elif event.kind in _MANDATE_EVENTS:
+        _validate_mandate_scheduler_event(world, event)
+    elif event.kind == "association_confirm_arrival":
+        _validate_confirmation_scheduler_event(world, event)
+
+
 def validate_federated_world(world: Any) -> None:
-    """Post-P0 validation. Never infer a new polity from an association name."""
-    if (len(world.charters) > 128 or len(world.associations) > 128
-            or len(world.mandates) > 128):
+    """P0 proof obligations for seatless P6 organizations and scheduled facts."""
+    if any(len(records) > 128 for records in (
+        world.charters, world.associations, world.mandates
+    )):
         raise ValueError("synthetic federation fixture exceeds bounded scope")
     for key, charter in world.charters.items():
         _validate_charter(world, key, charter)
@@ -354,32 +527,4 @@ def validate_federated_world(world: Any) -> None:
     for key, mandate in world.mandates.items():
         _validate_mandate(world, key, mandate)
     for event in world.pending:
-        if event.kind in {"charter_offer_arrival", "charter_response_arrival",
-                          "charter_expiry"}:
-            charter = world.charters.get(event.payload.get("charter_id"))
-            if charter is None:
-                raise ValueError("orphaned charter scheduler event")
-            allowed = {
-                "charter_offer_arrival": charter.offer_due_s,
-                "charter_response_arrival": charter.response_due_s,
-                "charter_expiry": charter.expires_s,
-            }
-            if event.due_s != allowed[event.kind]:
-                raise ValueError("charter scheduler time mismatches contract")
-        if event.kind == "association_confirm_arrival":
-            association = world.associations.get(event.payload.get("association_id"))
-            if (association is None or association.confirmed_to_invitee
-                    or association.confirmation_due_s != event.due_s):
-                raise ValueError("orphaned association confirmation signal")
-        if event.kind in {"mandate_offer_arrival", "mandate_vote_arrival",
-                          "mandate_expiry"}:
-            mandate = world.mandates.get(event.payload.get("mandate_id"))
-            if mandate is None:
-                raise ValueError("orphaned mandate scheduler event")
-            allowed = {
-                "mandate_offer_arrival": mandate.offer_due_s,
-                "mandate_vote_arrival": mandate.vote_due_s,
-                "mandate_expiry": mandate.expires_s,
-            }
-            if event.due_s != allowed[event.kind]:
-                raise ValueError("mandate scheduler time mismatches contract")
+        _validate_federated_scheduler_event(world, event)

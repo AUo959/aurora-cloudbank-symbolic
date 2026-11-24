@@ -8,6 +8,7 @@ or automatic physical dispatch is created.
 from __future__ import annotations
 
 from .federated_actions import association_view
+from .federated_model import MandateRequest
 from .kernel import CausalEngine
 from .model import Corridor
 from .governance_scenario import governance_fixture
@@ -51,29 +52,15 @@ def _charter(engine: CausalEngine, *, accept: bool) -> tuple[str, str | None, di
     }
 
 
-def run_p6(*, charter_accept: bool = True,
-           mandate_approve: bool = True) -> dict:
-    engine = CausalEngine(
-        federated_fixture(),
-        run_id=f"synthetic-p6-{charter_accept}-{mandate_approve}")
-    cid, aid, knowledge = _charter(engine, accept=charter_accept)
-    if not charter_accept:
-        engine.advance_to(28)
-        return {
-            "schema": "gumas.unified.seatless_association_scenario.p6",
-            "authority": "synthetic_L2_only",
-            "charter_id": cid,
-            "association_formed": False,
-            "knowledge": knowledge,
-            "origin": engine.site_view("union_depot"),
-            "destination": engine.site_view("frontier_port"),
-            "evidence": engine.evidence(),
-        }
+def _run_mandate_exchange(engine: CausalEngine, aid: str,
+                          mandate_approve: bool) -> dict:
+    """Receive, count and separately execute one two-way resource mandate."""
     engine.confirm_association(
         aid, "governor", cause="actor:founder-acknowledges-formation")
     proposed = engine.propose_mandate(
-        aid, "governor", "corridor_a", "corridor_a", "rations", 3,
-        expires_s=44, cause="actor:founder-proposes-relief")
+        aid, "governor", MandateRequest(
+            "corridor_a", "corridor_a", "rations", 3, 44),
+        cause="actor:founder-proposes-relief")
     mid = proposed.effect["mandate_id"]
     engine.advance_to(11)
     remote_before = engine.actor_view("member_b")
@@ -94,12 +81,6 @@ def run_p6(*, charter_accept: bool = True,
     after_execution = association_view(engine, aid)
     engine.advance_to(28)
     return {
-        "schema": "gumas.unified.seatless_association_scenario.p6",
-        "authority": "synthetic_L2_only",
-        "charter_id": cid,
-        "association_id": aid,
-        "association_formed": True,
-        "knowledge": knowledge,
         "remote_before_mandate": remote_before,
         "remote_after_mandate": remote_after,
         "founder_before_vote": founder_before,
@@ -107,6 +88,36 @@ def run_p6(*, charter_accept: bool = True,
         "before_execution": before_execution,
         "after_execution": after_execution,
         "shipment": None if shipment is None else shipment.effect,
+    }
+
+
+def run_p6(*, charter_accept: bool = True,
+           mandate_approve: bool = True) -> dict:
+    engine = CausalEngine(
+        federated_fixture(),
+        run_id=f"synthetic-p6-{charter_accept}-{mandate_approve}")
+    cid, aid, knowledge = _charter(engine, accept=charter_accept)
+    if not charter_accept:
+        engine.advance_to(28)
+        return {
+            "schema": "gumas.unified.seatless_association_scenario.p6",
+            "authority": "synthetic_L2_only",
+            "charter_id": cid,
+            "association_formed": False,
+            "knowledge": knowledge,
+            "origin": engine.site_view("union_depot"),
+            "destination": engine.site_view("frontier_port"),
+            "evidence": engine.evidence(),
+        }
+    exchange = _run_mandate_exchange(engine, aid, mandate_approve)
+    return {
+        "schema": "gumas.unified.seatless_association_scenario.p6",
+        "authority": "synthetic_L2_only",
+        "charter_id": cid,
+        "association_id": aid,
+        "association_formed": True,
+        "knowledge": knowledge,
+        **exchange,
         "origin": engine.site_view("union_depot"),
         "destination": engine.site_view("frontier_port"),
         "association": association_view(engine, aid),
@@ -123,8 +134,8 @@ def run_remote_initiative() -> dict:
         aid, "governor", cause="actor:founder-transmits-confirmation")
     engine.advance_to(12)
     proposed = engine.propose_mandate(
-        aid, "member_b", "return_signal", "return_signal",
-        "rations", 1, expires_s=40,
+        aid, "member_b", MandateRequest(
+            "return_signal", "return_signal", "rations", 1, 40),
         cause="actor:remote-member-initiates-new-proposal")
     mid = proposed.effect["mandate_id"]
     engine.advance_to(16)

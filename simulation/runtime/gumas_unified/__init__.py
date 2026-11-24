@@ -4,7 +4,7 @@ from .model import (
     Actor, Corridor, PhysicsProfile, Site, Universe,
     Institution, ReliefMotion, GovernanceProtocol, RemoteBallot,
 )
-from .federated_model import Charter, Association, Mandate
+from .federated_model import Charter, Association, Mandate, MandateRequest
 from .kernel import CausalEngine, FeasibilityError, verify_ledger
 from .legacy_political import observe_legacy_political_snapshot
 from .bindings import identity_binding_view, prepare_fixture_identity_binding
@@ -22,7 +22,7 @@ from .federated_actions import association_view
 __all__ = [
     "Actor", "Corridor", "PhysicsProfile", "Site", "Universe", "Institution",
     "ReliefMotion", "GovernanceProtocol", "RemoteBallot",
-    "Charter", "Association", "Mandate",
+    "Charter", "Association", "Mandate", "MandateRequest",
     "CausalEngine", "FeasibilityError", "verify_ledger",
     "observe_legacy_political_snapshot",
     "identity_binding_view", "prepare_fixture_identity_binding",

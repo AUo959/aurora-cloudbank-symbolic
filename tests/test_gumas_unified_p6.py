@@ -10,7 +10,8 @@ import unittest
 from simulation.runtime.gumas_unified import CausalEngine, FeasibilityError
 from simulation.runtime.gumas_unified.federated_actions import association_view
 from simulation.runtime.gumas_unified.federated_model import (
-    Association, Charter, Mandate, charter_terms, fingerprint, mandate_terms,
+    Association, Charter, Mandate, MandateRequest,
+    charter_terms, fingerprint, mandate_terms,
 )
 from simulation.runtime.gumas_unified.federated_scenario import (
     federated_fixture, run_p6, run_remote_initiative,
@@ -44,8 +45,9 @@ def proposal(engine, association_id, proposer_id="governor", *,
              amount=3, expires_s=44, commodity="rations"):
     route = "corridor_a" if proposer_id == "governor" else "return_signal"
     receipt = engine.propose_mandate(
-        association_id, proposer_id, route, route, commodity, amount,
-        expires_s=expires_s, cause="actor:coordinated-proposal")
+        association_id, proposer_id,
+        MandateRequest(route, route, commodity, amount, expires_s),
+        cause="actor:coordinated-proposal")
     return receipt.effect["mandate_id"]
 
 
@@ -604,8 +606,8 @@ class P6SeatlessAssociationTests(unittest.TestCase):
                 "fictional-association", "governor",
                 cause="operator:invalid"),
             lambda: engine.propose_mandate(
-                "fictional-association", "governor", "corridor_a",
-                "corridor_a", "rations", 3, expires_s=42,
+                "fictional-association", "governor",
+                MandateRequest("corridor_a", "corridor_a", "rations", 3, 42),
                 cause="operator:invalid"),
             lambda: engine.respond_mandate(
                 "fictional-mandate", "member_b", True, "return_signal",
@@ -621,6 +623,38 @@ class P6SeatlessAssociationTests(unittest.TestCase):
                 call()
             self.assertEqual(engine.state.digest(), before)
             self.assertEqual(engine.ledger, history)
+
+    def test_typed_mandate_request_preserves_public_terms_and_receipt(self):
+        engine, _, association_id = setup_engine()
+        request = MandateRequest("corridor_a", "corridor_a", "rations", 3, 44)
+        offered = engine.propose_mandate(
+            association_id, "governor", request,
+            cause="actor:typed-mandate-contract")
+        mandate = engine.state.mandates[offered.effect["mandate_id"]]
+        self.assertEqual(mandate.cargo_route_id, request.cargo_route_id)
+        self.assertEqual(mandate.outbound_route_id, request.notice_route_id)
+        self.assertEqual(mandate.expires_s, request.expires_s)
+        self.assertEqual(mandate.amount, request.amount)
+        self.assertEqual(offered.effect["material_authorized"], False)
+        self.assertTrue(engine.evidence()["ledger_valid"])
+
+    def test_invalid_mandate_request_fails_without_ledger_or_material_change(self):
+        engine, _, association_id = setup_engine()
+        before, ledger = engine.state.digest(), engine.ledger
+        with self.assertRaisesRegex(FeasibilityError, "typed synthetic"):
+            engine.propose_mandate(
+                association_id, "governor",
+                {"cargo_route_id": "corridor_a", "amount": 3},
+                cause="actor:untyped-proposal")
+        self.assertEqual(engine.state.digest(), before)
+        self.assertEqual(engine.ledger, ledger)
+
+    def test_mandate_request_is_frozen_before_any_signal_is_sent(self):
+        from dataclasses import FrozenInstanceError
+
+        request = MandateRequest("corridor_a", "corridor_a", "rations", 3, 44)
+        with self.assertRaises(FrozenInstanceError):
+            request.amount = 999
 
     def test_p6_clock_determinism_and_event_replay_checks(self):
         a, b = run_p6(), run_p6()

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from .federated_actions import association_view
 from .kernel import CausalEngine
-from .political_scenario import p3_fixture
 from .model import Corridor
 from .governance_scenario import governance_fixture
 

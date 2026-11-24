@@ -12,6 +12,29 @@ from .model import GovernanceProtocol, Institution, ReliefMotion, Universe
 KINDS = frozenset(("delegated", "unanimous", "veto"))
 
 
+def _validate_delegated(institution: Institution, rule: GovernanceProtocol,
+                        members: set[str]) -> None:
+    if (rule.delegate_id not in members or rule.veto_ids
+            or institution.quorum != 1
+            or institution.approval_threshold != 1):
+        raise ValueError("delegation requires one member and one-vote ratification")
+
+
+def _validate_unanimous(institution: Institution, rule: GovernanceProtocol,
+                        members: set[str]) -> None:
+    if (rule.delegate_id is not None or rule.veto_ids
+            or institution.quorum != len(members)
+            or institution.approval_threshold != len(members)):
+        raise ValueError("unanimous consent must include every member")
+
+
+def _validate_veto(rule: GovernanceProtocol, members: set[str]) -> None:
+    if (rule.delegate_id is not None or not rule.veto_ids
+            or len(rule.veto_ids) != len(set(rule.veto_ids))
+            or not set(rule.veto_ids).issubset(members)):
+        raise ValueError("veto holders must be distinct recorded members")
+
+
 def validate_protocol(institution: Institution, rule: GovernanceProtocol) -> None:
     """Check static institutional constraints, not one civilization's norms."""
     if (rule.institution_id != institution.institution_id
@@ -20,20 +43,11 @@ def validate_protocol(institution: Institution, rule: GovernanceProtocol) -> Non
         raise ValueError("unknown or mismatched synthetic governance protocol")
     members = set(institution.members)
     if rule.kind == "delegated":
-        if (rule.delegate_id not in members or rule.veto_ids
-                or institution.quorum != 1
-                or institution.approval_threshold != 1):
-            raise ValueError("delegation requires one member and one-vote ratification")
+        _validate_delegated(institution, rule, members)
     elif rule.kind == "unanimous":
-        if (rule.delegate_id is not None or rule.veto_ids
-                or institution.quorum != len(members)
-                or institution.approval_threshold != len(members)):
-            raise ValueError("unanimous consent must include every member")
+        _validate_unanimous(institution, rule, members)
     elif rule.kind == "veto":
-        if (rule.delegate_id is not None or not rule.veto_ids
-                or len(rule.veto_ids) != len(set(rule.veto_ids))
-                or not set(rule.veto_ids).issubset(members)):
-            raise ValueError("veto holders must be distinct recorded members")
+        _validate_veto(rule, members)
 
 
 def rule_for(world: Universe, institution_id: str) -> GovernanceProtocol | None:
@@ -49,24 +63,27 @@ def ballot_eligible(world: Universe, motion: ReliefMotion, actor_id: str) -> boo
     return rule is None or rule.kind != "delegated" or actor_id == rule.delegate_id
 
 
+def _threshold_ready(institution: Institution, votes: dict[str, bool]) -> bool:
+    return (
+        len(votes) >= institution.quorum
+        and sum(votes.values()) >= institution.approval_threshold
+    )
+
+
 def approval_ready(world: Universe, motion: ReliefMotion) -> bool:
     """Deterministically derive ratifiability from actual recorded ballots."""
     institution = world.institutions[motion.institution_id]
     rule = rule_for(world, institution.institution_id)
     votes = motion.votes
     if rule is None:
-        return (
-            len(votes) >= institution.quorum
-            and sum(votes.values()) >= institution.approval_threshold
-        )
+        return _threshold_ready(institution, votes)
     if rule.kind == "delegated":
         return votes.get(rule.delegate_id) is True
     if rule.kind == "unanimous":
         return len(votes) == len(institution.members) and all(votes.values())
     if rule.kind == "veto":
         return (
-            len(votes) >= institution.quorum
-            and sum(votes.values()) >= institution.approval_threshold
+            _threshold_ready(institution, votes)
             and all(votes.get(vetoer) is True for vetoer in rule.veto_ids)
         )
     return False

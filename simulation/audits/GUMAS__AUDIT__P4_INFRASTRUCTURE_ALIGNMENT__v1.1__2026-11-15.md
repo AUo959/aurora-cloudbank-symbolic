@@ -25,7 +25,7 @@ review is recorded.
 ## Evidence and alignment matrix
 
 | Interface | Repository source / verified state | P4 decision |
-|---|---|---|
+| --- | --- | --- |
 | Repository authority | Root `catalog/repo_authority_policy.yaml`, `catalog/repo_registry.yaml`; CloudBank `ARCHITECTURE_QUICKMAP.md`, `docs/CANON_PROVENANCE.md`. CanonRec controls canon, root routes integration, CloudBank is a runtime mirror/projection | Code remains in CloudBank's own Git history; no upstream registry or canon mutation |
 | Layer model | CloudBank `AGENTS.md`, `docs/architecture/LAYER_ARCHITECTURE.md`. L1-resident relay/crew supervise L2 but do not reside inside L2; L3 is a conceptual framework, not a runtime polity engine | L2-only synthetic actor choices; no L1 dispatch or L3 enforcement bypass |
 | Live service topology | CloudBank `docs/architecture/RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md`: FastAPI `api/aurora_api.py`, active `/gumas` ethics route in `modules/gumas/api/routes.py`; mesh is separately owned | P4 has no API mount, no service startup hook, no mesh route, no mutable external store |
@@ -67,7 +67,7 @@ review is recorded.
 ## Audit risk register
 
 | ID | Severity | Evidence | Disposition |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | P4-A1 | BLOCKING MERGE | P3 SonarCloud C reliability rating and Codacy two findings, PR #1704 | Must resolve, or document independently reviewed explicit waiver; do not auto-merge |
 | P4-A2 | BLOCKING LIVE INTEGRATION | P0-P3 all draft; unified runtime path absent on CloudBank main | Retain stacked draft and isolated test-only usage |
 | P4-A3 | HIGH | No independent L3-authenticated source identity or clock mapping | Continue fixture-only source references |
@@ -96,7 +96,6 @@ it is not proof of full compatibility with unmerged upstream PRs or actual
 Aurora production deployments. An independent reviewer must inspect the
 diff, source hashes, external quality findings and repository integration
 gates before merge. Canon promotion would require its own authorization.
-
 
 ## Post-implementation addendum — v1.1 (2026-11-15)
 

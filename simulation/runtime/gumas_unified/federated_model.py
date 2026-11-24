@@ -158,6 +158,8 @@ def _charter_grounding(world: Any, key: str, charter: Charter):
         raise ValueError("charter has ungrounded actors, path or terms")
     if not isinstance(charter.purpose, str):
         raise ValueError("charter has ungrounded actors, path or terms")
+    if not all((_nat(charter.offered_s), _nat(charter.expires_s))):
+        raise ValueError("charter has ungrounded actors, path or terms")
     valid = (
         charter.founder_id != charter.invitee_id,
         0 < len(charter.purpose) <= 160,
@@ -195,6 +197,8 @@ def _charter_offer_state(world: Any, key: str, charter: Charter,
 def _charter_sent_intent(world: Any, charter: Charter,
                          founder: Any, invitee: Any) -> None:
     if type(charter.response_accept) is not bool:
+        raise ValueError("charter response lacks physical informed intent")
+    if not all((_nat(charter.response_sent_s), _nat(charter.response_due_s))):
         raise ValueError("charter response lacks physical informed intent")
     correct = (
         _path(world, charter.return_route_id, invitee.site_id, founder.site_id,
@@ -285,6 +289,8 @@ def _association_foundation(world: Any, key: str, association: Association):
     charter = world.charters.get(association.charter_id)
     if charter is None:
         raise ValueError("seatless association was not founded by received consent")
+    if not _nat(association.formed_s):
+        raise ValueError("seatless association was not founded by received consent")
     valid = (
         charter.status == "formed",
         charter.association_id == key,
@@ -320,6 +326,9 @@ def _association_confirmation(world: Any, key: str, association: Association,
                 or association.confirmed_to_invitee is not False):
             raise ValueError("association has no physically sent formation confirmation")
         return
+    if not all((_nat(association.confirmation_sent_s),
+                _nat(association.confirmation_due_s))):
+        raise ValueError("association confirmation lacks physical signal path")
     path = _path(
         world, charter.outbound_route_id,
         world.actors[charter.founder_id].site_id,
@@ -354,6 +363,9 @@ def _mandate_grounding(world: Any, mandate: Mandate,
     if custodian is None or route is None:
         raise ValueError("mandate has invalid custody, physical path or terms")
     if not isinstance(mandate.commodity, str):
+        raise ValueError("mandate has invalid custody, physical path or terms")
+    if not all((type(mandate.amount) is int,
+                _nat(mandate.offered_s), _nat(mandate.expires_s))):
         raise ValueError("mandate has invalid custody, physical path or terms")
     valid = (
         mandate.custodian_id == mandate.proposer_id,
@@ -396,6 +408,8 @@ def _mandate_offer_state(world: Any, key: str, mandate: Mandate,
 
 def _mandate_sent_vote(world: Any, mandate: Mandate,
                        proposer: Any, voter: Any) -> None:
+    if not all((_nat(mandate.vote_sent_s), _nat(mandate.vote_due_s))):
+        raise ValueError("mandate vote lacks physically informed actor")
     correct = (
         type(mandate.vote_approve) is bool,
         _path(world, mandate.return_route_id, voter.site_id, proposer.site_id,

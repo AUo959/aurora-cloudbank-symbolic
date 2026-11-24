@@ -656,6 +656,33 @@ class P6SeatlessAssociationTests(unittest.TestCase):
         with self.assertRaises(FrozenInstanceError):
             request.amount = 999
 
+    def test_malformed_p6_field_types_fail_closed_with_validation_errors(self):
+        engine, charter_id, association_id = setup_engine(confirm=True)
+        mandate_id = proposal(engine, association_id)
+        respond(engine, mandate_id)
+        mutations = (
+            ("charter_offered_time", lambda w: setattr(
+                w.charters[charter_id], "offered_s", "wrong")),
+            ("charter_response_time", lambda w: setattr(
+                w.charters[charter_id], "response_sent_s", "wrong")),
+            ("association_formation", lambda w: setattr(
+                w.associations[association_id], "formed_s", "wrong")),
+            ("association_confirmation", lambda w: setattr(
+                w.associations[association_id], "confirmation_sent_s", "wrong")),
+            ("mandate_amount", lambda w: setattr(
+                w.mandates[mandate_id], "amount", "wrong")),
+            ("mandate_expiry", lambda w: setattr(
+                w.mandates[mandate_id], "expires_s", "wrong")),
+            ("mandate_vote_time", lambda w: setattr(
+                w.mandates[mandate_id], "vote_sent_s", "wrong")),
+        )
+        for label, change in mutations:
+            with self.subTest(field=label):
+                snapshot = engine.state
+                change(snapshot)
+                with self.assertRaises(ValueError):
+                    CausalEngine(snapshot)
+
     def test_p6_clock_determinism_and_event_replay_checks(self):
         a, b = run_p6(), run_p6()
         self.assertEqual(a, b)

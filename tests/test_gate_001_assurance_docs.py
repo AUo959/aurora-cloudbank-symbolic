@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[1]
 ADDENDUM = (
     ROOT
@@ -107,3 +109,14 @@ def test_existing_external_engagement_scope_remains_present():
     text = PENTEST_SCOPE.read_text(encoding="utf-8")
     assert "External Security Review Scope v2" in text
     assert "Engagement must not begin until all three signatures are on record" in text
+
+
+def test_quantum_bayesian_manifest_leaves_required_arbitration_unbound():
+    path = ROOT / "src" / "core" / "quantum_bayesian_manifest.yaml"
+    manifest = yaml.safe_load(path.read_text(encoding="utf-8"))
+
+    assert manifest["divergent_truth_handling"] == {
+        "detection": True,
+        "fairness_privacy_conflicts": True,
+        "arbitration_required": True,
+    }

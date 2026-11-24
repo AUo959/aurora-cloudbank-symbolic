@@ -10,6 +10,7 @@ on:
       - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.2__2026-11-17.md"
       - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.3__2026-11-17.md"
       - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.4__2026-11-23.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.5__2026-11-23.md"
       - ".github/workflows/gumas-unified-p0.yml"
   workflow_dispatch:
 permissions:

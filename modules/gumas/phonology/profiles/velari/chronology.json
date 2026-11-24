@@ -63,6 +63,16 @@
      "target": {"syllabic": true}, "change": {"delete": true},
      "when": {"proclitic": true, "before": ["+"]}}
   ],
+  "sporadic": {
+    "_note": "Irregular changes that strike some words and not others. Applied only in generation, to a seeded share of candidates, after all regular laws; every application is recorded in the trace. Never applied to the canon corpus. Draft.",
+    "rate": 0.2,
+    "laws": [
+      {"id": "SP1", "name": "liquid dissimilation", "date": 2000, "era": "sporadic",
+       "description": "Of two r in a word, the later one becomes l (Varnkaras > Varnkalas).",
+       "target": {"phoneme": "r"}, "change": {"features": {"lateral": true}},
+       "when": {"preceded_anywhere_by": {"phoneme": "r"}}}
+    ]
+  },
   "dialects": {
     "_note": "Velari speech splits after the last common law. Canon: the Velari people are not the Imperium state; imperial, reformist and Union-aligned Velari coexist (species_velari.distribution). The branch laws and the split date are draft; the split is not yet mapped to a canon calendar date.",
     "split_at": 1000,

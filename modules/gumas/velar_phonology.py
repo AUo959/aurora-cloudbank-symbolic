@@ -18,9 +18,11 @@ from typing import Any, Sequence
 
 from . import phonology
 from .phonology import syllables
+from .phonology.analysis import Analysis, Analyzer
 from .phonology.engine import COMMON, Derivation, Engine, shared_roots
 
 ENGINE = Engine("velari")
+ANALYZER = Analyzer(ENGINE)
 ENGINE_VERSION = phonology.ENGINE_VERSION
 
 
@@ -66,11 +68,20 @@ def generate_house_names(
     stratum: Stratum | str | None = None,
     dialect: Dialect | str | None = None,
     registry: Any | None = None,
+    weighted: bool = False,
+    sporadic: bool = True,
 ) -> list[Derivation]:
     """House names for a lineage; the dialect defaults to the lineage's own."""
     eras = [Stratum(stratum).value] if stratum else None
     return ENGINE.generate(
-        Lineage(lineage).value, seed=seed, count=count, eras=eras, dialect=_dialect(dialect), registry=registry
+        Lineage(lineage).value,
+        seed=seed,
+        count=count,
+        eras=eras,
+        dialect=_dialect(dialect),
+        registry=registry,
+        weighted=weighted,
+        sporadic=sporadic,
     )
 
 
@@ -81,10 +92,29 @@ def generate_given_names(
     stratum: Stratum | str | None = None,
     dialect: Dialect | str | None = None,
     registry: Any | None = None,
+    weighted: bool = False,
+    sporadic: bool = True,
 ) -> list[Derivation]:
     """Given names: a content root plus a personal suffix."""
     eras = [Stratum(stratum).value] if stratum else None
-    return ENGINE.generate_given_names(seed=seed, count=count, eras=eras, dialect=_dialect(dialect), registry=registry)
+    return ENGINE.generate_given_names(
+        seed=seed,
+        count=count,
+        eras=eras,
+        dialect=_dialect(dialect),
+        registry=registry,
+        weighted=weighted,
+        sporadic=sporadic,
+    )
+
+
+def analyze(written: str) -> Analysis:
+    """Reverse-derive a written Velari name: its etymologies, or why it has none."""
+    return ANALYZER.analyze(written)
+
+
+def blind_recovery(*, include_fixtures: bool = True) -> list[dict[str, Any]]:
+    return ANALYZER.blind_recovery(include_fixtures=include_fixtures)
 
 
 def phonotactic_ok(written: str) -> bool:
@@ -97,12 +127,16 @@ def phonotactic_ok(written: str) -> bool:
 
 
 __all__ = [
+    "ANALYZER",
     "ENGINE",
     "ENGINE_VERSION",
+    "Analysis",
     "Derivation",
     "Dialect",
     "Lineage",
     "Stratum",
+    "analyze",
+    "blind_recovery",
     "derive",
     "fit_attested",
     "generate_given_names",

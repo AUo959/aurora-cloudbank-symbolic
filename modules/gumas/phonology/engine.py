@@ -25,11 +25,12 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 from . import syllables
+from .phonaesthetics import SoundModel
 from .lexicon import Lineage, Root, load_lexicon
 from .rules import Boundary, Morph, SoundLaw, Word
 from .segments import Inventory
 
-ENGINE_VERSION = "GUMAS_PHONOLOGY_ENGINE_v0.3"
+ENGINE_VERSION = "GUMAS_PHONOLOGY_ENGINE_v0.4"
 PROFILES_DIR = Path(__file__).resolve().parent / "profiles"
 COMMON = "common"
 
@@ -45,6 +46,9 @@ class Profile:
     laws: tuple[SoundLaw, ...]
     dialects: Mapping[str, tuple[SoundLaw, ...]]
     split_at: int | None
+    sporadic_laws: tuple[SoundLaw, ...]
+    sporadic_rate: float
+    loan_map: Mapping[str, str]
     eras: Mapping[str, int]
     reform_date: int
     lexicon: Mapping[str, Root]
@@ -53,6 +57,7 @@ class Profile:
     personal_suffixes: tuple[str, ...]
     attested: tuple[Mapping[str, Any], ...]
     fixtures: tuple[Mapping[str, Any], ...]
+    unexplained: tuple[Mapping[str, Any], ...]
     digest: str
 
     @classmethod
@@ -71,6 +76,9 @@ class Profile:
             laws=laws,
             dialects=_load_dialects(chronology.get("dialects"), laws),
             split_at=chronology.get("dialects", {}).get("split_at"),
+            sporadic_laws=_load_laws(chronology.get("sporadic", {}).get("laws", [])),
+            sporadic_rate=float(chronology.get("sporadic", {}).get("rate", 0.0)),
+            loan_map=_public(raw["inventory"].get("loan_map", {})),
             eras={name: spec["formed_at"] for name, spec in chronology["eras"].items()},
             reform_date=chronology["orthographic_events"]["scribal_reform"]["date"],
             lexicon=lexicon.roots,
@@ -79,11 +87,17 @@ class Profile:
             personal_suffixes=lexicon.personal_suffixes,
             attested=tuple(raw["attested"]["names"]),
             fixtures=tuple(raw["attested"].get("fixtures", [])),
+            unexplained=tuple(r for r in raw["attested"].get("unexplained", []) if "formal" in r),
             digest=hashlib.sha256(canonical.encode()).hexdigest()[:16],
         )
 
 
 _PROFILE_FILES = ("inventory", "chronology", "lexicon", "attested")
+
+
+def _public(mapping: Mapping[str, Any]) -> dict[str, Any]:
+    """Drop ``_note``-style keys from a data mapping."""
+    return {k: v for k, v in mapping.items() if not k.startswith("_")}
 
 
 def _read_profile_files(directory: Path) -> dict[str, Any]:
@@ -142,6 +156,8 @@ class Derivation:
     phonotactic_problems: list[str]
     profile: str
     profile_digest: str
+    euphony: float = 0.0
+    sporadic: list[str] = field(default_factory=list)
     findings: list[dict[str, Any]] = field(default_factory=list)
 
     @property
@@ -166,6 +182,7 @@ class Derivation:
             "gloss": self.gloss,
             "gloss_status": self.gloss_status,
             "lineage": self.lineage,
+            "sporadic": self.sporadic,
             "trace": self.trace,
         }
 
@@ -173,6 +190,17 @@ class Derivation:
 class Engine:
     def __init__(self, profile: Profile | str):
         self.profile = load_profile(profile) if isinstance(profile, str) else profile
+        self._sound_model: SoundModel | None = None
+
+    @property
+    def sound_model(self) -> SoundModel:
+        """Bigram model of canon Velari spellings (corpus forms and unexplained canon given names)."""
+        if self._sound_model is None:
+            rows = self.profile.attested + self.profile.unexplained
+            words = [r["formal"] for r in rows] + [r["informal"] for r in rows if "informal" in r]
+            graphemes = [self.profile.inventory[s].grapheme for s in self.profile.inventory.symbols()]
+            self._sound_model = SoundModel(words, graphemes)
+        return self._sound_model
 
     # ------------------------------------------------------------------ derivation
 
@@ -237,12 +265,14 @@ class Engine:
         *,
         formed_at: int | None = None,
         dialect: str | None = None,
+        sporadic: bool = False,
     ) -> Derivation:
+        """Derive a name. ``sporadic`` also applies the profile's irregular laws, recorded in the trace."""
         used = self._lookup(roots)
         era, formed_at = self._formation(era, formed_at)
         joined, trace = self._evolve(used, formed_at, self.laws_for(dialect))
+        joined, applied = self._apply_sporadic(joined, trace, sporadic)
         formal, informal = self._render(joined)
-        lineages = [r.lineage for r in used if r.lineage]
         return Derivation(
             roots=tuple(roots),
             radicals=tuple(r.radical for r in used),
@@ -255,12 +285,25 @@ class Engine:
             informal=informal,
             gloss=" + ".join(r.gloss for r in used),
             gloss_status=[r.gloss_status for r in used],
-            lineage=lineages[0] if lineages else None,
+            lineage=_first_lineage(used),
             trace=trace,
             phonotactic_problems=syllables.check(joined.segments(), self.profile.tactics),
             profile=self.profile.name,
             profile_digest=self.profile.digest,
+            euphony=self.sound_model.score(formal),
+            sporadic=applied,
         )
+
+    def _apply_sporadic(self, word: Word, trace: list[dict[str, Any]], enabled: bool) -> tuple[Word, list[str]]:
+        """Apply the profile's irregular laws when ``enabled``, recording each one that changes the word."""
+        applied: list[str] = []
+        for law in self.profile.sporadic_laws if enabled else ():
+            before = word.phonemic()
+            word = law.apply(word, self.profile.inventory)
+            if word.phonemic() != before:
+                trace.append({"sporadic": law.law_id, "name": law.name, "before": before, "after": word.phonemic()})
+                applied.append(law.law_id)
+        return word, applied
 
     # ------------------------------------------------------------------ orthography
 
@@ -339,16 +382,21 @@ class Engine:
         eras: Sequence[str] | None = None,
         dialect: str | None = None,
         registry: Any | None = None,
+        weighted: bool = False,
+        sporadic: bool = True,
     ) -> list[Derivation]:
         """Deterministically propose house names for a lineage class.
 
         ``dialect`` defaults to the lineage's own (``lexicon.json``); pass
         ``"common"`` for the undivided language. With ``registry`` (a
-        ``naming.NameRegistry``), BLOCK-level collisions are dropped.
+        ``naming.NameRegistry``), BLOCK-level collisions are dropped. ``weighted``
+        ranks a wider pool by how Velari each name sounds; ``sporadic`` lets the
+        profile's irregular laws strike a seeded share of candidates.
         """
         spec = self._lineage(lineage)
         pool = [(p, c, e) for p in spec.roots for c in self.profile.content_roots for e in (eras or spec.eras)]
-        return self._pick(pool, f"house|{lineage}|{seed}", count, dialect or spec.dialect, registry)
+        opts = GenerationOptions(dialect or spec.dialect, registry, weighted, sporadic)
+        return self._pick(pool, f"house|{lineage}|{seed}", count, opts)
 
     def generate_given_names(
         self,
@@ -358,11 +406,14 @@ class Engine:
         eras: Sequence[str] | None = None,
         dialect: str | None = None,
         registry: Any | None = None,
+        weighted: bool = False,
+        sporadic: bool = True,
     ) -> list[Derivation]:
         """Deterministically propose given names: a content root plus a personal suffix."""
         allowed = eras or tuple(self.profile.eras)
         pool = [(c, s, e) for c in self.profile.content_roots for s in self.profile.personal_suffixes for e in allowed]
-        return self._pick(pool, f"given|{seed}", count, dialect, registry)
+        opts = GenerationOptions(dialect, registry, weighted, sporadic)
+        return self._pick(pool, f"given|{seed}", count, opts)
 
     def _lineage(self, lineage: str) -> Lineage:
         if lineage not in self.profile.lineages:
@@ -370,24 +421,53 @@ class Engine:
         return self.profile.lineages[lineage]
 
     def _pick(
-        self, pool: list[tuple[str, str, str]], tag: str, count: int, dialect: str | None, registry: Any | None
+        self, pool: list[tuple[str, str, str]], tag: str, count: int, opts: "GenerationOptions"
     ) -> list[Derivation]:
-        """Shuffle the pool by seed, derive in order, keep the first ``count`` admissible names."""
-        digest = hashlib.sha256(f"{ENGINE_VERSION}|{self.profile.digest}|{tag}".encode()).hexdigest()
+        """Shuffle the pool by seed, keep the first admissible names, optionally ranked by sound."""
         # Deterministic, seeded shuffle for reproducible naming; not used for security.
-        random.Random(int(digest[:16], 16)).shuffle(pool)  # nosec B311
+        random.Random(int(self._hash(tag)[:16], 16)).shuffle(pool)  # nosec B311
+        want = count * WEIGHTED_POOL_FACTOR if opts.weighted else count
+        out = self._first_admissible(pool, tag, want, opts)
+        if opts.weighted:
+            out = sorted(out, key=lambda d: -d.euphony)[:count]
+        return out
+
+    def _first_admissible(
+        self, pool: list[tuple[str, str, str]], tag: str, want: int, opts: "GenerationOptions"
+    ) -> list[Derivation]:
         out: list[Derivation] = []
         seen: set[str] = set()
         for first, second, era in pool:
-            derived = self.derive((first, second), era, dialect=dialect)
+            hit = opts.sporadic and self._sporadic_hit(tag, first, second, era)
+            derived = self.derive((first, second), era, dialect=opts.dialect, sporadic=hit)
             key = derived.informal.lower()
-            if key in seen or not _admissible(derived, registry):
+            if key in seen or not _admissible(derived, opts.registry):
                 continue
             seen.add(key)
             out.append(derived)
-            if len(out) >= count:
+            if len(out) >= want:
                 break
         return out
+
+    def _hash(self, *parts: str) -> str:
+        return hashlib.sha256("|".join((ENGINE_VERSION, self.profile.digest, *parts)).encode()).hexdigest()
+
+    def _sporadic_hit(self, *parts: str) -> bool:
+        """A seeded, reproducible draw: does an irregular change strike this candidate?"""
+        if not self.profile.sporadic_laws:
+            return False
+        return int(self._hash("sporadic", *parts)[:8], 16) / 0xFFFFFFFF < self.profile.sporadic_rate
+
+
+WEIGHTED_POOL_FACTOR = 4
+
+
+@dataclass(frozen=True)
+class GenerationOptions:
+    dialect: str | None = None
+    registry: Any | None = None
+    weighted: bool = False
+    sporadic: bool = True
 
 
 def _admissible(derived: Derivation, registry: Any | None) -> bool:
@@ -404,6 +484,10 @@ def _partition(laws: Sequence[SoundLaw], formed_at: int) -> tuple[list[SoundLaw]
     """Laws before a compound's formation date, and laws from that date on."""
     early = [law for law in laws if law.date < formed_at]
     return early, list(laws[len(early) :])  # laws are sorted by date
+
+
+def _first_lineage(used: Sequence[Root]) -> str | None:
+    return next((r.lineage for r in used if r.lineage), None)
 
 
 def _show(pieces: Sequence[Word]) -> str:

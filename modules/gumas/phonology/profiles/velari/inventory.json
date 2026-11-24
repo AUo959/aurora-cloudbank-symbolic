@@ -21,6 +21,10 @@
     "k":  {"features": {"consonantal": true, "dorsal": true}},
     "h":  {"features": {"continuant": true, "low": true}}
   },
+  "loan_map": {
+    "_note": "How letters Velari lacks are heard by Velari speakers when a foreign name is borrowed. A hypothesis for classifying non-native spellings, not a claim about any canon name's origin. Draft.",
+    "x": "ks", "j": "y", "c": "k", "q": "k", "z": "s", "f": "v", "g": "k", "b": "v", "p": "t"
+  },
   "phonotactics": {
     "_onset_note": "t k is attested word-initially by canon T'karas (proclitic *ta- elided before karas).",
     "onset_clusters": [["d", "r"], ["t", "r"], ["k", "r"], ["k", "l"], ["th", "r"], ["s", "k"], ["s", "t"], ["t", "k"]],

@@ -203,3 +203,38 @@ def test_reduce_triple_condition():
     assert law.apply(Word.join(pieces, formed_at=50), INV).phonemic() == "var+nim"
     pieces = [Word.from_morph(Morph(k, "root"), INV.parse(p)) for k, p in (("a", "rynn"), ("b", "nim"))]
     assert law.apply(Word.join(pieces, formed_at=50), INV).phonemic() == "rynn+nim"  # nn after a vowel stays
+
+
+# ---------------------------------------------------------------- phase 3: sporadic, loans, analysis helpers
+
+
+def test_preceded_anywhere_by_condition():
+    law = SoundLaw.from_dict({
+        "id": "T4", "name": "test dissimilation", "date": 1,
+        "target": {"phoneme": "r"}, "change": {"features": {"lateral": True}},
+        "when": {"preceded_anywhere_by": {"phoneme": "r"}},
+    })  # fmt: skip
+    assert law.apply(_word(("karasa", "root")), INV).phonemic() == "karasa"  # one r: untouched
+    assert law.apply(_word(("warna", "root"), ("karasa", "root")), INV).phonemic() == "warna+kalasa"
+
+
+def test_loan_map_drops_note_keys():
+    assert "_note" not in VELARI.profile.loan_map
+    assert VELARI.profile.loan_map["x"] == "ks"
+
+
+def test_zero_sporadic_rate_never_strikes(tmp_path):
+    def off(ch):
+        ch["sporadic"]["rate"] = 0.0
+
+    engine = Engine(Profile.load(_mutated_profile(tmp_path, "chronology", off)))
+    names = engine.generate("reformist", seed=4718224, count=8)
+    assert not any(n.sporadic for n in names)
+
+
+def test_edit_distance():
+    from modules.gumas.phonology.analysis import _distance
+
+    assert _distance("syrr", "syr") == 1
+    assert _distance("thalen", "talen") == 1
+    assert _distance("", "abc") == 3

@@ -88,10 +88,13 @@ class PoliticalCausalTests(unittest.TestCase):
         self.assertNotIn("background", str(events))
 
     def test_deterministic_scenarios_and_event_ledger(self):
-        self.assertEqual(run_p3(), run_p3())
-        self.assertEqual(run_p3(council_choice="reject"),
-                         run_p3(council_choice="reject"))
-        kinds = [e["kind"] for e in run_p3()["evidence"]["ledger"]]
+        approved_initial = run_p3()
+        approved_replay = run_p3()
+        self.assertEqual(approved_initial, approved_replay)
+        rejected_initial = run_p3(council_choice="reject")
+        rejected_replay = run_p3(council_choice="reject")
+        self.assertEqual(rejected_initial, rejected_replay)
+        kinds = [e["kind"] for e in approved_initial["evidence"]["ledger"]]
         self.assertLess(kinds.index("relief_proposed"),
                         kinds.index("relief_vote_recorded"))
         self.assertLess(kinds.index("relief_vote_recorded"),

@@ -3,6 +3,8 @@ import pytest
 from modules.gumas.naming import NameRegistry, RegistryEntry
 from modules.gumas.velar_phonology import (
     ENGINE,
+    analyze,
+    blind_recovery,
     Dialect,
     Lineage,
     Stratum,
@@ -222,3 +224,85 @@ def test_unexplained_canon_given_names_are_recorded_with_reasons():
     assert all(r["reason"] and r["source"].startswith("canon/L2/") for r in rows)
     corpus = {r["attested"] for r in fit_attested(include_fixtures=True)}
     assert corpus.isdisjoint(r["formal"] for r in rows)
+
+
+# ---------------------------------------------------------------- phase 3
+
+
+def test_blind_recovery_finds_every_recorded_etymology():
+    rows = {r["name"]: r for r in blind_recovery()}
+    assert len(rows) == 12
+    assert all(r["recovered"] for r in rows.values())
+    assert rows["Tyren"]["rival_roots"] == [("tura", "ena")]  # a genuine rival etymology
+    assert all(not r["rival_roots"] for name, r in rows.items() if name != "Tyren")
+
+
+def test_apostrophe_dates_the_coinage_in_analysis():
+    for name in ("Tal'Varen", "T'karas", "Vel'Rynn"):
+        assert {d.era for d in analyze(name).exact} == {"scribal"}, name
+    assert {d.era for d in analyze("T\u2019karas").exact} == {"scribal"}
+    assert {d.era for d in analyze("Talvaren").exact} == {"elder", "scribal"}
+
+
+@pytest.mark.parametrize(
+    "name, status",
+    [
+        ("Velkonn", "derived"),
+        ("Talyx", "loan"),
+        ("Jaxx", "loan"),
+        ("Thalen", "near"),
+        ("Syrr", "near"),
+        ("Kaelor", "unexplained"),
+    ],
+)
+def test_analysis_status(name, status):
+    assert analyze(name).status == status
+
+
+def test_near_misses_point_at_the_specific_gap():
+    thalen = analyze("Thalen").nearest[0]
+    assert thalen[0] == 1 and thalen[1].formal == "Talen" and thalen[1].roots == ("tala", "ena")
+    syrr = analyze("Syrr").nearest[0]
+    assert syrr[0] == 1 and syrr[1].roots == ("syra",)
+
+
+def test_loans_are_adapted_not_claimed():
+    talyx = analyze("Talyx")
+    assert talyx.foreign == ["x"] and talyx.adapted == "talyks" and not talyx.exact
+    assert analyze("Jaxx").foreign == ["j", "x"]
+
+
+def test_every_unexplained_canon_given_name_now_has_a_classification():
+    statuses = {r["formal"]: analyze(r["formal"]).status for r in ENGINE.profile.unexplained}
+    assert set(statuses.values()) <= {"near", "loan"}
+
+
+def test_sporadic_change_is_recorded_and_opt_in_for_derive():
+    plain = derive(("warna", "karasa"))
+    struck = ENGINE.derive(("warna", "karasa"), "elder", sporadic=True)
+    assert plain.formal == "Varnkaras" and not plain.sporadic
+    assert struck.formal == "Varnkalas" and struck.sporadic == ["SP1"]
+    assert struck.trace[-1]["sporadic"] == "SP1"
+
+
+def test_generation_sporadic_is_seeded_and_can_be_disabled():
+    names = generate_house_names(Lineage.REFORMIST, seed=4718224, count=8)
+    assert any(n.sporadic for n in names)
+    again = generate_house_names(Lineage.REFORMIST, seed=4718224, count=8)
+    assert [n.formal for n in names] == [n.formal for n in again]
+    plain = generate_house_names(Lineage.REFORMIST, seed=4718224, count=8, sporadic=False)
+    assert not any(n.sporadic for n in plain)
+    assert all(n.formal.startswith("Rynn'") for n in names)  # dissimilation never touches the first r
+
+
+def test_weighted_generation_ranks_by_sound():
+    names = generate_house_names(Lineage.NOBLE, seed=4718224, count=6, weighted=True)
+    scores = [n.euphony for n in names]
+    assert scores == sorted(scores, reverse=True)
+    assert len(names) == 6 and all(n.legal for n in names)
+
+
+def test_sound_model_prefers_velari_shapes():
+    model = ENGINE.sound_model
+    assert model.score("Tal'Varen") > model.score("Xqzzt")
+    assert model.score("Velkonn") > model.score("Grubstok")

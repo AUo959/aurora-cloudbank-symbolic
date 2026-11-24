@@ -205,6 +205,12 @@ def _reduce_triple(ctx: _MatchContext, value: bool) -> bool:
     return value == (doubled and after_other)
 
 
+def _preceded_anywhere_by(ctx: _MatchContext, spec: Mapping[str, Any]) -> bool:
+    """Some earlier segment in the word matches ``spec`` (for dissimilation)."""
+    earlier = ctx.word.tokens[: ctx.index]
+    return any(isinstance(t, Seg) and Inventory.matches(t.phoneme, spec) for t in earlier)
+
+
 CONDITIONS: Mapping[str, Callable[[_MatchContext, Any], bool]] = {
     "element_initial": _element_initial,
     "element_final": _element_final,
@@ -215,6 +221,7 @@ CONDITIONS: Mapping[str, Callable[[_MatchContext, Any], bool]] = {
     "min_syllables": _min_syllables,
     "proclitic": _proclitic,
     "reduce_triple": _reduce_triple,
+    "preceded_anywhere_by": _preceded_anywhere_by,
 }
 
 

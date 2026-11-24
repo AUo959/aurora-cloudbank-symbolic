@@ -60,11 +60,13 @@ ajv validate \
 
 ## SHADOWFAX notice
 
-The SHADOWFAX standalone bundle has not been located. `shadowfax.fixture.json` has:
+The SHADOWFAX fixture demonstrates the missing-bundle state. `shadowfax.fixture.json` has:
 - `source_classification: missing_dependency`
 - `promotion_decision: blocked_pending_bundle_location`
 
-This state is schema-enforced (see `custody_record.schema.json` `if/then` branch). Any change to SHADOWFAX's `promotion_decision` requires the bundle to be located, hash-verified, and operator-approved first.
+The schema enforces this pairing through its `if/then` branch. The
+[live manifest](../recovered_protocol_manifest.json) records the current
+custody state and remaining gates.
 
 ## Schema references
 

@@ -99,7 +99,7 @@ class FieldCurvature:
         )
 
         # Determine resistance level
-        resistance_level = self._calculate_resistance_level(
+        resistance_level = self.classify_resistance(
             composite_score, critical_violations
         )
 
@@ -124,8 +124,8 @@ class FieldCurvature:
 
         return result
 
-    def _calculate_resistance_level(
-        self,
+    @staticmethod
+    def classify_resistance(
         composite_score: float,
         critical_violations: list
     ) -> str:

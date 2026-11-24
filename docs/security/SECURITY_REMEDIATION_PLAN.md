@@ -131,3 +131,24 @@
 ---
 
 *This plan follows Aurora CloudBank's Picard_Delta_3 ethics protocol and maintains symbolic anchor continuity throughout the security remediation process.*
+
+## Evidence reconciliation, 2026-11-23
+
+The historical plan has evidence of partial execution. The victory report
+records an estimated alert total and phase summaries. The fixes report
+describes four specific controls and leaves deployment and post-deployment
+verification open. Full plan completion requires per-item evidence or an
+explicit disposition for each historical alert. The GitHub integration
+could not read code-scanning alert dispositions during this review.
+[Fixes report](SECURITY_FIXES.md) · [Victory report](SECURITY_TRANSFORMATION_VICTORY.md)
+
+| Plan area | Evidence in the repository | Verification still needed |
+| --- | --- | --- |
+| Logging, permission hardening, input sanitization | The L2 server uses validated session identifiers on several routes. The security helpers contain input sanitization, and the fixes report documents CORS, CSRF, and WebSocket controls. [L2 server](../../src/servers/l2_integration_server.py) · [Security helpers](../../.security/secure_helpers.py) · [API](../../api/aurora_api.py) | Dispositions for the historical logging, scheduler permission, and multi-character sanitization alerts. Coverage of runtime call sites and deployed configuration. |
+| Command and expression handling | The security helpers implement AST-based expression validation. The fixes report documents the expression change and infrastructure controls. [Security helpers](../../.security/secure_helpers.py) · [Fixes report](SECURITY_FIXES.md) | Historical alert closure and verified coverage of command and expression entry points. |
+| Scanning, hooks, and dependency monitoring | Versioned CodeQL, dependency validation, and pre-commit configuration provide repository controls. [CodeQL](../../.github/workflows/codeql-unified.yml) · [Dependency validation](../../.github/workflows/dependency-validation.yml) · [Pre-commit](../../.pre-commit-config.yaml) | A dated code-scanning export with historical alert dispositions and evidence for the dependency and endpoint coverage claims. |
+| Penetration testing | Gate-001A has a recorded rehearsal result. Gate-001B awaits selection, signatures, and evidence. [Engagement history](pentest_history.md) | An independently attributable external report against the exact engagement baseline. |
+
+The verified status of the historical plan is partial. Keep the evidence
+gaps visible in [#1233](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1233)
+until the relevant records are available.

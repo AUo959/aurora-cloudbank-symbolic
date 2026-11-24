@@ -1,7 +1,8 @@
 # Geometric Ethics Curvature v2 — Evaluation
 
 **Issue:** #994  
-**Status:** Evaluation only — no runtime changes proposed at this stage  
+**Status:** Advisory evaluation available by opt-in. Scalar v1 governs formation.
+
 **Date:** 2026-06-15
 
 ---
@@ -100,8 +101,8 @@ Global penalty: `Σ(interaction_penalty_pair)` over all three pairs.
 
 v2 composite: `v1_composite - global_penalty`
 
-**Interaction weight:** 1.0 (unit scaling — the product of two 0.20 deficits
-produces a maximum per-pair penalty of 0.04, scaling naturally with severity).
+**Interaction weight:** 1.0. Two 0.20 deficits produce a per-pair penalty
+of 0.04. Larger paired deficits increase the penalty.
 
 ### Updated resistance thresholds for v2
 
@@ -119,9 +120,9 @@ seven canonical formation types from the acceptance criteria.
 
 ```
 picard=0.95, thermax=0.95, layer=0.98, welfare=0.90, transparency=0.92
-v1 composite = 0.9475  → LOW
+v1 composite = 0.951  → LOW
 interaction penalty ≈ 0.0 (all dims well above τ)
-v2 composite = 0.9475  → LOW
+v2 composite = 0.951  → LOW
 ```
 
 **Verdict:** v1 and v2 agree. No meaningful difference for healthy formations.
@@ -175,9 +176,9 @@ of v2.
 
 ```
 picard=0.90, thermax=0.90, layer=0.95, welfare=0.62, transparency=0.62
-v1 composite = 0.25*0.90 + 0.25*0.90 + 0.30*0.95 + 0.10*0.62 + 0.10*0.62 = 0.853  → LOW
+v1 composite = 0.25*0.90 + 0.25*0.90 + 0.30*0.95 + 0.10*0.62 + 0.10*0.62 = 0.859  → LOW
 Interaction: transparency+welfare: (0.18)(0.18)=0.0324
-v2 composite = 0.853 - 0.0324 = 0.821  → MODERATE
+v2 composite = 0.859 - 0.0324 = 0.8266  → MODERATE
 ```
 
 **Verdict:** v1 says LOW (easy formation); v2 downgrades to MODERATE because
@@ -209,9 +210,9 @@ dimension triggers a hard-zero veto.
 
 ```
 picard=0.90, thermax=0.65, layer=0.65, welfare=0.90, transparency=0.90
-v1 composite = 0.25*0.90 + 0.25*0.65 + 0.30*0.65 + 0.10*0.90 + 0.10*0.90 = 0.758  → MODERATE
+v1 composite = 0.25*0.90 + 0.25*0.65 + 0.30*0.65 + 0.10*0.90 + 0.10*0.90 = 0.7625  → MODERATE
 Interaction: thermax+layer: (0.15)(0.15)=0.0225
-v2 composite = 0.758 - 0.0225 = 0.735  → MODERATE (pushed toward boundary)
+v2 composite = 0.7625 - 0.0225 = 0.740  → MODERATE (pushed toward boundary)
 ```
 
 **Verdict:** v2 gives an earlier warning that memory + layer are co-degraded,
@@ -256,12 +257,25 @@ v2 should not replace v1 in the runtime at this stage. Reasons:
 - Create a follow-up issue with migration path and backward-compatibility notes
   before any runtime promotion.
 
+### Opt-in evaluation
+
+Use `GeometricEthics(evaluation=True)` to add `v2_composite`,
+`v2_resistance`, `interaction_alerts`, and `v2_risk_escalation` to
+`validate_synapse()`. The hard veto and optional unanimous check still
+govern formation. Escalations appear in the formation audit trail. In
+evaluation mode, `get_formation_statistics()` includes
+`interaction_alert_counts` by dimension pair and `v2_risk_escalations`.
+
+The evaluation tests exercise these fields through the production engine.
+Any proposal to make v2 authoritative requires a separate migration and
+compatibility review.
+
 ---
 
 ## 5. Evidence Ledger
 
-- **Observed:** `modules/ethics_field/field_curvature.py` implements scalar
-  weighted average with hard-zero veto. No interaction-aware computation exists.
+- **Observed in the June evaluation baseline:** The scalar field calculated a
+  weighted average with a hard-zero veto.
 - **Observed:** The five dimensions have natural functional interactions
   (autonomy/consent, memory/layer, transparency/accountability) that the scalar
   model cannot distinguish from independent variation.
@@ -270,8 +284,8 @@ v2 should not replace v1 in the runtime at this stage. Reasons:
 - **Verified:** Cases 3.4 and 3.5 demonstrate v2 escalates resistance level
   from MODERATE/LOW to HIGH/MODERATE in scenarios where scalar v1 would allow
   formation without additional annotation.
-- **Decided:** v2 as supplemental warning layer. No runtime changes proposed
-  here. Follow-up issue required for promotion.
+- **Decided:** v2 as a supplemental warning layer. An authoritative migration
+  requires a follow-up issue.
 
 ---
 

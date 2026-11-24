@@ -33,7 +33,7 @@
       "id": "TC-003",
       "description": "SHADOWFAX custody_record: source_classification=missing_dependency enforces promotion_decision=blocked_pending_bundle_location",
       "schema": "./custody_record.schema.json",
-      "instance_path": "../recovered_protocol_manifest.json#/protocols/4/custody_record",
+      "instance_path": "../fixtures/shadowfax.fixture.json#/custody_record",
       "expected": "valid",
       "rationale": "The if/then branch in custody_record.schema.json must bind correctly for SHADOWFAX."
     },

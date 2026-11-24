@@ -1,0 +1,56 @@
+{
+  "_note": "Relative chronology of Velari sound laws. Dates are relative ticks on a draft internal timeline, not canon calendar years. A compound formed at date T evolves as separate words under every law dated before T, then as one word under every law dated T or later.",
+  "eras": {
+    "elder": {"formed_at": 50, "description": "Old Velari coinages: the great houses and the people-names."},
+    "middle": {"formed_at": 450, "description": "Coined after junction syncope but before apocope; the linking vowel survives (Vela-, Varna-)."},
+    "scribal": {"formed_at": 900, "description": "Coined after the Thessari scribal reform; elements were already worn-down words, and scribes mark the junction with an apostrophe."}
+  },
+  "orthographic_events": {
+    "scribal_reform": {"date": 800, "description": "Thessari scribes begin marking compound junctions. Junctions formed on or after this date are written with an apostrophe."}
+  },
+  "laws": [
+    {"id": "VL1", "name": "w-fortition", "date": 100, "era": "Old Velari",
+     "description": "*w hardens to v at the start of an element.",
+     "target": {"phoneme": "w"}, "change": {"features": {"consonantal": true, "sonorant": false}},
+     "when": {"element_initial": true}},
+
+    {"id": "VL2", "name": "t-aspiration", "date": 200, "era": "Old Velari",
+     "description": "*t becomes th at the start of an element before e.",
+     "target": {"phoneme": "t"}, "change": {"features": {"continuant": true}},
+     "when": {"element_initial": true, "before": [{"phoneme": "e"}]}},
+
+    {"id": "VL3", "name": "u-fronting", "date": 300, "era": "Old Velari",
+     "description": "*u fronts to y under primary stress.",
+     "target": {"phoneme": "u"}, "change": {"features": {"back": false}},
+     "when": {"stress": "primary"}},
+
+    {"id": "VL4", "name": "junction syncope", "date": 400, "era": "Middle Velari",
+     "description": "Unstressed stem-final *a is lost before an internal boundary.",
+     "target": {"phoneme": "a"}, "change": {"delete": true},
+     "when": {"before": ["+"], "stress": "unstressed"}},
+
+    {"id": "VL5", "name": "apocope", "date": 500, "era": "Middle Velari",
+     "description": "Unstressed word-final *a is lost after a consonant in words of two or more syllables.",
+     "target": {"phoneme": "a"}, "change": {"delete": true},
+     "when": {"word_final": true, "after": [{"consonantal": true}], "stress": "unstressed", "min_syllables": 2}},
+
+    {"id": "VL6", "name": "high-vowel gemination", "date": 550, "era": "Middle Velari",
+     "description": "An element-final n after a high vowel doubles, compensating for the lost vowel.",
+     "target": {"phoneme": "n"}, "change": {"geminate": true},
+     "when": {"element_final": true, "after": [{"syllabic": true, "high": true}]}},
+
+    {"id": "VL7", "name": "u-lowering", "date": 600, "era": "Court Velari",
+     "description": "Remaining *u lowers to o.",
+     "target": {"phoneme": "u"}, "change": {"features": {"high": false}}},
+
+    {"id": "VL8", "name": "i-rounding", "date": 700, "era": "Court Velari",
+     "description": "i rounds to y before a geminate nn.",
+     "target": {"phoneme": "i"}, "change": {"features": {"round": true}},
+     "when": {"before": [{"phoneme": "n"}, {"phoneme": "n"}]}},
+
+    {"id": "VL9", "name": "proclitic elision", "date": 950, "era": "Late Velari",
+     "description": "The vowel of a proclitic is lost before the word it leans on.",
+     "target": {"syllabic": true}, "change": {"delete": true},
+     "when": {"proclitic": true, "before": ["+"]}}
+  ]
+}

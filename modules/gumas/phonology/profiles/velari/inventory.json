@@ -1,0 +1,31 @@
+{
+  "_note": "Velari phoneme inventory as feature bundles. Prototype; not canon.",
+  "phonemes": {
+    "a":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "low": true, "back": true}},
+    "e":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true}},
+    "i":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "high": true}},
+    "o":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "back": true, "round": true}},
+    "u":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "high": true, "back": true, "round": true}},
+    "y":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "high": true, "round": true}},
+
+    "w":  {"features": {"sonorant": true, "continuant": true, "voice": true, "labial": true, "dorsal": true, "high": true, "back": true, "round": true}},
+    "v":  {"features": {"consonantal": true, "continuant": true, "voice": true, "labial": true, "dorsal": true, "high": true, "back": true, "round": true}},
+    "m":  {"features": {"consonantal": true, "sonorant": true, "nasal": true, "voice": true, "labial": true}},
+    "t":  {"features": {"consonantal": true, "coronal": true}},
+    "th": {"features": {"consonantal": true, "continuant": true, "coronal": true}},
+    "d":  {"features": {"consonantal": true, "voice": true, "coronal": true}},
+    "s":  {"features": {"consonantal": true, "continuant": true, "strident": true, "coronal": true}},
+    "n":  {"features": {"consonantal": true, "sonorant": true, "nasal": true, "voice": true, "coronal": true}},
+    "l":  {"features": {"consonantal": true, "sonorant": true, "continuant": true, "voice": true, "coronal": true, "lateral": true}},
+    "r":  {"features": {"consonantal": true, "sonorant": true, "continuant": true, "voice": true, "coronal": true}},
+    "k":  {"features": {"consonantal": true, "dorsal": true}},
+    "h":  {"features": {"continuant": true, "low": true}}
+  },
+  "phonotactics": {
+    "_onset_note": "t k is attested word-initially by canon T'karas (proclitic *ta- elided before karas).",
+    "onset_clusters": [["d", "r"], ["t", "r"], ["k", "r"], ["k", "l"], ["th", "r"], ["s", "k"], ["s", "t"], ["t", "k"]],
+    "coda_clusters": [["n", "n"], ["r", "n"], ["r", "r"], ["s", "s"], ["l", "l"]],
+    "never_coda": ["h", "w"],
+    "never_final": ["d", "v"]
+  }
+}

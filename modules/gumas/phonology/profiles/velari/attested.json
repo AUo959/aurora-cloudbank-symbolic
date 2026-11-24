@@ -1,0 +1,37 @@
+{
+  "_note": "Velari forms the rules must reproduce. 'names' is the canon corpus: each complete form is cited to a CANON record in the canon repository, and a chronology change that breaks one is a change to canon, not a tuning step. 'fixtures' are regression targets whose complete form is NOT attested in canon; they guard engine behaviour but are not canon evidence.",
+  "canon_repository": "AUo959/CanonRec",
+  "verified_at_commit": "72f504b",
+  "evidence_kinds": {
+    "entity": "The form is the name or an alias of a CANON entity record.",
+    "canon_text": "The complete form appears verbatim in the text of a CANON record (e.g. a convention's worked example), not as an entity name."
+  },
+  "names": [
+    {"formal": "Velari", "roots": ["wela", "ari"], "era": "elder", "evidence": "entity",
+     "source": {"path": "canon/L2/entities/species/species_velari.json", "field": "name"}},
+    {"formal": "Velkonn", "roots": ["wela", "kuna"], "era": "elder", "evidence": "entity",
+     "source": {"path": "canon/L2/entities/organizations/org_house_velkonn.json", "field": "aliases"}},
+    {"formal": "Velkaris", "roots": ["wela", "karisa"], "era": "elder", "evidence": "entity",
+     "source": {"path": "canon/L2/entities/locations/loc_velkaris_v.json", "field": "name (Velkaris V)"}},
+    {"formal": "Tyren", "roots": ["tu", "rena"], "era": "elder", "evidence": "entity",
+     "source": {"path": "canon/L2/entities/characters/char_jaxx_tyren.json", "field": "name (Jaxx Tyren)"}},
+    {"formal": "Tyr", "roots": ["tura"], "era": "elder", "evidence": "entity",
+     "source": {"path": "canon/L2/entities/characters/char_jasrek_tyr.json", "field": "name (Jasrek Tyr)"}},
+    {"formal": "Rynn", "roots": ["rina"], "era": "elder", "evidence": "entity",
+     "source": {"path": "canon/L2/entities/characters/char_thalen_rynn.json", "field": "name (Thalen Rynn)"}},
+    {"formal": "Tal'Varen", "informal": "Talvaren", "roots": ["tala", "warena"], "era": "scribal", "evidence": "entity",
+     "source": {"path": "canon/L2/entities/characters/char_virex_talvaren.json", "field": "aliases (Virex Tal'Varen, Virex Talvaren)"}},
+    {"formal": "T'karas", "informal": "Tkaras", "roots": ["ta", "karasa"], "era": "scribal", "evidence": "entity",
+     "source": {"path": "canon/L2/entities/locations/loc_tkaras_prime.json", "field": "aliases (T’karas, Tkaras Prime)"}},
+    {"formal": "Tymar", "roots": ["tu", "mara"], "era": "elder", "evidence": "canon_text",
+     "source": {"path": "canon/L2/entities/polities/polity_velar_imperium.json", "field": "naming_conventions.lineage_prefixes[\"Ty-\"] example \"(Tyren, Tymar)\""}},
+    {"formal": "Vel'Rynn", "roots": ["wela", "rina"], "era": "scribal", "evidence": "canon_text",
+     "source": {"path": "canon/L2/entities/polities/polity_velar_imperium.json", "field": "naming_conventions.lineage_prefixes[\"Vel-\"] example \"(Velkonn, Vel’Rynn)\""}}
+  ],
+  "fixtures": [
+    {"formal": "Varn", "roots": ["warna"], "era": "elder",
+     "reason": "Canon attests only the prefix Varn- (naming_conventions.lineage_prefixes); the standalone form is the engine's reconstruction."},
+    {"formal": "Thessari", "roots": ["tessa", "ari"], "era": "elder",
+     "reason": "Canon has the field key social_structure.lorekeepers_thessari but no verbatim form 'Thessari'; this is a draft reading of that key."}
+  ]
+}

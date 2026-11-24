@@ -12,6 +12,7 @@ import hashlib
 import json
 from typing import Any, Callable
 
+from .federated_model import MandateRequest
 from .model import Corridor, PhysicsProfile, ScheduledEvent, Shipment, Universe
 
 

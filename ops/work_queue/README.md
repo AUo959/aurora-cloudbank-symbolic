@@ -10,10 +10,10 @@ Tracked in: [#1147](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1
 
 | File | Role | Edit? |
 |---|---|---|
-| `queue.json` | **Canonical source of truth** — machine-readable task list | ✅ Yes (via `aurora(queue):` commit) |
+| `queue.json` | **Canonical task source** — machine-readable task list | ✅ Yes (via `aurora(queue):` commit) |
 | `queue_schema.json` | JSON schema for `queue.json` | ✅ Yes (schema owner only) |
 | `triage_rules.json` | Scoring weights and escalation triggers | ✅ Yes (Aurora / queue steward) |
-| `gate_registry.json` | Named gate definitions | ✅ Yes (Aurora / queue steward) |
+| `gate_registry.json` | **Canonical human-gate source** — named decisions and integrity holds | ✅ Yes (Aurora / queue steward) |
 | `QUEUE_GUIDE.md` | Onboarding — how Aurora, agents, and humans use the queue | ✅ Yes |
 | `CROSS_PLATFORM_COORDINATION.md` | Queue → broker/claim → GitHub → handoff contract | ✅ Yes |
 | `BRIDGE_FIELDS.md` | Optional queue-to-control-plane metadata reference | ✅ Yes |
@@ -29,7 +29,10 @@ Tracked in: [#1147](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1
 
 ## 🚫 Generated Files — Do Not Edit
 
-`QUEUE.md`, `NEXT_UP.md`, `OPEN_GATES.md`, and `COORDINATION_METRICS.md` are **rendered projections** of `queue.json`.
+`QUEUE.md`, `NEXT_UP.md`, and `COORDINATION_METRICS.md` are rendered
+projections of `queue.json`. `OPEN_GATES.md` is a joint projection:
+human-gate authority comes from `gate_registry.json`, while task status and
+dependency context come from `queue.json`.
 They are generated automatically and must not be edited by hand.
 
 **If you edit them directly:**
@@ -37,7 +40,8 @@ They are generated automatically and must not be edited by hand.
 - CI will flag the PR as failing the queue drift check.
 - The queue loses its single-source-of-truth guarantee.
 
-**To change what appears in these files, edit `queue.json` instead, then run:**
+**To change what appears in these files, edit the relevant canonical source
+(`queue.json` for tasks or `gate_registry.json` for human gates), then run:**
 
 ```bash
 python ops/work_queue/sync_queue.py
@@ -56,8 +60,9 @@ python ops/work_queue/collect_coordination_metrics.py --check
 
 ## Queue Authority Model
 
-- **Canonical state:** `queue.json` — the only file agents and scripts read for task truth.
-- **Computed views:** `QUEUE.md`, `NEXT_UP.md`, `OPEN_GATES.md` — rendered by `sync_queue.py`, verified by CI.
+- **Canonical task state:** `queue.json` — task status, rank, dependencies, and completion truth.
+- **Canonical human-gate state:** `gate_registry.json` — gate state, decision owner, and integrity holds.
+- **Computed views:** `QUEUE.md` and `NEXT_UP.md` project `queue.json`; `OPEN_GATES.md` projects both canonical sources. All are rendered by `sync_queue.py` and verified by CI.
 - **Aurora authority:** Items with `aurora_authority: true` may only have `rank` or `aurora_note` changed via a commit prefixed `aurora(queue):`.
 - **Agent rules:** Agents may claim items with `status: open` and `depends_on: []`. Agents may not re-rank items, close gates, or edit generated views.
 - **Human gates:** Items with `status: needs-decision` require a named human or governance decision before any work begins.
@@ -70,7 +75,10 @@ python ops/work_queue/collect_coordination_metrics.py --check
 
 It will **block merge** if:
 - `queue.json` is not valid JSON.
-- Any generated view (`QUEUE.md`, `NEXT_UP.md`, `OPEN_GATES.md`) is out of sync with `queue.json`.
+- Any generated view is out of sync with its canonical source.
+- A queue gate has no registry record, gate/queue lifecycle states contradict,
+  or a missing registry queue reference lacks an explicit
+  `reconciliation_required` integrity hold.
 
 To fix a failing check:
 ```bash

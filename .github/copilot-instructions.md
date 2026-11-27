@@ -636,6 +636,6 @@ pytest -m "not slow"                    # Fast tests only (CI pattern)
 ```
 
 ### Workflow Files
-- `.github/workflows/code-quality.yml` - Quality analysis
+- `.github/workflows/aurora-ci-minimal.yml` - Quality analysis
 - `.github/workflows/dependency-validation.yml` - Dependency checks  
 - `.github/workflows/aurora-ci-minimal.yml` - Core CI (10 min)

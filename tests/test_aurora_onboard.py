@@ -67,7 +67,7 @@ def healthy_repo(tmp_path: Path) -> Path:
     )
     _json(
         tmp_path,
-        "QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json",
+        "QGIA_Integration/QUANTUM_FORGE_Axiom_Manifest.json",
         {"ethics_binding": "GUMAS_Thermax"},
     )
     _write(

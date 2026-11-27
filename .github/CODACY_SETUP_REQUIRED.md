@@ -1,38 +1,14 @@
-## 🚨 Codacy Repository Setup Required
+# Codacy integration status
 
-The workflow failed because the repository `aurora-cloudbank-symbolic` is not yet configured in Codacy.
+The disabled Actions workflows `codacy.yml` and `codacy-analysis.yml` were retired
+on November 9, 2026. They executed no analysis. Do not dispatch these filenames.
 
-### Quick Setup Steps
+Codacy Static Code Analysis is an external GitHub App integration. Diagnose its
+checks in the Codacy dashboard and the app installation settings. Its repository
+configuration remains in place. No app settings or secrets were changed by the
+CI consolidation. Canonical Python validation is the Actions **CI Check** job;
+CodeQL remains a separate security workflow.
 
-1. **Add Repository to Codacy:**
-   - Go to [Codacy Dashboard](https://app.codacy.com)
-   - Click "Add repository" 
-   - Select GitHub and authorize access
-   - Choose `AUo959/aurora-cloudbank-symbolic`
-   - Complete the setup wizard
-
-2. **Verify Project Token:**
-   - In Codacy: Project Settings → Integrations → Project API
-   - Copy the Project Token (starts with `proj_...`)
-   - In GitHub: Settings → Secrets and variables → Actions
-   - Confirm `CODACY_PROJECT_TOKEN` matches the copied token
-
-3. **Re-run Workflow:**
-   ```bash
-   gh workflow run codacy-analysis.yml
-   ```
-
-### Current Status
-- ✅ Quality Gate Check: PASSING (Flake8 clean)
-- ✅ Coverage Report: PASSING (pytest executed successfully) 
-- ❌ Security Scan: BLOCKED (repository setup required)
-
-### Alternative: Skip Codacy Temporarily
-To proceed without Codacy, remove the secret `CODACY_PROJECT_TOKEN` and the workflow will skip security analysis while maintaining quality gate enforcement.
-
-**Error Details:**
-```
-ERROR c.c.a.c.clients.CodacyClient:187 - Error: getting Project Configuration : not found
-```
-
-This indicates the project token exists but the repository isn't registered in Codacy's system.
+If the external app reports “Project Configuration not found”, check that the
+repository is registered in the Codacy dashboard and that its integration points
+to this repository. Retiring the disabled workflows does not repair app setup.

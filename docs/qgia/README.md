@@ -73,7 +73,7 @@ independent semantics.
 
 The human axiom registry uses the stable identifiers `AN-001` through
 `AN-023`. The detailed machine registry remains
-`QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json`. Its explicit legacy alias
+`QGIA_Integration/QUANTUM_FORGE_Axiom_Manifest.json`. Its explicit legacy alias
 map keeps existing `A01`–`E02` and `S01` bundle references resolvable; `A02`
 remains a corollary of `AN-001`, not a standalone twenty-fourth node.
 

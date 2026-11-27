@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "receipt_id": "l1-fleet-authority-projection-2026-08-08",
+  "decision_date": "2026-08-08",
+  "status": "resolved_cloudbank_projection_canon_authority_unverified",
+  "canonrec_authority": {
+    "status": "not_verified_in_current_canonrec_projection",
+    "policy": "This receipt does not promote CloudBank fleet material into CanonRec. Any later CanonRec conflict overrides this runtime projection for canon-sensitive claims."
+  },
+  "cloudbank_projection": {
+    "role": "runtime_projection_non_authoritative",
+    "identity_surface": "src/entities/fleet",
+    "design_surface": "simulation/fleet",
+    "current_state_source": "deterministic_l1_run_state",
+    "current_state_epoch": "2026_run",
+    "legacy_aggregate_policy": "provenance_only",
+    "historical_mission_policy": "provenance_only_never_current_run_truth",
+    "legacy_api_bridge_policy": "consumer_only_synthetic_defaults_not_l1_state_authority",
+    "ord_policy_boundary": "mcp_validation_policy_requires_explicit_physical_mission_adapter"
+  },
+  "source_precedence": [
+    {
+      "rank": 1,
+      "surface": "src/entities/fleet",
+      "role": "active_runtime_identity_and_component_registry",
+      "causal_use": "identity_class_and_autonomy_projection_only"
+    },
+    {
+      "rank": 2,
+      "surface": "simulation/fleet",
+      "role": "detailed_design_and_historical_mission_provenance",
+      "causal_use": "durable_identity_class_and_autonomy_fields_only; dated mission status coordinates and deployment counters are excluded"
+    },
+    {
+      "rank": 3,
+      "surface": ".aurora/canonical/fleet.json",
+      "role": "legacy_dark_matter_aggregate",
+      "causal_use": "none; incompatible names statuses coordinates counts and crew claims remain provenance only"
+    },
+    {
+      "rank": 4,
+      "surface": "modules/ord",
+      "role": "mcp_validation_policy_library",
+      "causal_use": "none until an explicit physical mission proposal is separately authorized and adapted"
+    },
+    {
+      "rank": 5,
+      "surface": "src/integrations/fleet_bridge.py",
+      "role": "legacy_python_to_javascript_api_consumer_with_synthetic_defaults",
+      "causal_use": "none for L1 genesis status mission location dimensions or docking"
+    }
+  ],
+  "sources": [
+    {
+      "path": ".aurora/canonical/fleet.json",
+      "sha256": "87aa72256ae4d73b4c98ef7ff83eed59569593c808cdddc132848212545300da",
+      "role": "legacy_aggregate_provenance_only"
+    },
+    {
+      "path": "src/entities/fleet_entities.py",
+      "sha256": "fda41f887607619c3ae1370626eccc6b7af9b0ef34b107fc3627a04d8af5198c",
+      "role": "compatibility_shim_to_modular_identity_surface"
+    },
+    {
+      "path": "src/entities/fleet/registry_vessels.py",
+      "sha256": "9dab592dcf06d3f5718cbbefa8262e3187cec9d7ef4668c6398b7e153d366c48",
+      "role": "active_vessel_identity_registry"
+    },
+    {
+      "path": "src/entities/fleet/registry_probes.py",
+      "sha256": "4562784bbafde13313b54727c123306717e550fe1d95f7d33d7cb7d1f800b8ff",
+      "role": "active_probe_identity_registry"
+    },
+    {
+      "path": "src/entities/fleet/registry_drones.py",
+      "sha256": "c0b7e03ce3ddb83db477f9f8fbe8b165c1c012955e6857bc84467b07220af42b",
+      "role": "active_drone_identity_registry"
+    },
+    {
+      "path": "src/integrations/fleet_bridge.py",
+      "sha256": "d5cf6b2543aae3f32e93c6483d89f1173972e61e3403d444123b604b0184ac70",
+      "role": "legacy_api_consumer_synthetic_defaults_not_l1_state_authority"
+    },
+    {
+      "path": "simulation/fleet/ORF-01_CONSTANCY.json",
+      "sha256": "c8976d15b2fe162338ffe0c4fcdd83cee7bc99bf438f1658e2bc56fece3b09af",
+      "role": "design_provenance_with_historical_2025_mission_snapshot"
+    },
+    {
+      "path": "simulation/fleet/ORS-01_HELIOS.json",
+      "sha256": "3ab72b3178badaf145a3108290296a2d9ff57b895f2708f213db6033641caa28",
+      "role": "design_provenance_with_historical_2025_mission_snapshot"
+    },
+    {
+      "path": "simulation/fleet/ORS-02_LIORA.json",
+      "sha256": "f9c93d331131346b91a7085de2e77980ed4dc202e82e7575b671c4ee76828af2",
+      "role": "design_provenance_with_historical_2025_mission_snapshot"
+    },
+    {
+      "path": "simulation/fleet/ORS-03_ARCHIMEDES.json",
+      "sha256": "5d593e34389b3f0d2b2447c79cbc5f74036a58cae5c2d735d187753a7fbeceb8",
+      "role": "design_provenance_with_historical_2025_mission_snapshot"
+    },
+    {
+      "path": "simulation/fleet/ORS-04_PIONEER.json",
+      "sha256": "f9df13fc6b5b9fa5b570e3f97d6fea1e7eaef4f3496f22ce093302f364ffe62a",
+      "role": "design_provenance_with_historical_2025_mission_snapshot"
+    },
+    {
+      "path": "simulation/fleet/ORS-05_LACEWING.json",
+      "sha256": "ba72dc7cc72eb887a3abb7008b333b40864c853b12954ffefc5d4aa3e9a2b4b5",
+      "role": "design_provenance_with_historical_2025_mission_snapshot"
+    },
+    {
+      "path": "simulation/fleet/ORP-1_ALPHA_SURVEYOR.json",
+      "sha256": "5a5fe56de611a17ea20060ba5e673234789d0425798b3002158331de0cf191ae",
+      "role": "design_provenance_with_historical_2025_mission_snapshot"
+    },
+    {
+      "path": "simulation/fleet/ORP-2_BETA_ARRAY.json",
+      "sha256": "7a0d66ef09714afa33370a9d4bbc5ee86a57846a1f5fbebca49fc6ea0fb8bb05",
+      "role": "design_provenance_with_historical_2025_mission_snapshot"
+    },
+    {
+      "path": "simulation/fleet/ORD_SERIES.json",
+      "sha256": "d3a65424c8a7d2231ba5de60fafbadb941b8e0befb68acaa5926bee79de3d59c",
+      "role": "design_provenance_with_historical_2025_deployment_snapshot"
+    },
+    {
+      "path": "modules/ord/README.md",
+      "sha256": "3918fd3d564543d66bc84bdd1ca96430747bec31aaea1dd52ddf002f01998fad",
+      "role": "policy_domain_boundary"
+    },
+    {
+      "path": "modules/ord/ord_policy_engine.py",
+      "sha256": "ac048ef9f2738875fc38450f47cee3bc4572ffb2f1582e40481b4c9aadb6db2a",
+      "role": "mcp_validation_dispatch_policy_not_physical_flight"
+    }
+  ],
+  "entities": [
+    {
+      "fleet_id": "ORF-01",
+      "display_name": "Constancy",
+      "asset_class": "flagship",
+      "autonomy_class": "supervised_autonomous",
+      "design_source_path": "simulation/fleet/ORF-01_CONSTANCY.json",
+      "implementation_source_path": "src/entities/fleet/registry_vessels.py",
+      "routine_mission_class": "fleet_command_patrol",
+      "operating_location_class": "station_proximity",
+      "standby_location_class": "docked_at_orion"
+    },
+    {
+      "fleet_id": "ORS-01",
+      "display_name": "Helios",
+      "asset_class": "command_shuttle",
+      "autonomy_class": "supervised_autonomous",
+      "design_source_path": "simulation/fleet/ORS-01_HELIOS.json",
+      "implementation_source_path": "src/entities/fleet/registry_vessels.py",
+      "routine_mission_class": "command_liaison",
+      "operating_location_class": "station_proximity",
+      "standby_location_class": "docked_at_orion"
+    },
+    {
+      "fleet_id": "ORS-02",
+      "display_name": "Liora",
+      "asset_class": "research_survey_shuttle",
+      "autonomy_class": "supervised_autonomous",
+      "design_source_path": "simulation/fleet/ORS-02_LIORA.json",
+      "implementation_source_path": "src/entities/fleet/registry_vessels.py",
+      "routine_mission_class": "research_survey",
+      "operating_location_class": "external_operating_area",
+      "standby_location_class": "docked_at_orion"
+    },
+    {
+      "fleet_id": "ORS-03",
+      "display_name": "Archimedes",
+      "asset_class": "construction_engineering_shuttle",
+      "autonomy_class": "supervised_autonomous",
+      "design_source_path": "simulation/fleet/ORS-03_ARCHIMEDES.json",
+      "implementation_source_path": "src/entities/fleet/registry_vessels.py",
+      "routine_mission_class": "construction_maintenance",
+      "operating_location_class": "station_proximity",
+      "standby_location_class": "docked_at_orion"
+    },
+    {
+      "fleet_id": "ORS-04",
+      "display_name": "Pioneer",
+      "asset_class": "utility_logistics_shuttle",
+      "autonomy_class": "supervised_autonomous",
+      "design_source_path": "simulation/fleet/ORS-04_PIONEER.json",
+      "implementation_source_path": "src/entities/fleet/registry_vessels.py",
+      "routine_mission_class": "logistics_transfer",
+      "operating_location_class": "station_proximity",
+      "standby_location_class": "docked_at_orion"
+    },
+    {
+      "fleet_id": "ORS-05",
+      "display_name": "Lacewing",
+      "asset_class": "exploration_diplomatic_shuttle",
+      "autonomy_class": "supervised_autonomous",
+      "design_source_path": "simulation/fleet/ORS-05_LACEWING.json",
+      "implementation_source_path": "src/entities/fleet/registry_vessels.py",
+      "routine_mission_class": "exploration_liaison",
+      "operating_location_class": "external_operating_area",
+      "standby_location_class": "docked_at_orion"
+    },
+    {
+      "fleet_id": "ORP-1",
+      "display_name": "Alpha Surveyor",
+      "asset_class": "deep_space_survey_probe",
+      "autonomy_class": "fully_autonomous",
+      "design_source_path": "simulation/fleet/ORP-1_ALPHA_SURVEYOR.json",
+      "implementation_source_path": "src/entities/fleet/registry_probes.py",
+      "routine_mission_class": "autonomous_survey",
+      "operating_location_class": "external_operating_area",
+      "standby_location_class": "station_proximity"
+    },
+    {
+      "fleet_id": "ORP-2",
+      "display_name": "Beta Array",
+      "asset_class": "quantum_field_probe",
+      "autonomy_class": "fully_autonomous",
+      "design_source_path": "simulation/fleet/ORP-2_BETA_ARRAY.json",
+      "implementation_source_path": "src/entities/fleet/registry_probes.py",
+      "routine_mission_class": "quantum_relay",
+      "operating_location_class": "external_operating_area",
+      "standby_location_class": "station_proximity"
+    },
+    {
+      "fleet_id": "ORD-1",
+      "display_name": "Gamma Swarm",
+      "asset_class": "maintenance_drone_swarm",
+      "autonomy_class": "swarm_autonomous",
+      "design_source_path": "simulation/fleet/ORD_SERIES.json",
+      "implementation_source_path": "src/entities/fleet/registry_drones.py",
+      "routine_mission_class": "physical_maintenance",
+      "operating_location_class": "assigned_host_vessel",
+      "standby_location_class": "orion_hangar"
+    },
+    {
+      "fleet_id": "ORD-2",
+      "display_name": "Delta Scout",
+      "asset_class": "reconnaissance_drone",
+      "autonomy_class": "fully_autonomous",
+      "design_source_path": "simulation/fleet/ORD_SERIES.json",
+      "implementation_source_path": "src/entities/fleet/registry_drones.py",
+      "routine_mission_class": "physical_reconnaissance",
+      "operating_location_class": "station_proximity",
+      "standby_location_class": "orion_hangar"
+    },
+    {
+      "fleet_id": "ORD-3",
+      "display_name": "Shadowfax",
+      "asset_class": "audit_drone",
+      "autonomy_class": "fully_autonomous",
+      "design_source_path": "simulation/fleet/ORD_SERIES.json",
+      "implementation_source_path": "src/entities/fleet/registry_drones.py",
+      "routine_mission_class": "physical_audit",
+      "operating_location_class": "station_proximity",
+      "standby_location_class": "orion_hangar"
+    },
+    {
+      "fleet_id": "ORD-4",
+      "display_name": "Wisp",
+      "asset_class": "courier_drone",
+      "autonomy_class": "fully_autonomous",
+      "design_source_path": "simulation/fleet/ORD_SERIES.json",
+      "implementation_source_path": "src/entities/fleet/registry_drones.py",
+      "routine_mission_class": "physical_courier",
+      "operating_location_class": "station_proximity",
+      "standby_location_class": "orion_hangar"
+    }
+  ],
+  "runtime_rules": {
+    "initial_status": "identity_projected",
+    "initial_mission_state_class": "unassigned",
+    "initial_docking_location_class": "unresolved",
+    "mission_and_location_advancement": "deterministic_world_process_namespaced_by_seed_fleet_id_and_tick",
+    "observation_effect_on_world_process": "none",
+    "historical_snapshot_fields_forbidden_as_current_state": [
+      "current_mission",
+      "current_deployment_status",
+      "operational_status",
+      "status",
+      "location",
+      "coordinates",
+      "distance",
+      "crew_assigned",
+      "mission_counters"
+    ],
+    "exact_navigation_policy": "location classes only; exact trajectories and coordinates remain quarantined",
+    "ord_physical_mission_policy": "MCP DispatchOrder is advisory policy output. Physical mission activation requires an explicit adapter proposal and complete Triplex governance receipt."
+  }
+}

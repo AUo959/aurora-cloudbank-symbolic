@@ -9,6 +9,7 @@ import os
 import shlex
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 # Always run commands from the repository root, independent of current CWD
@@ -41,14 +42,41 @@ def run_command(cmd, timeout=30):
         return -1, "", "Command timed out"
 
 
+def run_agent_ci():
+    """Exercise the entry point without contacting or modifying live GitHub."""
+    runner = """
+import runpy
+import sys
+from unittest.mock import Mock, patch
+
+with patch('requests.get', return_value=Mock(status_code=200, json=lambda: [])) as get, \\
+     patch('requests.post', side_effect=AssertionError('Unexpected GitHub write')) as post:
+    runpy.run_path(sys.argv[1], run_name='__main__')
+    get.assert_called_once()
+    post.assert_not_called()
+"""
+    env = {**os.environ, "CI": "true"}
+    env.pop("GITHUB_TOKEN", None)
+    with tempfile.TemporaryDirectory(prefix="aurora-agent-test-") as directory:
+        result = subprocess.run(
+            [sys.executable, "-c", runner, str(REPO_ROOT / ".github/agents/aurora_agent_final.py")],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=directory,
+            env=env,
+        )
+        log_file = Path(directory) / "logs" / "aurora_agent.log"
+        log_content = log_file.read_text(encoding="utf-8") if log_file.exists() else None
+    return result, log_content
+
+
 def test_aurora_agent_ci_mode():
     """Test Aurora Agent runs correctly in CI mode."""
     print("🧪 Testing Aurora Agent in CI mode...")
 
-    returncode, stdout, stderr = run_command(
-        f"{PYTHON} .github/agents/aurora_agent_final.py",
-        timeout=10,
-    )
+    result, _ = run_agent_ci()
+    returncode, stdout, stderr = result.returncode, result.stdout, result.stderr
 
     assert returncode == 0, f"Exit code {returncode}, stderr: {stderr}"
     assert "Single-run (CI)" in stdout, "Not running in single-run mode"
@@ -61,18 +89,7 @@ def test_aurora_agent_token_handling():
     """Test Aurora Agent handles missing token gracefully."""
     print("🧪 Testing Aurora Agent token handling...")
 
-    env = {**os.environ, "CI": "true"}
-    env.pop("GITHUB_TOKEN", None)
-
-    result = subprocess.run(
-        f"{PYTHON} .github/agents/aurora_agent_final.py",
-        shell=True,
-        capture_output=True,
-        text=True,
-        timeout=10,
-        cwd=REPO_ROOT,
-        env=env,
-    )
+    result, _ = run_agent_ci()
 
     assert "Warning: GITHUB_TOKEN not set" in result.stdout, "Token warning not shown"
     assert result.returncode == 0, f"Exit code {result.returncode} (should be 0)"
@@ -115,13 +132,9 @@ def test_log_files_created():
     """Test that log files are created correctly."""
     print("🧪 Testing log file creation...")
 
-    log_file = REPO_ROOT / "logs" / "aurora_agent.log"
-    run_command(f"{PYTHON} .github/agents/aurora_agent_final.py", timeout=10)
-
-    assert log_file.exists(), "Log file not created"
-
-    with open(log_file, "r", encoding="utf-8") as handle:
-        content = handle.read()
+    result, content = run_agent_ci()
+    assert result.returncode == 0, result.stderr
+    assert content is not None, "Log file not created"
 
     assert "Aurora Agent" in content, "Log content invalid"
 

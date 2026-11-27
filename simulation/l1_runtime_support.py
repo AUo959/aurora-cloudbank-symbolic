@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import tempfile
@@ -24,6 +25,7 @@ def evaluate_preflight(
     baseline: Dict[str, Any],
     population: Any,
     provenance_path: Path,
+    fleet_receipt_path: Path,
     *,
     run_created: bool,
 ) -> Dict[str, Any]:
@@ -34,6 +36,7 @@ def evaluate_preflight(
     _check_pilot_boundary(baseline, blockers)
     _check_population(population, blockers, warnings)
     _check_locus_authority(baseline, provenance_path, blockers, warnings)
+    _check_fleet_authority(baseline, fleet_receipt_path, blockers, warnings)
     _check_legacy_and_benchmark(baseline, blockers)
     _check_governance(baseline, blockers)
     locus = baseline["orbital_locus"]
@@ -52,6 +55,145 @@ def evaluate_preflight(
             "communications_latency": locus["communications_latency"],
         },
     }
+
+
+def _check_fleet_authority(
+    baseline: Dict[str, Any],
+    receipt_path: Path,
+    blockers: List[str],
+    warnings: List[str],
+) -> None:
+    authority = baseline.get("authority", {}).get("fleet", {})
+    _check_fleet_baseline(authority, blockers)
+    receipt = _load_fleet_receipt(receipt_path, authority, blockers)
+    if receipt is None:
+        return
+    _check_fleet_receipt_values(receipt, blockers)
+    _check_fleet_source_hashes(receipt, receipt_path.parents[1], blockers)
+    warnings.append(
+        "fleet identities are a CloudBank runtime projection; CanonRec fleet authority "
+        "is not verified and historical 2025 missions remain provenance only"
+    )
+
+
+def _check_fleet_baseline(authority: Dict[str, Any], blockers: List[str]) -> None:
+    if (
+        authority.get("status")
+        != "resolved_cloudbank_projection_canon_authority_unverified"
+    ):
+        blockers.append("fleet projection authority boundary is unresolved")
+    if authority.get("cloudbank_projection_role") != "runtime_projection_non_authoritative":
+        blockers.append("fleet state is not typed as a non-authoritative projection")
+    if authority.get("current_state_source") != "deterministic_l1_run_state":
+        blockers.append("fleet current state is not bound to deterministic run state")
+    if (
+        authority.get("historical_mission_policy")
+        != "provenance_only_never_current_run_truth"
+    ):
+        blockers.append("historical fleet missions are eligible as current run truth")
+    if (
+        authority.get("ord_policy_boundary")
+        != "mcp_validation_policy_requires_explicit_physical_mission_adapter"
+    ):
+        blockers.append("ORD policy is not separated from physical flight")
+
+    configured_path = authority.get("receipt_path")
+    if configured_path != "config/l1_fleet_authority_receipt.json":
+        blockers.append("fleet authority receipt path is unsupported")
+
+
+def _load_fleet_receipt(
+    receipt_path: Path,
+    authority: Dict[str, Any],
+    blockers: List[str],
+) -> Optional[Dict[str, Any]]:
+    try:
+        receipt = read_json(receipt_path)
+    except (OSError, ValueError):
+        blockers.append("fleet authority receipt is unavailable or invalid")
+        return None
+    expected_hash = authority.get("receipt_sha256")
+    try:
+        actual_hash = sha256_file(receipt_path)
+    except OSError:
+        blockers.append("fleet authority receipt is unavailable or invalid")
+        return None
+    if expected_hash != actual_hash:
+        blockers.append("fleet authority receipt hash does not match the baseline")
+    return receipt
+
+
+def _check_fleet_receipt_values(
+    receipt: Dict[str, Any],
+    blockers: List[str],
+) -> None:
+    if receipt.get("status") != "resolved_cloudbank_projection_canon_authority_unverified":
+        blockers.append("fleet receipt does not preserve its limited authority status")
+    _check_fleet_projection(receipt.get("cloudbank_projection", {}), blockers)
+    _check_fleet_receipt_entities(receipt.get("entities"), blockers)
+
+
+def _check_fleet_projection(projection: Any, blockers: List[str]) -> None:
+    if not isinstance(projection, dict):
+        blockers.append("fleet receipt projection is invalid")
+        return
+    if projection.get("role") != "runtime_projection_non_authoritative":
+        blockers.append("fleet receipt projection role is unsupported")
+    if projection.get("current_state_source") != "deterministic_l1_run_state":
+        blockers.append("fleet receipt does not bind current state to the L1 run")
+    if (
+        projection.get("historical_mission_policy")
+        != "provenance_only_never_current_run_truth"
+    ):
+        blockers.append("fleet receipt permits stale mission state at genesis")
+    if (
+        projection.get("ord_policy_boundary")
+        != "mcp_validation_policy_requires_explicit_physical_mission_adapter"
+    ):
+        blockers.append("fleet receipt conflates ORD policy with physical flight")
+
+
+def _check_fleet_receipt_entities(entities: Any, blockers: List[str]) -> None:
+    if not isinstance(entities, list) or len(entities) != 12:
+        blockers.append("fleet receipt must project exactly twelve ORF/ORS/ORP/ORD identities")
+        return
+    identifiers = [item.get("fleet_id") for item in entities if isinstance(item, dict)]
+    if len(set(identifiers)) != 12:
+        blockers.append("fleet receipt identities are missing or duplicated")
+
+
+def _check_fleet_source_hashes(
+    receipt: Dict[str, Any],
+    project_root: Path,
+    blockers: List[str],
+) -> None:
+    sources = receipt.get("sources")
+    if not isinstance(sources, list) or not sources:
+        blockers.append("fleet receipt contains no hashed provenance sources")
+        return
+    for source in sources:
+        error = _fleet_source_error(source, project_root)
+        if error is not None:
+            blockers.append(error)
+
+
+def _fleet_source_error(source: Any, project_root: Path) -> Optional[str]:
+    if not isinstance(source, dict):
+        return "fleet receipt source entry is invalid"
+    relative = source.get("path")
+    expected = source.get("sha256")
+    if not isinstance(relative, str) or not relative or not isinstance(expected, str):
+        return "fleet receipt source path or hash is invalid"
+    source_path = (project_root / relative).resolve()
+    if project_root.resolve() not in source_path.parents:
+        return "fleet receipt source escapes the repository"
+    try:
+        actual = sha256_file(source_path)
+    except OSError:
+        return f"fleet receipt source is unavailable: {relative}"
+    if actual != expected:
+        return f"fleet receipt source hash mismatch: {relative}"
+    return None
 
 
 def _check_staff_authority(
@@ -207,11 +349,39 @@ def _check_locus_resolution(
         blockers.append("orbital siting class is not marked as canonical")
     if locus.get("siting_class") != "lagrange_point":
         blockers.append("orbital siting class is not Lagrange point")
+    _check_historical_locus_dispositions(locus, blockers)
     unresolved = locus.get("unresolved_parameters", [])
     if "exact_lagrange_point" not in unresolved:
         blockers.append("exact Lagrange-point uncertainty is not preserved")
     if not locus.get("prohibited_causal_derivations"):
         blockers.append("exact orbital uncertainty lacks causal-use restrictions")
+
+
+def _check_historical_locus_dispositions(
+    locus: Dict[str, Any],
+    blockers: List[str],
+) -> None:
+    expected_description = (
+        "Orion Station is stationed at a Lagrange point in real space; "
+        "the exact libration point and primary-body system remain unresolved."
+    )
+    if locus.get("safe_runtime_description") != expected_description:
+        blockers.append("runtime orbital description exceeds the resolved locus claim")
+    historical = locus.get("historical_claims")
+    expected = {
+        "high_inclination_synchronous_orbit_38600_km": (
+            "staging_not_current_siting_authority"
+        ),
+        "earth_moon_l4": "historical_named_candidate_not_exact_current_canon",
+    }
+    if not isinstance(historical, dict):
+        blockers.append("historical orbital claims lack typed dispositions")
+        return
+    for claim, disposition in expected.items():
+        if historical.get(claim) != disposition:
+            blockers.append(
+                f"historical orbital claim {claim} is active or lacks its safe disposition"
+            )
 
 
 def _check_locus_latency(
@@ -371,6 +541,10 @@ def is_git_sha(value: Any) -> bool:
     )
 
 
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def validate_revision(value: str, field_name: str) -> None:
     if not is_git_sha(value):
         raise ValueError(f"{field_name} must be a 40-character git SHA")
@@ -469,6 +643,14 @@ def export_run_state(state: Any) -> Dict[str, Any]:
             "population": asdict(state.manifest.population),
         },
         "world_state": state.world_state,
+        "fleet": asdict(state.fleet),
+        "staffing": asdict(state.staffing),
+        # Embodiment state is persisted alongside fleet state. Without this the
+        # projection was rebuilt from the registry on every load and never
+        # round-tripped, so a persisted run carried no "embodiments" key at all
+        # and the 1.1.0/1.2.0 migration path could not tell a pre-embodiment run
+        # from a current one.
+        "embodiments": asdict(state.embodiments),
         "character_knowledge": {
             key: [asdict(record) for record in records]
             for key, records in state.character_knowledge.items()

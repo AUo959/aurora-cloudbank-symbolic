@@ -244,8 +244,30 @@ class DriftResponder:
     # ------------------------------------------------------------------
 
     def handle_alert(self, alert: DriftAlert) -> DriftResponseEvent:
-        """Synchronously handle a single DriftAlert by running its runbook."""
+        """Synchronously handle a single DriftAlert by running its runbook.
+
+        Runbook selection prefers an explicit ``metadata['runbook']`` key over the
+        DriftLevel default. This exists for alerts whose correct response differs
+        from statistical drift at the same severity: a fabric-invariant VIOLATION
+        (RULING-FABRIC-WIRING) is CRITICAL, but the stock `critical` runbook
+        suspends the agent and hard-rebaselines — useless and disruptive for what
+        is a canon data-integrity finding, not a runaway process. Such alerts name
+        `fabric_violation` / `fabric_gap` instead, which alert/escalate and
+        log/notify as the ruling specifies.
+
+        Falls back to the level default when no key is given, or when the named
+        runbook is missing — an unknown key must not silently swallow the alert.
+        """
         level_key = alert.level.value.lower()
+        requested = (alert.metadata or {}).get("runbook")
+        if requested:
+            runbook = self._runbooks.get(str(requested).lower())
+            if runbook:
+                return self._run_runbook(alert, str(requested).lower(), runbook)
+            logger.warning(
+                "[DriftResponder] Requested runbook '%s' not found — falling back to level '%s'",
+                requested, level_key,
+            )
         runbook = self._runbooks.get(level_key)
         if not runbook:
             return self._no_runbook_event(alert, level_key)

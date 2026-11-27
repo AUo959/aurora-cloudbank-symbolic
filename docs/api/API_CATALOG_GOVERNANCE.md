@@ -20,6 +20,12 @@ primary-fastapi-with-declared-standalone-services
 
 ## Source of Truth Order
 
+Current primary-app dashboard read path: `GET /api/system/metrics` is defined
+directly in `api/aurora_api.py`, with observations assembled by
+`src/observability/dashboard_metrics.py`. See the
+[local contract and smoke procedure](../operations/LOCAL_DASHBOARD_SMOKE.md).
+It does not create a new standalone service or modify historical snapshots.
+
 For API catalog claims, use this order:
 
 1. Committed runtime entrypoints and routers

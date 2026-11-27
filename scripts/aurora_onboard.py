@@ -160,7 +160,7 @@ class AuroraOnboarding:
         )
 
     def _check_ethics(self) -> None:
-        manifest = self._read_json("QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json")
+        manifest = self._read_json("QGIA_Integration/QUANTUM_FORGE_Axiom_Manifest.json")
         audit_text = self._read_text("QGIA_Integration/04_GUMAS_AuditSchema.md")
         script_text = self._read_text("scripts/activate_l3_ethics.sh")
         binding = manifest.get("ethics_binding")
@@ -175,7 +175,7 @@ class AuroraOnboarding:
             "activation_source_present": "Picard_Delta_3" in script_text,
             "sources": [
                 "AURORA_CONTEXT.json",
-                "QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json",
+                "QGIA_Integration/QUANTUM_FORGE_Axiom_Manifest.json",
                 "QGIA_Integration/04_GUMAS_AuditSchema.md",
                 "scripts/activate_l3_ethics.sh",
             ],
@@ -185,7 +185,7 @@ class AuroraOnboarding:
             "ethics_anchor",
             "pass" if verified else "fail",
             f"Ethics layer={self.ethics['layer_status']}; GUMAS_Thermax binding={binding or 'missing'}",
-            "AURORA_CONTEXT.json + QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json",
+            "AURORA_CONTEXT.json + QGIA_Integration/QUANTUM_FORGE_Axiom_Manifest.json",
         )
 
     def validate(self) -> None:

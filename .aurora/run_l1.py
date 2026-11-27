@@ -103,6 +103,9 @@ def _status(runtime: OrionL1Runtime) -> Dict[str, Any]:
         "event_count": len(state.events),
         "communication_count": len(state.communications),
         "character_action_count": len(state.character_actions),
+        "fleet_provider_status": state.fleet.provider_status,
+        "fleet_entity_count": len(state.fleet.entities),
+        "fleet_process_position": state.fleet.process_position,
     }
 
 

@@ -10,24 +10,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def resolve_qgia_file(filename: str, preferred_directory: str) -> Path:
-    """Resolve either historical QGIA directory casing during consolidation."""
-    directories = dict.fromkeys(
-        (preferred_directory, "QGIA_Integration", "QGIA_integration")
-    )
-    for directory in directories:
-        candidate = ROOT / directory / filename
-        if candidate.is_file():
-            return candidate
+def resolve_qgia_file(filename: str) -> Path:
+    """Resolve a QGIA artifact from the canonical directory."""
+    candidate = ROOT / "QGIA_Integration" / filename
+    if candidate.is_file():
+        return candidate
     raise FileNotFoundError(f"Could not locate QGIA file: {filename}")
 
 
-MANIFEST_PATH = resolve_qgia_file(
-    "QUANTUM_FORGE_Axiom_Manifest.json", "QGIA_integration"
-)
-HUMAN_MANIFEST_PATH = resolve_qgia_file(
-    "01_QUANTUM_FORGE_AxiomManifest.md", "QGIA_Integration"
-)
+MANIFEST_PATH = resolve_qgia_file("QUANTUM_FORGE_Axiom_Manifest.json")
+HUMAN_MANIFEST_PATH = resolve_qgia_file("01_QUANTUM_FORGE_AxiomManifest.md")
 
 EXPECTED_LEGACY_ALIASES = {
     "A01": ("AN-001", "NODE", "TRUMP_REACTIVE_AGENT_MODEL"),

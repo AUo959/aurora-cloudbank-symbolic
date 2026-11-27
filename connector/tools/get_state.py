@@ -13,7 +13,7 @@ Returns Aurora's current system-level symbolic state:
 
 import json
 from datetime import datetime, timezone
-from mcp.types import Tool
+from mcp_types import Tool
 
 from connector.transport.bridge import (
     CloudbankBridge,
@@ -35,7 +35,7 @@ class GetStateTool:
         return Tool(
             name=self.NAME,
             description=self.DESCRIPTION,
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "include_echochain": {

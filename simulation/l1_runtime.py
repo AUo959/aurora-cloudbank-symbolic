@@ -23,6 +23,8 @@ Core invariants:
 from __future__ import annotations
 
 import copy
+import hashlib
+import json
 import os
 import uuid
 from dataclasses import asdict
@@ -31,6 +33,32 @@ from typing import Any, Dict, Optional
 
 from l1_character_actor import BoundedCharacterActor, CharacterContext
 from l1_character_actor_policy import POLICY_VERSION
+from l1_embodiment import (
+    assess_embodiment_readiness,
+    build_initial_embodiment_state,
+    embodiment_observation,
+    validate_embodiment_projection,
+    validate_embodiment_registry,
+)
+from l1_fleet import (
+    OrdPhysicalMissionAdapter,
+    OrdPhysicalMissionProposal,
+    advance_fleet_world_process,
+    build_initial_fleet_state,
+    observation_for_focus,
+    validate_fleet_identity_projection,
+)
+from l1_staffing import (
+    PersonnelRecord,
+    StaffingDecision,
+    StaffingDemand,
+    apply_staffing_decision,
+    mark_persona_resolved,
+    plan_staffing_action,
+    record_personnel_observation,
+    retire_staffing_seat,
+    transfer_personnel_from_orion,
+)
 from l1_runtime_support import (
     GovernanceError,
     PreflightError,
@@ -48,16 +76,22 @@ from l1_runtime_support import (
 from l1_runtime_types import (
     DeterministicReplayRNG,
     EpistemicRecord,
+    FleetEntityState,
     GovernanceReceipt,
     L1RunState,
     PopulationSnapshot,
     RunManifest,
     l1_run_state_from_payload,
 )
+from modules.ord.ord_policy_engine import DispatchOrder
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_PATH = PROJECT_ROOT / "config" / "l1_runtime_baseline.json"
 CANON_PROVENANCE_PATH = PROJECT_ROOT / "config" / "canon_provenance.json"
+FLEET_AUTHORITY_RECEIPT_PATH = (
+    PROJECT_ROOT / "config" / "l1_fleet_authority_receipt.json"
+)
+EMBODIMENT_REGISTRY_PATH = PROJECT_ROOT / "config" / "l1_embodiment_registry.json"
 DEFAULT_RUN_ROOT = Path(
     os.environ.get("AURORA_L1_RUN_ROOT", Path.home() / ".aurora" / "l1-runs")
 )
@@ -69,20 +103,124 @@ class OrionL1Runtime:
     def __init__(self, baseline_path: Path = BASELINE_PATH) -> None:
         self.baseline_path = baseline_path
         self.baseline = read_json(baseline_path)
+        self.fleet_receipt: Optional[Dict[str, Any]] = None
+        self.fleet_receipt_sha256: Optional[str] = None
+        self.embodiment_registry: Optional[Dict[str, Any]] = None
+        self.embodiment_registry_sha256: Optional[str] = None
         self.population = PopulationSnapshot.from_baseline(self.baseline)
         self.state: Optional[L1RunState] = None
         self._rng: Optional[DeterministicReplayRNG] = None
         self._run_root: Optional[Path] = None
         self._commander_actor = BoundedCharacterActor()
+        self._ord_physical_adapter = OrdPhysicalMissionAdapter()
 
     def preflight(self) -> Dict[str, Any]:
         """Validate bootstrap invariants without creating or advancing a run."""
-        return evaluate_preflight(
+        self.fleet_receipt = None
+        self.fleet_receipt_sha256 = None
+        self.embodiment_registry = None
+        self.embodiment_registry_sha256 = None
+        report = evaluate_preflight(
             self.baseline,
             self.population,
             CANON_PROVENANCE_PATH,
+            FLEET_AUTHORITY_RECEIPT_PATH,
             run_created=self.state is not None,
         )
+        if report["ready"]:
+            try:
+                self.fleet_receipt = self._load_verified_fleet_receipt()
+            except PreflightError as exc:
+                report["blockers"].append(str(exc))
+                report["ready"] = False
+        try:
+            self.embodiment_registry = self._load_verified_embodiment_registry()
+        except PreflightError as exc:
+            report["blockers"].append(str(exc))
+            report["ready"] = False
+        if self.embodiment_registry is None:
+            report["embodiment"] = {
+                "registry_status": "unavailable",
+                "ready": False,
+                "resume_blockers": [
+                    {
+                        "embodiment_id": "L1-EMB-REGISTRY",
+                        "component": "L1 embodiment registry",
+                        "provider_status": "unbound",
+                        "blockers": ["registry_unavailable_or_invalid"],
+                    }
+                ],
+            }
+        else:
+            report["embodiment"] = assess_embodiment_readiness(
+                self.embodiment_registry
+            )
+        report["resume_ready"] = report["ready"] and report["embodiment"]["ready"]
+        return report
+
+    def _load_verified_fleet_receipt(self) -> Dict[str, Any]:
+        """Read, hash, and parse the exact receipt bytes retained by the runtime."""
+        expected_hash = self.baseline.get("authority", {}).get("fleet", {}).get(
+            "receipt_sha256"
+        )
+        try:
+            raw = FLEET_AUTHORITY_RECEIPT_PATH.read_bytes()
+        except OSError as exc:
+            raise PreflightError(
+                "fleet authority receipt became unavailable after preflight"
+            ) from exc
+        actual_hash = hashlib.sha256(raw).hexdigest()
+        if actual_hash != expected_hash:
+            raise PreflightError(
+                "fleet authority receipt hash changed after preflight"
+            )
+        try:
+            receipt = json.loads(raw)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise PreflightError(
+                "fleet authority receipt became invalid after preflight"
+            ) from exc
+        if not isinstance(receipt, dict):
+            raise PreflightError("fleet authority receipt must remain a JSON object")
+        self.fleet_receipt_sha256 = actual_hash
+        return receipt
+
+    def _load_verified_embodiment_registry(self) -> Dict[str, Any]:
+        """Bind exact non-activating registry bytes retained by this runtime."""
+        authority = self.baseline.get("authority", {}).get(
+            "embodiment_registry", {}
+        )
+        if (
+            authority.get("status")
+            != "verified_recovery_projection_activation_blocked"
+        ):
+            raise PreflightError("embodiment registry authority status is unsupported")
+        if authority.get("projection_role") != "runtime_projection_non_authoritative":
+            raise PreflightError("embodiment registry projection role is unsupported")
+        if authority.get("activation_authority") is not False:
+            raise PreflightError("embodiment registry cannot grant activation authority")
+        if authority.get("registry_path") != "config/l1_embodiment_registry.json":
+            raise PreflightError("embodiment registry path is unsupported")
+        expected_hash = authority.get("registry_sha256")
+        try:
+            raw = EMBODIMENT_REGISTRY_PATH.read_bytes()
+        except OSError as exc:
+            raise PreflightError("embodiment registry is unavailable") from exc
+        actual_hash = hashlib.sha256(raw).hexdigest()
+        if actual_hash != expected_hash:
+            raise PreflightError("embodiment registry hash does not match baseline")
+        try:
+            registry = json.loads(raw)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise PreflightError("embodiment registry is invalid") from exc
+        if not isinstance(registry, dict):
+            raise PreflightError("embodiment registry must be a JSON object")
+        try:
+            validate_embodiment_registry(registry)
+        except ValueError as exc:
+            raise PreflightError("embodiment registry contract is invalid") from exc
+        self.embodiment_registry_sha256 = actual_hash
+        return registry
 
     def init_run(
         self,
@@ -134,7 +272,10 @@ class OrionL1Runtime:
             raise PreflightError(
                 "persisted L1 run state is unavailable or invalid"
             ) from exc
+        source_contract_version = restored.manifest.runtime_contract_version
         self._validate_loaded_state(restored, normalized_run_id)
+        self._upgrade_loaded_fleet(restored, source_contract_version)
+        self._upgrade_loaded_embodiments(restored, source_contract_version)
         self.state = restored
         self._run_root = resolved_run_root
         self._restore_replay_generator(restored)
@@ -172,6 +313,8 @@ class OrionL1Runtime:
             created_at=utcnow(),
             cloudbank_revision=cloudbank_revision,
             canonrec_revision=canonrec_revision,
+            fleet_authority_receipt_sha256=self._require_fleet_receipt_sha256(),
+            embodiment_registry_sha256=self._require_embodiment_registry_sha256(),
             seed=seed,
             station_cycle_length_minutes=int(defaults["station_cycle_length_minutes"]),
             station_cycle_minute=int(defaults["station_cycle_start_minute"]),
@@ -188,6 +331,11 @@ class OrionL1Runtime:
     def _build_initial_state(self, manifest: RunManifest) -> L1RunState:
         return L1RunState(
             manifest=manifest,
+            fleet=build_initial_fleet_state(self._require_fleet_receipt()),
+            embodiments=build_initial_embodiment_state(
+                self._require_embodiment_registry(),
+                self._require_embodiment_registry_sha256(),
+            ),
             world_state={
                 "station": "Orion Station",
                 "l1_status": "initialized",
@@ -216,6 +364,129 @@ class OrionL1Runtime:
             },
         )
 
+    def plan_staffing(self, demand: StaffingDemand) -> StaffingDecision:
+        """Plan from institutional evidence without mutating personnel state."""
+        state = self._require_state()
+        return plan_staffing_action(state.staffing, demand)
+
+    def apply_staffing(
+        self,
+        demand: StaffingDemand,
+        decision: StaffingDecision,
+        *,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Apply a deterministic HR decision under complete Triplex authority."""
+        state = self._require_state()
+        self._require_complete_staffing_receipt(receipt)
+        action = apply_staffing_decision(
+            state.staffing,
+            demand,
+            decision,
+            receipt_id=receipt.receipt_id,
+            tick=state.manifest.tick,
+        )
+        state.governance_receipts.append(receipt)
+        state.events.append(self._staffing_event(action))
+        self._project_staffing_counters(state)
+        self._persist_if_configured()
+        return action
+
+    def observe_personnel(
+        self,
+        personnel_id: str,
+        observations: Dict[str, str],
+        *,
+        provenance: str,
+    ) -> PersonnelRecord:
+        """Resolve only observed operational traits, never a generated biography."""
+        state = self._require_state()
+        record = record_personnel_observation(
+            state.staffing,
+            personnel_id,
+            observations,
+            provenance=provenance,
+        )
+        state.events.append(
+            {
+                "event_id": str(uuid.uuid4()),
+                "tick": state.manifest.tick,
+                "kind": "staffing_personnel_observation",
+                "personnel_id": personnel_id,
+                "observation_fields": sorted(observations),
+                "provenance": provenance,
+                "canon_status": "run_state",
+            }
+        )
+        self._project_staffing_counters(state)
+        self._persist_if_configured()
+        return record
+
+    def resolve_personnel_persona(
+        self,
+        personnel_id: str,
+        *,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Resolve an observed run persona without promoting repository canon."""
+        state = self._require_state()
+        self._require_complete_staffing_receipt(receipt)
+        action = mark_persona_resolved(
+            state.staffing,
+            personnel_id,
+            receipt_id=receipt.receipt_id,
+            tick=state.manifest.tick,
+        )
+        state.governance_receipts.append(receipt)
+        state.events.append(self._staffing_event(action))
+        self._project_staffing_counters(state)
+        self._persist_if_configured()
+        return action
+
+    def transfer_personnel_off_station(
+        self,
+        personnel_id: str,
+        *,
+        provenance: str,
+        rationale: str,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Transfer an assigned human from Orion without deleting identity."""
+        state = self._require_state()
+        self._require_complete_staffing_receipt(receipt)
+        action = transfer_personnel_from_orion(
+            state.staffing,
+            personnel_id,
+            provenance=provenance,
+            rationale=rationale,
+            receipt_id=receipt.receipt_id,
+            tick=state.manifest.tick,
+        )
+        self._record_staffing_action(state, action, receipt)
+        return action
+
+    def retire_staffing_seat(
+        self,
+        staffing_seat: str,
+        *,
+        provenance: str,
+        rationale: str,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Retire a vacant run-scoped role/seat under complete authority."""
+        state = self._require_state()
+        self._require_complete_staffing_receipt(receipt)
+        action = retire_staffing_seat(
+            state.staffing,
+            staffing_seat,
+            provenance=provenance,
+            rationale=rationale,
+            receipt_id=receipt.receipt_id,
+            tick=state.manifest.tick,
+        )
+        self._record_staffing_action(state, action, receipt)
+        return action
+
     def advance(self, elapsed_minutes: int = 15) -> Dict[str, Any]:
         """Advance autonomous station state; observation focus is not consulted."""
         state = self._require_state()
@@ -234,6 +505,31 @@ class OrionL1Runtime:
 
         roll = self._rng.random()
         kind, summary = event_for_roll(roll)
+        fleet_transitions = advance_fleet_world_process(
+            state.fleet,
+            seed=state.manifest.seed,
+            tick=state.manifest.tick,
+            elapsed_minutes=elapsed_minutes,
+        )
+        event = self._record_autonomous_event(
+            elapsed_minutes,
+            kind,
+            summary,
+            fleet_transitions,
+        )
+        self._deliver_queued_communications()
+        self._queue_due_station_responses()
+        self._persist_if_configured()
+        return event
+
+    def _record_autonomous_event(
+        self,
+        elapsed_minutes: int,
+        kind: str,
+        summary: str,
+        fleet_transitions: list[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        state = self._require_state()
         event = {
             "event_id": str(uuid.uuid4()),
             "tick": state.manifest.tick,
@@ -243,6 +539,9 @@ class OrionL1Runtime:
             "cause": "autonomous_world_process",
             "pilot_attention_influenced_probability": False,
             "governance": "standing_authority_routine",
+            "fleet_transition_ids": [
+                transition["transition_id"] for transition in fleet_transitions
+            ],
             "canon_status": "run_state",
         }
         state.events.append(event)
@@ -257,9 +556,6 @@ class OrionL1Runtime:
                 tick=state.manifest.tick,
             )
         )
-        self._deliver_queued_communications()
-        self._queue_due_station_responses()
-        self._persist_if_configured()
         return event
 
     def _deliver_queued_communications(self) -> None:
@@ -374,9 +670,7 @@ class OrionL1Runtime:
         for message in tuple(state.communications):
             if not self._commander_response_is_due(message, replied_to):
                 continue
-            decision = self._commander_actor.decide(
-                self._commander_context(message)
-            )
+            decision = self._commander_actor.decide(self._commander_context(message))
             response = self._build_commander_action_response(message, decision)
             decision["response_message_id"] = response["message_id"]
             decision["operational_steps"][-1]["message_id"] = response["message_id"]
@@ -390,9 +684,7 @@ class OrionL1Runtime:
             run_id=state.manifest.run_id,
             tick=state.manifest.tick,
             inbound=copy.deepcopy(inbound),
-            station_records=tuple(
-                asdict(item) for item in state.station_records[-8:]
-            ),
+            station_records=tuple(asdict(item) for item in state.station_records[-8:]),
             character_knowledge=tuple(
                 asdict(item)
                 for item in state.character_knowledge.get("CMD_001", [])[-8:]
@@ -534,6 +826,9 @@ class OrionL1Runtime:
     def observe(self, focus: str = "station") -> Dict[str, Any]:
         """Expose instrumentation without advancing or rearranging L1."""
         state = self._require_state()
+        provider_payload = embodiment_observation(state, focus)
+        if provider_payload is None:
+            provider_payload = observation_for_focus(state, focus)
         recent = [asdict(item) for item in state.station_records[-5:]]
         payload = {
             "observation_id": str(uuid.uuid4()),
@@ -542,8 +837,16 @@ class OrionL1Runtime:
             "instrumentation": True,
             "pilot_embodied": False,
             "generated_world_event": False,
-            "records": recent,
+            "records": recent if provider_payload is None else provider_payload["records"],
         }
+        if provider_payload is not None:
+            payload.update(
+                {
+                    key: copy.deepcopy(value)
+                    for key, value in provider_payload.items()
+                    if key not in {"tick", "records"}
+                }
+            )
         observation = EpistemicRecord(
             record_id=payload["observation_id"],
             subject=f"observation:{payload['focus']}",
@@ -567,6 +870,52 @@ class OrionL1Runtime:
         )
         self._persist_if_configured()
         return copy.deepcopy(payload)
+
+    def propose_ord_physical_mission(
+        self,
+        order: DispatchOrder,
+        *,
+        physical_mission_class: str,
+        docking_location_class: str,
+    ) -> OrdPhysicalMissionProposal:
+        """Create a non-executing bridge proposal from ORD MCP policy."""
+        self._require_state()
+        return self._ord_physical_adapter.propose(
+            order,
+            physical_mission_class=physical_mission_class,
+            docking_location_class=docking_location_class,
+        )
+
+    def activate_ord_physical_mission(
+        self,
+        proposal: OrdPhysicalMissionProposal,
+        *,
+        receipt: GovernanceReceipt,
+    ) -> Dict[str, Any]:
+        """Apply an explicit physical ORD mission without advancing simulation time."""
+        state = self._require_state()
+        transitions = self._ord_physical_adapter.activate(
+            state.fleet,
+            proposal,
+            receipt=receipt,
+            tick=state.manifest.tick,
+        )
+        state.governance_receipts.append(receipt)
+        event = {
+            "event_id": str(uuid.uuid4()),
+            "tick": state.manifest.tick,
+            "kind": "governed_ord_physical_mission_activation",
+            "cause": "explicit_ord_physical_mission_adapter",
+            "proposal_id": proposal.proposal_id,
+            "policy_mission_id": proposal.policy_mission_id,
+            "receipt_id": receipt.receipt_id,
+            "transition_ids": [item["transition_id"] for item in transitions],
+            "pilot_attention_influenced_probability": False,
+            "canon_status": "run_state",
+        }
+        state.events.append(event)
+        self._persist_if_configured()
+        return event
 
     def route_operator_input(
         self,
@@ -762,10 +1111,11 @@ class OrionL1Runtime:
             raise PreflightError("persisted run ID does not match its persistence path")
         if manifest.schema_version != 1:
             raise PreflightError("persisted run schema version is unsupported")
-        if (
-            manifest.runtime_contract_version
-            != self.baseline["runtime_contract_version"]
-        ):
+        compatible_versions = self.baseline.get(
+            "compatible_persisted_contract_versions",
+            [self.baseline["runtime_contract_version"]],
+        )
+        if manifest.runtime_contract_version not in compatible_versions:
             raise PreflightError("persisted run contract does not match this runtime")
         if (
             manifest.canonrec_revision
@@ -776,6 +1126,8 @@ class OrionL1Runtime:
             )
         self._validate_revision(manifest.cloudbank_revision, "cloudbank_revision")
         self._validate_revision(manifest.canonrec_revision, "canonrec_revision")
+        self._validate_loaded_fleet_receipt_digest(state)
+        self._validate_loaded_embodiment_registry_digest(state)
         if manifest.tick < 0:
             raise PreflightError("persisted run tick cannot be negative")
         if (
@@ -786,9 +1138,97 @@ class OrionL1Runtime:
             raise PreflightError("persisted station cycle minute is out of range")
         manifest.population.validate()
         self._validate_loaded_world_state(state)
-        self._validate_replay_position(state)
         self._validate_loaded_communications(state)
         self._validate_loaded_character_actions(state)
+        self._validate_autonomous_event_replay(state)
+        self._validate_loaded_fleet(state)
+        self._validate_loaded_staffing(state)
+        self._validate_loaded_embodiments(state)
+
+    @staticmethod
+    def _validate_loaded_staffing(state: L1RunState) -> None:
+        try:
+            state.staffing.validate()
+        except ValueError as exc:
+            raise PreflightError("persisted staffing state is invalid") from exc
+        receipts = OrionL1Runtime._complete_receipt_ids(state)
+        if not OrionL1Runtime._staffing_receipts_are_complete(state, receipts):
+            raise PreflightError(
+                "persisted staffing action lacks complete Triplex evidence"
+            )
+        if not OrionL1Runtime._staffing_actions_match_events(state):
+            raise PreflightError(
+                "persisted staffing action lacks matching audit event"
+            )
+        OrionL1Runtime._validate_loaded_staffing_projection(state)
+
+    @staticmethod
+    def _validate_loaded_staffing_projection(state: L1RunState) -> None:
+        population = state.world_state.get("population")
+        if not isinstance(population, dict):
+            raise PreflightError("persisted population projection must be an object")
+        projection = population.get("run_staffing")
+        if not state.staffing.actions and projection is None:
+            if state.staffing.personnel or state.staffing.seats:
+                raise PreflightError(
+                    "persisted staffing ledger requires a population projection"
+                )
+            return
+        expected = OrionL1Runtime._staffing_counter_payload(state)
+        if projection != expected:
+            raise PreflightError(
+                "persisted staffing counters do not match personnel state"
+            )
+
+    @staticmethod
+    def _complete_receipt_ids(state: L1RunState) -> set[str]:
+        return {
+            receipt.receipt_id
+            for receipt in state.governance_receipts
+            if receipt.complete
+        }
+
+    @staticmethod
+    def _staffing_receipts_are_complete(
+        state: L1RunState,
+        receipts: set[str],
+    ) -> bool:
+        return all(
+            action.get("receipt_id") in receipts
+            for action in state.staffing.actions
+        )
+
+    @staticmethod
+    def _staffing_actions_match_events(state: L1RunState) -> bool:
+        actions = {
+            action["action_id"]: action for action in state.staffing.actions
+        }
+        events = [
+            event
+            for event in state.events
+            if event.get("kind") == "governed_staffing_action"
+        ]
+        if len(events) != len(actions):
+            return False
+        for event in events:
+            action = actions.get(event.get("staffing_action_id"))
+            if action is None:
+                return False
+            expected = (
+                action.get("receipt_id"),
+                action.get("personnel_id"),
+                action.get("staffing_seat"),
+                action.get("tick"),
+            )
+            actual = (
+                event.get("receipt_id"),
+                event.get("personnel_id"),
+                event.get("staffing_seat"),
+                event.get("tick"),
+            )
+            if actual != expected:
+                return False
+        return True
 
     @staticmethod
     def _validate_loaded_world_state(state: L1RunState) -> None:
@@ -805,17 +1245,6 @@ class OrionL1Runtime:
             pilot.get("residency") != "Earth" or pilot.get("l1_entity") is not False
         ):
             raise PreflightError("persisted world state violates the Pilot boundary")
-
-    @staticmethod
-    def _validate_replay_position(state: L1RunState) -> None:
-        autonomous_events = sum(
-            event.get("cause") == "autonomous_world_process"
-            for event in state.events
-        )
-        if autonomous_events != state.manifest.tick:
-            raise PreflightError(
-                "persisted autonomous event ledger does not match manifest tick"
-            )
 
     def _validate_loaded_character_actions(self, state: L1RunState) -> None:
         action_ids = set()
@@ -835,9 +1264,7 @@ class OrionL1Runtime:
             policy = self._require_action_string(action, "policy", prefix)
             self._require_action_string(action, "response_content", prefix)
             if actor_id != "CMD_001" or policy != POLICY_VERSION:
-                raise PreflightError(
-                    f"{prefix} actor or policy is unsupported"
-                )
+                raise PreflightError(f"{prefix} actor or policy is unsupported")
             if action_id in action_ids:
                 raise PreflightError("persisted character actions contain duplicate IDs")
             if response_id in response_ids:
@@ -847,11 +1274,7 @@ class OrionL1Runtime:
             self._validate_character_action_references(
                 prefix, trigger_id, response_id, messages
             )
-            self._validate_character_action_links(
-                prefix,
-                action,
-                messages,
-            )
+            self._validate_character_action_links(prefix, action, messages)
             self._validate_character_action_tick(
                 prefix, action.get("tick"), state.manifest.tick
             )
@@ -936,6 +1359,290 @@ class OrionL1Runtime:
             raise PreflightError(f"{prefix} {field} must be a non-empty string")
         return value
 
+    def _validate_autonomous_event_replay(self, state: L1RunState) -> None:
+        autonomous_events = [
+            event
+            for event in state.events
+            if event.get("cause") == "autonomous_world_process"
+        ]
+        if len(autonomous_events) != state.manifest.tick:
+            raise PreflightError(
+                "persisted autonomous event ledger does not match run tick"
+            )
+        for expected_tick, event in enumerate(autonomous_events, start=1):
+            event_tick = event.get("tick")
+            if (type(event_tick), event_tick) != (int, expected_tick):
+                raise PreflightError(
+                    "persisted autonomous event ledger is not contiguous"
+                )
+            elapsed = event.get("elapsed_minutes")
+            if type(elapsed) is not int or elapsed <= 0:
+                raise PreflightError(
+                    "persisted autonomous event elapsed time is invalid"
+                )
+
+    def _validate_loaded_fleet(self, state: L1RunState) -> None:
+        try:
+            state.fleet.validate()
+            if state.fleet.provider_status == "bound":
+                validate_fleet_identity_projection(
+                    state.fleet,
+                    self._require_fleet_receipt(),
+                )
+        except ValueError as exc:
+            raise PreflightError("persisted fleet state is invalid") from exc
+        current_version = self.baseline["runtime_contract_version"]
+        if (
+            state.manifest.runtime_contract_version == current_version
+            and state.fleet.provider_status != "bound"
+        ):
+            raise PreflightError("persisted current-contract fleet provider is unbound")
+        if (
+            state.fleet.provider_status == "bound"
+            and state.fleet.process_position != state.manifest.tick
+        ):
+            raise PreflightError("persisted fleet replay position does not match run tick")
+        self._validate_loaded_ord_adapter_evidence(state)
+
+    def _validate_loaded_fleet_receipt_digest(self, state: L1RunState) -> None:
+        manifest = state.manifest
+        digest = manifest.fleet_authority_receipt_sha256
+        if manifest.runtime_contract_version == "1.1.0":
+            if digest is not None:
+                raise PreflightError(
+                    "persisted contract 1.1.0 cannot claim a fleet receipt digest"
+                )
+            return
+        if manifest.runtime_contract_version == "1.2.0" and digest is None:
+            return
+        if digest != self._require_fleet_receipt_sha256():
+            raise PreflightError(
+                "persisted fleet authority receipt digest does not match runtime"
+            )
+
+    def _validate_loaded_embodiment_registry_digest(self, state: L1RunState) -> None:
+        manifest = state.manifest
+        digest = manifest.embodiment_registry_sha256
+        if manifest.runtime_contract_version in {"1.1.0", "1.2.0"}:
+            if digest is not None:
+                raise PreflightError(
+                    "persisted pre-1.3.0 contract cannot claim an embodiment digest"
+                )
+            return
+        if digest != self._require_embodiment_registry_sha256():
+            raise PreflightError(
+                "persisted embodiment registry digest does not match runtime"
+            )
+
+    def _validate_loaded_embodiments(self, state: L1RunState) -> None:
+        try:
+            state.embodiments.validate()
+            if state.embodiments.registry_status == "bound":
+                validate_embodiment_projection(
+                    state.embodiments,
+                    self._require_embodiment_registry(),
+                    self._require_embodiment_registry_sha256(),
+                )
+        except ValueError as exc:
+            raise PreflightError("persisted embodiment state is invalid") from exc
+        current_version = self.baseline["runtime_contract_version"]
+        if (
+            state.manifest.runtime_contract_version == current_version
+            and state.embodiments.registry_status != "bound"
+        ):
+            raise PreflightError(
+                "persisted current-contract embodiment registry is unbound"
+            )
+
+    def _validate_loaded_ord_adapter_evidence(self, state: L1RunState) -> None:
+        active_entities = [
+            entity
+            for entity in state.fleet.entities.values()
+            if entity.mission_state_class == "active_explicit_adapter"
+        ]
+        for entity in active_entities:
+            transition = self._loaded_adapter_transition(state, entity)
+            receipt_id = transition.get("governance_receipt_id")
+            self._require_loaded_triplex_receipt(state, receipt_id)
+            self._require_loaded_adapter_event(state, entity, transition, receipt_id)
+
+    @staticmethod
+    def _loaded_adapter_transition(
+        state: L1RunState,
+        entity: FleetEntityState,
+    ) -> Dict[str, Any]:
+        candidates = [
+            item
+            for item in state.fleet.transitions
+            if OrionL1Runtime._is_adapter_transition_for_entity(item, entity)
+        ]
+        if len(candidates) != 1:
+            raise PreflightError(
+                "persisted ORD adapter state lacks an exact activation transition"
+            )
+        transition = candidates[0]
+        if not OrionL1Runtime._adapter_transition_matches_entity(
+            transition,
+            entity,
+        ):
+            raise PreflightError(
+                "persisted ORD adapter transition does not match active fleet state"
+            )
+        transition_id = transition.get("transition_id")
+        if not isinstance(transition_id, str) or not transition_id:
+            raise PreflightError(
+                "persisted ORD adapter transition lacks transition identity"
+            )
+        return transition
+
+    @staticmethod
+    def _is_adapter_transition_for_entity(
+        transition: Dict[str, Any],
+        entity: FleetEntityState,
+    ) -> bool:
+        return (
+            transition.get("fleet_id") == entity.fleet_id
+            and transition.get("tick") == entity.last_transition_tick
+            and transition.get("cause") == "explicit_ord_physical_mission_adapter"
+        )
+
+    @staticmethod
+    def _adapter_transition_matches_entity(
+        transition: Dict[str, Any],
+        entity: FleetEntityState,
+    ) -> bool:
+        after = transition.get("after")
+        expected = {
+            "status": entity.status,
+            "mission_state_class": entity.mission_state_class,
+            "docking_location_class": entity.docking_location_class,
+            "mission_id": entity.mission_id,
+            "mission_class": entity.mission_class,
+        }
+        return isinstance(after, dict) and all(
+            after.get(field) == value for field, value in expected.items()
+        )
+
+    @staticmethod
+    def _require_loaded_triplex_receipt(
+        state: L1RunState,
+        receipt_id: Any,
+    ) -> None:
+        if not isinstance(receipt_id, str) or not receipt_id:
+            raise PreflightError(
+                "persisted ORD adapter transition lacks Triplex receipt identity"
+            )
+        if not any(
+            receipt.receipt_id == receipt_id and receipt.complete
+            for receipt in state.governance_receipts
+        ):
+            raise PreflightError(
+                "persisted ORD adapter transition lacks complete Triplex evidence"
+            )
+
+    @staticmethod
+    def _require_loaded_adapter_event(
+        state: L1RunState,
+        entity: FleetEntityState,
+        transition: Dict[str, Any],
+        receipt_id: str,
+    ) -> None:
+        transition_id = transition["transition_id"]
+        matching_events = [
+            event
+            for event in state.events
+            if OrionL1Runtime._is_loaded_adapter_event(
+                event,
+                entity,
+                transition,
+                receipt_id,
+                transition_id,
+            )
+        ]
+        if len(matching_events) != 1:
+            raise PreflightError(
+                "persisted ORD adapter transition lacks a governed activation event"
+            )
+
+    @staticmethod
+    def _is_loaded_adapter_event(
+        event: Dict[str, Any],
+        entity: FleetEntityState,
+        transition: Dict[str, Any],
+        receipt_id: str,
+        transition_id: str,
+    ) -> bool:
+        transition_ids = event.get("transition_ids")
+        return (
+            event.get("kind") == "governed_ord_physical_mission_activation"
+            and event.get("cause") == "explicit_ord_physical_mission_adapter"
+            and event.get("tick") == transition.get("tick")
+            and event.get("proposal_id") == entity.mission_id
+            and event.get("receipt_id") == receipt_id
+            and isinstance(transition_ids, list)
+            and transition_id in transition_ids
+        )
+
+    def _upgrade_loaded_fleet(
+        self,
+        state: L1RunState,
+        source_contract_version: str,
+    ) -> None:
+        current_version = self.baseline["runtime_contract_version"]
+        receipt = self._require_fleet_receipt()
+        if state.fleet.provider_status == "unbound":
+            state.fleet = build_initial_fleet_state(receipt)
+            autonomous_events = [
+                event
+                for event in state.events
+                if event.get("cause") == "autonomous_world_process"
+            ]
+            for event in autonomous_events:
+                advance_fleet_world_process(
+                    state.fleet,
+                    seed=state.manifest.seed,
+                    tick=event["tick"],
+                    elapsed_minutes=event["elapsed_minutes"],
+                )
+            state.fleet.migrated_from_contract_version = source_contract_version
+            state.manifest.fleet_authority_receipt_sha256 = (
+                self._require_fleet_receipt_sha256()
+            )
+        if state.fleet.authority_receipt_id != receipt.get("receipt_id"):
+            raise PreflightError("persisted fleet authority receipt does not match runtime")
+        try:
+            validate_fleet_identity_projection(state.fleet, receipt)
+        except ValueError as exc:
+            raise PreflightError(
+                "persisted fleet identities do not match runtime authority receipt"
+            ) from exc
+        if state.manifest.fleet_authority_receipt_sha256 is None:
+            state.manifest.fleet_authority_receipt_sha256 = (
+                self._require_fleet_receipt_sha256()
+            )
+        state.manifest.runtime_contract_version = current_version
+
+    def _upgrade_loaded_embodiments(
+        self,
+        state: L1RunState,
+        source_contract_version: str,
+    ) -> None:
+        registry = self._require_embodiment_registry()
+        digest = self._require_embodiment_registry_sha256()
+        if state.embodiments.registry_status == "unbound":
+            state.embodiments = build_initial_embodiment_state(registry, digest)
+            state.embodiments.migrated_from_contract_version = source_contract_version
+        try:
+            validate_embodiment_projection(state.embodiments, registry, digest)
+        except ValueError as exc:
+            raise PreflightError(
+                "persisted embodiment projection does not match runtime registry"
+            ) from exc
+        state.manifest.embodiment_registry_sha256 = digest
+        state.manifest.runtime_contract_version = self.baseline[
+            "runtime_contract_version"
+        ]
+
     def _validate_loaded_communications(self, state: L1RunState) -> None:
         message_ids = set()
         for index, message in enumerate(state.communications):
@@ -1015,6 +1722,82 @@ class OrionL1Runtime:
     @staticmethod
     def _validate_revision(value: str, field_name: str) -> None:
         validate_revision(value, field_name)
+
+    def _require_fleet_receipt(self) -> Dict[str, Any]:
+        if self.fleet_receipt is None:
+            raise PreflightError("fleet authority receipt is unavailable after preflight")
+        return self.fleet_receipt
+
+    @staticmethod
+    def _require_complete_staffing_receipt(receipt: GovernanceReceipt) -> None:
+        if not receipt.complete:
+            raise GovernanceError(
+                "Triplex authorization incomplete; staffing action rejected"
+            )
+
+    @staticmethod
+    def _staffing_event(action: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "event_id": str(uuid.uuid4()),
+            "tick": action["tick"],
+            "kind": "governed_staffing_action",
+            "staffing_action_id": action["action_id"],
+            "personnel_id": action.get("personnel_id"),
+            "staffing_seat": action.get("staffing_seat"),
+            "receipt_id": action["receipt_id"],
+            "canon_status": action["canon_status"],
+        }
+
+    @staticmethod
+    def _staffing_counter_payload(state: L1RunState) -> Dict[str, int]:
+        return {
+            "operational_personnel_records": len(state.staffing.personnel),
+            "human_complement_delta": state.staffing.human_complement_delta,
+            "persona_resolved_delta": state.staffing.persona_resolved_delta,
+            "active_staffing_seats": sum(
+                seat.status == "active" for seat in state.staffing.seats.values()
+            ),
+            "retired_staffing_seats": sum(
+                seat.status == "retired" for seat in state.staffing.seats.values()
+            ),
+        }
+
+    def _record_staffing_action(
+        self,
+        state: L1RunState,
+        action: Dict[str, Any],
+        receipt: GovernanceReceipt,
+    ) -> None:
+        state.governance_receipts.append(receipt)
+        state.events.append(self._staffing_event(action))
+        self._project_staffing_counters(state)
+        self._persist_if_configured()
+
+    @staticmethod
+    def _project_staffing_counters(state: L1RunState) -> None:
+        population = state.world_state.setdefault("population", {})
+        if not isinstance(population, dict):
+            raise PreflightError("runtime population projection must be a JSON object")
+        population["run_staffing"] = OrionL1Runtime._staffing_counter_payload(state)
+
+    def _require_fleet_receipt_sha256(self) -> str:
+        if self.fleet_receipt_sha256 is None:
+            raise PreflightError(
+                "fleet authority receipt digest is unavailable after preflight"
+            )
+        return self.fleet_receipt_sha256
+
+    def _require_embodiment_registry(self) -> Dict[str, Any]:
+        if self.embodiment_registry is None:
+            raise PreflightError("embodiment registry is unavailable after preflight")
+        return self.embodiment_registry
+
+    def _require_embodiment_registry_sha256(self) -> str:
+        if self.embodiment_registry_sha256 is None:
+            raise PreflightError(
+                "embodiment registry digest is unavailable after preflight"
+            )
+        return self.embodiment_registry_sha256
 
     def _require_state(self) -> L1RunState:
         if self.state is None:

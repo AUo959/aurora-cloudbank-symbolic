@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 """
+Status: SUPERSEDED by simulation/orion_station_simulation_v2.py, which adds
+the canonical character loader. This module has no importers anywhere in the
+tree and is retained as the Phase 1 execution record. Do not build on it.
+See #1132.
+
 Orion Station Multi-Agent Simulation (L1 Canon) — Phase 1 Execution
 -------------------------------------------------------------------
 - Environment: Ant-farm universe sandbox, emergent behaviors encouraged

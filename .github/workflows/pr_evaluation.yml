@@ -144,11 +144,10 @@ jobs:
             });
           }
 
-    - name: Check evaluation status (advisory; tracked in #1342)
+    - name: Enforce evaluation status
       if: steps.detect.outputs.should_run == 'true' && steps.evaluate.outputs.exit_code != '0'
-      continue-on-error: true
       run: |
-        echo "PR evaluation found issues. Review the artifact and #1342 before merge."
+        echo "PR evaluation found blocking issues. Review the artifact before merge."
         exit 1
 
     - name: Skip summary

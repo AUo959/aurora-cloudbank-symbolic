@@ -104,3 +104,53 @@ runbooks:
         params:
           window_size: 300
           hard: true  # wipe existing baseline and rebuild from scratch
+
+  # ------------------------------------------------------------------------
+  # Fabric-invariant runbooks (RULING-FABRIC-WIRING, 2026-07-21)
+  #
+  # Selected by DriftAlert.metadata['runbook'], not by DriftLevel, because a
+  # fabric finding needs a different response from statistical drift at the same
+  # severity. A fabric VIOLATION is CRITICAL, but suspending an agent and
+  # hard-rebaselining because a canon record overstates its map placement would be
+  # both useless and disruptive — the problem is in the corpus, not the process.
+  # The ruling specifies alert/escalate for VIOLATION and log/notify for GAP, and
+  # deliberately names no suspend, throttle or rebaseline action.
+  # Emitted by src/monitoring/fabric_invariant_bridge.py.
+  # ------------------------------------------------------------------------
+  - level: fabric_violation
+    name: "FABRIC VIOLATION — Alert & Escalate"
+    description: >
+      A fabric invariant (T/P/C) is violated in committed canon. Canon integrity
+      is compromised: raise an internal alert and escalate to the canon owner.
+      No agent is suspended and no baseline is touched — the finding concerns the
+      corpus, not a running agent.
+    actions:
+      - type: log
+        params:
+          severity: critical
+          message: "Fabric invariant VIOLATION in canon — escalating to canon owner."
+      - type: alert
+        params:
+          channel: sentinel
+          title: "Fabric invariant violation"
+      - type: escalate
+        params:
+          target: canon-owner
+      - type: notify
+        params:
+          stream: sentinel
+
+  - level: fabric_gap
+    name: "FABRIC GAP — Log & Notify"
+    description: >
+      A fabric invariant cannot be checked for this subject (missing binding,
+      absent map row, null adjacency anchor). Not a contradiction in canon — an
+      unverifiable claim. Record it and surface it; take no corrective action.
+    actions:
+      - type: log
+        params:
+          severity: warning
+          message: "Fabric invariant GAP — invariant unverifiable for this subject."
+      - type: notify
+        params:
+          stream: sentinel

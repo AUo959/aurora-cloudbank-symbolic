@@ -37,11 +37,19 @@ jobs:
           git reset --hard origin/main
 
       - name: Log trigger info
+        env:
+          # Every value below is caller-controlled on a repository_dispatch, so
+          # none of them may be interpolated into the script body. Same class
+          # of finding as #1546 fixed in the publisher and router workflows.
+          EVENT_ACTION: ${{ github.event.action }}
+          SOURCE_NODE: ${{ github.event.client_payload.source_node }}
+          SOURCE_REPO: ${{ github.event.client_payload.source_repo }}
+          CORRELATION_ID: ${{ github.event.client_payload.correlation_id }}
         run: |
-          echo "Event type: ${{ github.event.action }}"
-          echo "Source node: ${{ github.event.client_payload.source_node }}"
-          echo "Source repo: ${{ github.event.client_payload.source_repo }}"
-          echo "Correlation ID: ${{ github.event.client_payload.correlation_id }}"
+          echo "Event type: ${EVENT_ACTION}"
+          echo "Source node: ${SOURCE_NODE}"
+          echo "Source repo: ${SOURCE_REPO}"
+          echo "Correlation ID: ${CORRELATION_ID}"
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
@@ -51,15 +59,23 @@ jobs:
       - name: Run aggregator
         run: python scripts/aggregate-knowledge-indexes.py
 
-      - name: Commit aggregated index
+      # This step used to commit and push directly to main. That could never
+      # succeed: main requires the `CI Check` status, a direct push from the
+      # bot never produces it, and protection rejected every attempt
+      # (98 failures, 0 successes, GH006 "Protected branch update failed").
+      # The run did the work and then discarded it. See #1566 and #1558.
+      #
+      # It is a drift gate instead: the aggregation still runs on every
+      # dispatch, and a difference against the committed index fails the run
+      # with the diff, rather than being silently thrown away.
+      - name: Check aggregated index is current
         run: |
-          git config user.name "aurora-constellation[bot]"
-          git config user.email "aurora-constellation[bot]@users.noreply.github.com"
-          git add knowledge-indexes/
-          if git diff --cached --quiet; then
-            echo "No knowledge-index changes to commit."
+          if git diff --quiet -- knowledge-indexes/; then
+            echo "::notice::Aggregated knowledge index is current."
             exit 0
           fi
-          git commit -m "chore: aggregate knowledge indexes from ${{ github.event.client_payload.source_node || 'manual' }} [skip ci]"
-          git pull --rebase origin main
-          git push
+          echo "::error::knowledge-indexes/ is out of date. Regenerate and commit:"
+          echo "    python scripts/aggregate-knowledge-indexes.py"
+          echo ""
+          git --no-pager diff --stat -- knowledge-indexes/
+          exit 1

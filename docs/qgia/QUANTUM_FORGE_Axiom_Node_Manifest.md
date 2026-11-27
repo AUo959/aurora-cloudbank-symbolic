@@ -12,7 +12,7 @@
 ## Scope and authority
 
 This document is the human-readable registry for
-`QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json`. The JSON manifest is the
+`QGIA_Integration/QUANTUM_FORGE_Axiom_Manifest.json`. The JSON manifest is the
 detailed machine mirror for the 23 QGIA axiom definitions; it retains every
 rule summary, corollary, violation signal, audit event, PAT command, and
 advisory hook.

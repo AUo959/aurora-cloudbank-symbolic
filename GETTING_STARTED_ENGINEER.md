@@ -49,7 +49,7 @@ HALO is an L1 continuity system-entity, not a sixth communication relay. Read [`
 | --- | --- |
 | Canonical L1/L2/L3 and Triplex definitions | `docs/architecture/LAYER_ARCHITECTURE.md` |
 | Geometric ethics and GUMAS governance | `modules/ethics_field/`, `modules/gumas/` |
-| GUMAS audit-event schema and Thermax binding | `QGIA_Integration/04_GUMAS_AuditSchema.md`, `QGIA_integration/QUANTUM_FORGE_Axiom_Manifest.json` |
+| GUMAS audit-event schema and Thermax binding | `QGIA_Integration/04_GUMAS_AuditSchema.md`, `QGIA_Integration/QUANTUM_FORGE_Axiom_Manifest.json` |
 | Hierarchical symbolic memory with SHA-256 sealing | `modules/aumemmanager/` |
 | HALO/PAS continuity controller | `src/aurora/continuity/halo_pas_controller.py` |
 | Triplex orchestration | `src/aurora_orchestrator/triplex_handshake.py` |

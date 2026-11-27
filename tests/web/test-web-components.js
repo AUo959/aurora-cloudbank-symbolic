@@ -1,108 +1,132 @@
 /**
- * Aurora CloudBank Web Interface Tests
- * Basic tests for web components and API endpoints
+ * Aurora CloudBank browser utility tests.
+ *
+ * The harness supplies only the browser primitives used by the maintained
+ * static modules; assertions exercise those modules directly.
  */
-/* eslint-env browser */
-/* global document */
-import { mock } from 'node:test';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import test, { mock } from 'node:test';
+import assert from 'node:assert/strict';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '../..');
+function createMockElement(tagName) {
+  const attributes = new Map();
 
-// Mock DOM globals for testing
+  return {
+    tagName: tagName.toUpperCase(),
+    textContent: '',
+    innerHTML: '',
+    setAttribute(name, value) {
+      attributes.set(name, value);
+    },
+    getAttribute(name) {
+      return attributes.get(name) ?? null;
+    },
+    removeAttribute(name) {
+      attributes.delete(name);
+    },
+  };
+}
+
+const storageData = new Map();
+
 global.window = {
   location: { host: 'localhost:8000', origin: 'http://localhost:8000' },
-  performance: { now: () => Date.now() },
-  addEventListener: () => {},
-  WebSocket: class MockWebSocket {
-    constructor(url) { this.url = url; this.readyState = 1; }
-    send() {}
-    close() {}
-  }
+  performance: { now: () => 42 },
+  addEventListener: mock.fn(),
 };
 
 global.document = {
-  getElementById: () => ({ 
-    value: 'test-value',
-    textContent: '',
-    appendChild: () => {},
-    scrollTop: 0,
-    scrollHeight: 100
-  }),
-  createElement: () => ({
-    className: '',
-    textContent: '',
-    style: {},
-    appendChild: () => {},
-    title: '',
-    setAttribute: () => {},
-    removeAttribute: () => {}
-  }),
-  createTextNode: (text) => ({ textContent: text }),
-  createDocumentFragment: () => ({ appendChild: () => {} }),
-  createTreeWalker: () => ({ nextNode: () => null }),
-  addEventListener: () => {}
+  createElement: createMockElement,
 };
 
 global.localStorage = {
-  data: {},
-  getItem: function(key) { return this.data[key] || null; },
-  setItem: function(key, value) { this.data[key] = value; },
-  removeItem: function(key) { delete this.data[key]; }
+  getItem(key) {
+    return storageData.get(key) ?? null;
+  },
+  setItem(key, value) {
+    storageData.set(key, value);
+  },
+  removeItem(key) {
+    storageData.delete(key);
+  },
+  clear() {
+    storageData.clear();
+  },
 };
 
-global.fetch = mock.fn(() => Promise.resolve({
-  ok: true,
-  json: () => Promise.resolve({ status: 'success' })
-}));
+global.fetch = mock.fn(async () => ({ ok: true }));
 
-global.NodeFilter = {
-  SHOW_ELEMENT: 1,
-  FILTER_ACCEPT: 1,
-  FILTER_REJECT: 2
-};
+test('maintained browser utilities expose and enforce their contracts', async t => {
+  await import('../../static/js/aurora-security.js');
+  await import('../../static/js/aurora-web-logger.js');
 
-/**
- * Enhanced multi-pass sanitization for security
- * 
- * This function implements defense-in-depth sanitization:
- * - Removes control characters (null bytes, carriage returns, etc.)
- * - Strips script tags and JavaScript protocols
- * - Removes event handler attributes
- * - Uses replaceAll() for reliable, complete replacements
- * - Employs iterative sanitization to prevent bypass attempts
- * 
- * @param {string} input - The input string to sanitize
- * @returns {string} The sanitized string, truncated to 1000 characters
- */
-function sanitizeInput(input) {
-  if (typeof input !== 'string') return '';
-  
-  let sanitized = input;
-  let previousLength;
-  
-  // SECURITY: Repeat sanitization until no more changes occur
-  // This prevents bypass via nested patterns like <scr<script>ipt>
-  do {
-    previousLength = sanitized.length;
-    
-    // Remove control characters and potential XSS vectors
-    sanitized = sanitized
-      // Control characters: Remove ASCII control chars (0x00-0x1F) and 
-      // extended control chars (0x7F-0x9F) which can be used to hide malicious
-      // content or bypass filters (null bytes, carriage returns, line feeds, etc.)
-      .replace(/[\x00-\x1f\x7f-\x9f]/g, '')
-      // Script tags: Remove all script tags and their content
-      .replace(/<script[^>]*>.*?<\/script>/gi, '')
-      // JavaScript protocol: Remove javascript: pseudo-protocol from URLs
-      .replace(/javascript:/gi, '')
-      // Event handlers: Remove inline event handler attributes (onclick, onload, etc.)
-      .replace(/on\w+\s*=/gi, '');
-  } while (sanitized.length !== previousLength);
-  
-  // Truncate to reasonable length to prevent DoS
-  return sanitized.substring(0, 1000);
-}
+  const security = global.window.AuroraSecurity;
+  const AuroraWebLogger = global.window.AuroraWebLogger;
+
+  await t.test('modules register their browser APIs', () => {
+    assert.ok(security);
+    assert.equal(typeof AuroraWebLogger, 'function');
+  });
+
+  await t.test('HTML-sensitive characters are escaped', () => {
+    assert.equal(
+      security.escapeHtml('<script>alert("x")</script>'),
+      '&lt;script&gt;alert(&quot;x&quot;)&lt;&#x2F;script&gt;'
+    );
+  });
+
+  await t.test('unsafe control characters are removed from display text', () => {
+    assert.equal(security.sanitizeText('anchor\u0000-safe\u007f'), 'anchor-safe');
+    assert.equal(security.sanitizeText({ message: 'not text' }), '');
+  });
+
+  await t.test('safe elements use text content and reject event attributes', () => {
+    const element = security.createSafeElement('button', '<b>Launch</b>', {
+      class: 'primary',
+      onclick: 'launch()',
+    });
+
+    assert.equal(element.textContent, '<b>Launch</b>');
+    assert.equal(element.getAttribute('class'), 'primary');
+    assert.equal(element.getAttribute('onclick'), null);
+  });
+
+  await t.test('WebSocket payloads are normalized without executing markup', () => {
+    assert.deepEqual(
+      security.sanitizeWebSocketData('{"message":"safe\\u0000text","count":2}'),
+      { message: 'safetext', count: 2 }
+    );
+    assert.match(
+      security.sanitizeWebSocketData('{not-json').error,
+      /Invalid JSON data/
+    );
+  });
+
+  await t.test('logger bounds its in-memory and persisted history', () => {
+    global.localStorage.clear();
+    const logger = new AuroraWebLogger('TEST_COMPONENT', {
+      console: false,
+      maxStorageEntries: 2,
+    });
+
+    logger.info('first');
+    logger.warn('second');
+    logger.error('third');
+
+    assert.deepEqual(logger.logBuffer.map(entry => entry.message), ['second', 'third']);
+    assert.deepEqual(
+      logger.getStoredLogs().map(entry => entry.message),
+      ['second', 'third']
+    );
+  });
+
+  await t.test('logger honors configured severity thresholds', () => {
+    const logger = new AuroraWebLogger('TEST_COMPONENT', {
+      console: false,
+      storage: false,
+      level: 'WARN',
+    });
+
+    assert.equal(logger.shouldLog('INFO'), false);
+    assert.equal(logger.shouldLog('ERROR'), true);
+  });
+});

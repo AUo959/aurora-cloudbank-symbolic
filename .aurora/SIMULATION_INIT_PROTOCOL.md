@@ -1,6 +1,6 @@
 # Aurora CloudBank — Orion L1 INIT Protocol
 
-**Version:** 2.1.0
+**Version:** 2.2.0
 **Last Updated:** 2026-08-08  
 **Purpose:** Governed, reproducible initialization of a live Orion Station L1 run
 
@@ -50,6 +50,12 @@ L1 genesis authority.
     is required before `simulation/l1_runtime.py` applies a governed action.
 11. **Normal runtime persistence stays outside the repository.** Ordinary L1
     operation does not write GitHub canon.
+12. **Fleet state is run-scoped.** ORF/ORS/ORP/ORD identity and class are a
+    non-authoritative projection; 2025 mission snapshots never become current
+    2026 run truth.
+13. **ORD policy is not flight.** MCP validation dispatch requires an explicit
+    physical-mission adapter and complete Triplex receipt before drone state can
+    change.
 
 ---
 
@@ -76,6 +82,9 @@ Preflight validates, without creating a run:
 - the benchmark is not mistaken for the entire live L1 world runtime;
 - Picard_Delta_3 / Triplex fail-closed governance is active in the runtime
   contract.
+- the fleet authority/projection receipt and its source hashes match;
+- historical fleet missions are provenance-only and ORD policy is separated
+  from physical flight.
 
 A successful report contains:
 
@@ -109,10 +118,11 @@ INIT:
 4. records the deterministic runtime seed;
 5. records the runtime-contract version;
 6. records the population snapshot and active quarantines;
-7. creates a unique run ID;
-8. creates a run state at **tick 0**;
-9. persists the run outside the repository;
-10. performs **no station advancement**.
+7. binds the fleet authority receipt and typed ORF/ORS/ORP/ORD projection;
+8. creates a unique run ID;
+9. creates a run state at **tick 0**;
+10. persists the run outside the repository;
+11. performs **no station or fleet advancement**.
 
 The resulting run is advancement-capable but still at genesis.
 
@@ -136,6 +146,12 @@ A quiet advancement window is valid. The runtime must not manufacture drama,
 character availability, emergencies, discoveries, or convenient explanations
 for engagement.
 
+Station-event and fleet processes are deterministic but separately namespaced.
+Fleet state advances from seed, fleet identity, tick, and elapsed time without
+consulting observation focus. It uses qualitative mission and location classes;
+exact orbital coordinates, ranges, docking bays, and trajectories remain
+unavailable.
+
 Persisted runs continue through the governed continuation entry point:
 
 ```bash
@@ -158,6 +174,11 @@ not presented as live readings. The accompanying logical schematic projects
 only causal-safe topology. Historical deck layouts that conflict with current
 locus, population, or Earth-side Pilot rulings remain reference-only.
 
+Persisted contract `1.1.0` states from PR #1480 remain loadable. If they lack
+fleet state, continuation deterministically reconstructs fleet process position
+from the existing autonomous-event ledger. Loading alone does not advance or
+rewrite the persisted run.
+
 ---
 
 ## Observation controls
@@ -174,6 +195,27 @@ Observation may reveal instrumentation unavailable through ordinary station
 communications, but such output must be labeled as instrumentation.
 
 Observation does not change autonomous event probability.
+
+The explicit fleet apertures are `fleet`, `proximity`, `docking`, and
+`drone`/`drones`. A bound provider returns run-state records and the fleet
+authority receipt. An unbound provider returns
+`unavailable / provider_unbound`, not an empty-record false negative.
+
+---
+
+## Fleet authority and ORD physical-mission boundary
+
+`config/l1_fleet_authority_receipt.json` reconciles the active modular
+ORF/ORS/ORP/ORD implementation, detailed design records, the legacy Dark
+Matter fleet aggregate, and the ORD MCP policy library.
+
+The runtime imports identity, class, autonomy, and source provenance only. It
+does not import dated `current_mission`, `current_deployment_status`, status,
+coordinate, crew-assignment, or mission-counter fields from 2025 records.
+
+An ORD `DispatchOrder` remains a policy result. `simulation/l1_fleet.py`
+creates a proposal-only bridge object; no physical state changes until a
+complete Triplex receipt is supplied to the explicit activation call.
 
 ---
 
@@ -328,6 +370,9 @@ Before issuing INIT:
 - [ ] legacy state is non-genesis
 - [ ] canonical Phase-1 benchmark is v2
 - [ ] Triplex fail-closed policy is present
+- [ ] fleet authority receipt and source hashes match
+- [ ] historical 2025 fleet mission/deployment fields are provenance-only
+- [ ] ORD MCP policy cannot imply physical flight
 
 After INIT:
 
@@ -336,6 +381,8 @@ After INIT:
 - [ ] seed is persisted
 - [ ] tick is exactly 0
 - [ ] event ledger is empty
+- [ ] fleet provider is bound at replay position 0
+- [ ] fleet entities carry no imported historical mission IDs or coordinates
 - [ ] run persistence is outside the repository
 
 ---

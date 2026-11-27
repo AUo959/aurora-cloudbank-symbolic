@@ -18,6 +18,10 @@ on:
       - 'Dockerfile'
       - 'requirements*.txt'
       - '.github/workflows/k8s-deploy.yml'
+      - '.github/workflows/aurora-ci-minimal.yml'
+      - 'scripts/ci_verification.py'
+      - 'tests/test_ci_verification.py'
+      - '!**.md'  # Canonical CI intentionally skips Markdown-only pushes.
   pull_request:
     branches: [main, develop]
     paths:
@@ -28,6 +32,9 @@ on:
       - 'Dockerfile'
       - 'requirements*.txt'
       - '.github/workflows/k8s-deploy.yml'
+      - '.github/workflows/aurora-ci-minimal.yml'
+      - 'scripts/ci_verification.py'
+      - 'tests/test_ci_verification.py'
   workflow_dispatch:
     inputs:
       environment:
@@ -64,20 +71,33 @@ jobs:
   test:
     name: "Run Tests"
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     if: ${{ !inputs.skip_tests }}
+
+    permissions:
+      contents: read
+      actions: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
+      - name: Verify canonical CI before automatic builds
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python scripts/ci_verification.py wait
+
       - name: Set up Python
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: '3.12'
           cache: 'pip'
 
       - name: Install dependencies
+        if: github.event_name == 'workflow_dispatch'
         run: |
           python -m pip install --upgrade pip
           # Hash-checked: requirements-ci-hashed.txt is compiled from both
@@ -86,6 +106,7 @@ jobs:
             -r requirements-ci-hashed.txt
 
       - name: Python syntax check
+        if: github.event_name == 'workflow_dispatch'
         run: |
           paths=""
           for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager; do
@@ -98,6 +119,7 @@ jobs:
             --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv
 
       - name: Run unit tests (blocking)
+        if: github.event_name == 'workflow_dispatch'
         run: |
           if [ -d tests ]; then
             pytest tests/ -v --cov=. --cov-report=term-missing -m "not slow"
@@ -119,7 +141,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c  # v4.2.0
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e  # v4.3.0
 
       - name: Log in to Container Registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
@@ -158,7 +180,7 @@ jobs:
 
       - name: Generate SBOM
         if: github.event_name != 'pull_request'
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610  # v0.24.0
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26  # v0.24.2
         with:
           image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           format: spdx-json
@@ -481,7 +503,7 @@ jobs:
   notify:
     name: "Deployment Notification"
     runs-on: ubuntu-latest
-    needs: [build, validate-manifests, deploy-staging, validate-logs]
+    needs: [test, build, validate-manifests, deploy-staging, validate-logs]
     if: always()
 
     steps:

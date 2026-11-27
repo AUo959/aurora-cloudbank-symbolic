@@ -447,9 +447,12 @@ _FACTION_WORDS = (
 class NameService:
     """Resolve stable names against a supplied canonical registry."""
 
-    def __init__(self, registry: NameRegistry | None = None, max_attempts: int = 128):
+    def __init__(self, registry: NameRegistry | None = None, max_attempts: int = 128, shadow: Any | None = None):
+        """``shadow``: an optional observer (e.g. ``phonology_shadow.PhonologyShadow``) told about each
+        resolved name. It records to its own log and cannot change the resolution or its receipt."""
         self.registry = registry or NameRegistry()
         self.max_attempts = max(8, int(max_attempts))
+        self.shadow = shadow
 
     def resolve(self, request: NameRequest) -> NameResolution:
         seed = self._seed_for_request(request)
@@ -507,6 +510,8 @@ class NameService:
                     "aliases": aliases,
                 },
             )
+            if self.shadow is not None:
+                self.shadow.observe(request, resolution)
             return resolution
 
         raise RuntimeError(
@@ -529,7 +534,7 @@ class NameService:
                 seed_hint=(request.seed_hint or self._seed_for_request(request)) + index,
                 candidate_count=request.candidate_count,
             )
-            resolution = NameService(working, self.max_attempts).resolve(varied)
+            resolution = NameService(working, self.max_attempts, shadow=self.shadow).resolve(varied)
             resolution.request["entity_id"] = request.entity_id
             resolution.selection_mode = "candidate"
             shortlist.append(resolution)

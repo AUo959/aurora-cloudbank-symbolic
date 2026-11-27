@@ -31,7 +31,7 @@ class ClaudeConfig:
     preferred_model: str = "claude-opus-5"  # Default to Opus 5
     fallback_model: str = "claude-sonnet-5"  # Fallback to Sonnet 5
     enable_gpt_fallback: bool = True
-    gpt_fallback_model: str = "gpt-4o"
+    gpt_fallback_model: str = "gpt-6.1-sol"
 
     # Performance settings
     max_tokens: int = 16384  # conservative default; Opus 5 supports up to 128k
@@ -60,7 +60,7 @@ class ClaudeIntegrationHub:
 
     Key features:
     - Automatic model selection based on availability
-    - Intelligent fallback chain: Opus 5 → Sonnet 5 → GPT-4o
+    - Intelligent fallback chain: Opus 5 → Sonnet 5 → GPT-6.1 Sol
     - Context window optimization
     - Code execution support
     - Backward compatible with existing sonnet4_integration_hub
@@ -85,7 +85,7 @@ class ClaudeIntegrationHub:
             preferred_model=claude_cfg.get("preferred_model", "claude-opus-5"),
             fallback_model=claude_cfg.get("fallback_model", "claude-sonnet-5"),
             enable_gpt_fallback=claude_cfg.get("enable_gpt_fallback", True),
-            gpt_fallback_model=claude_cfg.get("gpt_fallback_model", "gpt-4o"),
+            gpt_fallback_model=claude_cfg.get("gpt_fallback_model", "gpt-6.1-sol"),
             max_tokens=claude_cfg.get("max_tokens", 16384),
             temperature=claude_cfg.get("temperature", 0.7),
             top_p=claude_cfg.get("top_p", 0.9),
@@ -165,6 +165,7 @@ class ClaudeIntegrationHub:
             dlp_tracking=self.claude_config.dlp_tracking,
             safety_level=self.claude_config.safety_level,
             functions=kwargs.get("functions"),
+            reasoning_effort=kwargs.get("reasoning_effort", "medium"),
         )
 
         try:
@@ -209,7 +210,7 @@ class ClaudeIntegrationHub:
 
         # Add GPT fallback if enabled
         if self.claude_config.enable_gpt_fallback:
-            chain.append(AIModel.GPT_4O)
+            chain.append(AIModel(self.claude_config.gpt_fallback_model))
 
         return chain
 

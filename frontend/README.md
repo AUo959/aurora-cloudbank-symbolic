@@ -248,7 +248,7 @@ frontend/
 Create `.env` file (see `.env.example`):
 
 ```env
-VITE_API_BASE_URL=http://localhost:8000
+VITE_API_BASE_URL= # empty uses the same-origin Vite/reverse proxy
 VITE_WS_URL=ws://localhost:8000
 ```
 

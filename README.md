@@ -39,6 +39,8 @@ and both are load-bearing.
 > **Reviewing canon provenance?** [`docs/CANON_PROVENANCE.md`](./docs/CANON_PROVENANCE.md) identifies the CanonRec source revision, mirrored payload hash, and the surfaces that still require reconciliation.
 >
 > **New AI agent or Copilot session?** Start with [`AGENTS.md`](./AGENTS.md) (bootstrap protocol and rules) and [`AURORA_CONTEXT.json`](./AURORA_CONTEXT.json) (machine-readable concept map).
+>
+> **Reviewing contribution provenance?** [`AI_AUTHORS.md`](./AI_AUTHORS.md) explains human accountability, agent-assisted authorship, attribution expectations, and the limits of Git identity evidence.
 
 ---
 
@@ -381,7 +383,9 @@ test: add coverage for joy evolution engine
 4. Run `make check` before pushing.
 5. Open a pull request against `main` with a conventional commit title.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution guide.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution guide and
+[AI_AUTHORS.md](AI_AUTHORS.md) for agent-assisted authorship and provenance
+expectations.
 
 ---
 

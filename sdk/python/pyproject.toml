@@ -32,7 +32,11 @@ classifiers = [
 
 dependencies = [
     "httpx>=0.28.0",
-    "pydantic>=2.5.0",
+    # Ceiling per the selective-bounding policy: pydantic has a breaking
+    # major in this project's history (V1->V2) and a V2->V3 step would be
+    # breaking again. Other runtime deps here stay unbounded so they do not
+    # constrain consumers. See #1417.
+    "pydantic>=2.5.0,<3.0.0",
     "python-dotenv>=1.0.0",
     "typing-extensions>=4.8.0",
 ]

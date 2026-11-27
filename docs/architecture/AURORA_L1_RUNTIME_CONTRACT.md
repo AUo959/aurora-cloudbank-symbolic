@@ -1,6 +1,6 @@
 # Aurora L1 Runtime Contract
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Date:** 2026-08-08  
 **Status:** Runtime contract for governed Orion L1 initialization and advancement  
 **Machine-readable baseline:** `config/l1_runtime_baseline.json`  
@@ -55,6 +55,15 @@ but it cannot overrule CanonRec on canon conflicts.
 Run state is lower authority than both. Runtime facts begin as `run_state` and
 must not become primary canon without explicit post-run review.
 
+Fleet identity is currently a CloudBank
+`runtime_projection_non_authoritative`, governed by
+`config/l1_fleet_authority_receipt.json`. The active projection selects the
+ORF/ORS/ORP/ORD identity surface in `src/entities/fleet/`. Detailed
+`simulation/fleet/` records remain design provenance, and their dated 2025
+missions, coordinates, assignments, and counters are not current 2026 run
+state. The conflicting Dark Matter aggregate at `.aurora/canonical/fleet.json`
+is legacy provenance only.
+
 ## Pilot boundary
 
 Pilot is an Earth-side institutional operator role.
@@ -83,6 +92,12 @@ frequently.
 
 A no-material-event result is valid. The runtime does not manufacture content
 to reward attention.
+
+Fleet advancement is a second deterministic world process namespaced by seed,
+fleet identity, and tick. It does not consume observation state or the station
+event generator's replay position. It advances only qualitative mission,
+status, proximity, and docking/location classes; exact trajectories and
+coordinates remain quarantined.
 
 ## Input routing
 
@@ -209,6 +224,84 @@ The `PopulationSnapshot` type also permits a future evidence-supported state in
 which, for example, human complement is 81 while identified/persona-resolved
 subsets are smaller.
 
+### Need-driven staffing and progressive personnel resolution
+
+The run-scoped `StaffingRunState` is distinct from both the static bootstrap
+population snapshot and the legacy HR character generator. Staffing demand is
+accepted only as typed institutional evidence: workload over capacity,
+sustained overtime, uncovered shifts, program expansion, a new technical
+capability requirement, attrition/leave, safety or ethics constraints,
+separation-of-duties requirements, or succession and coverage risk. A demand
+with none of those signals produces `no_action`.
+
+Planning is deterministic and uses existing capacity before creating a new
+person. An eligible internal reassignment is preferred, then an acting
+promotion, then a transfer to Orion, and only then an external hire or
+contractor/visitor assignment. Applying the plan requires a complete Triplex
+receipt and records the demand provenance, rationale, before/after operational
+state, receipt identity, and run tick. The target role/seat is created as an
+explicit run-scoped seat record when first needed. An outbound transfer keeps
+the personnel identity and prior observations but marks the assignment
+departed; a now-vacant seat may then be retired under a separate provenance-rich
+Triplex action. Occupied seats cannot be retired, and a retired seat cannot be
+silently reused.
+
+A newly instantiated person begins as a minimal operational record containing
+only a run-derived personnel ID, employment/assignment status, department,
+role/seat, clearance envelope, shift/workload state, capabilities needed for
+the assignment, and arrival provenance. The runtime does not invent a name,
+biography, appearance, personality, family, hobbies, intimate history, or
+narrative arc merely because the institution needs a worker.
+
+Progressive resolution accepts only provenance-linked observations in a small
+operational allowlist (demonstrated skill, collaboration pattern,
+communication style, and operational preference). Observation first produces
+`partially_observed`; a separate Triplex-reviewed action may later mark a
+persona `persona_resolved_run_state`. That state remains run-local and is not
+canon promotion. A persistently important person may only be nominated through
+the normal candidate-promotion workflow, followed by independent canon review,
+identity-conflict checks, and owner authorization.
+
+The staffing projection keeps `human_complement_delta`,
+`persona_resolved_delta`, and active/retired seat counts independent. Hiring or
+transferring a human to Orion increments the complement delta; transferring a
+human from Orion decrements it without erasing the personnel record.
+Contractors do not inflate the human complement, and observation alone does not
+count as a resolved persona. Persisted staffing actions fail closed unless
+their complete Triplex receipt, matching audit event, and projected counters
+remain present and coherent.
+
+## Fleet state and observation providers
+
+`L1RunState.fleet` carries typed state for each projected asset:
+
+- identity and display name;
+- asset class and autonomy class;
+- run-scoped status and mission-state class;
+- qualitative docking/location class;
+- authority receipt and source provenance;
+- deterministic fleet-process replay position.
+
+The fleet, proximity, docking, and drone observation providers read this state
+without advancing it. A bound provider returns `available` with the receipt and
+projection role. An unbound provider returns
+`unavailable / provider_unbound`; it must never turn missing provider data into
+a claim that no craft are active. Exact range, docking bay, and navigation
+trajectory remain unavailable.
+
+ORD policy and physical flight are separate domains. `modules/ord/` may create
+an MCP-validation `DispatchOrder`, but the order has no physical effect. The
+explicit ORD-to-L1 adapter first creates a non-executing proposal; physical
+drone mission state changes only after a separate call supplies a complete
+Triplex governance receipt.
+
+Restoration applies the same boundary to persisted state. Every active
+`active_explicit_adapter` entity must match one exact fleet transition, a
+complete Triplex receipt named by that transition, and the corresponding
+governed activation event. A syntactically valid ORD mission state without
+that linked evidence is rejected rather than exposed as resumed physical
+state.
+
 ## Lagrange-point authority and remaining uncertainty
 
 CanonRec's owner ruling establishes the current siting class:
@@ -252,10 +345,29 @@ INIT records at minimum:
 - pinned CanonRec revision;
 - deterministic seed;
 - runtime-contract version;
+- exact SHA-256 of the fleet authority receipt bytes retained at INIT;
 - station-cycle position;
 - active quarantines;
 - typed population snapshot;
+- the fleet authority receipt, typed fleet projection, and fleet replay
+  position;
 - tick/status.
+
+Contract `1.2.0` accepts persisted `1.1.0` continuation states from PR #1480.
+When their fleet field is absent, the runtime reconstructs it from seed plus the
+contiguous autonomous-event ledger without advancing the tick, station cycle,
+or central replay generator. The verified current fleet-receipt digest is
+attached to that in-memory upgrade. The upgraded state is persisted only on a
+later explicit run mutation, including advancement, governed action, or the
+normal recording of an observation into the run-scoped epistemic ledgers.
+Loading by itself remains non-mutating.
+
+Current-contract persisted runs with a fleet-receipt digest must match the
+receipt bytes verified by preflight. A `1.2.0` state created before the digest
+field was introduced may bind the verified digest in memory only after its
+complete bound fleet projection and governed ORD adapter evidence pass current
+validation. Loading remains non-mutating; the digest is persisted only by a
+later explicit run mutation. A present but mismatched digest is always rejected.
 
 Run persistence is rejected if the requested run root is inside the repository.
 The default is external user state under `~/.aurora/l1-runs`.
@@ -299,6 +411,9 @@ The live L1 path is INIT-eligible when:
 - Phase-1 benchmark wiring points to v2;
 - live L1 runtime is distinct from that benchmark;
 - Picard_Delta_3 / Triplex exceptional-action policy fails closed;
+- the fleet authority receipt and all hashed sources match;
+- historical fleet missions cannot seed current run state;
+- ORD MCP policy cannot become physical flight without the explicit adapter;
 - preflight leaves tick 0 and creates no run.
 
 Warnings may remain for quarantined uncertainty. Warnings are not blockers when

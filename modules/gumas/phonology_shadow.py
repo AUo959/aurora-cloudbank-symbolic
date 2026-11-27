@@ -113,7 +113,7 @@ class PhonologyShadow:
 
     def _analyzer(self, profile: str) -> Analyzer:
         if profile not in self._analyzers:
-            self._analyzers[profile] = Analyzer(self._engine(profile))
+            self._analyzers[profile] = Analyzer.shared(self._engine(profile))
         return self._analyzers[profile]
 
     def _fill(self, observation: ShadowObservation, request: "NameRequest") -> None:

@@ -220,7 +220,10 @@ def test_preceded_anywhere_by_condition():
 
 def test_loan_map_drops_note_keys():
     assert "_note" not in VELARI.profile.loan_map
-    assert VELARI.profile.loan_map["x"] == "ks"
+    assert VELARI.profile.loan_map["z"] == "s"
+    assert (
+        "x" not in VELARI.profile.loan_map and "j" not in VELARI.profile.loan_map
+    )  # native since the canon-gaps phase
 
 
 def test_zero_sporadic_rate_never_strikes(tmp_path):
@@ -238,3 +241,30 @@ def test_edit_distance():
     assert _distance("syrr", "syr") == 1
     assert _distance("thalen", "talen") == 1
     assert _distance("", "abc") == 3
+
+
+# ---------------------------------------------------------------- canon gaps: new conditions and orthography
+
+
+def test_max_syllables_condition():
+    law = SoundLaw.from_dict({
+        "id": "T5", "name": "test", "date": 1, "target": {"phoneme": "a"}, "change": {"delete": True},
+        "when": {"word_final": True, "max_syllables": 1},
+    })  # fmt: skip
+    assert law.apply(_word(("ta", "root")), INV).phonemic() == "t"
+    assert law.apply(_word(("tala", "root")), INV).phonemic() == "tala"
+
+
+def test_new_phonemes_come_from_feature_shifts():
+    assert INV.shift(INV["i"], {"syllabic": False, "consonantal": True}).symbol == "j"
+    assert INV.shift(INV["k"], {"strident": True}).symbol == "x"
+    assert INV.shift(INV["d"], {"sonorant": True, "continuant": True}).symbol == "r"
+    assert INV.shift(INV["o"], {"high": True}).symbol == "u"
+
+
+def test_junction_marks_load_in_date_order_with_dialects():
+    marks = VELARI.profile.junction_marks
+    assert [(m.name, m.date, m.mark, m.dialect) for m in marks] == [
+        ("scribal_reform", 800, "'", None),
+        ("union_hyphenation", 1000, "-", "union"),
+    ]

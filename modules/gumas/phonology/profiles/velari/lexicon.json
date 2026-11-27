@@ -20,6 +20,10 @@
     "isa":    {"proto": "isa",    "gloss": "bearer of (personal)",    "gloss_status": "draft", "kind": "suffix"},
     "ara":    {"proto": "ara",    "gloss": "child of (personal)",     "gloss_status": "draft", "kind": "suffix"},
     "ta":     {"proto": "ta",     "gloss": "that, the (demonstrative)", "gloss_status": "draft", "kind": "proclitic"},
+    "eksa":   {"proto": "eksa",   "gloss": "(unknown; epithet suffix)", "gloss_status": "unknown", "kind": "suffix", "source": "Virex"},
+    "yksa":   {"proto": "yksa",   "gloss": "(unknown; epithet suffix)", "gloss_status": "unknown", "kind": "suffix", "source": "Talyx"},
+    "ra":     {"proto": "ra",     "gloss": "diminutive (late)",       "gloss_status": "inferred", "kind": "suffix",
+               "source": "Sira; canon naming_conventions.informal_use: close relations use childhood honorifics"},
 
     "kuna":   {"proto": "kuna",   "gloss": "flame",       "gloss_status": "inferred", "source": "House Velkonn; 'Sira of Flamewake'"},
     "tala":   {"proto": "tala",   "gloss": "stand fast",  "gloss_status": "draft"},
@@ -38,7 +42,17 @@
     "syra":   {"proto": "syra",   "gloss": "silver",      "gloss_status": "draft", "source": "legacy NameService chunk 'syr"},
     "vakara": {"proto": "vakara", "gloss": "oath",        "gloss_status": "draft", "source": "legacy NameService chunk 'vakar"},
     "nima":   {"proto": "nima",   "gloss": "river",       "gloss_status": "draft"},
-    "lunda":  {"proto": "lunda",  "gloss": "harbor",      "gloss_status": "draft"}
+    "lunda":  {"proto": "lunda",  "gloss": "harbor",      "gloss_status": "draft"},
+
+    "wira":     {"proto": "wira",     "gloss": "(unknown)", "gloss_status": "unknown", "source": "Virex (Lord Marshal Virex Tal'Varen)"},
+    "iasreka":  {"proto": "iasreka",  "gloss": "(unknown)", "gloss_status": "unknown", "source": "Jasrek (Jasrek Tyr)"},
+    "iaksa":    {"proto": "iaksa",    "gloss": "(unknown)", "gloss_status": "unknown", "source": "Jaxx (Jaxx Tyren)"},
+    "syrda":    {"proto": "syrda",    "gloss": "(unknown)", "gloss_status": "unknown", "source": "Syrr (Dr. Syrr Velkonn)"},
+    "thala":    {"proto": "thala",    "gloss": "(unknown)", "gloss_status": "unknown", "source": "Thalen (Thalen Rynn)"},
+    "si":       {"proto": "si",       "gloss": "(unknown)", "gloss_status": "unknown", "source": "Sira (Sira Velkonn)"},
+    "nurusa":   {"proto": "nurusa",   "gloss": "(unknown)", "gloss_status": "unknown", "source": "Nyros (Nyros Expanse)"},
+    "soraka":   {"proto": "soraka",   "gloss": "(unknown)", "gloss_status": "unknown", "source": "Surak (Vel-Surak)"},
+    "daerytha": {"proto": "daerytha", "gloss": "(unknown)", "gloss_status": "unknown", "source": "Daeryth (Daeryth Enclave)"}
   },
   "lineages": {
     "_source": "canon/L2/entities/polities/polity_velar_imperium.json naming_conventions.lineage_prefixes (prefix spellings are canon; root assignments, eras and dialects are prototype inference)",

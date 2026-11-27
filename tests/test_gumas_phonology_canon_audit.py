@@ -57,7 +57,7 @@ def test_words_are_classified_and_framing_set_aside(canon):
     report = canon_audit.audit(canon, english=frozenset())
     by_word = {r["word"]: r for r in report["words"]}
     assert by_word["Velkonn"]["status"] == "derived" and by_word["Velkonn"]["tier"] == "velar"
-    assert by_word["Syrr"]["status"] == "near"
+    assert by_word["Syrr"]["status"] == "derived"  # since the canon-gaps phase (rd-assimilation)
     assert by_word["Mara"]["tier"] == "control"
     assert "Captain" not in by_word and "Dr" not in by_word
     assert "record-id:house_velkonn" in report["set_aside"]

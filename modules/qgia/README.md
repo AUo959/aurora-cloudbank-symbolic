@@ -50,7 +50,7 @@ The local bridge accepts a version `1.0` QGIA package containing the existing `F
 
 The L1 mediation record binds the exact forecast reference and identifies the approving authority, relay, decision, selected tiers, review time, translation notes, constraints, exclusions, and ethics state. It also pins the approved GUMAS engine revision and fixture parameters. An accepted L1 decision carries the `L2:scenario_seed` scope. Pending, partial, rejected, superseded, or held material stops before staging.
 
-Use the module with local checkouts and pinned reference files.
+Use the module with local checkouts, pinned reference files, and GitPython from the existing CloudBank development requirements.
 
 ```bash
 python -m modules.qgia.canon_bridge prepare --policy policy.json \

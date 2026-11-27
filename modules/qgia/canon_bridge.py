@@ -5,11 +5,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
-import subprocess
 from collections.abc import Callable, Mapping
 from pathlib import Path, PurePosixPath
-from typing import Annotated, Literal
+from typing import Annotated, BinaryIO, Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, JsonValue, StrictInt, TypeAdapter, field_validator
 
@@ -92,6 +90,13 @@ class EnginePin(BridgeModel):
 
     version: Literal["4.0.0-synth"]
     commit: GitCommit
+
+
+class GateReference(BridgeModel):
+    """Identify one independently issued CanonRec gate receipt."""
+
+    receipt_id: Label
+    artifact: Artifact
 
 
 class Mediation(BridgeModel):
@@ -185,8 +190,8 @@ def _validate_review(forecast: ForecastPackage, review: Mediation, policy: Polic
         raise BridgeError("L1 mediation predates the forecast")
     if review.engine.commit != policy.engine_commit:
         raise BridgeError("L1 mediation pins an unsupported engine commit")
-    tiers = forecast.forecast.tier_assessments
-    branches = {tier.tier for tier in tiers}
+def _validate_selection(forecast: ForecastPackage, review: Mediation) -> None:
+    branches = {tier.tier for tier in forecast.forecast.tier_assessments}
     selected = set(review.selected_tiers)
     if not all((selected, selected <= branches, len(selected) == len(review.selected_tiers))):
         raise BridgeError("L1 mediation must select distinct branches of the verified forecast")
@@ -198,6 +203,10 @@ def _validate_forecast(forecast: ForecastPackage, source: Artifact, policy: Poli
         raise BridgeError("The forecast is superseded or unregistered")
     if FORECAST_INSTANT.validate_python(result.timestamp) != forecast.as_of:
         raise BridgeError("The package timestamp differs from its forecast timestamp")
+    _validate_tiers(result)
+
+
+def _validate_tiers(result: ForecastOutput) -> None:
     if len({branch.tier for branch in result.tier_assessments}) != len(result.tier_assessments):
         raise BridgeError("A forecast branch identifier is repeated")
     values = (value for branch in result.tier_assessments for value in (branch.probability, branch.confidence))
@@ -217,6 +226,7 @@ def prepare_material(source: Artifact, mediation: Artifact, policy: Policy, read
     if review.forecast != source:
         raise BridgeError("The approval binds a different forecast or evidence hash")
     _validate_review(forecast, review, policy)
+    _validate_selection(forecast, review)
     for reference in (*forecast.evidence, *forecast.priors):
         if reference.layer != "L1":
             raise BridgeError("A forecast evidence reference crosses layers")
@@ -251,13 +261,13 @@ def request_subject(material: dict, seed: Artifact, evidence: Artifact, read: Re
     }
 
 
-def _verify_gate(name: str, reference: dict, subject: dict, policy: Policy, read: Reader) -> None:
-    artifact = Artifact.model_validate(reference["artifact"])
+def _verify_gate(name: str, reference: GateReference, subject: dict, policy: Policy, read: Reader) -> None:
+    artifact = reference.artifact
     if artifact.layer != "L2" or _origin(artifact) not in policy.gate_origins.get(name, []):
         raise BridgeError(f"{name} has no trusted L2 origin")
     gate = _json(_verified(artifact, read))
     expected = {
-        "gate": name, "receipt_id": reference["receipt_id"], "subject_sha256": _digest(subject), "verdict": "PASS",
+        "gate": name, "receipt_id": reference.receipt_id, "subject_sha256": _digest(subject), "verdict": "PASS",
     }
     if name == "authorization_approval":
         expected.update(decision="approved", authority=subject["approval"]["authority"])
@@ -267,75 +277,109 @@ def _verify_gate(name: str, reference: dict, subject: dict, policy: Policy, read
         raise BridgeError(f"{name} does not approve the exact staging subject")
 
 
-def finalize_request(subject: dict, receipts: dict, policy: Policy, read: Reader) -> dict:
-    """Emit the CanonRec request after verifying every independently supplied gate."""
+def _validate_subject(subject: dict) -> None:
     scope = tuple(subject[key] for key in ("layer", "operation", "execution_mode"))
     if scope != ("L2", "create_staging_claim", "reference"):
         raise BridgeError("A mediated package can only create L2 staging material")
-    if any((target["layer"], target["kind"], target["expected_state"]) != ("L2", "scenario_seed", None)
-           for target in subject["targets"]):
+    targets = subject["targets"]
+    if len(targets) != 1:
+        raise BridgeError("A mediated package requires exactly one approved scenario seed")
+    target, = targets
+    if (target["layer"], target["kind"], target["expected_state"]) != ("L2", "scenario_seed", None):
         raise BridgeError("A mediated package requires an L2 scenario seed target")
+
+
+def _receipt_for_gate(name: str, reference: dict) -> tuple[str, GateReference]:
+    if name == "naming":
+        variant, = reference
+        if variant not in {"exemption", "receipt"}:
+            raise BridgeError("Expected a naming decision or naming exemption")
+        name, reference = ("naming_exemption" if variant == "exemption" else name), reference[variant]
+    return name, GateReference.model_validate(reference)
+
+
+def finalize_request(subject: dict, receipts: dict, policy: Policy, read: Reader) -> dict:
+    """Emit the CanonRec request after verifying every independently supplied gate."""
+    _validate_subject(subject)
     if set(receipts) != set(REQUIRED_GATES):
         raise BridgeError("The current L2 stage request needs the complete CanonRec gate receipt set")
     for name, reference in receipts.items():
-        if name == "naming":
-            variant, = reference
-            if variant not in {"exemption", "receipt"}:
-                raise BridgeError("Expected a naming decision or naming exemption")
-            name, reference = ("naming_exemption" if variant == "exemption" else name), reference[variant]
-        if set(reference) != {"receipt_id", "artifact"} or not isinstance(reference["receipt_id"], str):
-            raise BridgeError(f"{name} must be a CanonRec gate receipt reference")
-        _verify_gate(name, reference, subject, policy, read)
+        gate, receipt = _receipt_for_gate(name, reference)
+        _verify_gate(gate, receipt, subject, policy, read)
     request = {**subject, "gate_receipts": receipts}
     return {**request, "content_hash": _digest(request)}
 
 
 def git_reader(repositories: Mapping[str, Path]) -> Reader:
     """Resolve evidence from configured local Git object databases."""
-    env = {**os.environ, "GIT_NO_LAZY_FETCH": "1", "GIT_NO_REPLACE_OBJECTS": "1"}
+    try:
+        from git import GitCommandError, InvalidGitRepositoryError, NoSuchPathError, Repo
+    except ImportError as exc:
+        raise BridgeError(
+            "Install GitPython from the CloudBank development requirements to use local Git evidence"
+        ) from exc
+
+    try:
+        checkouts = {name: Repo(path) for name, path in repositories.items()}
+    except (InvalidGitRepositoryError, NoSuchPathError) as exc:
+        raise BridgeError("An evidence repository is not available as a local Git checkout") from exc
 
     def read(reference: Artifact) -> bytes:
-        root = repositories[reference.repository]
-        command = ["git", "-C", str(root), "cat-file"]
-        kind = subprocess.check_output([*command, "-t", reference.commit], env=env)
-        if kind.strip() != b"commit":
-            raise BridgeError("An artifact must pin a full Git commit")
-        return subprocess.check_output([*command, "blob", f"{reference.commit}:{reference.path}"], env=env)
+        repo = checkouts[reference.repository]
+        try:
+            with repo.git.custom_environment(GIT_NO_LAZY_FETCH="1", GIT_NO_REPLACE_OBJECTS="1", GIT_ALLOW_PROTOCOL=""):
+                if repo.git.cat_file("-t", reference.commit) != "commit":
+                    raise BridgeError("An artifact must pin a full Git commit")
+                return repo.git.cat_file(
+                    "blob", f"{reference.commit}:{reference.path}",
+                    stdout_as_string=False, strip_newline_in_stdout=False,
+                )
+        except GitCommandError as exc:
+            raise BridgeError(f"Git artifact unavailable for {reference.path}") from exc
 
     return read
+
+
+def _document(stream: BinaryIO) -> dict:
+    with stream:
+        return _json(stream.read())
+
+
+def _reference(stream: BinaryIO) -> Artifact:
+    return Artifact.model_validate(_document(stream))
+
+
+def _invoke(args: argparse.Namespace) -> dict:
+    policy = Policy.model_validate(_document(args.policy))
+    repositories = {name: Path(path) for name, path in (item.split("=", 1) for item in args.repository)}
+    read = git_reader(repositories)
+    material = prepare_material(_reference(args.forecast), _reference(args.mediation), policy, read)
+    if args.action == "prepare":
+        return material
+    if args.seed is None or args.evidence is None:
+        raise BridgeError("Select pinned seed and evidence artifacts with --seed and --evidence")
+    subject = request_subject(material, _reference(args.seed), _reference(args.evidence), read)
+    if args.action == "subject":
+        return subject
+    if args.gate_receipts is None:
+        raise BridgeError("Supply independently issued gate proofs with --gate-receipts")
+    return finalize_request(subject, _document(args.gate_receipts), policy, read)
 
 
 def main() -> int:
     """Prepare evidence, issue a gate subject, or finalize a review-only packet."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("prepare", "subject", "request"))
-    parser.add_argument("--policy", required=True, type=Path)
-    parser.add_argument("--forecast", required=True, type=Path)
-    parser.add_argument("--mediation", required=True, type=Path)
-    parser.add_argument("--seed", type=Path)
-    parser.add_argument("--evidence", type=Path)
-    parser.add_argument("--gate-receipts", type=Path)
+    for name in ("policy", "forecast", "mediation"):
+        parser.add_argument(f"--{name}", required=True, type=argparse.FileType("rb"))
+    for name in ("seed", "evidence", "gate-receipts"):
+        parser.add_argument(f"--{name}", type=argparse.FileType("rb"))
     parser.add_argument("--repository", action="append", default=[], metavar="OWNER/REPO=PATH")
     args = parser.parse_args()
 
-    def reference(path: Path) -> Artifact:
-        return Artifact.model_validate(_json(path.read_bytes()))
-
     try:
-        policy = Policy.model_validate(_json(args.policy.read_bytes()))
-        read = git_reader({name: Path(path) for name, path in (item.split("=", 1) for item in args.repository)})
-        material = prepare_material(reference(args.forecast), reference(args.mediation), policy, read)
-        result = material
-        if args.action != "prepare":
-            if args.seed is None or args.evidence is None:
-                raise BridgeError("Select pinned seed and evidence artifacts with --seed and --evidence")
-            result = request_subject(material, reference(args.seed), reference(args.evidence), read)
-        if args.action == "request":
-            if args.gate_receipts is None:
-                raise BridgeError("Supply independently issued gate proofs with --gate-receipts")
-            result = finalize_request(result, _json(args.gate_receipts.read_bytes()), policy, read)
-        print(_canonical(result).decode())
-    except (KeyError, OSError, ValueError, TypeError, subprocess.CalledProcessError) as exc:
+        print(_canonical(_invoke(args)).decode())
+    except (KeyError, OSError, ValueError, TypeError) as exc:
         parser.exit(1, f"{exc}\n")
     return 0
 

@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - "simulation/runtime/gumas_unified/**"
-      - "tests/test_gumas_unified.py"
+      - "tests/test_gumas_unified*.py"
       - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__v0.1__2026-11-14.md"
       - ".github/workflows/gumas-unified-p0.yml"
   workflow_dispatch:
@@ -21,6 +21,6 @@ jobs:
         with:
           python-version: "3.12"
       - name: Verify P0 causal invariants
-        run: python -m unittest discover -s tests -p 'test_gumas_unified.py' -v
+        run: python -m unittest discover -s tests -p 'test_gumas_unified*.py' -v
       - name: Execute synthetic cross-scale scenario
         run: python -m simulation.runtime.gumas_unified.scenario > /dev/null

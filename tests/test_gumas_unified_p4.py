@@ -253,7 +253,9 @@ class P4GovernanceTests(unittest.TestCase):
 
     def test_deterministic_replay_and_refusal_of_duplicate_dispatch(self):
         for mode in ("delegated", "unanimous", "veto"):
-            self.assertEqual(run_p4(mode), run_p4(mode))
+            initial = run_p4(mode)
+            replay = run_p4(mode)
+            self.assertEqual(initial, replay)
         engine, motion_id = start("delegated")
         vote(engine, motion_id, "governor")
         ratify_and_dispatch(engine, motion_id)

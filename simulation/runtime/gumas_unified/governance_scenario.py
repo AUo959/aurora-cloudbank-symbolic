@@ -37,6 +37,20 @@ def governance_fixture(protocol: str):
     return world
 
 
+def _record_ballots(engine: CausalEngine, motion_id: str,
+                    protocol: str, veto_yes: bool) -> None:
+    """Record the same actor ballots in their original causal order."""
+    engine.cast_relief_vote(motion_id, "governor", True, cause="actor:governor-yes")
+
+    if protocol in ("unanimous", "veto"):
+        engine.cast_relief_vote(motion_id, "member_a", True,
+                                cause="actor:member-a-yes")
+    if protocol == "unanimous" or protocol == "veto":
+        engine.cast_relief_vote(
+            motion_id, "member_b", True if protocol == "unanimous" else veto_yes,
+            cause="actor:member-b-decision")
+
+
 def run_p4(protocol: str = "delegated", *, veto_yes: bool = True) -> dict:
     """Take the same relief policy through one local institutional contract."""
     if protocol != "veto" and veto_yes is not True:
@@ -48,23 +62,16 @@ def run_p4(protocol: str = "delegated", *, veto_yes: bool = True) -> dict:
         engine, institution_id="relief_council", proposer_id="governor",
         route_id="corridor_a", commodity="rations", amount=3, expires_s=30)
     motion_id = engine.propose_relief(proposal, cause="actor:relief-intent").effect["motion_id"]
-    engine.cast_relief_vote(motion_id, "governor", True, cause="actor:governor-yes")
-
-    if protocol in ("unanimous", "veto"):
-        engine.cast_relief_vote(motion_id, "member_a", True,
-                                cause="actor:member-a-yes")
-    if protocol == "unanimous" or protocol == "veto":
-        engine.cast_relief_vote(
-            motion_id, "member_b", True if protocol == "unanimous" else veto_yes,
-            cause="actor:member-b-decision")
+    _record_ballots(engine, motion_id, protocol, veto_yes)
     before_ratification = institution_view(engine, "relief_council")
-    if protocol != "veto" or veto_yes:
+    approved = protocol != "veto" or veto_yes
+    if approved:
         engine.ratify_relief(motion_id, "governor", cause="institution:rule-satisfied")
         engine.dispatch_ratified_relief(
             motion_id, "governor", cause="actor:physical-fulfillment")
     engine.send_report(
         "governor", "observer", "corridor_a",
-        f"Governance outcome: {protocol} / {'approved' if protocol != 'veto' or veto_yes else 'rejected'}",
+        f"Governance outcome: {protocol} / {'approved' if approved else 'rejected'}",
         cause="actor:report-outcome")
     before_report = engine.actor_view("observer")
     engine.advance_to(4)

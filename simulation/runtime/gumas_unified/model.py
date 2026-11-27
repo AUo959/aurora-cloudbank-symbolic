@@ -71,6 +71,96 @@ class ScheduledEvent:
     payload: dict[str, Any]
 
 
+P0_SCHEDULED_EVENT_KINDS = ("cargo_arrival", "report_arrival")
+
+
+def _natural(value: int, name: str, *, positive: bool = False) -> None:
+    if type(value) is not int or value < (1 if positive else 0):
+        raise ValueError(f"{name} must be a nonnegative integer" if not positive
+                         else f"{name} must be a positive integer")
+
+
+def _validate_scalars(world: Any) -> None:
+    _natural(world.time_s, "time_s")
+    _natural(world.heat_j, "heat_j")
+    _natural(world.next_serial, "next_serial")
+
+
+def _validate_profile(profile: PhysicsProfile) -> None:
+    _natural(profile.signal_speed_ceiling_km_s, "signal ceiling", positive=True)
+    _natural(profile.cargo_speed_ceiling_km_s, "cargo ceiling", positive=True)
+    if profile.signal_speed_ceiling_km_s > 299792:
+        raise ValueError("P0 does not authorize superluminal signaling")
+    if profile.cargo_speed_ceiling_km_s > 299792:
+        raise ValueError("P0 does not authorize superluminal cargo transport")
+
+
+def _validate_sites(world: Any) -> None:
+    for key, site in world.sites.items():
+        if key != site.site_id or not site.polity_id:
+            raise ValueError("invalid site identity")
+        for name, amount in site.inventory.items():
+            if not name:
+                raise ValueError("empty commodity")
+            _natural(amount, f"inventory {key}/{name}")
+
+
+def _validate_actors(world: Any) -> None:
+    for key, actor in world.actors.items():
+        if key != actor.actor_id or actor.site_id not in world.sites:
+            raise ValueError("invalid actor identity or site")
+        if any(s not in world.sites for s in actor.authorized_dispatch_sites):
+            raise ValueError("invalid actor authorization site")
+
+
+def _validate_corridor(world: Any, key: str, route: Any, profile: PhysicsProfile) -> None:
+    if key != route.corridor_id:
+        raise ValueError("invalid route identity")
+    if route.origin_id not in world.sites or route.destination_id not in world.sites:
+        raise ValueError("route endpoint absent")
+    for n in ("distance_km", "cargo_speed_km_s", "signal_speed_km_s",
+              "capacity_units_per_window", "window_seconds"):
+        _natural(getattr(route, n), n, positive=True)
+    for n in ("shipment_energy_j_per_unit_km", "signal_energy_j_per_km"):
+        _natural(getattr(route, n), n)
+    if route.signal_speed_km_s > profile.signal_speed_ceiling_km_s:
+        raise ValueError("route signaling exceeds established physical limit")
+    if route.cargo_speed_km_s > profile.cargo_speed_ceiling_km_s:
+        raise ValueError("route cargo transport exceeds established physical limit")
+
+
+def _validate_corridors(world: Any, profile: PhysicsProfile) -> None:
+    for key, route in world.corridors.items():
+        _validate_corridor(world, key, route, profile)
+
+
+def _validate_in_transit(world: Any) -> None:
+    for key, shipment in world.in_transit.items():
+        if key != shipment.shipment_id or shipment.route_id not in world.corridors:
+            raise ValueError("invalid in-transit shipment")
+        if shipment.destination_id not in world.sites or shipment.cargo_name == "energy_j":
+            raise ValueError("invalid shipment destination or commodity")
+        _natural(shipment.amount, "shipment amount", positive=True)
+        _natural(shipment.arrives_s, "shipment due")
+
+
+def _validate_capacity(world: Any) -> None:
+    for k, used in world.capacity_used.items():
+        if not k:
+            raise ValueError("invalid capacity key")
+        _natural(used, "capacity used")
+
+
+def _validate_pending(world: Any) -> None:
+    for event in world.pending:
+        _natural(event.due_s, "pending due")
+        _natural(event.order, "pending order")
+        if event.due_s < world.time_s:
+            raise ValueError("scheduled event in the past")
+        if event.kind not in P0_SCHEDULED_EVENT_KINDS:
+            raise ValueError("unknown scheduled event")
+
+
 @dataclass
 class Universe:
     time_s: int
@@ -84,64 +174,19 @@ class Universe:
     next_serial: int = 0
 
     def validate(self, profile: PhysicsProfile) -> None:
-        def natural(value: int, name: str, *, positive: bool = False) -> None:
-            if type(value) is not int or value < (1 if positive else 0):
-                raise ValueError(f"{name} must be a nonnegative integer" if not positive
-                                 else f"{name} must be a positive integer")
-
-        natural(self.time_s, "time_s")
-        natural(self.heat_j, "heat_j")
-        natural(self.next_serial, "next_serial")
-        natural(profile.signal_speed_ceiling_km_s, "signal ceiling", positive=True)
-        natural(profile.cargo_speed_ceiling_km_s, "cargo ceiling", positive=True)
-        if profile.signal_speed_ceiling_km_s > 299792:
-            raise ValueError("P0 does not authorize superluminal signaling")
-        if profile.cargo_speed_ceiling_km_s > 299792:
-            raise ValueError("P0 does not authorize superluminal cargo transport")
-        for key, site in self.sites.items():
-            if key != site.site_id or not site.polity_id:
-                raise ValueError("invalid site identity")
-            for name, amount in site.inventory.items():
-                if not name:
-                    raise ValueError("empty commodity")
-                natural(amount, f"inventory {key}/{name}")
-        for key, actor in self.actors.items():
-            if key != actor.actor_id or actor.site_id not in self.sites:
-                raise ValueError("invalid actor identity or site")
-            if any(s not in self.sites for s in actor.authorized_dispatch_sites):
-                raise ValueError("invalid actor authorization site")
-        for key, route in self.corridors.items():
-            if key != route.corridor_id:
-                raise ValueError("invalid route identity")
-            if route.origin_id not in self.sites or route.destination_id not in self.sites:
-                raise ValueError("route endpoint absent")
-            for n in ("distance_km", "cargo_speed_km_s", "signal_speed_km_s",
-                      "capacity_units_per_window", "window_seconds"):
-                natural(getattr(route, n), n, positive=True)
-            for n in ("shipment_energy_j_per_unit_km", "signal_energy_j_per_km"):
-                natural(getattr(route, n), n)
-            if route.signal_speed_km_s > profile.signal_speed_ceiling_km_s:
-                raise ValueError("route signaling exceeds established physical limit")
-            if route.cargo_speed_km_s > profile.cargo_speed_ceiling_km_s:
-                raise ValueError("route cargo transport exceeds established physical limit")
-        for key, shipment in self.in_transit.items():
-            if key != shipment.shipment_id or shipment.route_id not in self.corridors:
-                raise ValueError("invalid in-transit shipment")
-            if shipment.destination_id not in self.sites or shipment.cargo_name == "energy_j":
-                raise ValueError("invalid shipment destination or commodity")
-            natural(shipment.amount, "shipment amount", positive=True)
-            natural(shipment.arrives_s, "shipment due")
-        for k, used in self.capacity_used.items():
-            if not k:
-                raise ValueError("invalid capacity key")
-            natural(used, "capacity used")
-        for event in self.pending:
-            natural(event.due_s, "pending due")
-            natural(event.order, "pending order")
-            if event.due_s < self.time_s:
-                raise ValueError("scheduled event in the past")
-            if event.kind not in ("cargo_arrival", "report_arrival"):
-                raise ValueError("unknown scheduled event")
+        # Order is part of the contract: the first failing section's error is
+        # the transaction's rejection reason. Later layers insert sections at
+        # the seams noted below without reordering existing calls.
+        _validate_scalars(self)
+        _validate_profile(profile)
+        _validate_sites(self)
+        _validate_actors(self)
+        # Seam: identity, institution and motion sections follow actors.
+        _validate_corridors(self, profile)
+        _validate_in_transit(self)
+        # Seam: remote ballot section follows in-transit shipments.
+        _validate_capacity(self)
+        _validate_pending(self)
 
     def totals(self) -> dict[str, int]:
         """Account for all represented matter and energy, including in-flight cargo.

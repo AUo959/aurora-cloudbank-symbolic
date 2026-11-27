@@ -9,7 +9,6 @@ observations. The kernel alone commits this record.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from copy import deepcopy
 import re
 from typing import Any
 

@@ -76,7 +76,9 @@ jobs:
       - name: Validate against provider catalog
         id: validate
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # The repository secret is named ANTHROPIC_KEY; ANTHROPIC_API_KEY is
+          # still honored first so either name works.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY || secrets.ANTHROPIC_KEY }}
         run: |
           python scripts/validate_model_catalog.py
 

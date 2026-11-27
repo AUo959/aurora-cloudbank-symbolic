@@ -21,6 +21,7 @@ modules/qgia/
 ├── forecast_engine.py         # Core QSFE — belief propagation + aggregation
 ├── scenario.py                # Scenario model + 4 example templates
 ├── output_formatter.py        # Three-tier formatted output
+├── canon_bridge.py            # L1-mediated CanonRec staging packets
 └── README.md
 ```
 
@@ -42,6 +43,26 @@ output = engine.run_forecast(scenario)
 report = format_forecast(output, scenario_title=scenario.title)
 print(report)
 ```
+
+## L1-mediated CanonRec staging
+
+The local bridge accepts a version `1.0` QGIA package containing the existing `ForecastOutput`, an immutable forecast time, question, horizon, region, domain, calibration, model, prior and evidence references, assumptions, unknowns, and applicable WATCHCON and axiom state. The caller supplies a full Git commit and SHA-256 for each artifact. The operator policy pins trusted forecast, mediation, and gate origins and the current forecast hash for each forecast ID.
+
+The L1 mediation record binds the exact forecast reference and identifies the approving authority, relay, decision, selected tiers, review time, translation notes, constraints, exclusions, and ethics state. It also pins the approved GUMAS engine revision and fixture parameters. An accepted L1 decision carries the `L2:scenario_seed` scope. Pending, partial, rejected, superseded, or held material stops before staging.
+
+Use the module with local checkouts and pinned reference files.
+
+```bash
+python -m modules.qgia.canon_bridge prepare --policy policy.json \
+  --forecast forecast-ref.json --mediation mediation-ref.json \
+  --repository Org/Evidence=/path/to/evidence-checkout
+```
+
+`prepare` returns the `scenario_seed` and `mediation_evidence` artifacts. The first uses the versioned ORIONCORE GUMAS seed shape. The second preserves the forecast, assumptions, unknowns, L1 decision, and source hashes as `STAGING` evidence. Pin both as L2 artifacts and pass their references to `subject` using `--seed` and `--evidence`. That command emits the exact request subject for gate attestation.
+
+Pass the independently issued gate references to `request` using `--gate-receipts`, alongside the same policy, source, and projected artifact references. The adapter verifies each gate against the subject and emits a CanonRec `MutationRequest` in `reference` mode. ORIONCORE operators submit the packet through the CanonRec staging bridge. Every command in this module reads local evidence and writes JSON to standard output.
+
+[CanonRec v1 contract](https://github.com/AUo959/CanonRec/tree/778ba3b3aced338f30bc4b35accecf14ecf419a3/contracts/canon-ops/v1) · [ORIONCORE bridge and execution guide](https://github.com/AUo959/Aurora_ORIONCORE_Directory_Main/blob/main/docs/CANON_OPERATIONS_BRIDGE_v1.md)
 
 ## Algorithm
 

@@ -167,12 +167,14 @@ async def select_model(
         if not model:
             raise HTTPException(status_code=404, detail=f"Model '{request.model}' not found")
 
-        # Check if model is available
+        # Check if live routing may use the model: provider-available AND
+        # operator-enabled. Checking `available` alone would report a disabled
+        # model as selected while select_optimal_model() skips it.
         caps = unified_ai.get_model_capabilities(model)
-        if not caps.available:
+        if not caps.routable:
             return {
                 "success": False,
-                "message": f"Model '{request.model}' is not currently available",
+                "message": f"Model '{request.model}' is not currently available and enabled",
                 "model": request.model,
                 "available": False,
             }

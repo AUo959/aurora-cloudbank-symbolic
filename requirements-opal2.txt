@@ -1,9 +1,9 @@
 # Standalone OPAL2 runtime dependencies.
 # Keep this surface narrower than the Aurora monolith requirements.
-fastapi>=0.162.5,<1.0.0
+fastapi>=0.165.0,<1.0.0
 uvicorn[standard]>=0.54.0
 starlette>=1.10.0,<2.0.0
-pydantic>=2.14.3,<3.0.0
-numpy>=2.5.4
-pyyaml>=6.0.3
+pydantic>=2.14.4,<3.0.0
+numpy>=2.5.5
+pyyaml>=6.0.4
 slowapi>=0.1.10

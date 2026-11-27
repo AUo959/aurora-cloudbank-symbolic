@@ -44,7 +44,7 @@ prometheus-client==0.26.0
 psutil==7.2.2
 pycodestyle==2.15.0
 pycparser==3.12
-pydantic-core==2.46.4
+pydantic-core==2.50.4
 pydantic-settings==2.16.3
 pydantic==2.14.3
 pyflakes==3.4.0

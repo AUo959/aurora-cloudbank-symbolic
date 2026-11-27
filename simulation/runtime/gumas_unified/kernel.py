@@ -10,10 +10,13 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass
 import hashlib
 import json
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from .federated_model import MandateRequest
 from .model import Corridor, PhysicsProfile, ScheduledEvent, Shipment, Universe
+
+if TYPE_CHECKING:
+    from .political_actions import ReliefProposal
 
 
 class FeasibilityError(ValueError):

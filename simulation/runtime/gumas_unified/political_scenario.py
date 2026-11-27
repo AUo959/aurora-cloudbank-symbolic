@@ -54,10 +54,8 @@ def synthetic_ace_projection() -> dict:
     return observe_ace_identity(world, character)
 
 
-def run_p3(*, council_choice: str = "approve") -> dict:
-    if council_choice not in ("approve", "reject"):
-        raise ValueError("synthetic council_choice must be approve or reject")
-    engine = CausalEngine(p3_fixture(), run_id=f"synthetic-p3-{council_choice}")
+def _bind_governor_identity(engine: CausalEngine) -> None:
+    """Bind the same synthetic identity and exact state-bound grant."""
     ace = synthetic_ace_projection()
     state = engine.state
     grant = {
@@ -76,20 +74,11 @@ def run_p3(*, council_choice: str = "approve") -> dict:
         "allow_permission_changes": False,
     }
     engine.bind_fixture_identity(ace, grant)
-    engine.disrupt_route("corridor_a", 4, cause="fixture:p3-corridor-disruption")
 
-    proposal = prepare_relief_proposal(
-        engine, institution_id="relief_council", proposer_id="governor",
-        route_id="corridor_a", commodity="rations", amount=3, expires_s=30)
-    motion = engine.propose_relief(proposal, cause="actor:governor-relief-motion")
-    motion_id = motion.effect["motion_id"]
-    engine.cast_relief_vote(
-        motion_id, "governor", True, cause="actor:governor-yes")
-    engine.cast_relief_vote(
-        motion_id, "member_a", council_choice == "approve",
-        cause="actor:member-a-ballot")
 
-    after_ballots = institution_view(engine, "relief_council")
+def _resolve_motion(engine: CausalEngine, motion_id: str,
+                    council_choice: str) -> dict | None:
+    """Preserve independent ratification, dispatch and negative ballots."""
     after_reservation = None
     if council_choice == "approve":
         engine.ratify_relief(
@@ -104,32 +93,54 @@ def run_p3(*, council_choice: str = "approve") -> dict:
     else:
         engine.cast_relief_vote(
             motion_id, "member_b", False, cause="actor:member-b-ballot")
+    return after_reservation
+
+
+def _relief_snapshot(engine: CausalEngine) -> dict:
+    """Read the existing operator projections without mutating the world."""
+    return {
+        "origin": engine.site_view("union_depot"),
+        "destination": engine.site_view("frontier_port"),
+        "union": engine.polity_view("fixture_union"),
+        "frontier": engine.polity_view("fixture_frontier"),
+        "institution": institution_view(engine, "relief_council"),
+    }
+
+
+def run_p3(*, council_choice: str = "approve") -> dict:
+    if council_choice not in ("approve", "reject"):
+        raise ValueError("synthetic council_choice must be approve or reject")
+    engine = CausalEngine(p3_fixture(), run_id=f"synthetic-p3-{council_choice}")
+    _bind_governor_identity(engine)
+    engine.disrupt_route("corridor_a", 4, cause="fixture:p3-corridor-disruption")
+
+    proposal = prepare_relief_proposal(
+        engine, institution_id="relief_council", proposer_id="governor",
+        route_id="corridor_a", commodity="rations", amount=3, expires_s=30)
+    motion = engine.propose_relief(proposal, cause="actor:governor-relief-motion")
+    motion_id = motion.effect["motion_id"]
+    engine.cast_relief_vote(
+        motion_id, "governor", True, cause="actor:governor-yes")
+    engine.cast_relief_vote(
+        motion_id, "member_a", council_choice == "approve",
+        cause="actor:member-a-ballot")
+
+    after_ballots = institution_view(engine, "relief_council")
+    after_reservation = _resolve_motion(engine, motion_id, council_choice)
 
     engine.send_report(
         "governor", "observer", "corridor_a",
         f"Relief motion outcome: {council_choice}",
         cause="actor:governor-notifies-frontier")
 
-    departure = {
-        "origin": engine.site_view("union_depot"),
-        "destination": engine.site_view("frontier_port"),
-        "union": engine.polity_view("fixture_union"),
-        "frontier": engine.polity_view("fixture_frontier"),
-        "institution": institution_view(engine, "relief_council"),
-        "remote_observer": engine.actor_view("observer"),
-    }
+    departure = _relief_snapshot(engine)
+    departure["remote_observer"] = engine.actor_view("observer")
     engine.advance_to(3)
     before_report = engine.actor_view("observer")
     engine.advance_to(4)
     after_report = engine.actor_view("observer")
     engine.advance_to(12)
-    arrival = {
-        "origin": engine.site_view("union_depot"),
-        "destination": engine.site_view("frontier_port"),
-        "union": engine.polity_view("fixture_union"),
-        "frontier": engine.polity_view("fixture_frontier"),
-        "institution": institution_view(engine, "relief_council"),
-    }
+    arrival = _relief_snapshot(engine)
     return {
         "scope": "synthetic_L2_only",
         "council_choice": council_choice,

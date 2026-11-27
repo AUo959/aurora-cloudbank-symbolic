@@ -38,6 +38,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--count", type=int, default=5)
     parser.add_argument("--constraints", default="{}", help="JSON object")
     parser.add_argument(
+        "--phonology-shadow",
+        type=Path,
+        help="Write a phonology shadow report (advisory only) to this JSON file; stdout is unchanged",
+    )
+    parser.add_argument(
         "--select",
         type=int,
         help="Select candidate index and emit a final naming receipt",
@@ -65,7 +70,12 @@ def main() -> int:
         registry = load_registry(args.registry, allowed_root=REPO_ROOT)
     except (OSError, ValueError) as exc:
         raise SystemExit(f"invalid registry: {exc}") from exc
-    service = NameService(registry)
+    shadow = None
+    if args.phonology_shadow:
+        from modules.gumas.phonology_shadow import PhonologyShadow
+
+        shadow = PhonologyShadow()
+    service = NameService(registry, shadow=shadow)
     source_registry_digest = service.registry.digest
     candidates = service.resolve_candidates(request)
     for candidate in candidates:
@@ -87,6 +97,9 @@ def main() -> int:
 
     text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     print(text, end="")
+    if shadow is not None:
+        report = json.dumps(shadow.report(), indent=2, ensure_ascii=False) + "\n"
+        args.phonology_shadow.write_text(report, encoding="utf-8")
     return 0
 
 

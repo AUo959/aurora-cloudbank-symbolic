@@ -55,7 +55,6 @@ divergent_truth_handling:
   detection: true
   fairness_privacy_conflicts: true
   arbitration_required: true
-  tribunal_integration: "SHADOWFAX"
 
 memory_sovereignty:
   thermax_doctrine: true

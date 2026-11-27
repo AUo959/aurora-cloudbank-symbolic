@@ -10,9 +10,13 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass
 import hashlib
 import json
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
+from .federated_model import MandateRequest
 from .model import Corridor, PhysicsProfile, ScheduledEvent, Shipment, Universe
+
+if TYPE_CHECKING:
+    from .political_actions import ReliefProposal
 
 
 class FeasibilityError(ValueError):
@@ -102,6 +106,122 @@ class CausalEngine:
         self._state = candidate
         self._ledger.append(receipt)
         return deepcopy(receipt)
+
+    def bind_fixture_identity(self, ace_projection: dict[str, Any],
+                              grant: dict[str, Any]) -> Receipt:
+        """Commit a provenance-labeled synthetic identity alias, not source canon.
+
+        A fixture-only grant is explicit test intent, not authenticated
+        operator authorization. No ACE or tactical processes are invoked.
+        """
+        from .bindings import prepare_fixture_identity_binding
+
+        record = prepare_fixture_identity_binding(self, ace_projection, grant)
+
+        def change(world: Universe) -> dict[str, Any]:
+            actor_id = record["actor_id"]
+            if actor_id not in world.actors:
+                raise FeasibilityError("bound actor no longer exists")
+            if actor_id in world.identity_bindings:
+                raise FeasibilityError("actor identity already bound")
+            if any((value["world_id"], value["entity_id"])
+                   == (record["world_id"], record["entity_id"])
+                   for value in world.identity_bindings.values()):
+                raise FeasibilityError("ACE identity already assigned")
+            if world.time_s != record["bound_at_s"]:
+                raise FeasibilityError("binding grant is stale")
+            world.identity_bindings[actor_id] = deepcopy(record)
+            return {"actor_id": actor_id, "world_id": record["world_id"],
+                    "entity_id": record["entity_id"],
+                    "binding_sha256": record["binding_sha256"],
+                    "scope": "synthetic_fixture_only",
+                    "source_canon_promoted": False}
+
+        return self._commit("fixture_identity_bound", record["actor_id"],
+                            record["grant_ref"], change)
+
+    def propose_relief(self, proposal: "ReliefProposal", *, cause: str) -> Receipt:
+        """Commit a state-bound, synthetic noncombat policy proposal."""
+        from .political_actions import commit_relief_proposal
+
+        return commit_relief_proposal(self, proposal, cause=cause)
+
+    def cast_relief_vote(self, motion_id: str, voter_id: str,
+                         approve: bool, *, cause: str) -> Receipt:
+        from .political_actions import cast_relief_vote
+
+        return cast_relief_vote(self, motion_id, voter_id, approve, cause=cause)
+
+    def ratify_relief(self, motion_id: str, officer_id: str, *,
+                      cause: str) -> Receipt:
+        from .political_actions import ratify_relief
+
+        return ratify_relief(self, motion_id, officer_id, cause=cause)
+
+    def dispatch_ratified_relief(self, motion_id: str,
+                                 executor_id: str, *, cause: str) -> Receipt:
+        from .political_actions import dispatch_ratified_relief
+
+        return dispatch_ratified_relief(self, motion_id, executor_id, cause=cause)
+
+    def send_policy_notice(self, motion_id: str, sender_id: str,
+                           recipient_id: str, route_id: str, *,
+                           cause: str) -> Receipt:
+        """Send a typed proposal notice over a real outgoing information route."""
+        from .distributed_actions import send_policy_notice
+
+        return send_policy_notice(
+            self, motion_id, sender_id, recipient_id, route_id, cause=cause)
+
+    def submit_remote_ballot(self, motion_id: str, voter_id: str,
+                             approve: bool, return_route_id: str, *,
+                             cause: str) -> Receipt:
+        """Transmit remote intent; it becomes a ballot only at arrival."""
+        from .distributed_actions import submit_remote_ballot
+
+        return submit_remote_ballot(
+            self, motion_id, voter_id, approve, return_route_id, cause=cause)
+
+    def offer_charter(self, founder_id: str, invitee_id: str, purpose: str,
+                      outbound_route_id: str, *,
+                      expires_s: int, cause: str) -> Receipt:
+        from .federated_actions import offer_charter
+
+        return offer_charter(self, founder_id, invitee_id, purpose,
+                             outbound_route_id, expires_s=expires_s, cause=cause)
+
+    def respond_charter(self, charter_id: str, invitee_id: str, accept: bool,
+                        return_route_id: str, *, cause: str) -> Receipt:
+        from .federated_actions import respond_charter
+
+        return respond_charter(self, charter_id, invitee_id, accept,
+                               return_route_id, cause=cause)
+
+    def confirm_association(self, association_id: str, founder_id: str, *,
+                            cause: str) -> Receipt:
+        from .federated_actions import confirm_association
+
+        return confirm_association(self, association_id, founder_id, cause=cause)
+
+    def propose_mandate(self, association_id: str, proposer_id: str,
+                        request: "MandateRequest", *, cause: str) -> Receipt:
+        from .federated_actions import propose_mandate
+
+        return propose_mandate(
+            self, association_id, proposer_id, request, cause=cause)
+
+    def respond_mandate(self, mandate_id: str, voter_id: str, approve: bool,
+                        return_route_id: str, *, cause: str) -> Receipt:
+        from .federated_actions import respond_mandate
+
+        return respond_mandate(
+            self, mandate_id, voter_id, approve, return_route_id, cause=cause)
+
+    def execute_mandate(self, mandate_id: str, custodian_id: str, *,
+                        cause: str) -> Receipt:
+        from .federated_actions import execute_mandate
+
+        return execute_mandate(self, mandate_id, custodian_id, cause=cause)
 
     @staticmethod
     def _id(world: Universe, prefix: str) -> str:
@@ -244,6 +364,41 @@ class CausalEngine:
                         "route_id": payload["route_id"]})
                     return {"recipient": actor.actor_id, "from": payload["sender"],
                             "sent_s": payload["sent_s"]}
+                if event.kind == "policy_notice_arrival":
+                    from .distributed_actions import deliver_policy_notice
+
+                    return deliver_policy_notice(world, event.payload)
+                if event.kind == "policy_ballot_arrival":
+                    from .distributed_actions import deliver_remote_ballot
+
+                    return deliver_remote_ballot(world, event.payload["ballot_id"])
+                if event.kind in {
+                    "charter_offer_arrival", "charter_response_arrival",
+                    "charter_expiry", "association_confirm_arrival",
+                    "mandate_offer_arrival", "mandate_vote_arrival",
+                    "mandate_expiry",
+                }:
+                    from .federated_actions import deliver_federated_event
+
+                    return deliver_federated_event(world, event.kind, event.payload)
+                if event.kind == "policy_expiry":
+                    motion = world.relief_motions[event.payload["motion_id"]]
+                    old_status = motion.status
+                    returned = motion.escrow_amount
+                    if returned:
+                        institution = world.institutions[motion.institution_id]
+                        site = world.sites[institution.seat_site_id]
+                        site.inventory[motion.commodity] = (
+                            site.inventory.get(motion.commodity, 0) + returned)
+                        motion.escrow_amount = 0
+                    if motion.status in ("proposed", "ratified"):
+                        motion.status = "expired"
+                        motion.approved_at_s = None
+                    return {"motion_id": motion.motion_id,
+                            "previous_status": old_status, "status": motion.status,
+                            "resource_released": returned,
+                            "commodity": motion.commodity,
+                            "canonical_authority": False}
                 raise AssertionError("unsupported scheduled event")
 
             committed.append(self._commit(event.kind, None,
@@ -258,8 +413,18 @@ class CausalEngine:
 
     def site_view(self, site_id: str) -> dict[str, Any]:
         site = self._state.sites[site_id]
-        return {"site_id": site_id, "polity_id": site.polity_id,
-                "time_s": self._state.time_s, "inventory": dict(site.inventory)}
+        result = {"site_id": site_id, "polity_id": site.polity_id,
+                  "time_s": self._state.time_s, "inventory": dict(site.inventory)}
+        reserved: dict[str, int] = {}
+        for motion in self._state.relief_motions.values():
+            if motion.escrow_amount and (
+                self._state.institutions[motion.institution_id].seat_site_id == site_id
+            ):
+                reserved[motion.commodity] = (
+                    reserved.get(motion.commodity, 0) + motion.escrow_amount)
+        if reserved:
+            result["reserved"] = reserved
+        return result
 
     def polity_view(self, polity_id: str) -> dict[str, Any]:
         """Authoritative aggregate, not a claim of anyone's personal knowledge."""
@@ -274,8 +439,15 @@ class CausalEngine:
             if shipment.destination_id in sites:
                 incoming[shipment.cargo_name] = (
                     incoming.get(shipment.cargo_name, 0) + shipment.amount)
-        return {"polity_id": polity_id, "time_s": self._state.time_s,
-                "sites": sites, "available": available, "incoming": incoming}
+        result = {"polity_id": polity_id, "time_s": self._state.time_s,
+                  "sites": sites, "available": available, "incoming": incoming}
+        reserved: dict[str, int] = {}
+        for site_id in sites:
+            for commodity, amount in self.site_view(site_id).get("reserved", {}).items():
+                reserved[commodity] = reserved.get(commodity, 0) + amount
+        if reserved:
+            result["reserved"] = reserved
+        return result
 
     def actor_view(self, actor_id: str) -> dict[str, Any]:
         """Only local inventory and actually delivered reports are visible."""

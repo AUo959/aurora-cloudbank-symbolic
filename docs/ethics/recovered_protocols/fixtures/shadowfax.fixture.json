@@ -1,14 +1,14 @@
 {
   "_fixture_meta": {
     "fixture_for": "shadowfax",
-    "description": "Canonical sanitized example for the SHADOWFAX recovered protocol. source_classification is missing_dependency and promotion_decision is blocked_pending_bundle_location — both are schema-enforced via the if/then constraint in custody_record.schema.json. The standalone SHADOWFAX bundle has not been located. No wiring decision may be made until the bundle is found and hash-verified.",
+    "description": "Sanitized example of the missing-bundle state for the SHADOWFAX recovered protocol. The custody schema pairs missing_dependency with blocked_pending_bundle_location. See the live manifest for current custody evidence.",
     "schema_refs": [
       "../schemas/custody_record.schema.json",
       "../schemas/recovered_protocol_manifest.schema.json"
     ],
     "intake_status": "sanitized_canonical_example",
     "validation_command": "ajv validate -s docs/ethics/recovered_protocols/schemas/custody_record.schema.json -d docs/ethics/recovered_protocols/fixtures/shadowfax.fixture.json --spec=draft2020",
-    "sanitization_notes": "No real source packages, file paths, or hashes are present. The missing_dependency classification and blocked_pending_bundle_location promotion_decision are correct and schema-enforced. Do not change promotion_decision without locating the standalone bundle and obtaining operator approval."
+    "sanitization_notes": "Package names, file paths, and hashes are intentionally placeholders. The missing_dependency classification and blocked_pending_bundle_location decision exercise the custody schema's conditional rule."
   },
   "protocol_id": "shadowfax",
   "role": "Stillness, supervisory review, paradox escalation, and boundary-instability oversight.",

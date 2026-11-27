@@ -17,9 +17,11 @@ DLP: context_tag=geometric_ethics_core, symbolic_hash=FIELD_GEOMETRY_v1
 """
 
 import logging
+from collections import Counter
 from typing import Any, Dict
 
 from .field_curvature import FieldCurvature
+from .field_curvature_v2 import FieldCurvatureV2
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +35,10 @@ class GeometricEthics:
     they are geometric impossibilities, not violations of external rules.
     """
 
-    def __init__(self):
-        """Initialize the geometric ethics engine."""
+    def __init__(self, *, evaluation: bool = False):
+        """Initialize the engine with optional v2 advisory scoring."""
         self.field_curvature = FieldCurvature()
+        self.curvature_evaluation = FieldCurvatureV2() if evaluation else None
         self.formation_history = []  # Track all synapse attempts
 
     def validate_synapse(
@@ -60,9 +63,14 @@ class GeometricEthics:
                 - curvature_result: Full curvature calculation
                 - explanation: Human-readable explanation
                 - recommendations: How to improve if denied
+                - v2_composite, v2_resistance, interaction_alerts and
+                  v2_risk_escalation: Advisory fields when evaluation is enabled
         """
         # Calculate field curvature
         curvature_result = self.field_curvature.calculate_curvature(synapse_context)
+        advisory = {}
+        if self.curvature_evaluation is not None:
+            advisory = self.curvature_evaluation.evaluate(curvature_result)
 
         # Determine if formation allowed
         allowed = curvature_result["formation_allowed"]
@@ -90,7 +98,7 @@ class GeometricEthics:
 
         # Log attempt
         self._log_formation_attempt(
-            synapse_context, curvature_result, allowed
+            synapse_context, curvature_result, allowed, advisory
         )
 
         return {
@@ -98,7 +106,8 @@ class GeometricEthics:
             "curvature_result": curvature_result,
             "explanation": explanation,
             "recommendations": recommendations,
-            "synapse_context": synapse_context
+            "synapse_context": synapse_context,
+            **advisory,
         }
 
     def _generate_explanation(
@@ -201,7 +210,8 @@ class GeometricEthics:
         self,
         synapse_context: Dict[str, Any],
         curvature_result: Dict[str, Any],
-        allowed: bool
+        allowed: bool,
+        advisory: Dict[str, Any],
     ):
         """Log synapse formation attempt for audit trail."""
         source = synapse_context.get("source_node", {}).get("name", "Unknown")
@@ -215,6 +225,16 @@ class GeometricEthics:
             "resistance": curvature_result["resistance_level"],
             "violations": curvature_result["critical_violations"]
         }
+        if advisory:
+            pairs = [alert["pair"] for alert in advisory["interaction_alerts"]]
+            log_entry["interaction_alerts"] = pairs
+            log_entry["v2_risk_escalation"] = advisory["v2_risk_escalation"]
+            if advisory["v2_risk_escalation"]:
+                logger.warning(
+                    "Geometric ethics v2 advisory escalation to %s: %s",
+                    advisory["v2_resistance"],
+                    ", ".join(pairs),
+                )
 
         self.formation_history.append(log_entry)
 
@@ -238,15 +258,6 @@ class GeometricEthics:
         Returns:
             Dict with formation statistics
         """
-        if not self.formation_history:
-            return {
-                "total_attempts": 0,
-                "allowed": 0,
-                "denied": 0,
-                "success_rate": 0.0,
-                "common_violations": {}
-            }
-
         total = len(self.formation_history)
         allowed = sum(1 for entry in self.formation_history if entry["allowed"])
         denied = total - allowed
@@ -258,13 +269,23 @@ class GeometricEthics:
                 for violation in entry["violations"]:
                     violation_counts[violation] = violation_counts.get(violation, 0) + 1
 
-        return {
+        stats = {
             "total_attempts": total,
             "allowed": allowed,
             "denied": denied,
             "success_rate": allowed / total if total > 0 else 0.0,
             "common_violations": violation_counts
         }
+        if self.curvature_evaluation is not None:
+            stats["interaction_alert_counts"] = dict(Counter(
+                pair
+                for entry in self.formation_history
+                for pair in entry.get("interaction_alerts", ())
+            ))
+            stats["v2_risk_escalations"] = sum(
+                entry.get("v2_risk_escalation", False) for entry in self.formation_history
+            )
+        return stats
 
     def clear_history(self):
         """Clear formation history (for testing or cleanup)."""

@@ -96,11 +96,31 @@ jobs:
 
           # Deliberately no `|| echo <empty>` fallback anywhere below. A failed
           # query must be reported as a failed query, never as "no issues".
+          #
+          # The one fallback that IS allowed: when the authenticated request is
+          # refused (401/403) or no token is configured, retry the same URL
+          # anonymously. This project is public on SonarCloud, so the anonymous
+          # API returns the same rule/file/line detail (#1477: an absent token
+          # left #1546 red for a week while two unauthenticated calls would have
+          # named the cause). The retry's own status code is what gets judged,
+          # so an anonymous failure is still reported as a failure, and the
+          # report says which path produced the data.
+          #
+          # Prints "<final_code> <mode>", where mode is "auth", or
+          # "anon:<auth_code>" ("anon:none" when SONAR_TOKEN is empty).
           fetch() {
             local url="$1" out="$2"
-            local code
-            code=$(curl -sS -u "${SONAR_TOKEN}:" -o "$out" -w '%{http_code}' "$url" 2>"$out.err" || echo "000")
-            echo "$code"
+            local code="none"
+            if [ -n "${SONAR_TOKEN:-}" ]; then
+              code=$(curl -sS -u "${SONAR_TOKEN}:" -o "$out" -w '%{http_code}' "$url" 2>"$out.err" || echo "000")
+              case "$code" in
+                401|403) ;;
+                *) echo "$code auth"; return ;;
+              esac
+            fi
+            local anon
+            anon=$(curl -sS -o "$out" -w '%{http_code}' "$url" 2>"$out.err" || echo "000")
+            echo "$anon anon:$code"
           }
 
           # SonarCloud already states the failing condition in the check run it
@@ -118,8 +138,17 @@ jobs:
           import json
           import os
 
-          def load(path, code):
+          AUTH_REFUSED = {
+              "none": "SONAR_TOKEN is not configured",
+              "401": "SONAR_TOKEN was rejected (401 - missing, expired, or wrong scope)",
+              "403": "SONAR_TOKEN was refused (403 - no access to this project)",
+          }
+          fallbacks = []
+
+          def load(path, result, endpoint):
               """Return (data, error_text). Never conflates failure with emptiness."""
+              code, _, mode = result.partition(" ")
+              anon_from = mode[len("anon:"):] if mode.startswith("anon:") else None
               if code != "200":
                   detail = {
                       "000": "request failed (network, DNS, or TLS)",
@@ -128,16 +157,22 @@ jobs:
                       "404": "not found - project key or pull request unknown to SonarCloud",
                       "429": "rate limited",
                   }.get(code, f"HTTP {code}")
+                  if anon_from is not None:
+                      detail = (
+                          f"{detail} (anonymous retry, after {AUTH_REFUSED.get(anon_from, 'HTTP ' + anon_from)})"
+                      )
                   return None, detail
+              if anon_from is not None:
+                  fallbacks.append((endpoint, AUTH_REFUSED.get(anon_from, f"HTTP {anon_from}")))
               try:
                   with open(path, encoding="utf-8") as handle:
                       return json.load(handle), None
               except (OSError, ValueError) as exc:
                   return None, f"unreadable response ({exc})"
 
-          gate, gate_err = load("gate.json", os.environ["GATE_CODE"])
-          issues, issues_err = load("issues.json", os.environ["ISSUES_CODE"])
-          hotspots, hotspots_err = load("hotspots.json", os.environ["HOTSPOTS_CODE"])
+          gate, gate_err = load("gate.json", os.environ["GATE_CODE"], "qualitygates/project_status")
+          issues, issues_err = load("issues.json", os.environ["ISSUES_CODE"], "issues/search")
+          hotspots, hotspots_err = load("hotspots.json", os.environ["HOTSPOTS_CODE"], "hotspots/search")
 
           try:
               with open("check_summary.txt", encoding="utf-8") as handle:
@@ -233,6 +268,19 @@ jobs:
 
           if not lines:
               lines = ["### No gate detail available", ""]
+
+          # Say when data came from the anonymous path, so a broken token stays
+          # visible even while the report itself is complete.
+          if fallbacks:
+              reasons = sorted({reason for _, reason in fallbacks})
+              endpoints = ", ".join(f"`api/{name}`" for name, _ in fallbacks)
+              lines += [
+                  f"> Fetched anonymously: {endpoints}. {'; '.join(reasons)}. "
+                  "Rotate the `SONAR_TOKEN` repository secret (see #1477).",
+                  "",
+              ]
+              for name, reason in fallbacks:
+                  print(f"::warning::api/{name} fetched anonymously: {reason}")
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write("body<<SONAR_EOF\n")

@@ -61,7 +61,7 @@ The local rule engine implements overlapping safety, oversight, transparency, fa
 |---|---|---|
 | [`recovered_protocols/README.md`](./recovered_protocols/README.md) | Intake rules, separation of duties, and runtime boundary warning | Active planning guide; #993 |
 | [`recovered_protocols/PROTOCOL_PROMOTION_PLAN.md`](./recovered_protocols/PROTOCOL_PROMOTION_PLAN.md) | Required evidence, gates, tests, rollback, and follow-up sequence | Planning artifact; #993 |
-| [`recovered_protocols/recovered_protocol_manifest.json`](./recovered_protocols/recovered_protocol_manifest.json) | Live custody fixture and authoritative wiring-gate list for the recovered lane | `custody_fixture`; all protocol hashes remain `PENDING`; #1148 and #1138 |
+| [`recovered_protocols/recovered_protocol_manifest.json`](./recovered_protocols/recovered_protocol_manifest.json) | Live custody fixture and authoritative wiring-gate list for the recovered lane | `custody_fixture`; SHADOWFAX package verified; protocol-file custody remains open in #1233 |
 | [`recovered_protocols/recovered_protocol_manifest.example.json`](./recovered_protocols/recovered_protocol_manifest.example.json) | Earlier example shape for schema/onboarding comparison | `draft_schema`; not the live manifest |
 | [`recovered_protocols/runtime_mapping_design.md`](./recovered_protocols/runtime_mapping_design.md) | Conditional protocol-to-runtime mapping design | Documentation only; no wiring authorization; #1151 |
 

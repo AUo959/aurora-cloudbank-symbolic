@@ -1,10 +1,10 @@
 {
   "manifest_id": "recovered-ethics-protocols-custody-live",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "custody_fixture",
   "created": "2026-06-22",
-  "updated": "2026-06-24",
-  "update_ref": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1148",
+  "updated": "2026-11-23",
+  "update_ref": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1233",
   "decision_recorded_by": "operator (session 2026-06-22)",
   "decision_ref": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1126",
 
@@ -18,7 +18,7 @@
       "pentest_scope_v2.md is complete, signed, and on file in docs/security/.",
       "All test plan items in PROTOCOL_PROMOTION_PLAN.md Section 7 pass for that protocol.",
       "A follow-up implementation issue exists and is approved (per PROTOCOL_PROMOTION_PLAN.md Section 8).",
-      "SHADOWFAX additionally requires the standalone bundle to be located and hash-verified before any wiring decision."
+      "SHADOWFAX additionally requires attribution and verification of the protocol file inside the verified historical package, plus ORD-3 identity reconciliation (#1361), before any wiring decision."
     ],
     "authority": "Operator + Aurora joint decision required at wiring time. This manifest does not pre-authorize wiring."
   },
@@ -238,21 +238,20 @@
       "role": "Stillness, supervisory review, paradox escalation, and boundary-instability oversight.",
 
       "custody_record": {
-        "source_package_name": "PENDING",
-        "source_package_sha256": "PENDING",
+        "source_package_name": "SRB_SHADOWFAX_Stillness_v1.0.zip",
+        "source_package_sha256": "6c97167ed6b9c2339b63428cdd06ac5f507e7c87ce347bb0631d0484b87eb26d",
         "internal_file_path": "PENDING",
         "internal_file_sha256": "PENDING",
         "observed_version": "unverified-partial-lineage",
         "observed_status": "sealed_bundle_reference",
-        "source_classification": "missing_dependency",
+        "source_classification": "verified_archive",
         "verification_date": "PENDING",
         "reviewer_or_agent_surface": "PENDING",
         "unresolved_blockers": [
-          "Standalone SHADOWFAX bundle identified but not in hand — HARD BLOCK on any wiring decision. .repohealth/artifacts_manifest.json records it as releases/SRB_SHADOWFAX_Stillness_v1.0.zip, 7595909 bytes, created 2025-08-17T13:57:44Z, expected sha256 6c97167ed6b9c2339b63428cdd06ac5f507e7c87ce347bb0631d0484b87eb26d, with 11 entries listed in .repohealth/zip_inventory.json. releases/ is not tracked in git, so the bytes are not obtainable from this repository and none of the hashes below can be checked.",
-          "Exact source package name and hash not yet verified — the digest recorded above is an expectation carried by the artifact manifest, not a verification. source_package_sha256 stays PENDING until the artifact is obtained and hashed.",
-          "Internal file path and hash not yet verified."
+          "HARD BLOCK on any wiring decision: the identified archive is hash-verified, but no internal file has been attributed to the standalone SHADOWFAX protocol. Internal file path, hash, and full custody sign-off remain pending.",
+          "ORD-3 lineage and runtime-surface reconciliation are tracked in issue #1361."
         ],
-        "promotion_decision": "blocked_pending_bundle_location"
+        "promotion_decision": "pending_custody_verification"
       },
 
       "allowed_actions": [

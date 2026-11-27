@@ -170,12 +170,12 @@ Runtime integration must not proceed until tests cover:
 
 Create follow-up implementation issues only after this promotion plan is accepted.
 
-1. **Protocol custody inventory** — add machine-readable manifest of recovered package/file hashes and blockers.
-2. **Protocol JSON schemas** — add schema files and validation tests.
-3. **Protocol fixture intake** — add sanitized canonical examples for Sherlock, Watson, Moriarty, Tribunal, and SHADOWFAX.
-4. **Runtime mapping design** — decide how protocol decisions map to `EthicsEngine`, `ethics_gate`, compliance monitor, and geometric ethics.
-5. **Moriarty containment tests** — test anomaly quarantine/review-only/rollback rules without enabling active L2-to-L1 behavior.
-6. **Tribunal appeal tests** — test dispute/appeal record requirements without runtime enforcement.
+1. **Protocol custody inventory** — add a machine-readable manifest of recovered package/file hashes and blockers. [#1148](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1148)
+2. **Protocol JSON schemas** — add schema files and validation tests. [#1149](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1149)
+3. **Protocol fixture intake** — add sanitized canonical examples for Sherlock, Watson, Moriarty, Tribunal, and SHADOWFAX. [#1150](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1150)
+4. **Runtime mapping design** — decide how protocol decisions map to `EthicsEngine`, `ethics_gate`, compliance monitor, and geometric ethics. [#1151](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1151)
+5. **Moriarty containment tests** — test anomaly quarantine, review-only translation, and rollback rules without enabling active L2-to-L1 behavior. [#1152](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1152)
+6. **Tribunal appeal tests** — test dispute and appeal record requirements without runtime enforcement. [#1153](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/1153)
 
 ## 9. Non-goals
 

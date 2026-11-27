@@ -1,0 +1,67 @@
+{
+  "_note": "Velari roots. gloss_status: canon (stated in canon) | inferred (implied by canon context) | draft (invented here) | unknown (form attested, meaning not). Only canon-status glosses are canon.",
+  "radicals": {
+    "_note": "Radicals carry the meaning; stem formants in an ablaut grade make words from them. Entries derived from one radical are cognates.",
+    "WAR": {"form": "war", "gloss": "guard", "gloss_status": "inferred", "lineage": "military"}
+  },
+  "formants": {
+    "N": {"gloss": "stem former", "grades": {"zero": "na", "full": "ena"}}
+  },
+  "roots": {
+    "wela":   {"proto": "wela",   "gloss": "high, elder",             "gloss_status": "inferred", "lineage": "noble"},
+    "warna":  {"derive": {"radical": "WAR", "formant": "N", "grade": "zero"}},
+    "warena": {"derive": {"radical": "WAR", "formant": "N", "grade": "full"}},
+    "tessa":  {"proto": "tessa",  "gloss": "keep, remember",          "gloss_status": "inferred", "lineage": "scholarly"},
+    "rina":   {"proto": "rina",   "gloss": "voice",                   "gloss_status": "inferred", "lineage": "reformist"},
+    "tu":     {"proto": "tu",     "gloss": "outward, far",            "gloss_status": "inferred", "lineage": "outworld"},
+
+    "ari":    {"proto": "ari",    "gloss": "people of, ones who",     "gloss_status": "draft", "kind": "suffix"},
+    "ena":    {"proto": "ena",    "gloss": "one of (personal)",       "gloss_status": "draft", "kind": "suffix"},
+    "isa":    {"proto": "isa",    "gloss": "bearer of (personal)",    "gloss_status": "draft", "kind": "suffix"},
+    "ara":    {"proto": "ara",    "gloss": "child of (personal)",     "gloss_status": "draft", "kind": "suffix"},
+    "ta":     {"proto": "ta",     "gloss": "that, the (demonstrative)", "gloss_status": "draft", "kind": "proclitic"},
+    "eksa":   {"proto": "eksa",   "gloss": "(unknown; epithet suffix)", "gloss_status": "unknown", "kind": "suffix", "source": "Virex"},
+    "yksa":   {"proto": "yksa",   "gloss": "(unknown; epithet suffix)", "gloss_status": "unknown", "kind": "suffix", "source": "Talyx"},
+    "ra":     {"proto": "ra",     "gloss": "diminutive (late)",       "gloss_status": "inferred", "kind": "suffix",
+               "source": "Sira; canon naming_conventions.informal_use: close relations use childhood honorifics"},
+
+    "kuna":   {"proto": "kuna",   "gloss": "flame",       "gloss_status": "inferred", "source": "House Velkonn; 'Sira of Flamewake'"},
+    "tala":   {"proto": "tala",   "gloss": "stand fast",  "gloss_status": "draft"},
+    "karasa": {"proto": "karasa", "gloss": "hold, fortress", "gloss_status": "draft"},
+    "karisa": {"proto": "karisa", "gloss": "(unknown)",   "gloss_status": "unknown", "source": "Velkaris"},
+    "rena":   {"proto": "rena",   "gloss": "(unknown)",   "gloss_status": "unknown", "source": "Tyren"},
+    "mara":   {"proto": "mara",   "gloss": "(unknown)",   "gloss_status": "unknown", "source": "Tymar"},
+    "tura":   {"proto": "tura",   "gloss": "(unknown)",   "gloss_status": "unknown", "source": "Tyr"},
+    "sela":   {"proto": "sela",   "gloss": "star",        "gloss_status": "draft"},
+    "dura":   {"proto": "dura",   "gloss": "stone",       "gloss_status": "draft"},
+    "lira":   {"proto": "lira",   "gloss": "song",        "gloss_status": "draft"},
+    "hesa":   {"proto": "hesa",   "gloss": "night",       "gloss_status": "draft"},
+    "mora":   {"proto": "mora",   "gloss": "deep",        "gloss_status": "draft"},
+    "ketha":  {"proto": "ketha",  "gloss": "blade",       "gloss_status": "draft", "source": "legacy NameService chunk 'keth"},
+    "drena":  {"proto": "drena",  "gloss": "watch",       "gloss_status": "draft", "source": "legacy NameService chunk 'dren"},
+    "syra":   {"proto": "syra",   "gloss": "silver",      "gloss_status": "draft", "source": "legacy NameService chunk 'syr"},
+    "vakara": {"proto": "vakara", "gloss": "oath",        "gloss_status": "draft", "source": "legacy NameService chunk 'vakar"},
+    "nima":   {"proto": "nima",   "gloss": "river",       "gloss_status": "draft"},
+    "lunda":  {"proto": "lunda",  "gloss": "harbor",      "gloss_status": "draft"},
+
+    "wira":     {"proto": "wira",     "gloss": "(unknown)", "gloss_status": "unknown", "source": "Virex (Lord Marshal Virex Tal'Varen)"},
+    "iasreka":  {"proto": "iasreka",  "gloss": "(unknown)", "gloss_status": "unknown", "source": "Jasrek (Jasrek Tyr)"},
+    "iaksa":    {"proto": "iaksa",    "gloss": "(unknown)", "gloss_status": "unknown", "source": "Jaxx (Jaxx Tyren)"},
+    "syrda":    {"proto": "syrda",    "gloss": "(unknown)", "gloss_status": "unknown", "source": "Syrr (Dr. Syrr Velkonn)"},
+    "thala":    {"proto": "thala",    "gloss": "(unknown)", "gloss_status": "unknown", "source": "Thalen (Thalen Rynn)"},
+    "si":       {"proto": "si",       "gloss": "(unknown)", "gloss_status": "unknown", "source": "Sira (Sira Velkonn)"},
+    "nurusa":   {"proto": "nurusa",   "gloss": "(unknown)", "gloss_status": "unknown", "source": "Nyros (Nyros Expanse)"},
+    "soraka":   {"proto": "soraka",   "gloss": "(unknown)", "gloss_status": "unknown", "source": "Surak (Vel-Surak)"},
+    "daerytha": {"proto": "daerytha", "gloss": "(unknown)", "gloss_status": "unknown", "source": "Daeryth (Daeryth Enclave)"}
+  },
+  "lineages": {
+    "_source": "canon/L2/entities/polities/polity_velar_imperium.json naming_conventions.lineage_prefixes (prefix spellings are canon; root assignments, eras and dialects are prototype inference)",
+    "noble":     {"prefix": "Vel",   "roots": ["wela"],  "eras": ["elder", "middle", "scribal"], "dialect": "imperial"},
+    "military":  {"prefix": "Varn",  "roots": ["warna"], "eras": ["elder", "middle", "scribal"], "dialect": "imperial"},
+    "scholarly": {"prefix": "Thess", "roots": ["tessa"], "eras": ["elder", "middle", "scribal"], "dialect": "imperial"},
+    "reformist": {"prefix": "Rynn",  "roots": ["rina"],  "eras": ["scribal"], "dialect": "union", "era_note": "Reformist families are a late political formation, so their names are scribal-era coinages."},
+    "outworld":  {"prefix": "Ty",    "roots": ["tu"],    "eras": ["elder", "middle", "scribal"], "dialect_note": "Frontier speech keeps the common pre-split forms (draft)."}
+  },
+  "generative_content_roots": ["kuna", "karasa", "sela", "dura", "lira", "hesa", "mora", "ketha", "drena", "syra", "vakara", "nima", "lunda"],
+  "personal_suffixes": ["ena", "isa", "ara"]
+}

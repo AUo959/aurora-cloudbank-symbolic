@@ -12,6 +12,7 @@ from pathlib import Path
 
 import pytest
 import jsonschema
+from referencing import Registry, Resource
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = REPO_ROOT / "schemas" / "ethics" / "recovered_protocol.schema.json"
@@ -23,6 +24,27 @@ MANIFEST_PATH = (
     / "recovered_protocol_manifest.example.json"
 )
 EXPECTED_PROTOCOLS = {"sherlock", "watson", "moriarty", "tribunal", "shadowfax"}
+
+
+@pytest.mark.unit
+def test_live_manifest_keeps_partial_archive_verification_blocked() -> None:
+    manifest_dir = MANIFEST_PATH.parent
+    schemas = manifest_dir / "schemas"
+    manifest_schema = json.loads((schemas / "recovered_protocol_manifest.schema.json").read_text(encoding="utf-8"))
+    custody_schema = json.loads((schemas / "custody_record.schema.json").read_text(encoding="utf-8"))
+    registry = Registry().with_resource(custody_schema["$id"], Resource.from_contents(custody_schema))
+    manifest = json.loads((manifest_dir / "recovered_protocol_manifest.json").read_text(encoding="utf-8"))
+    jsonschema.Draft202012Validator(manifest_schema, registry=registry).validate(manifest)
+
+    assert manifest["runtime_posture"] == "planning_only_no_runtime_enforcement"
+    protocols = {record["protocol_id"]: record["custody_record"] for record in manifest["protocols"]}
+    assert protocols.keys() == EXPECTED_PROTOCOLS
+    shadowfax = protocols["shadowfax"]
+    assert shadowfax["source_classification"] == "verified_archive"
+    assert shadowfax["source_package_sha256"] != "PENDING"
+    assert shadowfax["internal_file_sha256"] == "PENDING"
+    assert shadowfax["promotion_decision"] == "pending_custody_verification"
+    assert any("HARD BLOCK" in blocker for blocker in shadowfax["unresolved_blockers"])
 
 
 @pytest.fixture(scope="module")

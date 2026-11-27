@@ -73,7 +73,8 @@ def validate_executed_shipment(world: Universe, mandate: Mandate) -> None:
     if not isinstance(shipment_id, str) or not shipment_id:
         raise ValueError("executed mandate requires an existing shipment reference")
     due = _valid_dispatch_clock(world, mandate)
-    if world.time_s < due:
+    arriving_now = world.time_s == due and shipment_id in world.in_transit
+    if world.time_s < due or arriving_now:
         _check_inflight_cargo(world, mandate)
     elif shipment_id in world.in_transit:
         raise ValueError("overdue mandate cargo remains incorrectly in transit")

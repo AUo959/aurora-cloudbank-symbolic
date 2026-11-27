@@ -506,6 +506,30 @@ class P6SeatlessAssociationTests(unittest.TestCase):
         self.assertEqual((cargo.departed_s, cargo.arrives_s), (16, 28))
         self.assertTrue(engine.evidence()["ledger_valid"])
 
+    def test_cargo_due_with_earlier_ordered_event_at_same_instant(self):
+        # Charter expiry and mandate cargo arrival both fall due at t=42;
+        # validating after the expiry must not treat the pending cargo as overdue.
+        engine, _, association_id = setup_engine(expires_s=42)
+        mandate_id = proposal(engine, association_id, expires_s=60)
+        respond(engine, mandate_id)
+        engine.advance_to(30)
+        receipt = engine.execute_mandate(
+            mandate_id, "governor", cause="actor:same-instant-arrival")
+        shipment_id = receipt.effect["shipment_id"]
+        self.assertEqual(engine.state.in_transit[shipment_id].arrives_s, 42)
+        engine.advance_to(50)
+        self.assertNotIn(shipment_id, engine.state.in_transit)
+        self.assertTrue(engine.evidence()["ledger_valid"])
+
+    def test_cargo_still_in_transit_after_due_time_is_rejected(self):
+        engine, mandate_id, shipment_id = self._approved_mandate()
+        snapshot = engine.state
+        snapshot.pending = [e for e in snapshot.pending
+                            if e.payload.get("shipment_id") != shipment_id]
+        snapshot.time_s = engine.state.mandates[mandate_id].shipment_due_s
+        with self.assertRaises(ValueError):
+            CausalEngine(snapshot)
+
     def test_forged_executed_mandate_without_real_cargo_is_rejected(self):
         engine, mandate_id, _ = self._approved_mandate()
         snapshot = engine.state

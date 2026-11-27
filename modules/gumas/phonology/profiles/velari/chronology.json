@@ -3,16 +3,25 @@
   "eras": {
     "elder": {"formed_at": 50, "description": "Old Velari coinages: the great houses and the people-names."},
     "middle": {"formed_at": 450, "description": "Coined after junction syncope but before apocope; the linking vowel survives (Vela-, Varna-)."},
-    "scribal": {"formed_at": 900, "description": "Coined after the Thessari scribal reform; elements were already worn-down words, and scribes mark the junction with an apostrophe."}
+    "scribal": {"formed_at": 900, "description": "Coined after the Thessari scribal reform; elements were already worn-down words, and scribes mark the junction with an apostrophe."},
+    "late": {"formed_at": 1050, "description": "Coined after the dialect split; each dialect's later laws reach across the junction, and Union scribes write it with a hyphen (Vel-Surak)."}
   },
   "orthographic_events": {
-    "scribal_reform": {"date": 800, "description": "Thessari scribes begin marking compound junctions. Junctions formed on or after this date are written with an apostrophe."}
+    "scribal_reform": {"date": 800, "mark": "'", "capitalize": "lineage", "informal": "",
+                       "description": "Thessari scribes begin marking compound junctions. Junctions formed on or after this date are written with an apostrophe."},
+    "union_hyphenation": {"date": 1000, "dialect": "union", "mark": "-", "capitalize": "all", "informal": " ",
+                          "description": "Union scribes write post-split compound junctions with a hyphen and capitalize each element; informally the parts stand apart (canon Vel-Surak, alias Vel Surak)."}
   },
   "laws": [
     {"id": "VL1", "name": "w-fortition", "date": 100, "era": "Old Velari",
      "description": "*w hardens to v at the start of an element.",
      "target": {"phoneme": "w"}, "change": {"features": {"consonantal": true, "sonorant": false}},
      "when": {"element_initial": true}},
+
+    {"id": "VL12", "name": "j-hardening", "date": 150, "era": "Old Velari",
+     "description": "Element-initial *i before a vowel hardens to j (*iaksa > jaksa). Attested by canon Jasrek, Jaxx.",
+     "target": {"phoneme": "i"}, "change": {"features": {"syllabic": false, "consonantal": true}},
+     "when": {"element_initial": true, "before": [{"syllabic": true}]}},
 
     {"id": "VL2", "name": "t-aspiration", "date": 200, "era": "Old Velari",
      "description": "*t becomes th at the start of an element before e.",
@@ -39,6 +48,11 @@
      "target": {"phoneme": "a"}, "change": {"delete": true},
      "when": {"word_final": true, "after": [{"consonantal": true}], "stress": "unstressed", "min_syllables": 2}},
 
+    {"id": "VL16", "name": "rd-assimilation", "date": 560, "era": "Middle Velari",
+     "description": "A word-final d after r assimilates to it (*syrda > syrd > syrr). Attested by canon Syrr.",
+     "target": {"phoneme": "d"}, "change": {"features": {"sonorant": true, "continuant": true}},
+     "when": {"word_final": true, "after": [{"phoneme": "r"}]}},
+
     {"id": "VL6", "name": "high-vowel gemination", "date": 550, "era": "Middle Velari",
      "description": "An element-final n after a high vowel doubles, compensating for the lost vowel.",
      "target": {"phoneme": "n"}, "change": {"geminate": true},
@@ -52,6 +66,21 @@
      "description": "Of a doubled consonant after another consonant, one is lost (*varn+nim > varnim). Scribal compounds joined later keep both, written across the apostrophe.",
      "target": {"consonantal": true}, "change": {"delete": true},
      "when": {"reduce_triple": true}},
+
+    {"id": "VL13", "name": "ks-coalescence", "date": 640, "era": "Court Velari",
+     "description": "k before s becomes x (first half of *ks > x). Attested by canon Talyx, Virex, Jaxx.",
+     "target": {"phoneme": "k"}, "change": {"features": {"strident": true}},
+     "when": {"before": [{"phoneme": "s"}]}},
+
+    {"id": "VL14", "name": "s-absorption", "date": 645, "era": "Court Velari",
+     "description": "s after x is absorbed (second half of *ks > x).",
+     "target": {"phoneme": "s"}, "change": {"delete": true},
+     "when": {"after": [{"phoneme": "x"}]}},
+
+    {"id": "VL15", "name": "x-gemination", "date": 650, "era": "Court Velari",
+     "description": "A word-final x doubles in a one-syllable word (*jaks > jax > jaxx). Attested by canon Jaxx.",
+     "target": {"phoneme": "x"}, "change": {"geminate": true},
+     "when": {"word_final": true, "max_syllables": 1}},
 
     {"id": "VL8", "name": "i-rounding", "date": 700, "era": "Court Velari",
      "description": "i rounds to y before a geminate nn.",
@@ -93,10 +122,10 @@
            "description": "ss simplifies to s.",
            "target": {"phoneme": "s"}, "change": {"delete": true},
            "when": {"before": [{"phoneme": "s"}]}},
-          {"id": "VU2", "name": "final th-stopping", "date": 1040, "era": "Union Velari",
-           "description": "Word-final th becomes t (keth > ket).",
-           "target": {"phoneme": "th"}, "change": {"features": {"continuant": false}},
-           "when": {"word_final": true}}
+          {"id": "VU3", "name": "o-raising", "date": 1060, "era": "Union Velari",
+           "description": "Stressed o rises to u (*sorak > surak). Attested by canon Vel-Surak, a Union-aligned Velari world. Replaces a draft final th-stopping law that canon Daeryth (Union-aligned, ends in th) contradicted.",
+           "target": {"phoneme": "o"}, "change": {"features": {"high": true}},
+           "when": {"stress": "stressed"}}
         ]
       }
     }

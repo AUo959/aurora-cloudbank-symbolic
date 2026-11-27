@@ -185,6 +185,10 @@ def _min_syllables(ctx: _MatchContext, value: int) -> bool:
     return ctx.nuclei >= int(value)
 
 
+def _max_syllables(ctx: _MatchContext, value: int) -> bool:
+    return ctx.nuclei <= int(value)
+
+
 def _proclitic(ctx: _MatchContext, value: bool) -> bool:
     return value == (ctx.word.morphs[ctx.token.morph].kind == "proclitic")
 
@@ -219,6 +223,7 @@ CONDITIONS: Mapping[str, Callable[[_MatchContext, Any], bool]] = {
     "after": _after,
     "stress": _stress,
     "min_syllables": _min_syllables,
+    "max_syllables": _max_syllables,
     "proclitic": _proclitic,
     "reduce_triple": _reduce_triple,
     "preceded_anywhere_by": _preceded_anywhere_by,

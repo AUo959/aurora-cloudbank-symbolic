@@ -221,7 +221,7 @@ def audit(canon_root: Path, english: frozenset[str] | None = None) -> dict[str, 
     corpus_text = (PROFILES_DIR / "velari" / "attested.json").read_text(encoding="utf-8")
     linker = VelariLinker(records, corpus_text)
     words, tally = collect_words(records, linker, english_words() if english is None else english)
-    results = analyze_words(words, Analyzer(Engine("velari")))
+    results = analyze_words(words, Analyzer.shared(Engine("velari")))
     tiers = ("velar", "control")
     return {
         "complete": not unreadable,

@@ -22,7 +22,7 @@ from .phonology.analysis import Analysis, Analyzer
 from .phonology.engine import COMMON, Derivation, Engine, shared_roots
 
 ENGINE = Engine("velari")
-ANALYZER = Analyzer(ENGINE)
+ANALYZER = Analyzer.shared(ENGINE)
 ENGINE_VERSION = phonology.ENGINE_VERSION
 
 

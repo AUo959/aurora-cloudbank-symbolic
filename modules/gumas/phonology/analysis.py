@@ -54,6 +54,14 @@ class Analyzer:
         self.near_distance = near_distance
         self._index: dict[str, list[Derivation]] | None = None
 
+    @classmethod
+    def shared(cls, engine: Engine) -> "Analyzer":
+        """One analyzer per profile version: the index (every derivable form) is costly to build."""
+        key = (engine.profile.name, engine.profile.digest)
+        if key not in _SHARED:
+            _SHARED[key] = cls(engine)
+        return _SHARED[key]
+
     # ------------------------------------------------------------------ index
 
     @property
@@ -134,12 +142,20 @@ class Analyzer:
         }
 
 
+_SHARED: dict[tuple[str, str], "Analyzer"] = {}
+
+
 def _spelled_as(derived: Derivation, written: str) -> bool:
-    """An apostrophe dates a junction to after the scribal reform, so a formal spelling must match
-    exactly; a solid spelling may be either the informal register or an older fused coinage."""
-    formal = written.replace("’", "'")
-    if "'" in formal:
-        return derived.formal.lower() == formal.lower()
+    """Junction marks date a coinage, so a formal spelling (apostrophe or hyphen) must match exactly.
+
+    A spaced spelling must match the informal register (Vel Surak); a solid spelling may be either the
+    informal register or an older fused coinage.
+    """
+    text = written.replace("\u2019", "'").lower()
+    if "'" in text or "-" in text:
+        return derived.formal.lower() == text
+    if " " in text:
+        return derived.informal.lower() == text
     return True
 
 

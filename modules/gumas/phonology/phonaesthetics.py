@@ -19,7 +19,8 @@ START, END = "^", "$"
 
 
 def normalize(written: str) -> str:
-    return written.lower().replace("'", "").replace("’", "")
+    """Spelling key: lowercase, without junction marks (apostrophe, hyphen) or the space of a split informal form."""
+    return "".join(ch for ch in written.lower() if ch not in "'\u2019- ")
 
 
 class SoundModel:

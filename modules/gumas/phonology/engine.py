@@ -30,12 +30,24 @@ from .lexicon import Lineage, Root, load_lexicon
 from .rules import Boundary, Morph, SoundLaw, Word
 from .segments import Inventory
 
-ENGINE_VERSION = "GUMAS_PHONOLOGY_ENGINE_v0.4"
+ENGINE_VERSION = "GUMAS_PHONOLOGY_ENGINE_v0.5"
 PROFILES_DIR = Path(__file__).resolve().parent / "profiles"
 COMMON = "common"
 
 __all__ = ["COMMON", "ENGINE_VERSION", "Derivation", "Engine", "Lineage", "Profile", "Root", "load_profile",
            "shared_roots"]  # fmt: skip
+
+
+@dataclass(frozen=True)
+class JunctionMark:
+    """How scribes write a compound junction formed on or after ``date`` (optionally in one dialect only)."""
+
+    name: str
+    date: int
+    mark: str  # written between the parts: "'" or "-"
+    capitalize: str  # "lineage": only lineage elements after the mark; "all": every element
+    informal: str  # joiner in the informal register: "" (solid) or " " (apart)
+    dialect: str | None = None
 
 
 @dataclass(frozen=True)
@@ -51,6 +63,7 @@ class Profile:
     loan_map: Mapping[str, str]
     eras: Mapping[str, int]
     reform_date: int
+    junction_marks: tuple[JunctionMark, ...]
     lexicon: Mapping[str, Root]
     lineages: Mapping[str, Lineage]
     content_roots: tuple[str, ...]
@@ -81,6 +94,7 @@ class Profile:
             loan_map=_public(raw["inventory"].get("loan_map", {})),
             eras={name: spec["formed_at"] for name, spec in chronology["eras"].items()},
             reform_date=chronology["orthographic_events"]["scribal_reform"]["date"],
+            junction_marks=_load_junction_marks(chronology["orthographic_events"]),
             lexicon=lexicon.roots,
             lineages=lexicon.lineages,
             content_roots=lexicon.content_roots,
@@ -102,6 +116,15 @@ def _public(mapping: Mapping[str, Any]) -> dict[str, Any]:
 
 def _read_profile_files(directory: Path) -> dict[str, Any]:
     return {part: json.loads((directory / f"{part}.json").read_text(encoding="utf-8")) for part in _PROFILE_FILES}
+
+
+def _load_junction_marks(events: Mapping[str, Any]) -> tuple[JunctionMark, ...]:
+    marks = [
+        JunctionMark(name, int(e["date"]), e.get("mark", "'"), e.get("capitalize", "lineage"), e.get("informal", ""),
+                     e.get("dialect"))  # fmt: skip
+        for name, e in _public(events).items()
+    ]
+    return tuple(sorted(marks, key=lambda m: m.date))
 
 
 def _load_tactics(raw_inventory: Mapping[str, Any], inventory: Inventory) -> syllables.Phonotactics:
@@ -272,7 +295,7 @@ class Engine:
         era, formed_at = self._formation(era, formed_at)
         joined, trace = self._evolve(used, formed_at, self.laws_for(dialect))
         joined, applied = self._apply_sporadic(joined, trace, sporadic)
-        formal, informal = self._render(joined)
+        formal, informal = self._render(joined, dialect or COMMON)
         return Derivation(
             roots=tuple(roots),
             radicals=tuple(r.radical for r in used),
@@ -307,38 +330,48 @@ class Engine:
 
     # ------------------------------------------------------------------ orthography
 
-    def _render(self, word: Word) -> tuple[str, str]:
+    def _render(self, word: Word, dialect: str) -> tuple[str, str]:
         """Return (formal, informal) spellings.
 
-        Formal: scribal-era compound junctions are written with an apostrophe,
-        and an element after one is capitalized when it is itself a lineage
-        name (Vel'Rynn) but not when it is a common noun (T'karas).
-        Informal: the apostrophe is dropped and the word written solid.
+        A compound junction is written with the mark of the latest orthographic event in force when it was
+        formed (``orthographic_events``): an apostrophe after the scribal reform (Vel'Rynn, T'karas), a hyphen
+        in post-split Union coinages (Vel-Surak). After an apostrophe only lineage elements are capitalized;
+        after a hyphen every element is. The informal register drops the apostrophe and writes the word solid
+        (Talvaren), or sets hyphenated parts apart (Vel Surak).
         """
-        chunks = self._written_chunks(word)
-        formal_parts = [chunks[0][0].capitalize()]
-        formal_parts += [text.capitalize() if morph.lineage else text for text, morph in chunks[1:]]
-        return "'".join(formal_parts), "".join(text for text, _ in chunks).capitalize()
+        chunks = self._written_chunks(word, dialect)
+        formal = chunks[0][0].capitalize()
+        informal = chunks[0][0]
+        for text, morph, mark in chunks[1:]:
+            formal += mark.mark + (text.capitalize() if _capitalized(mark, morph) else text)
+            informal += mark.informal + (text.capitalize() if mark.informal else text)
+        return formal, informal[:1].upper() + informal[1:]
 
-    def _written_chunks(self, word: Word) -> list[tuple[str, Morph]]:
-        """Split a word at its apostrophe junctions: (spelling, morph that opens the chunk)."""
-        texts: list[list[str]] = []
-        openers: list[Morph] = []
+    def _written_chunks(self, word: Word, dialect: str) -> list[tuple[str, Morph, JunctionMark | None]]:
+        """Split a word at its written junctions: (spelling, morph that opens the chunk, mark before it)."""
+        chunks: list[tuple[list[str], Morph, JunctionMark | None]] = []
+        pending: JunctionMark | None = None
         start_new = True
         for token in word.tokens:
             if isinstance(token, Boundary):
-                start_new = start_new or self._written_junction(token)
+                mark = self._junction_mark(token, dialect)
+                pending = mark or pending
+                start_new = start_new or mark is not None
                 continue
             if start_new:
-                texts.append([])
-                openers.append(word.morphs[token.morph])
-                start_new = False
-            texts[-1].append(token.phoneme.grapheme)
-        return [("".join(text), morph) for text, morph in zip(texts, openers)]
+                chunks.append(([], word.morphs[token.morph], pending))
+                pending, start_new = None, False
+            chunks[-1][0].append(token.phoneme.grapheme)
+        return [("".join(text), morph, mark) for text, morph, mark in chunks]
 
-    def _written_junction(self, boundary: Boundary) -> bool:
-        """Compound junctions formed on or after the scribal reform are written with an apostrophe."""
-        return boundary.kind == "compound" and boundary.formed_at >= self.profile.reform_date
+    def _junction_mark(self, boundary: Boundary, dialect: str) -> JunctionMark | None:
+        """The latest orthographic event in force for this junction, or None when it is written solid."""
+        if boundary.kind != "compound":
+            return None
+        in_force = [
+            m for m in self.profile.junction_marks if m.date <= boundary.formed_at and m.dialect in (None, dialect)
+        ]
+        return in_force[-1] if in_force else None
 
     # ------------------------------------------------------------------ corpus fit
 
@@ -484,6 +517,10 @@ def _partition(laws: Sequence[SoundLaw], formed_at: int) -> tuple[list[SoundLaw]
     """Laws before a compound's formation date, and laws from that date on."""
     early = [law for law in laws if law.date < formed_at]
     return early, list(laws[len(early) :])  # laws are sorted by date
+
+
+def _capitalized(mark: JunctionMark, morph: Morph) -> bool:
+    return mark.capitalize == "all" or bool(morph.lineage)
 
 
 def _first_lineage(used: Sequence[Root]) -> str | None:

@@ -166,7 +166,7 @@ def test_hiatus_elision_keeps_middle_era_suffixes_clean():
     [
         (("wela", "kuna"), Stratum.SCRIBAL, "Vel'kynn", "Vel'kinn", "Vel'kynn"),
         (("tessa", "ari"), Stratum.ELDER, "Thessari", "Thessari", "Thesari"),
-        (("warna", "ketha"), Stratum.ELDER, "Varnketh", "Varnketh", "Varnket"),
+        (("warna", "mora"), Stratum.ELDER, "Varnmor", "Varnmor", "Varnmur"),
     ],
 )
 def test_dialects_diverge_after_the_split(roots, stratum, common, imperial, union):
@@ -182,6 +182,15 @@ def test_dialect_tagged_canon_rows_survive_their_branch():
         ("Tyr", "imperial"),
         ("Tal'Varen", "imperial"),
         ("Rynn", "union"),
+        ("Talyx", "imperial"),
+        ("Virex", "imperial"),
+        ("Jasrek", "imperial"),
+        ("Syrr", "imperial"),
+        ("Sira", "imperial"),
+        ("Nyros", "imperial"),
+        ("Thalen", "union"),
+        ("Vel-Surak", "union"),
+        ("Daeryth", "union"),
     }
     assert all(r["match"] for r in tagged)
 
@@ -213,17 +222,13 @@ def test_given_names_screened_by_registry():
     assert first not in [n.formal for n in generate_given_names(seed=4718224, count=12, registry=registry)]
 
 
-def test_unexplained_canon_given_names_are_recorded_with_reasons():
-    import json
-
-    from modules.gumas.phonology.engine import PROFILES_DIR
-
-    data = json.loads((PROFILES_DIR / "velari" / "attested.json").read_text(encoding="utf-8"))
-    rows = [r for r in data["unexplained"] if "formal" in r]
-    assert {r["formal"] for r in rows} == {"Sira", "Syrr", "Talyx", "Virex", "Thalen", "Jasrek", "Jaxx"}
-    assert all(r["reason"] and r["source"].startswith("canon/L2/") for r in rows)
-    corpus = {r["attested"] for r in fit_attested(include_fixtures=True)}
-    assert corpus.isdisjoint(r["formal"] for r in rows)
+def test_no_canon_velari_name_is_left_unexplained():
+    """The seven canon given names once listed as unexplained now derive and are cited in the corpus."""
+    assert ENGINE.profile.unexplained == ()
+    corpus = {r["attested"]: r for r in fit_attested()}
+    for name in ("Sira", "Syrr", "Talyx", "Virex", "Thalen", "Jasrek", "Jaxx"):
+        assert corpus[name]["match"], name
+        assert corpus[name]["evidence"] == "entity"
 
 
 # ---------------------------------------------------------------- phase 3
@@ -231,27 +236,33 @@ def test_unexplained_canon_given_names_are_recorded_with_reasons():
 
 def test_blind_recovery_finds_every_recorded_etymology():
     rows = {r["name"]: r for r in blind_recovery()}
-    assert len(rows) == 12
+    assert len(rows) == 22
     assert all(r["recovered"] for r in rows.values())
-    assert rows["Tyren"]["rival_roots"] == [("tura", "ena")]  # a genuine rival etymology
-    assert all(not r["rival_roots"] for name, r in rows.items() if name != "Tyren")
+    # Genuine rival etymologies: different roots spelling the same name.
+    rivals = {name: r["rival_roots"] for name, r in rows.items() if r["rival_roots"]}
+    assert rivals == {"Tyren": [("tura", "ena")], "Tyr": [("tu", "ra")], "Syrr": [("syra", "ra")]}
 
 
-def test_apostrophe_dates_the_coinage_in_analysis():
+def test_junction_marks_date_the_coinage_in_analysis():
     for name in ("Tal'Varen", "T'karas", "Vel'Rynn"):
-        assert {d.era for d in analyze(name).exact} == {"scribal"}, name
+        eras = {d.era for d in analyze(name).exact}
+        assert eras and eras <= {"scribal", "late"}, name  # an apostrophe means coined after the reform
     assert {d.era for d in analyze("T\u2019karas").exact} == {"scribal"}
-    assert {d.era for d in analyze("Talvaren").exact} == {"elder", "scribal"}
+    assert "elder" in {d.era for d in analyze("Talvaren").exact}  # solid: could be an old fused coinage
+    for spelling in ("Vel-Surak", "Vel Surak"):
+        assert {(d.era, d.dialect) for d in analyze(spelling).exact} == {("late", "union")}, spelling
 
 
 @pytest.mark.parametrize(
     "name, status",
     [
         ("Velkonn", "derived"),
-        ("Talyx", "loan"),
-        ("Jaxx", "loan"),
-        ("Thalen", "near"),
-        ("Syrr", "near"),
+        ("Talyx", "derived"),
+        ("Jaxx", "derived"),
+        ("Thalen", "derived"),
+        ("Syrr", "derived"),
+        ("Velkon", "near"),
+        ("Zhar'keth", "loan"),
         ("Kaelor", "unexplained"),
     ],
 )
@@ -259,22 +270,40 @@ def test_analysis_status(name, status):
     assert analyze(name).status == status
 
 
-def test_near_misses_point_at_the_specific_gap():
-    thalen = analyze("Thalen").nearest[0]
-    assert thalen[0] == 1 and thalen[1].formal == "Talen" and thalen[1].roots == ("tala", "ena")
-    syrr = analyze("Syrr").nearest[0]
-    assert syrr[0] == 1 and syrr[1].roots == ("syra",)
+def test_near_miss_points_at_the_nearest_form():
+    distance, nearest = analyze("Velkon").nearest[0]
+    assert distance == 1 and nearest.formal == "Velkonn" and nearest.roots == ("wela", "kuna")
 
 
 def test_loans_are_adapted_not_claimed():
-    talyx = analyze("Talyx")
-    assert talyx.foreign == ["x"] and talyx.adapted == "talyks" and not talyx.exact
-    assert analyze("Jaxx").foreign == ["j", "x"]
+    zhar = analyze("Zhar'keth")
+    assert zhar.foreign == ["z"] and zhar.adapted == "sharketh" and not zhar.exact
+    assert analyze("Talyx").foreign == []  # x and j are native Velari now
 
 
-def test_every_unexplained_canon_given_name_now_has_a_classification():
-    statuses = {r["formal"]: analyze(r["formal"]).status for r in ENGINE.profile.unexplained}
-    assert set(statuses.values()) <= {"near", "loan"}
+@pytest.mark.parametrize(
+    "roots, era, dialect, formal",
+    [
+        (("iaksa",), "elder", None, "Jaxx"),  # j-hardening, ks > x, x-gemination in one syllable
+        (("iasreka",), "elder", None, "Jasrek"),  # j-hardening
+        (("tala", "yksa"), "elder", None, "Talyx"),  # ks > x, no gemination in two syllables
+        (("wira", "eksa"), "elder", None, "Virex"),
+        (("syrda",), "elder", None, "Syrr"),  # rd-assimilation
+        (("si", "ra"), "scribal", None, "Sira"),  # late suffix escapes apocope
+        (("si", "ra"), "elder", None, "Sir"),  # the same suffix coined early loses its -a
+        (("nurusa",), "elder", None, "Nyros"),
+        (("daerytha",), "elder", "union", "Daeryth"),  # Union keeps final th (canon)
+    ],
+)
+def test_canon_gap_mechanisms(roots, era, dialect, formal):
+    assert ENGINE.derive(roots, era, dialect=dialect).formal == formal
+
+
+def test_union_hyphenates_post_split_compounds_and_raises_o():
+    union = ENGINE.derive(("wela", "soraka"), "late", dialect="union")
+    assert (union.formal, union.informal) == ("Vel-Surak", "Vel Surak")
+    imperial = ENGINE.derive(("wela", "soraka"), "late", dialect="imperial")
+    assert (imperial.formal, imperial.informal) == ("Vel'sorak", "Velsorak")  # apostrophe, no o-raising
 
 
 def test_sporadic_change_is_recorded_and_opt_in_for_derive():
@@ -286,13 +315,15 @@ def test_sporadic_change_is_recorded_and_opt_in_for_derive():
 
 
 def test_generation_sporadic_is_seeded_and_can_be_disabled():
-    names = generate_house_names(Lineage.REFORMIST, seed=4718224, count=8)
-    assert any(n.sporadic for n in names)
-    again = generate_house_names(Lineage.REFORMIST, seed=4718224, count=8)
-    assert [n.formal for n in names] == [n.formal for n in again]
-    plain = generate_house_names(Lineage.REFORMIST, seed=4718224, count=8, sporadic=False)
-    assert not any(n.sporadic for n in plain)
-    assert all(n.formal.startswith("Rynn'") for n in names)  # dissimilation never touches the first r
+    # Which candidates are struck depends on the profile digest, so look across seeds rather than at one.
+    runs = {seed: generate_house_names(Lineage.REFORMIST, seed=seed, count=13) for seed in range(10)}
+    assert any(n.sporadic for names in runs.values() for n in names)
+    for seed, names in runs.items():
+        again = generate_house_names(Lineage.REFORMIST, seed=seed, count=13)
+        assert [n.formal for n in names] == [n.formal for n in again]
+        assert all(n.formal.startswith("Rynn'") for n in names)  # dissimilation never touches the first r
+        plain = generate_house_names(Lineage.REFORMIST, seed=seed, count=13, sporadic=False)
+        assert not any(n.sporadic for n in plain)
 
 
 def test_weighted_generation_ranks_by_sound():

@@ -6,7 +6,10 @@ from simulation.runtime.canonrec_tactical.resolver import (
     CanonRecResolutionError,
     canonical_certainty,
     canonical_json_bytes,
+    DIVISION_PROFILES,
+    ROLE_PROFILES,
     canonical_record_id,
+    classify_role_profile,
     derive_capability,
     derive_doctrine,
     normalize_seed64,
@@ -122,3 +125,71 @@ def test_seed64_encoding_is_lossless_for_json_consumers() -> None:
     assert normalize_seed64("0xffffffffffffffff") == "0xffffffffffffffff"
     with pytest.raises(CanonRecResolutionError):
         normalize_seed64(2**64)
+
+
+# Verbatim CanonRec cls_aegis fields (CanonRec@dc629a5). The prose role lists a
+# secondary "fleet support" duty; before derivation v1.2 the bare "support"
+# logistics rule fired first and binned this battlecruiser as logistics.
+AEGIS = {
+    "entity_id": "cls_aegis",
+    "name": "Aegis-Class",
+    "division": "battlecruiser",
+    "role": "Frontline combat, planetary defense, fleet support",
+    "key_features": [
+        "Long-range rail cannons",
+        "Modular armor plating",
+        "Adaptive energy shielding",
+    ],
+}
+
+
+def test_aegis_battlecruiser_is_a_heavy_combatant_not_logistics() -> None:
+    derived = derive_capability(AEGIS)
+    assert derived["role_profile"] == "heavy_combatant"
+    assert derived["role_profile_basis"] == "division"
+    assert derived["values"]["firepower"] > derived["values"]["support"]
+
+
+def test_division_outranks_scoped_doctrine_and_prose_role_words() -> None:
+    noisy = derive_capability(AEGIS, "logistics resupply medical repair support")
+    assert noisy["role_profile"] == "heavy_combatant"
+
+
+@pytest.mark.parametrize(
+    ("division", "role", "expected"),
+    [
+        # CanonRec ship-class division tokens with their canon role prose.
+        ("battlecruiser", "Frontline combat, planetary defense, fleet support", "heavy_combatant"),
+        ("frigate", "Patrol, anti-piracy, high-speed interception, frontier security", "frigate_escort"),
+        ("escort_destroyer", "General-purpose fleet escort, screening, interception", "frigate_escort"),
+        ("heavy_carrier", "Carrier for fighters, bombers, fleet support units", "carrier"),
+        ("logistics", "Fleet resupply, mobile command, battlefield medical support", "logistics_support"),
+        ("fleet_bulker", "High-capacity fleet replenishment", "logistics_support"),
+        ("stealth_destroyer", "Black-ops, deep-space reconnaissance", "stealth_combatant"),
+        ("flagship_command", "Strategic fleet coordination", "flagship"),
+        ("defense_platform", "Orbital defense, station-to-surface fire support", "fortress"),
+    ],
+)
+def test_canon_divisions_map_to_hull_profiles(division: str, role: str, expected: str) -> None:
+    derived = derive_capability({"division": division, "role": role})
+    assert (derived["role_profile"], derived["role_profile_basis"]) == (expected, "division")
+
+
+def test_division_lookup_normalizes_case_and_separators() -> None:
+    assert classify_role_profile({"division": "Escort Destroyer"}, "")[0] == "frigate_escort"
+    assert classify_role_profile({"division": "heavy-carrier"}, "")[0] == "carrier"
+
+
+def test_unmapped_division_falls_back_to_role_text() -> None:
+    derived = derive_capability({"division": "raider", "role": "Mobile fortress, command nexus"})
+    assert (derived["role_profile"], derived["role_profile_basis"]) == ("fortress", "role_text")
+
+
+def test_bare_support_in_prose_no_longer_means_logistics() -> None:
+    derived = derive_capability({"role": "Heavy cruiser providing fleet support"})
+    assert derived["role_profile"] == "heavy_combatant"
+    assert derive_capability({"role": "Fleet resupply tender"})["role_profile"] == "logistics_support"
+
+
+def test_every_division_profile_exists() -> None:
+    assert set(DIVISION_PROFILES.values()) <= set(ROLE_PROFILES)

@@ -15,8 +15,8 @@ import unicodedata
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence, Tuple
 
-RESOLVER_VERSION = "1.0.1"
-DERIVATION_VERSION = "canonrec-tactical-derivation-v1.1"
+RESOLVER_VERSION = "1.1.0"
+DERIVATION_VERSION = "canonrec-tactical-derivation-v1.2"
 CANONICAL_JSON_PROFILE = "aurora-canonical-json-v1"
 
 CAPABILITY_KEYS: Tuple[str, ...] = (
@@ -43,6 +43,34 @@ ROLE_PROFILES: Mapping[str, Mapping[str, int]] = {
     "logistics_support": {"firepower": 230, "defense": 520, "mobility": 430, "sensors": 520, "stealth": 200, "electronic_warfare": 380, "carrier_projection": 180, "support": 950, "boarding": 120, "command": 420, "range": 590, "endurance": 950},
 }
 
+# Structured classification comes first: CanonRec ship classes carry a
+# ``division`` hull-type token (e.g. ``battlecruiser``). It is authoritative for
+# the base role profile because it names what the hull *is*, while ``role`` is
+# free prose listing what the hull *does* ("... fleet support") and can mention
+# secondary duties that belong to another profile. Divisions not listed here
+# (or records without one) fall back to ROLE_RULES over the record text.
+DIVISION_PROFILES: Mapping[str, str] = {
+    "flagship_command": "flagship",
+    "defense_platform": "fortress",
+    "dreadnought": "dreadnought",
+    "heavy_carrier": "carrier",
+    "carrier": "carrier",
+    "battlecruiser": "heavy_combatant",
+    "battleship": "heavy_combatant",
+    "cruiser": "heavy_combatant",
+    "destroyer": "heavy_combatant",
+    "escort_destroyer": "frigate_escort",
+    "frigate": "frigate_escort",
+    "interceptor": "interceptor_patrol",
+    "stealth_destroyer": "stealth_combatant",
+    "special_operations": "special_operations",
+    "logistics": "logistics_support",
+    "fleet_bulker": "logistics_support",
+}
+
+# Fallback prose rules, checked in order. Bare "support" is deliberately not a
+# logistics trigger: canon uses it for combat duties too ("fleet support",
+# "fire support"), which mis-binned the Aegis battlecruiser before v1.2.
 ROLE_RULES: Tuple[Tuple[Tuple[str, ...], str], ...] = (
     (("flagship", "command ship"), "flagship"),
     (("fortress", "bastion"), "fortress"),
@@ -52,7 +80,7 @@ ROLE_RULES: Tuple[Tuple[Tuple[str, ...], str], ...] = (
     (("stealth", "infiltration", "recon", "reconnaissance"), "stealth_combatant"),
     (("interceptor", "patrol", "pursuit", "skirmishing"), "interceptor_patrol"),
     (("frigate", "escort"), "frigate_escort"),
-    (("logistics", "support", "repair", "medical"), "logistics_support"),
+    (("logistics", "resupply", "replenishment", "repair", "medical"), "logistics_support"),
     (("cruiser", "battlecruiser", "destroyer", "combatant", "battleship"), "heavy_combatant"),
 )
 
@@ -172,6 +200,11 @@ def term_matches(text: str, term: str) -> bool:
     return f" {needle} " in f" {haystack} "
 
 
+def division_token(record: Mapping[str, Any]) -> str:
+    """Normalize a record's structured ``division`` to a snake_case token."""
+    return "_".join(normalize_match_text(str(record.get("division") or "")).split())
+
+
 def choose_role_profile(text: str) -> str:
     for needles, profile in ROLE_RULES:
         if any(term_matches(text, needle) for needle in needles):
@@ -179,6 +212,14 @@ def choose_role_profile(text: str) -> str:
     raise CanonRecResolutionError(
         f"No deterministic role profile for canonical text: {text[:160]!r}"
     )
+
+
+def classify_role_profile(record: Mapping[str, Any], text: str) -> Tuple[str, str]:
+    """Return ``(profile, basis)``; structured division wins over prose rules."""
+    profile = DIVISION_PROFILES.get(division_token(record))
+    if profile is not None:
+        return profile, "division"
+    return choose_role_profile(text), "role_text"
 
 
 def apply_rules(
@@ -207,13 +248,14 @@ def derive_capability(
     record: Mapping[str, Any], scoped_doctrine_text: str = ""
 ) -> Dict[str, Any]:
     text = f"{record_text(record)} {scoped_doctrine_text}".strip()
-    role_profile = choose_role_profile(text)
+    role_profile, role_basis = classify_role_profile(record, text)
     values, fired = apply_rules(ROLE_PROFILES[role_profile], text, FEATURE_RULES)
     return {
         "values": values,
         "provenance": "DERIVED_FROM_CANON",
         "derivation_version": DERIVATION_VERSION,
         "role_profile": role_profile,
+        "role_profile_basis": role_basis,
         "rules_fired": fired,
     }
 

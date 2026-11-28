@@ -21,7 +21,7 @@ from simulation.runtime.gumas_physical_t0.constructor import (  # noqa: E402
     construct_t0_state,
 )
 
-EXPECTED_T0_SHA256 = "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec"
+EXPECTED_T0_SHA256 = "05634f702bd888ce17e7d6586a06cc071d2e41e6e47191dc5b857b429942a444"
 EXPECTED_CONSTRUCTOR_SOURCE_SHA256 = (
     "01dd9f1ed08ebc1822e42c28d038e2fff742fe8d0421c342198fbebf56208f6f"
 )

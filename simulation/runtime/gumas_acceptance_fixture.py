@@ -20,7 +20,7 @@ from simulation.runtime.gumas_movement_geometry.kernel import (
 from simulation.runtime.gumas_physical_t0.constructor import construct_t0_state
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPECTED_T0_SHA256 = "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec"
+EXPECTED_T0_SHA256 = "05634f702bd888ce17e7d6586a06cc071d2e41e6e47191dc5b857b429942a444"
 BASELINE = (
     ROOT / "simulation/baselines/gumas/"
     "GUMAS__BASELINE__FLASH_REBELLION_PLANETOID_EQUAL_FLEETS__v1.2__2026-08-11.json"

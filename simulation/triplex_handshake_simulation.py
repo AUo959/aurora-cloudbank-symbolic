@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 """
+Status: CANONICAL. This is the documented triplex entrypoint —
+simulation/SIMULATION_STATUS_REPORT.md names this file and gives its run
+command (`python3 simulation/triplex_handshake_simulation.py`).
+Parallel variant: simulation/triplex_handshake_simulator.py. See #1132.
+
 Orion Station – Triplex Handshake & Drift/Coherence Simulation Prototype
 
 This simulation models the ethical decision-making and drift management system

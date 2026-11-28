@@ -8,6 +8,7 @@ import hashlib
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from l1_staffing import StaffingRunState
 from l1_runtime_support import (
     int_mapping,
     optional_int,
@@ -573,6 +574,7 @@ class L1RunState:
     manifest: RunManifest
     world_state: Dict[str, Any]
     fleet: FleetRunState = field(default_factory=FleetRunState.unbound)
+    staffing: StaffingRunState = field(default_factory=StaffingRunState)
     embodiments: EmbodimentRunState = field(default_factory=EmbodimentRunState.unbound)
     character_knowledge: Dict[str, List[EpistemicRecord]] = field(default_factory=dict)
     character_actions: List[Dict[str, Any]] = field(default_factory=list)
@@ -609,6 +611,7 @@ def l1_run_state_from_payload(payload: Dict[str, Any]) -> L1RunState:
         manifest=manifest,
         world_state=copy.deepcopy(_mapping(payload.get("world_state"), "world_state")),
         fleet=_fleet_state_from_payload(payload.get("fleet")),
+        staffing=StaffingRunState.from_payload(payload.get("staffing")),
         embodiments=_embodiment_state_from_payload(payload.get("embodiments")),
         character_knowledge=_character_knowledge_from_payload(
             payload.get("character_knowledge", {})

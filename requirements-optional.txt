@@ -45,7 +45,7 @@ azure-quantum>=1.0.0                # Azure Quantum workspace SDK
 cirq>=1.3.0                         # Required for Azure Quantum + other use cases
 
 # AWS Braket (Amazon)
-amazon-braket-sdk>=1.124.3           # AWS Braket SDK
+amazon-braket-sdk>=1.127.0           # AWS Braket SDK
 
 # ===================================================================
 # ADDITIONAL QUANTUM FRAMEWORKS (Optional)
@@ -58,7 +58,7 @@ pennylane>=0.45.1                   # PennyLane quantum ML (optional)
 # ===================================================================
 # Optional performance enhancements
 torch>=2.0.0                        # PyTorch for Flash Attention (memory compression)
-numba>=0.58.0                       # JIT compilation for numerical code
+numba>=0.67.0                       # JIT compilation for numerical code
 cython>=3.0.0                       # C-extensions compiler
 
 # ===================================================================
@@ -90,4 +90,4 @@ sentry-sdk>=2.65.0                  # Error tracking
 # Required by connector/server.py to expose Aurora state over the Model
 # Context Protocol. Without it the connector and tests/connector are
 # unavailable; the core API is unaffected. See connector/README.md.
-mcp>=1.29.0,<2.0.0                  # Model Context Protocol SDK (v1 API)
+mcp>=2.3.0,<3.0.0                  # Model Context Protocol SDK (v2 API)

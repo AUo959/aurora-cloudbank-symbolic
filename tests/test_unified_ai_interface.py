@@ -5,11 +5,13 @@ Tests model selection, fallback chains, and integration
 """
 
 import asyncio
+import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from modules.ai_core.unified_ai_interface import (
+    MODEL_PROVIDER_NOT_FOUND_TOTAL,
     AIModel,
     AIProvider,
     AIRequest,
@@ -20,20 +22,20 @@ from modules.ai_core.unified_ai_interface import (
 
 
 @pytest.fixture(autouse=True)
-def restore_model_availability():
-    """Restore the shipped ``available`` flags after every test.
+def restore_model_catalog_gates():
+    """Restore the shipped catalog and routing flags after every test.
 
-    ``UnifiedAIInterface.CAPABILITIES`` is a class attribute, so every instance
-    (including the module-level ``unified_ai`` singleton) shares one dict.
-    Tests that flip availability would otherwise leak into later tests and make
-    assertions about shipped defaults order-dependent.
+    Instances deep-copy the class catalog, but guarding the class defaults here
+    also protects future tests that deliberately exercise those defaults.
     """
     original = {
-        model: caps.available for model, caps in UnifiedAIInterface.CAPABILITIES.items()
+        model: (caps.available, caps.enabled)
+        for model, caps in UnifiedAIInterface.CAPABILITIES.items()
     }
     yield
-    for model, available in original.items():
+    for model, (available, enabled) in original.items():
         UnifiedAIInterface.CAPABILITIES[model].available = available
+        UnifiedAIInterface.CAPABILITIES[model].enabled = enabled
 
 
 @pytest.mark.unit
@@ -82,13 +84,13 @@ class TestUnifiedAIInterface:
         """Test model selection respects user preference"""
         interface = UnifiedAIInterface()
 
-        # Mark GPT-4O as available
-        interface.CAPABILITIES[AIModel.GPT_4O].available = True
+        # Mark GPT-6.1 Sol as available
+        interface.CAPABILITIES[AIModel.GPT_6_1_SOL].available = True
 
-        request = AIRequest(prompt="test", model_preference=AIModel.GPT_4O)
+        request = AIRequest(prompt="test", model_preference=AIModel.GPT_6_1_SOL)
 
         selected = await interface.select_optimal_model(request, "general")
-        assert selected == AIModel.GPT_4O
+        assert selected == AIModel.GPT_6_1_SOL
 
     @pytest.mark.asyncio
     async def test_optimal_model_selection_fallback(self):
@@ -114,43 +116,58 @@ class TestUnifiedAIInterface:
         # Make all models available
         for model in interface.CAPABILITIES:
             interface.CAPABILITIES[model].available = True
+            interface.CAPABILITIES[model].enabled = True
 
         request = AIRequest(prompt="test")
 
         # For code generation, should prefer Codex
         selected_code = await interface.select_optimal_model(request, "code_generation")
-        assert selected_code == AIModel.GPT_5_CODEX  # First in code gen chain
+        assert selected_code == AIModel.GPT_6_1_SOL  # Current direct OpenAI model
 
         # For reasoning, should prefer Claude Opus 5
         selected_reasoning = await interface.select_optimal_model(request, "reasoning")
         assert selected_reasoning == AIModel.CLAUDE_OPUS_5  # First in reasoning chain
 
     def test_get_available_models(self):
-        """Test getting list of available models"""
+        """The compatibility API returns only available and enabled models."""
         interface = UnifiedAIInterface()
 
         # Set some models as available
         interface.CAPABILITIES[AIModel.GPT_4O].available = True
+        interface.CAPABILITIES[AIModel.GPT_4O].enabled = False
         interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5].available = True
         interface.CAPABILITIES[AIModel.GPT_5].available = False
 
         available = interface.get_available_models()
 
-        assert AIModel.GPT_4O in available
+        assert AIModel.GPT_4O not in available
         assert AIModel.CLAUDE_SONNET_5 in available
         assert AIModel.GPT_5 not in available
 
     def test_enable_disable_models(self):
-        """Test runtime model enable/disable"""
+        """Routing policy changes do not rewrite provider availability."""
+        interface = UnifiedAIInterface()
+        model = AIModel.GPT_6_1_SOL
+
+        interface.disable_model(model)
+        assert interface.CAPABILITIES[model].available
+        assert not interface.CAPABILITIES[model].enabled
+        assert not interface.CAPABILITIES[model].routable
+
+        interface.enable_model(model)
+        assert interface.CAPABILITIES[model].available
+        assert interface.CAPABILITIES[model].enabled
+        assert interface.CAPABILITIES[model].routable
+
+    def test_unverified_model_cannot_be_enabled(self):
+        """Local routing policy cannot promote an unverified catalog entry."""
         interface = UnifiedAIInterface()
 
-        # Disable GPT-5
-        interface.disable_model(AIModel.GPT_5)
-        assert not interface.CAPABILITIES[AIModel.GPT_5].available
+        with pytest.raises(ValueError, match="unverified or provider-unavailable"):
+            interface.enable_model(AIModel.GPT_5)
 
-        # Enable GPT-5
-        interface.enable_model(AIModel.GPT_5)
-        assert interface.CAPABILITIES[AIModel.GPT_5].available
+        assert not interface.CAPABILITIES[AIModel.GPT_5].available
+        assert not interface.CAPABILITIES[AIModel.GPT_5].enabled
 
     def test_aspirational_models_default_unavailable(self):
         """Aspirational placeholder IDs must ship gated (available=False)."""
@@ -161,6 +178,7 @@ class TestUnifiedAIInterface:
                 f"{model.value} is an unverified placeholder and must default to "
                 "available=False"
             )
+            assert interface.CAPABILITIES[model].enabled is False
 
     def test_claude_models_are_current_catalog_ids(self):
         """Claude entries must carry live, date-suffix-free catalog IDs and be
@@ -187,6 +205,7 @@ class TestUnifiedAIInterface:
             assert interface.CAPABILITIES[model].available is True, (
                 f"{model.value} is verified live and must be selectable"
             )
+            assert interface.CAPABILITIES[model].routable is True
 
         assert AIModel.CLAUDE_OPUS_5.value == "claude-opus-5"
         assert AIModel.CLAUDE_SONNET_5.value == "claude-sonnet-5"
@@ -204,7 +223,40 @@ class TestUnifiedAIInterface:
         sonnet = interface.CAPABILITIES[AIModel.CLAUDE_SONNET_5]
         assert sonnet.context_window == 1_000_000
         assert sonnet.max_output_tokens == 128_000
-        assert sonnet.cost_per_1k_tokens == 0.003
+        assert sonnet.cost_per_1k_tokens == 0.002
+
+    @pytest.mark.asyncio
+    async def test_shutdown_gpt4_preference_uses_available_fallback(self):
+        """The retired GPT-4 alias must not be sent to a provider."""
+        interface = UnifiedAIInterface()
+        assert interface.CAPABILITIES[AIModel.GPT_4].available is False
+        request = AIRequest(prompt="test", model_preference=AIModel.GPT_4)
+        selected = await interface.select_optimal_model(request)
+        assert selected is not AIModel.GPT_4
+        assert interface.CAPABILITIES[selected].available is True
+
+    @pytest.mark.asyncio
+    async def test_mathematical_request_survives_anthropic_failure(self):
+        """Retiring GPT-4 must preserve the available OpenAI fallback."""
+        interface = UnifiedAIInterface()
+        interface._budget = None
+        expected = AIResponse(
+            content="42", model_used=AIModel.GPT_6_1_SOL, provider=AIProvider.OPENAI,
+            tokens_used=5, latency_ms=10,
+        )
+        with (
+            patch.object(interface, "_execute_anthropic", new_callable=AsyncMock) as anthropic,
+            patch.object(interface, "_execute_openai", new_callable=AsyncMock) as openai,
+            patch("modules.ai_core.unified_ai_interface.asyncio.sleep", new_callable=AsyncMock),
+        ):
+            anthropic.side_effect = RuntimeError("provider unavailable")
+            openai.return_value = expected
+            request = AIRequest(prompt="calculate")
+            result = await interface.execute_request(request, task_type="mathematical")
+        assert result.success is True
+        assert result.model_used is AIModel.GPT_6_1_SOL
+        assert anthropic.await_count == 2
+        openai.assert_awaited_once_with(request, AIModel.GPT_6_1_SOL)
 
     @pytest.mark.asyncio
     async def test_unavailable_model_cannot_be_selected(self):
@@ -212,16 +264,16 @@ class TestUnifiedAIInterface:
         even when requested explicitly as the preference."""
         interface = UnifiedAIInterface()
 
-        # Gate every model except one known-available target.
+        # Gate every model except one known-available target (GPT-4o retired in #1680).
         for model in interface.CAPABILITIES:
             interface.CAPABILITIES[model].available = False
-        interface.CAPABILITIES[AIModel.GPT_4O].available = True
+        interface.CAPABILITIES[AIModel.GPT_6_1_SOL].available = True
 
         # Explicitly prefer a gated model; selector must skip it.
         request = AIRequest(prompt="test", model_preference=AIModel.GPT_5)
         selected = await interface.select_optimal_model(request, "general")
 
-        assert selected == AIModel.GPT_4O
+        assert selected == AIModel.GPT_6_1_SOL
         assert interface.CAPABILITIES[selected].available is True
         assert selected != AIModel.GPT_5
 
@@ -499,6 +551,63 @@ class TestAIIntegrationErrorHandling:
         assert selected == AIModel.CLAUDE_SONNET_5
 
     @pytest.mark.asyncio
+    async def test_provider_404_alerts_before_successful_fallback(self, caplog):
+        """An enabled model disappearing must be observable, even if fallback works."""
+
+        class ModelNotFoundError(RuntimeError):
+            status_code = 404
+
+        interface = UnifiedAIInterface()
+        interface._budget = None
+        request = AIRequest(
+            prompt="test",
+            model_preference=AIModel.CLAUDE_OPUS_5,
+            fallback_chain=[AIModel.GPT_6_1_SOL],
+        )
+        fallback_response = AIResponse(
+            content="fallback worked",
+            model_used=AIModel.GPT_6_1_SOL,
+            provider=AIProvider.OPENAI,
+            tokens_used=5,
+            latency_ms=10,
+        )
+        metric = MODEL_PROVIDER_NOT_FOUND_TOTAL.labels(
+            provider=AIProvider.ANTHROPIC.value,
+            model=AIModel.CLAUDE_OPUS_5.value,
+        )
+        before = metric._value.get()
+
+        with caplog.at_level(logging.CRITICAL):
+            with (
+                patch.object(
+                    interface,
+                    "_execute_anthropic",
+                    new_callable=AsyncMock,
+                    side_effect=ModelNotFoundError("HTTP 404 model_not_found"),
+                ),
+                patch.object(
+                    interface,
+                    "_execute_openai",
+                    new_callable=AsyncMock,
+                    return_value=fallback_response,
+                ),
+            ):
+                response = await interface.execute_request(request)
+
+        assert response is fallback_response
+        assert metric._value.get() == before + 1
+        assert "MODEL CATALOG ALERT" in caplog.text
+        assert AIModel.CLAUDE_OPUS_5.value in caplog.text
+
+    def test_not_found_detection_rejects_unrelated_404_text(self):
+        assert UnifiedAIInterface._is_model_not_found(
+            RuntimeError("processed 404 tokens")
+        ) is False
+        assert UnifiedAIInterface._is_model_not_found(
+            RuntimeError("provider says model_not_found")
+        ) is True
+
+    @pytest.mark.asyncio
     async def test_all_models_unavailable(self):
         """Test behavior when all models are unavailable."""
         interface = UnifiedAIInterface()
@@ -723,15 +832,17 @@ class TestAIIntegrationResilience:
         """Test that models can recover after temporary failures."""
         interface = UnifiedAIInterface()
 
-        model = AIModel.GPT_4O
+        model = AIModel.GPT_6_1_SOL
 
         # Simulate failure
         interface.disable_model(model)
-        assert not interface.CAPABILITIES[model].available
+        assert interface.CAPABILITIES[model].available
+        assert not interface.CAPABILITIES[model].enabled
 
         # Simulate recovery
         interface.enable_model(model)
         assert interface.CAPABILITIES[model].available
+        assert interface.CAPABILITIES[model].enabled
 
     @pytest.mark.asyncio
     async def test_request_metadata_preservation(self):
@@ -747,3 +858,112 @@ class TestAIIntegrationResilience:
         # Metadata should be preserved even if request fails
         assert request.context_tag == "test_context_123"
         assert request.dlp_tracking is True
+
+
+@pytest.mark.critical
+class TestAnthropicRequestConstruction:
+    """Assert the request `_execute_anthropic` actually builds.
+
+    Every other Anthropic test in this module patches `_execute_anthropic`
+    itself, so the method body never runs and the outgoing keyword arguments
+    are never observed. That is how #1560 survived: the call passed
+    `temperature` and `top_p`, which `claude-opus-5` and `claude-sonnet-5`
+    both reject, and which the anthropic 1.x client does not accept at all.
+
+    These tests patch the *client* instead, so the real body executes.
+    """
+
+    @staticmethod
+    def _mock_client() -> MagicMock:
+        message = MagicMock()
+        message.content = [MagicMock(text="ok")]
+        message.usage.input_tokens = 11
+        message.usage.output_tokens = 7
+        message.stop_reason = "end_turn"
+
+        client = MagicMock()
+        client.messages.create = AsyncMock(return_value=message)
+        return client
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "banned", ["temperature", "top_p", "top_k"]
+    )
+    async def test_sampling_parameters_are_not_sent(self, banned: str) -> None:
+        """Sampling parameters must never reach the Anthropic API."""
+        interface = UnifiedAIInterface()
+        interface.anthropic_client = self._mock_client()
+
+        await interface._execute_anthropic(
+            AIRequest(prompt="test"), AIModel.CLAUDE_SONNET_5
+        )
+
+        kwargs = interface.anthropic_client.messages.create.await_args.kwargs
+        assert banned not in kwargs, (
+            f"{banned} was sent to messages.create; claude-opus-5 and "
+            "claude-sonnet-5 reject it and anthropic 1.x raises TypeError"
+        )
+
+    @pytest.mark.asyncio
+    async def test_supported_parameters_are_sent(self) -> None:
+        """Removing sampling parameters must not drop the real ones."""
+        interface = UnifiedAIInterface()
+        interface.anthropic_client = self._mock_client()
+
+        await interface._execute_anthropic(
+            AIRequest(prompt="hello", system_prompt="be brief", max_tokens=256),
+            AIModel.CLAUDE_OPUS_5,
+        )
+
+        kwargs = interface.anthropic_client.messages.create.await_args.kwargs
+        assert kwargs["model"] == AIModel.CLAUDE_OPUS_5.value
+        assert kwargs["max_tokens"] == 256
+        assert kwargs["system"] == "be brief"
+        assert kwargs["messages"] == [{"role": "user", "content": "hello"}]
+
+    @pytest.mark.asyncio
+    async def test_response_is_mapped_from_the_real_body(self) -> None:
+        """The mapping from the API response is exercised, not mocked away."""
+        interface = UnifiedAIInterface()
+        interface.anthropic_client = self._mock_client()
+
+        result = await interface._execute_anthropic(
+            AIRequest(prompt="test", context_tag="ctx-1"), AIModel.CLAUDE_SONNET_5
+        )
+
+        assert result.content == "ok"
+        assert result.provider is AIProvider.ANTHROPIC
+        assert result.model_used is AIModel.CLAUDE_SONNET_5
+        assert result.tokens_used == 18
+        assert result.context_tag == "ctx-1"
+        assert result.metadata["stop_reason"] == "end_turn"
+
+    def test_client_timeout_matches_the_sdk_http_layer(self) -> None:
+        """The Anthropic client's timeout must be the SDK's own `Timeout` type.
+
+        anthropic 1.x moved its HTTP layer from httpx to httpx2. A raw
+        `httpx.Timeout` is accepted at construction but fails every request
+        with a misleading `APIConnectionError: Connection error.`, so client
+        setup alone looks healthy. Verified against both versions:
+
+            anthropic 1.2.0   httpx.Timeout -> APIConnectionError
+                              anthropic.Timeout / httpx2.Timeout -> HTTP 401
+            anthropic 0.120.2 both -> HTTP 401 (anthropic.Timeout IS
+                              httpx.Timeout there, so the fix is a no-op)
+
+        Identity against `anthropic.Timeout` is the assertion that works on
+        both. A `__module__` check does not: the SDK reassigns
+        ``Timeout.__module__ = "anthropic"`` on the shared class, so on 0.120.2
+        even a raw `httpx.Timeout` reports ``"anthropic"``.
+        """
+        anthropic = pytest.importorskip("anthropic")
+
+        with patch.object(anthropic, "AsyncAnthropic") as mock_ctor:
+            UnifiedAIInterface()
+
+        assert mock_ctor.called, "Anthropic client was never constructed"
+        timeout = mock_ctor.call_args.kwargs["timeout"]
+        assert type(timeout) is anthropic.Timeout, (
+            f"Anthropic client built with {type(timeout)!r}; use "
+            "anthropic.Timeout so the object matches the SDK's HTTP layer"
+        )

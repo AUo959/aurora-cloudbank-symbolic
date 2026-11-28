@@ -3,7 +3,7 @@ Unified AI Interface for Aurora CloudBank Symbolic
 
 Multi-model AI abstraction layer supporting:
 - Claude Opus 5, Claude Sonnet 5
-- GPT-4, GPT-4o, GPT-5 (Codex)
+- GPT-6.1 Sol and GPT-6 Astra through the Responses API
 - Intelligent fallback chains
 - Runtime model selection
 - Performance tracking and optimization
@@ -18,7 +18,15 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+from prometheus_client import Counter
+
 logger = logging.getLogger(__name__)
+
+MODEL_PROVIDER_NOT_FOUND_TOTAL = Counter(
+    "aurora_ai_model_provider_not_found_total",
+    "Provider model-not-found responses observed before AI fallback",
+    ("provider", "model"),
+)
 
 
 class AIProvider(Enum):
@@ -31,18 +39,20 @@ class AIProvider(Enum):
 class AIModel(Enum):
     """Supported AI models with version tracking.
 
-    Catalog reconciliation: 2026-07-25 (Anthropic entries).
+    Catalog reconciliation: 2026-11-07 (published provider documentation).
+    Sources and lifecycle notes: docs/MODEL_CATALOG_VERIFICATION_2026-11-07.md.
 
     Identifiers tagged "UNVERIFIED placeholder" below are aspirational and are
     NOT confirmed against the provider's live catalog. They are gated by
-    ``available=False`` in ``CAPABILITIES`` so they can never be selected
-    through the public interface (see ``select_optimal_model``). Promote one to
-    a live identifier only after confirming it against the provider catalog and
-    flipping its ``available`` flag in the same change.
+    ``available=False`` and ``enabled=False`` in ``CAPABILITIES`` so they can
+    never be selected through the public interface (see
+    ``select_optimal_model``). Promote one to a live identifier only after
+    confirming it against the provider catalog and recording a dated source;
+    routing policy can then enable it independently.
 
-    A "Verified live" tag means the identifier was checked against the
-    provider's own catalog on the reconciliation date above — not that it was
-    once believed correct. The previous Claude entries violated that rule: a
+    A "Published catalog" tag means the identifier was checked against the
+    provider's documentation; it does not establish account-specific API access.
+    The previous Claude entries violated that rule: a
     retired identifier (``claude-3-5-sonnet-20241022``, retired 2025-10-28)
     carried the tag while being the only selectable Anthropic model, and the
     gated entry (``claude-4-5-opus-20250115``) named a release that never
@@ -51,14 +61,16 @@ class AIModel(Enum):
     written.
     """
 
-    # Claude family — verified against the Anthropic catalog on 2026-07-25
-    CLAUDE_OPUS_5 = "claude-opus-5"  # Verified live
-    CLAUDE_SONNET_5 = "claude-sonnet-5"  # Verified live
+    # Claude family — published catalog checked on 2026-11-07
+    CLAUDE_OPUS_5 = "claude-opus-5"  # Published catalog: active legacy model
+    CLAUDE_SONNET_5 = "claude-sonnet-5"  # Published catalog: active legacy model
 
-    # GPT family
-    GPT_4 = "gpt-4"  # Verified live
+    # GPT family — current direct OpenAI models
+    GPT_6_1_SOL = "gpt-6.1-sol"  # Published catalog: 2026-11-08
+    GPT_6_ASTRA = "gpt-6-astra"  # Published catalog: 2026-11-08
+    GPT_4 = "gpt-4"  # Shut down 2026-10-23; available=False
     GPT_4_TURBO = "gpt-4-turbo-preview"  # Defined but no capability profile -> not selectable
-    GPT_4O = "gpt-4o"  # Verified live
+    GPT_4O = "gpt-4o"  # Legacy identifier; disabled after migration
     GPT_5 = "gpt-5"  # UNVERIFIED placeholder (available=False)
     GPT_5_CODEX = "gpt-5-codex"  # UNVERIFIED placeholder (available=False)
 
@@ -79,7 +91,11 @@ class ModelCapabilities:
     mathematical_strength: int = 5  # 1-10 scale
     cost_per_1k_tokens: float = 0.0  # USD
     latency_avg_ms: int = 1000
+    # Provider/catalog fact: this identifier exists and has a dated source.
     available: bool = True
+    # Local routing policy: operators may disable a verified model without
+    # erasing the catalog fact that it exists.
+    enabled: bool = True
 
     # Machine-readable verification claim, replacing the "# Verified live"
     # comment convention. A comment is a *claim*; nothing can falsify it, which
@@ -100,6 +116,11 @@ class ModelCapabilities:
     verified_on: str = ""
     verified_source: str = "unverified"
 
+    @property
+    def routable(self) -> bool:
+        """Whether live selection may route traffic to this model."""
+        return self.available and self.enabled
+
 
 @dataclass
 class AIRequest:
@@ -118,6 +139,7 @@ class AIRequest:
     safety_level: str = "high"
     stream: bool = False
     user_id: str = "anonymous"
+    reasoning_effort: str = "medium"
 
 
 @dataclass
@@ -149,7 +171,9 @@ class UnifiedAIInterface:
     - DLP-compliant request/response tracking
     """
 
-    # Model capabilities registry
+    # Model capabilities registry. cost_per_1k_tokens is the standard uncached
+    # input-token price; output/tool costs and latency/strength estimates are
+    # not verified by these published-catalog claims. See the source receipt.
     CAPABILITIES: Dict[AIModel, ModelCapabilities] = {
         AIModel.CLAUDE_OPUS_5: ModelCapabilities(
             model=AIModel.CLAUDE_OPUS_5,
@@ -164,8 +188,8 @@ class UnifiedAIInterface:
             mathematical_strength=10,
             cost_per_1k_tokens=0.005,  # $5 / 1M input tokens
             latency_avg_ms=1200,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.CLAUDE_SONNET_5: ModelCapabilities(
             model=AIModel.CLAUDE_SONNET_5,
@@ -178,39 +202,71 @@ class UnifiedAIInterface:
             reasoning_strength=9,
             code_generation_strength=9,
             mathematical_strength=9,
-            cost_per_1k_tokens=0.003,  # $3 / 1M input tokens
+            cost_per_1k_tokens=0.002,  # $2 / 1M input tokens
             latency_avg_ms=800,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
+        ),
+        AIModel.GPT_6_1_SOL: ModelCapabilities(
+            model=AIModel.GPT_6_1_SOL,
+            provider=AIProvider.OPENAI,
+            context_window=1_050_000,
+            max_output_tokens=128_000,
+            supports_function_calling=True,
+            supports_vision=True,
+            reasoning_strength=10,
+            code_generation_strength=10,
+            mathematical_strength=10,
+            cost_per_1k_tokens=0.002,  # Standard uncached input; long-context surcharges apply.
+            verified_on="2026-11-08",
+            verified_source="pricing-docs",
+        ),
+        AIModel.GPT_6_ASTRA: ModelCapabilities(
+            model=AIModel.GPT_6_ASTRA,
+            provider=AIProvider.OPENAI,
+            context_window=1_050_000,
+            max_output_tokens=128_000,
+            supports_function_calling=True,
+            supports_vision=True,
+            reasoning_strength=10,
+            code_generation_strength=10,
+            mathematical_strength=10,
+            cost_per_1k_tokens=0.01,  # Standard uncached input; long-context surcharges apply.
+            verified_on="2026-11-08",
+            verified_source="pricing-docs",
         ),
         AIModel.GPT_4: ModelCapabilities(
             model=AIModel.GPT_4,
             provider=AIProvider.OPENAI,
             context_window=8192,
-            max_output_tokens=4096,
+            max_output_tokens=8192,
             supports_function_calling=True,
             reasoning_strength=8,
             code_generation_strength=7,
             mathematical_strength=8,
             cost_per_1k_tokens=0.03,
             latency_avg_ms=1500,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            available=False,  # Provider shut down gpt-4 on 2026-10-23.
+            enabled=False,
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.GPT_4O: ModelCapabilities(
             model=AIModel.GPT_4O,
             provider=AIProvider.OPENAI,
             context_window=128_000,
-            max_output_tokens=4096,
+            max_output_tokens=16_384,
             supports_function_calling=True,
             supports_vision=True,
             reasoning_strength=9,
             code_generation_strength=8,
             mathematical_strength=8,
-            cost_per_1k_tokens=0.005,
+            cost_per_1k_tokens=0.0025,  # Historical $2.50 / 1M input tokens
             latency_avg_ms=600,
-            verified_on="2026-07-25",
-            verified_source="manual",
+            available=False,  # Migrated to GPT-6.1 Sol before retirement.
+            enabled=False,
+            verified_on="2026-11-07",
+            verified_source="pricing-docs",
         ),
         AIModel.GPT_5: ModelCapabilities(
             model=AIModel.GPT_5,
@@ -226,6 +282,7 @@ class UnifiedAIInterface:
             cost_per_1k_tokens=0.02,  # Expected pricing
             latency_avg_ms=1000,
             available=False,  # Not yet released
+            enabled=False,
             verified_on="",
             verified_source="unverified",
         ),
@@ -243,6 +300,7 @@ class UnifiedAIInterface:
             cost_per_1k_tokens=0.025,  # Expected pricing
             latency_avg_ms=900,
             available=False,  # Not yet released
+            enabled=False,
             verified_on="",
             verified_source="unverified",
         ),
@@ -250,31 +308,10 @@ class UnifiedAIInterface:
 
     # Default fallback chains for different task types
     FALLBACK_CHAINS = {
-        "reasoning": [
-            AIModel.CLAUDE_OPUS_5,
-            AIModel.GPT_5,
-            AIModel.CLAUDE_SONNET_5,
-            AIModel.GPT_4O,
-        ],
-        "code_generation": [
-            AIModel.GPT_5_CODEX,
-            AIModel.GPT_5,
-            AIModel.CLAUDE_OPUS_5,
-            AIModel.CLAUDE_SONNET_5,
-            AIModel.GPT_4O,
-        ],
-        "mathematical": [
-            AIModel.CLAUDE_OPUS_5,
-            AIModel.CLAUDE_SONNET_5,
-            AIModel.GPT_5,
-            AIModel.GPT_4,
-        ],
-        "general": [
-            AIModel.GPT_4O,
-            AIModel.CLAUDE_SONNET_5,
-            AIModel.GPT_5,
-            AIModel.CLAUDE_OPUS_5,
-        ],
+        "reasoning": [AIModel.CLAUDE_OPUS_5, AIModel.GPT_6_1_SOL, AIModel.CLAUDE_SONNET_5],
+        "code_generation": [AIModel.GPT_6_1_SOL, AIModel.CLAUDE_OPUS_5, AIModel.CLAUDE_SONNET_5],
+        "mathematical": [AIModel.CLAUDE_OPUS_5, AIModel.CLAUDE_SONNET_5, AIModel.GPT_6_1_SOL],
+        "general": [AIModel.GPT_6_1_SOL, AIModel.CLAUDE_SONNET_5, AIModel.CLAUDE_OPUS_5],
     }
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -285,8 +322,8 @@ class UnifiedAIInterface:
         #
         # CAPABILITIES is declared at class level, so every instance shared one
         # dict and enable_model()/disable_model() mutated it process-wide: one
-        # caller ungating a model ungated it for every other caller, including
-        # the IDs deliberately shipped as available=False unverified
+        # caller changing routing policy changed it for every other caller,
+        # including the IDs deliberately shipped as unavailable, unverified
         # placeholders. A gate that any instance can silently open for all the
         # others is not a gate.
         #
@@ -320,9 +357,14 @@ class UnifiedAIInterface:
         # Try Anthropic
         try:
             import anthropic
-            import httpx
 
-            _TIMEOUT = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0)
+            # Use the SDK's own re-export rather than constructing an
+            # `httpx.Timeout`. anthropic 1.x moved its HTTP layer to httpx2, and
+            # an old-httpx Timeout handed to that client fails every request
+            # with a misleading `APIConnectionError: Connection error.` rather
+            # than a type error. `anthropic.Timeout` is correct on both the
+            # currently pinned 0.120.2 and on 1.x. See #1560.
+            _TIMEOUT = anthropic.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0)
             _MAX_RETRIES = 2
 
             self.anthropic_client = anthropic.AsyncAnthropic(
@@ -338,14 +380,14 @@ class UnifiedAIInterface:
 
         # Try OpenAI
         try:
-            import openai
             import httpx
+            import openai
 
             _TIMEOUT = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0)
             _MAX_RETRIES = 2
 
             self.openai_client = openai.AsyncOpenAI(
-                api_key=self.config.get("openai_api_key", ""),
+                api_key=self.config.get("openai_api_key") or os.environ.get("OPENAI_API_KEY"),
                 timeout=_TIMEOUT,
                 max_retries=_MAX_RETRIES,
             )
@@ -355,13 +397,12 @@ class UnifiedAIInterface:
         except Exception as e:
             logger.warning(f"⚠️  OpenAI client initialization failed: {e}")
 
-        # Surface the active model catalog so operators can verify which IDs are
-        # actually selectable (available=True) versus gated placeholders.
-        active = [model.value for model, caps in self.CAPABILITIES.items() if caps.available]
-        gated = [model.value for model, caps in self.CAPABILITIES.items() if not caps.available]
-        logger.info("🧭 Active AI models (available=True): %s", ", ".join(active) or "none")
+        # Surface routing state separately from provider/catalog existence.
+        active = [model.value for model, caps in self.CAPABILITIES.items() if caps.routable]
+        gated = [model.value for model, caps in self.CAPABILITIES.items() if not caps.routable]
+        logger.info("🧭 Routable AI models (available and enabled): %s", ", ".join(active) or "none")
         if gated:
-            logger.info("🚧 Gated AI models (available=False, not selectable): %s", ", ".join(gated))
+            logger.info("🚧 Gated AI models (unavailable or disabled): %s", ", ".join(gated))
 
     async def select_optimal_model(
         self, request: AIRequest, task_type: str = "general"
@@ -376,32 +417,67 @@ class UnifiedAIInterface:
         Returns:
             Selected AI model
         """
-        # Use explicit preference if provided and available
+        # Use explicit preference if provided and routable
         if request.model_preference:
             caps = self.CAPABILITIES.get(request.model_preference)
-            if caps and caps.available:
+            if caps and caps.routable:
                 return request.model_preference
 
         # Use fallback chain if provided
         if request.fallback_chain:
             for model in request.fallback_chain:
                 caps = self.CAPABILITIES.get(model)
-                if caps and caps.available:
+                if caps and caps.routable:
                     return model
 
         # Use task-specific fallback chain
         fallback = self.FALLBACK_CHAINS.get(task_type, self.FALLBACK_CHAINS["general"])
         for model in fallback:
             caps = self.CAPABILITIES.get(model)
-            if caps and caps.available:
+            if caps and caps.routable:
                 return model
 
-        # Final fallback to any available model
+        # Astra is opt-in, including when all ordinary defaults are disabled.
         for model, caps in self.CAPABILITIES.items():
-            if caps.available:
+            if caps.routable and model is not AIModel.GPT_6_ASTRA:
                 return model
 
-        raise RuntimeError("No AI models available")
+        raise RuntimeError("No AI models available and enabled")
+
+    @staticmethod
+    def _is_model_not_found(error: Exception) -> bool:
+        """Recognize provider model-not-found failures across SDK shapes."""
+        status_code = getattr(error, "status_code", None)
+        if status_code is None:
+            status_code = getattr(getattr(error, "response", None), "status_code", None)
+        if status_code is not None:
+            return status_code == 404
+        detail = str(error).lower()
+        return any(
+            marker in detail
+            for marker in ("model_not_found", "model not found", "not_found_error")
+        )
+
+    @classmethod
+    def _alert_on_model_not_found(
+        cls,
+        model: AIModel,
+        caps: ModelCapabilities,
+        error: Exception,
+    ) -> None:
+        """Emit an operator-visible metric and log before attempting fallback."""
+        if not cls._is_model_not_found(error):
+            return
+        MODEL_PROVIDER_NOT_FOUND_TOTAL.labels(
+            provider=caps.provider.value,
+            model=model.value,
+        ).inc()
+        logger.critical(
+            "MODEL CATALOG ALERT: provider returned 404/not-found for enabled "
+            "model %s (%s); attempting fallback",
+            model.value,
+            caps.provider.value,
+        )
 
     async def execute_request(
         self, request: AIRequest, task_type: str = "general"
@@ -440,15 +516,7 @@ class UnifiedAIInterface:
             else:
                 raise ValueError(f"Unknown provider: {caps.provider}")
 
-            # Record actual usage after a successful call
-            if self._budget is not None and response.success:
-                self._budget.record_usage(
-                    user_id=request.user_id,
-                    tokens_used=response.tokens_used,
-                    context_tag=request.context_tag,
-                )
-
-            return response
+            return self._finalize_response(request, response)
 
         except TokenBudgetExceededError:
             # Budget errors indicate limits are reached, not transient failures.
@@ -457,6 +525,7 @@ class UnifiedAIInterface:
 
         except Exception as e:
             logger.error(f"Model {model.value} failed: {e}")
+            self._alert_on_model_not_found(model, caps, e)
 
             # Try fallback chain
             fallback = request.fallback_chain or self.FALLBACK_CHAINS.get(
@@ -468,13 +537,19 @@ class UnifiedAIInterface:
                     continue  # Skip the failed model
 
                 fallback_caps = self.CAPABILITIES.get(fallback_model)
-                if not fallback_caps or not fallback_caps.available:
+                if not fallback_caps or not fallback_caps.routable:
                     continue
 
                 if attempt > 0:
                     await asyncio.sleep(0.5 * (2 ** (attempt - 1)))
 
                 try:
+                    if self._budget is not None:
+                        self._budget.check_pre_call(
+                            user_id=request.user_id,
+                            max_tokens_requested=request.max_tokens,
+                            context_tag=request.context_tag,
+                        )
                     logger.info(f"Trying fallback model: {fallback_model.value}")
                     if fallback_caps.provider == AIProvider.ANTHROPIC:
                         response = await self._execute_anthropic(request, fallback_model)
@@ -483,21 +558,18 @@ class UnifiedAIInterface:
                     else:
                         continue
 
-                    # Record actual usage for the successful fallback call
-                    if self._budget is not None and response.success:
-                        self._budget.record_usage(
-                            user_id=request.user_id,
-                            tokens_used=response.tokens_used,
-                            context_tag=request.context_tag,
-                        )
-
-                    return response
+                    return self._finalize_response(request, response)
 
                 except TokenBudgetExceededError:
                     raise
 
                 except Exception as fallback_error:
                     logger.error(f"Fallback model {fallback_model.value} failed: {fallback_error}")
+                    self._alert_on_model_not_found(
+                        fallback_model,
+                        fallback_caps,
+                        fallback_error,
+                    )
                     continue
 
             # All models failed
@@ -512,6 +584,20 @@ class UnifiedAIInterface:
                 context_tag=request.context_tag,
             )
 
+    def _finalize_response(self, request: AIRequest, response: AIResponse) -> AIResponse:
+        """Account for billed output before returning or entering provider fallback."""
+        if self._budget is not None and response.tokens_used > 0:
+            self._budget.record_usage(
+                user_id=request.user_id,
+                tokens_used=response.tokens_used,
+                context_tag=request.context_tag,
+            )
+        # A failed Responses result is a provider failure, even on HTTP 200.
+        # Incomplete output remains visible to callers without a billed retry.
+        if not response.success and response.metadata.get("finish_reason") == "failed":
+            raise RuntimeError(response.error or "OpenAI response failed")
+        return response
+
     async def _execute_anthropic(self, request: AIRequest, model: AIModel) -> AIResponse:
         """Execute request using Anthropic API"""
         if not self.anthropic_client:
@@ -521,11 +607,17 @@ class UnifiedAIInterface:
 
         messages = [{"role": "user", "content": request.prompt}]
 
+        # `temperature` / `top_p` / `top_k` are deliberately not sent.
+        # Sampling parameters were removed from the Claude models this
+        # interface can select: claude-opus-5 and claude-sonnet-5 reject a
+        # request that carries any of them. They are also absent from the
+        # anthropic 1.x `messages.create()` signature, so passing them raises
+        # TypeError there before a request is even made. `AIRequest.temperature`
+        # and `.top_p` remain compatibility fields; reasoning OpenAI models
+        # also omit them.
         response = await self.anthropic_client.messages.create(
             model=model.value,
             max_tokens=request.max_tokens,
-            temperature=request.temperature,
-            top_p=request.top_p,
             system=request.system_prompt or "",
             messages=messages,
         )
@@ -553,39 +645,54 @@ class UnifiedAIInterface:
 
         start_time = asyncio.get_event_loop().time()
 
-        messages = []
-        if request.system_prompt:
-            messages.append({"role": "system", "content": request.system_prompt})
-        messages.append({"role": "user", "content": request.prompt})
+        if request.stream:
+            raise ValueError("Unified AIResponse requires stream=False")
+        caps = self.CAPABILITIES[model]
+        if not 1 <= request.max_tokens <= caps.max_output_tokens:
+            raise ValueError("max_tokens exceeds the model output limit")
 
         kwargs = {
             "model": model.value,
-            "messages": messages,
-            "max_tokens": request.max_tokens,
-            "temperature": request.temperature,
-            "top_p": request.top_p,
+            "input": [{"role": "user", "content": request.prompt}],
+            "max_output_tokens": request.max_tokens,
+            "store": False,
         }
-
+        if request.system_prompt:
+            kwargs["instructions"] = request.system_prompt
+        if model in (AIModel.GPT_6_1_SOL, AIModel.GPT_6_ASTRA):
+            if request.reasoning_effort not in {"low", "medium", "high", "xhigh", "max"}:
+                raise ValueError("Unsupported reasoning effort")
+            kwargs["reasoning"] = {"effort": request.reasoning_effort}
         if request.functions:
-            kwargs["tools"] = [
-                {"type": "function", "function": func} for func in request.functions
-            ]
+            # Responses uses flat function definitions, unlike Chat Completions.
+            kwargs["tools"] = [{"type": "function", "strict": False, **func} for func in request.functions]
 
-        response = await self.openai_client.chat.completions.create(**kwargs)
-
+        response = await self.openai_client.responses.create(**kwargs)
         latency = (asyncio.get_event_loop().time() - start_time) * 1000
-
+        calls = [
+            {
+                "id": item.call_id,
+                "type": "function",
+                "function": {"name": item.name, "arguments": item.arguments},
+            }
+            for item in response.output if item.type == "function_call"
+        ]
+        success = response.status == "completed"
         return AIResponse(
-            content=response.choices[0].message.content or "",
+            content=response.output_text,
             model_used=model,
             provider=AIProvider.OPENAI,
-            tokens_used=response.usage.total_tokens,
+            tokens_used=response.usage.total_tokens if response.usage else 0,
             latency_ms=latency,
+            success=success,
+            error=None if success else f"OpenAI response status: {response.status}",
+            function_calls=calls or None,
             context_tag=request.context_tag,
             metadata={
-                "input_tokens": response.usage.prompt_tokens,
-                "output_tokens": response.usage.completion_tokens,
-                "finish_reason": response.choices[0].finish_reason,
+                "input_tokens": response.usage.input_tokens if response.usage else 0,
+                "output_tokens": response.usage.output_tokens if response.usage else 0,
+                "finish_reason": response.status,
+                "response_id": response.id,
             },
         )
 
@@ -594,19 +701,25 @@ class UnifiedAIInterface:
         return self.CAPABILITIES[model]
 
     def get_available_models(self) -> List[AIModel]:
-        """Get list of currently available models"""
-        return [model for model, caps in self.CAPABILITIES.items() if caps.available]
+        """Get models that both exist in the provider catalog and are enabled."""
+        return [model for model, caps in self.CAPABILITIES.items() if caps.routable]
 
     def enable_model(self, model: AIModel):
-        """Enable a model (e.g., when a gated placeholder like GPT-5 becomes available)"""
-        if model in self.CAPABILITIES:
-            self.CAPABILITIES[model].available = True
-            logger.info(f"✅ Model {model.value} enabled")
+        """Enable routing for a model whose provider existence is verified."""
+        if model not in self.CAPABILITIES:
+            return
+        caps = self.CAPABILITIES[model]
+        if not caps.available or not caps.verified_on or caps.verified_source == "unverified":
+            raise ValueError(
+                f"Cannot enable unverified or provider-unavailable model: {model.value}"
+            )
+        caps.enabled = True
+        logger.info(f"✅ Model {model.value} enabled")
 
     def disable_model(self, model: AIModel):
-        """Disable a model (e.g., for maintenance or cost control)"""
+        """Disable routing without erasing the provider/catalog fact."""
         if model in self.CAPABILITIES:
-            self.CAPABILITIES[model].available = False
+            self.CAPABILITIES[model].enabled = False
             logger.info(f"⚠️  Model {model.value} disabled")
 
 

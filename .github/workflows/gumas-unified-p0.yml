@@ -1,0 +1,41 @@
+name: GUMAS Unified P0-P6 contract tests
+on:
+  pull_request:
+    paths:
+      - "simulation/runtime/gumas_unified/**"
+      - "tests/test_gumas_unified*.py"
+      - "simulation/specs/GUMAS__SPEC__UNIFIED_CAUSAL_ENGINE__*.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.0__2026-11-16.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.1__2026-11-17.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.2__2026-11-17.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.3__2026-11-17.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.4__2026-11-23.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.5__2026-11-23.md"
+      - "simulation/audits/GUMAS__AUDIT__P6_SEATLESS_ASSOCIATION_ALIGNMENT__v1.6__2026-11-23.md"
+      - ".github/workflows/gumas-unified-p0.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-p0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify P0-P6 isolation and causal contracts
+        run: python -m unittest discover -s tests -p 'test_gumas_unified*.py' -v
+      - name: Baseline P0 corridor fixture
+        run: python -m simulation.runtime.gumas_unified.scenario > /dev/null
+      - name: P3 institutional decision fixture
+        run: python -m simulation.runtime.gumas_unified.political_scenario > /dev/null
+      - name: P4 governance variants
+        run: python -m simulation.runtime.gumas_unified.governance_scenario > /dev/null
+      - name: P5 delayed voting fixture
+        run: python -m simulation.runtime.gumas_unified.distributed_scenario > /dev/null
+      - name: P6 seatless association and mandates
+        run: python -m simulation.runtime.gumas_unified.federated_scenario > /dev/null

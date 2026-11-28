@@ -16,6 +16,7 @@ neutral OPAL2 product.
 - [ ] Provider/network/model assumptions are explicit.
 - [ ] Clean-room fixtures exist.
 - [ ] `.opaltool` export and verification are supported when package scope is ready.
+- [ ] Emit and validate a shipment manifest against [`shipment-manifest.schema.json`](../../constellation-contracts/schemas/shipment-manifest.schema.json), starting from the [worked example](../../constellation-contracts/manifests/shipment-manifest.example.json).
 - [ ] Standalone execution outside Aurora has been demonstrated.
 - [ ] Product claims do not exceed the implemented boundary.
 

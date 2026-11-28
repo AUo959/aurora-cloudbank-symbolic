@@ -1,0 +1,318 @@
+{
+  "_note": "Velari forms the rules must reproduce. 'names' is the canon corpus: each complete form is cited to a CANON record in the canon repository, and a chronology change that breaks one is a change to canon, not a tuning step. 'fixtures' are regression targets whose complete form is NOT attested in canon; they guard engine behaviour but are not canon evidence.",
+  "canon_repository": "AUo959/CanonRec",
+  "verified_at_commit": "778ba3b",
+  "dialect_note": "Rows without a dialect are derived in the common (undivided) language; a tagged row must also survive that branch's later laws.",
+  "evidence_kinds": {
+    "entity": "The form is the name or an alias of a CANON entity record.",
+    "canon_text": "The complete form appears verbatim in the text of a CANON record (e.g. a convention's worked example), not as an entity name."
+  },
+  "names": [
+    {
+      "formal": "Velari",
+      "roots": [
+        "wela",
+        "ari"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/species/species_velari.json",
+        "field": "name"
+      }
+    },
+    {
+      "formal": "Velkonn",
+      "dialect": "imperial",
+      "dialect_basis": "org_house_velkonn faction_bindings [velar_imperium]; Imperial Loyalist High House",
+      "roots": [
+        "wela",
+        "kuna"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/organizations/org_house_velkonn.json",
+        "field": "aliases"
+      }
+    },
+    {
+      "formal": "Velkaris",
+      "roots": [
+        "wela",
+        "karisa"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/locations/loc_velkaris_v.json",
+        "field": "name (Velkaris V)"
+      }
+    },
+    {
+      "formal": "Tyren",
+      "roots": [
+        "tu",
+        "rena"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_jaxx_tyren.json",
+        "field": "name (Jaxx Tyren)"
+      }
+    },
+    {
+      "formal": "Tyr",
+      "dialect": "imperial",
+      "dialect_basis": "char_jasrek_tyr faction_bindings [velar_imperium]",
+      "roots": [
+        "tura"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_jasrek_tyr.json",
+        "field": "name (Jasrek Tyr)"
+      }
+    },
+    {
+      "formal": "Rynn",
+      "dialect": "union",
+      "dialect_basis": "char_thalen_rynn faction_bindings [galactic_union], organization org_republican_reformists",
+      "roots": [
+        "rina"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_thalen_rynn.json",
+        "field": "name (Thalen Rynn)"
+      }
+    },
+    {
+      "formal": "Tal'Varen",
+      "dialect": "imperial",
+      "dialect_basis": "char_virex_talvaren faction_bindings [velar_imperium]",
+      "informal": "Talvaren",
+      "roots": [
+        "tala",
+        "warena"
+      ],
+      "era": "scribal",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_virex_talvaren.json",
+        "field": "aliases (Virex Tal'Varen, Virex Talvaren)"
+      }
+    },
+    {
+      "formal": "T'karas",
+      "informal": "Tkaras",
+      "roots": [
+        "ta",
+        "karasa"
+      ],
+      "era": "scribal",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/locations/loc_tkaras_prime.json",
+        "field": "aliases (T’karas, Tkaras Prime)"
+      }
+    },
+    {
+      "formal": "Tymar",
+      "roots": [
+        "tu",
+        "mara"
+      ],
+      "era": "elder",
+      "evidence": "canon_text",
+      "source": {
+        "path": "canon/L2/entities/polities/polity_velar_imperium.json",
+        "field": "naming_conventions.lineage_prefixes[\"Ty-\"] example \"(Tyren, Tymar)\""
+      }
+    },
+    {
+      "formal": "Vel'Rynn",
+      "roots": [
+        "wela",
+        "rina"
+      ],
+      "era": "scribal",
+      "evidence": "canon_text",
+      "source": {
+        "path": "canon/L2/entities/polities/polity_velar_imperium.json",
+        "field": "naming_conventions.lineage_prefixes[\"Vel-\"] example \"(Velkonn, Vel’Rynn)\""
+      }
+    },
+    {
+      "formal": "Talyx",
+      "dialect": "imperial",
+      "dialect_basis": "char_talyx_velkonn faction_bindings [velar_imperium], org_house_velkonn",
+      "roots": [
+        "tala",
+        "yksa"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_talyx_velkonn.json",
+        "field": "name (Talyx Velkonn)"
+      }
+    },
+    {
+      "formal": "Virex",
+      "dialect": "imperial",
+      "dialect_basis": "char_virex_talvaren faction_bindings [velar_imperium]",
+      "roots": [
+        "wira",
+        "eksa"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_virex_talvaren.json",
+        "field": "aliases (Virex Tal'Varen)"
+      }
+    },
+    {
+      "formal": "Jaxx",
+      "roots": [
+        "iaksa"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_jaxx_tyren.json",
+        "field": "name (Jaxx Tyren)"
+      }
+    },
+    {
+      "formal": "Jasrek",
+      "dialect": "imperial",
+      "dialect_basis": "char_jasrek_tyr faction_bindings [velar_imperium]",
+      "roots": [
+        "iasreka"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_jasrek_tyr.json",
+        "field": "name (Jasrek Tyr)"
+      }
+    },
+    {
+      "formal": "Syrr",
+      "dialect": "imperial",
+      "dialect_basis": "char_syrr_velkonn faction_bindings [velar_imperium], org_house_velkonn",
+      "roots": [
+        "syrda"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_syrr_velkonn.json",
+        "field": "name (Syrr Velkonn)"
+      }
+    },
+    {
+      "formal": "Thalen",
+      "dialect": "union",
+      "dialect_basis": "char_thalen_rynn faction_bindings [galactic_union], organization org_republican_reformists",
+      "roots": [
+        "thala",
+        "ena"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_thalen_rynn.json",
+        "field": "name (Thalen Rynn)"
+      }
+    },
+    {
+      "formal": "Sira",
+      "dialect": "imperial",
+      "dialect_basis": "char_sira_velkonn faction_bindings [velar_imperium], org_imperial_loyalists",
+      "roots": [
+        "si",
+        "ra"
+      ],
+      "era": "scribal",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/characters/char_sira_velkonn.json",
+        "field": "name (Sira Velkonn)"
+      }
+    },
+    {
+      "formal": "Nyros",
+      "dialect": "imperial",
+      "dialect_basis": "loc_nyros_expanse faction_bindings [velar_imperium]; imperial restorationist houses",
+      "roots": [
+        "nurusa"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/locations/loc_nyros_expanse.json",
+        "field": "name (Nyros Expanse)"
+      }
+    },
+    {
+      "formal": "Vel-Surak",
+      "informal": "Vel Surak",
+      "dialect": "union",
+      "dialect_basis": "loc_vel_surak faction_bindings [galactic_union]; species_velari: Velari-heritage world in the Union",
+      "roots": [
+        "wela",
+        "soraka"
+      ],
+      "era": "late",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/locations/loc_vel_surak.json",
+        "field": "name, aliases (Vel-Surak, Vel Surak)"
+      }
+    },
+    {
+      "formal": "Daeryth",
+      "dialect": "union",
+      "dialect_basis": "loc_daeryth_enclave organization org_republican_reformists; Reformist capital (Union-aligned)",
+      "roots": [
+        "daerytha"
+      ],
+      "era": "elder",
+      "evidence": "entity",
+      "source": {
+        "path": "canon/L2/entities/locations/loc_daeryth_enclave.json",
+        "field": "name (Daeryth Enclave)"
+      }
+    }
+  ],
+  "unexplained": [
+    {
+      "_note": "Canon Velari names the rules cannot yet produce. Empty since the canon-gaps phase: the seven given names once listed here (Sira, Syrr, Talyx, Virex, Thalen, Jasrek, Jaxx) now derive and sit in 'names'."
+    }
+  ],
+  "fixtures": [
+    {
+      "formal": "Varn",
+      "roots": [
+        "warna"
+      ],
+      "era": "elder",
+      "reason": "Canon attests only the prefix Varn- (naming_conventions.lineage_prefixes); the standalone form is the engine's reconstruction."
+    },
+    {
+      "formal": "Thessari",
+      "roots": [
+        "tessa",
+        "ari"
+      ],
+      "era": "elder",
+      "reason": "Canon has the field key social_structure.lorekeepers_thessari but no verbatim form 'Thessari'; this is a draft reading of that key."
+    }
+  ]
+}

@@ -34,13 +34,7 @@ export const auroraAPI = {
       apiClient.delete(`/api/aumem/memory/${memoryId}`),
 
     metrics: () =>
-      apiClient.get<{
-        total_memories: number;
-        active_memories: number;
-        compressed_memories: number;
-        archived_memories: number;
-        cache_hit_rate: number;
-      }>('/api/aumem/metrics'),
+      apiClient.get<SystemMetrics>('/api/system/metrics').then((snapshot) => snapshot.memory),
   },
 
   // ===== Quantum Simulator =====

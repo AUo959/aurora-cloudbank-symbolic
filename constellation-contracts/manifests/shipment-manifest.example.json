@@ -1,0 +1,50 @@
+{
+  "shipment": {
+    "name": "sherlock-watson",
+    "version": "1.0.0",
+    "description": "Neutral evidence-to-understanding toolkit: provenance-sensitive investigation (SHERLOCK) plus evidence-bound synthesis (WATSON). Ships the method, not the lore.",
+    "extracted_from": {
+      "source_repo": "AUo959/aurora-cloudbank-symbolic",
+      "source_ref": "9c34d8e9768c6dfb1afe18f96d42e3c743e2a4e9",
+      "extraction_date": "2026-08-12",
+      "extraction_tool": "modules/opal2/tool_package.py"
+    }
+  },
+  "capabilities": [
+    {
+      "id": "sherlock-core",
+      "kind": "tool",
+      "paths": [
+        "modules/opal2/tools/sherlock/"
+      ],
+      "notes": "Provenance-sensitive investigation; audit-ready case files."
+    },
+    {
+      "id": "watson-core",
+      "kind": "tool",
+      "paths": [
+        "modules/opal2/tools/watson/"
+      ],
+      "notes": "Evidence-bound synthesis with residual-uncertainty reporting."
+    },
+    {
+      "id": "python-sdk",
+      "kind": "sdk",
+      "paths": [
+        "sdk/python/"
+      ]
+    }
+  ],
+  "provenance": {
+    "build_receipt_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_attestation": "urn:aurora:attestation:example"
+  },
+  "ethics": {
+    "execution_default_off": true,
+    "audit_log_included": true,
+    "consent_model": "pending #1380 / ORIONCORE #46"
+  },
+  "canon_license": {
+    "includes_canon": false
+  }
+}

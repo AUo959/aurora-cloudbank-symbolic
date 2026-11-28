@@ -1,0 +1,37 @@
+{
+  "_note": "Velari phoneme inventory as feature bundles. Prototype; not canon.",
+  "phonemes": {
+    "a":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "low": true, "back": true}},
+    "e":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true}},
+    "i":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "high": true}},
+    "o":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "back": true, "round": true}},
+    "u":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "high": true, "back": true, "round": true}},
+    "y":  {"features": {"syllabic": true, "sonorant": true, "continuant": true, "voice": true, "high": true, "round": true}},
+
+    "w":  {"features": {"sonorant": true, "continuant": true, "voice": true, "labial": true, "dorsal": true, "high": true, "back": true, "round": true}},
+    "v":  {"features": {"consonantal": true, "continuant": true, "voice": true, "labial": true, "dorsal": true, "high": true, "back": true, "round": true}},
+    "m":  {"features": {"consonantal": true, "sonorant": true, "nasal": true, "voice": true, "labial": true}},
+    "t":  {"features": {"consonantal": true, "coronal": true}},
+    "th": {"features": {"consonantal": true, "continuant": true, "coronal": true}},
+    "d":  {"features": {"consonantal": true, "voice": true, "coronal": true}},
+    "s":  {"features": {"consonantal": true, "continuant": true, "strident": true, "coronal": true}},
+    "n":  {"features": {"consonantal": true, "sonorant": true, "nasal": true, "voice": true, "coronal": true}},
+    "l":  {"features": {"consonantal": true, "sonorant": true, "continuant": true, "voice": true, "coronal": true, "lateral": true}},
+    "r":  {"features": {"consonantal": true, "sonorant": true, "continuant": true, "voice": true, "coronal": true}},
+    "k":  {"features": {"consonantal": true, "dorsal": true}},
+    "x":  {"features": {"consonantal": true, "dorsal": true, "strident": true}, "_note": "written x; from *k+s (VL13, VL14). Attested by canon Talyx, Virex, Jaxx."},
+    "j":  {"features": {"consonantal": true, "sonorant": true, "continuant": true, "voice": true, "high": true}, "_note": "from element-initial *i before a vowel (VL12). Attested by canon Jasrek, Jaxx."},
+    "h":  {"features": {"continuant": true, "low": true}}
+  },
+  "loan_map": {
+    "_note": "How letters Velari lacks are heard by Velari speakers when a foreign name is borrowed. A hypothesis for classifying non-native spellings, not a claim about any canon name's origin. Draft.",
+    "c": "k", "q": "k", "z": "s", "f": "v", "g": "k", "b": "v", "p": "t"
+  },
+  "phonotactics": {
+    "_onset_note": "t k is attested word-initially by canon T'karas (proclitic *ta- elided before karas).",
+    "onset_clusters": [["d", "r"], ["t", "r"], ["k", "r"], ["k", "l"], ["th", "r"], ["s", "k"], ["s", "t"], ["t", "k"]],
+    "coda_clusters": [["n", "n"], ["r", "n"], ["r", "r"], ["s", "s"], ["l", "l"], ["x", "x"]],
+    "never_coda": ["h", "w"],
+    "never_final": ["d", "v"]
+  }
+}

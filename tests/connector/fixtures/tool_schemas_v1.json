@@ -1,0 +1,96 @@
+[
+  {
+    "name": "aurora_get_state",
+    "description": "Returns Aurora's current symbolic system state including vector state, lockpoint, ethics protocol, active modules, and layer flags. Use this as the first call to orient any Aurora session.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "include_echochain": {
+          "type": "boolean",
+          "description": "Include EchoChain loop details in response (default: true)",
+          "default": true
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "aurora_get_agents",
+    "description": "Returns the Aurora agent PAT registry. Lists all active agents with their role, current PAT visibility status (Available/DND/Invisible), and specialty. Use to understand who is reachable in the current session.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "visibility_filter": {
+          "type": "string",
+          "enum": [
+            "all",
+            "available",
+            "dnd",
+            "invisible"
+          ],
+          "description": "Filter agents by PAT visibility (default: all)",
+          "default": "all"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "aurora_get_drift",
+    "description": "Returns current drift readings for all three architectural layers against their stratified thresholds (L1=0.002 capsule, L2=0.02 agent/QGIA, L3=0.1 macro/network). Reports any active threshold breaches. See docs/dev-notes/drift-threshold-stratification.md for full rationale.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "include_history": {
+          "type": "boolean",
+          "description": "Include last 5 drift readings per layer (default: false)",
+          "default": false
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "aurora_get_ethics_log",
+    "description": "Returns the tail of the GUMAS ethics audit log. Each entry records an ethics check event: protocol invocation, boundary check, coherence validation, or symbolic memory merge audit. Active protocol: Picard_Delta_3.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "description": "Number of most recent entries to return (default: 20, max: 100)",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 100
+        },
+        "severity_filter": {
+          "type": "string",
+          "enum": [
+            "all",
+            "info",
+            "warning",
+            "violation"
+          ],
+          "description": "Filter by severity (default: all)",
+          "default": "all"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "aurora_get_capsules",
+    "description": "Returns the Aurora capsule module registry. Reports load status, export readiness, and symbolic hash for all registered capsule modules. Capsule categories: Knowledge (Ev/In/B), SymbolicMemory Merge, Ethics Audit Log.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "loaded_only": {
+          "type": "boolean",
+          "description": "Return only currently loaded capsules (default: false)",
+          "default": false
+        }
+      },
+      "required": []
+    }
+  }
+]

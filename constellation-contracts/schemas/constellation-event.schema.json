@@ -3,7 +3,12 @@
   "$id": "https://aurora.constellation/schemas/constellation-event.json",
   "title": "Constellation Event",
   "type": "object",
-  "required": ["event_type", "source_node", "timestamp", "payload"],
+  "required": [
+    "event_type",
+    "source_node",
+    "timestamp",
+    "payload"
+  ],
   "properties": {
     "event_type": {
       "type": "string",
@@ -20,18 +25,47 @@
     },
     "source_node": {
       "type": "string",
-      "enum": ["CONSTELLATION-PRIME", "AURORA-RUNTIME", "QUANTUM-VAULT", "QGIA-CORPUS", "QGIA-SPINE", "ZIPWIZ-ENGINE"]
+      "enum": [
+        "CONSTELLATION-PRIME",
+        "AURORA-RUNTIME",
+        "QUANTUM-VAULT",
+        "QGIA-CORPUS",
+        "QGIA-SPINE",
+        "ZIPWIZ-ENGINE",
+        "ORIONCORE-CONTROL",
+        "SENTINEL-COORDINATOR"
+      ]
     },
-    "timestamp": { "type": "string", "format": "date-time" },
-    "correlation_id": { "type": "string", "format": "uuid" },
-    "payload": { "type": "object" },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "payload": {
+      "type": "object"
+    },
     "provenance": {
       "type": "object",
       "properties": {
-        "caelion_anchor": { "type": "string" },
-        "charter": { "type": "string" },
-        "l3_compliance": { "type": "boolean" }
+        "caelion_anchor": {
+          "type": "string"
+        },
+        "charter": {
+          "type": "string"
+        },
+        "l3_compliance": {
+          "type": "boolean"
+        }
       }
+    },
+    "hop": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "Router hop count. Incremented on each hub re-dispatch; events at hop 3 are dropped to break routing loops."
     }
   }
 }

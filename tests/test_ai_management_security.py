@@ -36,6 +36,7 @@ def stub_ai_core(monkeypatch):
                 latency_avg_ms=120,
                 cost_per_1k_tokens=0.02,
                 available=True,
+                routable=True,
             )
 
     monkeypatch.setattr(ai_management_routes, "claude_hub", _DummyHub())
@@ -76,3 +77,28 @@ def test_ai_routes_accept_valid_token(client):
     assert response.status_code == 200
     payload = response.json()
     assert payload["total_models"] == 1
+
+
+def test_select_model_rejects_disabled_but_available_model(client, monkeypatch):
+    """Routing policy, not provider availability alone, gates /ai/select-model."""
+    from modules.ai_core.unified_ai_interface import AIModel, UnifiedAIInterface
+
+    interface = UnifiedAIInterface()
+    model = AIModel.GPT_6_1_SOL
+    caps = interface.CAPABILITIES[model]
+    monkeypatch.setattr(caps, "available", True)
+    monkeypatch.setattr(caps, "enabled", False)
+    monkeypatch.setattr(ai_management_routes, "unified_ai", interface)
+    monkeypatch.setattr(ai_management_routes, "AIModel", AIModel)
+
+    token = generate_csrf_token("test-session")
+    response = client.post(
+        "/ai/select-model",
+        json={"model": model.value, "task_type": "general"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["success"] is False
+    assert payload["available"] is False

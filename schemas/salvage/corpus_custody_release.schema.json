@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/schemas/salvage/corpus_custody_release.schema.json",
+  "title": "Corpus Custody Verbatim Release Manifest",
+  "description": "Authority-separated manifest that releases exact custody-inventoried UTF-8 content for read-only corpus archaeology preparation. Release authority authorizes bytes only and cannot assign epistemic source, creator, or decision authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "release_id",
+    "release_authority_ref",
+    "inventory_report_id",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "release_id": {
+      "type": "string",
+      "pattern": "^release:[A-Za-z0-9_.:/-]+$"
+    },
+    "release_authority_ref": {"type": "string", "minLength": 1},
+    "inventory_report_id": {
+      "type": "string",
+      "pattern": "^inventory:[a-f0-9]{64}$"
+    },
+    "entries": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/release_entry"}
+    }
+  },
+  "$defs": {
+    "release_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "sha256", "content"],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "pattern": "^artifact:[a-f0-9]{24}$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "content": {"type": "string"}
+      }
+    }
+  }
+}

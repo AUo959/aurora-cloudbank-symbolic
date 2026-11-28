@@ -25,12 +25,19 @@ on:
     paths:
       - 'ops/work_queue/**'
       - '.github/workflows/queue-validation.yml'
+      - '.github/workflows/queue-issue-ingestion.yml'
+      - '.github/workflows/queue-decision-escalation.yml'
+      - 'scripts/publish_queue_pr.py'
+      - 'tests/test_publish_queue_pr.py'
   workflow_dispatch:
     inputs:
       reason:
         description: 'Reason for manual dispatch (optional)'
         required: false
         default: 'Manual audit'
+
+permissions:
+  contents: read
 
 jobs:
   queue-drift-check:
@@ -43,7 +50,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -82,7 +89,7 @@ jobs:
       # conftest fixtures, so it runs standalone.
       - name: Validate queue.json against queue_schema.json
         run: |
-          pytest --noconftest tests/test_work_queue_schema.py tests/test_queue_issue_ingestion.py tests/test_gate_escalation.py -q --no-header
+          pytest --noconftest tests/test_work_queue_schema.py tests/test_queue_issue_ingestion.py tests/test_gate_escalation.py tests/test_publish_queue_pr.py -q --no-header
 
       - name: Check generated views and gate authority are coherent
         id: drift_check

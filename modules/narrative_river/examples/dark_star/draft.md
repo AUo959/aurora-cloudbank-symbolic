@@ -1,0 +1,3 @@
+# Quiet Lane Draft
+
+Iven kept the direct lane on the display after Maelin had moved the gunboat behind the ore moon. The route looked empty because someone had taken care to make it look empty. Tessa gave him one decoy and five minutes. When the foundry opened fire, the first weapons were exactly where he expected them. The pursuit craft waiting above the lane were not.

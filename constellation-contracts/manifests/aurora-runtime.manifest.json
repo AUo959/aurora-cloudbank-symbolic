@@ -1,5 +1,5 @@
 {
-  "constellation_version": "1.0.0-alpha",
+  "constellation_version": "1.1.0-alpha",
   "node": {
     "designation": "AURORA-RUNTIME",
     "symbolic_tag": "s.tag::aurora.runtime",

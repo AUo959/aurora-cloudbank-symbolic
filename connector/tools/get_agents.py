@@ -13,7 +13,7 @@ is mapped to PAT visibility: online → Available, offline → Invisible.
 
 import json
 from datetime import datetime, timezone
-from mcp.types import Tool
+from mcp_types import Tool
 
 from connector.transport.bridge import (
     CloudbankBridge,
@@ -34,7 +34,7 @@ class GetAgentsTool:
         return Tool(
             name=self.NAME,
             description=self.DESCRIPTION,
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "visibility_filter": {

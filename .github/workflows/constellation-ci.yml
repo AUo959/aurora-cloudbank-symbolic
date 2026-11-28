@@ -19,13 +19,24 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Setup Node.js
-      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
       with:
         node-version: '20'
         cache: 'npm'
 
     - name: Install dependencies
       run: npm ci --ignore-scripts
+
+    - name: Run npm audit (advisory; security blocker tracked in #1341)
+      continue-on-error: true
+      run: npm audit --audit-level=moderate --json > audit-results.json
+
+    - name: Upload audit results
+      if: always()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+      with:
+        name: security-audit
+        path: audit-results.json
 
     - name: Type check
       run: |
@@ -44,7 +55,7 @@ jobs:
 
     - name: Upload TypeScript diagnostics
       if: always()
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
       with:
         name: typescript-check
         path: typescript-check.log
@@ -59,7 +70,7 @@ jobs:
 
     - name: Upload lint diagnostics
       if: always()
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
       with:
         name: lint-check
         path: lint-check.log
@@ -74,62 +85,9 @@ jobs:
 
     - name: Upload build diagnostics
       if: always()
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
       with:
         name: build-log
         path: build.log
         retention-days: 30
         if-no-files-found: ignore
-
-  integration:
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-      with:
-        repository: AUo959/aurora-cloudbank-symbolic
-
-    - name: Setup Node.js
-      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
-      with:
-        node-version: '20'
-
-    - name: Install dependencies
-      run: npm ci --ignore-scripts
-
-    - name: Run constellation health check
-      run: |
-        echo "Constellation integration tests would run here"
-        echo "This requires all satellite repositories to be available"
-
-  security:
-    runs-on: ubuntu-latest
-    needs: test
-    permissions:
-      contents: read
-
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-
-    - name: Setup Node.js
-      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
-      with:
-        node-version: '20'
-
-    - name: Install dependencies
-      run: npm ci --ignore-scripts
-
-    - name: Run npm audit (advisory; security blocker tracked in #1341)
-      continue-on-error: true
-      run: npm audit --audit-level=moderate --json > audit-results.json
-
-    - name: Upload audit results
-      if: always()
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-      with:
-        name: security-audit
-        path: audit-results.json

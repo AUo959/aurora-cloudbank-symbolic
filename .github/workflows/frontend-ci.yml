@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       - name: Set up Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v5.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v5.0.0
         with:
           node-version: '22'
           cache: npm
@@ -82,5 +82,8 @@ jobs:
       # --no-install so npx can only run the vitest already pinned by
       # package-lock.json; without it npx will silently fetch and execute an
       # unpinned release when the local one is missing.
+      - name: Sanitizer security regressions
+        run: npm run test:security
+
       - name: Unit tests
         run: npx --no-install vitest run --passWithNoTests

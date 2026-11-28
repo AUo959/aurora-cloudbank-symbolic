@@ -17,6 +17,7 @@ from .kernel import CausalEngine
 from .model import is_sha256_hex
 
 _PHASE9_SCHEMA = "gumas.unified.phase9_ledger_reference.p1"
+_FIXTURE_PREFIX = "fixture:"
 _CLOCK_GRANT_FIELDS = frozenset({
     "schema", "operation", "scope", "grant_ref", "operator_intent_explicit",
     "run_id", "local_state_sha256", "local_epoch_s",
@@ -108,7 +109,7 @@ def _clock_grant_in_scope(grant: Mapping[str, Any]) -> bool:
     return (fields_match(grant, _CLOCK_GRANT_SCOPE)
             and type(grant["rate"]) is str
             and isinstance(grant["grant_ref"], str)
-            and grant["grant_ref"].startswith("fixture:"))
+            and grant["grant_ref"].startswith(_FIXTURE_PREFIX))
 
 
 def _clock_grant_bound(engine: CausalEngine, local: Any, grant: Mapping[str, Any],
@@ -165,7 +166,7 @@ def prepare_fixture_clock_anchor(engine: CausalEngine,
     if not _clock_grant_in_scope(grant):
         raise EvidenceError("clock grant exceeds synthetic reference-frame authority")
     _bounded(grant["grant_ref"], "clock grant_ref")
-    if not _bounded(grant["reference_frame_id"], "frame id").startswith("fixture:"):
+    if not _bounded(grant["reference_frame_id"], "frame id").startswith(_FIXTURE_PREFIX):
         raise EvidenceError("reference frame must be explicitly synthetic")
     local = engine.state
     epoch = _nonnegative(grant["local_epoch_s"], "local_epoch_s")
@@ -176,7 +177,7 @@ def prepare_fixture_clock_anchor(engine: CausalEngine,
 
 def _anchor_frame_valid(anchor: Mapping[str, Any]) -> bool:
     frame = anchor.get("reference_frame_id")
-    return (isinstance(frame, str) and frame.startswith("fixture:")
+    return (isinstance(frame, str) and frame.startswith(_FIXTURE_PREFIX)
             and is_sha256_hex(anchor.get("grant_sha256")))
 
 

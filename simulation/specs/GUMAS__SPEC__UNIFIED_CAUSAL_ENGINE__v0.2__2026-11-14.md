@@ -16,7 +16,7 @@ tactical macrostep, synchronizing disjoint clocks, or promoting canon.
 **Source pins reviewed for this contract:**
 
 | Upstream | Branch | PR/head | Relevant contract |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Root / ACE | `codex/ace-persistent-continuity-20260906` | #85 / `7ffb7c94eb8bf539d9b3a5e99ef549bbaaab8c68` | `tools/ace/sandbox.py` World.verify() and World._result() |
 | CloudBank / tactical | `agent/gumas-flash-rebellion-battle-baseline` | #1506 / `40b5866dba2d8ac3a0636736dcf069adaa451c8a` | `simulation/runtime/gumas_battle_orchestrator/orchestrator.py` Phase-9 ledger |
 | CloudBank / tactical | same | same | `simulation/receipts/GUMAS__RECEIPT__LIVE_OBSERVATION_ORCHESTRATOR_LEDGER_PHASE9__v1.0__2026-08-15.json` |

@@ -48,7 +48,7 @@ Those findings are **not overridden** by adding P5.
 ## P5 integration risk register
 
 | Risk | Assessment | Mitigation / gate |
-|---|---|---|
+| --- | --- | --- |
 | Instant remote knowledge | Critical design hazard | Typed notice must arrive before remote vote can be sent |
 | Instant remote voting | Critical design hazard | Separate return corridor and counted-on-arrival event |
 | Wrong-way or unpowered signal | Invalid physical action | P0 enabled directed route, sender-site signal energy consumed to heat |

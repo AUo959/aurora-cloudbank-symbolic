@@ -8,9 +8,9 @@
   "authority_boundary": {
     "historical_gumas_authority": "GUMAS-PACKAGE-V2 via separately versioned restoration",
     "canonrec_identity_authority": "AUo959/CanonRec@dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
-    "canonrec_resolver_version": "1.0.1",
-    "canonrec_derivation_version": "canonrec-tactical-derivation-v1.1",
-    "control_manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc",
+    "canonrec_resolver_version": "1.1.0",
+    "canonrec_derivation_version": "canonrec-tactical-derivation-v1.2",
+    "control_manifest_sha256": "9e4a184431887e79f76e9d023709886d4eadcd7f708b026966c011c2d41928e1",
     "calibration_provenance": "SCENARIO_LOCAL",
     "canon_promotion": false,
     "combat_resolution_authority": false

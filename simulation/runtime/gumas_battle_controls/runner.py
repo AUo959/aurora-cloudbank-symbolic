@@ -109,12 +109,22 @@ def report_input(run: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+REPORT_PROFILES = (PUBLIC_SUMMARY_PROFILE, SIMULATION_TRUTH_PROFILE)
+
+
+def export_report(run: Mapping[str, Any], profile: str) -> dict[str, Any]:
+    """Export one Phase-10 profile for a completed run."""
+    if profile not in REPORT_PROFILES:
+        raise Phase11Error(f"unsupported report profile: {profile}")
+    return export_factual_report(report_input(run), profile_id=profile)
+
+
 def export_reports(run: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
-    packet = report_input(run)
-    return {
-        SIMULATION_TRUTH_PROFILE: export_factual_report(packet),
-        PUBLIC_SUMMARY_PROFILE: export_factual_report(packet, profile_id=PUBLIC_SUMMARY_PROFILE),
-    }
+    return {profile: export_report(run, profile) for profile in sorted(REPORT_PROFILES)}
+
+
+def report_identity(report: Mapping[str, Any]) -> dict[str, str]:
+    return _report_identity(report)
 
 
 def _report_identity(report: Mapping[str, Any]) -> dict[str, str]:
@@ -128,7 +138,7 @@ def _report_identity(report: Mapping[str, Any]) -> dict[str, str]:
 
 def run_receipt(
     run: Mapping[str, Any],
-    reports: Mapping[str, Mapping[str, Any]],
+    report_identities: Mapping[str, Mapping[str, str]],
     *,
     authority: Mapping[str, Any],
     run0: bool,
@@ -154,7 +164,7 @@ def run_receipt(
             "\n".join(str(entry["ledger_entry_sha256"]) for entry in ledger).encode("ascii")
         ).hexdigest(),
         "terminal_outcome": copy.deepcopy(run["terminal_outcome"]),
-        "reports": {profile: _report_identity(report) for profile, report in sorted(reports.items())},
+        "reports": {profile: dict(identity) for profile, identity in sorted(report_identities.items())},
         "authority": {
             "authority_id": str(authority["authority_id"]),
             "authority_sha256": str(authority["authority_sha256"]),

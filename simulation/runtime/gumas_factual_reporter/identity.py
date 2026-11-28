@@ -43,8 +43,51 @@ def canonical_json_bytes(value: Any) -> bytes:
     ).encode("utf-8")
 
 
+_STREAM_DEPTH = 3
+
+
+def _dumps(value: Any) -> bytes:
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+
+
+def _update_canonical(digest: Any, value: Any, depth: int) -> None:
+    """Feed exactly ``canonical_json_bytes(value)`` into ``digest`` in pieces.
+
+    The outer container levels are emitted piecewise so a full run chain is
+    never materialized as one multi-gigabyte string.
+    """
+    if depth and type(value) is dict:
+        digest.update(b"{")
+        for index, key in enumerate(sorted(value)):
+            if index:
+                digest.update(b",")
+            digest.update(_dumps(key))
+            digest.update(b":")
+            _update_canonical(digest, value[key], depth - 1)
+        digest.update(b"}")
+        return
+    if depth and type(value) in (list, tuple):
+        digest.update(b"[")
+        for index, item in enumerate(value):
+            if index:
+                digest.update(b",")
+            _update_canonical(digest, item, depth - 1)
+        digest.update(b"]")
+        return
+    digest.update(_dumps(value))
+
+
 def sha256_canonical(value: Any) -> str:
-    return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+    _validate_json_value(value)
+    digest = hashlib.sha256()
+    _update_canonical(digest, value, _STREAM_DEPTH)
+    return digest.hexdigest()
 
 
 def sha256_bytes(value: bytes) -> str:

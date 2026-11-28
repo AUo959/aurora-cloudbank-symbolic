@@ -9,7 +9,7 @@
 **Repository:** `AUo959/aurora-cloudbank-symbolic`
 **Branch:** `claude/project-thread-t3tl0t` (continues `agent/gumas-flash-rebellion-battle-baseline`)
 **PR:** `#1506` lineage
-**Current phase:** `Phase 11: controls harness implemented; execution waits on the owner's explicit authority record`
+**Current phase:** `Phase 11: authority granted; Run 0 and controls executed on the engaging engine`
 **Owner direction (2026-11-28):** Asked whether to finish or park #1506, the owner answered "finish it, obviously" and "our goal is to get everything functional." That is direction to finish the work. It is not yet the explicit, committed Phase-11 execution authority record that §5 of the Phase-11 contract requires. That record is requested from the owner separately.
 
 ---
@@ -24,13 +24,18 @@
    - Tests: `tests/test_gumas_battle_controls.py`
    - Workflow: `.github/workflows/gumas-battle-controls.yml`
 
-Accepted source identities for Phases 4, 9 and 10 change because their sources changed. Historical Phase 1–10 receipts remain unchanged as records of what was accepted on their heads.
+5. **Owner authority granted 2026-11-28** (decision card). The authority record is committed. The first full execution passed Controls A/B/C, but every run was a non-engagement with zero weapon attempts.
+6. **Phase-5/9 gap fixed: no navigation intent closed range.** `POSITION_FOR_ADVANTAGE` now steers to a weapon-range standoff against the side-local contact track. `EVASIVE_VECTOR` without a contact falls back to the tangent instead of aborting. See Phase-11 spec §2.3 and the movement-spec amendment.
+7. **Phase-2 role fix folded in** (from #1740): resolver 1.1.0, derivation v1.2, control manifest `9e4a1844…`, T0 `05634f70…`.
+8. The evidence was re-generated on the fixed engine. Two workers are used because four parallel full runs exceed 16 GB.
+
+Accepted source identities for Phases 2, 4, 5, 9 and 10 change because their sources changed. Historical Phase 1–10 receipts remain unchanged as records of what was accepted on their heads.
 
 ## 2. Phase status
 
 - **Phases 0–10:** PASS (Phase 4, Phase 9 and the Phase-10 validator amended as above).
 - **Phase 11 harness, preflight, and contract tests:** IMPLEMENTED. Synthetic and pinned-CanonRec input-resolution tests pass. No full battle has been committed.
-- **Control A/B/C execution and Run 0:** WAITING ON OWNER AUTHORITY RECORD. Run them with `controls_cli.py execute`, commit the evidence, and CI regenerates it.
+- **Control A/B/C execution and Run 0:** EXECUTED. The evidence is committed and CI regenerates it byte for byte.
 
 ## 3. Exact next action
 
@@ -40,7 +45,6 @@ Accepted source identities for Phases 4, 9 and 10 change because their sources c
 
 ## 4. Follow-ups recorded, not done here
 
-- Phase-2 role derivation maps `cls_aegis` to `logistics_support` (spec §9).
 - SonarCloud and Codacy advisory statuses carried over from v2.1.
 
 **Outputs remain non-canon. No battle result is claimed in this record.**

@@ -22,7 +22,7 @@ from .constants import (
 )
 from .identity import Phase11Error, canonical_json_bytes, hash_without_field, json_diff_paths
 from .inputs import check_input_deltas, resolve_inputs
-from .runner import export_reports, run_receipt, run_to_termination
+from .runner import REPORT_PROFILES, export_report, report_identity, run_receipt, run_to_termination
 
 # Receipt fields that legitimately differ between Run 0 and its Control-A replay.
 REPLAY_EXEMPT_FIELDS = frozenset({"authority", "run0_executed", "run_receipt_sha256"})
@@ -30,6 +30,17 @@ REPLAY_EXEMPT_FIELDS = frozenset({"authority", "run0_executed", "run_receipt_sha
 
 def _digest(value: Any) -> str:
     return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+
+
+def _stream_list_digest(items: list[Any]) -> str:
+    """SHA-256 of ``canonical_json_bytes(items)`` without materializing it."""
+    digest = hashlib.sha256(b"[")
+    for index, item in enumerate(items):
+        if index:
+            digest.update(b",")
+        digest.update(canonical_json_bytes(item))
+    digest.update(b"]")
+    return digest.hexdigest()
 
 
 def execute_variant(
@@ -42,22 +53,28 @@ def execute_variant(
     """Resolve, run, and report one variant; return its sealed receipt and digests."""
     inputs = resolve_inputs(Path(canonrec_root), variant)
     run = run_to_termination(inputs)
-    reports = export_reports(run)
-    receipt = run_receipt(run, reports, authority=authority, run0=run0)
+    # Export one profile at a time and keep only its identity and digest:
+    # holding both full exports of a 2,160-step engaged run exceeds 7 GB.
+    identities: dict[str, dict[str, str]] = {}
+    report_digests: dict[str, str] = {}
+    for profile in sorted(REPORT_PROFILES):
+        report = export_report(run, profile)
+        identities[profile] = report_identity(report)
+        report_digests[profile] = _digest(report)
+        text = report["rendered_report"].get("text")
+        if rendered_out and isinstance(text, str):
+            out = Path(rendered_out)
+            out.mkdir(parents=True, exist_ok=True)
+            (out / f"{variant}{'_run0' if run0 else ''}__{profile}.txt").write_text(text, encoding="utf-8")
+        del report, text
+    receipt = run_receipt(run, identities, authority=authority, run0=run0)
     first_decisions = run["packets"][0]["decisions_by_fleet"]
-    if rendered_out:
-        out = Path(rendered_out)
-        out.mkdir(parents=True, exist_ok=True)
-        for profile, report in sorted(reports.items()):
-            text = report["rendered_report"].get("text")
-            if isinstance(text, str):
-                (out / f"{variant}{'_run0' if run0 else ''}__{profile}.txt").write_text(text, encoding="utf-8")
     return {
         "receipt": receipt,
         "artifact_digests": {
             "ledger_entries": [_digest(p["ledger_entry"]) for p in run["packets"]],
-            "packets_sha256": _digest(run["packets"]),
-            "reports": {profile: _digest(report) for profile, report in sorted(reports.items())},
+            "packets_sha256": _stream_list_digest(run["packets"]),
+            "reports": report_digests,
         },
         "manifest": inputs.manifest,
         "t0_sha256": inputs.t0["t0_sha256"],

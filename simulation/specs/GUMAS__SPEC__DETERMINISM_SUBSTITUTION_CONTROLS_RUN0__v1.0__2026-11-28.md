@@ -67,7 +67,7 @@ Each variant applies one declared edit to deep copies of the three frozen contro
 | `class_substitution` | per side, one `CLASS-PEREGRINE-01` becomes one `CLASS-BASTION-01` (`cls_bastion`). This is the source set's own `substitution_witness`, so 19 vessels per side and mirror symmetry still hold | `/fleet_template/composition` | `/identity_mapping/baseline_class_to_canonrec/CLASS-BASTION-01`, `/authority_boundary/control_manifest_sha256` | none |
 | `polity_substitution` | operating authority `org_galactic_union` becomes `org_union_naval_forces`, whose source is appended to the source set. It is Union-bound, so every control class still binds and hardware is unchanged | none | `/identity_mapping/organization_id`, `/authority_boundary/control_manifest_sha256` | `/sources` |
 
-`control_manifest_sha256` is re-bound to the manifest that the unchanged pinned resolver produces for the variant. The control variant must reproduce the accepted pin `cd8a22b8…` and the accepted T0 `47d31a29…`.
+`control_manifest_sha256` is re-bound to the manifest that the unchanged pinned resolver produces for the variant. The control variant must reproduce the accepted pin `9e4a1844…` and the accepted T0 `05634f70…` (resolver 1.1.0, derivation v1.2; these replaced `cd8a22b8…` and `47d31a29…` when the role fix in §9 landed).
 
 `polity_prime_construct` (the source set's second authority witness) is **not** used. CanonRec binds every control class to `galactic_union`, so the pinned resolver correctly refuses to let the Prime Construct field them. Substituting it would require a hardware change too, which would no longer be a polity-only control.
 
@@ -107,4 +107,4 @@ A refusal returns `aurora://simulation/gumas/phase11_refusal_receipt/v1.0` with 
 - Outputs are non-canon. Promotion needs separate Git governance.
 - `publication_authorized = false`. Rendered prose is not published outside the repository.
 - No LLM, ambient RNG, floating-point authority, wall clock, or network participates in transitions, reporting, or comparison.
-- Known Phase-2 derivation limit, recorded and not changed here: `cls_aegis` (role text "Frontline combat, planetary defense, fleet support") resolves to the `logistics_support` role profile because "support" matches before "combatant". The derivation is deterministic and accepted, but it understates Aegis firepower. Fixing it is a versioned Phase-2 change that would invalidate every downstream identity, so it is a follow-up.
+- Phase-2 role derivation, fixed 2026-11-28 (resolver 1.1.0, derivation v1.2): role profiles now come from the structured CanonRec `division` field before prose rules. `cls_aegis` had resolved to `logistics_support` because bare "support" matched first; it is now `heavy_combatant`. Vanguard and Vigilant moved from `interceptor_patrol` to `frigate_escort`. The Phase-2 v1.1 receipt records the change.

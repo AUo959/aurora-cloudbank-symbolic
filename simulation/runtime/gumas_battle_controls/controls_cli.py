@@ -28,10 +28,18 @@ from simulation.runtime.gumas_battle_controls import (  # noqa: E402
 from simulation.runtime.gumas_battle_controls.identity import canonical_json_bytes  # noqa: E402
 
 
+def _repo_file(path: Path) -> Path:
+    """Resolve a committed input file, refusing anything outside the repository."""
+    resolved = path.resolve()
+    if not resolved.is_relative_to(ROOT.resolve()) or not resolved.is_file():
+        raise SystemExit(f"input must be a file inside the repository: {path}")
+    return resolved
+
+
 def _load(path: Path | None):
     if path is None:
         return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(_repo_file(path).read_text(encoding="utf-8"))
 
 
 def main() -> int:

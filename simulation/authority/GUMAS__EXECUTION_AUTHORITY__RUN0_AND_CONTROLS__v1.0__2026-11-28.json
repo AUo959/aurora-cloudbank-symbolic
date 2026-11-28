@@ -1,0 +1,41 @@
+{
+  "authority_id": "AUTH-20261128-gumas-battle-runtime-run0-controls",
+  "authority_sha256": "983b4c7c5fdbc984f3788a145614deac26c4c1f33777ff9296328146551a67e8",
+  "canon_promotion_authorized": false,
+  "capabilities": [
+    "gumas_battle_controls_execution",
+    "gumas_run0_execution"
+  ],
+  "evidence": [
+    {
+      "answered_at": "2026-11-28T01:29:18Z",
+      "channel": "Claude project thread (Aurora Project Manager)",
+      "chosen_option": "Authorize Run 0 and controls",
+      "decision_message_id": "cmsg_019wdetTPJoLN9B7pn3GP1BWQDa4VmM2YavLqtooGiMzjm",
+      "kind": "owner_decision_card",
+      "option_consequence": "Commit a signed authority record citing the answer, run all four full battles, and commit the non-canon results and receipts to the PR.",
+      "question": "Authorize executing GUMAS Run 0 and Controls A/B/C on PR 1506?"
+    },
+    {
+      "kind": "owner_direction",
+      "message_id": "cmsg_019wdetTPJoLN9B7pn3GP1BWL6KHpARpcpj9AbrhQ2uhJH",
+      "sent_at": "2026-11-28T00:55:19Z",
+      "text": "finish it, obviously / our goal is to get everything functional"
+    }
+  ],
+  "expires_on": "2027-02-28",
+  "granted_by": {
+    "github_login": "AUo959",
+    "owner": "Travis",
+    "role": "repository owner"
+  },
+  "granted_on": "2026-11-28",
+  "phase11_contract_id": "GUMAS_DETERMINISM_SUBSTITUTION_CONTROLS_RUN0_v1_0",
+  "publication_authorized": false,
+  "schema": "aurora://simulation/gumas/phase11_execution_authority/v1.0",
+  "scope": {
+    "baseline_id": "SIM-L2-FR-P17-EQUAL-001",
+    "baseline_version": "1.2",
+    "repository": "AUo959/aurora-cloudbank-symbolic"
+  }
+}

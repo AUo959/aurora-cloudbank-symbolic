@@ -5,6 +5,7 @@ from .identity import Phase9Error, source_identity
 from .live_observation import derive_live_observations
 from .orchestrator import (
     accepted_source_identities,
+    authority_doctrine_binding,
     execute_macrostep,
     initialize_run_context,
 )
@@ -14,6 +15,7 @@ __all__ = [
     "PHASE9_VERSION",
     "Phase9Error",
     "accepted_source_identities",
+    "authority_doctrine_binding",
     "derive_live_observations",
     "execute_macrostep",
     "initialize_run_context",

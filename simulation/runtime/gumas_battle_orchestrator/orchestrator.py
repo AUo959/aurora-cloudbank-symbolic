@@ -7,10 +7,12 @@ from typing import Any, Mapping, Sequence
 from simulation.runtime.gumas_command_policy.policy import (
     _source_identity as command_source_identity,
     decide,
+    normalize_doctrine,
 )
 from simulation.runtime.gumas_damage_disposition import step_phase7_state
 from simulation.runtime.gumas_damage_disposition import kernel as phase7_kernel
 from simulation.runtime.gumas_damage_disposition.normalization import (
+    normalize_phase6_receipt,
     normalizer_source_identity,
 )
 from simulation.runtime.gumas_morale_resolution import (
@@ -122,8 +124,14 @@ def initialize_run_context(
     t0_snapshot: Mapping[str, Any],
     initial_state: Mapping[str, Any],
     baseline: Mapping[str, Any],
+    authority_doctrine_by_side: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """Freeze the non-canon run, roster, seed, and accepted source identities."""
+    """Freeze the non-canon run, roster, seed, and accepted source identities.
+
+    ``authority_doctrine_by_side`` optionally binds each side's resolved CanonRec
+    authority doctrine (see ``authority_doctrine_binding``) into the run
+    identity. When present, Phase 4 conditions that side's commander on it.
+    """
     _verify_t0_snapshot(t0_snapshot)
     _verify_motion_state(initial_state)
     if int(initial_state.get("macrostep_index", -1)) != 0 or int(initial_state.get("elapsed_ms", -1)) != 0:
@@ -175,8 +183,59 @@ def initialize_run_context(
         "seed_u64": seed,
         "accepted_source_identities": accepted_source_identities(),
     }
+    if authority_doctrine_by_side is not None:
+        context["authority_doctrine_by_side"] = _validated_doctrine_bindings(
+            authority_doctrine_by_side, t0_records, side_to_fleet
+        )
     context["run_identity_sha256"] = hash_without_field(context, "run_identity_sha256")
     return context
+
+
+def authority_doctrine_binding(resolved_manifest: Mapping[str, Any]) -> dict[str, Any]:
+    """Extract the hash-bound authority doctrine from a resolved CanonRec manifest."""
+    authority = resolved_manifest.get("authority")
+    if not isinstance(authority, Mapping):
+        raise Phase9Error("resolved manifest missing authority")
+    vector = (authority.get("doctrine_vector") or {}).get("values")
+    if not isinstance(vector, Mapping):
+        raise Phase9Error("resolved authority missing doctrine vector")
+    binding = {
+        "authority_id": str(authority.get("authority_id") or ""),
+        "authority_resolution_sha256": str(authority.get("resolution_sha256") or ""),
+        "manifest_sha256": str(resolved_manifest.get("manifest_sha256") or ""),
+        "doctrine_q1000": {str(k): v for k, v in sorted(vector.items())},
+    }
+    if not all(binding[k] for k in ("authority_id", "authority_resolution_sha256", "manifest_sha256")):
+        raise Phase9Error("incomplete authority doctrine binding")
+    return binding
+
+
+def _validated_doctrine_bindings(
+    bindings: Mapping[str, Mapping[str, Any]],
+    t0_records: Sequence[Mapping[str, str]],
+    side_to_fleet: Mapping[str, str],
+) -> dict[str, dict[str, Any]]:
+    if set(str(side) for side in bindings) != set(side_to_fleet):
+        raise Phase9Error("authority doctrine side set differs from frozen baseline")
+    result: dict[str, dict[str, Any]] = {}
+    for side_id in sorted(side_to_fleet):
+        binding = bindings[side_id]
+        if set(binding) != {"authority_id", "authority_resolution_sha256", "manifest_sha256", "doctrine_q1000"}:
+            raise Phase9Error(f"authority doctrine binding fields invalid: {side_id}")
+        try:
+            doctrine = normalize_doctrine(dict(binding["doctrine_q1000"]))
+        except (TypeError, ValueError) as exc:
+            raise Phase9Error(f"invalid authority doctrine for {side_id}: {exc}") from exc
+        organizations = {record["organization_id"] for record in t0_records if record["side_id"] == side_id}
+        if organizations != {str(binding["authority_id"])}:
+            raise Phase9Error(f"authority doctrine does not match T0 organization for {side_id}")
+        result[side_id] = {
+            "authority_id": str(binding["authority_id"]),
+            "authority_resolution_sha256": str(binding["authority_resolution_sha256"]),
+            "manifest_sha256": str(binding["manifest_sha256"]),
+            "doctrine_q1000": doctrine,
+        }
+    return result
 
 
 def _validate_run_context(run_context: Mapping[str, Any], baseline: Mapping[str, Any]) -> None:
@@ -263,7 +322,15 @@ def _validate_prior_checkpoint(
         raise Phase9Error("prior Phase-8 receipt does not bind current state")
     if str(phase8.get("resolution_state_sha256") or "") != resolution_sha:
         raise Phase9Error("prior Phase-8 receipt/resolution mismatch")
-    if str(state.get("last_phase6_receipt_sha256") or "") != phase6_sha:
+    # Phase 7 consumes the semantic-normalized Phase-6 receipt, so the committed
+    # state and the Phase-7 receipt retain the normalized identity, not the raw one.
+    try:
+        phase6_normalized_sha = str(normalize_phase6_receipt(phase6)["phase6_receipt_sha256"])
+    except ValueError as exc:
+        raise Phase9Error(f"prior Phase-6 receipt normalization failed: {exc}") from exc
+    if str(phase7.get("phase6_receipt_sha256") or "") != phase6_normalized_sha:
+        raise Phase9Error("prior Phase-7 receipt does not bind normalized prior Phase-6 receipt")
+    if str(state.get("last_phase6_receipt_sha256") or "") != phase6_normalized_sha:
         raise Phase9Error("current state does not retain prior Phase-6 receipt")
     if str(state.get("last_phase8_resolution_state_sha256") or "") != resolution_sha:
         raise Phase9Error("current state does not retain prior Phase-8 resolution")
@@ -458,8 +525,12 @@ def execute_macrostep(
     decisions_by_side: dict[str, dict[str, Any]] = {}
     decisions_by_fleet: dict[str, dict[str, Any]] = {}
     orders_by_fleet: dict[str, dict[str, Any]] = {}
+    doctrine_bindings = run_context.get("authority_doctrine_by_side")
     for side_id, side in sorted((baseline.get("sides") or {}).items()):
         fleet_id = str(side["fleet_id"])
+        doctrine = None
+        if doctrine_bindings is not None:
+            doctrine = doctrine_bindings[str(side_id)]["doctrine_q1000"]
         decision = decide(
             side["command_team"],
             observations[str(side_id)],
@@ -467,6 +538,7 @@ def execute_macrostep(
             fleet_id=fleet_id,
             decision_epoch=int(state["macrostep_index"]),
             baseline_identity=baseline_identity,
+            doctrine=doctrine,
         )
         decisions_by_side[str(side_id)] = decision
         decisions_by_fleet[fleet_id] = decision

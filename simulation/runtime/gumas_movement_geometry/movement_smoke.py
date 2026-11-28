@@ -24,7 +24,7 @@ from simulation.runtime.gumas_movement_geometry.kernel import (  # noqa: E402
 )
 
 EXPECTED_COMMAND_POLICY_SHA256 = (
-    "8c9ba9d413945404e7648c8f427b660576b0e85887c7639a0944f56b38585b3f"
+    "6b4348bf8622540986f98f573c6115f9d2f6e3055b7ba48dfad1652fd94ff67a"
 )
 
 

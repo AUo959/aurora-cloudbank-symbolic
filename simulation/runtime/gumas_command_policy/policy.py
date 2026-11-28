@@ -10,6 +10,9 @@ from typing import Any, Mapping, Sequence
 from .coefficients import (
     CANONICAL_JSON_PROFILE,
     COMMANDER_FIELDS,
+    DOCTRINE_COMMANDER_BIAS,
+    DOCTRINE_KEYS,
+    DOCTRINE_NEUTRAL_Q1000,
     OBSERVATION_DEFAULTS,
     POLICY_ID,
     POLICY_VERSION,
@@ -124,6 +127,38 @@ def normalize_command_team(
         }
 
     return {"commander": commander, "specialists": specialists}
+
+
+def normalize_doctrine(doctrine: Mapping[str, Any]) -> dict[str, int]:
+    """Validate a complete integer Q1000 authority-doctrine vector."""
+    if set(doctrine) != set(DOCTRINE_KEYS):
+        raise ValueError(
+            f"doctrine must contain exactly {sorted(DOCTRINE_KEYS)}; got {sorted(doctrine)}"
+        )
+    result: dict[str, int] = {}
+    for key in DOCTRINE_KEYS:
+        value = doctrine[key]
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise TypeError(f"doctrine {key} must be an integer Q1000")
+        if not 0 <= value <= 1000:
+            raise ValueError(f"doctrine {key} outside [0,1000]")
+        result[key] = value
+    return result
+
+
+def apply_doctrine(
+    commander: Mapping[str, int], doctrine: Mapping[str, int]
+) -> tuple[dict[str, int], dict[str, int]]:
+    """Return doctrine-conditioned commander attributes and the applied deltas."""
+    adjusted = dict(commander)
+    deltas: dict[str, int] = {}
+    for field in sorted(DOCTRINE_COMMANDER_BIAS):
+        delta = 0
+        for axis, sign, weight in DOCTRINE_COMMANDER_BIAS[field]:
+            delta += sign * mul_q(doctrine[axis] - DOCTRINE_NEUTRAL_Q1000, weight)
+        adjusted[field] = max(0, min(1000, int(commander[field]) + delta))
+        deltas[field] = adjusted[field] - int(commander[field])
+    return adjusted, deltas
 
 
 def _derived_observation(obs: Mapping[str, int]) -> dict[str, int]:
@@ -324,6 +359,7 @@ def decide(
     fleet_id: str,
     decision_epoch: int,
     baseline_identity: Mapping[str, str],
+    doctrine: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     if (
         isinstance(decision_epoch, bool)
@@ -337,6 +373,20 @@ def decide(
     obs = normalize_observation(observation)
     team = normalize_command_team(command_team)
     commander = team["commander"]["attributes_q1000"]
+    doctrine_block: dict[str, Any] | None = None
+    if doctrine is not None:
+        doctrine_values = normalize_doctrine(doctrine)
+        unconditioned = dict(commander)
+        commander, doctrine_deltas = apply_doctrine(unconditioned, doctrine_values)
+        # Downstream phases (e.g. Phase-8 surrender resolve) read the commander
+        # from command_team_numeric, so it carries the conditioned attributes.
+        team["commander"]["attributes_q1000"] = dict(commander)
+        doctrine_block = {
+            "doctrine_q1000": doctrine_values,
+            "doctrine_sha256": sha256_canonical(doctrine_values),
+            "commander_attribute_deltas_q1000": doctrine_deltas,
+            "unconditioned_commander_q1000": unconditioned,
+        }
     strategic = score_strategic(commander, obs)
     specialist_receipts = {}
     for role in ROLE_ORDER:
@@ -379,5 +429,7 @@ def decide(
         "prose_inputs_used": False,
         "rng_used": False,
     }
+    if doctrine_block is not None:
+        receipt["authority_doctrine"] = doctrine_block
     receipt["decision_sha256"] = sha256_canonical(receipt)
     return receipt

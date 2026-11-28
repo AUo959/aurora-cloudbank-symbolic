@@ -73,6 +73,8 @@ RUN_CONTEXT_FIELDS = frozenset(
         "run_identity_sha256",
     }
 )
+# Optional run-context binding added by the Phase-11 authority-doctrine bridge.
+OPTIONAL_RUN_CONTEXT_FIELDS = frozenset({"authority_doctrine_by_side"})
 ROSTER_FIELDS = frozenset(
     {
         "ship_id",
@@ -143,7 +145,11 @@ def _validate_run_context(
     expected_run_identity_sha256: str,
 ) -> tuple[dict[str, Any], dict[str, str], set[str], set[str]]:
     context = _mapping(raw, "run_context")
-    _exact_keys(context, RUN_CONTEXT_FIELDS, "run_context")
+    _exact_keys(
+        context,
+        RUN_CONTEXT_FIELDS | (OPTIONAL_RUN_CONTEXT_FIELDS & set(context)),
+        "run_context",
+    )
     if context.get("schema") != PHASE9_RUN_CONTEXT_SCHEMA:
         raise Phase10Error("unsupported Phase-9 run-context schema")
     if context.get("phase9_contract_id") != PHASE9_CONTRACT_ID:
@@ -304,6 +310,7 @@ def _validate_decisions(
     *,
     side_to_fleet: Mapping[str, str],
     macrostep_index: int,
+    doctrine_by_side: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> tuple[dict[str, dict[str, Any]], dict[str, str], dict[str, str]]:
     decisions = _mapping(raw, "decisions_by_fleet")
     fleets = set(side_to_fleet.values())
@@ -330,6 +337,14 @@ def _validate_decisions(
         _mapping(receipt.get("orders"), f"decision[{fleet_id}].orders")
         _require_false(receipt, "prose_inputs_used", f"decision[{fleet_id}]")
         _require_false(receipt, "rng_used", f"decision[{fleet_id}]")
+        doctrine_block = receipt.get("authority_doctrine")
+        if doctrine_by_side is None:
+            if doctrine_block is not None:
+                raise Phase10Error(f"command receipt carries unbound authority doctrine: {fleet_id}")
+        else:
+            doctrine_block = _mapping(doctrine_block, f"decision[{fleet_id}].authority_doctrine")
+            if doctrine_block.get("doctrine_q1000") != doctrine_by_side[side_id]["doctrine_q1000"]:
+                raise Phase10Error(f"command doctrine differs from run-context binding: {fleet_id}")
         decision_sha = _verify_hash(receipt, "decision_sha256", f"decision[{fleet_id}]")
         normalized[fleet_id] = copy.deepcopy(dict(receipt))
         by_fleet[fleet_id] = decision_sha
@@ -670,6 +685,7 @@ def validate_report_input(raw: Any) -> dict[str, Any]:
             step.get("decisions_by_fleet"),
             side_to_fleet=side_to_fleet,
             macrostep_index=offset,
+            doctrine_by_side=context.get("authority_doctrine_by_side"),
         )
         for side_id, fleet_id in side_to_fleet.items():
             if str(decisions[fleet_id].get("observation_sha256") or "") != observation_hashes[side_id]:

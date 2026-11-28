@@ -441,3 +441,31 @@ SPECIALIST_RULES: Mapping[str, Mapping[str, Mapping[str, Any]]] = {
         },
     },
 }
+
+# Phase-11 authority-doctrine bridge (policy v1.1).
+#
+# A CanonRec authority (organization or polity) resolves to an integer Q1000
+# doctrine vector centred on 500. When the caller supplies that vector, each
+# listed doctrine axis shifts the listed commander attributes by
+# sign * (doctrine - 500) * weight / 1000, rounded half-even and clamped to
+# [0, 1000]. Without a doctrine vector the v1.0 behaviour is unchanged.
+DOCTRINE_NEUTRAL_Q1000 = 500
+DOCTRINE_KEYS = (
+    "coordination",
+    "centralization",
+    "ai_integration",
+    "aggression",
+    "defensive_bias",
+    "diplomatic_restraint",
+    "boarding_preference",
+    "risk_tolerance",
+)
+DOCTRINE_COMMANDER_BIAS = {
+    "aggression": (("aggression", 1, 1000),),
+    "casualty_aversion": (("risk_tolerance", -1, 1000), ("defensive_bias", 1, 1000)),
+    "adaptability": (("ai_integration", 1, 500), ("centralization", -1, 500)),
+    "deception": (("boarding_preference", 1, 1000),),
+    "discipline": (("coordination", 1, 1000), ("centralization", 1, 500)),
+    "negotiation_openness": (("diplomatic_restraint", 1, 1000),),
+    "initiative": (("centralization", -1, 1000), ("risk_tolerance", 1, 500)),
+}

@@ -1,0 +1,25 @@
+{
+  "artifact": "GUMAS v2 combat restoration manifest",
+  "authoritative_contract": "CombatResolver.resolve_battle(CombatState, attacker_fleets, defender_fleets, topology_manager)",
+  "files": {
+    "simulation/runtime/gumas_v2_restored/__init__.py": "6e4d0864596d800a4db560d0ca1dfdde9312dc74c7b1c34efcd4c319a625a430",
+    "simulation/runtime/gumas_v2_restored/restoration_smoke.py": "aa726a8f63613052a7e14a3456a2c728cf1f7fd343062c3086eb303eaac4edba",
+    "simulation/runtime/gumas_v2_restored/restored_engine.py": "1ddb95521d0cd4d2034f9ed4ef8e8309090af9de5a6faa914d88f3491a22242e"
+  },
+  "historical_anchor": "GUMAS-PACKAGE-V2",
+  "historical_import_mode": "verified_segmented_base64_to_ephemeral_zip_no_unpacked_runtime_copy",
+  "historical_tree_sha256": "a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9",
+  "local_replay_sha256": "de55355d1b489c1a89c63508d9fbe5779e0ac9e66248f28850c1012c266d07ea",
+  "recovery_package_sha256": "039c0f48341aa9847b8400e45a29e41fef734a2b2e80b78bfe3de1abc165ec07",
+  "recovery_segment_count": 9,
+  "recovery_transport": {
+    "authoritative_decoded_sha256": "039c0f48341aa9847b8400e45a29e41fef734a2b2e80b78bfe3de1abc165ec07",
+    "encoding": "base64",
+    "ordered_segment_glob": "vendor/recovery_b64/part-*.b64",
+    "segment_count": 9,
+    "segment_text_hashes_authoritative": false,
+    "verification": "decode all ordered segments, sha256 decoded bytes, fail closed before import"
+  },
+  "restoration_version": "2.0.1-restored.1",
+  "version": "1.0"
+}

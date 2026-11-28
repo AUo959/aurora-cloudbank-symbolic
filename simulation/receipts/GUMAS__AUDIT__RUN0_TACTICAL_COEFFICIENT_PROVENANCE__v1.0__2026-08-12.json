@@ -1,0 +1,23 @@
+{
+  "artifact": "Run-0 tactical coefficient provenance audit",
+  "version": "1.0",
+  "date": "2026-08-12",
+  "status": "PASS_WITH_PHASE3_CALIBRATION_PENDING",
+  "baseline": "simulation/baselines/gumas/GUMAS__BASELINE__FLASH_REBELLION_PLANETOID_EQUAL_FLEETS__v1.2__2026-08-11.json",
+  "canonrec_commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+  "rule": "No baseline numerical proxy is promoted to canon merely because CanonRec identifies the corresponding qualitative capability.",
+  "provenance_classes": {
+    "canonical_identity_and_text": "CANON_DIRECT",
+    "applicable_marshal_sentinel_doctrine": "CANON_SCOPED_DOCTRINE",
+    "dimensionless_0_1000_capability_and_doctrine_vectors": "DERIVED_FROM_CANON",
+    "existing_baseline_physical_and_combat_numbers": "SCENARIO_LOCAL"
+  },
+  "scenario_local_namespaces_retained": [
+    "fleet_compositions.*.combat_power",
+    "tactical_proxy_parameters.*",
+    "engagement_geometry.* numerical values",
+    "planetoid_p17.* numerical values",
+    "termination_rules.* numerical thresholds"
+  ],
+  "phase3_requirement": "A separately versioned physical calibration table must map dimensionless canon-derived capability vectors plus explicit scenario-local calibration into per-vessel physical coefficients. The calibration itself is not canon and must be included in run identity."
+}

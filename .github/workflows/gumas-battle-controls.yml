@@ -1,0 +1,98 @@
+name: GUMAS Battle Controls
+
+on:
+  pull_request:
+    paths:
+      - 'simulation/runtime/gumas_battle_controls/**'
+      - 'simulation/runtime/gumas_factual_reporter/**'
+      - 'simulation/runtime/gumas_battle_orchestrator/**'
+      - 'simulation/runtime/gumas_morale_resolution/**'
+      - 'simulation/runtime/gumas_damage_disposition/**'
+      - 'simulation/runtime/gumas_sensing_weapons/**'
+      - 'simulation/runtime/gumas_movement_geometry/**'
+      - 'simulation/runtime/gumas_command_policy/**'
+      - 'simulation/runtime/gumas_physical_t0/**'
+      - 'simulation/runtime/canonrec_tactical/**'
+      - 'simulation/authority/**'
+      - 'simulation/runs/gumas/**'
+      - 'simulation/specs/GUMAS__SPEC__DETERMINISM_SUBSTITUTION_CONTROLS_RUN0__v1.0__2026-11-28.md'
+      - 'tests/test_gumas_battle_controls.py'
+      - '.github/workflows/gumas-battle-controls.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AUTHORITY: simulation/authority/GUMAS__EXECUTION_AUTHORITY__RUN0_AND_CONTROLS__v1.0__2026-11-28.json
+  EVIDENCE: simulation/runs/gumas/GUMAS__EVIDENCE__RUN0_AND_CONTROLS__v1.0__2026-11-28.json
+
+jobs:
+  controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout CloudBank
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Checkout pinned CanonRec
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: AUo959/CanonRec
+          ref: dc629a566b2f42fa1c652140b9eef72a4fb0d58a
+          path: canonrec
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+
+      - name: Install focused test dependency
+        run: >-
+          python -m pip install --only-binary=:all: pytest==9.0.3
+
+      - name: Run Phase-11 contract tests (pinned CanonRec input resolution)
+        env:
+          GUMAS_CANONREC_ROOT: canonrec
+        run: |
+          set -o pipefail
+          python -m pytest --noconftest tests/test_gumas_battle_controls.py \
+            -q --no-header 2>&1 | tee gumas-battle-controls-tests.log
+
+      - name: Preflight without authority must refuse
+        run: |
+          set +e
+          python simulation/runtime/gumas_battle_controls/controls_cli.py preflight \
+            --as-of 2026-11-28 > gumas-preflight-refusal.json
+          status=$?
+          cat gumas-preflight-refusal.json
+          test "$status" -eq 3
+
+      - name: Regenerate committed Run-0 and control evidence
+        if: ${{ hashFiles(env.AUTHORITY) != '' && hashFiles(env.EVIDENCE) != '' }}
+        env:
+          PYTHONHASHSEED: '0'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -o pipefail
+          as_of=$(python -c "import json,os;print(json.load(open(os.environ['EVIDENCE']))['as_of'])")
+          python simulation/runtime/gumas_battle_controls/controls_cli.py execute \
+            --canonrec-root canonrec \
+            --authority "$AUTHORITY" \
+            --as-of "$as_of" \
+            --workers 2 \
+            --out gumas-regenerated-evidence.json \
+            --verify "$EVIDENCE" 2>&1 | tee gumas-battle-controls-regeneration.log
+
+      - name: Upload controls evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gumas-battle-controls-evidence
+          path: |
+            gumas-battle-controls-tests.log
+            gumas-preflight-refusal.json
+            gumas-battle-controls-regeneration.log
+            gumas-regenerated-evidence.json
+          retention-days: 30
+          if-no-files-found: warn

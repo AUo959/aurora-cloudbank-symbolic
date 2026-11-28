@@ -1,0 +1,35 @@
+{
+  "artifact": "GUMAS v2 combat restoration Phase-1 receipt",
+  "version": "1.0",
+  "date": "2026-08-12",
+  "phase": "Phase 1 — Historical tactical restoration",
+  "status": "PASS",
+  "authority_note": "Phase 1 restores only the historical aggregate combat integration boundary. It does not authorize Run 0 or claim per-vessel physical combat capability.",
+  "historical_anchor": "GUMAS-PACKAGE-V2",
+  "historical_tree_sha256": "a218541009b0a870eb3558f09d3a497ff31673143a47b6ce1191715fc9617ed9",
+  "recovery_package_sha256": "039c0f48341aa9847b8400e45a29e41fef734a2b2e80b78bfe3de1abc165ec07",
+  "restoration_version": "2.0.1-restored.1",
+  "authoritative_contract": "CombatResolver.resolve_battle(CombatState, attacker_fleets, defender_fleets, topology_manager)",
+  "implementation_commit": "79efdb2dbdfaec790efc8b42155eae94d067c1bd",
+  "normalized_replay_sha256": "de55355d1b489c1a89c63508d9fbe5779e0ac9e66248f28850c1012c266d07ea",
+  "local_validation": {
+    "focused_pytest": "1 passed",
+    "automatic_phase9": "PASS",
+    "explicit_fleet_battle": "PASS",
+    "historical_zip_hash_fail_closed": "PASS",
+    "reverse_insertion_order_equivalence": "PASS"
+  },
+  "github_ci": {
+    "workflow": "Aurora CI (Minimal)",
+    "run_id": 31566442227,
+    "job": "CI Check",
+    "job_id": 94019102643,
+    "conclusion": "success",
+    "syntax": "success",
+    "critical_tests": "success",
+    "opal2": "success",
+    "container_hash_validation": "success",
+    "full_test_suite": "success"
+  },
+  "next_phase": "Phase 2 — deterministic CanonRec resolver and resolved tactical manifest"
+}

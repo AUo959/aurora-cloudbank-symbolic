@@ -1,0 +1,860 @@
+{
+  "all_controls_passed": true,
+  "as_of": "2026-11-28",
+  "authority_sha256": "983b4c7c5fdbc984f3788a145614deac26c4c1f33777ff9296328146551a67e8",
+  "canon_promotion": false,
+  "control_receipts": {
+    "class_substitution": {
+      "authority": {
+        "as_of": "2026-11-28",
+        "authority_id": "AUTH-20261128-gumas-battle-runtime-run0-controls",
+        "authority_sha256": "983b4c7c5fdbc984f3788a145614deac26c4c1f33777ff9296328146551a67e8",
+        "capability": "gumas_battle_controls_execution"
+      },
+      "authority_doctrine_by_side": {
+        "loyalist": {
+          "authority_id": "org_galactic_union",
+          "authority_resolution_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+          "doctrine_q1000": {
+            "aggression": 500,
+            "ai_integration": 500,
+            "boarding_preference": 500,
+            "centralization": 520,
+            "coordination": 615,
+            "defensive_bias": 500,
+            "diplomatic_restraint": 560,
+            "risk_tolerance": 540
+          },
+          "manifest_sha256": "d20cbe034f522d99f17311436a61cd47dd4602aacc3f4d82aaac1483d4ab9fae"
+        },
+        "rebel": {
+          "authority_id": "org_galactic_union",
+          "authority_resolution_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+          "doctrine_q1000": {
+            "aggression": 500,
+            "ai_integration": 500,
+            "boarding_preference": 500,
+            "centralization": 520,
+            "coordination": 615,
+            "defensive_bias": 500,
+            "diplomatic_restraint": 560,
+            "risk_tolerance": 540
+          },
+          "manifest_sha256": "d20cbe034f522d99f17311436a61cd47dd4602aacc3f4d82aaac1483d4ab9fae"
+        }
+      },
+      "canon_promotion": false,
+      "engine_source_identity": {
+        "frozen_input_sources": {
+          "simulation/runtime/canonrec_tactical/resolver.py": "41023137331d2e8f3beae01ccf3c1f37afd084c44ad72665832c3b2ce1941576",
+          "simulation/runtime/gumas_physical_t0/constructor.py": "01dd9f1ed08ebc1822e42c28d038e2fff742fe8d0421c342198fbebf56208f6f"
+        },
+        "phase10_reporter": {
+          "bundle_sha256": "47dc397a41e75ccc4e44b67aef8721a2cffaff22dd625ac9e1e06aade64b5695",
+          "module_sha256": {
+            "__init__.py": "78fe5c97a0c0303a0931e06fdd293dd826a54af12081f4aa017f332f86b28e12",
+            "constants.py": "bd1945eff9a4bc92365af2d0eea5f33370afd9be102d8ccf7e95df7f98c4a2dc",
+            "exporter.py": "3c1bedb42f9eabd4aef2f673f293b026c39d2f881a7646cab10d30faa79abf00",
+            "identity.py": "249798641bb39c7f281a0b562fa8b6b07d14a4273d21512a3e70a21099b90f65",
+            "projection.py": "f2b70d68c8e9a11ed7a7b2e0e88f316d6c6a013c67d7a426703f7249ec44a11e",
+            "rendering.py": "630f1a2e3e4f4bfb028b08d09c49ba162b9c9dc66da0af114ce2054618463995",
+            "validation.py": "fc96e833abfb2fb5582d23e3e8eccaccf4dcc72e04a92060b8a6323eb7062c55"
+          }
+        },
+        "phase11_controls": {
+          "bundle_sha256": "c5c15ffbee81f2a5d99b85815c4a8e46487dbdb144450f84c59592683fb64cb5",
+          "module_sha256": {
+            "__init__.py": "56260705d3e58caadb0f5a48d7f67c53a3fa2e7a3b0e78093577efd05267628c",
+            "authority.py": "b326c00fff35e00bc43cf4b4e88cada333f4e023fd4285c3e251df4c86a7668d",
+            "constants.py": "b9d9368aeb4efab389c341dd90f89f9f2b92b17f58cc49d7a5dc0ac00ed57708",
+            "controls.py": "56fe6dae02821a5992b064c3185fbb852fa4b96093c30a99d28ca1e0132b651f",
+            "identity.py": "8b13ad14c4f067acddeaffdb72469bc69ca38e08ba7892938095f74c692a2b33",
+            "inputs.py": "193354410d241fb2f8481f19f5f9f34495d30e75e03447567fb362c39aa93329",
+            "runner.py": "caa6178e25da253b56c8f5b945712ba7e1b49169adfe9fa42d477c7b9a9af1e1"
+          }
+        },
+        "phase4_to_phase9": {
+          "phase4_command_policy": {
+            "bundle_sha256": "6b4348bf8622540986f98f573c6115f9d2f6e3055b7ba48dfad1652fd94ff67a",
+            "coefficient_table_sha256": "32c96d796ad7334598aa9b6219e22204be3c8c82db786b2d1fab65b0cb8665e3",
+            "policy_module_sha256": "ab70013e470517cfd3a3aff227c8b7059550ab876ce6dca1f8c16d8f3df4c5c1"
+          },
+          "phase5_movement_geometry": {
+            "bundle_sha256": "565ef76f94cef320a4e4e8a0cbf75a301270eeef4326975b4cf41681d46bab57",
+            "module_sha256": {
+              "constants.py": "2d9ba7639250980bc35f43a8d10301e3fc12487064b1185bd6e2578127f14dea",
+              "geometry.py": "37995ef3e26bd8c787fbb5133db7b15f7f5f0db009911dc73c022a53b212163e",
+              "kernel.py": "123d5bdecf7aeafa2b93a99a830b4ea35f7f2fc0a26249b42efc66be22cf5501"
+            }
+          },
+          "phase6_sensing_weapons": {
+            "bundle_sha256": "05e65b2ee5744809f22eeb1dd6cf5cbf637690d1fa16c177c3bbeedca74427e7",
+            "module_sha256": {
+              "constants.py": "4958641b12ec762c33197f7bf7bb299485296dd944ca5816deb0422535abdd4e",
+              "kernel.py": "df17a75eb1ad9323a1971c3955a4b0ad839489b57d00f67fd7fafcfac609db28"
+            }
+          },
+          "phase7_damage_disposition": {
+            "composite_source_sha256": "bbe6d1663ddf32b651db957434f6b1c6e86d56456c9bd93cffd8b8ecf972ed5a",
+            "damage_core_source_identity": {
+              "bundle_sha256": "ff5d94f98b0742b3d81a3230827b640777870dea8c3a6c1011d9e0e1c81dcad1",
+              "module_sha256": {
+                "constants.py": "e12f92132bd2c7d3a922d4517818b65e5c9cfa4e553fb9afb0d3b714b1064820",
+                "kernel.py": "10d664316cac8a8378ea3ebdb07449a6e043ca975a8dce5286a639ea981735a6"
+              }
+            },
+            "semantic_normalizer_source_identity": {
+              "bundle_sha256": "ad9f5ad8217813db66796cd2960d0788e140bfae1fe7ad2ce263695be2ccfefe",
+              "module_sha256": {
+                "__init__.py": "350a1311e62c8fbd90f4f1e2eb89cf78e6a809ee30189e14481e32c4b9f6589a",
+                "normalization.py": "56f83746bb20d4c39f74802f76a37c6edc7fe5f751ece186c84c1f77710e755d"
+              }
+            }
+          },
+          "phase8_morale_resolution": {
+            "composite_source_sha256": "a848e798414d98b0840a5d2dc46b88f2d0a9cc4d76028d25a47beb207990277a",
+            "phase8_boundary_source_identity": {
+              "bundle_sha256": "6096d1c1249f6c4881fceb0b39d1dbbf9c8d7598ef34996c9f1e3ea294bb6990",
+              "module_sha256": {
+                "__init__.py": "0eb7b7e334a5403d5f05c91eab8f62317338953135f578ed61389f53673895a2",
+                "boundary.py": "8699292d66ac51aabac0a547411a4ad2704cc8c3caf6c05e1ffcaac0329db34c"
+              }
+            },
+            "resolution_core_source_identity": {
+              "bundle_sha256": "52d89f6ea6c17428d747b16143f8d6bbdda03743b14bf5dea02962773bbfced7",
+              "module_sha256": {
+                "constants.py": "194fc8f5a682907570dd181275ea4581e24b6c55bbec3a57792bc30e4c1f3226",
+                "kernel.py": "37ad82fdd4fa41935040e3b9e0089df3af7acfaa2da7835dde6cb34ef8a11777"
+              }
+            }
+          },
+          "phase9_orchestrator": {
+            "bundle_sha256": "7dc348e3f205000ea9c1ed271070061e7bdd51fb2bdd6fc5b064311b88c3cab9",
+            "module_sha256": {
+              "__init__.py": "45ae2c8f4c7ad74d435ac3f56bd47846a421107da0a4c5c39d2df06b81b0b28e",
+              "constants.py": "8ff4fb53b060af592c76317f06141f6508a7bc8543216ad6005ac204242b1bb6",
+              "identity.py": "c1ccec77e984c4ffbe341d2dacd9e364c274c22e057e13527cedeadeba8b1674",
+              "live_observation.py": "edd8a151da5f096427cb7c20ca005132d035dad44f6f30370940e7e319cf792b",
+              "orchestrator.py": "ba62f55735caad13149fcc44d04a0397b2511699cf2875d92825b56ea09dd428"
+            }
+          }
+        }
+      },
+      "final_elapsed_ms": 21600000,
+      "final_state_sha256": "68e445269257d8316af0a8158c8eb3ca17db1838ce9215737216acd8466a7294",
+      "historical_canon_status": "non_canon_simulation_instance",
+      "input_identities": {
+        "authority_resolution_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+        "baseline_sha256": "86493c8207bd1f5a6da57f48be29a20170ee9b166e498750e0d1bdbd96a9888b",
+        "calibration_sha256": "fe13506434532e622f49cc7dec233b03dd31c383b2c8eb4b6d5f3b6796c6ef23",
+        "canonrec_commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+        "initial_state_sha256": "8a51906aa484a7df758e703efb95ed106dc9e20c43a1a8093a055a6830d9429b",
+        "resolved_manifest_sha256": "d20cbe034f522d99f17311436a61cd47dd4602aacc3f4d82aaac1483d4ab9fae",
+        "run_identity_sha256": "aded19f339f25bbebc69d3bcaaf2d454eb6ce046031f8b3c027ab3e37b75aef5",
+        "source_set_sha256": "a29ac678c3edfd3230f6ed2c9f86c844c8649d936e11d1d3208eb9413db38cff",
+        "t0_roster_sha256": "9f049f5875401ebaa9d6b3e7e8bf4c4595f89d6de9e9c374f9c78466ffea7929",
+        "t0_sha256": "f6dce3cbcb60886b69fdf85a48ab996bd0b06378fe2cc117808fd5b25cdd5827"
+      },
+      "ledger_chain_sha256": "3946c187d13d524f58587bef86817120f148880b3ec0ef6bce3e25e14bde0ade",
+      "ledger_genesis_sha256": "81937c0e0851bf0a695ed4e52c03ccb0303ccd7df3d8f0673e292e50925f3073",
+      "ledger_head_sha256": "52c5967dd352846a5d0921f4087301545356c0b50ee64a5e13edfafbe03bafdb",
+      "macrosteps_executed": 2160,
+      "phase11_contract_id": "GUMAS_DETERMINISM_SUBSTITUTION_CONTROLS_RUN0_v1_0",
+      "phase11_version": "1.0.0",
+      "reports": {
+        "public_summary_v1": {
+          "evidence_index_sha256": "deb6aa724f1d417790f7f6b6bf71e917613db9da2dad3e07b68c7794eb37113e",
+          "export_receipt_sha256": "5c5987263a77d103ff1f33b628090748b0db5ed21d00387dc986d24bd4bd2272",
+          "normalized_report_sha256": "685c93a8aa0953cdecca0326897bf5ab8574db2975061d26660a2d569f06ff97",
+          "rendered_report_sha256": "9e94e8529bfade84fe048efe3e45a327546ccbbfec3aea716f08eea0620e03db"
+        },
+        "simulation_truth_v1": {
+          "evidence_index_sha256": "5e460f41f49e68a3ac82f83916fdf7bbcfeeaf2f0985320bb83b5f3e518679eb",
+          "export_receipt_sha256": "fc2df21e20fb1ca8a70d258909639ac171eb98a9a4313deeee378209c7df6387",
+          "normalized_report_sha256": "5939960d4d4442425e0340a7bd11a035a5f6b38175ebf840cb17fa17fe5e203f",
+          "rendered_report_sha256": "8e6435fb64b26ded7be142d997d150ef1872ab3d2c5215dabe28c6317cc948e6"
+        }
+      },
+      "run0_executed": false,
+      "run_receipt_sha256": "36e21112c207d6d1752fff89bc92d23d6bcb0bc7300e520784c797842f27890c",
+      "schema": "aurora://simulation/gumas/phase11_run_receipt/v1.0",
+      "terminal_outcome": {
+        "annihilated_side_ids": [],
+        "incapacitated_side_ids": [],
+        "local_control_side_id": null,
+        "reason_code": "hard_limit_stalemate",
+        "stalemate": true,
+        "surrendered_side_ids": [],
+        "terminated": true,
+        "termination_mode": "hard_limit_stalemate",
+        "victor_side_id": null,
+        "withdrawn_side_ids": []
+      },
+      "variant": "class_substitution"
+    },
+    "polity_substitution": {
+      "authority": {
+        "as_of": "2026-11-28",
+        "authority_id": "AUTH-20261128-gumas-battle-runtime-run0-controls",
+        "authority_sha256": "983b4c7c5fdbc984f3788a145614deac26c4c1f33777ff9296328146551a67e8",
+        "capability": "gumas_battle_controls_execution"
+      },
+      "authority_doctrine_by_side": {
+        "loyalist": {
+          "authority_id": "org_union_naval_forces",
+          "authority_resolution_sha256": "08c7c65bd480e34b94ddcbdba11cf445d447ec4b5f0e627619c727cb3fa936f7",
+          "doctrine_q1000": {
+            "aggression": 500,
+            "ai_integration": 500,
+            "boarding_preference": 500,
+            "centralization": 520,
+            "coordination": 570,
+            "defensive_bias": 500,
+            "diplomatic_restraint": 560,
+            "risk_tolerance": 500
+          },
+          "manifest_sha256": "44d62da04aa78e6142977373c412970b531e2ba7bc2f0a4ed6fbceca1b8af45c"
+        },
+        "rebel": {
+          "authority_id": "org_union_naval_forces",
+          "authority_resolution_sha256": "08c7c65bd480e34b94ddcbdba11cf445d447ec4b5f0e627619c727cb3fa936f7",
+          "doctrine_q1000": {
+            "aggression": 500,
+            "ai_integration": 500,
+            "boarding_preference": 500,
+            "centralization": 520,
+            "coordination": 570,
+            "defensive_bias": 500,
+            "diplomatic_restraint": 560,
+            "risk_tolerance": 500
+          },
+          "manifest_sha256": "44d62da04aa78e6142977373c412970b531e2ba7bc2f0a4ed6fbceca1b8af45c"
+        }
+      },
+      "canon_promotion": false,
+      "engine_source_identity": {
+        "frozen_input_sources": {
+          "simulation/runtime/canonrec_tactical/resolver.py": "41023137331d2e8f3beae01ccf3c1f37afd084c44ad72665832c3b2ce1941576",
+          "simulation/runtime/gumas_physical_t0/constructor.py": "01dd9f1ed08ebc1822e42c28d038e2fff742fe8d0421c342198fbebf56208f6f"
+        },
+        "phase10_reporter": {
+          "bundle_sha256": "47dc397a41e75ccc4e44b67aef8721a2cffaff22dd625ac9e1e06aade64b5695",
+          "module_sha256": {
+            "__init__.py": "78fe5c97a0c0303a0931e06fdd293dd826a54af12081f4aa017f332f86b28e12",
+            "constants.py": "bd1945eff9a4bc92365af2d0eea5f33370afd9be102d8ccf7e95df7f98c4a2dc",
+            "exporter.py": "3c1bedb42f9eabd4aef2f673f293b026c39d2f881a7646cab10d30faa79abf00",
+            "identity.py": "249798641bb39c7f281a0b562fa8b6b07d14a4273d21512a3e70a21099b90f65",
+            "projection.py": "f2b70d68c8e9a11ed7a7b2e0e88f316d6c6a013c67d7a426703f7249ec44a11e",
+            "rendering.py": "630f1a2e3e4f4bfb028b08d09c49ba162b9c9dc66da0af114ce2054618463995",
+            "validation.py": "fc96e833abfb2fb5582d23e3e8eccaccf4dcc72e04a92060b8a6323eb7062c55"
+          }
+        },
+        "phase11_controls": {
+          "bundle_sha256": "c5c15ffbee81f2a5d99b85815c4a8e46487dbdb144450f84c59592683fb64cb5",
+          "module_sha256": {
+            "__init__.py": "56260705d3e58caadb0f5a48d7f67c53a3fa2e7a3b0e78093577efd05267628c",
+            "authority.py": "b326c00fff35e00bc43cf4b4e88cada333f4e023fd4285c3e251df4c86a7668d",
+            "constants.py": "b9d9368aeb4efab389c341dd90f89f9f2b92b17f58cc49d7a5dc0ac00ed57708",
+            "controls.py": "56fe6dae02821a5992b064c3185fbb852fa4b96093c30a99d28ca1e0132b651f",
+            "identity.py": "8b13ad14c4f067acddeaffdb72469bc69ca38e08ba7892938095f74c692a2b33",
+            "inputs.py": "193354410d241fb2f8481f19f5f9f34495d30e75e03447567fb362c39aa93329",
+            "runner.py": "caa6178e25da253b56c8f5b945712ba7e1b49169adfe9fa42d477c7b9a9af1e1"
+          }
+        },
+        "phase4_to_phase9": {
+          "phase4_command_policy": {
+            "bundle_sha256": "6b4348bf8622540986f98f573c6115f9d2f6e3055b7ba48dfad1652fd94ff67a",
+            "coefficient_table_sha256": "32c96d796ad7334598aa9b6219e22204be3c8c82db786b2d1fab65b0cb8665e3",
+            "policy_module_sha256": "ab70013e470517cfd3a3aff227c8b7059550ab876ce6dca1f8c16d8f3df4c5c1"
+          },
+          "phase5_movement_geometry": {
+            "bundle_sha256": "565ef76f94cef320a4e4e8a0cbf75a301270eeef4326975b4cf41681d46bab57",
+            "module_sha256": {
+              "constants.py": "2d9ba7639250980bc35f43a8d10301e3fc12487064b1185bd6e2578127f14dea",
+              "geometry.py": "37995ef3e26bd8c787fbb5133db7b15f7f5f0db009911dc73c022a53b212163e",
+              "kernel.py": "123d5bdecf7aeafa2b93a99a830b4ea35f7f2fc0a26249b42efc66be22cf5501"
+            }
+          },
+          "phase6_sensing_weapons": {
+            "bundle_sha256": "05e65b2ee5744809f22eeb1dd6cf5cbf637690d1fa16c177c3bbeedca74427e7",
+            "module_sha256": {
+              "constants.py": "4958641b12ec762c33197f7bf7bb299485296dd944ca5816deb0422535abdd4e",
+              "kernel.py": "df17a75eb1ad9323a1971c3955a4b0ad839489b57d00f67fd7fafcfac609db28"
+            }
+          },
+          "phase7_damage_disposition": {
+            "composite_source_sha256": "bbe6d1663ddf32b651db957434f6b1c6e86d56456c9bd93cffd8b8ecf972ed5a",
+            "damage_core_source_identity": {
+              "bundle_sha256": "ff5d94f98b0742b3d81a3230827b640777870dea8c3a6c1011d9e0e1c81dcad1",
+              "module_sha256": {
+                "constants.py": "e12f92132bd2c7d3a922d4517818b65e5c9cfa4e553fb9afb0d3b714b1064820",
+                "kernel.py": "10d664316cac8a8378ea3ebdb07449a6e043ca975a8dce5286a639ea981735a6"
+              }
+            },
+            "semantic_normalizer_source_identity": {
+              "bundle_sha256": "ad9f5ad8217813db66796cd2960d0788e140bfae1fe7ad2ce263695be2ccfefe",
+              "module_sha256": {
+                "__init__.py": "350a1311e62c8fbd90f4f1e2eb89cf78e6a809ee30189e14481e32c4b9f6589a",
+                "normalization.py": "56f83746bb20d4c39f74802f76a37c6edc7fe5f751ece186c84c1f77710e755d"
+              }
+            }
+          },
+          "phase8_morale_resolution": {
+            "composite_source_sha256": "a848e798414d98b0840a5d2dc46b88f2d0a9cc4d76028d25a47beb207990277a",
+            "phase8_boundary_source_identity": {
+              "bundle_sha256": "6096d1c1249f6c4881fceb0b39d1dbbf9c8d7598ef34996c9f1e3ea294bb6990",
+              "module_sha256": {
+                "__init__.py": "0eb7b7e334a5403d5f05c91eab8f62317338953135f578ed61389f53673895a2",
+                "boundary.py": "8699292d66ac51aabac0a547411a4ad2704cc8c3caf6c05e1ffcaac0329db34c"
+              }
+            },
+            "resolution_core_source_identity": {
+              "bundle_sha256": "52d89f6ea6c17428d747b16143f8d6bbdda03743b14bf5dea02962773bbfced7",
+              "module_sha256": {
+                "constants.py": "194fc8f5a682907570dd181275ea4581e24b6c55bbec3a57792bc30e4c1f3226",
+                "kernel.py": "37ad82fdd4fa41935040e3b9e0089df3af7acfaa2da7835dde6cb34ef8a11777"
+              }
+            }
+          },
+          "phase9_orchestrator": {
+            "bundle_sha256": "7dc348e3f205000ea9c1ed271070061e7bdd51fb2bdd6fc5b064311b88c3cab9",
+            "module_sha256": {
+              "__init__.py": "45ae2c8f4c7ad74d435ac3f56bd47846a421107da0a4c5c39d2df06b81b0b28e",
+              "constants.py": "8ff4fb53b060af592c76317f06141f6508a7bc8543216ad6005ac204242b1bb6",
+              "identity.py": "c1ccec77e984c4ffbe341d2dacd9e364c274c22e057e13527cedeadeba8b1674",
+              "live_observation.py": "edd8a151da5f096427cb7c20ca005132d035dad44f6f30370940e7e319cf792b",
+              "orchestrator.py": "ba62f55735caad13149fcc44d04a0397b2511699cf2875d92825b56ea09dd428"
+            }
+          }
+        }
+      },
+      "final_elapsed_ms": 21600000,
+      "final_state_sha256": "e353bdd588d52b736139792bff1d7c6a84d88d9d6fccf4cb83f5d189107a347b",
+      "historical_canon_status": "non_canon_simulation_instance",
+      "input_identities": {
+        "authority_resolution_sha256": "08c7c65bd480e34b94ddcbdba11cf445d447ec4b5f0e627619c727cb3fa936f7",
+        "baseline_sha256": "bafb248a395135ebabf00c5ea6f8de7420daed92affb61ae9f0589a61ab0bf4c",
+        "calibration_sha256": "e7a8fc68bc5d69a69dc30acc7e39f4af2ae2e1bc6ddb48da59a984d226678504",
+        "canonrec_commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+        "initial_state_sha256": "bf3ce79903a29925017145c3df042647ae5dd15a3a344defcdf2665ea8c1913d",
+        "resolved_manifest_sha256": "44d62da04aa78e6142977373c412970b531e2ba7bc2f0a4ed6fbceca1b8af45c",
+        "run_identity_sha256": "c704208bc5b5efb78a051408f88b837b5fd5eff9f30fd04965e830625ae8b827",
+        "source_set_sha256": "4bd9e4bf00ff42fce375a12181cee7d58af2d00e2be39dfd71a846de231f2cff",
+        "t0_roster_sha256": "392cdfe52ca4122b21af5ee6877d46680c033125e241d33a03da87dcf1b65ed2",
+        "t0_sha256": "7b69e25a0f6b27f0dcd4b3cf316d7971fe12b6954e461a9ecb7cd9c3583659f9"
+      },
+      "ledger_chain_sha256": "8d7c0783cde1d5461891a9536c86d1d0674f69b1e2ca8921f196a31a95844dae",
+      "ledger_genesis_sha256": "e8812abf274670c62c3aa91054bf8fef608bc1ae00dbcb74126fbacfc92889ad",
+      "ledger_head_sha256": "45df158a34c7be5a51faa8d249d6cbb4b1d344dfdc389c0e5e47baec4f2222e1",
+      "macrosteps_executed": 2160,
+      "phase11_contract_id": "GUMAS_DETERMINISM_SUBSTITUTION_CONTROLS_RUN0_v1_0",
+      "phase11_version": "1.0.0",
+      "reports": {
+        "public_summary_v1": {
+          "evidence_index_sha256": "7b0ae44b03b5d6b4b0168440fdd87fce4bb4692b16a82a533bed2a5598cabf4b",
+          "export_receipt_sha256": "fab02f40d475f0a3f51990c71506857d17b3bee4a746f54c88bb44c1badaf5b3",
+          "normalized_report_sha256": "3dd3d40b18c5ccc967b71c50e2e6403c8b80f19987f74cf580abed015279081a",
+          "rendered_report_sha256": "008dee8348bf81d05f7825f92b07850308b013dbaa3bbe614b882e9c912cbe5c"
+        },
+        "simulation_truth_v1": {
+          "evidence_index_sha256": "e0788d1c11117a9aa610713aa90ef8ade2b2d0c0545dc021b0175aadff32170d",
+          "export_receipt_sha256": "fb02b79ca50a2195962917605bc4c812854c1ec5c7b94aa57cf3649bc93c31a0",
+          "normalized_report_sha256": "b5532d54cea006dc4c24614a3c1c0a244b19ba493a1f923a4af6da128f82a696",
+          "rendered_report_sha256": "063c59659966b13480a96cd4b3870f27dcfb1d4d8fb380ace15a1afa0339b16f"
+        }
+      },
+      "run0_executed": false,
+      "run_receipt_sha256": "417c58b675d373815effcca27db41a95cf42f3166b623721f15e9f82d8a85cc6",
+      "schema": "aurora://simulation/gumas/phase11_run_receipt/v1.0",
+      "terminal_outcome": {
+        "annihilated_side_ids": [],
+        "incapacitated_side_ids": [],
+        "local_control_side_id": null,
+        "reason_code": "hard_limit_stalemate",
+        "stalemate": true,
+        "surrendered_side_ids": [],
+        "terminated": true,
+        "termination_mode": "hard_limit_stalemate",
+        "victor_side_id": null,
+        "withdrawn_side_ids": []
+      },
+      "variant": "polity_substitution"
+    },
+    "replay": {
+      "authority": {
+        "as_of": "2026-11-28",
+        "authority_id": "AUTH-20261128-gumas-battle-runtime-run0-controls",
+        "authority_sha256": "983b4c7c5fdbc984f3788a145614deac26c4c1f33777ff9296328146551a67e8",
+        "capability": "gumas_battle_controls_execution"
+      },
+      "authority_doctrine_by_side": {
+        "loyalist": {
+          "authority_id": "org_galactic_union",
+          "authority_resolution_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+          "doctrine_q1000": {
+            "aggression": 500,
+            "ai_integration": 500,
+            "boarding_preference": 500,
+            "centralization": 520,
+            "coordination": 615,
+            "defensive_bias": 500,
+            "diplomatic_restraint": 560,
+            "risk_tolerance": 540
+          },
+          "manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc"
+        },
+        "rebel": {
+          "authority_id": "org_galactic_union",
+          "authority_resolution_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+          "doctrine_q1000": {
+            "aggression": 500,
+            "ai_integration": 500,
+            "boarding_preference": 500,
+            "centralization": 520,
+            "coordination": 615,
+            "defensive_bias": 500,
+            "diplomatic_restraint": 560,
+            "risk_tolerance": 540
+          },
+          "manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc"
+        }
+      },
+      "canon_promotion": false,
+      "engine_source_identity": {
+        "frozen_input_sources": {
+          "simulation/runtime/canonrec_tactical/resolver.py": "41023137331d2e8f3beae01ccf3c1f37afd084c44ad72665832c3b2ce1941576",
+          "simulation/runtime/gumas_physical_t0/constructor.py": "01dd9f1ed08ebc1822e42c28d038e2fff742fe8d0421c342198fbebf56208f6f"
+        },
+        "phase10_reporter": {
+          "bundle_sha256": "47dc397a41e75ccc4e44b67aef8721a2cffaff22dd625ac9e1e06aade64b5695",
+          "module_sha256": {
+            "__init__.py": "78fe5c97a0c0303a0931e06fdd293dd826a54af12081f4aa017f332f86b28e12",
+            "constants.py": "bd1945eff9a4bc92365af2d0eea5f33370afd9be102d8ccf7e95df7f98c4a2dc",
+            "exporter.py": "3c1bedb42f9eabd4aef2f673f293b026c39d2f881a7646cab10d30faa79abf00",
+            "identity.py": "249798641bb39c7f281a0b562fa8b6b07d14a4273d21512a3e70a21099b90f65",
+            "projection.py": "f2b70d68c8e9a11ed7a7b2e0e88f316d6c6a013c67d7a426703f7249ec44a11e",
+            "rendering.py": "630f1a2e3e4f4bfb028b08d09c49ba162b9c9dc66da0af114ce2054618463995",
+            "validation.py": "fc96e833abfb2fb5582d23e3e8eccaccf4dcc72e04a92060b8a6323eb7062c55"
+          }
+        },
+        "phase11_controls": {
+          "bundle_sha256": "c5c15ffbee81f2a5d99b85815c4a8e46487dbdb144450f84c59592683fb64cb5",
+          "module_sha256": {
+            "__init__.py": "56260705d3e58caadb0f5a48d7f67c53a3fa2e7a3b0e78093577efd05267628c",
+            "authority.py": "b326c00fff35e00bc43cf4b4e88cada333f4e023fd4285c3e251df4c86a7668d",
+            "constants.py": "b9d9368aeb4efab389c341dd90f89f9f2b92b17f58cc49d7a5dc0ac00ed57708",
+            "controls.py": "56fe6dae02821a5992b064c3185fbb852fa4b96093c30a99d28ca1e0132b651f",
+            "identity.py": "8b13ad14c4f067acddeaffdb72469bc69ca38e08ba7892938095f74c692a2b33",
+            "inputs.py": "193354410d241fb2f8481f19f5f9f34495d30e75e03447567fb362c39aa93329",
+            "runner.py": "caa6178e25da253b56c8f5b945712ba7e1b49169adfe9fa42d477c7b9a9af1e1"
+          }
+        },
+        "phase4_to_phase9": {
+          "phase4_command_policy": {
+            "bundle_sha256": "6b4348bf8622540986f98f573c6115f9d2f6e3055b7ba48dfad1652fd94ff67a",
+            "coefficient_table_sha256": "32c96d796ad7334598aa9b6219e22204be3c8c82db786b2d1fab65b0cb8665e3",
+            "policy_module_sha256": "ab70013e470517cfd3a3aff227c8b7059550ab876ce6dca1f8c16d8f3df4c5c1"
+          },
+          "phase5_movement_geometry": {
+            "bundle_sha256": "565ef76f94cef320a4e4e8a0cbf75a301270eeef4326975b4cf41681d46bab57",
+            "module_sha256": {
+              "constants.py": "2d9ba7639250980bc35f43a8d10301e3fc12487064b1185bd6e2578127f14dea",
+              "geometry.py": "37995ef3e26bd8c787fbb5133db7b15f7f5f0db009911dc73c022a53b212163e",
+              "kernel.py": "123d5bdecf7aeafa2b93a99a830b4ea35f7f2fc0a26249b42efc66be22cf5501"
+            }
+          },
+          "phase6_sensing_weapons": {
+            "bundle_sha256": "05e65b2ee5744809f22eeb1dd6cf5cbf637690d1fa16c177c3bbeedca74427e7",
+            "module_sha256": {
+              "constants.py": "4958641b12ec762c33197f7bf7bb299485296dd944ca5816deb0422535abdd4e",
+              "kernel.py": "df17a75eb1ad9323a1971c3955a4b0ad839489b57d00f67fd7fafcfac609db28"
+            }
+          },
+          "phase7_damage_disposition": {
+            "composite_source_sha256": "bbe6d1663ddf32b651db957434f6b1c6e86d56456c9bd93cffd8b8ecf972ed5a",
+            "damage_core_source_identity": {
+              "bundle_sha256": "ff5d94f98b0742b3d81a3230827b640777870dea8c3a6c1011d9e0e1c81dcad1",
+              "module_sha256": {
+                "constants.py": "e12f92132bd2c7d3a922d4517818b65e5c9cfa4e553fb9afb0d3b714b1064820",
+                "kernel.py": "10d664316cac8a8378ea3ebdb07449a6e043ca975a8dce5286a639ea981735a6"
+              }
+            },
+            "semantic_normalizer_source_identity": {
+              "bundle_sha256": "ad9f5ad8217813db66796cd2960d0788e140bfae1fe7ad2ce263695be2ccfefe",
+              "module_sha256": {
+                "__init__.py": "350a1311e62c8fbd90f4f1e2eb89cf78e6a809ee30189e14481e32c4b9f6589a",
+                "normalization.py": "56f83746bb20d4c39f74802f76a37c6edc7fe5f751ece186c84c1f77710e755d"
+              }
+            }
+          },
+          "phase8_morale_resolution": {
+            "composite_source_sha256": "a848e798414d98b0840a5d2dc46b88f2d0a9cc4d76028d25a47beb207990277a",
+            "phase8_boundary_source_identity": {
+              "bundle_sha256": "6096d1c1249f6c4881fceb0b39d1dbbf9c8d7598ef34996c9f1e3ea294bb6990",
+              "module_sha256": {
+                "__init__.py": "0eb7b7e334a5403d5f05c91eab8f62317338953135f578ed61389f53673895a2",
+                "boundary.py": "8699292d66ac51aabac0a547411a4ad2704cc8c3caf6c05e1ffcaac0329db34c"
+              }
+            },
+            "resolution_core_source_identity": {
+              "bundle_sha256": "52d89f6ea6c17428d747b16143f8d6bbdda03743b14bf5dea02962773bbfced7",
+              "module_sha256": {
+                "constants.py": "194fc8f5a682907570dd181275ea4581e24b6c55bbec3a57792bc30e4c1f3226",
+                "kernel.py": "37ad82fdd4fa41935040e3b9e0089df3af7acfaa2da7835dde6cb34ef8a11777"
+              }
+            }
+          },
+          "phase9_orchestrator": {
+            "bundle_sha256": "7dc348e3f205000ea9c1ed271070061e7bdd51fb2bdd6fc5b064311b88c3cab9",
+            "module_sha256": {
+              "__init__.py": "45ae2c8f4c7ad74d435ac3f56bd47846a421107da0a4c5c39d2df06b81b0b28e",
+              "constants.py": "8ff4fb53b060af592c76317f06141f6508a7bc8543216ad6005ac204242b1bb6",
+              "identity.py": "c1ccec77e984c4ffbe341d2dacd9e364c274c22e057e13527cedeadeba8b1674",
+              "live_observation.py": "edd8a151da5f096427cb7c20ca005132d035dad44f6f30370940e7e319cf792b",
+              "orchestrator.py": "ba62f55735caad13149fcc44d04a0397b2511699cf2875d92825b56ea09dd428"
+            }
+          }
+        }
+      },
+      "final_elapsed_ms": 21600000,
+      "final_state_sha256": "11809d5f1214710ea8c2e0647c25d595e9e1d543e7e4f6b2f463d48e3b375226",
+      "historical_canon_status": "non_canon_simulation_instance",
+      "input_identities": {
+        "authority_resolution_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+        "baseline_sha256": "bafb248a395135ebabf00c5ea6f8de7420daed92affb61ae9f0589a61ab0bf4c",
+        "calibration_sha256": "94a6cd7ec934d3fd4a382af051e1a6bb5994ecb5d2bf6b906102367c28592cf6",
+        "canonrec_commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+        "initial_state_sha256": "6b5e6b195aa8f7f839d69c1ba8e89f4a9b74db7946035f11a4a9c2e79581548d",
+        "resolved_manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc",
+        "run_identity_sha256": "6e5102e5da0c1d3491844b09b472043e0da33b3c130a64d9d699ab1e56400185",
+        "source_set_sha256": "a29ac678c3edfd3230f6ed2c9f86c844c8649d936e11d1d3208eb9413db38cff",
+        "t0_roster_sha256": "11d22e6de49e18768a94b4a0f43170b70ae6b0fd901dafa6d610f7f1e180ff85",
+        "t0_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec"
+      },
+      "ledger_chain_sha256": "5a67de52cad2724f02b005b0abc5fafeb3ad9982909f4d7d934f40698404ec08",
+      "ledger_genesis_sha256": "e976ddcf56fe35c0164b8a04ab33eb69b363fcd62e61d996cc35d4c5cca536b9",
+      "ledger_head_sha256": "70472a3bcf4ff8788adb3db9a6e413ef616fb3a80022d64117aa9aa1e7b75a14",
+      "macrosteps_executed": 2160,
+      "phase11_contract_id": "GUMAS_DETERMINISM_SUBSTITUTION_CONTROLS_RUN0_v1_0",
+      "phase11_version": "1.0.0",
+      "reports": {
+        "public_summary_v1": {
+          "evidence_index_sha256": "ca68a269ac86704c3506e334516bbd7dac3fe45ae7fc637a88a1298fd6411fbc",
+          "export_receipt_sha256": "5d8498c90764e9ac5a35ab4839ca70c6a92676532db259eaa6f152efa6e53935",
+          "normalized_report_sha256": "789f7771381b09b17f1d0ebbc461f1a756e671bbc1294c79a30022cd17112058",
+          "rendered_report_sha256": "39cce7ed8530e5bf12d6f96d89c99041814b9ba12653ac306ce9fa3a62b84e71"
+        },
+        "simulation_truth_v1": {
+          "evidence_index_sha256": "27f49cb6a54374a854927b75136b3f3a32b033e5b1b57ed2cc59fb73a6d92d35",
+          "export_receipt_sha256": "4bd1fab472b695a37e628a33e3462d38cbbe0f7daacd2a1cd9ac22a6cfd8c875",
+          "normalized_report_sha256": "f4ee454744ab9995bd30afdf90817a477ee3cccdc04729ef42972973304f761f",
+          "rendered_report_sha256": "df2f6dfd4dc65d38372d706e2c559d4a16bfc1097fd2e0950eb22724c5f10db4"
+        }
+      },
+      "run0_executed": false,
+      "run_receipt_sha256": "395e501d04a2f3f6a441108d07d34e750dd863577e88b46baa3d734250a8350a",
+      "schema": "aurora://simulation/gumas/phase11_run_receipt/v1.0",
+      "terminal_outcome": {
+        "annihilated_side_ids": [],
+        "incapacitated_side_ids": [],
+        "local_control_side_id": null,
+        "reason_code": "hard_limit_stalemate",
+        "stalemate": true,
+        "surrendered_side_ids": [],
+        "terminated": true,
+        "termination_mode": "hard_limit_stalemate",
+        "victor_side_id": null,
+        "withdrawn_side_ids": []
+      },
+      "variant": "control"
+    }
+  },
+  "controls": {
+    "A": {
+      "artifact_diff_paths": [],
+      "control": "A_same_input_exact_replay",
+      "macrosteps_compared": 2160,
+      "passed": true,
+      "receipt_diff_paths": []
+    },
+    "B": {
+      "checks": {
+        "aggregate_capability_changed": true,
+        "authority_identical": true,
+        "canonrec_commit_identical": true,
+        "engine_source_identity_identical": true,
+        "first_ledger_entry_changed": true,
+        "ledger_head_changed": true,
+        "only_declared_classes_changed": true,
+        "t0_changed": true
+      },
+      "control": "B_class_substitution",
+      "macrosteps_control": 2160,
+      "macrosteps_variant": 2160,
+      "passed": true,
+      "terminal_outcome_control": {
+        "annihilated_side_ids": [],
+        "incapacitated_side_ids": [],
+        "local_control_side_id": null,
+        "reason_code": "hard_limit_stalemate",
+        "stalemate": true,
+        "surrendered_side_ids": [],
+        "terminated": true,
+        "termination_mode": "hard_limit_stalemate",
+        "victor_side_id": null,
+        "withdrawn_side_ids": []
+      },
+      "terminal_outcome_identical": true,
+      "terminal_outcome_variant": {
+        "annihilated_side_ids": [],
+        "incapacitated_side_ids": [],
+        "local_control_side_id": null,
+        "reason_code": "hard_limit_stalemate",
+        "stalemate": true,
+        "surrendered_side_ids": [],
+        "terminated": true,
+        "termination_mode": "hard_limit_stalemate",
+        "victor_side_id": null,
+        "withdrawn_side_ids": []
+      }
+    },
+    "C": {
+      "checks": {
+        "authority_changed": true,
+        "canonrec_commit_identical": true,
+        "class_capability_vectors_identical": true,
+        "commander_conditioning_changed": true,
+        "doctrine_changed": true,
+        "engine_source_identity_identical": true,
+        "first_ledger_entry_changed": true,
+        "ledger_head_changed": true,
+        "roster_counts_identical": true,
+        "t0_changed": true
+      },
+      "control": "C_polity_substitution",
+      "macrosteps_control": 2160,
+      "macrosteps_variant": 2160,
+      "passed": true,
+      "terminal_outcome_control": {
+        "annihilated_side_ids": [],
+        "incapacitated_side_ids": [],
+        "local_control_side_id": null,
+        "reason_code": "hard_limit_stalemate",
+        "stalemate": true,
+        "surrendered_side_ids": [],
+        "terminated": true,
+        "termination_mode": "hard_limit_stalemate",
+        "victor_side_id": null,
+        "withdrawn_side_ids": []
+      },
+      "terminal_outcome_identical": true,
+      "terminal_outcome_variant": {
+        "annihilated_side_ids": [],
+        "incapacitated_side_ids": [],
+        "local_control_side_id": null,
+        "reason_code": "hard_limit_stalemate",
+        "stalemate": true,
+        "surrendered_side_ids": [],
+        "terminated": true,
+        "termination_mode": "hard_limit_stalemate",
+        "victor_side_id": null,
+        "withdrawn_side_ids": []
+      }
+    },
+    "schema": "aurora://simulation/gumas/phase11_control_receipt/v1.0"
+  },
+  "evidence_sha256": "c63167d31e353abfc9c5620c5bb48af99dc7e42f3f34e8a2a3de8473f46e098c",
+  "historical_canon_status": "non_canon_simulation_instance",
+  "phase11_contract_id": "GUMAS_DETERMINISM_SUBSTITUTION_CONTROLS_RUN0_v1_0",
+  "phase11_version": "1.0.0",
+  "run0_executed": true,
+  "run0_receipt": {
+    "authority": {
+      "as_of": "2026-11-28",
+      "authority_id": "AUTH-20261128-gumas-battle-runtime-run0-controls",
+      "authority_sha256": "983b4c7c5fdbc984f3788a145614deac26c4c1f33777ff9296328146551a67e8",
+      "capability": "gumas_run0_execution"
+    },
+    "authority_doctrine_by_side": {
+      "loyalist": {
+        "authority_id": "org_galactic_union",
+        "authority_resolution_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+        "doctrine_q1000": {
+          "aggression": 500,
+          "ai_integration": 500,
+          "boarding_preference": 500,
+          "centralization": 520,
+          "coordination": 615,
+          "defensive_bias": 500,
+          "diplomatic_restraint": 560,
+          "risk_tolerance": 540
+        },
+        "manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc"
+      },
+      "rebel": {
+        "authority_id": "org_galactic_union",
+        "authority_resolution_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+        "doctrine_q1000": {
+          "aggression": 500,
+          "ai_integration": 500,
+          "boarding_preference": 500,
+          "centralization": 520,
+          "coordination": 615,
+          "defensive_bias": 500,
+          "diplomatic_restraint": 560,
+          "risk_tolerance": 540
+        },
+        "manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc"
+      }
+    },
+    "canon_promotion": false,
+    "engine_source_identity": {
+      "frozen_input_sources": {
+        "simulation/runtime/canonrec_tactical/resolver.py": "41023137331d2e8f3beae01ccf3c1f37afd084c44ad72665832c3b2ce1941576",
+        "simulation/runtime/gumas_physical_t0/constructor.py": "01dd9f1ed08ebc1822e42c28d038e2fff742fe8d0421c342198fbebf56208f6f"
+      },
+      "phase10_reporter": {
+        "bundle_sha256": "47dc397a41e75ccc4e44b67aef8721a2cffaff22dd625ac9e1e06aade64b5695",
+        "module_sha256": {
+          "__init__.py": "78fe5c97a0c0303a0931e06fdd293dd826a54af12081f4aa017f332f86b28e12",
+          "constants.py": "bd1945eff9a4bc92365af2d0eea5f33370afd9be102d8ccf7e95df7f98c4a2dc",
+          "exporter.py": "3c1bedb42f9eabd4aef2f673f293b026c39d2f881a7646cab10d30faa79abf00",
+          "identity.py": "249798641bb39c7f281a0b562fa8b6b07d14a4273d21512a3e70a21099b90f65",
+          "projection.py": "f2b70d68c8e9a11ed7a7b2e0e88f316d6c6a013c67d7a426703f7249ec44a11e",
+          "rendering.py": "630f1a2e3e4f4bfb028b08d09c49ba162b9c9dc66da0af114ce2054618463995",
+          "validation.py": "fc96e833abfb2fb5582d23e3e8eccaccf4dcc72e04a92060b8a6323eb7062c55"
+        }
+      },
+      "phase11_controls": {
+        "bundle_sha256": "c5c15ffbee81f2a5d99b85815c4a8e46487dbdb144450f84c59592683fb64cb5",
+        "module_sha256": {
+          "__init__.py": "56260705d3e58caadb0f5a48d7f67c53a3fa2e7a3b0e78093577efd05267628c",
+          "authority.py": "b326c00fff35e00bc43cf4b4e88cada333f4e023fd4285c3e251df4c86a7668d",
+          "constants.py": "b9d9368aeb4efab389c341dd90f89f9f2b92b17f58cc49d7a5dc0ac00ed57708",
+          "controls.py": "56fe6dae02821a5992b064c3185fbb852fa4b96093c30a99d28ca1e0132b651f",
+          "identity.py": "8b13ad14c4f067acddeaffdb72469bc69ca38e08ba7892938095f74c692a2b33",
+          "inputs.py": "193354410d241fb2f8481f19f5f9f34495d30e75e03447567fb362c39aa93329",
+          "runner.py": "caa6178e25da253b56c8f5b945712ba7e1b49169adfe9fa42d477c7b9a9af1e1"
+        }
+      },
+      "phase4_to_phase9": {
+        "phase4_command_policy": {
+          "bundle_sha256": "6b4348bf8622540986f98f573c6115f9d2f6e3055b7ba48dfad1652fd94ff67a",
+          "coefficient_table_sha256": "32c96d796ad7334598aa9b6219e22204be3c8c82db786b2d1fab65b0cb8665e3",
+          "policy_module_sha256": "ab70013e470517cfd3a3aff227c8b7059550ab876ce6dca1f8c16d8f3df4c5c1"
+        },
+        "phase5_movement_geometry": {
+          "bundle_sha256": "565ef76f94cef320a4e4e8a0cbf75a301270eeef4326975b4cf41681d46bab57",
+          "module_sha256": {
+            "constants.py": "2d9ba7639250980bc35f43a8d10301e3fc12487064b1185bd6e2578127f14dea",
+            "geometry.py": "37995ef3e26bd8c787fbb5133db7b15f7f5f0db009911dc73c022a53b212163e",
+            "kernel.py": "123d5bdecf7aeafa2b93a99a830b4ea35f7f2fc0a26249b42efc66be22cf5501"
+          }
+        },
+        "phase6_sensing_weapons": {
+          "bundle_sha256": "05e65b2ee5744809f22eeb1dd6cf5cbf637690d1fa16c177c3bbeedca74427e7",
+          "module_sha256": {
+            "constants.py": "4958641b12ec762c33197f7bf7bb299485296dd944ca5816deb0422535abdd4e",
+            "kernel.py": "df17a75eb1ad9323a1971c3955a4b0ad839489b57d00f67fd7fafcfac609db28"
+          }
+        },
+        "phase7_damage_disposition": {
+          "composite_source_sha256": "bbe6d1663ddf32b651db957434f6b1c6e86d56456c9bd93cffd8b8ecf972ed5a",
+          "damage_core_source_identity": {
+            "bundle_sha256": "ff5d94f98b0742b3d81a3230827b640777870dea8c3a6c1011d9e0e1c81dcad1",
+            "module_sha256": {
+              "constants.py": "e12f92132bd2c7d3a922d4517818b65e5c9cfa4e553fb9afb0d3b714b1064820",
+              "kernel.py": "10d664316cac8a8378ea3ebdb07449a6e043ca975a8dce5286a639ea981735a6"
+            }
+          },
+          "semantic_normalizer_source_identity": {
+            "bundle_sha256": "ad9f5ad8217813db66796cd2960d0788e140bfae1fe7ad2ce263695be2ccfefe",
+            "module_sha256": {
+              "__init__.py": "350a1311e62c8fbd90f4f1e2eb89cf78e6a809ee30189e14481e32c4b9f6589a",
+              "normalization.py": "56f83746bb20d4c39f74802f76a37c6edc7fe5f751ece186c84c1f77710e755d"
+            }
+          }
+        },
+        "phase8_morale_resolution": {
+          "composite_source_sha256": "a848e798414d98b0840a5d2dc46b88f2d0a9cc4d76028d25a47beb207990277a",
+          "phase8_boundary_source_identity": {
+            "bundle_sha256": "6096d1c1249f6c4881fceb0b39d1dbbf9c8d7598ef34996c9f1e3ea294bb6990",
+            "module_sha256": {
+              "__init__.py": "0eb7b7e334a5403d5f05c91eab8f62317338953135f578ed61389f53673895a2",
+              "boundary.py": "8699292d66ac51aabac0a547411a4ad2704cc8c3caf6c05e1ffcaac0329db34c"
+            }
+          },
+          "resolution_core_source_identity": {
+            "bundle_sha256": "52d89f6ea6c17428d747b16143f8d6bbdda03743b14bf5dea02962773bbfced7",
+            "module_sha256": {
+              "constants.py": "194fc8f5a682907570dd181275ea4581e24b6c55bbec3a57792bc30e4c1f3226",
+              "kernel.py": "37ad82fdd4fa41935040e3b9e0089df3af7acfaa2da7835dde6cb34ef8a11777"
+            }
+          }
+        },
+        "phase9_orchestrator": {
+          "bundle_sha256": "7dc348e3f205000ea9c1ed271070061e7bdd51fb2bdd6fc5b064311b88c3cab9",
+          "module_sha256": {
+            "__init__.py": "45ae2c8f4c7ad74d435ac3f56bd47846a421107da0a4c5c39d2df06b81b0b28e",
+            "constants.py": "8ff4fb53b060af592c76317f06141f6508a7bc8543216ad6005ac204242b1bb6",
+            "identity.py": "c1ccec77e984c4ffbe341d2dacd9e364c274c22e057e13527cedeadeba8b1674",
+            "live_observation.py": "edd8a151da5f096427cb7c20ca005132d035dad44f6f30370940e7e319cf792b",
+            "orchestrator.py": "ba62f55735caad13149fcc44d04a0397b2511699cf2875d92825b56ea09dd428"
+          }
+        }
+      }
+    },
+    "final_elapsed_ms": 21600000,
+    "final_state_sha256": "11809d5f1214710ea8c2e0647c25d595e9e1d543e7e4f6b2f463d48e3b375226",
+    "historical_canon_status": "non_canon_simulation_instance",
+    "input_identities": {
+      "authority_resolution_sha256": "21c7a59d7f622dbfd21d6c1d6b5bd9943cc4efd2dd91c6f37f168238d4eb2de4",
+      "baseline_sha256": "bafb248a395135ebabf00c5ea6f8de7420daed92affb61ae9f0589a61ab0bf4c",
+      "calibration_sha256": "94a6cd7ec934d3fd4a382af051e1a6bb5994ecb5d2bf6b906102367c28592cf6",
+      "canonrec_commit": "dc629a566b2f42fa1c652140b9eef72a4fb0d58a",
+      "initial_state_sha256": "6b5e6b195aa8f7f839d69c1ba8e89f4a9b74db7946035f11a4a9c2e79581548d",
+      "resolved_manifest_sha256": "cd8a22b8d8721106ab94f5f881685cbd8f58c95beeb8f2d86853e09fd61bdfdc",
+      "run_identity_sha256": "6e5102e5da0c1d3491844b09b472043e0da33b3c130a64d9d699ab1e56400185",
+      "source_set_sha256": "a29ac678c3edfd3230f6ed2c9f86c844c8649d936e11d1d3208eb9413db38cff",
+      "t0_roster_sha256": "11d22e6de49e18768a94b4a0f43170b70ae6b0fd901dafa6d610f7f1e180ff85",
+      "t0_sha256": "47d31a29d882e565d15ba074e84c999952a689f06242362e14210e8777a548ec"
+    },
+    "ledger_chain_sha256": "5a67de52cad2724f02b005b0abc5fafeb3ad9982909f4d7d934f40698404ec08",
+    "ledger_genesis_sha256": "e976ddcf56fe35c0164b8a04ab33eb69b363fcd62e61d996cc35d4c5cca536b9",
+    "ledger_head_sha256": "70472a3bcf4ff8788adb3db9a6e413ef616fb3a80022d64117aa9aa1e7b75a14",
+    "macrosteps_executed": 2160,
+    "phase11_contract_id": "GUMAS_DETERMINISM_SUBSTITUTION_CONTROLS_RUN0_v1_0",
+    "phase11_version": "1.0.0",
+    "reports": {
+      "public_summary_v1": {
+        "evidence_index_sha256": "ca68a269ac86704c3506e334516bbd7dac3fe45ae7fc637a88a1298fd6411fbc",
+        "export_receipt_sha256": "5d8498c90764e9ac5a35ab4839ca70c6a92676532db259eaa6f152efa6e53935",
+        "normalized_report_sha256": "789f7771381b09b17f1d0ebbc461f1a756e671bbc1294c79a30022cd17112058",
+        "rendered_report_sha256": "39cce7ed8530e5bf12d6f96d89c99041814b9ba12653ac306ce9fa3a62b84e71"
+      },
+      "simulation_truth_v1": {
+        "evidence_index_sha256": "27f49cb6a54374a854927b75136b3f3a32b033e5b1b57ed2cc59fb73a6d92d35",
+        "export_receipt_sha256": "4bd1fab472b695a37e628a33e3462d38cbbe0f7daacd2a1cd9ac22a6cfd8c875",
+        "normalized_report_sha256": "f4ee454744ab9995bd30afdf90817a477ee3cccdc04729ef42972973304f761f",
+        "rendered_report_sha256": "df2f6dfd4dc65d38372d706e2c559d4a16bfc1097fd2e0950eb22724c5f10db4"
+      }
+    },
+    "run0_executed": true,
+    "run_receipt_sha256": "a00cf1170b58be68b68b539d378aa42da8d50455295c02eec2a4a138099148a4",
+    "schema": "aurora://simulation/gumas/phase11_run_receipt/v1.0",
+    "terminal_outcome": {
+      "annihilated_side_ids": [],
+      "incapacitated_side_ids": [],
+      "local_control_side_id": null,
+      "reason_code": "hard_limit_stalemate",
+      "stalemate": true,
+      "surrendered_side_ids": [],
+      "terminated": true,
+      "termination_mode": "hard_limit_stalemate",
+      "victor_side_id": null,
+      "withdrawn_side_ids": []
+    },
+    "variant": "control"
+  },
+  "schema": "aurora://simulation/gumas/phase11_controls_evidence/v1.0"
+}

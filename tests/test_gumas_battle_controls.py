@@ -164,8 +164,9 @@ def test_forbidden_input_delta_fails_closed(variant):
 
 
 def test_substitution_without_effect_fails_closed():
+    unchanged = _documents(VARIANT_CONTROL)
     with pytest.raises(Phase11Error, match="no input delta"):
-        check_input_deltas(VARIANT_CLASS, _documents(VARIANT_CONTROL))
+        check_input_deltas(VARIANT_CLASS, unchanged)
 
 
 def test_json_diff_paths_reports_leaf_paths():

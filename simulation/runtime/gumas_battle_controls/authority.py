@@ -67,10 +67,7 @@ def seal_authority(record: Mapping[str, Any]) -> dict[str, Any]:
     return sealed
 
 
-def _check(authority: Any, capability: str, as_of: str) -> str | None:
-    """Return a refusal reason, or None when execution is authorized."""
-    if capability not in CAPABILITIES:
-        return f"unknown capability: {capability}"
+def _structure_reason(authority: Any) -> str | None:
     if authority is None:
         return "execution authority absent"
     if not isinstance(authority, Mapping):
@@ -83,6 +80,10 @@ def _check(authority: Any, capability: str, as_of: str) -> str | None:
         return "execution authority names a different contract"
     if str(authority.get("authority_sha256") or "") != hash_without_field(authority, "authority_sha256"):
         return "execution authority hash mismatch"
+    return None
+
+
+def _grant_reason(authority: Mapping[str, Any], capability: str) -> str | None:
     scope = authority.get("scope")
     if not isinstance(scope, Mapping) or set(scope) != SCOPE_FIELDS or dict(scope) != expected_scope():
         return "execution authority scope mismatch"
@@ -96,6 +97,10 @@ def _check(authority: Any, capability: str, as_of: str) -> str | None:
     evidence = authority.get("evidence")
     if not isinstance(evidence, list) or not evidence:
         return "execution authority lacks owner evidence"
+    return None
+
+
+def _window_reason(authority: Mapping[str, Any], as_of: str) -> str | None:
     try:
         granted = _date(authority.get("granted_on"), "granted_on")
         expires = _date(authority.get("expires_on"), "expires_on")
@@ -107,6 +112,17 @@ def _check(authority: Any, capability: str, as_of: str) -> str | None:
     if today > expires:
         return "execution authority expired"
     return None
+
+
+def _check(authority: Any, capability: str, as_of: str) -> str | None:
+    """Return a refusal reason, or None when execution is authorized."""
+    if capability not in CAPABILITIES:
+        return f"unknown capability: {capability}"
+    return (
+        _structure_reason(authority)
+        or _grant_reason(authority, capability)
+        or _window_reason(authority, as_of)
+    )
 
 
 def refusal_receipt(authority: Any, capability: str, as_of: str, reason: str) -> dict[str, Any]:

@@ -45,13 +45,7 @@ def _propose(engine: CausalEngine, *, expires_s: int) -> str:
         prepared, cause="actor:local-proposal").effect["motion_id"]
 
 
-def run_distributed(protocol: str = "veto", *, remote_approves: bool = True) -> dict:
-    if protocol not in ("delegated", "unanimous", "veto"):
-        raise ValueError("unsupported synthetic P5 governance protocol")
-    engine = CausalEngine(
-        distributed_fixture(protocol),
-        run_id=f"synthetic-p5-{protocol}-{remote_approves}",
-    )
+def _open_motion(engine: CausalEngine, protocol: str) -> str:
     engine.disrupt_route("corridor_a", 4, cause="fixture:p5-cargo-capacity")
     motion_id = _propose(engine, expires_s=28)
     if protocol != "delegated":
@@ -59,7 +53,10 @@ def run_distributed(protocol: str = "veto", *, remote_approves: bool = True) -> 
             motion_id, "governor", True, cause="actor:governor-consent")
         engine.cast_relief_vote(
             motion_id, "member_a", True, cause="actor:member-a-consent")
+    return motion_id
 
+
+def _observe_notice(engine: CausalEngine, motion_id: str) -> dict:
     engine.send_policy_notice(
         motion_id, "governor", "member_b", "corridor_a",
         cause="actor:notify-distant-member",
@@ -68,7 +65,15 @@ def run_distributed(protocol: str = "veto", *, remote_approves: bool = True) -> 
     before_notice = engine.actor_view("member_b")
     before_notice_council = institution_view(engine, "relief_council")
     engine.advance_to(4)
-    after_notice = engine.actor_view("member_b")
+    return {
+        "before_notice": before_notice,
+        "before_notice_council": before_notice_council,
+        "after_notice": engine.actor_view("member_b"),
+    }
+
+
+def _observe_remote_ballot(engine: CausalEngine, motion_id: str,
+                           remote_approves: bool) -> dict:
     remote_sent = engine.submit_remote_ballot(
         motion_id, "member_b", remote_approves, "return_signal",
         cause="actor:remote-deliberated-choice",
@@ -76,7 +81,15 @@ def run_distributed(protocol: str = "veto", *, remote_approves: bool = True) -> 
     engine.advance_to(7)
     before_ballot = distributed_council_view(engine, "relief_council")
     engine.advance_to(8)
-    counted_council = distributed_council_view(engine, "relief_council")
+    return {
+        "remote_ballot_sent": remote_sent.effect,
+        "before_ballot": before_ballot,
+        "counted_council": distributed_council_view(engine, "relief_council"),
+    }
+
+
+def _observe_outcome_report(engine: CausalEngine, motion_id: str,
+                            remote_approves: bool) -> dict:
     if remote_approves:
         engine.ratify_relief(
             motion_id, "governor", cause="institution:received-required-consent")
@@ -90,7 +103,23 @@ def run_distributed(protocol: str = "veto", *, remote_approves: bool = True) -> 
     engine.advance_to(11)
     observer_before_report = engine.actor_view("observer")
     engine.advance_to(12)
-    observer_after_report = engine.actor_view("observer")
+    return {
+        "observer_before_report": observer_before_report,
+        "observer_after_report": engine.actor_view("observer"),
+    }
+
+
+def run_distributed(protocol: str = "veto", *, remote_approves: bool = True) -> dict:
+    if protocol not in ("delegated", "unanimous", "veto"):
+        raise ValueError("unsupported synthetic P5 governance protocol")
+    engine = CausalEngine(
+        distributed_fixture(protocol),
+        run_id=f"synthetic-p5-{protocol}-{remote_approves}",
+    )
+    motion_id = _open_motion(engine, protocol)
+    notice = _observe_notice(engine, motion_id)
+    ballot = _observe_remote_ballot(engine, motion_id, remote_approves)
+    report = _observe_outcome_report(engine, motion_id, remote_approves)
     engine.advance_to(20)
     return {
         "schema": "gumas.unified.distributed_governance_scenario.p5",
@@ -103,14 +132,9 @@ def run_distributed(protocol: str = "veto", *, remote_approves: bool = True) -> 
             "remote_member_location": "fixture_frontier",
             "overlapping_membership": ["relief_council", "frontier_assembly"],
         },
-        "before_notice": before_notice,
-        "before_notice_council": before_notice_council,
-        "after_notice": after_notice,
-        "remote_ballot_sent": remote_sent.effect,
-        "before_ballot": before_ballot,
-        "counted_council": counted_council,
-        "observer_before_report": observer_before_report,
-        "observer_after_report": observer_after_report,
+        **notice,
+        **ballot,
+        **report,
         "at_20s": {
             "origin": engine.site_view("union_depot"),
             "destination": engine.site_view("frontier_port"),

@@ -20,6 +20,28 @@ _HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 _ACE_SOURCES = ("root", "CanonRec", "aurora-cloudbank-symbolic-main")
 _PHASE9_SCHEMA = "aurora://simulation/gumas/phase9_ledger_entry/v1.0"
 _PHASE9_CONTRACT = "GUMAS_LIVE_OBSERVATION_ORCHESTRATOR_LEDGER_v1_0"
+_ACE_WORLD_READY = {
+    "status": "ready", "world_scope": "isolated_aurora_world",
+    "canonical_workspace_authority": False,
+}
+_ACE_RETRIEVAL = {
+    "world_scope": "isolated_aurora_world", "operation": "retrieve",
+    "status": "RETRIEVED_CANON",
+}
+_PHASE9_PROVENANCE = {
+    "schema": _PHASE9_SCHEMA, "phase9_contract_id": _PHASE9_CONTRACT,
+    "phase9_version": "1.0.0", "canonical_json_profile": "aurora-canonical-json-v1",
+    "historical_canon_status": "non_canon_simulation_instance",
+}
+_PHASE9_NOT_EXECUTED = {"reporter_invoked": False, "run0_executed": False}
+_SUPPORTED_PROJECTIONS = frozenset({
+    "gumas.unified.ace_identity_reference.p1",
+    "gumas.unified.phase9_ledger_reference.p1",
+    "gumas.unified.phase9_acceptance_reference.p1",
+})
+_PROJECTION_AUTHORITIES = (
+    "unverified_external_observation_only", "external_acceptance_claim_only",
+)
 _PHASE9_HASH_FIELDS = (
     "run_identity_sha256", "t0_roster_sha256",
     "previous_committed_state_sha256", "phase5_state_sha256",
@@ -42,6 +64,31 @@ def canonical_sha256(payload: Any) -> str:
     except (TypeError, ValueError, OverflowError) as exc:
         raise EvidenceError("evidence is not canonical JSON") from exc
     return hashlib.sha256(data).hexdigest()
+
+
+def digest_without(payload: Mapping[str, Any], excluded: str) -> str:
+    """canonical_sha256 of a mapping with its own self-digest field removed."""
+    return canonical_sha256({k: v for k, v in payload.items() if k != excluded})
+
+
+def fields_match(source: Mapping[str, Any], required: Mapping[str, Any]) -> bool:
+    """True when each required field holds its value, checked in order.
+
+    A required ``True``/``False`` is an identity check (``0`` is not ``False``);
+    any other required value is compared with ``==``.
+    """
+    for key, want in required.items():
+        have = source.get(key)
+        if want is True or want is False:
+            if have is not want:
+                return False
+        elif have != want:
+            return False
+    return True
+
+
+def is_synthetic_engine(engine: Any) -> bool:
+    return isinstance(engine, CausalEngine) and engine.run_id.startswith("synthetic-")
 
 
 def _object(value: Any, name: str) -> Mapping[str, Any]:
@@ -78,6 +125,17 @@ def _hash_map(value: Any, name: str) -> dict[str, str]:
             if _string(k, f"{name} key")}
 
 
+def _ace_source_pins(world: Mapping[str, Any]) -> dict[str, str]:
+    sources = _object(world.get("sources"), "ACE world sources")
+    if not all(src in sources for src in _ACE_SOURCES):
+        raise EvidenceError("ACE world lacks required source repository pins")
+    return {
+        src: _sha(_object(sources[src], src).get("commit"),
+                  f"ACE source {src}", length=40)
+        for src in _ACE_SOURCES
+    }
+
+
 def observe_ace_identity(world_status: Mapping[str, Any],
                          character_response: Mapping[str, Any]) -> dict[str, Any]:
     """Project exactly one retrieved ACE sandbox identity, never create or promote.
@@ -89,14 +147,9 @@ def observe_ace_identity(world_status: Mapping[str, Any],
     world = _object(world_status, "ACE world_status")
     response = _object(character_response, "ACE character_response")
     world_id = _string(world.get("world_id"), "world_id")
-    if (world.get("status") != "ready"
-            or world.get("world_scope") != "isolated_aurora_world"
-            or world.get("canonical_workspace_authority") is not False):
+    if not fields_match(world, _ACE_WORLD_READY):
         raise EvidenceError("ACE world must be a verified isolated read-only source")
-    if (response.get("world_id") != world_id
-            or response.get("world_scope") != "isolated_aurora_world"
-            or response.get("operation") != "retrieve"
-            or response.get("status") != "RETRIEVED_CANON"):
+    if not fields_match(response, {"world_id": world_id, **_ACE_RETRIEVAL}):
         raise EvidenceError("ACE response must be a successful same-world retrieval")
     if response.get("origin") not in ("sandbox_created", "inherited_canon"):
         raise EvidenceError("ACE identity origin is not established")
@@ -108,14 +161,7 @@ def observe_ace_identity(world_status: Mapping[str, Any],
     determination_id = _string(response.get("determination_id"),
                                 "determination_id")
     _string(response.get("request_id"), "request_id")
-    sources = _object(world.get("sources"), "ACE world sources")
-    if not all(src in sources for src in _ACE_SOURCES):
-        raise EvidenceError("ACE world lacks required source repository pins")
-    source_pins = {
-        src: _sha(_object(sources[src], src).get("commit"),
-                  f"ACE source {src}", length=40)
-        for src in _ACE_SOURCES
-    }
+    source_pins = _ace_source_pins(world)
     canon_head = _sha(world.get("canon_head"), "sandbox canon head", length=40)
     result = {
         "schema": "gumas.unified.ace_identity_reference.p1",
@@ -135,27 +181,14 @@ def observe_ace_identity(world_status: Mapping[str, Any],
     return result
 
 
-def _validated_phase9_entry(raw: Any) -> Mapping[str, Any]:
-    entry = _object(raw, "Phase-9 ledger entry")
-    if (entry.get("schema") != _PHASE9_SCHEMA
-            or entry.get("phase9_contract_id") != _PHASE9_CONTRACT
-            or entry.get("phase9_version") != "1.0.0"
-            or entry.get("canonical_json_profile") != "aurora-canonical-json-v1"
-            or entry.get("historical_canon_status") != "non_canon_simulation_instance"):
-        raise EvidenceError("Phase-9 schema, provenance or authority mismatch")
-    if entry.get("reporter_invoked") is not False or entry.get("run0_executed") is not False:
-        raise EvidenceError("Phase-9 unapproved execution or reporter evidence")
+def _require_phase9_source_identities(entry: Mapping[str, Any]) -> None:
     if not _object(entry.get("phase9_source_identity"), "Phase-9 source identity"):
         raise EvidenceError("missing Phase-9 source identity")
     if not _object(entry.get("accepted_source_identities"), "accepted source identities"):
         raise EvidenceError("missing accepted source identities")
-    for field in _PHASE9_HASH_FIELDS:
-        _sha(entry.get(field), field)
-    _integer(entry.get("macrostep_index"), "macrostep_index", minimum=1)
-    start = _integer(entry.get("start_elapsed_ms"), "start_elapsed_ms")
-    end = _integer(entry.get("end_elapsed_ms"), "end_elapsed_ms")
-    if end <= start:
-        raise EvidenceError("Phase-9 time must advance")
+
+
+def _validate_phase9_hash_maps(entry: Mapping[str, Any]) -> None:
     observations = _hash_map(entry.get("live_observation_sha256_by_side"),
                              "observation hashes")
     receipts = _hash_map(entry.get("live_observation_receipt_sha256_by_side"),
@@ -163,13 +196,56 @@ def _validated_phase9_entry(raw: Any) -> Mapping[str, Any]:
     if set(observations) != set(receipts):
         raise EvidenceError("Phase-9 observation side identities mismatch")
     _hash_map(entry.get("phase4_decision_sha256_by_fleet"), "decision hashes")
+
+
+def _validated_phase9_entry(raw: Any) -> Mapping[str, Any]:
+    entry = _object(raw, "Phase-9 ledger entry")
+    if not fields_match(entry, _PHASE9_PROVENANCE):
+        raise EvidenceError("Phase-9 schema, provenance or authority mismatch")
+    if not fields_match(entry, _PHASE9_NOT_EXECUTED):
+        raise EvidenceError("Phase-9 unapproved execution or reporter evidence")
+    _require_phase9_source_identities(entry)
+    for field in _PHASE9_HASH_FIELDS:
+        _sha(entry.get(field), field)
+    _integer(entry.get("macrostep_index"), "macrostep_index", minimum=1)
+    start = _integer(entry.get("start_elapsed_ms"), "start_elapsed_ms")
+    end = _integer(entry.get("end_elapsed_ms"), "end_elapsed_ms")
+    if end <= start:
+        raise EvidenceError("Phase-9 time must advance")
+    _validate_phase9_hash_maps(entry)
     outcome = _object(entry.get("terminal_outcome"), "terminal outcome")
     _string(outcome.get("termination_mode"), "terminal outcome mode")
     _sha(entry.get("ledger_entry_sha256"), "ledger entry digest")
-    hashed = {k: v for k, v in entry.items() if k != "ledger_entry_sha256"}
-    if entry["ledger_entry_sha256"] != canonical_sha256(hashed):
+    if entry["ledger_entry_sha256"] != digest_without(entry, "ledger_entry_sha256"):
         raise EvidenceError("Phase-9 ledger entry digest mismatch")
     return entry
+
+
+def _phase9_genesis(first: Mapping[str, Any]) -> bool:
+    return (first["macrostep_index"] == 1
+            and first["start_elapsed_ms"] == 0
+            and first.get("previous_ledger_entry_sha256") == "GENESIS")
+
+
+def _phase9_linked(entry: Mapping[str, Any], prev: Mapping[str, Any], index: int) -> bool:
+    return (entry["macrostep_index"] == index
+            and entry.get("previous_ledger_entry_sha256") == prev["ledger_entry_sha256"]
+            and entry["previous_committed_state_sha256"]
+            == prev["phase8_next_state_sha256"]
+            and entry["start_elapsed_ms"] == prev["end_elapsed_ms"])
+
+
+def _validate_phase9_chain(validated: list[Mapping[str, Any]]) -> None:
+    first = prev = validated[0]
+    for index, entry in enumerate(validated[1:], 2):
+        if not _phase9_linked(entry, prev, index):
+            raise EvidenceError("Phase-9 ledger linkage or time continuity failed")
+        if (entry["run_identity_sha256"] != first["run_identity_sha256"]
+                or entry["t0_roster_sha256"] != first["t0_roster_sha256"]):
+            raise EvidenceError("Phase-9 run or roster identity drift")
+        if prev["terminal_outcome"]["termination_mode"] != "ongoing":
+            raise EvidenceError("Phase-9 entry follows a terminal outcome")
+        prev = entry
 
 
 def observe_phase9_ledger(entries: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
@@ -184,24 +260,9 @@ def observe_phase9_ledger(entries: Sequence[Mapping[str, Any]]) -> dict[str, Any
         raise EvidenceError("Phase-9 evidence needs 1..128 ledger entries")
     validated = [_validated_phase9_entry(e) for e in entries]
     first = validated[0]
-    if (first["macrostep_index"] != 1
-            or first["start_elapsed_ms"] != 0
-            or first.get("previous_ledger_entry_sha256") != "GENESIS"):
+    if not _phase9_genesis(first):
         raise EvidenceError("Phase-9 ledger requires a genesis-bound first entry")
-    prev = first
-    for index, entry in enumerate(validated[1:], 2):
-        if (entry["macrostep_index"] != index
-                or entry.get("previous_ledger_entry_sha256") != prev["ledger_entry_sha256"]
-                or entry["previous_committed_state_sha256"]
-                != prev["phase8_next_state_sha256"]
-                or entry["start_elapsed_ms"] != prev["end_elapsed_ms"]):
-            raise EvidenceError("Phase-9 ledger linkage or time continuity failed")
-        if (entry["run_identity_sha256"] != first["run_identity_sha256"]
-                or entry["t0_roster_sha256"] != first["t0_roster_sha256"]):
-            raise EvidenceError("Phase-9 run or roster identity drift")
-        if prev["terminal_outcome"]["termination_mode"] != "ongoing":
-            raise EvidenceError("Phase-9 entry follows a terminal outcome")
-        prev = entry
+    _validate_phase9_chain(validated)
     last = validated[-1]
     output = {
         "schema": "gumas.unified.phase9_ledger_reference.p1",
@@ -223,6 +284,16 @@ def observe_phase9_ledger(entries: Sequence[Mapping[str, Any]]) -> dict[str, Any
     return output
 
 
+def _acceptance_in_scope(src: Mapping[str, Any], contract: Mapping[str, Any],
+                         witness: Mapping[str, Any]) -> bool:
+    return (fields_match(src, {"phase": 9, "status": "PASS",
+                               "historical_canon_status": "non_canon_simulation_instance"})
+            and fields_match(contract, {"contract_id": _PHASE9_CONTRACT, "version": "1.0.0"})
+            and fields_match(src, {"run0_executed": False, "run0_remains_blocked": True})
+            and fields_match(witness, {"run0_executed": False, "reporter_invoked": False,
+                                       "macrosteps_executed": 1}))
+
+
 def observe_phase9_acceptance(receipt: Mapping[str, Any]) -> dict[str, Any]:
     """Summarize a Phase-9 acceptance *claim*, not an executable ledger.
 
@@ -233,15 +304,7 @@ def observe_phase9_acceptance(receipt: Mapping[str, Any]) -> dict[str, Any]:
     contract = _object(src.get("contract"), "Phase-9 acceptance contract")
     witness = _object(src.get("accepted_one_step_witness"),
                       "Phase-9 acceptance witness")
-    if (src.get("phase") != 9 or src.get("status") != "PASS"
-            or src.get("historical_canon_status") != "non_canon_simulation_instance"
-            or contract.get("contract_id") != _PHASE9_CONTRACT
-            or contract.get("version") != "1.0.0"
-            or src.get("run0_executed") is not False
-            or src.get("run0_remains_blocked") is not True
-            or witness.get("run0_executed") is not False
-            or witness.get("reporter_invoked") is not False
-            or witness.get("macrosteps_executed") != 1):
+    if not _acceptance_in_scope(src, contract, witness):
         raise EvidenceError("Phase-9 acceptance claim not in permitted one-step scope")
     for field in ("ledger_entry_sha256", "run_identity_sha256",
                   "t0_roster_sha256", "source_t0_sha256"):
@@ -265,6 +328,20 @@ def observe_phase9_acceptance(receipt: Mapping[str, Any]) -> dict[str, Any]:
     return output
 
 
+def _validated_projection_view(raw: Any, seen: set[str]) -> dict[str, Any]:
+    view = _object(raw, "external projection")
+    name = view.get("schema")
+    if name not in _SUPPORTED_PROJECTIONS or name in seen:
+        raise EvidenceError("unknown or duplicate external observation")
+    if view.get("authority") not in _PROJECTION_AUTHORITIES:
+        raise EvidenceError("external authority assertion refused")
+    digest = _sha(view.get("projection_sha256"), "projection digest")
+    if digest != digest_without(view, "projection_sha256"):
+        raise EvidenceError("external projection mutated after validation")
+    seen.add(name)
+    return deepcopy(dict(view))
+
+
 def operator_evidence_frame(engine: CausalEngine,
                             *projections: Mapping[str, Any]) -> dict[str, Any]:
     """Review-only combination. Never inject external evidence into agent beliefs.
@@ -277,27 +354,8 @@ def operator_evidence_frame(engine: CausalEngine,
     before = engine.state.digest()
     if not engine.evidence()["ledger_valid"]:
         raise EvidenceError("local kernel evidence is not chain-consistent")
-    supported = {
-        "gumas.unified.ace_identity_reference.p1",
-        "gumas.unified.phase9_ledger_reference.p1",
-        "gumas.unified.phase9_acceptance_reference.p1",
-    }
-    records: list[dict[str, Any]] = []
     seen: set[str] = set()
-    for raw in projections:
-        view = _object(raw, "external projection")
-        name = view.get("schema")
-        if name not in supported or name in seen:
-            raise EvidenceError("unknown or duplicate external observation")
-        if view.get("authority") not in (
-            "unverified_external_observation_only", "external_acceptance_claim_only"):
-            raise EvidenceError("external authority assertion refused")
-        digest = _sha(view.get("projection_sha256"), "projection digest")
-        if digest != canonical_sha256({k: v for k, v in view.items()
-                                      if k != "projection_sha256"}):
-            raise EvidenceError("external projection mutated after validation")
-        seen.add(name)
-        records.append(deepcopy(dict(view)))
+    records = [_validated_projection_view(raw, seen) for raw in projections]
     records.sort(key=lambda row: row["schema"])
     after = engine.state.digest()
     if before != after:

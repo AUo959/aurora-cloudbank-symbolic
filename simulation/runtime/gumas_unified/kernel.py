@@ -32,6 +32,103 @@ def _travel_seconds(distance_km: int, speed_km_s: int) -> int:
     return (distance_km + speed_km_s - 1) // speed_km_s
 
 
+def _add_counts(target: dict[str, int], counts: dict[str, int]) -> None:
+    for commodity, amount in counts.items():
+        target[commodity] = target.get(commodity, 0) + amount
+
+
+def _claim_scheduled(world: Universe, event: ScheduledEvent) -> None:
+    matches = [e for e in world.pending if e.scheduled_id == event.scheduled_id]
+    if len(matches) != 1:
+        raise AssertionError("scheduled event missing or duplicated")
+    world.pending.remove(matches[0])
+    world.time_s = event.due_s
+
+
+def _deliver_cargo(world: Universe, event: ScheduledEvent) -> dict[str, Any]:
+    shipment = world.in_transit.pop(event.payload["shipment_id"])
+    dest = world.sites[shipment.destination_id]
+    dest.inventory[shipment.cargo_name] = (
+        dest.inventory.get(shipment.cargo_name, 0) + shipment.amount)
+    return {"shipment_id": shipment.shipment_id,
+            "destination": dest.site_id,
+            "delivered": shipment.amount,
+            "commodity": shipment.cargo_name}
+
+
+def _deliver_report(world: Universe, event: ScheduledEvent) -> dict[str, Any]:
+    payload = dict(event.payload)
+    actor = world.actors[payload["recipient"]]
+    actor.received_reports.append({
+        "from": payload["sender"], "text": payload["text"],
+        "sent_s": payload["sent_s"], "received_s": world.time_s,
+        "route_id": payload["route_id"]})
+    return {"recipient": actor.actor_id, "from": payload["sender"],
+            "sent_s": payload["sent_s"]}
+
+
+def _deliver_policy_notice(world: Universe, event: ScheduledEvent) -> dict[str, Any]:
+    from .distributed_actions import deliver_policy_notice
+
+    return deliver_policy_notice(world, event.payload)
+
+
+def _deliver_policy_ballot(world: Universe, event: ScheduledEvent) -> dict[str, Any]:
+    from .distributed_actions import deliver_remote_ballot
+
+    return deliver_remote_ballot(world, event.payload["ballot_id"])
+
+
+def _deliver_federated(world: Universe, event: ScheduledEvent) -> dict[str, Any]:
+    from .federated_actions import deliver_federated_event
+
+    return deliver_federated_event(world, event.kind, event.payload)
+
+
+def _deliver_policy_expiry(world: Universe, event: ScheduledEvent) -> dict[str, Any]:
+    motion = world.relief_motions[event.payload["motion_id"]]
+    old_status = motion.status
+    returned = motion.escrow_amount
+    if returned:
+        institution = world.institutions[motion.institution_id]
+        site = world.sites[institution.seat_site_id]
+        site.inventory[motion.commodity] = (
+            site.inventory.get(motion.commodity, 0) + returned)
+        motion.escrow_amount = 0
+    if motion.status in ("proposed", "ratified"):
+        motion.status = "expired"
+        motion.approved_at_s = None
+    return {"motion_id": motion.motion_id,
+            "previous_status": old_status, "status": motion.status,
+            "resource_released": returned,
+            "commodity": motion.commodity,
+            "canonical_authority": False}
+
+
+_DELIVERY_HANDLERS: dict[str, Callable[[Universe, ScheduledEvent], dict[str, Any]]] = {
+    "cargo_arrival": _deliver_cargo,
+    "report_arrival": _deliver_report,
+    "policy_notice_arrival": _deliver_policy_notice,
+    "policy_ballot_arrival": _deliver_policy_ballot,
+    "policy_expiry": _deliver_policy_expiry,
+    **dict.fromkeys((
+        "charter_offer_arrival", "charter_response_arrival",
+        "charter_expiry", "association_confirm_arrival",
+        "mandate_offer_arrival", "mandate_vote_arrival",
+        "mandate_expiry",
+    ), _deliver_federated),
+}
+
+
+def _deliver_scheduled(world: Universe, event: ScheduledEvent) -> dict[str, Any]:
+    """Apply one due scheduled event inside a candidate world."""
+    _claim_scheduled(world, event)
+    handler = _DELIVERY_HANDLERS.get(event.kind)
+    if handler is None:
+        raise AssertionError("unsupported scheduled event")
+    return handler(world, event)
+
+
 @dataclass(frozen=True)
 class Receipt:
     number: int
@@ -371,80 +468,22 @@ class CausalEngine:
                     "arrival_s": due, "energy_to_heat_j": energy}
         return self._commit("report_sent", actor_id, cause, change)
 
+    def _next_due(self, time_s: int) -> ScheduledEvent | None:
+        ready = sorted((e for e in self._state.pending if e.due_s <= time_s),
+                       key=lambda e: (e.due_s, e.order))
+        return ready[0] if ready else None
+
     def advance_to(self, time_s: int) -> list[Receipt]:
         if type(time_s) is not int or time_s < self._state.time_s:
             raise FeasibilityError("simulation clock cannot run backward")
         committed: list[Receipt] = []
         while True:
-            ready = sorted((e for e in self._state.pending if e.due_s <= time_s),
-                           key=lambda e: (e.due_s, e.order))
-            if not ready:
+            event = self._next_due(time_s)
+            if event is None:
                 break
-            event = ready[0]
-
-            def deliver(world: Universe) -> dict[str, Any]:
-                matches = [e for e in world.pending if e.scheduled_id == event.scheduled_id]
-                if len(matches) != 1:
-                    raise AssertionError("scheduled event missing or duplicated")
-                world.pending.remove(matches[0])
-                world.time_s = event.due_s
-                if event.kind == "cargo_arrival":
-                    shipment = world.in_transit.pop(event.payload["shipment_id"])
-                    dest = world.sites[shipment.destination_id]
-                    dest.inventory[shipment.cargo_name] = (
-                        dest.inventory.get(shipment.cargo_name, 0) + shipment.amount)
-                    return {"shipment_id": shipment.shipment_id,
-                            "destination": dest.site_id,
-                            "delivered": shipment.amount,
-                            "commodity": shipment.cargo_name}
-                if event.kind == "report_arrival":
-                    payload = dict(event.payload)
-                    actor = world.actors[payload["recipient"]]
-                    actor.received_reports.append({
-                        "from": payload["sender"], "text": payload["text"],
-                        "sent_s": payload["sent_s"], "received_s": world.time_s,
-                        "route_id": payload["route_id"]})
-                    return {"recipient": actor.actor_id, "from": payload["sender"],
-                            "sent_s": payload["sent_s"]}
-                if event.kind == "policy_notice_arrival":
-                    from .distributed_actions import deliver_policy_notice
-
-                    return deliver_policy_notice(world, event.payload)
-                if event.kind == "policy_ballot_arrival":
-                    from .distributed_actions import deliver_remote_ballot
-
-                    return deliver_remote_ballot(world, event.payload["ballot_id"])
-                if event.kind in {
-                    "charter_offer_arrival", "charter_response_arrival",
-                    "charter_expiry", "association_confirm_arrival",
-                    "mandate_offer_arrival", "mandate_vote_arrival",
-                    "mandate_expiry",
-                }:
-                    from .federated_actions import deliver_federated_event
-
-                    return deliver_federated_event(world, event.kind, event.payload)
-                if event.kind == "policy_expiry":
-                    motion = world.relief_motions[event.payload["motion_id"]]
-                    old_status = motion.status
-                    returned = motion.escrow_amount
-                    if returned:
-                        institution = world.institutions[motion.institution_id]
-                        site = world.sites[institution.seat_site_id]
-                        site.inventory[motion.commodity] = (
-                            site.inventory.get(motion.commodity, 0) + returned)
-                        motion.escrow_amount = 0
-                    if motion.status in ("proposed", "ratified"):
-                        motion.status = "expired"
-                        motion.approved_at_s = None
-                    return {"motion_id": motion.motion_id,
-                            "previous_status": old_status, "status": motion.status,
-                            "resource_released": returned,
-                            "commodity": motion.commodity,
-                            "canonical_authority": False}
-                raise AssertionError("unsupported scheduled event")
-
-            committed.append(self._commit(event.kind, None,
-                                          f"scheduled:{event.scheduled_id}", deliver))
+            committed.append(self._commit(
+                event.kind, None, f"scheduled:{event.scheduled_id}",
+                lambda world, event=event: _deliver_scheduled(world, event)))
         if self._state.time_s < time_s:
             def progress(world: Universe) -> dict[str, Any]:
                 world.time_s = time_s
@@ -468,25 +507,27 @@ class CausalEngine:
             result["reserved"] = reserved
         return result
 
+    def _incoming_to(self, sites: list[str]) -> dict[str, int]:
+        incoming: dict[str, int] = {}
+        for shipment in self._state.in_transit.values():
+            if shipment.destination_id in sites:
+                incoming[shipment.cargo_name] = (
+                    incoming.get(shipment.cargo_name, 0) + shipment.amount)
+        return incoming
+
     def polity_view(self, polity_id: str) -> dict[str, Any]:
         """Authoritative aggregate, not a claim of anyone's personal knowledge."""
         sites = sorted(s.site_id for s in self._state.sites.values()
                        if s.polity_id == polity_id)
         available: dict[str, int] = {}
-        incoming: dict[str, int] = {}
         for site_id in sites:
-            for commodity, amount in self._state.sites[site_id].inventory.items():
-                available[commodity] = available.get(commodity, 0) + amount
-        for shipment in self._state.in_transit.values():
-            if shipment.destination_id in sites:
-                incoming[shipment.cargo_name] = (
-                    incoming.get(shipment.cargo_name, 0) + shipment.amount)
+            _add_counts(available, self._state.sites[site_id].inventory)
+        incoming = self._incoming_to(sites)
         result = {"polity_id": polity_id, "time_s": self._state.time_s,
                   "sites": sites, "available": available, "incoming": incoming}
         reserved: dict[str, int] = {}
         for site_id in sites:
-            for commodity, amount in self.site_view(site_id).get("reserved", {}).items():
-                reserved[commodity] = reserved.get(commodity, 0) + amount
+            _add_counts(reserved, self.site_view(site_id).get("reserved", {}))
         if reserved:
             result["reserved"] = reserved
         return result

@@ -58,6 +58,49 @@ def _send_signal_energy(world: Universe, route) -> int:
     return energy
 
 
+def _notice_endpoints(engine: CausalEngine, world: Universe, institution,
+                      sender_id: str, recipient_id: str, route_id: str):
+    """Return (recipient, route) for a directed seat-to-remote member notice."""
+    if sender_id not in institution.members or recipient_id not in institution.members:
+        raise FeasibilityError("policy notice participants must be known members")
+    sender = world.actors[sender_id]
+    recipient = world.actors[recipient_id]
+    route = engine._route(world, route_id)
+    if (sender.site_id != institution.seat_site_id
+            or route.origin_id != sender.site_id
+            or route.destination_id != recipient.site_id
+            or recipient.site_id == institution.seat_site_id):
+        raise FeasibilityError("policy notice needs a directed, remote information path")
+    return recipient, route
+
+
+def _notice_in_flight(world: Universe, motion_id: str, recipient_id: str) -> bool:
+    return any(
+        e.kind == "policy_notice_arrival"
+        and e.payload.get("motion_id") == motion_id
+        and e.payload.get("recipient") == recipient_id
+        for e in world.pending
+    )
+
+
+def _notice_received(recipient, motion_id: str, digest: str) -> bool:
+    return any(
+        r.get("kind") == "policy_motion_notice"
+        and r.get("motion_id") == motion_id
+        and r.get("motion_sha256") == digest
+        for r in recipient.received_reports
+    )
+
+
+def _schedule_signal(engine: CausalEngine, world: Universe, route, kind: str,
+                     payload: dict[str, Any]) -> tuple[str, int]:
+    """Queue a signal arrival at the corridor's light delay; return (event id, due)."""
+    due = world.time_s + _travel_seconds(route.distance_km, route.signal_speed_km_s)
+    scheduled_id = engine._id(world, "scheduled")
+    world.pending.append(ScheduledEvent(scheduled_id, due, world.next_serial, kind, payload))
+    return scheduled_id, due
+
+
 def send_policy_notice(engine: CausalEngine, motion_id: str, sender_id: str,
                        recipient_id: str, route_id: str, *, cause: str) -> Receipt:
     """Send proposal knowledge outward. No remote decision without delivery."""
@@ -71,40 +114,19 @@ def send_policy_notice(engine: CausalEngine, motion_id: str, sender_id: str,
     def change(world: Universe) -> dict[str, Any]:
         motion = _active_motion(world, motion_id)
         institution = world.institutions[motion.institution_id]
-        if sender_id not in institution.members or recipient_id not in institution.members:
-            raise FeasibilityError("policy notice participants must be known members")
-        sender = world.actors[sender_id]
-        recipient = world.actors[recipient_id]
-        route = engine._route(world, route_id)
-        if (sender.site_id != institution.seat_site_id
-                or route.origin_id != sender.site_id
-                or route.destination_id != recipient.site_id
-                or recipient.site_id == institution.seat_site_id):
-            raise FeasibilityError("policy notice needs a directed, remote information path")
+        recipient, route = _notice_endpoints(
+            engine, world, institution, sender_id, recipient_id, route_id)
         digest = motion_fingerprint(motion)
-        if any(
-            e.kind == "policy_notice_arrival"
-            and e.payload.get("motion_id") == motion_id
-            and e.payload.get("recipient") == recipient_id
-            for e in world.pending
-        ) or any(
-            r.get("kind") == "policy_motion_notice"
-            and r.get("motion_id") == motion_id
-            and r.get("motion_sha256") == digest
-            for r in recipient.received_reports
-        ):
+        if (_notice_in_flight(world, motion_id, recipient_id)
+                or _notice_received(recipient, motion_id, digest)):
             raise FeasibilityError("this remote participant already has a motion notice")
         energy = _send_signal_energy(world, route)
-        due = world.time_s + _travel_seconds(route.distance_km, route.signal_speed_km_s)
-        scheduled_id = engine._id(world, "scheduled")
-        world.pending.append(ScheduledEvent(
-            scheduled_id, due, world.next_serial,
-            "policy_notice_arrival", {
-                "motion_id": motion_id, "motion_sha256": digest,
-                "proposal": public_motion_terms(motion),
-                "sender": sender_id, "recipient": recipient_id,
-                "route_id": route_id, "sent_s": world.time_s,
-            }))
+        scheduled_id, due = _schedule_signal(engine, world, route, "policy_notice_arrival", {
+            "motion_id": motion_id, "motion_sha256": digest,
+            "proposal": public_motion_terms(motion),
+            "sender": sender_id, "recipient": recipient_id,
+            "route_id": route_id, "sent_s": world.time_s,
+        })
         return {
             "motion_id": motion_id, "recipient_id": recipient_id,
             "motion_sha256": digest,
@@ -145,6 +167,41 @@ def deliver_policy_notice(world: Universe, payload: dict[str, Any]) -> dict[str,
     }
 
 
+def _remote_voter(world: Universe, motion_id: str, motion: ReliefMotion, institution,
+                  voter_id: str):
+    """Return the eligible, remote, not-yet-voted actor for this motion."""
+    if not ballot_eligible(world, motion, voter_id):
+        raise FeasibilityError("remote actor has no recorded voting authority")
+    actor = world.actors[voter_id]
+    if actor.site_id == institution.seat_site_id:
+        raise FeasibilityError("seat-local voters use P3 direct ballots")
+    if voter_id in motion.votes or any(
+        b.motion_id == motion_id and b.voter_id == voter_id
+        for b in world.remote_ballots.values()
+    ):
+        raise FeasibilityError("duplicate remote ballot attempt")
+    return actor
+
+
+def _notice_matches(world: Universe, notice: dict[str, Any], motion_id: str,
+                    motion: ReliefMotion, digest: str) -> bool:
+    return (notice.get("kind") == "policy_motion_notice"
+            and notice.get("motion_id") == motion_id
+            and notice.get("institution_id") == motion.institution_id
+            and notice.get("motion_sha256") == digest
+            and notice.get("proposal") == public_motion_terms(motion)
+            and type(notice.get("received_s")) is int
+            and notice["received_s"] <= world.time_s)
+
+
+def _return_route(engine: CausalEngine, world: Universe, actor, institution, route_id: str):
+    route = engine._route(world, route_id)
+    if (route.origin_id != actor.site_id
+            or route.destination_id != institution.seat_site_id):
+        raise FeasibilityError("no directed return signal to institution")
+    return route
+
+
 def submit_remote_ballot(engine: CausalEngine, motion_id: str, voter_id: str,
                          approve: bool, return_route_id: str, *,
                          cause: str) -> Receipt:
@@ -164,33 +221,13 @@ def submit_remote_ballot(engine: CausalEngine, motion_id: str, voter_id: str,
     def change(world: Universe) -> dict[str, Any]:
         motion = _active_motion(world, motion_id)
         institution = world.institutions[motion.institution_id]
-        if not ballot_eligible(world, motion, voter_id):
-            raise FeasibilityError("remote actor has no recorded voting authority")
-        actor = world.actors[voter_id]
-        if actor.site_id == institution.seat_site_id:
-            raise FeasibilityError("seat-local voters use P3 direct ballots")
-        if voter_id in motion.votes or any(
-            b.motion_id == motion_id and b.voter_id == voter_id
-            for b in world.remote_ballots.values()
-        ):
-            raise FeasibilityError("duplicate remote ballot attempt")
+        actor = _remote_voter(world, motion_id, motion, institution, voter_id)
         digest = motion_fingerprint(motion)
-        notices = [
-            notice for notice in actor.received_reports
-            if (notice.get("kind") == "policy_motion_notice"
-                and notice.get("motion_id") == motion_id
-                and notice.get("institution_id") == motion.institution_id
-                and notice.get("motion_sha256") == digest
-                and notice.get("proposal") == public_motion_terms(motion)
-                and type(notice.get("received_s")) is int
-                and notice["received_s"] <= world.time_s)
-        ]
+        notices = [notice for notice in actor.received_reports
+                   if _notice_matches(world, notice, motion_id, motion, digest)]
         if not notices:
             raise FeasibilityError("remote actor has not received a matching motion notice")
-        route = engine._route(world, return_route_id)
-        if (route.origin_id != actor.site_id
-                or route.destination_id != institution.seat_site_id):
-            raise FeasibilityError("no directed return signal to institution")
+        route = _return_route(engine, world, actor, institution, return_route_id)
         energy = _send_signal_energy(world, route)
         due = world.time_s + _travel_seconds(route.distance_km, route.signal_speed_km_s)
         ballot_id = engine._id(world, "ballot")
@@ -199,10 +236,7 @@ def submit_remote_ballot(engine: CausalEngine, motion_id: str, voter_id: str,
             route_id=return_route_id, approve=approve,
             sent_s=world.time_s, arrives_s=due, notice_sha256=digest,
         )
-        event_id = engine._id(world, "scheduled")
-        world.pending.append(ScheduledEvent(
-            event_id, due, world.next_serial, "policy_ballot_arrival",
-            {"ballot_id": ballot_id}))
+        _schedule_signal(engine, world, route, "policy_ballot_arrival", {"ballot_id": ballot_id})
         return {
             "ballot_id": ballot_id, "motion_id": motion_id,
             "voter_id": voter_id, "route_id": return_route_id,

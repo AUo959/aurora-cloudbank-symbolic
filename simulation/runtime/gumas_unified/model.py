@@ -188,6 +188,10 @@ def _validate_corridor(world: Any, key: str, route: Any, profile: PhysicsProfile
         _natural(getattr(route, n), n)
     if type(route.enabled) is not bool:
         raise ValueError("route enabled must be a boolean")
+    _validate_corridor_speeds(route, profile)
+
+
+def _validate_corridor_speeds(route: Any, profile: PhysicsProfile) -> None:
     if route.signal_speed_km_s > profile.signal_speed_ceiling_km_s:
         raise ValueError("route signaling exceeds established physical limit")
     if route.cargo_speed_km_s > profile.cargo_speed_ceiling_km_s:
@@ -225,6 +229,344 @@ def _validate_pending_event(world: Any, event: Any) -> None:
         raise ValueError("unknown scheduled event")
 
 
+_FIXTURE_BINDING_SCHEMA = "gumas.unified.fixture_identity_binding.p2"
+_FIXTURE_BINDING_FALSE_FLAGS = (
+    "grant_authenticated", "source_canon_promoted",
+    "actor_permissions_changed", "agent_memory_injected",
+)
+_MOTION_STATUSES = ("proposed", "ratified", "dispatched", "rejected", "expired")
+_HEX_DIGITS = "0123456789abcdef"
+
+
+def _canonical_sha256(payload: Any) -> str:
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                   ensure_ascii=False, allow_nan=False).encode("utf-8")
+    ).hexdigest()
+
+
+def _signal_travel_s(route: Any) -> int:
+    return (route.distance_km + route.signal_speed_km_s - 1) // route.signal_speed_km_s
+
+
+def is_sha256_hex(value: Any) -> bool:
+    """Lowercase 64-character hexadecimal string (shape only, not authenticity)."""
+    return (isinstance(value, str) and len(value) == 64
+            and all(c in _HEX_DIGITS for c in value))
+
+
+# --- P2 fixture identity bindings ------------------------------------------
+
+def _binding_authorized(world: Any, actor_id: str, record: dict[str, Any]) -> bool:
+    if actor_id not in world.actors or record.get("actor_id") != actor_id:
+        return False
+    if record.get("schema") != _FIXTURE_BINDING_SCHEMA:
+        return False
+    if record.get("scope") != "synthetic_fixture_only":
+        return False
+    return all(record.get(flag) is False for flag in _FIXTURE_BINDING_FALSE_FLAGS)
+
+
+def _claim_binding_reference(record: dict[str, Any], bound: set[tuple[str, str]]) -> None:
+    key = (record.get("world_id"), record.get("entity_id"))
+    if not all(isinstance(value, str) and value for value in key):
+        raise ValueError("invalid identity reference")
+    if key in bound:
+        raise ValueError("duplicate ACE identity binding")
+    bound.add(key)
+
+
+def _validate_binding_interval(world: Any, record: dict[str, Any]) -> None:
+    _natural(record.get("bound_at_s"), "identity bound_at_s")
+    _natural(record.get("valid_until_s"), "identity valid_until_s")
+    if (record["bound_at_s"] > world.time_s
+            or record["valid_until_s"] <= record["bound_at_s"]):
+        raise ValueError("identity binding has invalid validity interval")
+
+
+def _validate_identity_binding(world: Any, actor_id: str, record: Any,
+                               bound: set[tuple[str, str]]) -> None:
+    if not isinstance(record, dict):
+        raise ValueError("identity binding must be an object")
+    if not _binding_authorized(world, actor_id, record):
+        raise ValueError("unauthorized or inconsistent L2 fixture identity binding")
+    _claim_binding_reference(record, bound)
+    _validate_binding_interval(world, record)
+    payload = {k: v for k, v in record.items() if k != "binding_sha256"}
+    if record.get("binding_sha256") != _canonical_sha256(payload):
+        raise ValueError("identity binding fingerprint does not match record")
+
+
+def _validate_identity_bindings(world: Any) -> None:
+    bound: set[tuple[str, str]] = set()
+    for actor_id, record in world.identity_bindings.items():
+        _validate_identity_binding(world, actor_id, record, bound)
+
+
+# --- P3 institutions and P4 governance protocols ----------------------------
+
+def _institution_members_valid(world: Any, institution: Any) -> bool:
+    members = institution.members
+    return (bool(members) and len(set(members)) == len(members)
+            and all(m in world.actors for m in members))
+
+
+def _validate_institution(world: Any, key: str, institution: Any) -> None:
+    if key != institution.institution_id or institution.seat_site_id not in world.sites:
+        raise ValueError("invalid institution identity or seat")
+    if world.sites[institution.seat_site_id].polity_id != institution.polity_id:
+        raise ValueError("institution polity does not match its local seat")
+    if not _institution_members_valid(world, institution):
+        raise ValueError("institution must have distinct, existing members")
+    _natural(institution.quorum, "institution quorum", positive=True)
+    _natural(institution.approval_threshold, "approval threshold", positive=True)
+    if (institution.quorum > len(institution.members)
+            or institution.approval_threshold > institution.quorum):
+        raise ValueError("impossible institution quorum or approval threshold")
+
+
+def _validate_institutions(world: Any) -> None:
+    for key, institution in world.institutions.items():
+        _validate_institution(world, key, institution)
+
+
+def _validate_governance_rules(world: Any) -> None:
+    from .governance_rules import validate_protocol
+
+    for key, rule in world.governance_rules.items():
+        if key not in world.institutions or not isinstance(rule, GovernanceProtocol):
+            raise ValueError("governance protocol refers to an absent institution")
+        validate_protocol(world.institutions[key], rule)
+
+
+# --- P3 relief motions ------------------------------------------------------
+
+def _validate_motion_identity(world: Any, key: str, motion: Any) -> None:
+    if key != motion.motion_id or motion.institution_id not in world.institutions:
+        raise ValueError("invalid relief motion identity or institution")
+    institution = world.institutions[motion.institution_id]
+    if motion.proposer_id not in institution.members:
+        raise ValueError("motion proposer not a member")
+    if motion.route_id not in world.corridors:
+        raise ValueError("motion references nonexistent corridor")
+    if world.corridors[motion.route_id].origin_id != institution.seat_site_id:
+        raise ValueError("motion route not connected to institution seat")
+
+
+def _validate_motion_terms(motion: Any) -> None:
+    if not motion.commodity or motion.commodity == "energy_j":
+        raise ValueError("invalid motion commodity")
+    _natural(motion.amount, "motion amount", positive=True)
+    _natural(motion.expires_s, "motion expiry", positive=True)
+    _natural(motion.escrow_amount, "motion escrow")
+    if (motion.status not in _MOTION_STATUSES
+            or motion.escrow_amount not in (0, motion.amount)
+            or (motion.status == "ratified") != (motion.escrow_amount == motion.amount)):
+        raise ValueError("inconsistent motion status or escrow")
+
+
+def _validate_motion_shipment_ref(motion: Any) -> None:
+    if motion.status == "dispatched" and not motion.shipment_id:
+        raise ValueError("dispatched motion missing shipment reference")
+    if motion.status != "dispatched" and motion.shipment_id is not None:
+        raise ValueError("motion shipment reference without dispatch")
+
+
+def _motion_approval_recorded(world: Any, motion: Any) -> bool:
+    from .governance_rules import approval_ready
+
+    approved = motion.approved_at_s
+    return (approved is not None and type(approved) is int
+            and 0 <= approved < motion.expires_s
+            and approval_ready(world, motion))
+
+
+def _validate_motion_votes(world: Any, motion: Any) -> None:
+    from .governance_rules import ballot_eligible
+
+    if any(type(vote) is not bool or not ballot_eligible(world, motion, voter)
+           for voter, vote in motion.votes.items()):
+        raise ValueError("unauthorized or invalid policy ballot")
+    if motion.status in ("ratified", "dispatched") and not _motion_approval_recorded(world, motion):
+        raise ValueError("motion lacks sufficient recorded approval")
+    if motion.status in ("proposed", "rejected", "expired") and motion.approved_at_s is not None:
+        raise ValueError("unapproved motion has approval timestamp")
+
+
+def _validate_relief_motions(world: Any) -> None:
+    for key, motion in world.relief_motions.items():
+        _validate_motion_identity(world, key, motion)
+        _validate_motion_terms(motion)
+        _validate_motion_shipment_ref(motion)
+        _validate_motion_votes(world, motion)
+
+
+# --- P5 remote ballots --------------------------------------------------------
+
+def _remote_ballot_motion(world: Any, key: str, ballot: Any) -> Any:
+    if not isinstance(ballot, RemoteBallot) or key != ballot.ballot_id:
+        raise ValueError("invalid remote ballot record")
+    if ballot.motion_id not in world.relief_motions:
+        raise ValueError("remote ballot refers to missing motion")
+    return world.relief_motions[ballot.motion_id]
+
+
+def _validate_ballot_voter(world: Any, motion: Any, ballot: Any) -> None:
+    from .governance_rules import ballot_eligible
+
+    if (ballot.voter_id not in world.actors
+            or not ballot_eligible(world, motion, ballot.voter_id)
+            or ballot.route_id not in world.corridors
+            or type(ballot.approve) is not bool):
+        raise ValueError("remote ballot has invalid voter, rule or route")
+
+
+def _validate_ballot_direction(world: Any, institution: Any, ballot: Any) -> None:
+    actor = world.actors[ballot.voter_id]
+    corridor = world.corridors[ballot.route_id]
+    if (actor.site_id == institution.seat_site_id
+            or corridor.origin_id != actor.site_id
+            or corridor.destination_id != institution.seat_site_id):
+        raise ValueError("remote ballot lacks directed information path")
+
+
+def _validate_ballot_timing(world: Any, ballot: Any) -> None:
+    _natural(ballot.sent_s, "remote ballot sent_s")
+    _natural(ballot.arrives_s, "remote ballot arrives_s")
+    travel = _signal_travel_s(world.corridors[ballot.route_id])
+    if (ballot.sent_s > world.time_s
+            or ballot.arrives_s != ballot.sent_s + travel
+            or not is_sha256_hex(ballot.notice_sha256)):
+        raise ValueError("remote ballot has invalid timing or notice fingerprint")
+
+
+def _ballot_notice_delivered(world: Any, motion: Any, ballot: Any) -> bool:
+    from .distributed_actions import public_motion_terms
+
+    actor = world.actors[ballot.voter_id]
+    matching_notice = [
+        report for report in actor.received_reports
+        if (report.get("kind") == "policy_motion_notice"
+            and report.get("motion_id") == ballot.motion_id
+            and report.get("motion_sha256") == ballot.notice_sha256
+            and report.get("proposal") == public_motion_terms(motion)
+            and report.get("received_s", world.time_s + 1) <= ballot.sent_s)
+    ]
+    return bool(matching_notice)
+
+
+def _ballot_receipt_scheduled(world: Any, motion: Any, ballot: Any) -> bool:
+    return ballot.voter_id not in motion.votes and any(
+        e.kind == "policy_ballot_arrival"
+        and e.payload.get("ballot_id") == ballot.ballot_id
+        and e.due_s == ballot.arrives_s for e in world.pending
+    )
+
+
+def _validate_ballot_status(world: Any, motion: Any, ballot: Any) -> None:
+    if ballot.status == "in_flight":
+        if not _ballot_receipt_scheduled(world, motion, ballot):
+            raise ValueError("remote ballot in flight missing scheduled receipt")
+    elif ballot.status == "counted":
+        if (ballot.arrives_s > world.time_s
+                or motion.votes.get(ballot.voter_id) is not ballot.approve):
+            raise ValueError("remote counted ballot not present in institution")
+    elif ballot.status == "arrived_unusable":
+        if ballot.arrives_s > world.time_s:
+            raise ValueError("unusable remote ballot has not arrived")
+    else:
+        raise ValueError("unknown remote ballot status")
+
+
+def _validate_remote_ballot(world: Any, key: str, ballot: Any,
+                            seen: set[tuple[str, str]]) -> None:
+    motion = _remote_ballot_motion(world, key, ballot)
+    institution = world.institutions[motion.institution_id]
+    _validate_ballot_voter(world, motion, ballot)
+    _validate_ballot_direction(world, institution, ballot)
+    _validate_ballot_timing(world, ballot)
+    pair = (ballot.motion_id, ballot.voter_id)
+    if pair in seen:
+        raise ValueError("duplicate remote voter intent")
+    seen.add(pair)
+    if not _ballot_notice_delivered(world, motion, ballot):
+        raise ValueError("remote ballot lacks prior delivered motion notice")
+    _validate_ballot_status(world, motion, ballot)
+
+
+def _validate_remote_ballots(world: Any) -> None:
+    seen: set[tuple[str, str]] = set()
+    for key, ballot in world.remote_ballots.items():
+        _validate_remote_ballot(world, key, ballot, seen)
+
+
+# --- P3/P5 scheduled political events ---------------------------------------
+
+def _validate_policy_expiry_event(world: Any, event: Any) -> None:
+    motion = world.relief_motions.get(event.payload.get("motion_id"))
+    if motion is None or motion.expires_s != event.due_s:
+        raise ValueError("policy expiry event lacks matching motion")
+
+
+def _notice_route_matches(institution: Any, sender: Any, recipient: Any, route: Any) -> bool:
+    return (sender.actor_id in institution.members
+            and recipient.actor_id in institution.members
+            and sender.site_id == route.origin_id
+            and recipient.site_id == route.destination_id
+            and route.origin_id == institution.seat_site_id
+            and route.destination_id != route.origin_id)
+
+
+def _notice_terms_match(world: Any, event: Any, motion: Any, route: Any) -> bool:
+    from .distributed_actions import motion_fingerprint, public_motion_terms
+
+    payload = event.payload
+    return (payload.get("motion_sha256") == motion_fingerprint(motion)
+            and payload.get("proposal") == public_motion_terms(motion)
+            and type(payload.get("sent_s")) is int
+            and payload["sent_s"] <= world.time_s
+            and event.due_s == payload["sent_s"] + _signal_travel_s(route))
+
+
+def _policy_notice_supported(world: Any, event: Any) -> bool:
+    payload = event.payload
+    motion = world.relief_motions.get(payload.get("motion_id"))
+    recipient = world.actors.get(payload.get("recipient"))
+    sender = world.actors.get(payload.get("sender"))
+    route = world.corridors.get(payload.get("route_id"))
+    if motion is None or recipient is None or sender is None or route is None:
+        return False
+    institution = world.institutions[motion.institution_id]
+    return (_notice_route_matches(institution, sender, recipient, route)
+            and _notice_terms_match(world, event, motion, route))
+
+
+def _validate_policy_notice_event(world: Any, event: Any) -> None:
+    if not _policy_notice_supported(world, event):
+        raise ValueError("policy notice lacks physically supported provenance")
+
+
+def _validate_policy_ballot_event(world: Any, event: Any) -> None:
+    ballot = world.remote_ballots.get(event.payload.get("ballot_id"))
+    if ballot is None or ballot.status != "in_flight" or event.due_s != ballot.arrives_s:
+        raise ValueError("policy ballot event lacks in-flight ballot")
+
+
+_POLITICAL_EVENT_CHECKS = {
+    "policy_expiry": _validate_policy_expiry_event,
+    "policy_notice_arrival": _validate_policy_notice_event,
+    "policy_ballot_arrival": _validate_policy_ballot_event,
+}
+
+
+def _validate_pending_events(world: Any) -> None:
+    for event in world.pending:
+        _validate_pending_event(world, event)
+        check = _POLITICAL_EVENT_CHECKS.get(event.kind)
+        if check is not None:
+            check(world, event)
+
+
 @dataclass
 class Universe:
     time_s: int
@@ -247,201 +589,20 @@ class Universe:
 
     def validate(self, profile: PhysicsProfile) -> None:
         # Order is part of the contract: the first failing section's error is
-        # the transaction's rejection reason. P0 sections are helpers; later
-        # layer sections remain inline at their seams until their own packets.
+        # the transaction's rejection reason. Each layer's section is a helper.
         _validate_scalars(self)
         _validate_profile(profile)
         _validate_sites(self)
         _validate_actors(self)
-        bound_entities: set[tuple[str, str]] = set()
-        for actor_id, record in self.identity_bindings.items():
-            if not isinstance(record, dict):
-                raise ValueError("identity binding must be an object")
-            if (actor_id not in self.actors or record.get("actor_id") != actor_id
-                    or record.get("schema") != "gumas.unified.fixture_identity_binding.p2"
-                    or record.get("scope") != "synthetic_fixture_only"
-                    or record.get("grant_authenticated") is not False
-                    or record.get("source_canon_promoted") is not False
-                    or record.get("actor_permissions_changed") is not False
-                    or record.get("agent_memory_injected") is not False):
-                raise ValueError("unauthorized or inconsistent L2 fixture identity binding")
-            key = (record.get("world_id"), record.get("entity_id"))
-            if not all(isinstance(value, str) and value for value in key):
-                raise ValueError("invalid identity reference")
-            if key in bound_entities:
-                raise ValueError("duplicate ACE identity binding")
-            bound_entities.add(key)
-            _natural(record.get("bound_at_s"), "identity bound_at_s")
-            _natural(record.get("valid_until_s"), "identity valid_until_s")
-            if (record["bound_at_s"] > self.time_s
-                    or record["valid_until_s"] <= record["bound_at_s"]):
-                raise ValueError("identity binding has invalid validity interval")
-            payload = {k: v for k, v in record.items() if k != "binding_sha256"}
-            expected = hashlib.sha256(
-                json.dumps(payload, sort_keys=True, separators=(",", ":"),
-                           ensure_ascii=False, allow_nan=False).encode("utf-8")
-            ).hexdigest()
-            if record.get("binding_sha256") != expected:
-                raise ValueError("identity binding fingerprint does not match record")
-        for key, institution in self.institutions.items():
-            if key != institution.institution_id or institution.seat_site_id not in self.sites:
-                raise ValueError("invalid institution identity or seat")
-            if self.sites[institution.seat_site_id].polity_id != institution.polity_id:
-                raise ValueError("institution polity does not match its local seat")
-            if (not institution.members or len(set(institution.members)) != len(institution.members)
-                    or any(m not in self.actors for m in institution.members)):
-                raise ValueError("institution must have distinct, existing members")
-            _natural(institution.quorum, "institution quorum", positive=True)
-            _natural(institution.approval_threshold, "approval threshold", positive=True)
-            if (institution.quorum > len(institution.members)
-                    or institution.approval_threshold > institution.quorum):
-                raise ValueError("impossible institution quorum or approval threshold")
-        from .governance_rules import validate_protocol, approval_ready, ballot_eligible
-
-        for key, rule in self.governance_rules.items():
-            if key not in self.institutions or not isinstance(rule, GovernanceProtocol):
-                raise ValueError("governance protocol refers to an absent institution")
-            validate_protocol(self.institutions[key], rule)
-        for key, motion in self.relief_motions.items():
-            if key != motion.motion_id or motion.institution_id not in self.institutions:
-                raise ValueError("invalid relief motion identity or institution")
-            institution = self.institutions[motion.institution_id]
-            if motion.proposer_id not in institution.members:
-                raise ValueError("motion proposer not a member")
-            if motion.route_id not in self.corridors:
-                raise ValueError("motion references nonexistent corridor")
-            route = self.corridors[motion.route_id]
-            if route.origin_id != institution.seat_site_id:
-                raise ValueError("motion route not connected to institution seat")
-            if not motion.commodity or motion.commodity == "energy_j":
-                raise ValueError("invalid motion commodity")
-            _natural(motion.amount, "motion amount", positive=True)
-            _natural(motion.expires_s, "motion expiry", positive=True)
-            _natural(motion.escrow_amount, "motion escrow")
-            if (motion.status not in ("proposed", "ratified", "dispatched",
-                                      "rejected", "expired")
-                    or motion.escrow_amount not in (0, motion.amount)
-                    or (motion.status == "ratified") != (motion.escrow_amount == motion.amount)):
-                raise ValueError("inconsistent motion status or escrow")
-            if motion.status == "dispatched" and not motion.shipment_id:
-                raise ValueError("dispatched motion missing shipment reference")
-            if motion.status != "dispatched" and motion.shipment_id is not None:
-                raise ValueError("motion shipment reference without dispatch")
-            if any(type(vote) is not bool
-                   or not ballot_eligible(self, motion, voter)
-                   for voter, vote in motion.votes.items()):
-                raise ValueError("unauthorized or invalid policy ballot")
-            if motion.status in ("ratified", "dispatched") and (
-                    motion.approved_at_s is None
-                    or type(motion.approved_at_s) is not int
-                    or not 0 <= motion.approved_at_s < motion.expires_s
-                    or not approval_ready(self, motion)):
-                raise ValueError("motion lacks sufficient recorded approval")
-            if motion.status in ("proposed", "rejected", "expired") and (
-                    motion.approved_at_s is not None):
-                raise ValueError("unapproved motion has approval timestamp")
+        _validate_identity_bindings(self)
+        _validate_institutions(self)
+        _validate_governance_rules(self)
+        _validate_relief_motions(self)
         _validate_corridors(self, profile)
         _validate_in_transit(self)
-        seen_ballots: set[tuple[str, str]] = set()
-        for key, ballot in self.remote_ballots.items():
-            if not isinstance(ballot, RemoteBallot) or key != ballot.ballot_id:
-                raise ValueError("invalid remote ballot record")
-            if ballot.motion_id not in self.relief_motions:
-                raise ValueError("remote ballot refers to missing motion")
-            motion = self.relief_motions[ballot.motion_id]
-            institution = self.institutions[motion.institution_id]
-            if (ballot.voter_id not in self.actors
-                    or not ballot_eligible(self, motion, ballot.voter_id)
-                    or ballot.route_id not in self.corridors
-                    or type(ballot.approve) is not bool):
-                raise ValueError("remote ballot has invalid voter, rule or route")
-            actor = self.actors[ballot.voter_id]
-            corridor = self.corridors[ballot.route_id]
-            if (actor.site_id == institution.seat_site_id
-                    or corridor.origin_id != actor.site_id
-                    or corridor.destination_id != institution.seat_site_id):
-                raise ValueError("remote ballot lacks directed information path")
-            _natural(ballot.sent_s, "remote ballot sent_s")
-            _natural(ballot.arrives_s, "remote ballot arrives_s")
-            travel = ((corridor.distance_km + corridor.signal_speed_km_s - 1)
-                      // corridor.signal_speed_km_s)
-            if (ballot.sent_s > self.time_s
-                    or ballot.arrives_s != ballot.sent_s + travel
-                    or not isinstance(ballot.notice_sha256, str)
-                    or len(ballot.notice_sha256) != 64
-                    or any(c not in "0123456789abcdef" for c in ballot.notice_sha256)):
-                raise ValueError("remote ballot has invalid timing or notice fingerprint")
-            pair = (ballot.motion_id, ballot.voter_id)
-            if pair in seen_ballots:
-                raise ValueError("duplicate remote voter intent")
-            seen_ballots.add(pair)
-            from .distributed_actions import public_motion_terms
-
-            matching_notice = [
-                report for report in actor.received_reports
-                if (report.get("kind") == "policy_motion_notice"
-                    and report.get("motion_id") == ballot.motion_id
-                    and report.get("motion_sha256") == ballot.notice_sha256
-                    and report.get("proposal") == public_motion_terms(motion)
-                    and report.get("received_s", self.time_s + 1) <= ballot.sent_s)
-            ]
-            if not matching_notice:
-                raise ValueError("remote ballot lacks prior delivered motion notice")
-            if ballot.status == "in_flight":
-                if ballot.voter_id in motion.votes or not any(
-                    e.kind == "policy_ballot_arrival"
-                    and e.payload.get("ballot_id") == ballot.ballot_id
-                    and e.due_s == ballot.arrives_s for e in self.pending
-                ):
-                    raise ValueError("remote ballot in flight missing scheduled receipt")
-            elif ballot.status == "counted":
-                if (ballot.arrives_s > self.time_s
-                        or motion.votes.get(ballot.voter_id) is not ballot.approve):
-                    raise ValueError("remote counted ballot not present in institution")
-            elif ballot.status == "arrived_unusable":
-                if ballot.arrives_s > self.time_s:
-                    raise ValueError("unusable remote ballot has not arrived")
-            else:
-                raise ValueError("unknown remote ballot status")
+        _validate_remote_ballots(self)
         _validate_capacity(self)
-        for event in self.pending:
-            _validate_pending_event(self, event)
-            if event.kind == "policy_expiry":
-                motion = self.relief_motions.get(event.payload.get("motion_id"))
-                if motion is None or motion.expires_s != event.due_s:
-                    raise ValueError("policy expiry event lacks matching motion")
-            if event.kind == "policy_notice_arrival":
-                from .distributed_actions import (
-                    motion_fingerprint, public_motion_terms,
-                )
-                payload = event.payload
-                motion = self.relief_motions.get(payload.get("motion_id"))
-                recipient = self.actors.get(payload.get("recipient"))
-                sender = self.actors.get(payload.get("sender"))
-                route = self.corridors.get(payload.get("route_id"))
-                if (motion is None or recipient is None or sender is None
-                        or route is None or sender.actor_id not in
-                        self.institutions[motion.institution_id].members
-                        or recipient.actor_id not in
-                        self.institutions[motion.institution_id].members
-                        or sender.site_id != route.origin_id
-                        or recipient.site_id != route.destination_id
-                        or route.origin_id !=
-                        self.institutions[motion.institution_id].seat_site_id
-                        or route.destination_id == route.origin_id
-                        or payload.get("motion_sha256") != motion_fingerprint(motion)
-                        or payload.get("proposal") != public_motion_terms(motion)
-                        or type(payload.get("sent_s")) is not int
-                        or payload["sent_s"] > self.time_s
-                        or event.due_s != payload["sent_s"]
-                        + (route.distance_km + route.signal_speed_km_s - 1)
-                        // route.signal_speed_km_s):
-                    raise ValueError("policy notice lacks physically supported provenance")
-            if event.kind == "policy_ballot_arrival":
-                ballot = self.remote_ballots.get(event.payload.get("ballot_id"))
-                if (ballot is None or ballot.status != "in_flight"
-                        or event.due_s != ballot.arrives_s):
-                    raise ValueError("policy ballot event lacks in-flight ballot")
+        _validate_pending_events(self)
         validate_federated_world(self)
 
     def totals(self) -> dict[str, int]:

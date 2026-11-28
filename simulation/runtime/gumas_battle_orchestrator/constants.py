@@ -5,6 +5,9 @@ PHASE9_VERSION = "1.0.0"
 CANONICAL_JSON_PROFILE = "aurora-canonical-json-v1"
 GENESIS_MARKER = "GENESIS"
 MISSION_PRESSURE_FLOOR_Q1000 = 500
+# POSITION_FOR_ADVANTAGE standoff: this fraction of the shortest effective
+# weapon range among the fleet's active vessels (amendment 2026-11-28).
+ADVANTAGE_STANDOFF_FRACTION_Q1000 = 800
 
 RUN_CONTEXT_SCHEMA = "aurora://simulation/gumas/phase9_run_context/v1.0"
 OBSERVATION_RECEIPT_SCHEMA = "aurora://simulation/gumas/live_command_observation_receipt/v1.0"

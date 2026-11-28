@@ -156,13 +156,13 @@ def test_throttle_tables_and_acceleration_caps_are_causal():
     assert norm_nearest(fast_thrust) > norm_nearest(slow_thrust)
 
 
-def test_evasive_vector_fails_closed_without_reference():
+def test_evasive_vector_without_reference_falls_back_to_tangent():
     vessel = _vessel(
         "A", "rebel", (6_000_000_000_000, 0, 0), (0, 0, 0), 100_000
     )
     order = _order("rebel", "PRESS", "EVASIVE_VECTOR", "BALANCED_POWER")
-    with pytest.raises(MovementError):
-        thrust_acceleration_um_s2(vessel, order, None)
+    thrust, _ = thrust_acceleration_um_s2(vessel, order, None)
+    assert thrust[0] == 0 and thrust[1] > 0 and thrust[2] == 0
 
 
 def test_one_step_replay_and_insertion_order_independence():
@@ -230,3 +230,75 @@ def test_withdrawal_boundary_semantics():
     outside = (P17_WITHDRAWAL_RADIUS_UM + 1, 0, 0)
     assert norm_nearest(at_boundary) <= P17_WITHDRAWAL_RADIUS_UM
     assert norm_nearest(outside) > P17_WITHDRAWAL_RADIUS_UM
+
+
+def _advantage_reference(position, velocity, standoff):
+    return {
+        "reference_kind": "phase9_side_local_contact_centroid",
+        "position_um": list(position),
+        "velocity_um_s": list(velocity),
+        "standoff_um": standoff,
+        "source_state_sha256": "s",
+        "source_receipt_sha256": "r",
+        "confidence_q1000": 700,
+    }
+
+
+def _advantage_order(fleet_id: str):
+    return _order(fleet_id, "POSITIONAL_MANEUVER", "POSITION_FOR_ADVANTAGE", "PRIORITIZE_PROPULSION")
+
+
+def test_position_for_advantage_closes_toward_standoff_with_a_contact_reference():
+    vessel = _vessel("A", "fleet-a", (-8_000_000_000_000, 0, 0), (0, 0, 0), 50_000)
+    reference = _advantage_reference((8_000_000_000_000, 0, 0), (0, 0, 0), 4_000_000_000_000)
+    thrust, _ = thrust_acceleration_um_s2(vessel, _advantage_order("fleet-a"), reference)
+    assert thrust[0] > 0 and thrust[1] == 0 and thrust[2] == 0
+    assert norm_nearest(thrust) <= 40_000_000
+
+    inside = _vessel("A", "fleet-a", (6_000_000_000_000, 0, 0), (0, 0, 0), 50_000)
+    retreat, _ = thrust_acceleration_um_s2(inside, _advantage_order("fleet-a"), reference)
+    assert retreat[0] < 0
+
+
+def test_position_for_advantage_holds_when_already_matched_at_standoff():
+    vessel = _vessel("A", "fleet-a", (4_000_000_000_000, 0, 0), (1_000_000, 0, 0), 50_000)
+    reference = _advantage_reference((8_000_000_000_000, 0, 0), (1_000_000, 0, 0), 4_000_000_000_000)
+    thrust, _ = thrust_acceleration_um_s2(vessel, _advantage_order("fleet-a"), reference)
+    assert thrust == (0, 0, 0)
+
+
+def test_position_for_advantage_without_reference_keeps_v1_tangent():
+    vessel = _vessel("A", "fleet-a", (6_000_000_000_000, 0, 0), (0, 0, 0), 50_000)
+    thrust, _ = thrust_acceleration_um_s2(vessel, _advantage_order("fleet-a"), None)
+    assert thrust[0] == 0 and thrust[1] > 0
+
+
+def test_closing_fleets_converge_to_standoff_and_replay():
+    vessels = [
+        _vessel("A", "fleet-a", (-8_000_000_000_000, 0, 0), (0, 0, 0), 50_000),
+        _vessel("B", "fleet-b", (8_000_000_000_000, 0, 0), (0, 0, 0), 50_000),
+    ]
+    state = _state(vessels)
+    orders = {fleet: _advantage_order(fleet) for fleet in ("fleet-a", "fleet-b")}
+    start = norm_nearest([16_000_000_000_000, 0, 0])
+    for _ in range(40):
+        by_id = {v["ship_id"]: v for v in state["vessels"]}
+        refs = {
+            "fleet-a": _advantage_reference(by_id["B"]["position_um"], by_id["B"]["velocity_um_s"], 4_000_000_000_000),
+            "fleet-b": _advantage_reference(by_id["A"]["position_um"], by_id["A"]["velocity_um_s"], 4_000_000_000_000),
+        }
+        replay, _ = step_motion_state(copy.deepcopy(state), orders, copy.deepcopy(refs))
+        state, _ = step_motion_state(state, orders, refs)
+        assert replay == state
+    by_id = {v["ship_id"]: v for v in state["vessels"]}
+    separation = norm_nearest([b - a for a, b in zip(by_id["A"]["position_um"], by_id["B"]["position_um"])])
+    assert separation < start
+    assert by_id["A"]["position_um"] == [-value for value in by_id["B"]["position_um"]]
+
+
+def test_advantage_reference_requires_positive_standoff():
+    vessels = [_vessel("A", "fleet-a", (-8_000_000_000_000, 0, 0), (0, 0, 0), 50_000)]
+    state = _state(vessels)
+    reference = _advantage_reference((8_000_000_000_000, 0, 0), (0, 0, 0), 0)
+    with pytest.raises(MovementError):
+        step_motion_state(state, {"fleet-a": _advantage_order("fleet-a")}, {"fleet-a": reference})

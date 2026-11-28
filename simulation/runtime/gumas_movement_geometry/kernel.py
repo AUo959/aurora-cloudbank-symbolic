@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .constants import (
+    ADVANTAGE_APPROACH_SPEED_CAP_UM_S,
+    ADVANTAGE_GUIDANCE_TIME_CONSTANT_S,
     CANONICAL_JSON_PROFILE,
     ENGINEERING_PROPULSION_CAP_Q1000,
     MACROSTEP_MS,
@@ -210,6 +212,14 @@ def normalize_motion_reference(reference: Mapping[str, Any]) -> dict[str, Any]:
         "source_receipt_sha256": str(reference.get("source_receipt_sha256") or ""),
         "confidence_q1000": confidence,
     }
+    # Optional range-seeking fields (POSITION_FOR_ADVANTAGE). They are added
+    # only when present so v1.0 EVASIVE_VECTOR reference identities hold.
+    if "velocity_um_s" in reference or "standoff_um" in reference:
+        standoff = int(reference.get("standoff_um", -1))
+        if standoff <= 0:
+            raise MovementError("motion reference standoff must be positive")
+        normalized["velocity_um_s"] = list(vec3(reference.get("velocity_um_s") or ()))
+        normalized["standoff_um"] = standoff
     normalized["reference_sha256"] = sha256_canonical(normalized)
     return normalized
 
@@ -243,7 +253,11 @@ def _guidance_direction_q12(
         return normalize_q12(tangent)
     if navigation == "EVASIVE_VECTOR":
         if reference is None:
-            raise MovementError("EVASIVE_VECTOR requires MotionReferenceV1")
+            # Amendment 2026-11-28: with no current track there is no threat
+            # line, so the evasive burn falls back to the body tangent.
+            if norm_nearest(tangent) != 0:
+                return normalize_q12(tangent)
+            return (Q12, 0, 0)
         threat = subtract(reference["position_um"], position)
         lateral = cross(spin, threat)
         if norm_nearest(lateral) != 0:
@@ -252,6 +266,33 @@ def _guidance_direction_q12(
             return normalize_q12(tangent)
         return (Q12, 0, 0)
     raise MovementError(f"unsupported navigation intent: {navigation}")
+
+
+def _advantage_velocity_error_um_s(
+    position_um: Sequence[int],
+    velocity_um_s: Sequence[int],
+    reference: Mapping[str, Any],
+) -> tuple[int, int, int]:
+    """Velocity change that steers toward the reference standoff range.
+
+    The commanded closing speed along the line to the reference is the range
+    error over the guidance time constant, capped; the reference's own velocity
+    is matched so the vessel holds the standoff instead of overshooting it.
+    """
+    line = subtract(reference["position_um"], position_um)
+    distance = norm_nearest(line)
+    if distance == 0:
+        return (0, 0, 0)
+    error = distance - int(reference["standoff_um"])
+    closing = round_half_even_fraction(error, ADVANTAGE_GUIDANCE_TIME_CONSTANT_S)
+    closing = max(-ADVANTAGE_APPROACH_SPEED_CAP_UM_S, min(ADVANTAGE_APPROACH_SPEED_CAP_UM_S, closing))
+    unit = normalize_q12(line)
+    desired = add(reference["velocity_um_s"], (
+        round_half_even_fraction(unit[0] * closing, Q12),
+        round_half_even_fraction(unit[1] * closing, Q12),
+        round_half_even_fraction(unit[2] * closing, Q12),
+    ))
+    return subtract(desired, velocity_um_s)
 
 
 def thrust_acceleration_um_s2(
@@ -265,6 +306,20 @@ def thrust_acceleration_um_s2(
         raise MovementError("negative vessel acceleration cap")
     throttle = applied_throttle_q1000(order)
     magnitude = round_half_even_fraction(max_accel * throttle, 1000)
+    position = position_um if position_um is not None else vessel["position_um"]
+    if (
+        str(order["navigation_intent"]) == "POSITION_FOR_ADVANTAGE"
+        and reference is not None
+        and "standoff_um" in reference
+    ):
+        error = _advantage_velocity_error_um_s(position, vessel["velocity_um_s"], reference)
+        if error == (0, 0, 0) or magnitude == 0:
+            return (0, 0, 0), throttle
+        # Never command more than the velocity change one substep can absorb.
+        limit = min(magnitude, round_half_even_fraction(norm_nearest(error) * 1000, SUBSTEP_MS))
+        if limit == 0:
+            return (0, 0, 0), throttle
+        return clamp_vector_magnitude(scale_q12(normalize_q12(error), limit), max_accel), throttle
     direction = _guidance_direction_q12(
         position_um if position_um is not None else vessel["position_um"],
         order,

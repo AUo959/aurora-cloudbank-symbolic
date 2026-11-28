@@ -31,9 +31,11 @@ from simulation.runtime.gumas_movement_geometry.kernel import (
     step_motion_state,
 )
 from simulation.runtime.gumas_sensing_weapons import step_phase6_state
+from simulation.runtime.gumas_sensing_weapons.constants import PROTECTED_DISPOSITIONS
 from simulation.runtime.gumas_sensing_weapons import kernel as phase6_kernel
 
 from .constants import (
+    ADVANTAGE_STANDOFF_FRACTION_Q1000,
     CANONICAL_JSON_PROFILE,
     GENESIS_MARKER,
     LEDGER_ENTRY_SCHEMA,
@@ -410,29 +412,50 @@ def _motion_references(
     references: dict[str, dict[str, Any]] = {}
     for side_id, decision in sorted(decisions_by_side.items()):
         navigation = str(((decision.get("orders") or {}).get("specialist_intents") or {}).get("navigation") or "")
-        if navigation != "EVASIVE_VECTOR":
+        if navigation not in {"EVASIVE_VECTOR", "POSITION_FOR_ADVANTAGE"}:
             continue
         receipt = observation_receipts_by_side[side_id]
         contacts = receipt.get("selected_contact_evidence") or []
         if not contacts:
-            raise Phase9Error(f"EVASIVE_VECTOR lacks a side-local contact reference: {side_id}")
+            # No side-local track: both intents fall back to the Phase-5 tangent.
+            continue
         target_positions = []
+        target_velocities = []
         qualities = []
         for contact in contacts:
             target_id = str(contact.get("target_ship_id") or "")
             if target_id not in vessels:
                 raise Phase9Error("motion reference target absent from state")
             target_positions.append(vessels[target_id]["position_um"])
+            target_velocities.append(vessels[target_id]["velocity_um_s"])
             qualities.append(int(contact["contact_quality_q1000"]))
         fleet_id = str(decision["fleet_id"])
-        references[fleet_id] = {
+        reference: dict[str, Any] = {
             "reference_kind": "phase9_side_local_contact_centroid",
             "position_um": list(mean_vector_round_half_even(target_positions)),
             "source_state_sha256": str(state["state_sha256"]),
             "source_receipt_sha256": str(receipt["source_phase6_receipt_sha256"]),
             "confidence_q1000": mean_round(qualities),
         }
+        if navigation == "POSITION_FOR_ADVANTAGE":
+            reference["velocity_um_s"] = list(mean_vector_round_half_even(target_velocities))
+            reference["standoff_um"] = _advantage_standoff_um(vessels.values(), fleet_id)
+        references[fleet_id] = reference
     return references
+
+
+def _advantage_standoff_um(vessels: Any, fleet_id: str) -> int:
+    """Standoff range for a fleet: a fixed fraction of its shortest active weapon range."""
+    ranges = [
+        int(vessel["physical"]["effective_weapon_range_m"]) * 1_000_000
+        for vessel in vessels
+        if str(vessel["fleet_id"]) == fleet_id
+        and str(vessel.get("disposition") or "") not in PROTECTED_DISPOSITIONS
+        and int(vessel["physical"]["effective_weapon_range_m"]) > 0
+    ]
+    if not ranges:
+        raise Phase9Error(f"POSITION_FOR_ADVANTAGE fleet has no active armed vessel: {fleet_id}")
+    return max(1, min(ranges) * ADVANTAGE_STANDOFF_FRACTION_Q1000 // 1000)
 
 
 def _ledger_entry(

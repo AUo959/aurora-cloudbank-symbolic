@@ -322,3 +322,51 @@ def test_terminal_checkpoint_refuses_another_macrostep_before_command():
 
     with pytest.raises(Phase9Error, match="terminal checkpoint"):
         execute_macrostep(committed, baseline, context, checkpoint)
+
+
+def test_position_for_advantage_reference_carries_track_velocity_and_standoff():
+    from simulation.runtime.gumas_battle_orchestrator import orchestrator as orch
+
+    def vessel(ship_id, fleet_id, side_id, position, velocity, weapon_range_m, disposition=None):
+        item = {
+            "ship_id": ship_id,
+            "fleet_id": fleet_id,
+            "side_id": side_id,
+            "position_um": list(position),
+            "velocity_um_s": list(velocity),
+            "physical": {"effective_weapon_range_m": weapon_range_m},
+        }
+        if disposition:
+            item["disposition"] = disposition
+        return item
+
+    state = {
+        "state_sha256": "state",
+        "vessels": [
+            vessel("A1", "FA", "a", (0, 0, 0), (0, 0, 0), 5_000_000),
+            vessel("A2", "FA", "a", (0, 0, 0), (0, 0, 0), 4_000_000),
+            vessel("A3", "FA", "a", (0, 0, 0), (0, 0, 0), 1_000_000, disposition="destroyed"),
+            vessel("B1", "FB", "b", (10, 0, 0), (2, 0, 0), 5_000_000),
+            vessel("B2", "FB", "b", (30, 0, 0), (4, 0, 0), 5_000_000),
+        ],
+    }
+    decisions = {
+        "a": {"fleet_id": "FA", "orders": {"specialist_intents": {"navigation": "POSITION_FOR_ADVANTAGE"}}},
+        "b": {"fleet_id": "FB", "orders": {"specialist_intents": {"navigation": "POSITION_FOR_ADVANTAGE"}}},
+    }
+    receipts = {
+        "a": {
+            "source_phase6_receipt_sha256": "p6",
+            "selected_contact_evidence": [
+                {"target_ship_id": "B1", "contact_quality_q1000": 600},
+                {"target_ship_id": "B2", "contact_quality_q1000": 800},
+            ],
+        },
+        "b": {"source_phase6_receipt_sha256": "p6", "selected_contact_evidence": []},
+    }
+    refs = orch._motion_references(state, decisions, receipts)
+    assert set(refs) == {"FA"}
+    assert refs["FA"]["position_um"] == [20, 0, 0]
+    assert refs["FA"]["velocity_um_s"] == [3, 0, 0]
+    # 800/1000 of the shortest active weapon range; the destroyed hull is ignored.
+    assert refs["FA"]["standoff_um"] == 4_000_000 * 1_000_000 * 800 // 1000

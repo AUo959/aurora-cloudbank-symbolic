@@ -222,6 +222,15 @@ If degenerate, deterministic fallback is `+X`.
 
 Because the two control forces begin as exact position inverses, this rule naturally produces mirrored tangential directions without a side branch.
 
+**Amendment 2026-11-28 (range-seeking guidance).** The tangent rule above has no term that closes range. In the full P17 run both fleets burned tangentially for six hours, separated past sensor range, and never fired. When Phase 9 supplies a `MotionReferenceV1` that also carries `velocity_um_s` and a positive `standoff_um` (built from the side-local contact centroid, the mean contacted-target velocity, and 800/1000 of the fleet's shortest active effective weapon range), `POSITION_FOR_ADVANTAGE` instead steers to the standoff:
+
+- `line = reference_position - r`, `error = |line| - standoff_um`.
+- Commanded closing speed `c = round_half_even(error / 200 s)`, clamped to ±4,000,000,000 µm/s.
+- `desired_velocity = reference_velocity + unit(line) * c`, and `dv = desired_velocity - current_velocity`.
+- Thrust is along `unit(dv)` with magnitude `min(max_accel * throttle, |dv| / substep)`. If `dv` is zero, thrust is zero.
+
+With no contact reference, the v1.0 tangent rule above still applies. Likewise, `EVASIVE_VECTOR` with no current side-local contact no longer fails closed: with no threat line it uses the tangent fallback below. Before this amendment, losing contact during an evasive order aborted the run. The optional reference fields enter `reference_sha256` only when present, so `EVASIVE_VECTOR` reference identities are unchanged.
+
 ### `WITHDRAW_VECTOR`
 
 Direction is normalized radial-outward vector `r`.

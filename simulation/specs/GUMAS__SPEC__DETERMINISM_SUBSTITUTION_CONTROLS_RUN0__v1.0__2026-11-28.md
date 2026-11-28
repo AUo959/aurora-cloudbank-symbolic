@@ -38,6 +38,12 @@ Bridge:
 
 Phase 11 always binds doctrine, so Run 0 and every control run with it.
 
+### 2.3 Phase 5 and Phase 9: range-seeking `POSITION_FOR_ADVANTAGE` (gap fix)
+
+The first complete Run 0 and controls passed every comparison, but every run was a non-engagement: zero weapon attempts in 2,160 macrosteps. The fleets start about 12,100 km apart, outside every effective weapon range (at most 5,636 km). The only navigation intent the policy chose, `POSITION_FOR_ADVANTAGE`, burned along the planetoid tangent and had no term that closes range. Both fleets accelerated apart and lost sensor contact.
+
+Fix: Phase 9 now builds a motion reference for `POSITION_FOR_ADVANTAGE` from the side-local contact centroid, the mean contacted-target velocity, and a standoff of 800/1000 of the fleet's shortest active effective weapon range. Phase 5 steers to that standoff and matches the track velocity (movement spec, amendment 2026-11-28). Without a contact, the v1.0 tangent rule still applies. No variant, side, class or authority is named. The evidence from the non-engaging runs was replaced by a re-run on the fixed engine.
+
 ## 3. Identity layers
 
 Every run receipt keeps these four layers separate:

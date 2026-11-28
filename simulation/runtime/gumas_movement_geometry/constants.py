@@ -84,6 +84,12 @@ NAVIGATION_THROTTLE_DEMAND_Q1000 = {
     "EVASIVE_VECTOR": 850,
     "WITHDRAW_VECTOR": 900,
 }
+# Range-seeking guidance for POSITION_FOR_ADVANTAGE with a contact reference
+# (amendment 2026-11-28). The commanded closing speed is the standoff error
+# divided by the time constant, capped in magnitude.
+ADVANTAGE_GUIDANCE_TIME_CONSTANT_S = 200
+ADVANTAGE_APPROACH_SPEED_CAP_UM_S = 4_000_000_000
+
 ENGINEERING_PROPULSION_CAP_Q1000 = {
     "BALANCED_POWER": 800,
     "REINFORCE_DEFENSE": 650,

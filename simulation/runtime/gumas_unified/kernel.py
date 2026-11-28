@@ -237,12 +237,24 @@ class CausalEngine:
             raise FeasibilityError("corridor is inaccessible")
         return route
 
-    def disrupt_route(self, route_id: str, new_capacity: int, *, cause: str) -> Receipt:
-        """Only scripted physical disturbance in this synthetic acceptance fixture."""
-        if type(new_capacity) is not int or new_capacity < 0:
-            raise FeasibilityError("invalid capacity")
+    @staticmethod
+    def _require_fixture_cause(cause: str) -> None:
         if not cause.startswith("fixture:"):
             raise FeasibilityError("external field changes require fixture provenance")
+
+    def disrupt_route(self, route_id: str, new_capacity: int, *, cause: str) -> Receipt:
+        """Scripted physical disturbance of an open corridor's throughput.
+
+        Capacity is the throughput of a corridor that exists, so it must stay
+        a positive integer (the P0 invariant in ``Universe.validate``). A
+        disruption to zero would be a second, partial encoding of closure:
+        cargo blocked but signals still flowing. It is refused here, before
+        any candidate state is built; use :meth:`close_route` instead.
+        """
+        if type(new_capacity) is not int or new_capacity < 1:
+            raise FeasibilityError(
+                "capacity must be a positive integer; use close_route for a full closure")
+        self._require_fixture_cause(cause)
 
         def change(world: Universe) -> dict[str, Any]:
             if route_id not in world.corridors:
@@ -253,6 +265,36 @@ class CausalEngine:
             return {"route_id": route_id, "old_capacity": old,
                     "new_capacity": new_capacity}
         return self._commit("route_capacity_changed", None, cause, change)
+
+    def close_route(self, route_id: str, *, cause: str) -> Receipt:
+        """Scripted full corridor closure: no new cargo or signals may enter.
+
+        Closure sets ``Corridor.enabled`` to False, so every access path that
+        resolves the corridor through ``_route`` refuses it. Capacity is left
+        untouched and applies again on reopening. Cargo and signals already
+        in transit were committed before the closure and still arrive.
+        """
+        return self._set_route_enabled(route_id, False, "route_closed", cause)
+
+    def reopen_route(self, route_id: str, *, cause: str) -> Receipt:
+        """Scripted reversal of :meth:`close_route` with the prior capacity."""
+        return self._set_route_enabled(route_id, True, "route_reopened", cause)
+
+    def _set_route_enabled(self, route_id: str, enabled: bool, kind: str,
+                           cause: str) -> Receipt:
+        self._require_fixture_cause(cause)
+
+        def change(world: Universe) -> dict[str, Any]:
+            if route_id not in world.corridors:
+                raise FeasibilityError("unknown corridor")
+            route = world.corridors[route_id]
+            if route.enabled is enabled:
+                raise FeasibilityError(
+                    "corridor is already " + ("open" if enabled else "closed"))
+            route.enabled = enabled
+            return {"route_id": route_id, "enabled": enabled,
+                    "capacity_units_per_window": route.capacity_units_per_window}
+        return self._commit(kind, None, cause, change)
 
     def dispatch(self, actor_id: str, route_id: str, commodity: str, amount: int,
                  *, cause: str) -> Receipt:

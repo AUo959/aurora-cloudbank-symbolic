@@ -97,6 +97,10 @@ FAULTS = [
     *[(f"route_{n}_negative", _base, (lambda n: lambda w: setattr(_route(w), n, -1))(n), {},
        f"{n} must be a nonnegative integer")
       for n in ("shipment_energy_j_per_unit_km", "signal_energy_j_per_km")],
+    *[(f"route_enabled_{label}", _base,
+       (lambda v: lambda w: setattr(_route(w), "enabled", v))(value), {},
+       "route enabled must be a boolean")
+      for label, value in (("int", 0), ("none", None), ("str", "false"))],
     ("route_signal_over_ceiling", _base,
      lambda w: setattr(_route(w), "signal_speed_km_s", 301), {"signal_speed_ceiling_km_s": 300},
      "route signaling exceeds established physical limit"),
@@ -283,10 +287,17 @@ class KernelTransaction(unittest.TestCase):
     def test_rejected_commit_leaves_state_and_ledger_unchanged(self):
         engine = CausalEngine(fixture())
         before_digest, before_ledger = engine.state.digest(), list(engine.ledger)
-        # Capacity 0 passes the kernel's own pre-checks, so the rejection
-        # comes from validate() on the deep-copied candidate, not FeasibilityError.
+
+        def zero_capacity(world):
+            world.corridors["corridor_a"].capacity_units_per_window = 0
+            return {}
+
+        # A mutation with no kernel pre-checks, so the rejection comes from
+        # validate() on the deep-copied candidate, not FeasibilityError.
+        # (disrupt_route now refuses 0 up front; see test_gumas_unified_closure.)
         with self.assertRaises(ValueError) as caught:
-            engine.disrupt_route("corridor_a", 0, cause="fixture:invalid-capacity")
+            engine._commit("route_capacity_changed", None,
+                           "fixture:invalid-capacity", zero_capacity)
         self.assertIs(type(caught.exception), ValueError)
         self.assertEqual(str(caught.exception),
                          "capacity_units_per_window must be a positive integer")

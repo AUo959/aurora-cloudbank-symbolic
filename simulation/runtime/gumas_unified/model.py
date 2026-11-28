@@ -186,6 +186,8 @@ def _validate_corridor(world: Any, key: str, route: Any, profile: PhysicsProfile
         _natural(getattr(route, n), n, positive=True)
     for n in ("shipment_energy_j_per_unit_km", "signal_energy_j_per_km"):
         _natural(getattr(route, n), n)
+    if type(route.enabled) is not bool:
+        raise ValueError("route enabled must be a boolean")
     if route.signal_speed_km_s > profile.signal_speed_ceiling_km_s:
         raise ValueError("route signaling exceeds established physical limit")
     if route.cargo_speed_km_s > profile.cargo_speed_ceiling_km_s:

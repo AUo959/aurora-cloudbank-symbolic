@@ -1,7 +1,7 @@
 """Scenario-local constants for deterministic GUMAS Phase-8 resolution."""
 
 PHASE8_CONTRACT_ID = "GUMAS_MORALE_RESOLUTION_TERMINATION_v1_0"
-PHASE8_VERSION = "1.0.0"
+PHASE8_VERSION = "1.1.0"
 CANONICAL_JSON_PROFILE = "aurora-canonical-json-v1"
 
 WITHDRAWAL_BOUNDARY_UM = 20_000_000_000_000
@@ -9,6 +9,9 @@ HARD_LIMIT_MS = 21_600_000
 CEASEFIRE_OFFER_TTL_MACROSTEPS = 3
 MUTUAL_DISENGAGE_REQUIRED_STREAK = 2
 WITHDRAWAL_SUCCESS_FRACTION_Q1000 = 700
+# Broken contact: no combat-effective pair within weapon reach, no fresh weapon
+# effect, and separation not closing, held continuously for this long.
+CONTACT_LAPSE_WINDOW_MS = 1_800_000
 
 BATTLE_SHOCK_WEIGHTS_Q1000 = {
     "fleet_hull_loss": 700,

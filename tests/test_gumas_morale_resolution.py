@@ -86,3 +86,46 @@ def test_command_mapping_order_inert_and_bad_phase7_hash_fails_closed():
     s=state(); c=commands(); assert run(s,phase7_receipt(s),c)==run(s,phase7_receipt(s),dict(reversed(list(c.items()))))
     bad=phase7_receipt(s); bad["phase7_receipt_sha256"]="0"*64
     with pytest.raises(Phase8Error): run(s,bad,c)
+
+def _lapse_step(sep_um, k, prior=None, effects=0, range_m=500_000):
+    vs=[vessel("L1","loyalist","F-L",weapon_range_m=range_m),vessel("L2","loyalist","F-L",disposition="disabled",weapons=0),
+        vessel("R1","rebel","F-R",position=[sep_um,0,0],weapon_range_m=range_m),vessel("R2","rebel","F-R",position=[sep_um,0,0],weapon_range_m=range_m)]
+    s=state(elapsed=100000+k*10000,macrostep=10+k,vessels=vs)
+    return run(s,phase7_receipt(s,(),effects),commands(),prior)[1]
+
+
+def _drive(seps, effects=None):
+    prior=None; out=[]
+    for k,sep in enumerate(seps):
+        prior=_lapse_step(sep,k,prior,(effects or {}).get(k,0)); out.append(prior)
+        if prior["terminal_outcome"]["terminated"]: break
+    return out
+
+
+def test_contact_broken_after_sustained_out_of_reach_window():
+    from simulation.runtime.gumas_morale_resolution.constants import CONTACT_LAPSE_WINDOW_MS
+    steps=CONTACT_LAPSE_WINDOW_MS//10000
+    far=600_000*1_000_000
+    rs=_drive([far+k for k in range(steps+5)])
+    assert rs[0]["contact_lapse"]["lapsed_this_step"] is False  # no prior separation yet
+    assert all(not r["terminal_outcome"]["terminated"] for r in rs[:-1])
+    last=rs[-1]; o=last["terminal_outcome"]
+    assert len(rs)==steps+2 and last["contact_lapse"]["lapse_duration_ms"]==CONTACT_LAPSE_WINDOW_MS
+    assert o["termination_mode"]=="contact_broken" and o["victor_side_id"] is None and o["stalemate"] is False
+    assert set(last["engagement_status_by_side"].values())=={"disengaged"}
+    assert last["protected_ship_ids"]==["L1","L2","R1","R2"]
+
+
+def test_contact_lapse_resets_when_closing_in_reach_or_firing():
+    far=600_000*1_000_000
+    closing=_drive([far+100-k for k in range(10)])
+    assert all(not r["contact_lapse"]["lapsed_this_step"] for r in closing)
+    reach=_drive([400_000*1_000_000+k for k in range(10)])
+    assert all(not r["contact_lapse"]["out_of_reach"] and not r["contact_lapse"]["lapsed_this_step"] for r in reach)
+    fired=_drive([far+k for k in range(6)],effects={3:1})
+    assert [r["contact_lapse"]["lapse_started_elapsed_ms"] for r in fired]==[None,110000,110000,None,140000,140000]
+
+
+def test_contact_lapse_requires_integer_weapon_range():
+    with pytest.raises(Phase8Error, match="effective weapon range"):
+        _lapse_step(1,0,range_m=None)

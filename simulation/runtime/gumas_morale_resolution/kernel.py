@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -19,6 +20,7 @@ from .constants import (
     CANONICAL_JSON_PROFILE,
     CEASEFIRE_OFFER_TTL_MACROSTEPS,
     COHESION_LOSS_WEIGHTS_Q1000,
+    CONTACT_LAPSE_WINDOW_MS,
     HARD_LIMIT_MS,
     KNOWN_STRATEGIC_POSTURES,
     MORALE_LOSS_WEIGHTS_Q1000,
@@ -350,7 +352,85 @@ def _surrender_receipt(command_receipt: Mapping[str, Any], aggregate: Mapping[st
     return {"eligible_posture": eligible, "commander_resolve_q1000": resolve, "surrender_threshold_q1000": threshold, "pressure_terms_q1000": terms, "surrender_pressure_q1000": pressure, "predicate": predicate}
 
 
-def _outcome(sides: Sequence[str], aggregate: Mapping[str, Mapping[str, Any]], active_offers: Mapping[str, bool], disengage_streak: int, withdrawal: Mapping[str, Mapping[str, Any]], surrender: Mapping[str, Mapping[str, Any]], elapsed_ms: int) -> dict[str, Any]:
+def _optional_int(value: Any) -> int | None:
+    return int(value) if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _effective_weapon_reach_um(effective: Mapping[str, Sequence[Mapping[str, Any]]]) -> int:
+    reach_um = 0
+    for side_vessels in effective.values():
+        for vessel in side_vessels:
+            range_m = (vessel.get("physical") or {}).get("effective_weapon_range_m")
+            if isinstance(range_m, bool) or not isinstance(range_m, int) or range_m <= 0:
+                raise Phase8Error(f"{vessel['ship_id']} effective weapon range must be a positive integer")
+            reach_um = max(reach_um, range_m * 1_000_000)
+    return reach_um
+
+
+def _contact_lapse_receipt(
+    sides: Sequence[str],
+    vessels_by_side: Mapping[str, Sequence[Mapping[str, Any]]],
+    aggregate: Mapping[str, Mapping[str, Any]],
+    effect_count: int,
+    prior: Mapping[str, Any] | None,
+    elapsed_ms: int,
+) -> dict[str, Any]:
+    """Track whether the two sides have physically broken contact.
+
+    A step is lapsed when every cross-side pair of combat-effective ships is
+    beyond the longest effective weapon range on either side, Phase 7 applied
+    no effect, and the closest pair is not closing relative to the prior step.
+    The lapse window starts at the first such step and resets on any other.
+    """
+    receipt: dict[str, Any] = {
+        "min_effective_separation_um": None,
+        "max_effective_weapon_range_um": None,
+        "out_of_reach": False,
+        "closing": False,
+        "lapsed_this_step": False,
+        "lapse_started_elapsed_ms": None,
+        "lapse_duration_ms": 0,
+        "window_ms": CONTACT_LAPSE_WINDOW_MS,
+        "contact_broken": False,
+    }
+    effective_ids = {s: set(aggregate[s]["combat_effective_ship_ids"]) for s in sides}
+    effective = {s: [v for v in vessels_by_side[s] if str(v["ship_id"]) in effective_ids[s]] for s in sides}
+    if not all(effective[s] for s in sides):
+        return receipt  # incapacity/annihilation already terminates this step
+    reach_um = _effective_weapon_reach_um(effective)
+    first, second = sides
+    min_sq = min(
+        sum((int(a) - int(b)) ** 2 for a, b in zip(x["position_um"], y["position_um"]))
+        for x in effective[first]
+        for y in effective[second]
+    )
+    separation = math.isqrt(min_sq)
+    prior_lapse = (prior or {}).get("contact_lapse") or {}
+    prior_separation = _optional_int(prior_lapse.get("min_effective_separation_um"))
+    out_of_reach = min_sq > reach_um * reach_um
+    closing = prior_separation is not None and separation < prior_separation
+    lapsed = out_of_reach and effect_count == 0 and prior_separation is not None and not closing
+    start = None
+    if lapsed:
+        prior_start = _optional_int(prior_lapse.get("lapse_started_elapsed_ms"))
+        start = prior_start if prior_start is not None else elapsed_ms
+    duration = elapsed_ms - start if start is not None else 0
+    receipt.update(
+        {
+            "min_effective_separation_um": separation,
+            "max_effective_weapon_range_um": reach_um,
+            "out_of_reach": out_of_reach,
+            "closing": closing,
+            "lapsed_this_step": lapsed,
+            "lapse_started_elapsed_ms": start,
+            "lapse_duration_ms": duration,
+            "contact_broken": lapsed and duration >= CONTACT_LAPSE_WINDOW_MS,
+        }
+    )
+    return receipt
+
+
+def _outcome(sides: Sequence[str], aggregate: Mapping[str, Mapping[str, Any]], active_offers: Mapping[str, bool], disengage_streak: int, withdrawal: Mapping[str, Mapping[str, Any]], surrender: Mapping[str, Mapping[str, Any]], elapsed_ms: int, contact_broken: bool = False) -> dict[str, Any]:
     annihilated = [s for s in sides if not aggregate[s]["surviving_ship_ids"]]
     incapacitated = [s for s in sides if aggregate[s]["surviving_ship_ids"] and not aggregate[s]["combat_effective_ship_ids"]]
     surrendered = [s for s in sides if surrender[s]["predicate"]]
@@ -380,6 +460,8 @@ def _outcome(sides: Sequence[str], aggregate: Mapping[str, Mapping[str, Any]], a
         mode = "successful_withdrawal"; opponent = next(s for s in sides if s not in withdrawn)
         if aggregate[opponent]["surviving_ship_ids"]:
             local_control = opponent
+    elif contact_broken:
+        mode = "contact_broken"
     elif elapsed_ms >= HARD_LIMIT_MS:
         mode = "hard_limit_stalemate"; stalemate = True
     terminated = mode != "ongoing"
@@ -392,7 +474,7 @@ def _engagement_and_protection(sides: Sequence[str], outcome: Mapping[str, Any],
     mode = str(outcome["termination_mode"])
     if mode == "mutual_ceasefire":
         status = {s: "ceasefire" for s in sides}; protected.update(ship for s in sides for ship in aggregate[s]["surviving_ship_ids"])
-    elif mode in {"mutual_disengagement", "mutual_withdrawal"}:
+    elif mode in {"mutual_disengagement", "mutual_withdrawal", "contact_broken"}:
         status = {s: "disengaged" for s in sides}; protected.update(ship for s in sides for ship in aggregate[s]["surviving_ship_ids"])
     elif mode in {"mutual_stand_down", "mutual_incapacity"}:
         value = "surrendered" if mode == "mutual_stand_down" else "incapacitated"
@@ -444,7 +526,8 @@ def step_phase8_state(state: Mapping[str, Any], phase7_receipt: Mapping[str, Any
     for side in sides:
         opponent = next(other for other in sides if other != side)
         surrender[side] = _surrender_receipt(commands_by_side[side], aggregate[side], withdrawal[side], aggregate[opponent])
-    outcome = _outcome(sides, aggregate, active_offers, disengage_streak, withdrawal, surrender, elapsed_ms)
+    contact_lapse = _contact_lapse_receipt(sides, updated_by_side, aggregate, int(phase7_receipt.get("effect_count", 0)), prior, elapsed_ms)
+    outcome = _outcome(sides, aggregate, active_offers, disengage_streak, withdrawal, surrender, elapsed_ms, bool(contact_lapse["contact_broken"]))
     engagement, protected = _engagement_and_protection(sides, outcome, aggregate)
 
     source_identity = _source_identity()
@@ -467,6 +550,7 @@ def step_phase8_state(state: Mapping[str, Any], phase7_receipt: Mapping[str, Any
         "negotiation_signal_q1000_by_side": negotiation_signal,
         "mutual_disengage_streak": disengage_streak,
         "withdrawal_by_side": withdrawal,
+        "contact_lapse": contact_lapse,
         "surrender_by_side": surrender,
         "engagement_status_by_side": engagement,
         "protected_ship_ids": protected,

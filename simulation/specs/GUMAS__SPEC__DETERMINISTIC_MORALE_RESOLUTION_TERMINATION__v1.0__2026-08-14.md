@@ -240,6 +240,29 @@ At streak `>= 2`:
 - all surviving ships are protected;
 - physical dispositions remain unchanged.
 
+**Amendment 2026-11-28 (broken contact, Phase-8 v1.1.0).** Mutual disengagement as defined above needs both commanders to select `DISENGAGE`. In the Run-0 evidence (8603a0e4…) neither did. Weapon effects stopped at macrostep 245 (about 41 min). The surviving combat-effective ships then drifted apart under `HOLD`/`POSITIONAL_MANEUVER`. Nothing fired again, yet every run ran to the 6 h hard limit. Phase 8 now also tracks a physical broken-contact state, `contact_lapse`, from committed positions:
+
+- `max_effective_weapon_range_um`: the longest `physical.effective_weapon_range_m` among combat-effective ships on either side, times 1,000,000.
+- `min_effective_separation_um`: `isqrt` of the minimum squared distance over all cross-side pairs of combat-effective ships.
+- A step is lapsed only when all of these hold:
+  - the separation exceeds the reach (an exact squared comparison);
+  - Phase 7 received zero effect descriptors;
+  - a prior step's separation exists;
+  - the separation is not smaller than that prior separation, so the sides are not closing.
+- `lapse_started_elapsed_ms` is the `elapsed_ms` of the first step in an unbroken run of lapsed steps. Any non-lapsed step resets it to `null`.
+- Scenario-local `CONTACT_LAPSE_WINDOW_MS = 1,800,000` (30 min). `contact_broken` becomes true when `elapsed_ms - lapse_started_elapsed_ms >= CONTACT_LAPSE_WINDOW_MS`.
+
+The closing test keeps the opening approach from T0 from counting as broken contact, because fleets that are out of reach but converging are still engaging. A side with no combat-effective ship is already terminal under §7/§8, so in that case the receipt is inert.
+
+At `contact_broken`:
+
+- `termination_mode = contact_broken`;
+- no victor and no local control;
+- `stalemate = false`, because the battle ended physically and not by the clock;
+- engagement status is `disengaged` for both sides, and all surviving ships are protected, as for mutual disengagement.
+
+This mode is placed in the §10 precedence between `successful_withdrawal` and `hard_limit_stalemate`. It is a physical stop-state. It invents no motive, posture, or surrender.
+
 # 5. Physical withdrawal
 
 ## 5.1 Boundary
@@ -427,8 +450,9 @@ Evaluate all predicates from the same committed post-morale snapshot, then selec
 5. unilateral `surrender`;
 6. `mutual_disengagement`;
 7. `successful_withdrawal`;
-8. `hard_limit_stalemate`;
-9. otherwise `ongoing`.
+8. `contact_broken` (amendment 2026-11-28);
+9. `hard_limit_stalemate`;
+10. otherwise `ongoing`.
 
 When the same-precedence unilateral predicate is true for both sides, use the corresponding mutual class rather than side-ID tie-breaking.
 
@@ -456,6 +480,7 @@ Protection rules:
 
 - mutual ceasefire: all surviving ships protected;
 - mutual disengagement: all surviving ships protected;
+- broken contact: all surviving ships protected;
 - mutual stand-down: all surviving ships protected;
 - unilateral surrender: all surviving surrendered-side ships protected;
 - incapacity: surviving incapacitated-side ships protected;

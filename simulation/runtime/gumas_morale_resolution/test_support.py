@@ -17,8 +17,8 @@ def _phase7_identity():
     return core,norm,composite
 
 
-def vessel(ship, side, fleet, *, disposition="combat_capable", hull=1000, morale=900, cohesion=900, position=None, velocity=None, propulsion=1000, weapons=1000):
-    return {"ship_id":ship,"side_id":side,"fleet_id":fleet,"position_um":list(position or [0,0,0]),"velocity_um_s":list(velocity or [0,0,0]),"physical":{"shield_capacity_milliunits":1000,"shield_current_milliunits":1000,"armor_integrity_milliunits":1000,"armor_current_milliunits":1000,"hull_integrity_milliunits":1000,"hull_current_milliunits":hull},"readiness_q1000":{"overall":1000,"sensors":1000,"ew":1000,"propulsion":propulsion,"weapons":weapons,"damage_control":1000},"morale_q1000":morale,"cohesion_q1000":cohesion,"damage_state":"undamaged" if hull==1000 else "major_damage","disposition":disposition}
+def vessel(ship, side, fleet, *, disposition="combat_capable", hull=1000, morale=900, cohesion=900, position=None, velocity=None, propulsion=1000, weapons=1000, weapon_range_m=500_000):
+    return {"ship_id":ship,"side_id":side,"fleet_id":fleet,"position_um":list(position or [0,0,0]),"velocity_um_s":list(velocity or [0,0,0]),"physical":{"shield_capacity_milliunits":1000,"shield_current_milliunits":1000,"armor_integrity_milliunits":1000,"armor_current_milliunits":1000,"hull_integrity_milliunits":1000,"hull_current_milliunits":hull,"effective_weapon_range_m":weapon_range_m},"readiness_q1000":{"overall":1000,"sensors":1000,"ew":1000,"propulsion":propulsion,"weapons":weapons,"damage_control":1000},"morale_q1000":morale,"cohesion_q1000":cohesion,"damage_state":"undamaged" if hull==1000 else "major_damage","disposition":disposition}
 
 
 def state(*, elapsed=100000, macrostep=10, vessels=None):

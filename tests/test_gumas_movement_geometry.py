@@ -162,7 +162,9 @@ def test_evasive_vector_without_reference_falls_back_to_tangent():
     )
     order = _order("rebel", "PRESS", "EVASIVE_VECTOR", "BALANCED_POWER")
     thrust, _ = thrust_acceleration_um_s2(vessel, order, None)
-    assert thrust[0] == 0 and thrust[1] > 0 and thrust[2] == 0
+    assert thrust[0] == 0
+    assert thrust[1] > 0
+    assert thrust[2] == 0
 
 
 def test_one_step_replay_and_insertion_order_independence():
@@ -252,7 +254,9 @@ def test_position_for_advantage_closes_toward_standoff_with_a_contact_reference(
     vessel = _vessel("A", "fleet-a", (-8_000_000_000_000, 0, 0), (0, 0, 0), 50_000)
     reference = _advantage_reference((8_000_000_000_000, 0, 0), (0, 0, 0), 4_000_000_000_000)
     thrust, _ = thrust_acceleration_um_s2(vessel, _advantage_order("fleet-a"), reference)
-    assert thrust[0] > 0 and thrust[1] == 0 and thrust[2] == 0
+    assert thrust[0] > 0
+    assert thrust[1] == 0
+    assert thrust[2] == 0
     assert norm_nearest(thrust) <= 40_000_000
 
     inside = _vessel("A", "fleet-a", (6_000_000_000_000, 0, 0), (0, 0, 0), 50_000)
@@ -270,7 +274,8 @@ def test_position_for_advantage_holds_when_already_matched_at_standoff():
 def test_position_for_advantage_without_reference_keeps_v1_tangent():
     vessel = _vessel("A", "fleet-a", (6_000_000_000_000, 0, 0), (0, 0, 0), 50_000)
     thrust, _ = thrust_acceleration_um_s2(vessel, _advantage_order("fleet-a"), None)
-    assert thrust[0] == 0 and thrust[1] > 0
+    assert thrust[0] == 0
+    assert thrust[1] > 0
 
 
 def test_closing_fleets_converge_to_standoff_and_replay():
@@ -300,5 +305,21 @@ def test_advantage_reference_requires_positive_standoff():
     vessels = [_vessel("A", "fleet-a", (-8_000_000_000_000, 0, 0), (0, 0, 0), 50_000)]
     state = _state(vessels)
     reference = _advantage_reference((8_000_000_000_000, 0, 0), (0, 0, 0), 0)
+    orders = {"fleet-a": _advantage_order("fleet-a")}
+    references = {"fleet-a": reference}
     with pytest.raises(MovementError):
-        step_motion_state(state, {"fleet-a": _advantage_order("fleet-a")}, {"fleet-a": reference})
+        step_motion_state(state, orders, references)
+
+
+def test_wrecks_coast_and_propulsion_readiness_scales_thrust():
+    order = _advantage_order("fleet-a")
+    healthy = _vessel("A", "fleet-a", (6_000_000_000_000, 0, 0), (0, 0, 0), 50_000)
+    full, _ = thrust_acceleration_um_s2(healthy, order, None)
+    for disposition in ("destroyed", "disabled"):
+        wreck = copy.deepcopy(healthy)
+        wreck["disposition"] = disposition
+        assert thrust_acceleration_um_s2(wreck, order, None) == ((0, 0, 0), 0)
+    damaged = copy.deepcopy(healthy)
+    damaged["readiness_q1000"] = {"propulsion": 500}
+    half, _ = thrust_acceleration_um_s2(damaged, order, None)
+    assert norm_nearest(half) * 2 == pytest.approx(norm_nearest(full), abs=2)

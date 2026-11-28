@@ -231,6 +231,8 @@ Because the two control forces begin as exact position inverses, this rule natur
 
 With no contact reference, the v1.0 tangent rule above still applies. Likewise, `EVASIVE_VECTOR` with no current side-local contact no longer fails closed: with no threat line it uses the tangent fallback below. Before this amendment, losing contact during an evasive order aborted the run. The optional reference fields enter `reference_sha256` only when present, so `EVASIVE_VECTOR` reference identities are unchanged.
 
+Vessels whose disposition is `destroyed` or `disabled` receive no commanded thrust and coast under P17 gravity. Every other vessel's thrust magnitude is scaled by `readiness_q1000.propulsion / 1000`.
+
 ### `WITHDRAW_VECTOR`
 
 Direction is normalized radial-outward vector `r`.

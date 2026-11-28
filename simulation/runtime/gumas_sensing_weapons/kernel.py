@@ -264,6 +264,8 @@ def _jam_effects(
     for jammer in sorted(vessels, key=lambda item: item["ship_id"]):
         if jammer["side_id"] == observer["side_id"]:
             continue
+        if str(jammer.get("disposition") or "") in PROTECTED_DISPOSITIONS:
+            continue
         jammer_command = commands[str(jammer["fleet_id"])]
         mode = jammer_command["ew_sensors"]
         if mode not in {"ACTIVE_JAM", "DECEPTIVE_EMISSIONS"}:
@@ -327,6 +329,8 @@ def build_observation_state(
     elapsed_ms = int(state["elapsed_ms"])
     contacts = []
     for observer in vessels:
+        if str(observer.get("disposition") or "") == "destroyed":
+            continue
         ew_details, track_loss, identity_loss = _jam_effects(
             observer, vessels, commands, elapsed_ms
         )

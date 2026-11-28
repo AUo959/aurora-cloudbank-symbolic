@@ -393,3 +393,28 @@ def test_higher_mobility_cannot_increase_hit_chance_and_firepower_increases_base
         strong_attempt["base_effect_milliunits"]
         >= low_attempt["base_effect_milliunits"]
     )
+
+
+def test_destroyed_jammer_applies_no_electronic_warfare():
+    from simulation.runtime.gumas_sensing_weapons import kernel as phase6
+
+    def ship(ship_id, side, disposition=None):
+        item = {
+            "ship_id": ship_id,
+            "side_id": side,
+            "fleet_id": f"F-{side}",
+            "position_um": [0, 6_000_000_000_000, 0] if side == "a" else [0, 6_100_000_000_000, 0],
+            "physical": {"sensor_range_m": 10_000_000},
+            "capability_q1000": {"electronic_warfare_q1000": 900},
+            "readiness_q1000": {"ew": 1000, "sensors": 1000},
+        }
+        if disposition:
+            item["disposition"] = disposition
+        return item
+
+    commands = {"F-a": {"ew_sensors": "PASSIVE_TRACK"}, "F-b": {"ew_sensors": "ACTIVE_JAM"}}
+    observer = ship("A1", "a")
+    live = phase6._jam_effects(observer, [observer, ship("B1", "b")], commands, 0)
+    dead = phase6._jam_effects(observer, [observer, ship("B1", "b", "destroyed")], commands, 0)
+    assert live[0]
+    assert dead == ([], 0, 0)

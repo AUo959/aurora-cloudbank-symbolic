@@ -44,6 +44,8 @@ The first complete Run 0 and controls passed every comparison, but every run was
 
 Fix: Phase 9 now builds a motion reference for `POSITION_FOR_ADVANTAGE` from the side-local contact centroid, the mean contacted-target velocity, and a standoff of 800/1000 of the fleet's shortest active effective weapon range. Phase 5 steers to that standoff and matches the track velocity (movement spec, amendment 2026-11-28). Without a contact, the v1.0 tangent rule still applies. No variant, side, class or authority is named. The evidence from the non-engaging runs was replaced by a re-run on the fixed engine.
 
+Once fleets engaged, peer review found that destroyed hulls kept maneuvering under power and destroyed jammers kept jamming. Wrecks and disabled hulls now coast, thrust scales with propulsion readiness, destroyed or disabled ships no longer jam, and destroyed ships no longer observe. The evidence was regenerated on that engine.
+
 ## 3. Identity layers
 
 Every run receipt keeps these four layers separate:

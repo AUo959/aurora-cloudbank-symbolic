@@ -24,6 +24,7 @@ from .constants import (
     STRATEGIC_THROTTLE_CAP_Q1000,
     SUBSTEP_MS,
     SUBSTEPS_PER_MACROSTEP,
+    UNPOWERED_DISPOSITIONS,
 )
 from .geometry import (
     GeometryError,
@@ -305,7 +306,14 @@ def thrust_acceleration_um_s2(
     if max_accel < 0:
         raise MovementError("negative vessel acceleration cap")
     throttle = applied_throttle_q1000(order)
-    magnitude = round_half_even_fraction(max_accel * throttle, 1000)
+    # Wrecks and disabled hulls coast under gravity only; surviving hulls
+    # thrust in proportion to propulsion readiness.
+    if str(vessel.get("disposition") or "") in UNPOWERED_DISPOSITIONS:
+        return (0, 0, 0), 0
+    propulsion = int((vessel.get("readiness_q1000") or {}).get("propulsion", 1000))
+    if not 0 <= propulsion <= 1000:
+        raise MovementError("propulsion readiness outside q1000 bounds")
+    magnitude = round_half_even_fraction(max_accel * throttle * propulsion, 1_000_000)
     position = position_um if position_um is not None else vessel["position_um"]
     if (
         str(order["navigation_intent"]) == "POSITION_FOR_ADVANTAGE"

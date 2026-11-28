@@ -419,16 +419,7 @@ def _motion_references(
         if not contacts:
             # No side-local track: both intents fall back to the Phase-5 tangent.
             continue
-        target_positions = []
-        target_velocities = []
-        qualities = []
-        for contact in contacts:
-            target_id = str(contact.get("target_ship_id") or "")
-            if target_id not in vessels:
-                raise Phase9Error("motion reference target absent from state")
-            target_positions.append(vessels[target_id]["position_um"])
-            target_velocities.append(vessels[target_id]["velocity_um_s"])
-            qualities.append(int(contact["contact_quality_q1000"]))
+        target_positions, target_velocities, qualities = _contact_tracks(vessels, contacts)
         fleet_id = str(decision["fleet_id"])
         reference: dict[str, Any] = {
             "reference_kind": "phase9_side_local_contact_centroid",
@@ -442,6 +433,20 @@ def _motion_references(
             reference["standoff_um"] = _advantage_standoff_um(vessels.values(), fleet_id)
         references[fleet_id] = reference
     return references
+
+
+def _contact_tracks(
+    vessels: Mapping[str, Mapping[str, Any]], contacts: Sequence[Mapping[str, Any]]
+) -> tuple[list[Any], list[Any], list[int]]:
+    positions, velocities, qualities = [], [], []
+    for contact in contacts:
+        target_id = str(contact.get("target_ship_id") or "")
+        if target_id not in vessels:
+            raise Phase9Error("motion reference target absent from state")
+        positions.append(vessels[target_id]["position_um"])
+        velocities.append(vessels[target_id]["velocity_um_s"])
+        qualities.append(int(contact["contact_quality_q1000"]))
+    return positions, velocities, qualities
 
 
 def _advantage_standoff_um(vessels: Any, fleet_id: str) -> int:
